@@ -3,7 +3,7 @@ package org.cescfe.numpairs.domain.puzzle
 object PuzzleSamples {
     val prototype: Puzzle = Puzzle(
         board = Board(
-            rows = listOf(
+            tileRows = listOf(
                 listOf(
                     Tile(
                         expression = Expression(

@@ -1,21 +1,21 @@
 package org.cescfe.numpairs.domain.puzzle
 
 data class Board(
-    val rows: List<List<Tile>>
+    val tileRows: List<List<Tile>>
 ) {
     init {
-        require(rows.size == ROW_COUNT) {
+        require(tileRows.size == ROW_COUNT) {
             "Board must contain exactly $ROW_COUNT rows."
         }
-        require(rows.all { row -> row.size == COLUMN_COUNT }) {
+        require(tileRows.all { row -> row.size == COLUMN_COUNT }) {
             "Each board row must contain exactly $COLUMN_COUNT tiles."
         }
     }
 
     val tiles: List<Tile>
-        get() = rows.flatten()
+        get() = tileRows.flatten()
 
-    fun tileAt(rowIndex: Int, columnIndex: Int): Tile = rows[rowIndex][columnIndex]
+    fun tileAt(rowIndex: Int, columnIndex: Int): Tile = tileRows[rowIndex][columnIndex]
 
     companion object {
         const val ROW_COUNT = 2

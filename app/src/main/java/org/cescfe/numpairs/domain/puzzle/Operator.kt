@@ -6,7 +6,7 @@ enum class Operator(
     ADDITION("+") {
         override fun apply(leftOperand: Int, rightOperand: Int): Int = leftOperand + rightOperand
     },
-    MULTIPLICATION("x") {
+    MULTIPLICATION("×") {
         override fun apply(leftOperand: Int, rightOperand: Int): Int = leftOperand * rightOperand
     };
 
