@@ -8,9 +8,9 @@ The objective of the project is to build a simple and enjoyable number puzzle ex
 
 ## Current Status
 
-### Version: v0 - Static Prototype
+### Version: v0 - Playable Prototype
 
-Implemented goal:
+Current milestone goal:
 
 - Single Android screen
 - 2x4 puzzle grid
@@ -40,38 +40,31 @@ Not included yet:
 
 ```text
 app/
+ └── src/main/java/org/cescfe/numpairs/
+     ├── domain/
+     │   └── model/
+     └── ui/
+         ├── components/
+         ├── screen/
+         └── theme/
 docs/
- ├── prd/
- └── adr/
 ```
 
 ---
 
 ## Documentation
-### PRD
-- docs/prd/prd-v0.md
-### ADRs
-- docs/adr/001-choose-native-android-application.md
-- docs/adr/002-use-jetpack-compose-for-ui.md
-
+### Product
+- Product Requirements Document (PRD): docs/product/prd/
+### Technical
+- Arqhitectural Decision Records (ADR): docs/adr/
+### Common Documentation
+- Ubiquitous Language: docs/ubiquitous-language/
 ---
 
 ## Roadmap
-### v0
-
-Static puzzle prototype
-
-### v1
-
-Interactive puzzle board
-
-### v2
-
-Validation, scoring and timer
-
-### v3
-
-Design polish, branding and game modes
+1. v0 - Playable prototype 
+2. v2 - Validation, scoring and timer
+3. v3 - Design polish, branding and game modes
 
 ---
 
