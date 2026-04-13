@@ -2,7 +2,7 @@
 
 NumPairs is a native Android puzzle game inspired by arithmetic grid challenges.
 
-The objective of the project is to build a simple and enjoyable number puzzle experience, starting with a minimal prototype and evolving iteratively with new gameplay features, design improvements and game modes.
+The project is being built iteratively, starting with a small playable prototype and expanding later with stronger gameplay rules, better presentation, and more game modes.
 
 ---
 
@@ -10,29 +10,47 @@ The objective of the project is to build a simple and enjoyable number puzzle ex
 
 ### Version: v0 - Playable Prototype
 
-Current milestone goal:
+Current milestone focus:
 
 - Single Android screen
 - 2x4 puzzle grid
 - 8-number strip
-- Basic UI structure
+- Basic clean layout
+- Initial puzzle domain model
+- Foundations for puzzle interaction
 
 Not included yet:
 
-- Game validation
 - Scoring
 - Persistence
 - Animations
 - Difficulty levels
+- Multiple puzzles
+- Backend or user accounts
 
 ---
 
 ## Tech Stack
 
 - Kotlin
-- Android Studio
 - Jetpack Compose
 - Gradle Kotlin DSL
+- Android Studio
+
+---
+
+## Domain Modeling
+
+The puzzle core uses a small domain layer guided by the project's ubiquitous language and DDD-inspired modeling.
+
+Current core concepts:
+
+- `Puzzle`
+- `Board`
+- `Tile`
+- `Expression`
+- `Operator`
+- `Strip`
 
 ---
 
@@ -40,37 +58,41 @@ Not included yet:
 
 ```text
 app/
- └── src/main/java/org/cescfe/numpairs/
-     ├── domain/
-     │   └── model/
-     └── ui/
-         ├── components/
-         ├── screen/
-         └── theme/
+├── src/main/java/org/cescfe/numpairs/
+│   ├── MainActivity.kt
+│   ├── domain/puzzle/
+│   └── ui/theme/
+└── src/test/java/org/cescfe/numpairs/
+    └── domain/puzzle/
 docs/
+├── product/
+├── technical/adr/
+└── ubiquitous-language.md
 ```
 
 ---
 
 ## Documentation
-### Product
-- Product Requirements Document (PRD): docs/product/prd/
-### Technical
-- Arqhitectural Decision Records (ADR): docs/adr/
-### Common Documentation
-- Ubiquitous Language: docs/ubiquitous-language/
+
+- Product Requirements Document (PRD): `docs/product/prd/prd-v0.md`
+- UX decisions: `docs/product/ux-decisions.md`
+- Architectural Decision Records (ADR): `docs/technical/adr/`
+- Ubiquitous Language: `docs/ubiquitous-language.md`
+
 ---
 
 ## Roadmap
-1. v0 - Playable prototype 
-2. v2 - Validation, scoring and timer
-3. v3 - Design polish, branding and game modes
+
+1. v0 - Playable prototype
+2. Add gameplay validation and scoring
+3. Improve presentation, polish, and game modes
 
 ---
 
 ## Run Locally
-1. Open the project in Android Studio 
-2. Sync Gradle 
+
+1. Open the project in Android Studio
+2. Sync Gradle
 3. Run on emulator or Android device
 
 ---
