@@ -30,10 +30,7 @@ import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GameScreen(
-    puzzle: Puzzle,
-    modifier: Modifier = Modifier.Companion
-) {
+fun GameScreen(puzzle: Puzzle, modifier: Modifier = Modifier.Companion) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -76,10 +73,7 @@ private fun SectionTitle(title: String) {
 }
 
 @Composable
-private fun BoardSection(
-    puzzle: Puzzle,
-    modifier: Modifier = Modifier.Companion
-) {
+private fun BoardSection(puzzle: Puzzle, modifier: Modifier = Modifier.Companion) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -103,10 +97,7 @@ private fun BoardSection(
 }
 
 @Composable
-private fun StripSection(
-    availableNumbers: List<Int>,
-    modifier: Modifier = Modifier.Companion
-) {
+private fun StripSection(availableNumbers: List<Int>, modifier: Modifier = Modifier.Companion) {
     Surface(
         modifier = modifier,
         color = MaterialTheme.colorScheme.surfaceVariant,

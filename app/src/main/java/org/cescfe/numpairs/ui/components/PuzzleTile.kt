@@ -24,10 +24,7 @@ import org.cescfe.numpairs.domain.puzzle.Tile
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
-fun PuzzleTile(
-    tile: Tile,
-    modifier: Modifier = Modifier
-) {
+fun PuzzleTile(tile: Tile, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp)
@@ -54,10 +51,7 @@ fun PuzzleTile(
 }
 
 @Composable
-private fun TileExpressionRow(
-    expression: Expression,
-    modifier: Modifier = Modifier
-) {
+private fun TileExpressionRow(expression: Expression, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -70,10 +64,7 @@ private fun TileExpressionRow(
 }
 
 @Composable
-private fun TileExpressionItem(
-    text: String,
-    modifier: Modifier = Modifier
-) {
+private fun TileExpressionItem(text: String, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier.sizeIn(minWidth = 24.dp),
         contentAlignment = Alignment.Center

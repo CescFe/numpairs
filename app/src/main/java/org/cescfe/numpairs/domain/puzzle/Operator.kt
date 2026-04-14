@@ -1,8 +1,6 @@
 package org.cescfe.numpairs.domain.puzzle
 
-enum class Operator(
-    val symbol: String
-) {
+enum class Operator(val symbol: String) {
     ADDITION("+") {
         override fun apply(leftOperand: Int, rightOperand: Int): Int = leftOperand + rightOperand
     },

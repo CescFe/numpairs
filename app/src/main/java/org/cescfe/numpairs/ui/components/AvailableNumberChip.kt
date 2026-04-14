@@ -13,10 +13,7 @@ import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
-fun AvailableNumberChip(
-    number: Int,
-    modifier: Modifier = Modifier
-) {
+fun AvailableNumberChip(number: Int, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
