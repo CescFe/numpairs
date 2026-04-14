@@ -75,7 +75,7 @@ object PuzzleSamples {
             )
         ),
         strip = Strip(
-            numbers = listOf(1, 2, 3, 4, 5, 6, 7, 8)
+            numbers = listOf(1, 2, 3, 4, 25, 6, 7, 888)
         )
     )
 }
