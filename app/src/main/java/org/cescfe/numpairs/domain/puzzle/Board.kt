@@ -1,8 +1,6 @@
 package org.cescfe.numpairs.domain.puzzle
 
-data class Board(
-    val tileRows: List<List<Tile>>
-) {
+data class Board(val tileRows: List<List<Tile>>) {
     init {
         require(tileRows.size == ROW_COUNT) {
             "Board must contain exactly $ROW_COUNT rows."
