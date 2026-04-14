@@ -97,6 +97,21 @@ docs/
 
 ---
 
+## Code Quality
+
+```bash
+# Check all formatting
+./gradlew spotlessCheck
+
+# Apply formatting
+./gradlew spotlessApply
+
+# Run all quality checks
+./gradlew check
+```
+
+---
+
 ## License
 
 MIT License
