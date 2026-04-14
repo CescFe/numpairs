@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">NumPairs</string>
+    <string name="board_content_description">Board</string>
+    <string name="strip_content_description">Strip</string>
 </resources>
