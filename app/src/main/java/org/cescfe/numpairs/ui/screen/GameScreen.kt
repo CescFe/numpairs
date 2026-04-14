@@ -33,7 +33,7 @@ import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GameScreen(puzzle: Puzzle, modifier: Modifier = Modifier.Companion) {
+fun GameScreen(puzzle: Puzzle, modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -65,7 +65,7 @@ fun GameScreen(puzzle: Puzzle, modifier: Modifier = Modifier.Companion) {
 }
 
 @Composable
-private fun BoardSection(puzzle: Puzzle, modifier: Modifier = Modifier.Companion) {
+private fun BoardSection(puzzle: Puzzle, modifier: Modifier = Modifier) {
     val boardContentDescription = stringResource(R.string.board_content_description)
 
     Column(
@@ -93,7 +93,7 @@ private fun BoardSection(puzzle: Puzzle, modifier: Modifier = Modifier.Companion
 }
 
 @Composable
-private fun StripSection(availableNumbers: List<Int>, modifier: Modifier = Modifier.Companion) {
+private fun StripSection(availableNumbers: List<Int>, modifier: Modifier = Modifier) {
     val stripContentDescription = stringResource(R.string.strip_content_description)
 
     Surface(
