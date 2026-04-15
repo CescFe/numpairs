@@ -22,6 +22,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -47,7 +48,9 @@ private val STRIP_VERTICAL_PADDING = 14.dp
 @Composable
 fun GameScreen(puzzle: Puzzle, modifier: Modifier = Modifier) {
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .testTag(GameScreenTestTags.SCREEN),
         topBar = {
             TopAppBar(
                 title = {
@@ -81,9 +84,11 @@ private fun BoardSection(puzzle: Puzzle, modifier: Modifier = Modifier) {
     val boardContentDescription = stringResource(R.string.board_content_description)
 
     BoxWithConstraints(
-        modifier = modifier.semantics {
-            contentDescription = boardContentDescription
-        }
+        modifier = modifier
+            .testTag(GameScreenTestTags.BOARD)
+            .semantics {
+                contentDescription = boardContentDescription
+            }
     ) {
         val visualColumnCount = calculateBoardColumnCount(maxWidth)
         val tileWidth = calculateBoardTileWidth(
@@ -123,9 +128,11 @@ private fun StripSection(availableNumbers: List<Int>, modifier: Modifier = Modif
     val stripContentDescription = stringResource(R.string.strip_content_description)
 
     Surface(
-        modifier = modifier.semantics {
-            contentDescription = stripContentDescription
-        },
+        modifier = modifier
+            .testTag(GameScreenTestTags.STRIP)
+            .semantics {
+                contentDescription = stripContentDescription
+            },
         color = MaterialTheme.colorScheme.surfaceVariant,
         shape = RoundedCornerShape(24.dp)
     ) {
