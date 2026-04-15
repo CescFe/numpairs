@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -42,9 +42,14 @@ fun PuzzleTile(tile: Tile, modifier: Modifier = Modifier) {
             )
             Text(
                 text = tile.result.toString(),
-                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontSize = MaterialTheme.typography.bodyLarge.fontSize * 2,
+                    lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 2
+                ),
                 color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center
             )
         }
     }
@@ -54,23 +59,33 @@ fun PuzzleTile(tile: Tile, modifier: Modifier = Modifier) {
 private fun TileExpressionRow(expression: Expression, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.SpaceEvenly,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        TileExpressionItem(text = expression.leftOperand.toString())
-        TileExpressionItem(text = expression.operator.symbol)
-        TileExpressionItem(text = expression.rightOperand.toString())
+        TileExpressionItem(
+            text = expression.leftOperand.toString(),
+            modifier = Modifier.weight(1f)
+        )
+        TileExpressionItem(
+            text = expression.operator.symbol,
+            modifier = Modifier.weight(1f)
+        )
+        TileExpressionItem(
+            text = expression.rightOperand.toString(),
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 
 @Composable
 private fun TileExpressionItem(text: String, modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier.sizeIn(minWidth = 24.dp),
+        modifier = modifier.widthIn(min = 24.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
+            modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center
         )
