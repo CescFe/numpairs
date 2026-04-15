@@ -1,7 +1,7 @@
 package org.cescfe.numpairs.ui.components
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -17,16 +17,16 @@ import org.cescfe.numpairs.ui.theme.NumPairsTheme
 fun AvailableNumberChip(number: Int, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(14.dp),
         color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 2.dp
+        tonalElevation = 1.dp
     ) {
         Text(
             text = number.toString(),
             modifier = Modifier
-                .widthIn(min = 44.dp)
-                .padding(horizontal = 14.dp, vertical = 10.dp),
-            style = MaterialTheme.typography.titleMedium,
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp, vertical = 8.dp),
+            style = MaterialTheme.typography.titleSmall,
             textAlign = TextAlign.Center
         )
     }

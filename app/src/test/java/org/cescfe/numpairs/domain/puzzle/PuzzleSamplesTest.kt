@@ -9,8 +9,6 @@ class PuzzleSamplesTest {
     fun prototype_matches_board_and_strip_shape() {
         val prototype = PuzzleSamples.prototype
 
-        assertEquals(Board.ROW_COUNT, prototype.board.tileRows.size)
-        assertEquals(Board.COLUMN_COUNT, prototype.board.tileRows.first().size)
         assertEquals(Board.TILE_COUNT, prototype.board.tiles.size)
         assertEquals(Strip.NUMBER_COUNT, prototype.strip.numbers.size)
         assertTrue(prototype.board.tiles.all { tile -> tile.result == tile.expression.evaluate() })

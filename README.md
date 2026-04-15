@@ -13,11 +13,13 @@ The project is being built iteratively, starting with a small playable prototype
 Current milestone focus:
 
 - Single Android screen
-- 2x4 puzzle grid
+- 8-tile puzzle board
 - 8-number strip
-- Basic clean layout
+- Responsive layout for strip and board
+- Bounded tile sizing to avoid stretched cards on wide screens
+- Larger visual emphasis for tile results
 - Initial puzzle domain model
-- Foundations for puzzle interaction
+- Lightweight Compose UI instrumented tests for `GameScreen`
 
 Not included yet:
 
@@ -61,9 +63,14 @@ app/
 ├── src/main/java/org/cescfe/numpairs/
 │   ├── MainActivity.kt
 │   ├── domain/puzzle/
-│   └── ui/theme/
-└── src/test/java/org/cescfe/numpairs/
-    └── domain/puzzle/
+│   └── ui/
+│       ├── components/
+│       ├── screen/
+│       └── theme/
+├── src/test/java/org/cescfe/numpairs/
+│   └── domain/puzzle/
+└── src/androidTest/java/org/cescfe/numpairs/
+    └── ui/screen/
 docs/
 ├── product/
 ├── technical/adr/
@@ -94,6 +101,16 @@ docs/
 1. Open the project in Android Studio
 2. Sync Gradle
 3. Run on emulator or Android device
+
+## Testing
+
+```bash
+# Run unit tests
+./gradlew testDebugUnitTest
+
+# Run instrumented UI tests on a connected emulator/device
+./gradlew connectedDebugAndroidTest
+```
 
 ---
 

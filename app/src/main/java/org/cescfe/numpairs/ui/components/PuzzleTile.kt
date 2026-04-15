@@ -97,7 +97,7 @@ private fun TileExpressionItem(text: String, modifier: Modifier = Modifier) {
 private fun PuzzleTilePreview() {
     NumPairsTheme {
         PuzzleTile(
-            tile = PuzzleSamples.prototype.board.tileAt(rowIndex = 0, columnIndex = 0)
+            tile = PuzzleSamples.prototype.board.tileAt(index = 0)
         )
     }
 }
