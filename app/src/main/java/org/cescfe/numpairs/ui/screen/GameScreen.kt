@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -30,6 +31,8 @@ import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
 import org.cescfe.numpairs.ui.components.AvailableNumberChip
 import org.cescfe.numpairs.ui.components.PuzzleTile
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
+
+private const val BOARD_VISUAL_COLUMN_COUNT = 3
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,6 +70,7 @@ fun GameScreen(puzzle: Puzzle, modifier: Modifier = Modifier) {
 @Composable
 private fun BoardSection(puzzle: Puzzle, modifier: Modifier = Modifier) {
     val boardContentDescription = stringResource(R.string.board_content_description)
+    val visualRows = puzzle.board.tiles.chunked(BOARD_VISUAL_COLUMN_COUNT)
 
     Column(
         modifier = modifier.semantics {
@@ -74,7 +78,7 @@ private fun BoardSection(puzzle: Puzzle, modifier: Modifier = Modifier) {
         },
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        puzzle.board.tileRows.forEach { row ->
+        visualRows.forEach { row ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -86,6 +90,10 @@ private fun BoardSection(puzzle: Puzzle, modifier: Modifier = Modifier) {
                             .weight(1f)
                             .wrapContentHeight()
                     )
+                }
+
+                repeat(BOARD_VISUAL_COLUMN_COUNT - row.size) {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
