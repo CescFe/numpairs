@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,6 +39,9 @@ private const val BOARD_MAX_VISUAL_COLUMN_COUNT = 4
 private val BOARD_TILE_MIN_WIDTH = 112.dp
 private val BOARD_TILE_MAX_WIDTH = 144.dp
 private val BOARD_TILE_SPACING = 12.dp
+private val STRIP_CHIP_SPACING = 4.dp
+private val STRIP_HORIZONTAL_PADDING = 8.dp
+private val STRIP_VERTICAL_PADDING = 14.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -127,20 +129,38 @@ private fun StripSection(availableNumbers: List<Int>, modifier: Modifier = Modif
         color = MaterialTheme.colorScheme.surfaceVariant,
         shape = RoundedCornerShape(24.dp)
     ) {
-        FlowRow(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 18.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            availableNumbers.forEach { availableNumber ->
-                AvailableNumberChip(
-                    number = availableNumber
+                .padding(
+                    horizontal = STRIP_HORIZONTAL_PADDING,
+                    vertical = STRIP_VERTICAL_PADDING
                 )
+        ) {
+            val chipCount = availableNumbers.size
+            val chipWidth = calculateStripChipWidth(
+                availableWidth = maxWidth,
+                chipCount = chipCount
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(STRIP_CHIP_SPACING)
+            ) {
+                availableNumbers.forEach { availableNumber ->
+                    AvailableNumberChip(
+                        number = availableNumber,
+                        modifier = Modifier.width(chipWidth)
+                    )
+                }
             }
         }
     }
+}
+
+private fun calculateStripChipWidth(availableWidth: Dp, chipCount: Int): Dp {
+    val totalSpacing = STRIP_CHIP_SPACING * (chipCount - 1)
+    return (availableWidth - totalSpacing) / chipCount
 }
 
 private fun calculateBoardColumnCount(availableWidth: Dp): Int {
