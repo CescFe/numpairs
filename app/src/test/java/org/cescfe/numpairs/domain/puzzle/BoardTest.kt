@@ -5,23 +5,20 @@ import org.junit.Test
 
 class BoardTest {
     @Test
-    fun requires_two_rows() {
-        assertThrows(IllegalArgumentException::class.java) {
-            Board(tileRows = emptyList())
+    fun requires_exactly_eight_tiles() {
+        listOf(0, 7, 9).forEach { tileCount ->
+            assertThrows(IllegalArgumentException::class.java) {
+                Board(tiles = validTiles(tileCount))
+            }
         }
     }
 
     @Test
-    fun requires_four_columns_per_row() {
-        assertThrows(IllegalArgumentException::class.java) {
-            Board(
-                tileRows = listOf(
-                    listOf(validTile(1), validTile(2), validTile(3)),
-                    listOf(validTile(4), validTile(5), validTile(6), validTile(7))
-                )
-            )
-        }
+    fun accepts_eight_tiles() {
+        Board(tiles = validTiles(Board.TILE_COUNT))
     }
+
+    private fun validTiles(count: Int): List<Tile> = (1..count).map(::validTile)
 
     private fun validTile(leftOperand: Int): Tile = Tile(
         expression = Expression(

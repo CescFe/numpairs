@@ -74,6 +74,6 @@ The board adapts the number of visual columns to the available width, but tile w
 - Keeps the board centered while still adapting to smaller widths
 
 ### Potential Concerns
-- The rendered board no longer mirrors the domain's 2x4 grouping exactly
+- The rendered board may not mirror any future logical grouping rules one-to-one
 - Some users may perceive reflow across orientations as a stronger layout change
 - Larger screens may expose more empty horizontal space around centered rows

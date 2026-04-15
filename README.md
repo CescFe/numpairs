@@ -13,7 +13,7 @@ The project is being built iteratively, starting with a small playable prototype
 Current milestone focus:
 
 - Single Android screen
-- 8 Tiles puzzle grid
+- 8-tile puzzle board
 - 8-number strip
 - Responsive layout for strip and board
 - Bounded tile sizing to avoid stretched cards on wide screens
