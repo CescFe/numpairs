@@ -6,6 +6,9 @@ labels: feat
 assignees: FrancescFe
 ---
 
+## Context
+Why is this feature needed? What problem does it solve?
+
 ## Description
 Describe the feature to implement.
 
