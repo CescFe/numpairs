@@ -74,6 +74,7 @@ app/
 docs/
 ├── product/
 ├── technical/adr/
+├── game-rules.md
 └── ubiquitous-language.md
 ```
 
@@ -84,6 +85,7 @@ docs/
 - Product Requirements Document (PRD): `docs/product/prd/prd-v0.md`
 - UX decisions: `docs/product/ux-decisions.md`
 - Architectural Decision Records (ADR): `docs/technical/adr/`
+- Game rules: `docs/game-rules.md`
 - Ubiquitous Language: `docs/ubiquitous-language.md`
 
 ---
