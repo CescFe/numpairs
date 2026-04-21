@@ -18,4 +18,10 @@ sealed interface StripItem {
             }
         }
     }
+
+    fun completeWith(value: Int): StripItem = when (this) {
+        Hidden -> PlayerEntered(value)
+        is Known -> error("Known strip items cannot be completed.")
+        is PlayerEntered -> PlayerEntered(value)
+    }
 }
