@@ -4,10 +4,7 @@ import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.domain.puzzle.Tile
 
-data class GameUiState(
-    val stripItems: List<StripItemUiState>,
-    val tiles: List<TileUiState>
-) {
+data class GameUiState(val stripItems: List<StripItemUiState>, val tiles: List<TileUiState>) {
     companion object {
         fun from(puzzle: Puzzle): GameUiState = GameUiState(
             stripItems = puzzle.strip.items.map(::StripItemUiState),
