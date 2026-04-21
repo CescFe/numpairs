@@ -73,12 +73,12 @@ object PuzzleSamples {
         strip = Strip(
             items = listOf(
                 StripItem.Known(1),
-                StripItem.Known(2),
+                StripItem.Hidden,
                 StripItem.Known(3),
-                StripItem.Known(4),
+                StripItem.Hidden,
                 StripItem.Known(25),
                 StripItem.Known(6),
-                StripItem.Known(7),
+                StripItem.Hidden,
                 StripItem.Known(888)
             )
         )
