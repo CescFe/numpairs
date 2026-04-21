@@ -10,7 +10,8 @@ class PuzzleSamplesTest {
         val prototype = PuzzleSamples.prototype
 
         assertEquals(Board.TILE_COUNT, prototype.board.tiles.size)
-        assertEquals(Strip.NUMBER_COUNT, prototype.strip.numbers.size)
+        assertEquals(Strip.NUMBER_COUNT, prototype.strip.items.size)
+        assertTrue(prototype.strip.items.all { it is StripItem.Known })
         assertTrue(prototype.board.tiles.all { tile -> tile.result == tile.expression.evaluate() })
     }
 }
