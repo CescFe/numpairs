@@ -24,7 +24,7 @@ class GameScreenTest {
     fun setUp() {
         composeTestRule.setContent {
             NumPairsTheme {
-                GameScreen(puzzle = PuzzleSamples.prototype)
+                GameScreen(uiState = GameUiState.from(PuzzleSamples.prototype))
             }
         }
     }
