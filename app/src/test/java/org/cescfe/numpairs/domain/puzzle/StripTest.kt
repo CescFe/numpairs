@@ -5,9 +5,15 @@ import org.junit.Test
 
 class StripTest {
     @Test
-    fun requires_eight_numbers() {
+    fun requires_eight_items() {
         assertThrows(IllegalArgumentException::class.java) {
-            Strip(numbers = listOf(1, 2, 3))
+            Strip(
+                items = listOf(
+                    StripItem.Known(1),
+                    StripItem.Known(2),
+                    StripItem.Known(3)
+                )
+            )
         }
     }
 }
