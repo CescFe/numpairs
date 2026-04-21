@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
-fun AvailableNumberChip(number: Int, modifier: Modifier = Modifier) {
+fun AvailableNumberChip(label: String, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(14.dp),
@@ -22,7 +22,7 @@ fun AvailableNumberChip(number: Int, modifier: Modifier = Modifier) {
         tonalElevation = 1.dp
     ) {
         Text(
-            text = number.toString(),
+            text = label,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 4.dp, vertical = 8.dp),
@@ -36,6 +36,6 @@ fun AvailableNumberChip(number: Int, modifier: Modifier = Modifier) {
 @Composable
 private fun AvailableNumberChipPreview() {
     NumPairsTheme {
-        AvailableNumberChip(number = 4)
+        AvailableNumberChip(label = "4")
     }
 }

@@ -1,9 +1,9 @@
 package org.cescfe.numpairs.domain.puzzle
 
-data class Strip(val numbers: List<Int>) {
+data class Strip(val items: List<StripItem>) {
     init {
-        require(numbers.size == NUMBER_COUNT) {
-            "Strip must contain exactly $NUMBER_COUNT numbers."
+        require(items.size == NUMBER_COUNT) {
+            "Strip must contain exactly $NUMBER_COUNT items."
         }
     }
 

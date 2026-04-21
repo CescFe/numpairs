@@ -71,7 +71,16 @@ object PuzzleSamples {
             )
         ),
         strip = Strip(
-            numbers = listOf(1, 2, 3, 4, 25, 6, 7, 888)
+            items = listOf(
+                StripItem.Known(1),
+                StripItem.Known(2),
+                StripItem.Known(3),
+                StripItem.Known(4),
+                StripItem.Known(25),
+                StripItem.Known(6),
+                StripItem.Known(7),
+                StripItem.Known(888)
+            )
         )
     )
 }
