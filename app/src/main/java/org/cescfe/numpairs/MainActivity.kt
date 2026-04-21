@@ -4,17 +4,24 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
+import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import org.cescfe.numpairs.ui.screen.GameScreen
+import org.cescfe.numpairs.ui.screen.GameViewModel
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 class MainActivity : ComponentActivity() {
+    private val gameViewModel: GameViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val uiState by gameViewModel.uiState.collectAsState()
+
             NumPairsTheme {
-                GameScreen(puzzle = PuzzleSamples.prototype)
+                GameScreen(uiState = uiState)
             }
         }
     }

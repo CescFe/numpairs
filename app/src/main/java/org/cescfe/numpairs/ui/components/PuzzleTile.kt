@@ -18,13 +18,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.cescfe.numpairs.domain.puzzle.Expression
 import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
-import org.cescfe.numpairs.domain.puzzle.Tile
+import org.cescfe.numpairs.ui.screen.GameUiState
+import org.cescfe.numpairs.ui.screen.TileUiState
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
-fun PuzzleTile(tile: Tile, modifier: Modifier = Modifier) {
+fun PuzzleTile(tile: TileUiState, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp)
@@ -37,11 +37,11 @@ fun PuzzleTile(tile: Tile, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             TileExpressionRow(
-                expression = tile.expression,
+                tile = tile,
                 modifier = Modifier.fillMaxWidth()
             )
             Text(
-                text = tile.result.toString(),
+                text = tile.resultLabel,
                 modifier = Modifier.fillMaxWidth(),
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontSize = MaterialTheme.typography.bodyLarge.fontSize * 2,
@@ -56,22 +56,22 @@ fun PuzzleTile(tile: Tile, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun TileExpressionRow(expression: Expression, modifier: Modifier = Modifier) {
+private fun TileExpressionRow(tile: TileUiState, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         TileExpressionItem(
-            text = expression.leftOperand.toString(),
+            text = tile.leftOperandLabel,
             modifier = Modifier.weight(1f)
         )
         TileExpressionItem(
-            text = expression.operator.symbol,
+            text = tile.operatorLabel,
             modifier = Modifier.weight(1f)
         )
         TileExpressionItem(
-            text = expression.rightOperand.toString(),
+            text = tile.rightOperandLabel,
             modifier = Modifier.weight(1f)
         )
     }
@@ -97,7 +97,7 @@ private fun TileExpressionItem(text: String, modifier: Modifier = Modifier) {
 private fun PuzzleTilePreview() {
     NumPairsTheme {
         PuzzleTile(
-            tile = PuzzleSamples.prototype.board.tileAt(index = 0)
+            tile = GameUiState.from(PuzzleSamples.prototype).tiles.first()
         )
     }
 }
