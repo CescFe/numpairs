@@ -30,9 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
-import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.ui.components.AvailableNumberChip
 import org.cescfe.numpairs.ui.components.PuzzleTile
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
@@ -47,7 +45,7 @@ private val STRIP_VERTICAL_PADDING = 14.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GameScreen(puzzle: Puzzle, modifier: Modifier = Modifier) {
+fun GameScreen(uiState: GameUiState, modifier: Modifier = Modifier) {
     Scaffold(
         modifier = modifier
             .fillMaxSize()
@@ -69,11 +67,11 @@ fun GameScreen(puzzle: Puzzle, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             StripSection(
-                stripItems = puzzle.strip.items,
+                stripItems = uiState.stripItems,
                 modifier = Modifier.fillMaxWidth()
             )
             BoardSection(
-                puzzle = puzzle,
+                tiles = uiState.tiles,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -81,7 +79,7 @@ fun GameScreen(puzzle: Puzzle, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun BoardSection(puzzle: Puzzle, modifier: Modifier = Modifier) {
+private fun BoardSection(tiles: List<TileUiState>, modifier: Modifier = Modifier) {
     val boardContentDescription = stringResource(R.string.board_content_description)
 
     BoxWithConstraints(
@@ -96,7 +94,7 @@ private fun BoardSection(puzzle: Puzzle, modifier: Modifier = Modifier) {
             availableWidth = maxWidth,
             visualColumnCount = visualColumnCount
         )
-        val visualRows = puzzle.board.tiles.chunked(visualColumnCount)
+        val visualRows = tiles.chunked(visualColumnCount)
 
         Column(
             verticalArrangement = Arrangement.spacedBy(BOARD_TILE_SPACING)
@@ -125,7 +123,7 @@ private fun BoardSection(puzzle: Puzzle, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun StripSection(stripItems: List<StripItem>, modifier: Modifier = Modifier) {
+private fun StripSection(stripItems: List<StripItemUiState>, modifier: Modifier = Modifier) {
     val stripContentDescription = stringResource(R.string.strip_content_description)
 
     Surface(
@@ -157,19 +155,13 @@ private fun StripSection(stripItems: List<StripItem>, modifier: Modifier = Modif
             ) {
                 stripItems.forEach { stripItem ->
                     AvailableNumberChip(
-                        label = stripItemLabel(stripItem),
+                        label = stripItem.label,
                         modifier = Modifier.width(chipWidth)
                     )
                 }
             }
         }
     }
-}
-
-private fun stripItemLabel(stripItem: StripItem): String = when (stripItem) {
-    StripItem.Hidden -> "?"
-    is StripItem.Known -> stripItem.value.toString()
-    is StripItem.PlayerEntered -> stripItem.value.toString()
 }
 
 private fun calculateStripChipWidth(availableWidth: Dp, chipCount: Int): Dp {
@@ -198,7 +190,7 @@ private fun calculateBoardTileWidth(availableWidth: Dp, visualColumnCount: Int):
 private fun GameScreenPreview() {
     NumPairsTheme {
         GameScreen(
-            puzzle = PuzzleSamples.prototype
+            uiState = GameUiState.from(PuzzleSamples.prototype)
         )
     }
 }
