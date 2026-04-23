@@ -1,12 +1,30 @@
 package org.cescfe.numpairs.domain.puzzle
 
-enum class Operator(val symbol: String) {
-    ADDITION("+") {
-        override fun apply(leftOperand: Int, rightOperand: Int): Int = leftOperand + rightOperand
-    },
-    MULTIPLICATION("×") {
-        override fun apply(leftOperand: Int, rightOperand: Int): Int = leftOperand * rightOperand
-    };
+sealed interface Operator {
+    val symbol: String
 
-    abstract fun apply(leftOperand: Int, rightOperand: Int): Int
+    fun apply(leftOperand: Int, rightOperand: Int): Int
+
+    data object Hidden : Operator {
+        override val symbol: String = "?"
+
+        override fun apply(leftOperand: Int, rightOperand: Int): Int = error("Hidden operators cannot be applied.")
+    }
+
+    data object Addition : Operator {
+        override val symbol: String = "+"
+
+        override fun apply(leftOperand: Int, rightOperand: Int): Int = leftOperand + rightOperand
+    }
+
+    data object Multiplication : Operator {
+        override val symbol: String = "×"
+
+        override fun apply(leftOperand: Int, rightOperand: Int): Int = leftOperand * rightOperand
+    }
+
+    companion object {
+        val ADDITION: Operator = Addition
+        val MULTIPLICATION: Operator = Multiplication
+    }
 }

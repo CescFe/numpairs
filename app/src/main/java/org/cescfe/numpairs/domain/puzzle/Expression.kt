@@ -8,7 +8,7 @@ data class Expression(val leftOperand: Operand, val operator: Operator, val righ
     )
 
     val isFullyKnown: Boolean
-        get() = leftOperand is Operand.Known && rightOperand is Operand.Known
+        get() = leftOperand is Operand.Known && operator != Operator.Hidden && rightOperand is Operand.Known
 
     fun evaluate(): Int = operator.apply(
         leftOperand = leftOperand.requireKnownValue(),
