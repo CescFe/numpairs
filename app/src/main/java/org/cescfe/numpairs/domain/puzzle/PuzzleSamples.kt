@@ -16,14 +16,14 @@ object PuzzleSamples {
         ),
         strip = Strip(
             items = listOf(
-                StripItem.Known(1),
                 StripItem.Hidden,
-                StripItem.Known(3),
                 StripItem.Hidden,
-                StripItem.Known(25),
                 StripItem.Known(6),
                 StripItem.Hidden,
-                StripItem.Known(888)
+                StripItem.Known(25),
+                StripItem.Hidden,
+                StripItem.Hidden,
+                StripItem.Known(222)
             )
         )
     )
