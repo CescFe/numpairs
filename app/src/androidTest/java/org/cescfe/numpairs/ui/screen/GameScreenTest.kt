@@ -82,7 +82,7 @@ class GameScreenTest {
             .assertIsDisplayed()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_RANGE)
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_RANGE, useUnmergedTree = true)
             .assert(
                 hasText(
                     composeTestRule.activity.getString(
