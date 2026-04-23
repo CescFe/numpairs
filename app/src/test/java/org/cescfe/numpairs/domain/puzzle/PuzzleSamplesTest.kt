@@ -9,8 +9,8 @@ class PuzzleSamplesTest {
     fun prototype_strip_starts_with_known_and_hidden_items() {
         val stripItems = PuzzleSamples.prototype.strip.items
 
-        assertEquals(3, stripItems.count { it == StripItem.Hidden })
-        assertEquals(5, stripItems.count { it is StripItem.Known })
+        assertEquals(5, stripItems.count { it == StripItem.Hidden })
+        assertEquals(3, stripItems.count { it is StripItem.Known })
         assertFalse(stripItems.any { it is StripItem.PlayerEntered })
     }
 
@@ -29,6 +29,6 @@ class PuzzleSamplesTest {
     fun prototype_tiles_keep_their_expected_results() {
         val boardTiles = PuzzleSamples.prototype.board.tiles
 
-        assertEquals(listOf(3, 6, 7, 20, 6, 6, 9, 8), boardTiles.map { it.result })
+        assertEquals(listOf(223, 222, 52, 100, 31, 150, 35, 250), boardTiles.map { it.result })
     }
 }
