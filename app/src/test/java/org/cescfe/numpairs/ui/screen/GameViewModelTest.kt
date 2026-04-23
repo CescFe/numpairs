@@ -41,7 +41,9 @@ class GameViewModelTest {
         assertEquals(
             StripItemEntryDialogUiState(
                 stripItemIndex = 1,
-                validRange = StripEntryRange(minimumValue = 1, maximumValue = 3)
+                validRange = StripEntryRange(minimumValue = 1, maximumValue = 3),
+                mode = StripItemEntryDialogMode.CREATE,
+                initialValue = ""
             ),
             viewModel.uiState.value.stripItemEntryDialog
         )
@@ -57,13 +59,13 @@ class GameViewModelTest {
         val uiState = viewModel.uiState.value
 
         assertEquals("2", uiState.stripItems[1].label)
-        assertEquals(false, uiState.stripItems[1].isEntryEnabled)
+        assertEquals(true, uiState.stripItems[1].isEntryEnabled)
         assertEquals(StripItemVisualStyle.PLAYER_ENTERED, uiState.stripItems[1].visualStyle)
         assertNull(uiState.stripItemEntryDialog)
     }
 
     @Test
-    fun confirming_an_out_of_range_value_keeps_the_dialog_open_and_does_not_change_the_strip_item() {
+    fun confirming_an_out_of_range_value_keeps_the_dialog_open_and_does_not_change_the_hidden_strip_item() {
         val viewModel = GameViewModel()
 
         viewModel.onStripItemTapped(index = 1)
@@ -75,7 +77,84 @@ class GameViewModelTest {
         assertEquals(
             StripItemEntryDialogUiState(
                 stripItemIndex = 1,
-                validRange = StripEntryRange(minimumValue = 1, maximumValue = 3)
+                validRange = StripEntryRange(minimumValue = 1, maximumValue = 3),
+                mode = StripItemEntryDialogMode.CREATE,
+                initialValue = ""
+            ),
+            uiState.stripItemEntryDialog
+        )
+    }
+
+    @Test
+    fun tapping_a_player_entered_strip_item_opens_the_entry_dialog_in_edit_mode() {
+        val viewModel = GameViewModel()
+
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryConfirmed(value = 2)
+        viewModel.onStripItemTapped(index = 1)
+
+        assertEquals(
+            StripItemEntryDialogUiState(
+                stripItemIndex = 1,
+                validRange = StripEntryRange(minimumValue = 1, maximumValue = 3),
+                mode = StripItemEntryDialogMode.EDIT,
+                initialValue = "2"
+            ),
+            viewModel.uiState.value.stripItemEntryDialog
+        )
+    }
+
+    @Test
+    fun confirming_the_entry_dialog_updates_a_player_entered_strip_item() {
+        val viewModel = GameViewModel()
+
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryConfirmed(value = 2)
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryConfirmed(value = 3)
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals("3", uiState.stripItems[1].label)
+        assertEquals(true, uiState.stripItems[1].isEntryEnabled)
+        assertEquals(StripItemVisualStyle.PLAYER_ENTERED, uiState.stripItems[1].visualStyle)
+        assertNull(uiState.stripItemEntryDialog)
+    }
+
+    @Test
+    fun cancelling_the_entry_dialog_leaves_a_player_entered_strip_item_unchanged() {
+        val viewModel = GameViewModel()
+
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryConfirmed(value = 2)
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryDismissed()
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals("2", uiState.stripItems[1].label)
+        assertEquals(true, uiState.stripItems[1].isEntryEnabled)
+        assertNull(uiState.stripItemEntryDialog)
+    }
+
+    @Test
+    fun confirming_an_out_of_range_value_keeps_the_dialog_open_and_does_not_change_the_player_entered_strip_item() {
+        val viewModel = GameViewModel()
+
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryConfirmed(value = 2)
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryConfirmed(value = 9)
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals("2", uiState.stripItems[1].label)
+        assertEquals(
+            StripItemEntryDialogUiState(
+                stripItemIndex = 1,
+                validRange = StripEntryRange(minimumValue = 1, maximumValue = 3),
+                mode = StripItemEntryDialogMode.EDIT,
+                initialValue = "2"
             ),
             uiState.stripItemEntryDialog
         )
@@ -128,7 +207,9 @@ class GameViewModelTest {
         assertEquals(
             StripItemEntryDialogUiState(
                 stripItemIndex = 0,
-                validRange = StripEntryRange(minimumValue = 1, maximumValue = 3)
+                validRange = StripEntryRange(minimumValue = 1, maximumValue = 3),
+                mode = StripItemEntryDialogMode.CREATE,
+                initialValue = ""
             ),
             viewModel.uiState.value.stripItemEntryDialog
         )

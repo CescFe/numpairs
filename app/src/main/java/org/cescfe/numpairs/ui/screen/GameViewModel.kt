@@ -22,7 +22,9 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
 
     fun onStripItemTapped(index: Int) {
-        if (puzzle.strip.items.getOrNull(index) != StripItem.Hidden) {
+        val stripItem = puzzle.strip.items.getOrNull(index)
+
+        if (stripItem != StripItem.Hidden && stripItem !is StripItem.PlayerEntered) {
             return
         }
 
@@ -43,7 +45,7 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
         val index = stripItemEntryDialogIndex ?: return
         val currentStripItem = puzzle.strip.items.getOrNull(index) ?: return
 
-        if (currentStripItem !is StripItem.Hidden) {
+        if (currentStripItem !is StripItem.Hidden && currentStripItem !is StripItem.PlayerEntered) {
             stripItemEntryDialogIndex = null
             publishUiState()
             return
