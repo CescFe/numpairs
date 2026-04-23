@@ -207,7 +207,19 @@ private fun HiddenStripItemEntryDialog(
     onConfirm: (Int) -> Unit
 ) {
     var enteredValue by rememberSaveable(dialogUiState.stripItemIndex) { mutableStateOf("") }
-    val confirmedValue = enteredValue.toIntOrNull()?.takeIf { it > 0 }
+    val parsedValue = enteredValue.toIntOrNull()
+    val confirmedValue = parsedValue?.takeIf { it in dialogUiState.validRange }
+    val isInputInvalid = enteredValue.isNotEmpty() && confirmedValue == null
+    val validRangeText = dialogUiState.validRange.maximumValue?.let { maximumValue ->
+        stringResource(
+            R.string.strip_entry_valid_range_bounded,
+            dialogUiState.validRange.minimumValue,
+            maximumValue
+        )
+    } ?: stringResource(
+        R.string.strip_entry_valid_range_unbounded,
+        dialogUiState.validRange.minimumValue
+    )
 
     AlertDialog(
         modifier = Modifier.testTag(GameScreenTestTags.STRIP_ENTRY_DIALOG),
@@ -225,6 +237,13 @@ private fun HiddenStripItemEntryDialog(
                 label = {
                     Text(text = stringResource(R.string.strip_entry_input_label))
                 },
+                supportingText = {
+                    Text(
+                        text = validRangeText,
+                        modifier = Modifier.testTag(GameScreenTestTags.STRIP_ENTRY_RANGE)
+                    )
+                },
+                isError = isInputInvalid,
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )

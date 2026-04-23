@@ -49,6 +49,13 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
             return
         }
 
+        val validRange = puzzle.strip.validEntryRangeFor(index)
+
+        if (value !in validRange) {
+            publishUiState()
+            return
+        }
+
         val updatedStripItems = puzzle.strip.items.toMutableList().apply {
             set(index, currentStripItem.completeWith(value))
         }

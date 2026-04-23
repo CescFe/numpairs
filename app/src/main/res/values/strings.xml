@@ -4,6 +4,8 @@
     <string name="strip_content_description">Strip</string>
     <string name="strip_entry_dialog_title">Enter number</string>
     <string name="strip_entry_input_label">Number</string>
+    <string name="strip_entry_valid_range_bounded">Valid range: %1$d to %2$d</string>
+    <string name="strip_entry_valid_range_unbounded">Valid range: %1$d or greater</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
 </resources>
