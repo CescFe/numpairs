@@ -28,7 +28,7 @@ class GameViewModelTest {
             uiState.stripItems.map { it.visualStyle }
         )
         assertEquals(8, uiState.tiles.size)
-        assertEquals(TileUiState("1", "+", "2", "3"), uiState.tiles.first())
+        assertEquals(TileUiState("?", "?", "?", "3"), uiState.tiles.first())
         assertNull(uiState.stripItemEntryDialog)
     }
 

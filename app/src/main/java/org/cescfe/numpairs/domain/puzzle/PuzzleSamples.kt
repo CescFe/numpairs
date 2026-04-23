@@ -4,70 +4,14 @@ object PuzzleSamples {
     val prototype: Puzzle = Puzzle(
         board = Board(
             tiles = listOf(
-                Tile(
-                    expression = Expression(
-                        leftOperand = 1,
-                        operator = Operator.ADDITION,
-                        rightOperand = 2
-                    ),
-                    result = 3
-                ),
-                Tile(
-                    expression = Expression(
-                        leftOperand = 2,
-                        operator = Operator.MULTIPLICATION,
-                        rightOperand = 3
-                    ),
-                    result = 6
-                ),
-                Tile(
-                    expression = Expression(
-                        leftOperand = 3,
-                        operator = Operator.ADDITION,
-                        rightOperand = 4
-                    ),
-                    result = 7
-                ),
-                Tile(
-                    expression = Expression(
-                        leftOperand = 4,
-                        operator = Operator.MULTIPLICATION,
-                        rightOperand = 5
-                    ),
-                    result = 20
-                ),
-                Tile(
-                    expression = Expression(
-                        leftOperand = 5,
-                        operator = Operator.ADDITION,
-                        rightOperand = 1
-                    ),
-                    result = 6
-                ),
-                Tile(
-                    expression = Expression(
-                        leftOperand = 6,
-                        operator = Operator.MULTIPLICATION,
-                        rightOperand = 1
-                    ),
-                    result = 6
-                ),
-                Tile(
-                    expression = Expression(
-                        leftOperand = 7,
-                        operator = Operator.ADDITION,
-                        rightOperand = 2
-                    ),
-                    result = 9
-                ),
-                Tile(
-                    expression = Expression(
-                        leftOperand = 8,
-                        operator = Operator.MULTIPLICATION,
-                        rightOperand = 1
-                    ),
-                    result = 8
-                )
+                hiddenExpressionTile(result = 3),
+                hiddenExpressionTile(result = 6),
+                hiddenExpressionTile(result = 7),
+                hiddenExpressionTile(result = 20),
+                hiddenExpressionTile(result = 6),
+                hiddenExpressionTile(result = 6),
+                hiddenExpressionTile(result = 9),
+                hiddenExpressionTile(result = 8)
             )
         ),
         strip = Strip(
@@ -84,3 +28,12 @@ object PuzzleSamples {
         )
     )
 }
+
+private fun hiddenExpressionTile(result: Int): Tile = Tile(
+    expression = Expression(
+        leftOperand = Expression.Operand.Hidden,
+        operator = Operator.Hidden,
+        rightOperand = Expression.Operand.Hidden
+    ),
+    result = result
+)

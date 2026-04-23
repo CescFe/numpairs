@@ -2,7 +2,6 @@ package org.cescfe.numpairs.domain.puzzle
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class PuzzleSamplesTest {
@@ -16,9 +15,20 @@ class PuzzleSamplesTest {
     }
 
     @Test
-    fun prototype_tiles_have_valid_results() {
+    fun prototype_tiles_start_with_hidden_expressions() {
         val boardTiles = PuzzleSamples.prototype.board.tiles
 
-        assertTrue(boardTiles.all { tile -> tile.result == tile.expression.evaluate() })
+        boardTiles.forEach { tile ->
+            assertEquals(Expression.Operand.Hidden, tile.expression.leftOperand)
+            assertEquals(Operator.Hidden, tile.expression.operator)
+            assertEquals(Expression.Operand.Hidden, tile.expression.rightOperand)
+        }
+    }
+
+    @Test
+    fun prototype_tiles_keep_their_expected_results() {
+        val boardTiles = PuzzleSamples.prototype.board.tiles
+
+        assertEquals(listOf(3, 6, 7, 20, 6, 6, 9, 8), boardTiles.map { it.result })
     }
 }
