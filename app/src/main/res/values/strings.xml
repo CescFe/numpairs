@@ -2,4 +2,8 @@
     <string name="app_name">NumPairs</string>
     <string name="board_content_description">Board</string>
     <string name="strip_content_description">Strip</string>
+    <string name="strip_entry_dialog_title">Enter number</string>
+    <string name="strip_entry_input_label">Number</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
 </resources>

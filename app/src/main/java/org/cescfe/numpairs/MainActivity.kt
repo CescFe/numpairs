@@ -21,7 +21,12 @@ class MainActivity : ComponentActivity() {
             val uiState by gameViewModel.uiState.collectAsState()
 
             NumPairsTheme {
-                GameScreen(uiState = uiState)
+                GameScreen(
+                    uiState = uiState,
+                    onStripItemTapped = gameViewModel::onStripItemTapped,
+                    onStripItemEntryDismissed = gameViewModel::onStripItemEntryDismissed,
+                    onStripItemEntryConfirmed = gameViewModel::onStripItemEntryConfirmed
+                )
             }
         }
     }

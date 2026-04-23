@@ -12,20 +12,30 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -45,7 +55,13 @@ private val STRIP_VERTICAL_PADDING = 14.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GameScreen(uiState: GameUiState, modifier: Modifier = Modifier) {
+fun GameScreen(
+    uiState: GameUiState,
+    modifier: Modifier = Modifier,
+    onStripItemTapped: (Int) -> Unit = {},
+    onStripItemEntryDismissed: () -> Unit = {},
+    onStripItemEntryConfirmed: (Int) -> Unit = {}
+) {
     Scaffold(
         modifier = modifier
             .fillMaxSize()
@@ -68,6 +84,7 @@ fun GameScreen(uiState: GameUiState, modifier: Modifier = Modifier) {
         ) {
             StripSection(
                 stripItems = uiState.stripItems,
+                onStripItemTapped = onStripItemTapped,
                 modifier = Modifier.fillMaxWidth()
             )
             BoardSection(
@@ -75,6 +92,14 @@ fun GameScreen(uiState: GameUiState, modifier: Modifier = Modifier) {
                 modifier = Modifier.fillMaxWidth()
             )
         }
+    }
+
+    uiState.stripItemEntryDialog?.let { dialogUiState ->
+        HiddenStripItemEntryDialog(
+            dialogUiState = dialogUiState,
+            onDismiss = onStripItemEntryDismissed,
+            onConfirm = onStripItemEntryConfirmed
+        )
     }
 }
 
@@ -123,7 +148,11 @@ private fun BoardSection(tiles: List<TileUiState>, modifier: Modifier = Modifier
 }
 
 @Composable
-private fun StripSection(stripItems: List<StripItemUiState>, modifier: Modifier = Modifier) {
+private fun StripSection(
+    stripItems: List<StripItemUiState>,
+    onStripItemTapped: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val stripContentDescription = stringResource(R.string.strip_content_description)
 
     Surface(
@@ -153,15 +182,71 @@ private fun StripSection(stripItems: List<StripItemUiState>, modifier: Modifier 
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(STRIP_CHIP_SPACING)
             ) {
-                stripItems.forEach { stripItem ->
+                stripItems.forEachIndexed { index, stripItem ->
                     AvailableNumberChip(
                         label = stripItem.label,
-                        modifier = Modifier.width(chipWidth)
+                        modifier = Modifier
+                            .width(chipWidth)
+                            .testTag(GameScreenTestTags.stripItem(index)),
+                        onClick = if (stripItem.isEntryEnabled) {
+                            { onStripItemTapped(index) }
+                        } else {
+                            null
+                        }
                     )
                 }
             }
         }
     }
+}
+
+@Composable
+private fun HiddenStripItemEntryDialog(
+    dialogUiState: StripItemEntryDialogUiState,
+    onDismiss: () -> Unit,
+    onConfirm: (Int) -> Unit
+) {
+    var enteredValue by rememberSaveable(dialogUiState.stripItemIndex) { mutableStateOf("") }
+    val confirmedValue = enteredValue.toIntOrNull()?.takeIf { it > 0 }
+
+    AlertDialog(
+        modifier = Modifier.testTag(GameScreenTestTags.STRIP_ENTRY_DIALOG),
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = stringResource(R.string.strip_entry_dialog_title))
+        },
+        text = {
+            OutlinedTextField(
+                value = enteredValue,
+                onValueChange = { newValue ->
+                    enteredValue = newValue.filter(Char::isDigit)
+                },
+                modifier = Modifier.testTag(GameScreenTestTags.STRIP_ENTRY_INPUT),
+                label = {
+                    Text(text = stringResource(R.string.strip_entry_input_label))
+                },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm(confirmedValue ?: return@Button) },
+                enabled = confirmedValue != null,
+                modifier = Modifier.testTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM)
+            ) {
+                Text(text = stringResource(R.string.confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.testTag(GameScreenTestTags.STRIP_ENTRY_CANCEL)
+            ) {
+                Text(text = stringResource(R.string.cancel))
+            }
+        }
+    )
 }
 
 private fun calculateStripChipWidth(availableWidth: Dp, chipCount: Int): Dp {
