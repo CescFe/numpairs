@@ -1,6 +1,7 @@
 package org.cescfe.numpairs.ui.screen
 
 import org.cescfe.numpairs.domain.puzzle.Puzzle
+import org.cescfe.numpairs.domain.puzzle.StripEntryRange
 import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.domain.puzzle.Tile
 
@@ -13,7 +14,12 @@ data class GameUiState(
         fun from(puzzle: Puzzle, stripItemEntryDialogIndex: Int? = null): GameUiState = GameUiState(
             stripItems = puzzle.strip.items.map(::StripItemUiState),
             tiles = puzzle.board.tiles.map(::TileUiState),
-            stripItemEntryDialog = stripItemEntryDialogIndex?.let(::StripItemEntryDialogUiState)
+            stripItemEntryDialog = stripItemEntryDialogIndex?.let { stripItemIndex ->
+                StripItemEntryDialogUiState(
+                    stripItemIndex = stripItemIndex,
+                    validRange = puzzle.strip.validEntryRangeFor(stripItemIndex)
+                )
+            }
         )
     }
 }
@@ -29,7 +35,7 @@ data class StripItemUiState(val label: String, val isEntryEnabled: Boolean) {
     )
 }
 
-data class StripItemEntryDialogUiState(val stripItemIndex: Int)
+data class StripItemEntryDialogUiState(val stripItemIndex: Int, val validRange: StripEntryRange)
 
 data class TileUiState(
     val leftOperandLabel: String,

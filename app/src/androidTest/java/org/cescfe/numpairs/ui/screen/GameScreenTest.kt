@@ -5,6 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -79,6 +80,18 @@ class GameScreenTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_DIALOG)
             .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_RANGE, useUnmergedTree = true)
+            .assert(
+                hasText(
+                    composeTestRule.activity.getString(
+                        R.string.strip_entry_valid_range_bounded,
+                        1,
+                        3
+                    )
+                )
+            )
     }
 
     @Test
@@ -89,7 +102,7 @@ class GameScreenTest {
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
-            .performTextInput("9")
+            .performTextInput("2")
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM)
@@ -97,7 +110,22 @@ class GameScreenTest {
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.stripItem(1), useUnmergedTree = true)
-            .assert(hasAnyDescendant(hasText("9")))
+            .assert(hasAnyDescendant(hasText("2")))
+    }
+
+    @Test
+    fun confirmingEntryDialogIsDisabledForOutOfRangeValues() {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(1))
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
+            .performTextInput("9")
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM)
+            .assertIsNotEnabled()
     }
 
     @Test

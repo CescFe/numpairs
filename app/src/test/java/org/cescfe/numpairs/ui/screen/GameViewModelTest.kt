@@ -1,5 +1,9 @@
 package org.cescfe.numpairs.ui.screen
 
+import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
+import org.cescfe.numpairs.domain.puzzle.Strip
+import org.cescfe.numpairs.domain.puzzle.StripEntryRange
+import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -21,7 +25,13 @@ class GameViewModelTest {
 
         viewModel.onStripItemTapped(index = 1)
 
-        assertEquals(StripItemEntryDialogUiState(stripItemIndex = 1), viewModel.uiState.value.stripItemEntryDialog)
+        assertEquals(
+            StripItemEntryDialogUiState(
+                stripItemIndex = 1,
+                validRange = StripEntryRange(minimumValue = 1, maximumValue = 3)
+            ),
+            viewModel.uiState.value.stripItemEntryDialog
+        )
     }
 
     @Test
@@ -29,13 +39,32 @@ class GameViewModelTest {
         val viewModel = GameViewModel()
 
         viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryConfirmed(value = 2)
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals("2", uiState.stripItems[1].label)
+        assertEquals(false, uiState.stripItems[1].isEntryEnabled)
+        assertNull(uiState.stripItemEntryDialog)
+    }
+
+    @Test
+    fun confirming_an_out_of_range_value_keeps_the_dialog_open_and_does_not_change_the_strip_item() {
+        val viewModel = GameViewModel()
+
+        viewModel.onStripItemTapped(index = 1)
         viewModel.onStripItemEntryConfirmed(value = 9)
 
         val uiState = viewModel.uiState.value
 
-        assertEquals("9", uiState.stripItems[1].label)
-        assertEquals(false, uiState.stripItems[1].isEntryEnabled)
-        assertNull(uiState.stripItemEntryDialog)
+        assertEquals("?", uiState.stripItems[1].label)
+        assertEquals(
+            StripItemEntryDialogUiState(
+                stripItemIndex = 1,
+                validRange = StripEntryRange(minimumValue = 1, maximumValue = 3)
+            ),
+            uiState.stripItemEntryDialog
+        )
     }
 
     @Test
@@ -59,5 +88,35 @@ class GameViewModelTest {
         viewModel.onStripItemTapped(index = 0)
 
         assertNull(viewModel.uiState.value.stripItemEntryDialog)
+    }
+
+    @Test
+    fun tapping_a_hidden_strip_item_without_a_known_value_on_the_left_uses_one_as_the_lower_bound() {
+        val viewModel = GameViewModel(
+            initialPuzzle = PuzzleSamples.prototype.copy(
+                strip = Strip(
+                    items = listOf(
+                        StripItem.Hidden,
+                        StripItem.Hidden,
+                        StripItem.Known(3),
+                        StripItem.Hidden,
+                        StripItem.Known(5),
+                        StripItem.Known(6),
+                        StripItem.Hidden,
+                        StripItem.Known(7)
+                    )
+                )
+            )
+        )
+
+        viewModel.onStripItemTapped(index = 0)
+
+        assertEquals(
+            StripItemEntryDialogUiState(
+                stripItemIndex = 0,
+                validRange = StripEntryRange(minimumValue = 1, maximumValue = 3)
+            ),
+            viewModel.uiState.value.stripItemEntryDialog
+        )
     }
 }
