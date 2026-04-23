@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.ui.screen
 
+import org.cescfe.numpairs.domain.puzzle.Expression
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.StripEntryRange
 import org.cescfe.numpairs.domain.puzzle.StripItem
@@ -77,9 +78,15 @@ data class TileUiState(
     val resultLabel: String
 ) {
     constructor(tile: Tile) : this(
-        leftOperandLabel = tile.expression.leftOperand.toString(),
+        leftOperandLabel = tile.expression.leftOperand.label,
         operatorLabel = tile.expression.operator.symbol,
-        rightOperandLabel = tile.expression.rightOperand.toString(),
+        rightOperandLabel = tile.expression.rightOperand.label,
         resultLabel = tile.result.toString()
     )
 }
+
+private val Expression.Operand.label: String
+    get() = when (this) {
+        Expression.Operand.Hidden -> "?"
+        is Expression.Operand.Known -> value.toString()
+    }
