@@ -57,10 +57,10 @@ private val STRIP_VERTICAL_PADDING = 14.dp
 @Composable
 fun GameScreen(
     uiState: GameUiState,
+    modifier: Modifier = Modifier,
     onStripItemTapped: (Int) -> Unit = {},
     onStripItemEntryDismissed: () -> Unit = {},
-    onStripItemEntryConfirmed: (Int) -> Unit = {},
-    modifier: Modifier = Modifier
+    onStripItemEntryConfirmed: (Int) -> Unit = {}
 ) {
     Scaffold(
         modifier = modifier
