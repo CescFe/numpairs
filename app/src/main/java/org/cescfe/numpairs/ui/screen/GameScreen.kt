@@ -96,7 +96,7 @@ fun GameScreen(
     }
 
     uiState.stripItemEntryDialog?.let { dialogUiState ->
-        HiddenStripItemEntryDialog(
+        StripItemEntryDialog(
             dialogUiState = dialogUiState,
             onDismiss = onStripItemEntryDismissed,
             onConfirm = onStripItemEntryConfirmed
@@ -207,12 +207,18 @@ private fun StripSection(
 }
 
 @Composable
-private fun HiddenStripItemEntryDialog(
+private fun StripItemEntryDialog(
     dialogUiState: StripItemEntryDialogUiState,
     onDismiss: () -> Unit,
     onConfirm: (Int) -> Unit
 ) {
-    var enteredValue by rememberSaveable(dialogUiState.stripItemIndex) { mutableStateOf("") }
+    var enteredValue by rememberSaveable(
+        dialogUiState.stripItemIndex,
+        dialogUiState.mode,
+        dialogUiState.initialValue
+    ) {
+        mutableStateOf(dialogUiState.initialValue)
+    }
     val parsedValue = enteredValue.toIntOrNull()
     val confirmedValue = parsedValue?.takeIf { it in dialogUiState.validRange }
     val isInputInvalid = enteredValue.isNotEmpty() && confirmedValue == null

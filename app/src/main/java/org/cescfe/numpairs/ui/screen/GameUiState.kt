@@ -15,9 +15,21 @@ data class GameUiState(
             stripItems = puzzle.strip.items.map(::StripItemUiState),
             tiles = puzzle.board.tiles.map(::TileUiState),
             stripItemEntryDialog = stripItemEntryDialogIndex?.let { stripItemIndex ->
+                val stripItem = puzzle.strip.items[stripItemIndex]
+
                 StripItemEntryDialogUiState(
                     stripItemIndex = stripItemIndex,
-                    validRange = puzzle.strip.validEntryRangeFor(stripItemIndex)
+                    validRange = puzzle.strip.validEntryRangeFor(stripItemIndex),
+                    mode = when (stripItem) {
+                        StripItem.Hidden -> StripItemEntryDialogMode.CREATE
+                        is StripItem.PlayerEntered -> StripItemEntryDialogMode.EDIT
+                        is StripItem.Known -> error("Known strip items do not support entry dialogs.")
+                    },
+                    initialValue = when (stripItem) {
+                        StripItem.Hidden -> ""
+                        is StripItem.PlayerEntered -> stripItem.value.toString()
+                        is StripItem.Known -> error("Known strip items do not support entry dialogs.")
+                    }
                 )
             }
         )
@@ -31,7 +43,7 @@ data class StripItemUiState(val label: String, val isEntryEnabled: Boolean, val 
             is StripItem.Known -> stripItem.value.toString()
             is StripItem.PlayerEntered -> stripItem.value.toString()
         },
-        isEntryEnabled = stripItem is StripItem.Hidden,
+        isEntryEnabled = stripItem == StripItem.Hidden || stripItem is StripItem.PlayerEntered,
         visualStyle = when (stripItem) {
             is StripItem.Known -> StripItemVisualStyle.KNOWN
             StripItem.Hidden -> StripItemVisualStyle.HIDDEN
@@ -46,7 +58,17 @@ enum class StripItemVisualStyle {
     PLAYER_ENTERED
 }
 
-data class StripItemEntryDialogUiState(val stripItemIndex: Int, val validRange: StripEntryRange)
+data class StripItemEntryDialogUiState(
+    val stripItemIndex: Int,
+    val validRange: StripEntryRange,
+    val mode: StripItemEntryDialogMode,
+    val initialValue: String
+)
+
+enum class StripItemEntryDialogMode {
+    CREATE,
+    EDIT
+}
 
 data class TileUiState(
     val leftOperandLabel: String,

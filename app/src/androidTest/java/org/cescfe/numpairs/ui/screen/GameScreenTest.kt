@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -111,6 +112,29 @@ class GameScreenTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.stripItem(1), useUnmergedTree = true)
             .assert(hasAnyDescendant(hasText("2")))
+    }
+
+    @Test
+    fun tappingPlayerEnteredStripItemReopensEntryDialogWithPrefilledValue() {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(1))
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
+            .performTextInput("2")
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(1))
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
+            .assertTextEquals("2")
     }
 
     @Test
