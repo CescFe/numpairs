@@ -4,14 +4,14 @@ object PuzzleSamples {
     val prototype: Puzzle = Puzzle(
         board = Board(
             tiles = listOf(
-                hiddenExpressionTile(result = 3),
-                hiddenExpressionTile(result = 6),
-                hiddenExpressionTile(result = 7),
-                hiddenExpressionTile(result = 20),
-                hiddenExpressionTile(result = 6),
-                hiddenExpressionTile(result = 6),
-                hiddenExpressionTile(result = 9),
-                hiddenExpressionTile(result = 8)
+                hiddenExpressionTile(result = 223),
+                hiddenExpressionTile(result = 222),
+                hiddenExpressionTile(result = 52),
+                hiddenExpressionTile(result = 100),
+                hiddenExpressionTile(result = 31),
+                hiddenExpressionTile(result = 150),
+                hiddenExpressionTile(result = 35),
+                hiddenExpressionTile(result = 250)
             )
         ),
         strip = Strip(
