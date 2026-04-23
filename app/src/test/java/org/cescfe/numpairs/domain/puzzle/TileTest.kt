@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
 
@@ -16,5 +17,20 @@ class TileTest {
                 result = 5
             )
         }
+    }
+
+    @Test
+    fun allows_hidden_operands_in_tile_expressions() {
+        val tile = Tile(
+            expression = Expression(
+                leftOperand = Expression.Operand.Hidden,
+                operator = Operator.MULTIPLICATION,
+                rightOperand = Expression.Operand.Known(3)
+            ),
+            result = 6
+        )
+
+        assertEquals(Expression.Operand.Hidden, tile.expression.leftOperand)
+        assertEquals(6, tile.result)
     }
 }
