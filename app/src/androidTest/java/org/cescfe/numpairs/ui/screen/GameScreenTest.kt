@@ -3,8 +3,10 @@ package org.cescfe.numpairs.ui.screen
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -94,8 +96,8 @@ class GameScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.stripItem(1))
-            .assertTextEquals("9")
+            .onNodeWithTag(GameScreenTestTags.stripItem(1), useUnmergedTree = true)
+            .assert(hasAnyDescendant(hasText("9")))
     }
 
     @Test
@@ -113,7 +115,7 @@ class GameScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.stripItem(1))
-            .assertTextEquals("?")
+            .onNodeWithTag(GameScreenTestTags.stripItem(1), useUnmergedTree = true)
+            .assert(hasAnyDescendant(hasText("?")))
     }
 }
