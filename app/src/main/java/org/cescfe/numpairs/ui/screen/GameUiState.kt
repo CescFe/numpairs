@@ -24,15 +24,26 @@ data class GameUiState(
     }
 }
 
-data class StripItemUiState(val label: String, val isEntryEnabled: Boolean) {
+data class StripItemUiState(val label: String, val isEntryEnabled: Boolean, val visualStyle: StripItemVisualStyle) {
     constructor(stripItem: StripItem) : this(
         label = when (stripItem) {
             StripItem.Hidden -> "?"
             is StripItem.Known -> stripItem.value.toString()
             is StripItem.PlayerEntered -> stripItem.value.toString()
         },
-        isEntryEnabled = stripItem is StripItem.Hidden
+        isEntryEnabled = stripItem is StripItem.Hidden,
+        visualStyle = when (stripItem) {
+            is StripItem.Known -> StripItemVisualStyle.KNOWN
+            StripItem.Hidden -> StripItemVisualStyle.HIDDEN
+            is StripItem.PlayerEntered -> StripItemVisualStyle.PLAYER_ENTERED
+        }
     )
+}
+
+enum class StripItemVisualStyle {
+    KNOWN,
+    HIDDEN,
+    PLAYER_ENTERED
 }
 
 data class StripItemEntryDialogUiState(val stripItemIndex: Int, val validRange: StripEntryRange)
