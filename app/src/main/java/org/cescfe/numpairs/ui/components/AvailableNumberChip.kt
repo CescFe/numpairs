@@ -14,22 +14,39 @@ import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
-fun AvailableNumberChip(label: String, modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 1.dp
-    ) {
-        Text(
-            text = label,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 8.dp),
-            style = MaterialTheme.typography.titleSmall,
-            textAlign = TextAlign.Center
-        )
+fun AvailableNumberChip(label: String, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
+    if (onClick == null) {
+        Surface(
+            modifier = modifier,
+            shape = RoundedCornerShape(14.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 1.dp
+        ) {
+            AvailableNumberChipLabel(label = label)
+        }
+    } else {
+        Surface(
+            modifier = modifier,
+            onClick = onClick,
+            shape = RoundedCornerShape(14.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 1.dp
+        ) {
+            AvailableNumberChipLabel(label = label)
+        }
     }
+}
+
+@Composable
+private fun AvailableNumberChipLabel(label: String) {
+    Text(
+        text = label,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp, vertical = 8.dp),
+        style = MaterialTheme.typography.titleSmall,
+        textAlign = TextAlign.Center
+    )
 }
 
 @Preview(showBackground = true)
