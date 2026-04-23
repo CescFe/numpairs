@@ -17,12 +17,12 @@ class GameViewModelTest {
         assertEquals(
             listOf(
                 StripItemVisualStyle.KNOWN,
-                StripItemVisualStyle.MODIFIABLE,
+                StripItemVisualStyle.HIDDEN,
                 StripItemVisualStyle.KNOWN,
-                StripItemVisualStyle.MODIFIABLE,
+                StripItemVisualStyle.HIDDEN,
                 StripItemVisualStyle.KNOWN,
                 StripItemVisualStyle.KNOWN,
-                StripItemVisualStyle.MODIFIABLE,
+                StripItemVisualStyle.HIDDEN,
                 StripItemVisualStyle.KNOWN
             ),
             uiState.stripItems.map { it.visualStyle }
@@ -58,7 +58,7 @@ class GameViewModelTest {
 
         assertEquals("2", uiState.stripItems[1].label)
         assertEquals(false, uiState.stripItems[1].isEntryEnabled)
-        assertEquals(StripItemVisualStyle.MODIFIABLE, uiState.stripItems[1].visualStyle)
+        assertEquals(StripItemVisualStyle.PLAYER_ENTERED, uiState.stripItems[1].visualStyle)
         assertNull(uiState.stripItemEntryDialog)
     }
 

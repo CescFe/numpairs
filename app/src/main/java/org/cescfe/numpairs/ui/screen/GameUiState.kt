@@ -34,14 +34,16 @@ data class StripItemUiState(val label: String, val isEntryEnabled: Boolean, val 
         isEntryEnabled = stripItem is StripItem.Hidden,
         visualStyle = when (stripItem) {
             is StripItem.Known -> StripItemVisualStyle.KNOWN
-            StripItem.Hidden, is StripItem.PlayerEntered -> StripItemVisualStyle.MODIFIABLE
+            StripItem.Hidden -> StripItemVisualStyle.HIDDEN
+            is StripItem.PlayerEntered -> StripItemVisualStyle.PLAYER_ENTERED
         }
     )
 }
 
 enum class StripItemVisualStyle {
     KNOWN,
-    MODIFIABLE
+    HIDDEN,
+    PLAYER_ENTERED
 }
 
 data class StripItemEntryDialogUiState(val stripItemIndex: Int, val validRange: StripEntryRange)

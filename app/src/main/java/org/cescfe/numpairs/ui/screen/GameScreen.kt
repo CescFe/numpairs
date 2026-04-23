@@ -191,7 +191,8 @@ private fun StripSection(
                             .testTag(GameScreenTestTags.stripItem(index)),
                         style = when (stripItem.visualStyle) {
                             StripItemVisualStyle.KNOWN -> AvailableNumberChipStyle.KNOWN
-                            StripItemVisualStyle.MODIFIABLE -> AvailableNumberChipStyle.MODIFIABLE
+                            StripItemVisualStyle.HIDDEN -> AvailableNumberChipStyle.HIDDEN
+                            StripItemVisualStyle.PLAYER_ENTERED -> AvailableNumberChipStyle.PLAYER_ENTERED
                         },
                         onClick = if (stripItem.isEntryEnabled) {
                             { onStripItemTapped(index) }

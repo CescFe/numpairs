@@ -21,11 +21,16 @@ import org.cescfe.numpairs.ui.theme.NumPairsTheme
 private val CHIP_MIN_HEIGHT = 48.dp
 private val CHIP_CORNER_RADIUS = 14.dp
 private val KNOWN_CHIP_BORDER_WIDTH = 1.dp
+private const val PLAYER_ENTERED_CHIP_CONTAINER_ALPHA = 0.06f
+private const val PLAYER_ENTERED_CHIP_BORDER_ALPHA = 0.35f
+private const val HIDDEN_CHIP_CONTAINER_ALPHA = 0.10f
+private const val HIDDEN_CHIP_BORDER_ALPHA = 0.50f
 private val MODIFIABLE_CHIP_BORDER_WIDTH = 1.dp
 
 enum class AvailableNumberChipStyle {
     KNOWN,
-    MODIFIABLE
+    HIDDEN,
+    PLAYER_ENTERED
 }
 
 @Composable
@@ -94,12 +99,21 @@ private fun chipColorsFor(style: AvailableNumberChipStyle): AvailableNumberChipC
             )
         )
 
-        AvailableNumberChipStyle.MODIFIABLE -> AvailableNumberChipColors(
-            containerColor = colorScheme.primary.copy(alpha = 0.10f),
+        AvailableNumberChipStyle.HIDDEN -> AvailableNumberChipColors(
+            containerColor = colorScheme.primary.copy(alpha = HIDDEN_CHIP_CONTAINER_ALPHA),
             contentColor = colorScheme.primary,
             border = BorderStroke(
                 width = MODIFIABLE_CHIP_BORDER_WIDTH,
-                color = colorScheme.primary.copy(alpha = 0.50f)
+                color = colorScheme.primary.copy(alpha = HIDDEN_CHIP_BORDER_ALPHA)
+            )
+        )
+
+        AvailableNumberChipStyle.PLAYER_ENTERED -> AvailableNumberChipColors(
+            containerColor = colorScheme.primary.copy(alpha = PLAYER_ENTERED_CHIP_CONTAINER_ALPHA),
+            contentColor = colorScheme.primary,
+            border = BorderStroke(
+                width = MODIFIABLE_CHIP_BORDER_WIDTH,
+                color = colorScheme.primary.copy(alpha = PLAYER_ENTERED_CHIP_BORDER_ALPHA)
             )
         )
     }
@@ -121,8 +135,16 @@ private fun AvailableNumberChipPreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun AvailableNumberChipModifiablePreview() {
+private fun AvailableNumberChipHiddenPreview() {
     NumPairsTheme {
-        AvailableNumberChip(label = "?", style = AvailableNumberChipStyle.MODIFIABLE)
+        AvailableNumberChip(label = "?", style = AvailableNumberChipStyle.HIDDEN)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AvailableNumberChipPlayerEnteredPreview() {
+    NumPairsTheme {
+        AvailableNumberChip(label = "4", style = AvailableNumberChipStyle.PLAYER_ENTERED)
     }
 }
