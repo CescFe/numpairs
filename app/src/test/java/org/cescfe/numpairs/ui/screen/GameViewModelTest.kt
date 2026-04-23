@@ -14,6 +14,19 @@ class GameViewModelTest {
         val uiState = GameViewModel().uiState.value
 
         assertEquals(listOf("1", "?", "3", "?", "25", "6", "?", "888"), uiState.stripItems.map { it.label })
+        assertEquals(
+            listOf(
+                StripItemVisualStyle.KNOWN,
+                StripItemVisualStyle.MODIFIABLE,
+                StripItemVisualStyle.KNOWN,
+                StripItemVisualStyle.MODIFIABLE,
+                StripItemVisualStyle.KNOWN,
+                StripItemVisualStyle.KNOWN,
+                StripItemVisualStyle.MODIFIABLE,
+                StripItemVisualStyle.KNOWN
+            ),
+            uiState.stripItems.map { it.visualStyle }
+        )
         assertEquals(8, uiState.tiles.size)
         assertEquals(TileUiState("1", "+", "2", "3"), uiState.tiles.first())
         assertNull(uiState.stripItemEntryDialog)
@@ -45,6 +58,7 @@ class GameViewModelTest {
 
         assertEquals("2", uiState.stripItems[1].label)
         assertEquals(false, uiState.stripItems[1].isEntryEnabled)
+        assertEquals(StripItemVisualStyle.MODIFIABLE, uiState.stripItems[1].visualStyle)
         assertNull(uiState.stripItemEntryDialog)
     }
 
