@@ -32,6 +32,18 @@ class ExpressionTest {
     }
 
     @Test
+    fun hidden_operators_are_supported() {
+        val expression = Expression(
+            leftOperand = Expression.Operand.Known(2),
+            operator = Operator.Hidden,
+            rightOperand = Expression.Operand.Known(3)
+        )
+
+        assertEquals(Operator.Hidden, expression.operator)
+        assertFalse(expression.isFullyKnown)
+    }
+
+    @Test
     fun known_operands_require_positive_values() {
         assertThrows(IllegalArgumentException::class.java) {
             Expression.Operand.Known(0)
@@ -43,6 +55,19 @@ class ExpressionTest {
         val expression = Expression(
             leftOperand = Expression.Operand.Hidden,
             operator = Operator.ADDITION,
+            rightOperand = Expression.Operand.Known(3)
+        )
+
+        assertThrows(IllegalStateException::class.java) {
+            expression.evaluate()
+        }
+    }
+
+    @Test
+    fun hidden_operators_cannot_be_evaluated() {
+        val expression = Expression(
+            leftOperand = Expression.Operand.Known(2),
+            operator = Operator.Hidden,
             rightOperand = Expression.Operand.Known(3)
         )
 

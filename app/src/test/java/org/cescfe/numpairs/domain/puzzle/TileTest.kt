@@ -33,4 +33,19 @@ class TileTest {
         assertEquals(Expression.Operand.Hidden, tile.expression.leftOperand)
         assertEquals(6, tile.result)
     }
+
+    @Test
+    fun allows_hidden_operators_in_tile_expressions() {
+        val tile = Tile(
+            expression = Expression(
+                leftOperand = Expression.Operand.Known(2),
+                operator = Operator.Hidden,
+                rightOperand = Expression.Operand.Known(3)
+            ),
+            result = 999
+        )
+
+        assertEquals(Operator.Hidden, tile.expression.operator)
+        assertEquals(999, tile.result)
+    }
 }
