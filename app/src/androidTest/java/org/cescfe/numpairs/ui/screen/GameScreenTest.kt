@@ -239,4 +239,43 @@ class GameScreenTest {
             .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
             .assert(hasAnyDescendant(hasText("?")))
     }
+
+    @Test
+    fun tappingFilledTileOperatorReopensSelectionDialogAndAllowsReassignment() {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.BOARD)
+            .performScrollTo()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.ADDITION), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_CONFIRM)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_DIALOG)
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.MULTIPLICATION), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_CONFIRM)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
+            .assert(hasAnyDescendant(hasText("×")))
+    }
 }

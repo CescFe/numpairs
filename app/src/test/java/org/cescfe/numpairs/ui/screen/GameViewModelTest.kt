@@ -63,7 +63,8 @@ class GameViewModelTest {
                 availableOperators = listOf(
                     Operator.ADDITION,
                     Operator.MULTIPLICATION
-                )
+                ),
+                initialOperator = null
             ),
             viewModel.uiState.value.tileOperatorSelectionDialog
         )
@@ -96,14 +97,39 @@ class GameViewModelTest {
     }
 
     @Test
-    fun tapping_a_filled_tile_operator_does_not_open_the_selection_dialog() {
+    fun tapping_a_filled_tile_operator_reopens_the_selection_dialog_with_the_current_operator() {
         val viewModel = GameViewModel()
 
         viewModel.onTileOperatorTapped(index = 0)
         viewModel.onTileOperatorSelectionConfirmed(operator = Operator.MULTIPLICATION)
         viewModel.onTileOperatorTapped(index = 0)
 
-        assertNull(viewModel.uiState.value.tileOperatorSelectionDialog)
+        assertEquals(
+            TileOperatorSelectionDialogUiState(
+                tileIndex = 0,
+                availableOperators = listOf(
+                    Operator.ADDITION,
+                    Operator.MULTIPLICATION
+                ),
+                initialOperator = Operator.MULTIPLICATION
+            ),
+            viewModel.uiState.value.tileOperatorSelectionDialog
+        )
+    }
+
+    @Test
+    fun confirming_the_selection_dialog_reassigns_a_filled_tile_operator() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileOperatorTapped(index = 0)
+        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.ADDITION)
+        viewModel.onTileOperatorTapped(index = 0)
+        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.MULTIPLICATION)
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals(TileUiState("?", "×", "?", "223"), uiState.tiles.first())
+        assertNull(uiState.tileOperatorSelectionDialog)
     }
 
     @Test

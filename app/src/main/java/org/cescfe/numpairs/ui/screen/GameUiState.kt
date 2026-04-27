@@ -41,14 +41,16 @@ data class GameUiState(
             },
             tileOperatorSelectionDialog = tileOperatorSelectionDialogIndex
                 ?.takeIf { tileIndex -> tileIndex in puzzle.board.tiles.indices }
-                ?.takeIf { tileIndex -> puzzle.board.tiles[tileIndex].expression.operator == Operator.Hidden }
                 ?.let { tileIndex ->
+                    val currentOperator = puzzle.board.tiles[tileIndex].expression.operator
+
                     TileOperatorSelectionDialogUiState(
                         tileIndex = tileIndex,
                         availableOperators = listOf(
                             Operator.ADDITION,
                             Operator.MULTIPLICATION
-                        )
+                        ),
+                        initialOperator = currentOperator.takeUnless { it == Operator.Hidden }
                     )
                 }
         )
@@ -91,7 +93,8 @@ enum class StripItemEntryDialogMode {
 
 data class TileOperatorSelectionDialogUiState(
     val tileIndex: Int,
-    val availableOperators: List<Operator>
+    val availableOperators: List<Operator>,
+    val initialOperator: Operator? = null
 )
 
 data class TileUiState(

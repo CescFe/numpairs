@@ -47,9 +47,7 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
     }
 
     fun onTileOperatorTapped(index: Int) {
-        val tile = puzzle.board.tiles.getOrNull(index) ?: return
-
-        if (tile.expression.operator != Operator.Hidden) {
+        if (puzzle.board.tiles.getOrNull(index) == null) {
             return
         }
 
@@ -96,12 +94,6 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
     fun onTileOperatorSelectionConfirmed(operator: Operator) {
         val index = tileOperatorSelectionDialogIndex ?: return
         val currentTile = puzzle.board.tiles.getOrNull(index) ?: return
-
-        if (currentTile.expression.operator != Operator.Hidden) {
-            tileOperatorSelectionDialogIndex = null
-            publishUiState()
-            return
-        }
 
         if (operator == Operator.Hidden) {
             publishUiState()

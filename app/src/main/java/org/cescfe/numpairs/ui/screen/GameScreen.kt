@@ -164,11 +164,7 @@ private fun BoardSection(
                                     .width(tileWidth)
                                     .wrapContentHeight(),
                                 operatorModifier = Modifier.testTag(GameScreenTestTags.tileOperator(tileIndex)),
-                                onOperatorClick = if (tile.operatorLabel == Operator.Hidden.symbol) {
-                                    { onTileOperatorTapped(tileIndex) }
-                                } else {
-                                    null
-                                }
+                                onOperatorClick = { onTileOperatorTapped(tileIndex) }
                             )
                         }
                     }
@@ -316,8 +312,14 @@ private fun TileOperatorSelectionDialog(
     onDismiss: () -> Unit,
     onConfirm: (Operator) -> Unit
 ) {
-    var selectedOperatorIndex by rememberSaveable(dialogUiState.tileIndex) {
-        mutableStateOf<Int?>(null)
+    val initialOperatorIndex = dialogUiState.initialOperator
+        ?.let(dialogUiState.availableOperators::indexOf)
+        ?.takeIf { it >= 0 }
+    var selectedOperatorIndex by rememberSaveable(
+        dialogUiState.tileIndex,
+        dialogUiState.initialOperator
+    ) {
+        mutableStateOf(initialOperatorIndex)
     }
     val selectedOperator = selectedOperatorIndex?.let(dialogUiState.availableOperators::getOrNull)
 
