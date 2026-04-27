@@ -57,14 +57,14 @@ data class GameUiState(
                 },
             tileOperandSelectionDialog = tileOperandSelectionTarget
                 ?.takeIf { target -> target.tileIndex in puzzle.board.tiles.indices }
-                ?.takeIf { target ->
-                    puzzle.board.tiles[target.tileIndex].operandAt(target.slot) == Expression.Operand.Hidden
-                }
                 ?.let { target ->
+                    val currentOperand = puzzle.board.tiles[target.tileIndex].operandAt(target.slot)
+
                     TileOperandSelectionDialogUiState(
                         tileIndex = target.tileIndex,
                         slot = target.slot,
-                        availableOperands = puzzle.strip.items.mapNotNull { stripItem -> stripItem.visibleValue }
+                        availableOperands = puzzle.strip.items.mapNotNull { stripItem -> stripItem.visibleValue },
+                        initialOperand = currentOperand.takeKnownValue()
                     )
                 }
         )
@@ -114,7 +114,8 @@ data class TileOperatorSelectionDialogUiState(
 data class TileOperandSelectionDialogUiState(
     val tileIndex: Int,
     val slot: TileOperandSlot,
-    val availableOperands: List<Int>
+    val availableOperands: List<Int>,
+    val initialOperand: Int? = null
 )
 
 data class TileOperandSelectionTarget(val tileIndex: Int, val slot: TileOperandSlot)
@@ -147,6 +148,11 @@ private val Expression.Operand.label: String
 private fun Tile.operandAt(slot: TileOperandSlot): Expression.Operand = when (slot) {
     TileOperandSlot.LEFT -> expression.leftOperand
     TileOperandSlot.RIGHT -> expression.rightOperand
+}
+
+private fun Expression.Operand.takeKnownValue(): Int? = when (this) {
+    Expression.Operand.Hidden -> null
+    is Expression.Operand.Known -> value
 }
 
 private val StripItem.visibleValue: Int?

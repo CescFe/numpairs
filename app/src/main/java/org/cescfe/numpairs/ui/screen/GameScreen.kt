@@ -180,19 +180,11 @@ private fun BoardSection(
                                     .width(tileWidth)
                                     .wrapContentHeight(),
                                 leftOperandModifier = Modifier.testTag(GameScreenTestTags.tileLeftOperand(tileIndex)),
-                                onLeftOperandClick = if (tile.leftOperandLabel == HIDDEN_TILE_SLOT_LABEL) {
-                                    { onTileLeftOperandTapped(tileIndex) }
-                                } else {
-                                    null
-                                },
+                                onLeftOperandClick = { onTileLeftOperandTapped(tileIndex) },
                                 operatorModifier = Modifier.testTag(GameScreenTestTags.tileOperator(tileIndex)),
                                 onOperatorClick = { onTileOperatorTapped(tileIndex) },
                                 rightOperandModifier = Modifier.testTag(GameScreenTestTags.tileRightOperand(tileIndex)),
-                                onRightOperandClick = if (tile.rightOperandLabel == HIDDEN_TILE_SLOT_LABEL) {
-                                    { onTileRightOperandTapped(tileIndex) }
-                                } else {
-                                    null
-                                }
+                                onRightOperandClick = { onTileRightOperandTapped(tileIndex) }
                             )
                         }
                     }
@@ -208,11 +200,14 @@ private fun TileOperandSelectionDialog(
     onDismiss: () -> Unit,
     onConfirm: (Int) -> Unit
 ) {
+    val initialOperand = dialogUiState.initialOperand
+        ?.takeIf { operand -> operand in dialogUiState.availableOperands }
     var selectedOperand by rememberSaveable(
         dialogUiState.tileIndex,
-        dialogUiState.slot
+        dialogUiState.slot,
+        dialogUiState.initialOperand
     ) {
-        mutableStateOf<Int?>(null)
+        mutableStateOf(initialOperand)
     }
 
     AlertDialog(
@@ -494,8 +489,6 @@ private fun calculateBoardTileWidth(availableWidth: Dp, visualColumnCount: Int):
 
     return availableTileWidth.coerceIn(BOARD_TILE_MIN_WIDTH, BOARD_TILE_MAX_WIDTH)
 }
-
-private const val HIDDEN_TILE_SLOT_LABEL = "?"
 
 @Composable
 private fun Operator.selectionLabel(): String = when (this) {
