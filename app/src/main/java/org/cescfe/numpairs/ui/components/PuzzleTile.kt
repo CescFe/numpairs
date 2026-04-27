@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,7 +25,12 @@ import org.cescfe.numpairs.ui.screen.TileUiState
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
-fun PuzzleTile(tile: TileUiState, modifier: Modifier = Modifier) {
+fun PuzzleTile(
+    tile: TileUiState,
+    modifier: Modifier = Modifier,
+    operatorModifier: Modifier = Modifier,
+    onOperatorClick: (() -> Unit)? = null
+) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp)
@@ -38,6 +44,8 @@ fun PuzzleTile(tile: TileUiState, modifier: Modifier = Modifier) {
         ) {
             TileExpressionRow(
                 tile = tile,
+                operatorModifier = operatorModifier,
+                onOperatorClick = onOperatorClick,
                 modifier = Modifier.fillMaxWidth()
             )
             Text(
@@ -56,7 +64,12 @@ fun PuzzleTile(tile: TileUiState, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun TileExpressionRow(tile: TileUiState, modifier: Modifier = Modifier) {
+private fun TileExpressionRow(
+    tile: TileUiState,
+    modifier: Modifier = Modifier,
+    operatorModifier: Modifier = Modifier,
+    onOperatorClick: (() -> Unit)? = null
+) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -68,7 +81,10 @@ private fun TileExpressionRow(tile: TileUiState, modifier: Modifier = Modifier) 
         )
         TileExpressionItem(
             text = tile.operatorLabel,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .then(operatorModifier),
+            onClick = onOperatorClick
         )
         TileExpressionItem(
             text = tile.rightOperandLabel,
@@ -78,9 +94,17 @@ private fun TileExpressionRow(tile: TileUiState, modifier: Modifier = Modifier) 
 }
 
 @Composable
-private fun TileExpressionItem(text: String, modifier: Modifier = Modifier) {
+private fun TileExpressionItem(text: String, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
     Box(
-        modifier = modifier.widthIn(min = 24.dp),
+        modifier = modifier
+            .widthIn(min = 24.dp)
+            .let { currentModifier ->
+                if (onClick == null) {
+                    currentModifier
+                } else {
+                    currentModifier.clickable(onClick = onClick)
+                }
+            },
         contentAlignment = Alignment.Center
     ) {
         Text(

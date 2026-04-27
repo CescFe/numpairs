@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.cescfe.numpairs.domain.puzzle.Board
+import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
 import org.cescfe.numpairs.domain.puzzle.Strip
@@ -12,11 +14,13 @@ import org.cescfe.numpairs.domain.puzzle.StripItem
 class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel() {
     private var puzzle: Puzzle = initialPuzzle
     private var stripItemEntryDialogIndex: Int? = null
+    private var tileOperatorSelectionDialogIndex: Int? = null
 
     private val _uiState = MutableStateFlow(
         GameUiState.from(
             puzzle = puzzle,
-            stripItemEntryDialogIndex = stripItemEntryDialogIndex
+            stripItemEntryDialogIndex = stripItemEntryDialogIndex,
+            tileOperatorSelectionDialogIndex = tileOperatorSelectionDialogIndex
         )
     )
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
@@ -28,6 +32,7 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
             return
         }
 
+        tileOperatorSelectionDialogIndex = null
         stripItemEntryDialogIndex = index
         publishUiState()
     }
@@ -38,6 +43,25 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
         }
 
         stripItemEntryDialogIndex = null
+        publishUiState()
+    }
+
+    fun onTileOperatorTapped(index: Int) {
+        if (puzzle.board.tiles.getOrNull(index) == null) {
+            return
+        }
+
+        stripItemEntryDialogIndex = null
+        tileOperatorSelectionDialogIndex = index
+        publishUiState()
+    }
+
+    fun onTileOperatorSelectionDismissed() {
+        if (tileOperatorSelectionDialogIndex == null) {
+            return
+        }
+
+        tileOperatorSelectionDialogIndex = null
         publishUiState()
     }
 
@@ -67,10 +91,29 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
         publishUiState()
     }
 
+    fun onTileOperatorSelectionConfirmed(operator: Operator) {
+        val index = tileOperatorSelectionDialogIndex ?: return
+        val currentTile = puzzle.board.tiles.getOrNull(index) ?: return
+
+        if (operator == Operator.Hidden) {
+            publishUiState()
+            return
+        }
+
+        val updatedTiles = puzzle.board.tiles.toMutableList().apply {
+            set(index, currentTile.withOperator(operator))
+        }
+
+        puzzle = puzzle.copy(board = Board(updatedTiles))
+        tileOperatorSelectionDialogIndex = null
+        publishUiState()
+    }
+
     private fun publishUiState() {
         _uiState.value = GameUiState.from(
             puzzle = puzzle,
-            stripItemEntryDialogIndex = stripItemEntryDialogIndex
+            stripItemEntryDialogIndex = stripItemEntryDialogIndex,
+            tileOperatorSelectionDialogIndex = tileOperatorSelectionDialogIndex
         )
     }
 }

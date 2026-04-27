@@ -1,6 +1,7 @@
 package org.cescfe.numpairs.ui.screen
 
 import org.cescfe.numpairs.domain.puzzle.Expression
+import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.StripEntryRange
 import org.cescfe.numpairs.domain.puzzle.StripItem
@@ -9,10 +10,15 @@ import org.cescfe.numpairs.domain.puzzle.Tile
 data class GameUiState(
     val stripItems: List<StripItemUiState>,
     val tiles: List<TileUiState>,
-    val stripItemEntryDialog: StripItemEntryDialogUiState? = null
+    val stripItemEntryDialog: StripItemEntryDialogUiState? = null,
+    val tileOperatorSelectionDialog: TileOperatorSelectionDialogUiState? = null
 ) {
     companion object {
-        fun from(puzzle: Puzzle, stripItemEntryDialogIndex: Int? = null): GameUiState = GameUiState(
+        fun from(
+            puzzle: Puzzle,
+            stripItemEntryDialogIndex: Int? = null,
+            tileOperatorSelectionDialogIndex: Int? = null
+        ): GameUiState = GameUiState(
             stripItems = puzzle.strip.items.map(::StripItemUiState),
             tiles = puzzle.board.tiles.map(::TileUiState),
             stripItemEntryDialog = stripItemEntryDialogIndex?.let { stripItemIndex ->
@@ -32,7 +38,21 @@ data class GameUiState(
                         is StripItem.Known -> error("Known strip items do not support entry dialogs.")
                     }
                 )
-            }
+            },
+            tileOperatorSelectionDialog = tileOperatorSelectionDialogIndex
+                ?.takeIf { tileIndex -> tileIndex in puzzle.board.tiles.indices }
+                ?.let { tileIndex ->
+                    val currentOperator = puzzle.board.tiles[tileIndex].expression.operator
+
+                    TileOperatorSelectionDialogUiState(
+                        tileIndex = tileIndex,
+                        availableOperators = listOf(
+                            Operator.ADDITION,
+                            Operator.MULTIPLICATION
+                        ),
+                        initialOperator = currentOperator.takeUnless { it == Operator.Hidden }
+                    )
+                }
         )
     }
 }
@@ -70,6 +90,12 @@ enum class StripItemEntryDialogMode {
     CREATE,
     EDIT
 }
+
+data class TileOperatorSelectionDialogUiState(
+    val tileIndex: Int,
+    val availableOperators: List<Operator>,
+    val initialOperator: Operator? = null
+)
 
 data class TileUiState(
     val leftOperandLabel: String,

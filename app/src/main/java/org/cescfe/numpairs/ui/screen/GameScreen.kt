@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -19,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -33,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
@@ -40,6 +44,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
 import org.cescfe.numpairs.ui.components.AvailableNumberChip
 import org.cescfe.numpairs.ui.components.AvailableNumberChipStyle
@@ -61,7 +66,10 @@ fun GameScreen(
     modifier: Modifier = Modifier,
     onStripItemTapped: (Int) -> Unit = {},
     onStripItemEntryDismissed: () -> Unit = {},
-    onStripItemEntryConfirmed: (Int) -> Unit = {}
+    onStripItemEntryConfirmed: (Int) -> Unit = {},
+    onTileOperatorTapped: (Int) -> Unit = {},
+    onTileOperatorSelectionDismissed: () -> Unit = {},
+    onTileOperatorSelectionConfirmed: (Operator) -> Unit = {}
 ) {
     Scaffold(
         modifier = modifier
@@ -90,6 +98,7 @@ fun GameScreen(
             )
             BoardSection(
                 tiles = uiState.tiles,
+                onTileOperatorTapped = onTileOperatorTapped,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -102,10 +111,18 @@ fun GameScreen(
             onConfirm = onStripItemEntryConfirmed
         )
     }
+
+    uiState.tileOperatorSelectionDialog?.let { dialogUiState ->
+        TileOperatorSelectionDialog(
+            dialogUiState = dialogUiState,
+            onDismiss = onTileOperatorSelectionDismissed,
+            onConfirm = onTileOperatorSelectionConfirmed
+        )
+    }
 }
 
 @Composable
-private fun BoardSection(tiles: List<TileUiState>, modifier: Modifier = Modifier) {
+private fun BoardSection(tiles: List<TileUiState>, onTileOperatorTapped: (Int) -> Unit, modifier: Modifier = Modifier) {
     val boardContentDescription = stringResource(R.string.board_content_description)
 
     BoxWithConstraints(
@@ -120,7 +137,7 @@ private fun BoardSection(tiles: List<TileUiState>, modifier: Modifier = Modifier
             availableWidth = maxWidth,
             visualColumnCount = visualColumnCount
         )
-        val visualRows = tiles.chunked(visualColumnCount)
+        val visualRows = tiles.withIndex().toList().chunked(visualColumnCount)
 
         Column(
             verticalArrangement = Arrangement.spacedBy(BOARD_TILE_SPACING)
@@ -133,12 +150,17 @@ private fun BoardSection(tiles: List<TileUiState>, modifier: Modifier = Modifier
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(BOARD_TILE_SPACING)
                     ) {
-                        row.forEach { tile ->
+                        row.forEach { indexedTile ->
+                            val tileIndex = indexedTile.index
+                            val tile = indexedTile.value
+
                             PuzzleTile(
                                 tile = tile,
                                 modifier = Modifier
                                     .width(tileWidth)
-                                    .wrapContentHeight()
+                                    .wrapContentHeight(),
+                                operatorModifier = Modifier.testTag(GameScreenTestTags.tileOperator(tileIndex)),
+                                onOperatorClick = { onTileOperatorTapped(tileIndex) }
                             )
                         }
                     }
@@ -280,6 +302,78 @@ private fun StripItemEntryDialog(
     )
 }
 
+@Composable
+private fun TileOperatorSelectionDialog(
+    dialogUiState: TileOperatorSelectionDialogUiState,
+    onDismiss: () -> Unit,
+    onConfirm: (Operator) -> Unit
+) {
+    val initialOperatorIndex = dialogUiState.initialOperator
+        ?.let(dialogUiState.availableOperators::indexOf)
+        ?.takeIf { it >= 0 }
+    var selectedOperatorIndex by rememberSaveable(
+        dialogUiState.tileIndex,
+        dialogUiState.initialOperator
+    ) {
+        mutableStateOf(initialOperatorIndex)
+    }
+    val selectedOperator = selectedOperatorIndex?.let(dialogUiState.availableOperators::getOrNull)
+
+    AlertDialog(
+        modifier = Modifier.testTag(GameScreenTestTags.TILE_OPERATOR_DIALOG),
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = stringResource(R.string.tile_operator_dialog_title))
+        },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.selectableGroup()
+            ) {
+                dialogUiState.availableOperators.forEachIndexed { index, operator ->
+                    val isSelected = selectedOperator == operator
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag(GameScreenTestTags.tileOperatorOption(operator))
+                            .selectable(
+                                selected = isSelected,
+                                onClick = { selectedOperatorIndex = index },
+                                role = Role.RadioButton
+                            ),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        RadioButton(
+                            selected = isSelected,
+                            onClick = null
+                        )
+                        Text(text = operator.selectionLabel())
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm(selectedOperator ?: return@Button) },
+                enabled = selectedOperator != null,
+                modifier = Modifier.testTag(GameScreenTestTags.TILE_OPERATOR_CONFIRM)
+            ) {
+                Text(text = stringResource(R.string.confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.testTag(GameScreenTestTags.TILE_OPERATOR_CANCEL)
+            ) {
+                Text(text = stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
 private fun calculateStripChipWidth(availableWidth: Dp, chipCount: Int): Dp {
     val totalSpacing = STRIP_CHIP_SPACING * (chipCount - 1)
     return (availableWidth - totalSpacing) / chipCount
@@ -299,6 +393,13 @@ private fun calculateBoardTileWidth(availableWidth: Dp, visualColumnCount: Int):
     val availableTileWidth = (availableWidth - totalSpacing) / visualColumnCount
 
     return availableTileWidth.coerceIn(BOARD_TILE_MIN_WIDTH, BOARD_TILE_MAX_WIDTH)
+}
+
+@Composable
+private fun Operator.selectionLabel(): String = when (this) {
+    Operator.Addition -> stringResource(R.string.tile_operator_option_addition)
+    Operator.Multiplication -> stringResource(R.string.tile_operator_option_multiplication)
+    Operator.Hidden -> error("Hidden operator is not a selectable option.")
 }
 
 @Preview(showBackground = true)
