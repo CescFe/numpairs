@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.ui.screen
 
+import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
 import org.cescfe.numpairs.domain.puzzle.Strip
 import org.cescfe.numpairs.domain.puzzle.StripEntryRange
@@ -30,6 +31,7 @@ class GameViewModelTest {
         assertEquals(8, uiState.tiles.size)
         assertEquals(TileUiState("?", "?", "?", "223"), uiState.tiles.first())
         assertNull(uiState.stripItemEntryDialog)
+        assertNull(uiState.tileOperatorSelectionDialog)
     }
 
     @Test
@@ -47,6 +49,61 @@ class GameViewModelTest {
             ),
             viewModel.uiState.value.stripItemEntryDialog
         )
+    }
+
+    @Test
+    fun tapping_a_hidden_tile_operator_opens_the_selection_dialog() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileOperatorTapped(index = 0)
+
+        assertEquals(
+            TileOperatorSelectionDialogUiState(
+                tileIndex = 0,
+                availableOperators = listOf(
+                    Operator.ADDITION,
+                    Operator.MULTIPLICATION
+                )
+            ),
+            viewModel.uiState.value.tileOperatorSelectionDialog
+        )
+    }
+
+    @Test
+    fun confirming_the_selection_dialog_completes_the_hidden_tile_operator() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileOperatorTapped(index = 0)
+        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.ADDITION)
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals(TileUiState("?", "+", "?", "223"), uiState.tiles.first())
+        assertNull(uiState.tileOperatorSelectionDialog)
+    }
+
+    @Test
+    fun cancelling_the_selection_dialog_leaves_the_hidden_tile_operator_unchanged() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileOperatorTapped(index = 0)
+        viewModel.onTileOperatorSelectionDismissed()
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals(TileUiState("?", "?", "?", "223"), uiState.tiles.first())
+        assertNull(uiState.tileOperatorSelectionDialog)
+    }
+
+    @Test
+    fun tapping_a_filled_tile_operator_does_not_open_the_selection_dialog() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileOperatorTapped(index = 0)
+        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.MULTIPLICATION)
+        viewModel.onTileOperatorTapped(index = 0)
+
+        assertNull(viewModel.uiState.value.tileOperatorSelectionDialog)
     }
 
     @Test

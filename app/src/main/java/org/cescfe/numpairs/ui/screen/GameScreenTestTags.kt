@@ -1,5 +1,7 @@
 package org.cescfe.numpairs.ui.screen
 
+import org.cescfe.numpairs.domain.puzzle.Operator
+
 object GameScreenTestTags {
     const val SCREEN = "game_screen"
     const val BOARD = "game_board"
@@ -9,6 +11,17 @@ object GameScreenTestTags {
     const val STRIP_ENTRY_RANGE = "strip_entry_range"
     const val STRIP_ENTRY_CONFIRM = "strip_entry_confirm"
     const val STRIP_ENTRY_CANCEL = "strip_entry_cancel"
+    const val TILE_OPERATOR_DIALOG = "tile_operator_dialog"
+    const val TILE_OPERATOR_CONFIRM = "tile_operator_confirm"
+    const val TILE_OPERATOR_CANCEL = "tile_operator_cancel"
 
     fun stripItem(index: Int): String = "strip_item_$index"
+
+    fun tileOperator(index: Int): String = "tile_operator_$index"
+
+    fun tileOperatorOption(operator: Operator): String = when (operator) {
+        Operator.Addition -> "tile_operator_option_addition"
+        Operator.Multiplication -> "tile_operator_option_multiplication"
+        Operator.Hidden -> error("Hidden operator is not a selectable option.")
+    }
 }

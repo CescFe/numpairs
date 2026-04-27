@@ -17,6 +17,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Before
 import org.junit.Rule
@@ -42,7 +43,10 @@ class GameScreenTest {
                     uiState = uiState,
                     onStripItemTapped = viewModel::onStripItemTapped,
                     onStripItemEntryDismissed = viewModel::onStripItemEntryDismissed,
-                    onStripItemEntryConfirmed = viewModel::onStripItemEntryConfirmed
+                    onStripItemEntryConfirmed = viewModel::onStripItemEntryConfirmed,
+                    onTileOperatorTapped = viewModel::onTileOperatorTapped,
+                    onTileOperatorSelectionDismissed = viewModel::onTileOperatorSelectionDismissed,
+                    onTileOperatorSelectionConfirmed = viewModel::onTileOperatorSelectionConfirmed
                 )
             }
         }
@@ -168,6 +172,71 @@ class GameScreenTest {
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.stripItem(1), useUnmergedTree = true)
+            .assert(hasAnyDescendant(hasText("?")))
+    }
+
+    @Test
+    fun tappingHiddenTileOperatorOpensSelectionDialog() {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.BOARD)
+            .performScrollTo()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_DIALOG)
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.ADDITION), useUnmergedTree = true)
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.MULTIPLICATION), useUnmergedTree = true)
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun confirmingSelectionDialogCompletesTheHiddenTileOperator() {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.BOARD)
+            .performScrollTo()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.ADDITION), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_CONFIRM)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
+            .assert(hasAnyDescendant(hasText("+")))
+    }
+
+    @Test
+    fun cancellingSelectionDialogLeavesTheHiddenTileOperatorUnchanged() {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.BOARD)
+            .performScrollTo()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_CANCEL)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
             .assert(hasAnyDescendant(hasText("?")))
     }
 }
