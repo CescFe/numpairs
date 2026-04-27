@@ -81,7 +81,8 @@ class GameViewModelTest {
             TileOperandSelectionDialogUiState(
                 tileIndex = 0,
                 slot = TileOperandSlot.LEFT,
-                availableOperands = listOf(6, 25, 222)
+                availableOperands = listOf(6, 25, 222),
+                initialOperand = null
             ),
             viewModel.uiState.value.tileOperandSelectionDialog
         )
@@ -97,7 +98,8 @@ class GameViewModelTest {
             TileOperandSelectionDialogUiState(
                 tileIndex = 0,
                 slot = TileOperandSlot.RIGHT,
-                availableOperands = listOf(6, 25, 222)
+                availableOperands = listOf(6, 25, 222),
+                initialOperand = null
             ),
             viewModel.uiState.value.tileOperandSelectionDialog
         )
@@ -115,7 +117,46 @@ class GameViewModelTest {
             TileOperandSelectionDialogUiState(
                 tileIndex = 0,
                 slot = TileOperandSlot.LEFT,
-                availableOperands = listOf(2, 6, 25, 222)
+                availableOperands = listOf(2, 6, 25, 222),
+                initialOperand = null
+            ),
+            viewModel.uiState.value.tileOperandSelectionDialog
+        )
+    }
+
+    @Test
+    fun tapping_a_filled_left_tile_operand_reopens_the_selection_dialog_with_the_current_operand() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(value = 6)
+        viewModel.onTileLeftOperandTapped(index = 0)
+
+        assertEquals(
+            TileOperandSelectionDialogUiState(
+                tileIndex = 0,
+                slot = TileOperandSlot.LEFT,
+                availableOperands = listOf(6, 25, 222),
+                initialOperand = 6
+            ),
+            viewModel.uiState.value.tileOperandSelectionDialog
+        )
+    }
+
+    @Test
+    fun tapping_a_filled_right_tile_operand_reopens_the_selection_dialog_with_the_current_operand() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileRightOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(value = 6)
+        viewModel.onTileRightOperandTapped(index = 0)
+
+        assertEquals(
+            TileOperandSelectionDialogUiState(
+                tileIndex = 0,
+                slot = TileOperandSlot.RIGHT,
+                availableOperands = listOf(6, 25, 222),
+                initialOperand = 6
             ),
             viewModel.uiState.value.tileOperandSelectionDialog
         )
@@ -127,6 +168,36 @@ class GameViewModelTest {
 
         viewModel.onTileLeftOperandTapped(index = 0)
         viewModel.onTileOperandSelectionConfirmed(value = 6)
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals(TileUiState("6", "?", "?", "223"), uiState.tiles.first())
+        assertNull(uiState.tileOperandSelectionDialog)
+    }
+
+    @Test
+    fun confirming_the_selection_dialog_replaces_a_filled_left_tile_operand() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(value = 6)
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(value = 25)
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals(TileUiState("25", "?", "?", "223"), uiState.tiles.first())
+        assertNull(uiState.tileOperandSelectionDialog)
+    }
+
+    @Test
+    fun cancelling_the_selection_dialog_leaves_a_filled_tile_operand_unchanged() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(value = 6)
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionDismissed()
 
         val uiState = viewModel.uiState.value
 
