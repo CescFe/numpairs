@@ -117,10 +117,7 @@ data class TileOperandSelectionDialogUiState(
     val availableOperands: List<Int>
 )
 
-data class TileOperandSelectionTarget(
-    val tileIndex: Int,
-    val slot: TileOperandSlot
-)
+data class TileOperandSelectionTarget(val tileIndex: Int, val slot: TileOperandSlot)
 
 enum class TileOperandSlot {
     LEFT,
