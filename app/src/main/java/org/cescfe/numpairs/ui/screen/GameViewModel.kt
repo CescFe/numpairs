@@ -5,13 +5,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.cescfe.numpairs.domain.puzzle.Board
-import org.cescfe.numpairs.domain.puzzle.Expression
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
 import org.cescfe.numpairs.domain.puzzle.Strip
 import org.cescfe.numpairs.domain.puzzle.StripItem
-import org.cescfe.numpairs.domain.puzzle.Tile
 
 class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel() {
     private var puzzle: Puzzle = initialPuzzle
@@ -192,9 +190,4 @@ private fun Puzzle.visibleStripValues(): List<Int> = strip.items.mapNotNull { st
         is StripItem.Known -> stripItem.value
         is StripItem.PlayerEntered -> stripItem.value
     }
-}
-
-private fun Tile.operandAt(slot: TileOperandSlot): Expression.Operand = when (slot) {
-    TileOperandSlot.LEFT -> expression.leftOperand
-    TileOperandSlot.RIGHT -> expression.rightOperand
 }
