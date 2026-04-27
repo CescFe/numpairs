@@ -32,6 +32,7 @@ class GameViewModelTest {
         assertEquals(TileUiState("?", "?", "?", "223"), uiState.tiles.first())
         assertNull(uiState.stripItemEntryDialog)
         assertNull(uiState.tileOperatorSelectionDialog)
+        assertNull(uiState.tileOperandSelectionDialog)
     }
 
     @Test
@@ -68,6 +69,82 @@ class GameViewModelTest {
             ),
             viewModel.uiState.value.tileOperatorSelectionDialog
         )
+    }
+
+    @Test
+    fun tapping_a_hidden_left_tile_operand_opens_the_selection_dialog() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+
+        assertEquals(
+            TileOperandSelectionDialogUiState(
+                tileIndex = 0,
+                slot = TileOperandSlot.LEFT,
+                availableOperands = listOf(6, 25, 222)
+            ),
+            viewModel.uiState.value.tileOperandSelectionDialog
+        )
+    }
+
+    @Test
+    fun tapping_a_hidden_right_tile_operand_opens_the_selection_dialog() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileRightOperandTapped(index = 0)
+
+        assertEquals(
+            TileOperandSelectionDialogUiState(
+                tileIndex = 0,
+                slot = TileOperandSlot.RIGHT,
+                availableOperands = listOf(6, 25, 222)
+            ),
+            viewModel.uiState.value.tileOperandSelectionDialog
+        )
+    }
+
+    @Test
+    fun player_entered_strip_items_are_included_in_hidden_tile_operand_selection() {
+        val viewModel = GameViewModel()
+
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryConfirmed(value = 2)
+        viewModel.onTileLeftOperandTapped(index = 0)
+
+        assertEquals(
+            TileOperandSelectionDialogUiState(
+                tileIndex = 0,
+                slot = TileOperandSlot.LEFT,
+                availableOperands = listOf(2, 6, 25, 222)
+            ),
+            viewModel.uiState.value.tileOperandSelectionDialog
+        )
+    }
+
+    @Test
+    fun confirming_the_selection_dialog_completes_the_hidden_left_tile_operand() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(value = 6)
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals(TileUiState("6", "?", "?", "223"), uiState.tiles.first())
+        assertNull(uiState.tileOperandSelectionDialog)
+    }
+
+    @Test
+    fun cancelling_the_selection_dialog_leaves_the_hidden_tile_operand_unchanged() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionDismissed()
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals(TileUiState("?", "?", "?", "223"), uiState.tiles.first())
+        assertNull(uiState.tileOperandSelectionDialog)
     }
 
     @Test

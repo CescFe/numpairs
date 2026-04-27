@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.cescfe.numpairs.domain.puzzle.Board
+import org.cescfe.numpairs.domain.puzzle.Expression
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
@@ -15,12 +16,14 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
     private var puzzle: Puzzle = initialPuzzle
     private var stripItemEntryDialogIndex: Int? = null
     private var tileOperatorSelectionDialogIndex: Int? = null
+    private var tileOperandSelectionTarget: TileOperandSelectionTarget? = null
 
     private val _uiState = MutableStateFlow(
         GameUiState.from(
             puzzle = puzzle,
             stripItemEntryDialogIndex = stripItemEntryDialogIndex,
-            tileOperatorSelectionDialogIndex = tileOperatorSelectionDialogIndex
+            tileOperatorSelectionDialogIndex = tileOperatorSelectionDialogIndex,
+            tileOperandSelectionTarget = tileOperandSelectionTarget
         )
     )
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
@@ -33,6 +36,7 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
         }
 
         tileOperatorSelectionDialogIndex = null
+        tileOperandSelectionTarget = null
         stripItemEntryDialogIndex = index
         publishUiState()
     }
@@ -52,6 +56,7 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
         }
 
         stripItemEntryDialogIndex = null
+        tileOperandSelectionTarget = null
         tileOperatorSelectionDialogIndex = index
         publishUiState()
     }
@@ -62,6 +67,29 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
         }
 
         tileOperatorSelectionDialogIndex = null
+        publishUiState()
+    }
+
+    fun onTileLeftOperandTapped(index: Int) {
+        onTileOperandTapped(
+            index = index,
+            slot = TileOperandSlot.LEFT
+        )
+    }
+
+    fun onTileRightOperandTapped(index: Int) {
+        onTileOperandTapped(
+            index = index,
+            slot = TileOperandSlot.RIGHT
+        )
+    }
+
+    fun onTileOperandSelectionDismissed() {
+        if (tileOperandSelectionTarget == null) {
+            return
+        }
+
+        tileOperandSelectionTarget = null
         publishUiState()
     }
 
@@ -91,6 +119,37 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
         publishUiState()
     }
 
+    fun onTileOperandSelectionConfirmed(value: Int) {
+        val target = tileOperandSelectionTarget ?: return
+        val currentTile = puzzle.board.tiles.getOrNull(target.tileIndex) ?: return
+        val currentOperand = currentTile.operandAt(target.slot)
+
+        if (currentOperand != Expression.Operand.Hidden) {
+            tileOperandSelectionTarget = null
+            publishUiState()
+            return
+        }
+
+        if (value !in puzzle.visibleStripValues()) {
+            publishUiState()
+            return
+        }
+
+        val updatedTiles = puzzle.board.tiles.toMutableList().apply {
+            set(
+                target.tileIndex,
+                when (target.slot) {
+                    TileOperandSlot.LEFT -> currentTile.withLeftOperand(value)
+                    TileOperandSlot.RIGHT -> currentTile.withRightOperand(value)
+                }
+            )
+        }
+
+        puzzle = puzzle.copy(board = Board(updatedTiles))
+        tileOperandSelectionTarget = null
+        publishUiState()
+    }
+
     fun onTileOperatorSelectionConfirmed(operator: Operator) {
         val index = tileOperatorSelectionDialogIndex ?: return
         val currentTile = puzzle.board.tiles.getOrNull(index) ?: return
@@ -113,7 +172,37 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
         _uiState.value = GameUiState.from(
             puzzle = puzzle,
             stripItemEntryDialogIndex = stripItemEntryDialogIndex,
-            tileOperatorSelectionDialogIndex = tileOperatorSelectionDialogIndex
+            tileOperatorSelectionDialogIndex = tileOperatorSelectionDialogIndex,
+            tileOperandSelectionTarget = tileOperandSelectionTarget
         )
     }
+
+    private fun onTileOperandTapped(index: Int, slot: TileOperandSlot) {
+        val tile = puzzle.board.tiles.getOrNull(index) ?: return
+
+        if (tile.operandAt(slot) != Expression.Operand.Hidden) {
+            return
+        }
+
+        stripItemEntryDialogIndex = null
+        tileOperatorSelectionDialogIndex = null
+        tileOperandSelectionTarget = TileOperandSelectionTarget(
+            tileIndex = index,
+            slot = slot
+        )
+        publishUiState()
+    }
+}
+
+private fun Puzzle.visibleStripValues(): List<Int> = strip.items.mapNotNull { stripItem ->
+    when (stripItem) {
+        StripItem.Hidden -> null
+        is StripItem.Known -> stripItem.value
+        is StripItem.PlayerEntered -> stripItem.value
+    }
+}
+
+private fun org.cescfe.numpairs.domain.puzzle.Tile.operandAt(slot: TileOperandSlot): Expression.Operand = when (slot) {
+    TileOperandSlot.LEFT -> expression.leftOperand
+    TileOperandSlot.RIGHT -> expression.rightOperand
 }

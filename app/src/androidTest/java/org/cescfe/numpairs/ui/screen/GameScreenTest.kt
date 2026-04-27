@@ -46,6 +46,10 @@ class GameScreenTest {
                     onStripItemTapped = viewModel::onStripItemTapped,
                     onStripItemEntryDismissed = viewModel::onStripItemEntryDismissed,
                     onStripItemEntryConfirmed = viewModel::onStripItemEntryConfirmed,
+                    onTileLeftOperandTapped = viewModel::onTileLeftOperandTapped,
+                    onTileRightOperandTapped = viewModel::onTileRightOperandTapped,
+                    onTileOperandSelectionDismissed = viewModel::onTileOperandSelectionDismissed,
+                    onTileOperandSelectionConfirmed = viewModel::onTileOperandSelectionConfirmed,
                     onTileOperatorTapped = viewModel::onTileOperatorTapped,
                     onTileOperatorSelectionDismissed = viewModel::onTileOperatorSelectionDismissed,
                     onTileOperatorSelectionConfirmed = viewModel::onTileOperatorSelectionConfirmed
@@ -203,6 +207,117 @@ class GameScreenTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.MULTIPLICATION), useUnmergedTree = true)
             .assertIsDisplayed()
+    }
+
+    @Test
+    fun tappingHiddenLeftTileOperandOpensSelectionDialog() {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.BOARD)
+            .performScrollTo()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERAND_DIALOG)
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(6), useUnmergedTree = true)
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(25), useUnmergedTree = true)
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(222), useUnmergedTree = true)
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun tappingHiddenRightTileOperandOpensSelectionDialog() {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.BOARD)
+            .performScrollTo()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileRightOperand(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERAND_DIALOG)
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun playerEnteredStripItemAppearsAsSelectableOperandValue() {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(1))
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
+            .performTextInput("2")
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.BOARD)
+            .performScrollTo()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(2), useUnmergedTree = true)
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun confirmingSelectionDialogCompletesTheHiddenTileOperand() {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.BOARD)
+            .performScrollTo()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(6), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERAND_CONFIRM)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
+            .assert(hasAnyDescendant(hasText("6")))
+    }
+
+    @Test
+    fun cancellingSelectionDialogLeavesTheHiddenTileOperandUnchanged() {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.BOARD)
+            .performScrollTo()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERAND_CANCEL)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
+            .assert(hasAnyDescendant(hasText("?")))
     }
 
     @Test
