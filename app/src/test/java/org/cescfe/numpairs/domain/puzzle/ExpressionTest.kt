@@ -44,6 +44,62 @@ class ExpressionTest {
     }
 
     @Test
+    fun hidden_left_operands_can_be_assigned_a_concrete_value() {
+        val expression = Expression(
+            leftOperand = Expression.Operand.Hidden,
+            operator = Operator.ADDITION,
+            rightOperand = Expression.Operand.Known(3)
+        )
+
+        val updatedExpression = expression.withLeftOperand(2)
+
+        assertEquals(Expression.Operand.Known(2), updatedExpression.leftOperand)
+        assertTrue(updatedExpression.isFullyKnown)
+    }
+
+    @Test
+    fun hidden_right_operands_can_be_assigned_a_concrete_value() {
+        val expression = Expression(
+            leftOperand = Expression.Operand.Known(2),
+            operator = Operator.ADDITION,
+            rightOperand = Expression.Operand.Hidden
+        )
+
+        val updatedExpression = expression.withRightOperand(3)
+
+        assertEquals(Expression.Operand.Known(3), updatedExpression.rightOperand)
+        assertTrue(updatedExpression.isFullyKnown)
+    }
+
+    @Test
+    fun concrete_left_operands_can_be_replaced_with_another_concrete_value() {
+        val expression = Expression(
+            leftOperand = Expression.Operand.Known(2),
+            operator = Operator.ADDITION,
+            rightOperand = Expression.Operand.Known(3)
+        )
+
+        val updatedExpression = expression.withLeftOperand(4)
+
+        assertEquals(Expression.Operand.Known(4), updatedExpression.leftOperand)
+        assertTrue(updatedExpression.isFullyKnown)
+    }
+
+    @Test
+    fun concrete_right_operands_can_be_replaced_with_another_concrete_value() {
+        val expression = Expression(
+            leftOperand = Expression.Operand.Known(2),
+            operator = Operator.ADDITION,
+            rightOperand = Expression.Operand.Known(3)
+        )
+
+        val updatedExpression = expression.withRightOperand(5)
+
+        assertEquals(Expression.Operand.Known(5), updatedExpression.rightOperand)
+        assertTrue(updatedExpression.isFullyKnown)
+    }
+
+    @Test
     fun hidden_operators_can_be_assigned_as_addition() {
         val expression = Expression(
             leftOperand = Expression.Operand.Known(2),
