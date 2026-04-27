@@ -13,22 +13,22 @@ class GameViewModelTest {
     fun exposes_the_initial_screen_state() {
         val uiState = GameViewModel().uiState.value
 
-        assertEquals(listOf("1", "?", "3", "?", "25", "6", "?", "888"), uiState.stripItems.map { it.label })
+        assertEquals(listOf("?", "?", "6", "?", "25", "?", "?", "222"), uiState.stripItems.map { it.label })
         assertEquals(
             listOf(
-                StripItemVisualStyle.KNOWN,
+                StripItemVisualStyle.HIDDEN,
                 StripItemVisualStyle.HIDDEN,
                 StripItemVisualStyle.KNOWN,
                 StripItemVisualStyle.HIDDEN,
                 StripItemVisualStyle.KNOWN,
-                StripItemVisualStyle.KNOWN,
+                StripItemVisualStyle.HIDDEN,
                 StripItemVisualStyle.HIDDEN,
                 StripItemVisualStyle.KNOWN
             ),
             uiState.stripItems.map { it.visualStyle }
         )
         assertEquals(8, uiState.tiles.size)
-        assertEquals(TileUiState("?", "?", "?", "3"), uiState.tiles.first())
+        assertEquals(TileUiState("?", "?", "?", "223"), uiState.tiles.first())
         assertNull(uiState.stripItemEntryDialog)
     }
 
@@ -41,7 +41,7 @@ class GameViewModelTest {
         assertEquals(
             StripItemEntryDialogUiState(
                 stripItemIndex = 1,
-                validRange = StripEntryRange(minimumValue = 1, maximumValue = 3),
+                validRange = StripEntryRange(minimumValue = 1, maximumValue = 6),
                 mode = StripItemEntryDialogMode.CREATE,
                 initialValue = ""
             ),
@@ -77,7 +77,7 @@ class GameViewModelTest {
         assertEquals(
             StripItemEntryDialogUiState(
                 stripItemIndex = 1,
-                validRange = StripEntryRange(minimumValue = 1, maximumValue = 3),
+                validRange = StripEntryRange(minimumValue = 1, maximumValue = 6),
                 mode = StripItemEntryDialogMode.CREATE,
                 initialValue = ""
             ),
@@ -96,7 +96,7 @@ class GameViewModelTest {
         assertEquals(
             StripItemEntryDialogUiState(
                 stripItemIndex = 1,
-                validRange = StripEntryRange(minimumValue = 1, maximumValue = 3),
+                validRange = StripEntryRange(minimumValue = 1, maximumValue = 6),
                 mode = StripItemEntryDialogMode.EDIT,
                 initialValue = "2"
             ),
@@ -152,7 +152,7 @@ class GameViewModelTest {
         assertEquals(
             StripItemEntryDialogUiState(
                 stripItemIndex = 1,
-                validRange = StripEntryRange(minimumValue = 1, maximumValue = 3),
+                validRange = StripEntryRange(minimumValue = 1, maximumValue = 6),
                 mode = StripItemEntryDialogMode.EDIT,
                 initialValue = "2"
             ),
@@ -178,7 +178,7 @@ class GameViewModelTest {
     fun tapping_a_known_strip_item_does_not_open_the_entry_dialog() {
         val viewModel = GameViewModel()
 
-        viewModel.onStripItemTapped(index = 0)
+        viewModel.onStripItemTapped(index = 2)
 
         assertNull(viewModel.uiState.value.stripItemEntryDialog)
     }
