@@ -26,6 +26,10 @@ class MainActivity : ComponentActivity() {
                     onStripItemTapped = gameViewModel::onStripItemTapped,
                     onStripItemEntryDismissed = gameViewModel::onStripItemEntryDismissed,
                     onStripItemEntryConfirmed = gameViewModel::onStripItemEntryConfirmed,
+                    onTileLeftOperandTapped = gameViewModel::onTileLeftOperandTapped,
+                    onTileRightOperandTapped = gameViewModel::onTileRightOperandTapped,
+                    onTileOperandSelectionDismissed = gameViewModel::onTileOperandSelectionDismissed,
+                    onTileOperandSelectionConfirmed = gameViewModel::onTileOperandSelectionConfirmed,
                     onTileOperatorTapped = gameViewModel::onTileOperatorTapped,
                     onTileOperatorSelectionDismissed = gameViewModel::onTileOperatorSelectionDismissed,
                     onTileOperatorSelectionConfirmed = gameViewModel::onTileOperatorSelectionConfirmed

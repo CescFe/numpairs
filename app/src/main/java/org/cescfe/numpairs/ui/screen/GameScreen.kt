@@ -67,6 +67,10 @@ fun GameScreen(
     onStripItemTapped: (Int) -> Unit = {},
     onStripItemEntryDismissed: () -> Unit = {},
     onStripItemEntryConfirmed: (Int) -> Unit = {},
+    onTileLeftOperandTapped: (Int) -> Unit = {},
+    onTileRightOperandTapped: (Int) -> Unit = {},
+    onTileOperandSelectionDismissed: () -> Unit = {},
+    onTileOperandSelectionConfirmed: (Int) -> Unit = {},
     onTileOperatorTapped: (Int) -> Unit = {},
     onTileOperatorSelectionDismissed: () -> Unit = {},
     onTileOperatorSelectionConfirmed: (Operator) -> Unit = {}
@@ -98,6 +102,8 @@ fun GameScreen(
             )
             BoardSection(
                 tiles = uiState.tiles,
+                onTileLeftOperandTapped = onTileLeftOperandTapped,
+                onTileRightOperandTapped = onTileRightOperandTapped,
                 onTileOperatorTapped = onTileOperatorTapped,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -119,10 +125,24 @@ fun GameScreen(
             onConfirm = onTileOperatorSelectionConfirmed
         )
     }
+
+    uiState.tileOperandSelectionDialog?.let { dialogUiState ->
+        TileOperandSelectionDialog(
+            dialogUiState = dialogUiState,
+            onDismiss = onTileOperandSelectionDismissed,
+            onConfirm = onTileOperandSelectionConfirmed
+        )
+    }
 }
 
 @Composable
-private fun BoardSection(tiles: List<TileUiState>, onTileOperatorTapped: (Int) -> Unit, modifier: Modifier = Modifier) {
+private fun BoardSection(
+    tiles: List<TileUiState>,
+    onTileLeftOperandTapped: (Int) -> Unit,
+    onTileRightOperandTapped: (Int) -> Unit,
+    onTileOperatorTapped: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val boardContentDescription = stringResource(R.string.board_content_description)
 
     BoxWithConstraints(
@@ -159,8 +179,20 @@ private fun BoardSection(tiles: List<TileUiState>, onTileOperatorTapped: (Int) -
                                 modifier = Modifier
                                     .width(tileWidth)
                                     .wrapContentHeight(),
+                                leftOperandModifier = Modifier.testTag(GameScreenTestTags.tileLeftOperand(tileIndex)),
+                                onLeftOperandClick = if (tile.leftOperandLabel == HIDDEN_TILE_SLOT_LABEL) {
+                                    { onTileLeftOperandTapped(tileIndex) }
+                                } else {
+                                    null
+                                },
                                 operatorModifier = Modifier.testTag(GameScreenTestTags.tileOperator(tileIndex)),
-                                onOperatorClick = { onTileOperatorTapped(tileIndex) }
+                                onOperatorClick = { onTileOperatorTapped(tileIndex) },
+                                rightOperandModifier = Modifier.testTag(GameScreenTestTags.tileRightOperand(tileIndex)),
+                                onRightOperandClick = if (tile.rightOperandLabel == HIDDEN_TILE_SLOT_LABEL) {
+                                    { onTileRightOperandTapped(tileIndex) }
+                                } else {
+                                    null
+                                }
                             )
                         }
                     }
@@ -168,6 +200,74 @@ private fun BoardSection(tiles: List<TileUiState>, onTileOperatorTapped: (Int) -
             }
         }
     }
+}
+
+@Composable
+private fun TileOperandSelectionDialog(
+    dialogUiState: TileOperandSelectionDialogUiState,
+    onDismiss: () -> Unit,
+    onConfirm: (Int) -> Unit
+) {
+    var selectedOperand by rememberSaveable(
+        dialogUiState.tileIndex,
+        dialogUiState.slot
+    ) {
+        mutableStateOf<Int?>(null)
+    }
+
+    AlertDialog(
+        modifier = Modifier.testTag(GameScreenTestTags.TILE_OPERAND_DIALOG),
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = stringResource(R.string.tile_operand_dialog_title))
+        },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.selectableGroup()
+            ) {
+                dialogUiState.availableOperands.forEach { operand ->
+                    val isSelected = selectedOperand == operand
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag(GameScreenTestTags.tileOperandOption(operand))
+                            .selectable(
+                                selected = isSelected,
+                                onClick = { selectedOperand = operand },
+                                role = Role.RadioButton
+                            ),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        RadioButton(
+                            selected = isSelected,
+                            onClick = null
+                        )
+                        Text(text = operand.toString())
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm(selectedOperand ?: return@Button) },
+                enabled = selectedOperand != null,
+                modifier = Modifier.testTag(GameScreenTestTags.TILE_OPERAND_CONFIRM)
+            ) {
+                Text(text = stringResource(R.string.confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.testTag(GameScreenTestTags.TILE_OPERAND_CANCEL)
+            ) {
+                Text(text = stringResource(R.string.cancel))
+            }
+        }
+    )
 }
 
 @Composable
@@ -394,6 +494,8 @@ private fun calculateBoardTileWidth(availableWidth: Dp, visualColumnCount: Int):
 
     return availableTileWidth.coerceIn(BOARD_TILE_MIN_WIDTH, BOARD_TILE_MAX_WIDTH)
 }
+
+private const val HIDDEN_TILE_SLOT_LABEL = "?"
 
 @Composable
 private fun Operator.selectionLabel(): String = when (this) {

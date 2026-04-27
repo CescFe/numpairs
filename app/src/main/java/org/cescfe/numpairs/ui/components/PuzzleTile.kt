@@ -28,8 +28,12 @@ import org.cescfe.numpairs.ui.theme.NumPairsTheme
 fun PuzzleTile(
     tile: TileUiState,
     modifier: Modifier = Modifier,
+    leftOperandModifier: Modifier = Modifier,
+    onLeftOperandClick: (() -> Unit)? = null,
     operatorModifier: Modifier = Modifier,
-    onOperatorClick: (() -> Unit)? = null
+    onOperatorClick: (() -> Unit)? = null,
+    rightOperandModifier: Modifier = Modifier,
+    onRightOperandClick: (() -> Unit)? = null
 ) {
     Card(
         modifier = modifier,
@@ -44,8 +48,12 @@ fun PuzzleTile(
         ) {
             TileExpressionRow(
                 tile = tile,
+                leftOperandModifier = leftOperandModifier,
+                onLeftOperandClick = onLeftOperandClick,
                 operatorModifier = operatorModifier,
                 onOperatorClick = onOperatorClick,
+                rightOperandModifier = rightOperandModifier,
+                onRightOperandClick = onRightOperandClick,
                 modifier = Modifier.fillMaxWidth()
             )
             Text(
@@ -67,8 +75,12 @@ fun PuzzleTile(
 private fun TileExpressionRow(
     tile: TileUiState,
     modifier: Modifier = Modifier,
+    leftOperandModifier: Modifier = Modifier,
+    onLeftOperandClick: (() -> Unit)? = null,
     operatorModifier: Modifier = Modifier,
-    onOperatorClick: (() -> Unit)? = null
+    onOperatorClick: (() -> Unit)? = null,
+    rightOperandModifier: Modifier = Modifier,
+    onRightOperandClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = modifier,
@@ -77,7 +89,10 @@ private fun TileExpressionRow(
     ) {
         TileExpressionItem(
             text = tile.leftOperandLabel,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .then(leftOperandModifier),
+            onClick = onLeftOperandClick
         )
         TileExpressionItem(
             text = tile.operatorLabel,
@@ -88,7 +103,10 @@ private fun TileExpressionRow(
         )
         TileExpressionItem(
             text = tile.rightOperandLabel,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .then(rightOperandModifier),
+            onClick = onRightOperandClick
         )
     }
 }

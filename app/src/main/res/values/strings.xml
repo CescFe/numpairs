@@ -6,6 +6,7 @@
     <string name="strip_entry_input_label">Number</string>
     <string name="strip_entry_valid_range_bounded">Valid range: %1$d to %2$d</string>
     <string name="strip_entry_valid_range_unbounded">Valid range: %1$d or greater</string>
+    <string name="tile_operand_dialog_title">Choose operand</string>
     <string name="tile_operator_dialog_title">Choose operator</string>
     <string name="tile_operator_option_addition">Addition (+)</string>
     <string name="tile_operator_option_multiplication">Multiplication (×)</string>
