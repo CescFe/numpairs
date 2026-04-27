@@ -20,6 +20,25 @@ A tile is composed of:
 - bottom row:
     - result
 
+## Tile Resolution State
+The validation state of a tile based on how complete its expression is and whether it matches the tile result.
+
+A tile may be:
+- unresolved
+- correct
+- incorrect
+
+## Unresolved Tile
+A tile whose expression is not fully known yet because at least one operand or the operator is still hidden.
+
+## Correct Tile
+A tile whose expression is fully known and whose evaluated value matches the tile result.
+
+## Incorrect Tile
+A tile whose expression is fully known but whose evaluated value does not match the tile result.
+
+An incorrect tile is a valid gameplay state that the player can later correct.
+
 ## Expression
 The arithmetic expression formed by two operands and one operator.
 

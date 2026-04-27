@@ -281,6 +281,26 @@ class GameViewModelTest {
     }
 
     @Test
+    fun completing_a_tile_with_an_incorrect_expression_does_not_crash_the_ui_state() {
+        val viewModel = GameViewModel()
+
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryConfirmed(value = 1)
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(value = 1)
+        viewModel.onTileOperatorTapped(index = 0)
+        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.MULTIPLICATION)
+        viewModel.onTileRightOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(value = 222)
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals(TileUiState("1", "×", "222", "223"), uiState.tiles.first())
+        assertNull(uiState.tileOperandSelectionDialog)
+        assertNull(uiState.tileOperatorSelectionDialog)
+    }
+
+    @Test
     fun confirming_the_entry_dialog_completes_the_hidden_strip_item() {
         val viewModel = GameViewModel()
 
