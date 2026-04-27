@@ -1,7 +1,5 @@
 package org.cescfe.numpairs.ui.screen
 
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -13,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -122,11 +122,7 @@ fun GameScreen(
 }
 
 @Composable
-private fun BoardSection(
-    tiles: List<TileUiState>,
-    onTileOperatorTapped: (Int) -> Unit,
-    modifier: Modifier = Modifier
-) {
+private fun BoardSection(tiles: List<TileUiState>, onTileOperatorTapped: (Int) -> Unit, modifier: Modifier = Modifier) {
     val boardContentDescription = stringResource(R.string.board_content_description)
 
     BoxWithConstraints(

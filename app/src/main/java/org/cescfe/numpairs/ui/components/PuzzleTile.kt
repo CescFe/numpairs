@@ -94,11 +94,7 @@ private fun TileExpressionRow(
 }
 
 @Composable
-private fun TileExpressionItem(
-    text: String,
-    modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null
-) {
+private fun TileExpressionItem(text: String, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
     Box(
         modifier = modifier
             .widthIn(min = 24.dp)
