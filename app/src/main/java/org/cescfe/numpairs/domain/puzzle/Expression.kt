@@ -10,6 +10,14 @@ data class Expression(val leftOperand: Operand, val operator: Operator, val righ
     val isFullyKnown: Boolean
         get() = leftOperand is Operand.Known && operator != Operator.Hidden && rightOperand is Operand.Known
 
+    fun withOperator(operator: Operator): Expression {
+        require(operator != Operator.Hidden) {
+            "Expression operators can only be assigned concrete operators."
+        }
+
+        return copy(operator = operator)
+    }
+
     fun evaluate(): Int = operator.apply(
         leftOperand = leftOperand.requireKnownValue(),
         rightOperand = rightOperand.requireKnownValue()

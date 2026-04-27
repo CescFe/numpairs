@@ -101,12 +101,7 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
         }
 
         val updatedTiles = puzzle.board.tiles.toMutableList().apply {
-            set(
-                index,
-                currentTile.copy(
-                    expression = currentTile.expression.copy(operator = operator)
-                )
-            )
+            set(index, currentTile.withOperator(operator))
         }
 
         puzzle = puzzle.copy(board = Board(updatedTiles))

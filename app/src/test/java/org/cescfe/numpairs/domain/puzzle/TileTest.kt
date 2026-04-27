@@ -48,4 +48,25 @@ class TileTest {
         assertEquals(Operator.Hidden, tile.expression.operator)
         assertEquals(999, tile.result)
     }
+
+    @Test
+    fun assigning_a_tile_operator_keeps_result_validation_when_the_expression_becomes_fully_known() {
+        val tile = Tile(
+            expression = Expression(
+                leftOperand = Expression.Operand.Known(2),
+                operator = Operator.Hidden,
+                rightOperand = Expression.Operand.Known(3)
+            ),
+            result = 5
+        )
+
+        val updatedTile = tile.withOperator(Operator.ADDITION)
+
+        assertEquals(Operator.ADDITION, updatedTile.expression.operator)
+        assertEquals(5, updatedTile.result)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            updatedTile.withOperator(Operator.MULTIPLICATION)
+        }
+    }
 }
