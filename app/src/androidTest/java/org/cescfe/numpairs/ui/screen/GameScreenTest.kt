@@ -3,10 +3,11 @@ package org.cescfe.numpairs.ui.screen
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -15,6 +16,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.text.AnnotatedString
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Operator
@@ -93,7 +95,7 @@ class GameScreenTest {
                     composeTestRule.activity.getString(
                         R.string.strip_entry_valid_range_bounded,
                         1,
-                        3
+                        6
                     )
                 )
             )
@@ -138,7 +140,12 @@ class GameScreenTest {
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
-            .assertTextEquals("2")
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.EditableText,
+                    AnnotatedString("2")
+                )
+            )
     }
 
     @Test
