@@ -7,6 +7,14 @@ data class Tile(val expression: Expression, val result: Int) {
         }
     }
 
+    fun withLeftOperand(value: Int): Tile = copy(
+        expression = expression.withLeftOperand(value)
+    )
+
+    fun withRightOperand(value: Int): Tile = copy(
+        expression = expression.withRightOperand(value)
+    )
+
     fun withOperator(operator: Operator): Tile = copy(
         expression = expression.withOperator(operator)
     )
