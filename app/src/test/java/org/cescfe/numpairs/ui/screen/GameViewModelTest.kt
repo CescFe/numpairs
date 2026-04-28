@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.ui.screen
 
+import org.cescfe.numpairs.domain.puzzle.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
 import org.cescfe.numpairs.domain.puzzle.Strip
@@ -82,9 +83,12 @@ class GameViewModelTest {
         assertEquals(
             TileOperandSelectionDialogUiState(
                 tileIndex = 0,
-                slot = TileOperandSlot.LEFT,
-                availableOperands = listOf(6, 25, 222),
-                initialOperand = null
+                slot = OperandSlot.LEFT,
+                availableOperands = listOf(
+                    operandOption(stripEntryId = 2, value = 6),
+                    operandOption(stripEntryId = 4, value = 25),
+                    operandOption(stripEntryId = 7, value = 222)
+                )
             ),
             viewModel.uiState.value.tileOperandSelectionDialog
         )
@@ -99,9 +103,12 @@ class GameViewModelTest {
         assertEquals(
             TileOperandSelectionDialogUiState(
                 tileIndex = 0,
-                slot = TileOperandSlot.RIGHT,
-                availableOperands = listOf(6, 25, 222),
-                initialOperand = null
+                slot = OperandSlot.RIGHT,
+                availableOperands = listOf(
+                    operandOption(stripEntryId = 2, value = 6),
+                    operandOption(stripEntryId = 4, value = 25),
+                    operandOption(stripEntryId = 7, value = 222)
+                )
             ),
             viewModel.uiState.value.tileOperandSelectionDialog
         )
@@ -118,9 +125,13 @@ class GameViewModelTest {
         assertEquals(
             TileOperandSelectionDialogUiState(
                 tileIndex = 0,
-                slot = TileOperandSlot.LEFT,
-                availableOperands = listOf(2, 6, 25, 222),
-                initialOperand = null
+                slot = OperandSlot.LEFT,
+                availableOperands = listOf(
+                    operandOption(stripEntryId = 1, value = 2),
+                    operandOption(stripEntryId = 2, value = 6),
+                    operandOption(stripEntryId = 4, value = 25),
+                    operandOption(stripEntryId = 7, value = 222)
+                )
             ),
             viewModel.uiState.value.tileOperandSelectionDialog
         )
@@ -131,15 +142,19 @@ class GameViewModelTest {
         val viewModel = GameViewModel()
 
         viewModel.onTileLeftOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionConfirmed(value = 6)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
         viewModel.onTileLeftOperandTapped(index = 0)
 
         assertEquals(
             TileOperandSelectionDialogUiState(
                 tileIndex = 0,
-                slot = TileOperandSlot.LEFT,
-                availableOperands = listOf(6, 25, 222),
-                initialOperand = 6
+                slot = OperandSlot.LEFT,
+                availableOperands = listOf(
+                    operandOption(stripEntryId = 2, value = 6),
+                    operandOption(stripEntryId = 4, value = 25),
+                    operandOption(stripEntryId = 7, value = 222)
+                ),
+                initialOperandEntryId = 2
             ),
             viewModel.uiState.value.tileOperandSelectionDialog
         )
@@ -150,15 +165,19 @@ class GameViewModelTest {
         val viewModel = GameViewModel()
 
         viewModel.onTileRightOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionConfirmed(value = 6)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
         viewModel.onTileRightOperandTapped(index = 0)
 
         assertEquals(
             TileOperandSelectionDialogUiState(
                 tileIndex = 0,
-                slot = TileOperandSlot.RIGHT,
-                availableOperands = listOf(6, 25, 222),
-                initialOperand = 6
+                slot = OperandSlot.RIGHT,
+                availableOperands = listOf(
+                    operandOption(stripEntryId = 2, value = 6),
+                    operandOption(stripEntryId = 4, value = 25),
+                    operandOption(stripEntryId = 7, value = 222)
+                ),
+                initialOperandEntryId = 2
             ),
             viewModel.uiState.value.tileOperandSelectionDialog
         )
@@ -169,7 +188,7 @@ class GameViewModelTest {
         val viewModel = GameViewModel()
 
         viewModel.onTileLeftOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionConfirmed(value = 6)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
 
         val uiState = viewModel.uiState.value
 
@@ -182,7 +201,7 @@ class GameViewModelTest {
         val viewModel = GameViewModel()
 
         viewModel.onTileLeftOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionConfirmed(value = 6)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
 
         assertFalse(viewModel.uiState.value.tiles.first().isInvalid)
     }
@@ -192,9 +211,9 @@ class GameViewModelTest {
         val viewModel = GameViewModel()
 
         viewModel.onTileLeftOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionConfirmed(value = 6)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
         viewModel.onTileLeftOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionConfirmed(value = 25)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 4)
 
         val uiState = viewModel.uiState.value
 
@@ -207,7 +226,7 @@ class GameViewModelTest {
         val viewModel = GameViewModel()
 
         viewModel.onTileLeftOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionConfirmed(value = 6)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
         viewModel.onTileLeftOperandTapped(index = 0)
         viewModel.onTileOperandSelectionDismissed()
 
@@ -228,6 +247,46 @@ class GameViewModelTest {
 
         assertEquals(TileUiState("?", "?", "?", "223"), uiState.tiles.first())
         assertNull(uiState.tileOperandSelectionDialog)
+    }
+
+    @Test
+    fun repeated_numeric_values_remain_distinct_operand_options_with_separate_usage_hints() {
+        val viewModel = GameViewModel(
+            initialPuzzle = PuzzleSamples.prototype.copy(
+                strip = Strip.fromItems(
+                    items = listOf(
+                        StripItem.Known(6),
+                        StripItem.Known(6),
+                        StripItem.Hidden,
+                        StripItem.Hidden,
+                        StripItem.Known(25),
+                        StripItem.Hidden,
+                        StripItem.Hidden,
+                        StripItem.Known(222)
+                    )
+                )
+            )
+        )
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 0)
+        viewModel.onTileOperatorTapped(index = 0)
+        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.ADDITION)
+        viewModel.onTileLeftOperandTapped(index = 1)
+
+        assertEquals(
+            TileOperandSelectionDialogUiState(
+                tileIndex = 1,
+                slot = OperandSlot.LEFT,
+                availableOperands = listOf(
+                    operandOption(stripEntryId = 0, value = 6, additionUsed = true),
+                    operandOption(stripEntryId = 1, value = 6),
+                    operandOption(stripEntryId = 4, value = 25),
+                    operandOption(stripEntryId = 7, value = 222)
+                )
+            ),
+            viewModel.uiState.value.tileOperandSelectionDialog
+        )
     }
 
     @Test
@@ -299,11 +358,11 @@ class GameViewModelTest {
         viewModel.onStripItemTapped(index = 1)
         viewModel.onStripItemEntryConfirmed(value = 1)
         viewModel.onTileLeftOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionConfirmed(value = 1)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 1)
         viewModel.onTileOperatorTapped(index = 0)
         viewModel.onTileOperatorSelectionConfirmed(operator = Operator.MULTIPLICATION)
         viewModel.onTileRightOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionConfirmed(value = 222)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 7)
 
         val uiState = viewModel.uiState.value
 
@@ -320,11 +379,11 @@ class GameViewModelTest {
         viewModel.onStripItemTapped(index = 1)
         viewModel.onStripItemEntryConfirmed(value = 1)
         viewModel.onTileLeftOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionConfirmed(value = 1)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 1)
         viewModel.onTileOperatorTapped(index = 0)
         viewModel.onTileOperatorSelectionConfirmed(operator = Operator.MULTIPLICATION)
         viewModel.onTileRightOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionConfirmed(value = 222)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 7)
         viewModel.onTileOperatorTapped(index = 0)
         viewModel.onTileOperatorSelectionConfirmed(operator = Operator.ADDITION)
 
@@ -501,7 +560,7 @@ class GameViewModelTest {
     fun tapping_a_hidden_strip_item_without_a_known_value_on_the_left_uses_one_as_the_lower_bound() {
         val viewModel = GameViewModel(
             initialPuzzle = PuzzleSamples.prototype.copy(
-                strip = Strip(
+                strip = Strip.fromItems(
                     items = listOf(
                         StripItem.Hidden,
                         StripItem.Hidden,
@@ -529,3 +588,17 @@ class GameViewModelTest {
         )
     }
 }
+
+private fun operandOption(
+    stripEntryId: Int,
+    value: Int,
+    additionUsed: Boolean = false,
+    multiplicationUsed: Boolean = false,
+    hasUnresolvedUsage: Boolean = false
+): TileOperandOptionUiState = TileOperandOptionUiState(
+    stripEntryId = stripEntryId,
+    value = value,
+    additionUsed = additionUsed,
+    multiplicationUsed = multiplicationUsed,
+    hasUnresolvedUsage = hasUnresolvedUsage
+)

@@ -1,12 +1,15 @@
 package org.cescfe.numpairs.ui.screen
 
 import org.cescfe.numpairs.domain.puzzle.Expression
+import org.cescfe.numpairs.domain.puzzle.OperandSelectionHint
+import org.cescfe.numpairs.domain.puzzle.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.StripEntryRange
 import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.domain.puzzle.Tile
 import org.cescfe.numpairs.domain.puzzle.TileResolutionState
+import org.cescfe.numpairs.domain.puzzle.operandSelectionHintsFor
 
 data class GameUiState(
     val stripItems: List<StripItemUiState>,
@@ -64,8 +67,11 @@ data class GameUiState(
                     TileOperandSelectionDialogUiState(
                         tileIndex = target.tileIndex,
                         slot = target.slot,
-                        availableOperands = puzzle.strip.items.mapNotNull { stripItem -> stripItem.visibleValue },
-                        initialOperand = currentOperand.takeKnownValue()
+                        availableOperands = puzzle.operandSelectionHintsFor(
+                            tileIndex = target.tileIndex,
+                            slot = target.slot
+                        ).map(::TileOperandOptionUiState),
+                        initialOperandEntryId = currentOperand.stripEntryId
                     )
                 }
         )
@@ -114,17 +120,28 @@ data class TileOperatorSelectionDialogUiState(
 
 data class TileOperandSelectionDialogUiState(
     val tileIndex: Int,
-    val slot: TileOperandSlot,
-    val availableOperands: List<Int>,
-    val initialOperand: Int? = null
+    val slot: OperandSlot,
+    val availableOperands: List<TileOperandOptionUiState>,
+    val initialOperandEntryId: Int? = null
 )
 
-data class TileOperandSelectionTarget(val tileIndex: Int, val slot: TileOperandSlot)
-
-enum class TileOperandSlot {
-    LEFT,
-    RIGHT
+data class TileOperandOptionUiState(
+    val stripEntryId: Int,
+    val value: Int,
+    val additionUsed: Boolean,
+    val multiplicationUsed: Boolean,
+    val hasUnresolvedUsage: Boolean
+) {
+    constructor(operandSelectionHint: OperandSelectionHint) : this(
+        stripEntryId = operandSelectionHint.stripEntry.entryId,
+        value = operandSelectionHint.stripEntry.value,
+        additionUsed = operandSelectionHint.usageByOperator.additionUsed,
+        multiplicationUsed = operandSelectionHint.usageByOperator.multiplicationUsed,
+        hasUnresolvedUsage = operandSelectionHint.usageByOperator.hasUnresolvedUsage
+    )
 }
+
+data class TileOperandSelectionTarget(val tileIndex: Int, val slot: OperandSlot)
 
 data class TileUiState(
     val leftOperandLabel: String,
@@ -148,19 +165,13 @@ private val Expression.Operand.label: String
         is Expression.Operand.Known -> value.toString()
     }
 
-private fun Tile.operandAt(slot: TileOperandSlot): Expression.Operand = when (slot) {
-    TileOperandSlot.LEFT -> expression.leftOperand
-    TileOperandSlot.RIGHT -> expression.rightOperand
+private fun Tile.operandAt(slot: OperandSlot): Expression.Operand = when (slot) {
+    OperandSlot.LEFT -> expression.leftOperand
+    OperandSlot.RIGHT -> expression.rightOperand
 }
 
-private fun Expression.Operand.takeKnownValue(): Int? = when (this) {
-    Expression.Operand.Hidden -> null
-    is Expression.Operand.Known -> value
-}
-
-private val StripItem.visibleValue: Int?
+private val Expression.Operand.stripEntryId: Int?
     get() = when (this) {
-        StripItem.Hidden -> null
-        is StripItem.Known -> value
-        is StripItem.PlayerEntered -> value
+        Expression.Operand.Hidden -> null
+        is Expression.Operand.Known -> this.stripEntryId
     }

@@ -10,12 +10,12 @@ data class Expression(val leftOperand: Operand, val operator: Operator, val righ
     val isFullyKnown: Boolean
         get() = leftOperand is Operand.Known && operator != Operator.Hidden && rightOperand is Operand.Known
 
-    fun withLeftOperand(value: Int): Expression = copy(
-        leftOperand = Operand.Known(value)
+    fun withLeftOperand(value: Int, stripEntryId: Int? = null): Expression = copy(
+        leftOperand = Operand.Known(value = value, stripEntryId = stripEntryId)
     )
 
-    fun withRightOperand(value: Int): Expression = copy(
-        rightOperand = Operand.Known(value)
+    fun withRightOperand(value: Int, stripEntryId: Int? = null): Expression = copy(
+        rightOperand = Operand.Known(value = value, stripEntryId = stripEntryId)
     )
 
     fun withOperator(operator: Operator): Expression {
@@ -34,10 +34,13 @@ data class Expression(val leftOperand: Operand, val operator: Operator, val righ
     sealed interface Operand {
         data object Hidden : Operand
 
-        data class Known(val value: Int) : Operand {
+        data class Known(val value: Int, val stripEntryId: Int? = null) : Operand {
             init {
                 require(value > 0) {
                     "Expression operand value must be a positive integer."
+                }
+                require(stripEntryId == null || stripEntryId >= 0) {
+                    "Strip entry id must be non-negative when present."
                 }
             }
         }

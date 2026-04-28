@@ -145,9 +145,12 @@ The contextual selector is the primary interaction used to edit the grid.
 - Opened by tapping a left or right operand slot
 - Uses a compact bottom sheet rather than a confirmation dialog
 - Shows the currently available numbers from the strip
+- Repeated numeric values remain separate selectable options when they come from different strip entries
 - Hidden strip items are not shown as selectable values
 - Selecting a value immediately fills or replaces the operand slot and closes the sheet
 - Closing the selector without choosing a value leaves the slot unchanged
+
+Selector logic should treat strip entries as unique entities rather than grouping options only by numeric value. Any future operand-usage hinting must therefore be computed per strip entry.
 
 ### Operator Slot Mode
 
