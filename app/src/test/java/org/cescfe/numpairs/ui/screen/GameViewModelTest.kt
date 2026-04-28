@@ -6,7 +6,9 @@ import org.cescfe.numpairs.domain.puzzle.Strip
 import org.cescfe.numpairs.domain.puzzle.StripEntryRange
 import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class GameViewModelTest {
@@ -176,6 +178,16 @@ class GameViewModelTest {
     }
 
     @Test
+    fun partially_filled_tiles_are_not_marked_invalid_in_ui_state() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(value = 6)
+
+        assertFalse(viewModel.uiState.value.tiles.first().isInvalid)
+    }
+
+    @Test
     fun confirming_the_selection_dialog_replaces_a_filled_left_tile_operand() {
         val viewModel = GameViewModel()
 
@@ -281,7 +293,7 @@ class GameViewModelTest {
     }
 
     @Test
-    fun completing_a_tile_with_an_incorrect_expression_does_not_crash_the_ui_state() {
+    fun completing_a_tile_with_an_incorrect_expression_marks_it_invalid_without_crashing() {
         val viewModel = GameViewModel()
 
         viewModel.onStripItemTapped(index = 1)
@@ -295,9 +307,28 @@ class GameViewModelTest {
 
         val uiState = viewModel.uiState.value
 
-        assertEquals(TileUiState("1", "×", "222", "223"), uiState.tiles.first())
+        assertEquals(TileUiState("1", "×", "222", "223", isInvalid = true), uiState.tiles.first())
+        assertTrue(uiState.tiles.first().isInvalid)
         assertNull(uiState.tileOperandSelectionDialog)
         assertNull(uiState.tileOperatorSelectionDialog)
+    }
+
+    @Test
+    fun correcting_an_incorrect_tile_clears_its_invalid_ui_state() {
+        val viewModel = GameViewModel()
+
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryConfirmed(value = 1)
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(value = 1)
+        viewModel.onTileOperatorTapped(index = 0)
+        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.MULTIPLICATION)
+        viewModel.onTileRightOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(value = 222)
+        viewModel.onTileOperatorTapped(index = 0)
+        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.ADDITION)
+
+        assertFalse(viewModel.uiState.value.tiles.first().isInvalid)
     }
 
     @Test

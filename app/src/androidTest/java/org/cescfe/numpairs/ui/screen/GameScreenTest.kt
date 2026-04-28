@@ -520,4 +520,103 @@ class GameScreenTest {
             .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
             .assert(hasAnyDescendant(hasText("×")))
     }
+
+    @Test
+    fun fullyKnownIncorrectTilesAreMarkedInvalidAndRemainEditable() {
+        buildIncorrectFirstTile()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tile(0))
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.StateDescription,
+                    composeTestRule.activity.getString(R.string.tile_state_incorrect)
+                )
+            )
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_DIALOG)
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun correctingAnIncorrectTileClearsItsInvalidState() {
+        buildIncorrectFirstTile()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.ADDITION), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_CONFIRM)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tile(0))
+            .assert(
+                SemanticsMatcher.keyNotDefined(SemanticsProperties.StateDescription)
+            )
+    }
+
+    private fun buildIncorrectFirstTile() {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(1))
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
+            .performTextInput("1")
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.BOARD)
+            .performScrollTo()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(1), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERAND_CONFIRM)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.MULTIPLICATION), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_CONFIRM)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileRightOperand(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(222), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERAND_CONFIRM)
+            .performClick()
+    }
 }

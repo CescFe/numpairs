@@ -94,6 +94,19 @@ Each position may be shown in one of these states:
 - **Filled**
   - Displayed as the currently chosen number or operator
 
+A tile as a whole may also be shown in one of these validation states:
+
+- **Unresolved**
+  - At least one operand or the operator is still hidden
+  - The tile is not shown as invalid yet
+
+- **Correct**
+  - The expression is fully known and matches the tile result
+
+- **Incorrect**
+  - The expression is fully known but does not match the tile result
+  - The tile remains editable so the player can correct it
+
 ---
 
 ## Result Grid Interactions
@@ -104,7 +117,14 @@ Each position may be shown in one of these states:
 - Tapping a filled operator slot reopens the contextual selector so the value can be replaced
 - No strip item selection step is required before editing a grid slot
 
-This document defines only the basic editing gesture. It does not define advanced validation or correctness rules yet.
+This document defines only local tile-level correctness feedback. It does not define advanced prevention, hints, or whole-puzzle validation rules.
+
+### Tile Validation Feedback
+
+- A tile is shown as invalid only when its expression is fully known and does not match the tile result
+- A partially-filled tile is not shown as invalid
+- An invalid tile remains fully editable
+- The invalid styling is removed as soon as the tile becomes correct again
 
 ---
 
@@ -164,6 +184,8 @@ The grid should communicate two things at a glance:
 1. Which slots are still hidden
 2. Which slots already contain a chosen value
 
+The grid should also communicate when a fully-known tile is currently incorrect.
+
 Recommended visual direction for the first implementation:
 
 - `Known strip item`: outlined chip
@@ -172,6 +194,10 @@ Recommended visual direction for the first implementation:
 - Hidden grid slot: `?`
 - Filled grid slot: chosen number or operator
 - Active grid slot: temporary highlight while its contextual selector is open
+- Incorrect tile: subtle error-tinted container
+- Incorrect tile: error border
+- Incorrect tile: expression row in error color
+- Incorrect tile: result keeps its normal emphasis so the target value stays legible
 
 Exact colors, spacing, and animation can be refined later.
 

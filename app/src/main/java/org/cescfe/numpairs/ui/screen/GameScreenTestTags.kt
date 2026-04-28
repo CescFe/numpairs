@@ -20,6 +20,8 @@ object GameScreenTestTags {
 
     fun stripItem(index: Int): String = "strip_item_$index"
 
+    fun tile(index: Int): String = "tile_$index"
+
     fun tileLeftOperand(index: Int): String = "tile_left_operand_$index"
 
     fun tileRightOperand(index: Int): String = "tile_right_operand_$index"
