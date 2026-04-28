@@ -151,13 +151,14 @@ The contextual selector is the primary interaction used to edit the grid.
 ### Operator Slot Mode
 
 - Opened by tapping the operator slot
+- Uses a small anchored contextual popup rather than a full modal dialog
 - Shows exactly two options:
   - `+`
   - `x`
-- Selecting an option fills or replaces the operator slot
+- Selecting an option immediately fills or replaces the operator slot and closes the popup
 - Closing the selector without choosing a value leaves the slot unchanged
 
-The selector should appear anchored to the tapped slot, using a compact popover or bubble-style presentation.
+The selector should appear anchored to the tapped slot, using a compact popover or bubble-style presentation without extra confirmation buttons.
 
 ---
 
