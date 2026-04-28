@@ -18,6 +18,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -39,9 +41,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Operator
@@ -105,6 +110,9 @@ fun GameScreen(
                 onTileLeftOperandTapped = onTileLeftOperandTapped,
                 onTileRightOperandTapped = onTileRightOperandTapped,
                 onTileOperatorTapped = onTileOperatorTapped,
+                tileOperatorSelectionDialog = uiState.tileOperatorSelectionDialog,
+                onTileOperatorSelectionDismissed = onTileOperatorSelectionDismissed,
+                onTileOperatorSelectionConfirmed = onTileOperatorSelectionConfirmed,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -117,15 +125,6 @@ fun GameScreen(
             onConfirm = onStripItemEntryConfirmed
         )
     }
-
-    uiState.tileOperatorSelectionDialog?.let { dialogUiState ->
-        TileOperatorSelectionDialog(
-            dialogUiState = dialogUiState,
-            onDismiss = onTileOperatorSelectionDismissed,
-            onConfirm = onTileOperatorSelectionConfirmed
-        )
-    }
-
     uiState.tileOperandSelectionDialog?.let { dialogUiState ->
         TileOperandSelectionDialog(
             dialogUiState = dialogUiState,
@@ -141,6 +140,9 @@ private fun BoardSection(
     onTileLeftOperandTapped: (Int) -> Unit,
     onTileRightOperandTapped: (Int) -> Unit,
     onTileOperatorTapped: (Int) -> Unit,
+    tileOperatorSelectionDialog: TileOperatorSelectionDialogUiState?,
+    onTileOperatorSelectionDismissed: () -> Unit,
+    onTileOperatorSelectionConfirmed: (Operator) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val boardContentDescription = stringResource(R.string.board_content_description)
@@ -173,6 +175,8 @@ private fun BoardSection(
                         row.forEach { indexedTile ->
                             val tileIndex = indexedTile.index
                             val tile = indexedTile.value
+                            val tileOperatorSelectionUiState = tileOperatorSelectionDialog
+                                ?.takeIf { dialogUiState -> dialogUiState.tileIndex == tileIndex }
 
                             PuzzleTile(
                                 tile = tile,
@@ -184,6 +188,15 @@ private fun BoardSection(
                                 onLeftOperandClick = { onTileLeftOperandTapped(tileIndex) },
                                 operatorModifier = Modifier.testTag(GameScreenTestTags.tileOperator(tileIndex)),
                                 onOperatorClick = { onTileOperatorTapped(tileIndex) },
+                                operatorOverlay = {
+                                    tileOperatorSelectionUiState?.let { dialogUiState ->
+                                        TileOperatorSelectionMenu(
+                                            dialogUiState = dialogUiState,
+                                            onDismiss = onTileOperatorSelectionDismissed,
+                                            onConfirm = onTileOperatorSelectionConfirmed
+                                        )
+                                    }
+                                },
                                 rightOperandModifier = Modifier.testTag(GameScreenTestTags.tileRightOperand(tileIndex)),
                                 onRightOperandClick = { onTileRightOperandTapped(tileIndex) }
                             )
@@ -399,75 +412,53 @@ private fun StripItemEntryDialog(
 }
 
 @Composable
-private fun TileOperatorSelectionDialog(
+private fun TileOperatorSelectionMenu(
     dialogUiState: TileOperatorSelectionDialogUiState,
     onDismiss: () -> Unit,
     onConfirm: (Operator) -> Unit
 ) {
-    val initialOperatorIndex = dialogUiState.initialOperator
-        ?.let(dialogUiState.availableOperators::indexOf)
-        ?.takeIf { it >= 0 }
-    var selectedOperatorIndex by rememberSaveable(
-        dialogUiState.tileIndex,
-        dialogUiState.initialOperator
-    ) {
-        mutableStateOf(initialOperatorIndex)
-    }
-    val selectedOperator = selectedOperatorIndex?.let(dialogUiState.availableOperators::getOrNull)
+    val operatorMenuContentDescription = stringResource(R.string.tile_operator_dialog_title)
 
-    AlertDialog(
-        modifier = Modifier.testTag(GameScreenTestTags.TILE_OPERATOR_DIALOG),
+    DropdownMenu(
+        expanded = true,
         onDismissRequest = onDismiss,
-        title = {
-            Text(text = stringResource(R.string.tile_operator_dialog_title))
-        },
-        text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.selectableGroup()
-            ) {
-                dialogUiState.availableOperators.forEachIndexed { index, operator ->
-                    val isSelected = selectedOperator == operator
+        modifier = Modifier
+            .testTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR)
+            .semantics {
+                contentDescription = operatorMenuContentDescription
+            },
+        offset = DpOffset(x = 0.dp, y = 4.dp)
+    ) {
+        dialogUiState.availableOperators.forEach { operator ->
+            val isSelected = dialogUiState.initialOperator == operator
+            val operatorSelectionLabel = operator.selectionLabel()
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag(GameScreenTestTags.tileOperatorOption(operator))
-                            .selectable(
-                                selected = isSelected,
-                                onClick = { selectedOperatorIndex = index },
-                                role = Role.RadioButton
-                            ),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        RadioButton(
-                            selected = isSelected,
-                            onClick = null
-                        )
-                        Text(text = operator.selectionLabel())
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = operator.symbol,
+                        color = if (isSelected) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        },
+                        fontWeight = if (isSelected) {
+                            FontWeight.SemiBold
+                        } else {
+                            FontWeight.Normal
+                        }
+                    )
+                },
+                onClick = { onConfirm(operator) },
+                modifier = Modifier
+                    .testTag(GameScreenTestTags.tileOperatorOption(operator))
+                    .semantics {
+                        contentDescription = operatorSelectionLabel
+                        selected = isSelected
                     }
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = { onConfirm(selectedOperator ?: return@Button) },
-                enabled = selectedOperator != null,
-                modifier = Modifier.testTag(GameScreenTestTags.TILE_OPERATOR_CONFIRM)
-            ) {
-                Text(text = stringResource(R.string.confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                modifier = Modifier.testTag(GameScreenTestTags.TILE_OPERATOR_CANCEL)
-            ) {
-                Text(text = stringResource(R.string.cancel))
-            }
+            )
         }
-    )
+    }
 }
 
 private fun calculateStripChipWidth(availableWidth: Dp, chipCount: Int): Dp {
