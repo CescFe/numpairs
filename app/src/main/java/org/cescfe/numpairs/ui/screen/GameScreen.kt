@@ -177,6 +177,7 @@ private fun BoardSection(
                             PuzzleTile(
                                 tile = tile,
                                 modifier = Modifier
+                                    .testTag(GameScreenTestTags.tile(tileIndex))
                                     .width(tileWidth)
                                     .wrapContentHeight(),
                                 leftOperandModifier = Modifier.testTag(GameScreenTestTags.tileLeftOperand(tileIndex)),

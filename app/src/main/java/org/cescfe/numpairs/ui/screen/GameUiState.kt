@@ -6,6 +6,7 @@ import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.StripEntryRange
 import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.domain.puzzle.Tile
+import org.cescfe.numpairs.domain.puzzle.TileResolutionState
 
 data class GameUiState(
     val stripItems: List<StripItemUiState>,
@@ -129,13 +130,15 @@ data class TileUiState(
     val leftOperandLabel: String,
     val operatorLabel: String,
     val rightOperandLabel: String,
-    val resultLabel: String
+    val resultLabel: String,
+    val isInvalid: Boolean = false
 ) {
     constructor(tile: Tile) : this(
         leftOperandLabel = tile.expression.leftOperand.label,
         operatorLabel = tile.expression.operator.symbol,
         rightOperandLabel = tile.expression.rightOperand.label,
-        resultLabel = tile.result.toString()
+        resultLabel = tile.result.toString(),
+        isInvalid = tile.resolutionState == TileResolutionState.INCORRECT
     )
 }
 

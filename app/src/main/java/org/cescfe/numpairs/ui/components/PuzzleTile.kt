@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,15 +11,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
 import org.cescfe.numpairs.ui.screen.GameUiState
 import org.cescfe.numpairs.ui.screen.TileUiState
@@ -35,9 +42,32 @@ fun PuzzleTile(
     rightOperandModifier: Modifier = Modifier,
     onRightOperandClick: (() -> Unit)? = null
 ) {
+    val expressionColor = if (tile.isInvalid) {
+        MaterialTheme.colorScheme.error
+    } else {
+        Color.Unspecified
+    }
+    val incorrectStateDescription = stringResource(R.string.tile_state_incorrect)
+
     Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(20.dp)
+        modifier = modifier.semantics {
+            if (tile.isInvalid) {
+                stateDescription = incorrectStateDescription
+            }
+        },
+        shape = RoundedCornerShape(20.dp),
+        colors = if (tile.isInvalid) {
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.08f)
+            )
+        } else {
+            CardDefaults.cardColors()
+        },
+        border = if (tile.isInvalid) {
+            BorderStroke(1.5.dp, MaterialTheme.colorScheme.error)
+        } else {
+            null
+        }
     ) {
         Column(
             modifier = Modifier
@@ -54,6 +84,7 @@ fun PuzzleTile(
                 onOperatorClick = onOperatorClick,
                 rightOperandModifier = rightOperandModifier,
                 onRightOperandClick = onRightOperandClick,
+                textColor = expressionColor,
                 modifier = Modifier.fillMaxWidth()
             )
             Text(
@@ -80,7 +111,8 @@ private fun TileExpressionRow(
     operatorModifier: Modifier = Modifier,
     onOperatorClick: (() -> Unit)? = null,
     rightOperandModifier: Modifier = Modifier,
-    onRightOperandClick: (() -> Unit)? = null
+    onRightOperandClick: (() -> Unit)? = null,
+    textColor: Color = Color.Unspecified
 ) {
     Row(
         modifier = modifier,
@@ -92,27 +124,35 @@ private fun TileExpressionRow(
             modifier = Modifier
                 .weight(1f)
                 .then(leftOperandModifier),
-            onClick = onLeftOperandClick
+            onClick = onLeftOperandClick,
+            textColor = textColor
         )
         TileExpressionItem(
             text = tile.operatorLabel,
             modifier = Modifier
                 .weight(1f)
                 .then(operatorModifier),
-            onClick = onOperatorClick
+            onClick = onOperatorClick,
+            textColor = textColor
         )
         TileExpressionItem(
             text = tile.rightOperandLabel,
             modifier = Modifier
                 .weight(1f)
                 .then(rightOperandModifier),
-            onClick = onRightOperandClick
+            onClick = onRightOperandClick,
+            textColor = textColor
         )
     }
 }
 
 @Composable
-private fun TileExpressionItem(text: String, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
+private fun TileExpressionItem(
+    text: String,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
+    textColor: Color = Color.Unspecified
+) {
     Box(
         modifier = modifier
             .widthIn(min = 24.dp)
@@ -129,6 +169,7 @@ private fun TileExpressionItem(text: String, modifier: Modifier = Modifier, onCl
             text = text,
             modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.titleMedium,
+            color = textColor,
             textAlign = TextAlign.Center
         )
     }
