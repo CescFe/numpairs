@@ -1,10 +1,12 @@
 package org.cescfe.numpairs.ui.screen
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,7 +21,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -63,6 +64,11 @@ private val BOARD_TILE_SPACING = 12.dp
 private val STRIP_CHIP_SPACING = 4.dp
 private val STRIP_HORIZONTAL_PADDING = 8.dp
 private val STRIP_VERTICAL_PADDING = 14.dp
+private val TILE_OPERATOR_MENU_CORNER_RADIUS = 16.dp
+private val TILE_OPERATOR_MENU_PADDING = 8.dp
+private val TILE_OPERATOR_MENU_OPTION_SPACING = 8.dp
+private val TILE_OPERATOR_MENU_OPTION_HORIZONTAL_PADDING = 12.dp
+private val TILE_OPERATOR_MENU_OPTION_VERTICAL_PADDING = 8.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -429,34 +435,59 @@ private fun TileOperatorSelectionMenu(
             },
         offset = DpOffset(x = 0.dp, y = 4.dp)
     ) {
-        dialogUiState.availableOperators.forEach { operator ->
-            val isSelected = dialogUiState.initialOperator == operator
-            val operatorSelectionLabel = operator.selectionLabel()
+        Row(
+            modifier = Modifier
+                .padding(TILE_OPERATOR_MENU_PADDING)
+                .selectableGroup(),
+            horizontalArrangement = Arrangement.spacedBy(TILE_OPERATOR_MENU_OPTION_SPACING)
+        ) {
+            dialogUiState.availableOperators.forEach { operator ->
+                val isSelected = dialogUiState.initialOperator == operator
+                val operatorSelectionLabel = operator.selectionLabel()
 
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        text = operator.symbol,
+                Surface(
+                    onClick = { onConfirm(operator) },
+                    modifier = Modifier
+                        .defaultMinSize(minWidth = 0.dp)
+                        .testTag(GameScreenTestTags.tileOperatorOption(operator))
+                        .semantics {
+                            contentDescription = operatorSelectionLabel
+                            selected = isSelected
+                        },
+                    shape = RoundedCornerShape(TILE_OPERATOR_MENU_CORNER_RADIUS),
+                    color = if (isSelected) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surface
+                    },
+                    contentColor = if (isSelected) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
+                    border = BorderStroke(
+                        width = 1.dp,
                         color = if (isSelected) {
                             MaterialTheme.colorScheme.primary
                         } else {
-                            MaterialTheme.colorScheme.onSurface
-                        },
+                            MaterialTheme.colorScheme.outlineVariant
+                        }
+                    )
+                ) {
+                    Text(
+                        text = operator.symbol,
+                        modifier = Modifier.padding(
+                            horizontal = TILE_OPERATOR_MENU_OPTION_HORIZONTAL_PADDING,
+                            vertical = TILE_OPERATOR_MENU_OPTION_VERTICAL_PADDING
+                        ),
                         fontWeight = if (isSelected) {
                             FontWeight.SemiBold
                         } else {
                             FontWeight.Normal
                         }
                     )
-                },
-                onClick = { onConfirm(operator) },
-                modifier = Modifier
-                    .testTag(GameScreenTestTags.tileOperatorOption(operator))
-                    .semantics {
-                        contentDescription = operatorSelectionLabel
-                        selected = isSelected
-                    }
-            )
+                }
+            }
         }
     }
 }
