@@ -6,17 +6,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.text.AnnotatedString
+import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Operator
@@ -187,7 +191,7 @@ class GameScreenTest {
     }
 
     @Test
-    fun tappingHiddenTileOperatorOpensSelectionDialog() {
+    fun tappingHiddenTileOperatorOpensContextualSelector() {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.BOARD)
             .performScrollTo()
@@ -197,7 +201,7 @@ class GameScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_DIALOG)
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR, useUnmergedTree = true)
             .assertIsDisplayed()
 
         composeTestRule
@@ -441,7 +445,7 @@ class GameScreenTest {
     }
 
     @Test
-    fun confirmingSelectionDialogCompletesTheHiddenTileOperator() {
+    fun selectingAnOperatorOptionCompletesTheHiddenTileOperatorImmediately() {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.BOARD)
             .performScrollTo()
@@ -452,19 +456,19 @@ class GameScreenTest {
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.ADDITION), useUnmergedTree = true)
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_CONFIRM)
             .performClick()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
             .assert(hasAnyDescendant(hasText("+")))
+
+        composeTestRule
+            .onAllNodesWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR, useUnmergedTree = true)
+            .assertCountEquals(0)
     }
 
     @Test
-    fun cancellingSelectionDialogLeavesTheHiddenTileOperatorUnchanged() {
+    fun dismissingTheOperatorSelectorLeavesTheHiddenTileOperatorUnchanged() {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.BOARD)
             .performScrollTo()
@@ -473,17 +477,19 @@ class GameScreenTest {
             .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
             .performClick()
 
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_CANCEL)
-            .performClick()
+        pressBack()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
             .assert(hasAnyDescendant(hasText("?")))
+
+        composeTestRule
+            .onAllNodesWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR, useUnmergedTree = true)
+            .assertCountEquals(0)
     }
 
     @Test
-    fun tappingFilledTileOperatorReopensSelectionDialogAndAllowsReassignment() {
+    fun tappingFilledTileOperatorReopensTheSelectorWithTheCurrentOptionSelectedAndAllowsReassignment() {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.BOARD)
             .performScrollTo()
@@ -497,23 +503,19 @@ class GameScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_CONFIRM)
-            .performClick()
-
-        composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
             .performClick()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_DIALOG)
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR, useUnmergedTree = true)
             .assertIsDisplayed()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.MULTIPLICATION), useUnmergedTree = true)
-            .performClick()
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.ADDITION), useUnmergedTree = true)
+            .assertIsSelected()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_CONFIRM)
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.MULTIPLICATION), useUnmergedTree = true)
             .performClick()
 
         composeTestRule
@@ -539,7 +541,7 @@ class GameScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_DIALOG)
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR, useUnmergedTree = true)
             .assertIsDisplayed()
     }
 
@@ -553,10 +555,6 @@ class GameScreenTest {
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.ADDITION), useUnmergedTree = true)
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_CONFIRM)
             .performClick()
 
         composeTestRule
@@ -601,10 +599,6 @@ class GameScreenTest {
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.MULTIPLICATION), useUnmergedTree = true)
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_CONFIRM)
             .performClick()
 
         composeTestRule

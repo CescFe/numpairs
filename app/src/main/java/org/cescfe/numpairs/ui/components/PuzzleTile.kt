@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,6 +40,7 @@ fun PuzzleTile(
     onLeftOperandClick: (() -> Unit)? = null,
     operatorModifier: Modifier = Modifier,
     onOperatorClick: (() -> Unit)? = null,
+    operatorOverlay: @Composable BoxScope.() -> Unit = {},
     rightOperandModifier: Modifier = Modifier,
     onRightOperandClick: (() -> Unit)? = null
 ) {
@@ -82,6 +84,7 @@ fun PuzzleTile(
                 onLeftOperandClick = onLeftOperandClick,
                 operatorModifier = operatorModifier,
                 onOperatorClick = onOperatorClick,
+                operatorOverlay = operatorOverlay,
                 rightOperandModifier = rightOperandModifier,
                 onRightOperandClick = onRightOperandClick,
                 textColor = expressionColor,
@@ -110,6 +113,7 @@ private fun TileExpressionRow(
     onLeftOperandClick: (() -> Unit)? = null,
     operatorModifier: Modifier = Modifier,
     onOperatorClick: (() -> Unit)? = null,
+    operatorOverlay: @Composable BoxScope.() -> Unit = {},
     rightOperandModifier: Modifier = Modifier,
     onRightOperandClick: (() -> Unit)? = null,
     textColor: Color = Color.Unspecified
@@ -133,7 +137,8 @@ private fun TileExpressionRow(
                 .weight(1f)
                 .then(operatorModifier),
             onClick = onOperatorClick,
-            textColor = textColor
+            textColor = textColor,
+            overlayContent = operatorOverlay
         )
         TileExpressionItem(
             text = tile.rightOperandLabel,
@@ -151,7 +156,8 @@ private fun TileExpressionItem(
     text: String,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
-    textColor: Color = Color.Unspecified
+    textColor: Color = Color.Unspecified,
+    overlayContent: @Composable BoxScope.() -> Unit = {}
 ) {
     Box(
         modifier = modifier
@@ -172,6 +178,7 @@ private fun TileExpressionItem(
             color = textColor,
             textAlign = TextAlign.Center
         )
+        overlayContent()
     }
 }
 

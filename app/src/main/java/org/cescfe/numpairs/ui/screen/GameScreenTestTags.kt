@@ -14,9 +14,7 @@ object GameScreenTestTags {
     const val TILE_OPERAND_DIALOG = "tile_operand_dialog"
     const val TILE_OPERAND_CONFIRM = "tile_operand_confirm"
     const val TILE_OPERAND_CANCEL = "tile_operand_cancel"
-    const val TILE_OPERATOR_DIALOG = "tile_operator_dialog"
-    const val TILE_OPERATOR_CONFIRM = "tile_operator_confirm"
-    const val TILE_OPERATOR_CANCEL = "tile_operator_cancel"
+    const val TILE_OPERATOR_SELECTOR = "tile_operator_selector"
 
     fun stripItem(index: Int): String = "strip_item_$index"
 
