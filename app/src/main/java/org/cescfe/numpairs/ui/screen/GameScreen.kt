@@ -5,15 +5,19 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -23,8 +27,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -39,7 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -69,6 +72,12 @@ private val TILE_OPERATOR_MENU_PADDING = 8.dp
 private val TILE_OPERATOR_MENU_OPTION_SPACING = 8.dp
 private val TILE_OPERATOR_MENU_OPTION_HORIZONTAL_PADDING = 12.dp
 private val TILE_OPERATOR_MENU_OPTION_VERTICAL_PADDING = 8.dp
+private val TILE_OPERAND_SHEET_MAX_HEIGHT = 320.dp
+private val TILE_OPERAND_SHEET_PADDING = 20.dp
+private val TILE_OPERAND_SHEET_GRID_SPACING = 12.dp
+private val TILE_OPERAND_SHEET_OPTION_MIN_WIDTH = 88.dp
+private val TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT = 56.dp
+private val TILE_OPERAND_SHEET_OPTION_CORNER_RADIUS = 18.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -132,7 +141,7 @@ fun GameScreen(
         )
     }
     uiState.tileOperandSelectionDialog?.let { dialogUiState ->
-        TileOperandSelectionDialog(
+        TileOperandSelectionSheet(
             dialogUiState = dialogUiState,
             onDismiss = onTileOperandSelectionDismissed,
             onConfirm = onTileOperandSelectionConfirmed
@@ -214,75 +223,98 @@ private fun BoardSection(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TileOperandSelectionDialog(
+private fun TileOperandSelectionSheet(
     dialogUiState: TileOperandSelectionDialogUiState,
     onDismiss: () -> Unit,
     onConfirm: (Int) -> Unit
 ) {
-    val initialOperand = dialogUiState.initialOperand
-        ?.takeIf { operand -> operand in dialogUiState.availableOperands }
-    var selectedOperand by rememberSaveable(
-        dialogUiState.tileIndex,
-        dialogUiState.slot,
-        dialogUiState.initialOperand
+    val operandSheetContentDescription = stringResource(R.string.tile_operand_dialog_title)
+
+    ModalBottomSheet(
+        modifier = Modifier
+            .testTag(GameScreenTestTags.TILE_OPERAND_SELECTOR)
+            .semantics {
+                contentDescription = operandSheetContentDescription
+            },
+        onDismissRequest = onDismiss
     ) {
-        mutableStateOf(initialOperand)
-    }
+        Text(
+            text = operandSheetContentDescription,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(
+                start = TILE_OPERAND_SHEET_PADDING,
+                end = TILE_OPERAND_SHEET_PADDING,
+                bottom = 12.dp
+            )
+        )
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = TILE_OPERAND_SHEET_OPTION_MIN_WIDTH),
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = TILE_OPERAND_SHEET_MAX_HEIGHT)
+                .selectableGroup(),
+            contentPadding = PaddingValues(
+                start = TILE_OPERAND_SHEET_PADDING,
+                end = TILE_OPERAND_SHEET_PADDING,
+                bottom = TILE_OPERAND_SHEET_PADDING
+            ),
+            horizontalArrangement = Arrangement.spacedBy(TILE_OPERAND_SHEET_GRID_SPACING),
+            verticalArrangement = Arrangement.spacedBy(TILE_OPERAND_SHEET_GRID_SPACING)
+        ) {
+            itemsIndexed(dialogUiState.availableOperands) { index, operand ->
+                val isSelected = dialogUiState.initialOperand == operand
+                val operandSelectionLabel = operand.toString()
 
-    AlertDialog(
-        modifier = Modifier.testTag(GameScreenTestTags.TILE_OPERAND_DIALOG),
-        onDismissRequest = onDismiss,
-        title = {
-            Text(text = stringResource(R.string.tile_operand_dialog_title))
-        },
-        text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.selectableGroup()
-            ) {
-                dialogUiState.availableOperands.forEach { operand ->
-                    val isSelected = selectedOperand == operand
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .testTag(GameScreenTestTags.tileOperandOption(operand))
-                            .selectable(
-                                selected = isSelected,
-                                onClick = { selectedOperand = operand },
-                                role = Role.RadioButton
-                            ),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                Surface(
+                    onClick = { onConfirm(operand) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultMinSize(minHeight = TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT)
+                        .testTag(GameScreenTestTags.tileOperandOption(index, operand))
+                        .semantics {
+                            contentDescription = operandSelectionLabel
+                            selected = isSelected
+                        },
+                    shape = RoundedCornerShape(TILE_OPERAND_SHEET_OPTION_CORNER_RADIUS),
+                    color = if (isSelected) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surface
+                    },
+                    contentColor = if (isSelected) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
+                    border = BorderStroke(
+                        width = 1.dp,
+                        color = if (isSelected) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.outlineVariant
+                        }
+                    )
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        RadioButton(
-                            selected = isSelected,
-                            onClick = null
+                        Text(
+                            text = operandSelectionLabel,
+                            modifier = Modifier.padding(vertical = 12.dp),
+                            fontWeight = if (isSelected) {
+                                FontWeight.SemiBold
+                            } else {
+                                FontWeight.Normal
+                            }
                         )
-                        Text(text = operand.toString())
                     }
                 }
             }
-        },
-        confirmButton = {
-            Button(
-                onClick = { onConfirm(selectedOperand ?: return@Button) },
-                enabled = selectedOperand != null,
-                modifier = Modifier.testTag(GameScreenTestTags.TILE_OPERAND_CONFIRM)
-            ) {
-                Text(text = stringResource(R.string.confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                modifier = Modifier.testTag(GameScreenTestTags.TILE_OPERAND_CANCEL)
-            ) {
-                Text(text = stringResource(R.string.cancel))
-            }
         }
-    )
+    }
 }
 
 @Composable

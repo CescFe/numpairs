@@ -143,9 +143,10 @@ The contextual selector is the primary interaction used to edit the grid.
 ### Operand Slot Mode
 
 - Opened by tapping a left or right operand slot
+- Uses a compact bottom sheet rather than a confirmation dialog
 - Shows the currently available numbers from the strip
 - Hidden strip items are not shown as selectable values
-- Selecting a value fills or replaces the operand slot
+- Selecting a value immediately fills or replaces the operand slot and closes the sheet
 - Closing the selector without choosing a value leaves the slot unchanged
 
 ### Operator Slot Mode
@@ -158,7 +159,9 @@ The contextual selector is the primary interaction used to edit the grid.
 - Selecting an option immediately fills or replaces the operator slot and closes the popup
 - Closing the selector without choosing a value leaves the slot unchanged
 
-The selector should appear anchored to the tapped slot, using a compact popover or bubble-style presentation without extra confirmation buttons.
+The operand selector should use a compact bottom sheet presentation without extra confirmation buttons.
+
+The operator selector should appear anchored to the tapped slot, using a compact popover or bubble-style presentation without extra confirmation buttons.
 
 ---
 
