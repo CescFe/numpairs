@@ -8,7 +8,6 @@ import org.cescfe.numpairs.domain.puzzle.Board
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
-import org.cescfe.numpairs.domain.puzzle.Strip
 import org.cescfe.numpairs.domain.puzzle.StripItem
 
 class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel() {
@@ -109,11 +108,7 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
             return
         }
 
-        val updatedStripItems = puzzle.strip.items.toMutableList().apply {
-            set(index, currentStripItem.completeWith(value))
-        }
-
-        puzzle = puzzle.copy(strip = Strip(updatedStripItems))
+        puzzle = puzzle.copy(strip = puzzle.strip.withUpdatedEntry(index = index, value = value))
         stripItemEntryDialogIndex = null
         publishUiState()
     }

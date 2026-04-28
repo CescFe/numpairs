@@ -80,4 +80,64 @@ class StripTest {
             strip.validEntryRangeFor(index = 6)
         )
     }
+
+    @Test
+    fun updating_an_adjacent_hidden_entry_reorders_player_entered_values_within_the_editable_run() {
+        val strip = Strip(
+            items = listOf(
+                StripItem.PlayerEntered(5),
+                StripItem.Hidden,
+                StripItem.Known(6),
+                StripItem.Hidden,
+                StripItem.Known(8),
+                StripItem.Known(10),
+                StripItem.Known(12),
+                StripItem.Known(14)
+            )
+        )
+
+        assertEquals(
+            listOf(
+                StripItem.PlayerEntered(2),
+                StripItem.PlayerEntered(5),
+                StripItem.Known(6),
+                StripItem.Hidden,
+                StripItem.Known(8),
+                StripItem.Known(10),
+                StripItem.Known(12),
+                StripItem.Known(14)
+            ),
+            strip.withUpdatedEntry(index = 1, value = 2).items
+        )
+    }
+
+    @Test
+    fun editing_an_entry_reorders_only_player_entered_values_and_keeps_hidden_positions_in_place() {
+        val strip = Strip(
+            items = listOf(
+                StripItem.Known(1),
+                StripItem.PlayerEntered(5),
+                StripItem.Hidden,
+                StripItem.PlayerEntered(2),
+                StripItem.Known(6),
+                StripItem.Known(7),
+                StripItem.Known(8),
+                StripItem.Known(9)
+            )
+        )
+
+        assertEquals(
+            listOf(
+                StripItem.Known(1),
+                StripItem.PlayerEntered(2),
+                StripItem.Hidden,
+                StripItem.PlayerEntered(4),
+                StripItem.Known(6),
+                StripItem.Known(7),
+                StripItem.Known(8),
+                StripItem.Known(9)
+            ),
+            strip.withUpdatedEntry(index = 1, value = 4).items
+        )
+    }
 }
