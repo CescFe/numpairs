@@ -62,7 +62,6 @@ data class GameUiState(
             tileOperandSelectionDialog = tileOperandSelectionTarget
                 ?.takeIf { target -> target.tileIndex in puzzle.board.tiles.indices }
                 ?.let { target ->
-                    val currentTile = puzzle.board.tiles[target.tileIndex]
                     val currentOperand = puzzle.board.tiles[target.tileIndex].operandAt(target.slot)
 
                     TileOperandSelectionDialogUiState(
@@ -72,8 +71,7 @@ data class GameUiState(
                             tileIndex = target.tileIndex,
                             slot = target.slot
                         ).map(::TileOperandOptionUiState),
-                        initialOperandEntryId = currentOperand.stripEntryId,
-                        tileOperator = currentTile.expression.operator.takeUnless { operator -> operator == Operator.Hidden }
+                        initialOperandEntryId = currentOperand.stripEntryId
                     )
                 }
         )
@@ -124,8 +122,7 @@ data class TileOperandSelectionDialogUiState(
     val tileIndex: Int,
     val slot: OperandSlot,
     val availableOperands: List<TileOperandOptionUiState>,
-    val initialOperandEntryId: Int? = null,
-    val tileOperator: Operator? = null
+    val initialOperandEntryId: Int? = null
 )
 
 data class TileOperandOptionUiState(
