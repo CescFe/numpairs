@@ -1,10 +1,6 @@
 package org.cescfe.numpairs.domain.puzzle
 
-data class VisibleStripEntry(
-    val entryId: Int,
-    val stripIndex: Int,
-    val value: Int
-)
+data class VisibleStripEntry(val entryId: Int, val stripIndex: Int, val value: Int)
 
 data class NumberUsageByOperator(
     val additionUsageCount: Int = 0,
@@ -33,10 +29,7 @@ data class NumberUsageByOperator(
         get() = unresolvedUsageCount > 0
 }
 
-data class OperandSelectionHint(
-    val stripEntry: VisibleStripEntry,
-    val usageByOperator: NumberUsageByOperator
-)
+data class OperandSelectionHint(val stripEntry: VisibleStripEntry, val usageByOperator: NumberUsageByOperator)
 
 fun Puzzle.operandSelectionHintsFor(tileIndex: Int, slot: OperandSlot): List<OperandSelectionHint> {
     val usageByEntryId = board.tiles
@@ -46,7 +39,10 @@ fun Puzzle.operandSelectionHintsFor(tileIndex: Int, slot: OperandSlot): List<Ope
         .mapValues { (_, assignments) ->
             NumberUsageByOperator(
                 additionUsageCount = assignments.count { assignment -> assignment.operator == Operator.ADDITION },
-                multiplicationUsageCount = assignments.count { assignment -> assignment.operator == Operator.MULTIPLICATION },
+                multiplicationUsageCount = assignments.count { assignment ->
+                    assignment.operator ==
+                        Operator.MULTIPLICATION
+                },
                 unresolvedUsageCount = assignments.count { assignment -> assignment.operator == Operator.Hidden }
             )
         }

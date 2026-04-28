@@ -153,7 +153,7 @@ class StripTest {
                 StripEntry(15, StripItem.Known(10)),
                 StripEntry(16, StripItem.Known(12)),
                 StripEntry(17, StripItem.Known(14))
-            ),
+            )
         )
 
         assertEquals(

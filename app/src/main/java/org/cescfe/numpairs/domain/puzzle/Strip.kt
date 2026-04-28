@@ -66,7 +66,9 @@ data class Strip(val entries: List<StripEntry>) {
 
     fun visibleEntryWithId(entryId: Int): VisibleStripEntry? = entries
         .withIndex()
-        .firstOrNull { indexedEntry -> indexedEntry.value.id == entryId && indexedEntry.value.item.visibleValue != null }
+        .firstOrNull { indexedEntry ->
+            indexedEntry.value.id == entryId && indexedEntry.value.item.visibleValue != null
+        }
         ?.let { indexedEntry ->
             VisibleStripEntry(
                 entryId = indexedEntry.value.id,
