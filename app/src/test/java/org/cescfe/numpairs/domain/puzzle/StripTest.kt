@@ -8,7 +8,7 @@ class StripTest {
     @Test
     fun requires_eight_items() {
         assertThrows(IllegalArgumentException::class.java) {
-            Strip(
+            Strip.fromItems(
                 items = listOf(
                     StripItem.Known(1),
                     StripItem.Known(2),
@@ -20,7 +20,7 @@ class StripTest {
 
     @Test
     fun valid_entry_range_uses_the_nearest_known_values_on_both_sides() {
-        val strip = Strip(
+        val strip = Strip.fromItems(
             items = listOf(
                 StripItem.Known(1),
                 StripItem.Hidden,
@@ -41,7 +41,7 @@ class StripTest {
 
     @Test
     fun valid_entry_range_uses_one_when_there_is_no_known_value_on_the_left() {
-        val strip = Strip(
+        val strip = Strip.fromItems(
             items = listOf(
                 StripItem.Hidden,
                 StripItem.Hidden,
@@ -62,7 +62,7 @@ class StripTest {
 
     @Test
     fun valid_entry_range_has_no_upper_bound_when_there_is_no_known_value_on_the_right() {
-        val strip = Strip(
+        val strip = Strip.fromItems(
             items = listOf(
                 StripItem.Known(1),
                 StripItem.Hidden,
@@ -83,7 +83,7 @@ class StripTest {
 
     @Test
     fun updating_an_adjacent_hidden_entry_reorders_player_entered_values_within_the_editable_run() {
-        val strip = Strip(
+        val strip = Strip.fromItems(
             items = listOf(
                 StripItem.PlayerEntered(5),
                 StripItem.Hidden,
@@ -113,7 +113,7 @@ class StripTest {
 
     @Test
     fun editing_an_entry_reorders_only_player_entered_values_and_keeps_hidden_positions_in_place() {
-        val strip = Strip(
+        val strip = Strip.fromItems(
             items = listOf(
                 StripItem.Known(1),
                 StripItem.PlayerEntered(5),
@@ -138,6 +138,27 @@ class StripTest {
                 StripItem.Known(9)
             ),
             strip.withUpdatedEntry(index = 1, value = 4).items
+        )
+    }
+
+    @Test
+    fun reordering_player_entered_values_moves_their_entry_ids_with_them() {
+        val strip = Strip(
+            entries = listOf(
+                StripEntry(10, StripItem.PlayerEntered(5)),
+                StripEntry(11, StripItem.Hidden),
+                StripEntry(12, StripItem.Known(6)),
+                StripEntry(13, StripItem.Hidden),
+                StripEntry(14, StripItem.Known(8)),
+                StripEntry(15, StripItem.Known(10)),
+                StripEntry(16, StripItem.Known(12)),
+                StripEntry(17, StripItem.Known(14))
+            ),
+        )
+
+        assertEquals(
+            listOf(11, 10, 12, 13, 14, 15, 16, 17),
+            strip.withUpdatedEntry(index = 1, value = 2).entries.map(StripEntry::id)
         )
     }
 }

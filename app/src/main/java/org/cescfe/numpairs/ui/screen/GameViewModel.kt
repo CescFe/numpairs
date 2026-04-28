@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.cescfe.numpairs.domain.puzzle.Board
+import org.cescfe.numpairs.domain.puzzle.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
@@ -71,14 +72,14 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
     fun onTileLeftOperandTapped(index: Int) {
         onTileOperandTapped(
             index = index,
-            slot = TileOperandSlot.LEFT
+            slot = OperandSlot.LEFT
         )
     }
 
     fun onTileRightOperandTapped(index: Int) {
         onTileOperandTapped(
             index = index,
-            slot = TileOperandSlot.RIGHT
+            slot = OperandSlot.RIGHT
         )
     }
 
@@ -113,11 +114,12 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
         publishUiState()
     }
 
-    fun onTileOperandSelectionConfirmed(value: Int) {
+    fun onTileOperandSelectionConfirmed(stripEntryId: Int) {
         val target = tileOperandSelectionTarget ?: return
         val currentTile = puzzle.board.tiles.getOrNull(target.tileIndex) ?: return
+        val selectedEntry = puzzle.strip.visibleEntryWithId(stripEntryId)
 
-        if (value !in puzzle.visibleStripValues()) {
+        if (selectedEntry == null) {
             publishUiState()
             return
         }
@@ -126,8 +128,14 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
             set(
                 target.tileIndex,
                 when (target.slot) {
-                    TileOperandSlot.LEFT -> currentTile.withLeftOperand(value)
-                    TileOperandSlot.RIGHT -> currentTile.withRightOperand(value)
+                    OperandSlot.LEFT -> currentTile.withLeftOperand(
+                        value = selectedEntry.value,
+                        stripEntryId = selectedEntry.entryId
+                    )
+                    OperandSlot.RIGHT -> currentTile.withRightOperand(
+                        value = selectedEntry.value,
+                        stripEntryId = selectedEntry.entryId
+                    )
                 }
             )
         }
@@ -164,7 +172,7 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
         )
     }
 
-    private fun onTileOperandTapped(index: Int, slot: TileOperandSlot) {
+    private fun onTileOperandTapped(index: Int, slot: OperandSlot) {
         if (puzzle.board.tiles.getOrNull(index) == null) {
             return
         }
@@ -176,13 +184,5 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
             slot = slot
         )
         publishUiState()
-    }
-}
-
-private fun Puzzle.visibleStripValues(): List<Int> = strip.items.mapNotNull { stripItem ->
-    when (stripItem) {
-        StripItem.Hidden -> null
-        is StripItem.Known -> stripItem.value
-        is StripItem.PlayerEntered -> stripItem.value
     }
 }

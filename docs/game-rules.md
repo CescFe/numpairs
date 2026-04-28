@@ -18,6 +18,7 @@ The number strip is a sequence of positive integers with the following propertie
 - Numbers are displayed in **ascending order**
 - The ascending order must still be preserved after player-entered values are added or edited
 - Repeated values are allowed
+- Each strip entry is a unique game element even when two entries display the same numeric value
 - Some numbers may be hidden
 - Hidden numbers must be deduced by the player
 
@@ -71,6 +72,13 @@ Each pair of numbers generates:
 - one **product**
 
 These values correspond to two results present in the grid.
+
+Usage is tracked per strip entry, not per numeric value. In other words, if the strip contains two visible `25` values, they are still two distinct usable entries.
+
+For prototype hinting and selection logic, each strip entry may be consumed:
+
+- once in an addition expression
+- once in a multiplication expression
 
 Example:
 

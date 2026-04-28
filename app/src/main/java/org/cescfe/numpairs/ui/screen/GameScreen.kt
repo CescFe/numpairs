@@ -264,15 +264,15 @@ private fun TileOperandSelectionSheet(
             verticalArrangement = Arrangement.spacedBy(TILE_OPERAND_SHEET_GRID_SPACING)
         ) {
             itemsIndexed(dialogUiState.availableOperands) { index, operand ->
-                val isSelected = dialogUiState.initialOperand == operand
-                val operandSelectionLabel = operand.toString()
+                val isSelected = dialogUiState.initialOperandEntryId == operand.stripEntryId
+                val operandSelectionLabel = operand.value.toString()
 
                 Surface(
-                    onClick = { onConfirm(operand) },
+                    onClick = { onConfirm(operand.stripEntryId) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT)
-                        .testTag(GameScreenTestTags.tileOperandOption(index, operand))
+                        .testTag(GameScreenTestTags.tileOperandOption(index, operand.value))
                         .semantics {
                             contentDescription = operandSelectionLabel
                             selected = isSelected

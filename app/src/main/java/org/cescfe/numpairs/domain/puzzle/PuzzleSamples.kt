@@ -14,7 +14,7 @@ object PuzzleSamples {
                 hiddenExpressionTile(result = 250)
             )
         ),
-        strip = Strip(
+        strip = Strip.fromItems(
             items = listOf(
                 StripItem.Hidden,
                 StripItem.Hidden,
