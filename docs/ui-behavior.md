@@ -17,6 +17,7 @@ This is intended as an implementation target for the prototype. It favors clear 
 ## Terminology
 
 - **Strip item**: one position in the number strip
+- **Editable run**: a contiguous strip segment made only of hidden and player-entered items, delimited by known items or strip edges
 - **Operand slot**: one editable operand position in the top row of a tile
 - **Operator slot**: the editable operator position in the top row of a tile
 - **Contextual selector**: a small anchored popover or bubble used to choose a value for a grid slot
@@ -73,8 +74,15 @@ Each strip item has an origin state.
 ### Player-entered Strip Item
 
 - Editing must not rely on double tap
-- A player-entered strip item may expose an explicit `Edit` action
-- Triggering `Edit` reopens the entry dialog with the current value prefilled
+- Single tap on a player-entered strip item reopens the entry dialog with the current value prefilled
+
+### Strip Ordering
+
+- The strip must remain visually sorted in ascending order
+- When adjacent editable strip items form an editable run, player-entered values are kept in ascending order within that run
+- Known strip items never move
+- Hidden strip items remain hidden until they are filled
+- Reordering is limited to player-entered values inside the affected editable run
 
 ---
 
@@ -165,9 +173,10 @@ The entry dialog is used only for strip items, not for grid slot assignment.
 
 ### Edit Mode
 
-- Opened through the explicit `Edit` action on a player-entered strip item
+- Opened by tapping a player-entered strip item
 - Shows the current value prefilled
 - Confirming replaces the previous value with the new one
+- After confirmation, player-entered values may be reordered inside the same editable run to preserve ascending order
 
 ---
 
