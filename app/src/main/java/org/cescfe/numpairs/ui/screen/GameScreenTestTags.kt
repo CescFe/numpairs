@@ -11,9 +11,7 @@ object GameScreenTestTags {
     const val STRIP_ENTRY_RANGE = "strip_entry_range"
     const val STRIP_ENTRY_CONFIRM = "strip_entry_confirm"
     const val STRIP_ENTRY_CANCEL = "strip_entry_cancel"
-    const val TILE_OPERAND_DIALOG = "tile_operand_dialog"
-    const val TILE_OPERAND_CONFIRM = "tile_operand_confirm"
-    const val TILE_OPERAND_CANCEL = "tile_operand_cancel"
+    const val TILE_OPERAND_SELECTOR = "tile_operand_selector"
     const val TILE_OPERATOR_SELECTOR = "tile_operator_selector"
 
     fun stripItem(index: Int): String = "strip_item_$index"
@@ -26,7 +24,7 @@ object GameScreenTestTags {
 
     fun tileOperator(index: Int): String = "tile_operator_$index"
 
-    fun tileOperandOption(value: Int): String = "tile_operand_option_$value"
+    fun tileOperandOption(index: Int, value: Int): String = "tile_operand_option_${index}_$value"
 
     fun tileOperatorOption(operator: Operator): String = when (operator) {
         Operator.Addition -> "tile_operator_option_addition"
