@@ -16,9 +16,12 @@ The player must deduce hidden numbers and match them correctly with the grid til
 The number strip is a sequence of positive integers with the following properties:
 
 - Numbers are displayed in **ascending order**
+- The ascending order must still be preserved after player-entered values are added or edited
 - Repeated values are allowed
 - Some numbers may be hidden
 - Hidden numbers must be deduced by the player
+
+For prototype behavior, this means known strip items stay fixed while player-entered values may be reordered within adjacent editable positions so the strip remains sorted.
 
 Example:
 
