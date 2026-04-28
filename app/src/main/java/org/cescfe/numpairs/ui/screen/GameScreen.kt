@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,6 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -76,7 +77,7 @@ private val TILE_OPERAND_SHEET_MAX_HEIGHT = 320.dp
 private val TILE_OPERAND_SHEET_PADDING = 20.dp
 private val TILE_OPERAND_SHEET_GRID_SPACING = 12.dp
 private val TILE_OPERAND_SHEET_OPTION_MIN_WIDTH = 88.dp
-private val TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT = 56.dp
+private val TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT = 88.dp
 private val TILE_OPERAND_SHEET_OPTION_CORNER_RADIUS = 18.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -253,8 +254,7 @@ private fun TileOperandSelectionSheet(
             columns = GridCells.Adaptive(minSize = TILE_OPERAND_SHEET_OPTION_MIN_WIDTH),
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(max = TILE_OPERAND_SHEET_MAX_HEIGHT)
-                .selectableGroup(),
+                .heightIn(max = TILE_OPERAND_SHEET_MAX_HEIGHT),
             contentPadding = PaddingValues(
                 start = TILE_OPERAND_SHEET_PADDING,
                 end = TILE_OPERAND_SHEET_PADDING,
@@ -263,59 +263,135 @@ private fun TileOperandSelectionSheet(
             horizontalArrangement = Arrangement.spacedBy(TILE_OPERAND_SHEET_GRID_SPACING),
             verticalArrangement = Arrangement.spacedBy(TILE_OPERAND_SHEET_GRID_SPACING)
         ) {
-            itemsIndexed(dialogUiState.availableOperands) { index, operand ->
-                val isSelected = dialogUiState.initialOperand == operand
-                val operandSelectionLabel = operand.toString()
+            items(
+                items = dialogUiState.availableOperands,
+                key = { operandOption -> operandOption.value }
+            ) { operandOption ->
+                val operandSelectionLabel = operandOption.value.toString()
+                val usageStateDescription = stringResource(
+                    id = when (operandOption.usageState) {
+                        TileOperandUsageState.UNUSED -> R.string.tile_operand_option_state_unused
+                        TileOperandUsageState.USED_IN_OTHER_TILES -> R.string.tile_operand_option_state_used_elsewhere
+                        TileOperandUsageState.USED_IN_SAME_TILE -> R.string.tile_operand_option_state_used_in_this_tile
+                        TileOperandUsageState.USED_IN_SAME_AND_OTHER_TILES -> R.string.tile_operand_option_state_used_in_this_tile_and_elsewhere
+                    }
+                )
+                val supportingText = when (operandOption.usageState) {
+                    TileOperandUsageState.UNUSED -> stringResource(R.string.tile_operand_option_status_available)
+                    TileOperandUsageState.USED_IN_OTHER_TILES -> if (operandOption.usedInOtherTilesCount > 1) {
+                        stringResource(
+                            R.string.tile_operand_option_status_used_elsewhere_count,
+                            operandOption.usedInOtherTilesCount
+                        )
+                    } else {
+                        stringResource(R.string.tile_operand_option_status_used_elsewhere)
+                    }
+                    TileOperandUsageState.USED_IN_SAME_TILE -> stringResource(R.string.tile_operand_option_status_used_in_this_tile)
+                    TileOperandUsageState.USED_IN_SAME_AND_OTHER_TILES -> stringResource(
+                        R.string.tile_operand_option_status_used_in_this_tile_and_elsewhere_count,
+                        operandOption.usedInOtherTilesCount
+                    )
+                }
+                val usageSummaryText = when {
+                    operandOption.totalVisibleCount > 1 -> stringResource(
+                        R.string.tile_operand_option_usage_summary,
+                        operandOption.usedCount,
+                        operandOption.totalVisibleCount
+                    )
+                    else -> null
+                }
+                val (containerColor, contentColor, borderColor, borderWidth) = operandOption.optionColors()
+                val optionContentDescription = buildString {
+                    append(operandSelectionLabel)
+                    append(", ")
+                    append(usageStateDescription)
+                    usageSummaryText?.let { summary ->
+                        append(", ")
+                        append(summary)
+                    }
+                }
 
                 Surface(
-                    onClick = { onConfirm(operand) },
+                    onClick = { onConfirm(operandOption.value) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT)
-                        .testTag(GameScreenTestTags.tileOperandOption(index, operand))
+                        .testTag(GameScreenTestTags.tileOperandOption(operandOption.value))
                         .semantics {
-                            contentDescription = operandSelectionLabel
-                            selected = isSelected
+                            contentDescription = optionContentDescription
+                            stateDescription = usageStateDescription
                         },
                     shape = RoundedCornerShape(TILE_OPERAND_SHEET_OPTION_CORNER_RADIUS),
-                    color = if (isSelected) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surface
-                    },
-                    contentColor = if (isSelected) {
-                        MaterialTheme.colorScheme.onPrimaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    },
+                    color = containerColor,
+                    contentColor = contentColor,
                     border = BorderStroke(
-                        width = 1.dp,
-                        color = if (isSelected) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.outlineVariant
-                        }
+                        width = borderWidth,
+                        color = borderColor
                     )
                 ) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Text(
                             text = operandSelectionLabel,
-                            modifier = Modifier.padding(vertical = 12.dp),
-                            fontWeight = if (isSelected) {
-                                FontWeight.SemiBold
-                            } else {
-                                FontWeight.Normal
-                            }
+                            fontWeight = FontWeight.SemiBold
                         )
+                        Text(
+                            text = supportingText,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                        usageSummaryText?.let { summary ->
+                            Text(
+                                text = summary,
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
                     }
                 }
             }
         }
     }
 }
+
+@Composable
+private fun TileOperandOptionUiState.optionColors(): OperandOptionColors = when (usageState) {
+    TileOperandUsageState.UNUSED -> OperandOptionColors(
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        borderColor = MaterialTheme.colorScheme.outlineVariant,
+        borderWidth = 1.dp
+    )
+    TileOperandUsageState.USED_IN_OTHER_TILES -> OperandOptionColors(
+        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        borderColor = MaterialTheme.colorScheme.secondary,
+        borderWidth = 1.dp
+    )
+    TileOperandUsageState.USED_IN_SAME_TILE -> OperandOptionColors(
+        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+        borderColor = MaterialTheme.colorScheme.tertiary,
+        borderWidth = 1.dp
+    )
+    TileOperandUsageState.USED_IN_SAME_AND_OTHER_TILES -> OperandOptionColors(
+        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+        borderColor = MaterialTheme.colorScheme.tertiary,
+        borderWidth = 2.dp
+    )
+}
+
+private data class OperandOptionColors(
+    val containerColor: androidx.compose.ui.graphics.Color,
+    val contentColor: androidx.compose.ui.graphics.Color,
+    val borderColor: androidx.compose.ui.graphics.Color,
+    val borderWidth: Dp
+)
 
 @Composable
 private fun StripSection(

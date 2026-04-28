@@ -7,6 +7,16 @@
     <string name="strip_entry_valid_range_bounded">Valid range: %1$d to %2$d</string>
     <string name="strip_entry_valid_range_unbounded">Valid range: %1$d or greater</string>
     <string name="tile_operand_dialog_title">Choose operand</string>
+    <string name="tile_operand_option_state_unused">Unused</string>
+    <string name="tile_operand_option_state_used_elsewhere">Used in other tiles</string>
+    <string name="tile_operand_option_state_used_in_this_tile">Used in this tile</string>
+    <string name="tile_operand_option_state_used_in_this_tile_and_elsewhere">Used in this tile and other tiles</string>
+    <string name="tile_operand_option_status_available">Available</string>
+    <string name="tile_operand_option_status_used_elsewhere">Used elsewhere</string>
+    <string name="tile_operand_option_status_used_elsewhere_count">%1$d used elsewhere</string>
+    <string name="tile_operand_option_status_used_in_this_tile">Used in this tile</string>
+    <string name="tile_operand_option_status_used_in_this_tile_and_elsewhere_count">Used in this tile + %1$d elsewhere</string>
+    <string name="tile_operand_option_usage_summary">%1$d of %2$d used</string>
     <string name="tile_operator_dialog_title">Choose operator</string>
     <string name="tile_operator_option_addition">Addition (+)</string>
     <string name="tile_operator_option_multiplication">Multiplication (×)</string>

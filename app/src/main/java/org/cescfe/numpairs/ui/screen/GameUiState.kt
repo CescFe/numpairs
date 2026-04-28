@@ -59,13 +59,35 @@ data class GameUiState(
             tileOperandSelectionDialog = tileOperandSelectionTarget
                 ?.takeIf { target -> target.tileIndex in puzzle.board.tiles.indices }
                 ?.let { target ->
-                    val currentOperand = puzzle.board.tiles[target.tileIndex].operandAt(target.slot)
+                    val visibleOperands = puzzle.visibleStripValues()
+                    val visibleOperandCounts = visibleOperands.countByValuePreservingOrder()
+                    val sameTileOperand = puzzle.board.tiles[target.tileIndex].counterpartOperandValue(target.slot)
+                    val otherTileOperandUsageCounts = puzzle.board.tiles
+                        .withIndex()
+                        .filter { indexedTile -> indexedTile.index != target.tileIndex }
+                        .flatMap { indexedTile -> indexedTile.value.knownOperandValues() }
+                        .groupingBy { value -> value }
+                        .eachCount()
 
                     TileOperandSelectionDialogUiState(
                         tileIndex = target.tileIndex,
                         slot = target.slot,
-                        availableOperands = puzzle.strip.items.mapNotNull { stripItem -> stripItem.visibleValue },
-                        initialOperand = currentOperand.takeKnownValue()
+                        availableOperands = visibleOperandCounts.map { (value, totalVisibleCount) ->
+                            val isUsedInSameTile = sameTileOperand == value
+                            val usedCount = otherTileOperandUsageCounts.getOrDefault(value, 0) +
+                                if (isUsedInSameTile) {
+                                    1
+                                } else {
+                                    0
+                                }
+
+                            TileOperandOptionUiState(
+                                value = value,
+                                totalVisibleCount = totalVisibleCount,
+                                usedCount = usedCount,
+                                isUsedInSameTile = isUsedInSameTile
+                            )
+                        }
                     )
                 }
         )
@@ -115,9 +137,45 @@ data class TileOperatorSelectionDialogUiState(
 data class TileOperandSelectionDialogUiState(
     val tileIndex: Int,
     val slot: TileOperandSlot,
-    val availableOperands: List<Int>,
-    val initialOperand: Int? = null
+    val availableOperands: List<TileOperandOptionUiState>
 )
+
+data class TileOperandOptionUiState(
+    val value: Int,
+    val totalVisibleCount: Int,
+    val usedCount: Int,
+    val isUsedInSameTile: Boolean
+) {
+    init {
+        require(totalVisibleCount > 0) {
+            "Operand options must represent at least one visible strip value."
+        }
+        require(usedCount >= 0) {
+            "Operand usage counts cannot be negative."
+        }
+        require(!isUsedInSameTile || usedCount > 0) {
+            "A same-tile usage marker requires at least one recorded usage."
+        }
+    }
+
+    val usedInOtherTilesCount: Int
+        get() = usedCount - if (isUsedInSameTile) 1 else 0
+
+    val usageState: TileOperandUsageState
+        get() = when {
+            isUsedInSameTile && usedInOtherTilesCount > 0 -> TileOperandUsageState.USED_IN_SAME_AND_OTHER_TILES
+            isUsedInSameTile -> TileOperandUsageState.USED_IN_SAME_TILE
+            usedInOtherTilesCount > 0 -> TileOperandUsageState.USED_IN_OTHER_TILES
+            else -> TileOperandUsageState.UNUSED
+        }
+}
+
+enum class TileOperandUsageState {
+    UNUSED,
+    USED_IN_OTHER_TILES,
+    USED_IN_SAME_TILE,
+    USED_IN_SAME_AND_OTHER_TILES
+}
 
 data class TileOperandSelectionTarget(val tileIndex: Int, val slot: TileOperandSlot)
 
@@ -151,6 +209,30 @@ private val Expression.Operand.label: String
 private fun Tile.operandAt(slot: TileOperandSlot): Expression.Operand = when (slot) {
     TileOperandSlot.LEFT -> expression.leftOperand
     TileOperandSlot.RIGHT -> expression.rightOperand
+}
+
+private fun Tile.counterpartOperandValue(slot: TileOperandSlot): Int? = when (slot) {
+    TileOperandSlot.LEFT -> expression.rightOperand.takeKnownValue()
+    TileOperandSlot.RIGHT -> expression.leftOperand.takeKnownValue()
+}
+
+private fun Tile.knownOperandValues(): List<Int> = listOfNotNull(
+    expression.leftOperand.takeKnownValue(),
+    expression.rightOperand.takeKnownValue()
+)
+
+private fun Puzzle.visibleStripValues(): List<Int> = strip.items.mapNotNull { stripItem ->
+    stripItem.visibleValue
+}
+
+private fun List<Int>.countByValuePreservingOrder(): List<Pair<Int, Int>> {
+    val counts = linkedMapOf<Int, Int>()
+
+    forEach { value ->
+        counts[value] = counts.getOrDefault(value, 0) + 1
+    }
+
+    return counts.map { entry -> entry.key to entry.value }
 }
 
 private fun Expression.Operand.takeKnownValue(): Int? = when (this) {

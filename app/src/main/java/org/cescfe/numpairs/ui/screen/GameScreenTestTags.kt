@@ -24,7 +24,7 @@ object GameScreenTestTags {
 
     fun tileOperator(index: Int): String = "tile_operator_$index"
 
-    fun tileOperandOption(index: Int, value: Int): String = "tile_operand_option_${index}_$value"
+    fun tileOperandOption(value: Int): String = "tile_operand_option_$value"
 
     fun tileOperatorOption(operator: Operator): String = when (operator) {
         Operator.Addition -> "tile_operator_option_addition"

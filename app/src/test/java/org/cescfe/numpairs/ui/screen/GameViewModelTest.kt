@@ -83,8 +83,11 @@ class GameViewModelTest {
             TileOperandSelectionDialogUiState(
                 tileIndex = 0,
                 slot = TileOperandSlot.LEFT,
-                availableOperands = listOf(6, 25, 222),
-                initialOperand = null
+                availableOperands = listOf(
+                    operandOption(value = 6),
+                    operandOption(value = 25),
+                    operandOption(value = 222)
+                )
             ),
             viewModel.uiState.value.tileOperandSelectionDialog
         )
@@ -100,8 +103,11 @@ class GameViewModelTest {
             TileOperandSelectionDialogUiState(
                 tileIndex = 0,
                 slot = TileOperandSlot.RIGHT,
-                availableOperands = listOf(6, 25, 222),
-                initialOperand = null
+                availableOperands = listOf(
+                    operandOption(value = 6),
+                    operandOption(value = 25),
+                    operandOption(value = 222)
+                )
             ),
             viewModel.uiState.value.tileOperandSelectionDialog
         )
@@ -119,15 +125,19 @@ class GameViewModelTest {
             TileOperandSelectionDialogUiState(
                 tileIndex = 0,
                 slot = TileOperandSlot.LEFT,
-                availableOperands = listOf(2, 6, 25, 222),
-                initialOperand = null
+                availableOperands = listOf(
+                    operandOption(value = 2),
+                    operandOption(value = 6),
+                    operandOption(value = 25),
+                    operandOption(value = 222)
+                )
             ),
             viewModel.uiState.value.tileOperandSelectionDialog
         )
     }
 
     @Test
-    fun tapping_a_filled_left_tile_operand_reopens_the_selection_dialog_with_the_current_operand() {
+    fun tapping_a_filled_left_tile_operand_reopens_the_selection_dialog_without_counting_the_current_slot_as_used() {
         val viewModel = GameViewModel()
 
         viewModel.onTileLeftOperandTapped(index = 0)
@@ -138,15 +148,18 @@ class GameViewModelTest {
             TileOperandSelectionDialogUiState(
                 tileIndex = 0,
                 slot = TileOperandSlot.LEFT,
-                availableOperands = listOf(6, 25, 222),
-                initialOperand = 6
+                availableOperands = listOf(
+                    operandOption(value = 6),
+                    operandOption(value = 25),
+                    operandOption(value = 222)
+                )
             ),
             viewModel.uiState.value.tileOperandSelectionDialog
         )
     }
 
     @Test
-    fun tapping_a_filled_right_tile_operand_reopens_the_selection_dialog_with_the_current_operand() {
+    fun tapping_a_filled_right_tile_operand_reopens_the_selection_dialog_without_counting_the_current_slot_as_used() {
         val viewModel = GameViewModel()
 
         viewModel.onTileRightOperandTapped(index = 0)
@@ -157,8 +170,114 @@ class GameViewModelTest {
             TileOperandSelectionDialogUiState(
                 tileIndex = 0,
                 slot = TileOperandSlot.RIGHT,
-                availableOperands = listOf(6, 25, 222),
-                initialOperand = 6
+                availableOperands = listOf(
+                    operandOption(value = 6),
+                    operandOption(value = 25),
+                    operandOption(value = 222)
+                )
+            ),
+            viewModel.uiState.value.tileOperandSelectionDialog
+        )
+    }
+
+    @Test
+    fun reopening_a_tile_operand_selector_marks_the_counterpart_value_as_used_in_the_same_tile() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(value = 6)
+        viewModel.onTileRightOperandTapped(index = 0)
+
+        assertEquals(
+            TileOperandSelectionDialogUiState(
+                tileIndex = 0,
+                slot = TileOperandSlot.RIGHT,
+                availableOperands = listOf(
+                    operandOption(value = 6, usedCount = 1, isUsedInSameTile = true),
+                    operandOption(value = 25),
+                    operandOption(value = 222)
+                )
+            ),
+            viewModel.uiState.value.tileOperandSelectionDialog
+        )
+    }
+
+    @Test
+    fun opening_a_tile_operand_selector_marks_values_used_in_other_tiles() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(value = 6)
+        viewModel.onTileLeftOperandTapped(index = 1)
+
+        assertEquals(
+            TileOperandSelectionDialogUiState(
+                tileIndex = 1,
+                slot = TileOperandSlot.LEFT,
+                availableOperands = listOf(
+                    operandOption(value = 6, usedCount = 1),
+                    operandOption(value = 25),
+                    operandOption(value = 222)
+                )
+            ),
+            viewModel.uiState.value.tileOperandSelectionDialog
+        )
+    }
+
+    @Test
+    fun opening_a_tile_operand_selector_can_mark_same_tile_and_other_tile_usage_at_once() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(value = 6)
+        viewModel.onTileLeftOperandTapped(index = 1)
+        viewModel.onTileOperandSelectionConfirmed(value = 6)
+        viewModel.onTileRightOperandTapped(index = 0)
+
+        assertEquals(
+            TileOperandSelectionDialogUiState(
+                tileIndex = 0,
+                slot = TileOperandSlot.RIGHT,
+                availableOperands = listOf(
+                    operandOption(value = 6, usedCount = 2, isUsedInSameTile = true),
+                    operandOption(value = 25),
+                    operandOption(value = 222)
+                )
+            ),
+            viewModel.uiState.value.tileOperandSelectionDialog
+        )
+    }
+
+    @Test
+    fun repeated_visible_strip_values_are_grouped_by_value_in_the_operand_selector() {
+        val viewModel = GameViewModel(
+            initialPuzzle = PuzzleSamples.prototype.copy(
+                strip = Strip(
+                    items = listOf(
+                        StripItem.Known(6),
+                        StripItem.Known(6),
+                        StripItem.Hidden,
+                        StripItem.Hidden,
+                        StripItem.Known(25),
+                        StripItem.Hidden,
+                        StripItem.Hidden,
+                        StripItem.Known(222)
+                    )
+                )
+            )
+        )
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+
+        assertEquals(
+            TileOperandSelectionDialogUiState(
+                tileIndex = 0,
+                slot = TileOperandSlot.LEFT,
+                availableOperands = listOf(
+                    operandOption(value = 6, totalVisibleCount = 2),
+                    operandOption(value = 25),
+                    operandOption(value = 222)
+                )
             ),
             viewModel.uiState.value.tileOperandSelectionDialog
         )
@@ -529,3 +648,15 @@ class GameViewModelTest {
         )
     }
 }
+
+private fun operandOption(
+    value: Int,
+    totalVisibleCount: Int = 1,
+    usedCount: Int = 0,
+    isUsedInSameTile: Boolean = false
+): TileOperandOptionUiState = TileOperandOptionUiState(
+    value = value,
+    totalVisibleCount = totalVisibleCount,
+    usedCount = usedCount,
+    isUsedInSameTile = isUsedInSameTile
+)

@@ -145,7 +145,15 @@ The contextual selector is the primary interaction used to edit the grid.
 - Opened by tapping a left or right operand slot
 - Uses a compact bottom sheet rather than a confirmation dialog
 - Shows the currently available numbers from the strip
+- When the same numeric value appears more than once in the visible strip, the selector groups those copies by value
 - Hidden strip items are not shown as selectable values
+- The selector visually distinguishes:
+  - values not yet used anywhere on the board
+  - values already used in the other operand of the same tile
+  - values already used in other tiles
+- Operand usage indicators are informative only and do not block selection
+- The value currently stored in the tapped slot does not count as "already used" for these indicators
+- Repeated visible values should surface a grouped usage summary such as how many visible copies are already used
 - Selecting a value immediately fills or replaces the operand slot and closes the sheet
 - Closing the selector without choosing a value leaves the slot unchanged
 
