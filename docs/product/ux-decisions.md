@@ -77,3 +77,26 @@ The board adapts the number of visual columns to the available width, but tile w
 - The rendered board may not mirror any future logical grouping rules one-to-one
 - Some users may perceive reflow across orientations as a stronger layout change
 - Larger screens may expose more empty horizontal space around centered rows
+
+---
+
+## Invalid Tile Feedback
+
+When a tile becomes fully known but incorrect, the UI marks the tile using a combined error treatment instead of blocking interaction or crashing.
+
+Current visual direction:
+- subtle error-tinted tile container
+- error-colored tile border
+- error-colored expression row
+- normal result styling
+
+### Rationale
+- Makes incorrect tiles noticeable without overwhelming the board
+- Keeps the error attached to the player-entered expression instead of the target result
+- Preserves readability of the tile result while still making the mismatch obvious
+- Avoids relying on a single visual cue
+
+### Potential Concerns
+- Some themes may need tuning if the error tint is too subtle or too strong
+- Color-only feedback would be insufficient on its own, so accessibility semantics should remain in place
+- Future hinting or puzzle-completion states may require a clearer distinction from simple incorrectness

@@ -10,15 +10,16 @@ Build a simple Android app that allows users to view and play a Tetonor puzzle.
 ## MVP Scope
 - Single screen
 - Display:
-    - 4x2 grid with results
+    - 8 grid with results
     - 8-number strip
-- No game validation
+- Local editing feedback for fully-known incorrect tiles
 - No scoring
 - No persistence
 - No animations
 
 ## Out of Scope
-- Game logic validation
+- Automatic prevention of incorrect tile assignments
+- Whole-puzzle validation and completion flow
 - Difficulty levels
 - Timer
 - Backend
