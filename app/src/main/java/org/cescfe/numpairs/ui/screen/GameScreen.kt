@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -77,11 +78,13 @@ private val TILE_OPERATOR_MENU_OPTION_VERTICAL_PADDING = 8.dp
 private val TILE_OPERAND_SHEET_MAX_HEIGHT = 320.dp
 private val TILE_OPERAND_SHEET_PADDING = 20.dp
 private val TILE_OPERAND_SHEET_GRID_SPACING = 12.dp
-private val TILE_OPERAND_SHEET_OPTION_MIN_WIDTH = 88.dp
-private val TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT = 52.dp
+private val TILE_OPERAND_SHEET_OPTION_MIN_WIDTH = 72.dp
+private val TILE_OPERAND_SHEET_OPTION_CARD_MIN_WIDTH = 56.dp
+private val TILE_OPERAND_SHEET_OPTION_CARD_MAX_WIDTH = 76.dp
+private val TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT = 50.dp
 private val TILE_OPERAND_SHEET_OPTION_CORNER_RADIUS = 18.dp
 private val TILE_OPERAND_HINT_OVERLAY_LIFT = 8.dp
-private val TILE_OPERAND_HINT_EDGE_INSET = 10.dp
+private val TILE_OPERAND_HINT_EDGE_INSET = 8.dp
 private val TILE_OPERAND_HINT_CORNER_RADIUS = 999.dp
 private val TILE_OPERAND_HINT_HORIZONTAL_PADDING = 6.dp
 private val TILE_OPERAND_HINT_VERTICAL_PADDING = 2.dp
@@ -280,55 +283,61 @@ private fun TileOperandSelectionSheet(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = TILE_OPERAND_HINT_OVERLAY_LIFT)
+                        .padding(top = TILE_OPERAND_HINT_OVERLAY_LIFT),
+                    contentAlignment = Alignment.TopCenter
                 ) {
-                    Surface(
-                        onClick = { onConfirm(operand.stripEntryId) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .defaultMinSize(minHeight = TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT)
-                            .testTag(GameScreenTestTags.tileOperandOption(operand.stripEntryId))
-                            .semantics {
-                                contentDescription = operandSelectionLabel
-                            },
-                        shape = RoundedCornerShape(TILE_OPERAND_SHEET_OPTION_CORNER_RADIUS),
-                        color = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                        border = BorderStroke(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.outlineVariant
-                        )
-                    ) {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = operandSelectionLabel,
-                                modifier = Modifier.padding(vertical = 10.dp),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold
+                    Box {
+                        Surface(
+                            onClick = { onConfirm(operand.stripEntryId) },
+                            modifier = Modifier
+                                .widthIn(
+                                    min = TILE_OPERAND_SHEET_OPTION_CARD_MIN_WIDTH,
+                                    max = TILE_OPERAND_SHEET_OPTION_CARD_MAX_WIDTH
+                                )
+                                .defaultMinSize(minHeight = TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT)
+                                .testTag(GameScreenTestTags.tileOperandOption(operand.stripEntryId))
+                                .semantics {
+                                    contentDescription = operandSelectionLabel
+                                },
+                            shape = RoundedCornerShape(TILE_OPERAND_SHEET_OPTION_CORNER_RADIUS),
+                            color = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            border = BorderStroke(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.outlineVariant
                             )
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = operandSelectionLabel,
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
                         }
+                        OperandUsageHintBadge(
+                            operator = Operator.ADDITION,
+                            usageState = operand.usageStateFor(Operator.ADDITION),
+                            stripEntryId = operand.stripEntryId,
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(start = TILE_OPERAND_HINT_EDGE_INSET)
+                                .offset(y = -TILE_OPERAND_HINT_OVERLAY_LIFT)
+                        )
+                        OperandUsageHintBadge(
+                            operator = Operator.MULTIPLICATION,
+                            usageState = operand.usageStateFor(Operator.MULTIPLICATION),
+                            stripEntryId = operand.stripEntryId,
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(end = TILE_OPERAND_HINT_EDGE_INSET)
+                                .offset(y = -TILE_OPERAND_HINT_OVERLAY_LIFT)
+                        )
                     }
-                    OperandUsageHintBadge(
-                        operator = Operator.ADDITION,
-                        usageState = operand.usageStateFor(Operator.ADDITION),
-                        stripEntryId = operand.stripEntryId,
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .padding(start = TILE_OPERAND_HINT_EDGE_INSET)
-                            .offset(y = -TILE_OPERAND_HINT_OVERLAY_LIFT)
-                    )
-                    OperandUsageHintBadge(
-                        operator = Operator.MULTIPLICATION,
-                        usageState = operand.usageStateFor(Operator.MULTIPLICATION),
-                        stripEntryId = operand.stripEntryId,
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(end = TILE_OPERAND_HINT_EDGE_INSET)
-                            .offset(y = -TILE_OPERAND_HINT_OVERLAY_LIFT)
-                    )
                 }
             }
         }
