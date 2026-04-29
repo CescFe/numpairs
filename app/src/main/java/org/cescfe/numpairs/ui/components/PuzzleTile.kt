@@ -37,12 +37,12 @@ import org.cescfe.numpairs.ui.screen.TileUiState
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 private val TILE_CORNER_RADIUS = 20.dp
-private val TILE_HORIZONTAL_PADDING = 12.dp
+private val TILE_HORIZONTAL_PADDING = 10.dp
 private val TILE_VERTICAL_PADDING = 16.dp
-private val TILE_EXPRESSION_ITEM_SPACING = 4.dp
+private val TILE_EXPRESSION_ITEM_SPACING = 2.dp
 private val TILE_EXPRESSION_ITEM_MIN_WIDTH = 24.dp
 private val TILE_EXPRESSION_ITEM_MIN_HEIGHT = 40.dp
-private val TILE_OPERAND_TEXT_PADDING = 2.dp
+private val TILE_OPERAND_TEXT_PADDING = 0.dp
 private val TILE_OPERATOR_SLOT_WIDTH = 28.dp
 private const val LARGE_OPERAND_CHARACTER_COUNT = 3
 
