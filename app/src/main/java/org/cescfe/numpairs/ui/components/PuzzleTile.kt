@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -24,13 +26,25 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
 import org.cescfe.numpairs.ui.screen.GameUiState
 import org.cescfe.numpairs.ui.screen.TileUiState
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
+
+private val TILE_CORNER_RADIUS = 20.dp
+private val TILE_HORIZONTAL_PADDING = 12.dp
+private val TILE_VERTICAL_PADDING = 16.dp
+private val TILE_EXPRESSION_ITEM_SPACING = 4.dp
+private val TILE_EXPRESSION_ITEM_MIN_WIDTH = 24.dp
+private val TILE_EXPRESSION_ITEM_MIN_HEIGHT = 40.dp
+private val TILE_OPERAND_TEXT_PADDING = 2.dp
+private val TILE_OPERATOR_SLOT_WIDTH = 28.dp
+private const val LARGE_OPERAND_CHARACTER_COUNT = 3
 
 @Composable
 fun PuzzleTile(
@@ -57,7 +71,7 @@ fun PuzzleTile(
                 stateDescription = incorrectStateDescription
             }
         },
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(TILE_CORNER_RADIUS),
         colors = if (tile.isInvalid) {
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.08f)
@@ -74,7 +88,7 @@ fun PuzzleTile(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 16.dp),
+                .padding(horizontal = TILE_HORIZONTAL_PADDING, vertical = TILE_VERTICAL_PADDING),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -120,7 +134,7 @@ private fun TileExpressionRow(
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(TILE_EXPRESSION_ITEM_SPACING),
         verticalAlignment = Alignment.CenterVertically
     ) {
         TileExpressionItem(
@@ -129,12 +143,14 @@ private fun TileExpressionRow(
                 .weight(1f)
                 .then(leftOperandModifier),
             onClick = onLeftOperandClick,
-            textColor = textColor
+            textColor = textColor,
+            isOperand = true,
+            horizontalTextPadding = TILE_OPERAND_TEXT_PADDING
         )
         TileExpressionItem(
             text = tile.operatorLabel,
             modifier = Modifier
-                .weight(1f)
+                .width(TILE_OPERATOR_SLOT_WIDTH)
                 .then(operatorModifier),
             onClick = onOperatorClick,
             textColor = textColor,
@@ -146,7 +162,9 @@ private fun TileExpressionRow(
                 .weight(1f)
                 .then(rightOperandModifier),
             onClick = onRightOperandClick,
-            textColor = textColor
+            textColor = textColor,
+            isOperand = true,
+            horizontalTextPadding = TILE_OPERAND_TEXT_PADDING
         )
     }
 }
@@ -157,11 +175,14 @@ private fun TileExpressionItem(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
     textColor: Color = Color.Unspecified,
+    isOperand: Boolean = false,
+    horizontalTextPadding: Dp = 0.dp,
     overlayContent: @Composable BoxScope.() -> Unit = {}
 ) {
     Box(
         modifier = modifier
-            .widthIn(min = 24.dp)
+            .widthIn(min = TILE_EXPRESSION_ITEM_MIN_WIDTH)
+            .defaultMinSize(minHeight = TILE_EXPRESSION_ITEM_MIN_HEIGHT)
             .let { currentModifier ->
                 if (onClick == null) {
                     currentModifier
@@ -173,13 +194,23 @@ private fun TileExpressionItem(
     ) {
         Text(
             text = text,
-            modifier = Modifier.fillMaxWidth(),
-            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = horizontalTextPadding),
+            style = expressionTextStyle(text = text, isOperand = isOperand),
             color = textColor,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Clip
         )
         overlayContent()
     }
+}
+
+@Composable
+private fun expressionTextStyle(text: String, isOperand: Boolean) = when {
+    isOperand && text.length >= LARGE_OPERAND_CHARACTER_COUNT -> MaterialTheme.typography.titleSmall
+    else -> MaterialTheme.typography.titleMedium
 }
 
 @Preview(showBackground = true)
@@ -188,6 +219,22 @@ private fun PuzzleTilePreview() {
     NumPairsTheme {
         PuzzleTile(
             tile = GameUiState.from(PuzzleSamples.prototype).tiles.first()
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 128)
+@Composable
+private fun PuzzleTileLargeOperandsPreview() {
+    NumPairsTheme {
+        PuzzleTile(
+            tile = TileUiState(
+                leftOperandLabel = "1",
+                operatorLabel = "×",
+                rightOperandLabel = "222",
+                resultLabel = "222"
+            ),
+            modifier = Modifier.width(112.dp)
         )
     }
 }
