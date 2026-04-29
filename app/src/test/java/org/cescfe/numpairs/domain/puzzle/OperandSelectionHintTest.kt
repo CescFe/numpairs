@@ -120,7 +120,6 @@ private fun selectionHint(
 ): OperandSelectionHint = OperandSelectionHint(
     stripEntry = VisibleStripEntry(
         entryId = entryId,
-        stripIndex = entryId,
         value = value
     ),
     usageByOperator = NumberUsageByOperator(
