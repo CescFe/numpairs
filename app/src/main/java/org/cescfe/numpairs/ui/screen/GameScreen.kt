@@ -12,11 +12,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -45,6 +46,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -76,8 +78,14 @@ private val TILE_OPERAND_SHEET_MAX_HEIGHT = 320.dp
 private val TILE_OPERAND_SHEET_PADDING = 20.dp
 private val TILE_OPERAND_SHEET_GRID_SPACING = 12.dp
 private val TILE_OPERAND_SHEET_OPTION_MIN_WIDTH = 88.dp
-private val TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT = 56.dp
+private val TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT = 64.dp
 private val TILE_OPERAND_SHEET_OPTION_CORNER_RADIUS = 18.dp
+private val TILE_OPERAND_SHEET_OPTION_CONTENT_SPACING = 10.dp
+private val TILE_OPERAND_HINT_ROW_SPACING = 6.dp
+private val TILE_OPERAND_HINT_CORNER_RADIUS = 999.dp
+private val TILE_OPERAND_HINT_HORIZONTAL_PADDING = 7.dp
+private val TILE_OPERAND_HINT_VERTICAL_PADDING = 3.dp
+private val TILE_OPERAND_HINT_TEXT_WEIGHT = FontWeight.Medium
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -263,8 +271,10 @@ private fun TileOperandSelectionSheet(
             horizontalArrangement = Arrangement.spacedBy(TILE_OPERAND_SHEET_GRID_SPACING),
             verticalArrangement = Arrangement.spacedBy(TILE_OPERAND_SHEET_GRID_SPACING)
         ) {
-            itemsIndexed(dialogUiState.availableOperands) { index, operand ->
-                val isSelected = dialogUiState.initialOperandEntryId == operand.stripEntryId
+            items(
+                items = dialogUiState.availableOperands,
+                key = TileOperandOptionUiState::stripEntryId
+            ) { operand ->
                 val operandSelectionLabel = operand.value.toString()
 
                 Surface(
@@ -272,49 +282,144 @@ private fun TileOperandSelectionSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT)
-                        .testTag(GameScreenTestTags.tileOperandOption(index, operand.value))
+                        .testTag(GameScreenTestTags.tileOperandOption(operand.stripEntryId))
                         .semantics {
                             contentDescription = operandSelectionLabel
-                            selected = isSelected
                         },
                     shape = RoundedCornerShape(TILE_OPERAND_SHEET_OPTION_CORNER_RADIUS),
-                    color = if (isSelected) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surface
-                    },
-                    contentColor = if (isSelected) {
-                        MaterialTheme.colorScheme.onPrimaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    },
+                    color = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
                     border = BorderStroke(
                         width = 1.dp,
-                        color = if (isSelected) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.outlineVariant
-                        }
+                        color = MaterialTheme.colorScheme.outlineVariant
                     )
                 ) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalArrangement = Arrangement.spacedBy(TILE_OPERAND_SHEET_OPTION_CONTENT_SPACING)
                     ) {
-                        Text(
-                            text = operandSelectionLabel,
-                            modifier = Modifier.padding(vertical = 12.dp),
-                            fontWeight = if (isSelected) {
-                                FontWeight.SemiBold
-                            } else {
-                                FontWeight.Normal
-                            }
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            OperandUsageHintBadge(
+                                operator = Operator.ADDITION,
+                                usageState = operand.usageStateFor(Operator.ADDITION),
+                                stripEntryId = operand.stripEntryId
+                            )
+                            Box(modifier = Modifier.size(TILE_OPERAND_HINT_ROW_SPACING))
+                            OperandUsageHintBadge(
+                                operator = Operator.MULTIPLICATION,
+                                usageState = operand.usageStateFor(Operator.MULTIPLICATION),
+                                stripEntryId = operand.stripEntryId
+                            )
+                        }
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = operandSelectionLabel,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun OperandUsageHintBadge(
+    operator: Operator,
+    usageState: OperandUsageHintState,
+    stripEntryId: Int
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    val hintContentDescription = when (operator) {
+        Operator.Addition -> stringResource(R.string.tile_operand_usage_addition_hint)
+        Operator.Multiplication -> stringResource(R.string.tile_operand_usage_multiplication_hint)
+        Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
+    }
+    val hintStateDescription = stringResource(usageState.stateDescriptionResId)
+    val (containerColor, contentColor, borderColor) = when (usageState) {
+        OperandUsageHintState.AVAILABLE -> Triple(
+            colorScheme.surface,
+            colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
+            colorScheme.outlineVariant.copy(alpha = 0.9f)
+        )
+
+        OperandUsageHintState.POSSIBLY_USED -> Triple(
+            colorScheme.surfaceVariant,
+            colorScheme.onSurfaceVariant,
+            colorScheme.outline
+        )
+
+        OperandUsageHintState.USED -> when (operator) {
+            Operator.Addition -> Triple(
+                colorScheme.primaryContainer,
+                colorScheme.onPrimaryContainer,
+                colorScheme.primary
+            )
+
+            Operator.Multiplication -> Triple(
+                colorScheme.secondaryContainer,
+                colorScheme.onSecondaryContainer,
+                colorScheme.secondary
+            )
+
+            Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
+        }
+    }
+
+    Surface(
+        modifier = Modifier
+            .testTag(GameScreenTestTags.tileOperandUsageHint(stripEntryId, operator))
+            .semantics {
+                contentDescription = hintContentDescription
+                stateDescription = hintStateDescription
+            },
+        shape = RoundedCornerShape(TILE_OPERAND_HINT_CORNER_RADIUS),
+        color = containerColor,
+        contentColor = contentColor,
+        border = BorderStroke(width = 1.dp, color = borderColor)
+    ) {
+        Text(
+            text = operator.symbol,
+            modifier = Modifier.padding(
+                horizontal = TILE_OPERAND_HINT_HORIZONTAL_PADDING,
+                vertical = TILE_OPERAND_HINT_VERTICAL_PADDING
+            ),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = TILE_OPERAND_HINT_TEXT_WEIGHT
+        )
+    }
+}
+
+private fun TileOperandOptionUiState.usageStateFor(operator: Operator): OperandUsageHintState = when (operator) {
+    Operator.Addition -> when {
+        additionUsed -> OperandUsageHintState.USED
+        hasUnresolvedUsage -> OperandUsageHintState.POSSIBLY_USED
+        else -> OperandUsageHintState.AVAILABLE
+    }
+
+    Operator.Multiplication -> when {
+        multiplicationUsed -> OperandUsageHintState.USED
+        hasUnresolvedUsage -> OperandUsageHintState.POSSIBLY_USED
+        else -> OperandUsageHintState.AVAILABLE
+    }
+
+    Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
+}
+
+private enum class OperandUsageHintState(val stateDescriptionResId: Int) {
+    AVAILABLE(R.string.tile_operand_usage_state_available),
+    POSSIBLY_USED(R.string.tile_operand_usage_state_possibly_used),
+    USED(R.string.tile_operand_usage_state_used)
 }
 
 @Composable

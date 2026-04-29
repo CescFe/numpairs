@@ -149,6 +149,10 @@ The contextual selector is the primary interaction used to edit the grid.
 - Hidden strip items are not shown as selectable values
 - Selecting a value immediately fills or replaces the operand slot and closes the sheet
 - Closing the selector without choosing a value leaves the slot unchanged
+- The selector does not specially highlight the currently assigned operand when reopened
+- Each visible strip entry shows subtle `+` and `×` usage hints derived from the current board state
+- These hints are informational only and do not block selection
+- A hint may appear as ambiguous when the strip entry is already assigned inside a tile whose operator is still hidden
 
 Selector logic should treat strip entries as unique entities rather than grouping options only by numeric value. Any future operand-usage hinting must therefore be computed per strip entry.
 
@@ -202,6 +206,8 @@ The grid should communicate two things at a glance:
 
 The grid should also communicate when a fully-known tile is currently incorrect.
 
+The operand selector should communicate operator-family usage with minimal, low-noise signals rather than verbose per-option text.
+
 Recommended visual direction for the first implementation:
 
 - `Known strip item`: outlined chip
@@ -210,6 +216,7 @@ Recommended visual direction for the first implementation:
 - Hidden grid slot: `?`
 - Filled grid slot: chosen number or operator
 - Active grid slot: temporary highlight while its contextual selector is open
+- Operand selector option: number-first card with compact `+` / `×` micro-indicators
 - Incorrect tile: subtle error-tinted container
 - Incorrect tile: error border
 - Incorrect tile: expression row in error color
