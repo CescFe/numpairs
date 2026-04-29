@@ -177,11 +177,7 @@ private fun ReferenceOperandSamples(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ReferenceOperandSample(
-    text: String,
-    testTag: String,
-    modifier: Modifier = Modifier
-) {
+private fun ReferenceOperandSample(text: String, testTag: String, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.testTag(testTag),
         color = MaterialTheme.colorScheme.surface
