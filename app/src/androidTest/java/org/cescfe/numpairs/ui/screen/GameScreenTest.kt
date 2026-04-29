@@ -458,12 +458,10 @@ class GameScreenTest {
             .performClick()
 
         assertOperandUsageHintState(
-            entryId = 2,
             operator = Operator.ADDITION,
             stateDescription = composeTestRule.activity.getString(R.string.tile_operand_usage_state_used)
         )
         assertOperandUsageHintState(
-            entryId = 2,
             operator = Operator.MULTIPLICATION,
             stateDescription = composeTestRule.activity.getString(R.string.tile_operand_usage_state_available)
         )
@@ -488,12 +486,10 @@ class GameScreenTest {
             .performClick()
 
         assertOperandUsageHintState(
-            entryId = 2,
             operator = Operator.ADDITION,
             stateDescription = composeTestRule.activity.getString(R.string.tile_operand_usage_state_possibly_used)
         )
         assertOperandUsageHintState(
-            entryId = 2,
             operator = Operator.MULTIPLICATION,
             stateDescription = composeTestRule.activity.getString(R.string.tile_operand_usage_state_possibly_used)
         )
@@ -661,10 +657,10 @@ class GameScreenTest {
             .performClick()
     }
 
-    private fun assertOperandUsageHintState(entryId: Int, operator: Operator, stateDescription: String) {
+    private fun assertOperandUsageHintState(operator: Operator, stateDescription: String) {
         composeTestRule
             .onNodeWithTag(
-                GameScreenTestTags.tileOperandUsageHint(entryId = entryId, operator = operator),
+                GameScreenTestTags.tileOperandUsageHint(entryId = 2, operator = operator),
                 useUnmergedTree = true
             )
             .assert(
