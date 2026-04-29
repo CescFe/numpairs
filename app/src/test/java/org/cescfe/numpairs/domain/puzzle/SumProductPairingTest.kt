@@ -151,13 +151,7 @@ private fun solvedPuzzleWithTiles(vararg tiles: Tile): Puzzle = Puzzle(
     )
 )
 
-private fun tile(
-    leftEntryId: Int,
-    leftValue: Int,
-    operator: Operator,
-    rightEntryId: Int,
-    rightValue: Int
-): Tile = Tile(
+private fun tile(leftEntryId: Int, leftValue: Int, operator: Operator, rightEntryId: Int, rightValue: Int): Tile = Tile(
     expression = Expression(
         leftOperand = Expression.Operand.Known(
             value = leftValue,
