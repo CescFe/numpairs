@@ -24,10 +24,11 @@ val Puzzle.hasInvalidStripEntryUsage: Boolean
         }
     }
 
-private fun List<IndexedResolvedTileAssignment>.usageCountsFor(operator: Operator): Map<Int, Int> = filter { assignment ->
-    assignment.operator == operator
-}.flatMap { assignment ->
-    listOf(assignment.leftOperand.stripEntryId, assignment.rightOperand.stripEntryId)
-}.groupingBy { stripEntryId ->
-    stripEntryId
-}.eachCount()
+private fun List<IndexedResolvedTileAssignment>.usageCountsFor(operator: Operator): Map<Int, Int> =
+    filter { assignment ->
+        assignment.operator == operator
+    }.flatMap { assignment ->
+        listOf(assignment.leftOperand.stripEntryId, assignment.rightOperand.stripEntryId)
+    }.groupingBy { stripEntryId ->
+        stripEntryId
+    }.eachCount()

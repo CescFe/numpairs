@@ -6,7 +6,7 @@ import org.junit.Test
 
 class StripEntryUsageTest {
     @Test
-    fun repeated_visible_values_with_distinct_entry_ids_do_not_report_invalid_usage_when_each_id_is_used_once_per_operator_family() {
+    fun distinct_entry_ids_with_repeated_values_do_not_report_invalid_usage_when_used_once_per_operator_family() {
         val puzzle = puzzleWithStripValuesAndTileAssignments(
             stripValues = listOf(2, 2, 2, 2, 5, 5, 7, 7),
             TileAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
@@ -61,11 +61,7 @@ class StripEntryUsageTest {
     }
 }
 
-private data class TileAssignment(
-    val leftEntryId: Int,
-    val operator: Operator,
-    val rightEntryId: Int
-)
+private data class TileAssignment(val leftEntryId: Int, val operator: Operator, val rightEntryId: Int)
 
 private fun puzzleWithStripValuesAndTileAssignments(
     stripValues: List<Int>,
@@ -86,12 +82,7 @@ private fun puzzleWithStripValuesAndTileAssignments(
     )
 )
 
-private fun tile(
-    stripValues: List<Int>,
-    leftEntryId: Int,
-    operator: Operator,
-    rightEntryId: Int
-): Tile {
+private fun tile(stripValues: List<Int>, leftEntryId: Int, operator: Operator, rightEntryId: Int): Tile {
     val leftValue = stripValues[leftEntryId]
     val rightValue = stripValues[rightEntryId]
 
