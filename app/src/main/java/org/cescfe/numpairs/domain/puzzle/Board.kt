@@ -7,7 +7,8 @@ data class Board(val tiles: List<Tile>) {
         }
     }
 
-    fun tileAt(index: Int): Tile = tiles[index]
+    val hasUnresolvedTiles: Boolean
+        get() = tiles.any { tile -> tile.resolutionState == TileResolutionState.UNRESOLVED }
 
     companion object {
         const val TILE_COUNT = 8

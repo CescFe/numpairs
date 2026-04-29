@@ -13,6 +13,9 @@ data class Strip(val entries: List<StripEntry>) {
     val items: List<StripItem>
         get() = entries.map(StripEntry::item)
 
+    val hasHiddenEntries: Boolean
+        get() = entries.any { stripEntry -> stripEntry.item == StripItem.Hidden }
+
     fun validEntryRangeFor(index: Int): StripEntryRange {
         val editableRun = editableRunContaining(index)
         val minimumValue = entries
