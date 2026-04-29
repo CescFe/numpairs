@@ -7,6 +7,10 @@
     <string name="strip_entry_valid_range_bounded">Valid range: %1$d to %2$d</string>
     <string name="strip_entry_valid_range_unbounded">Valid range: %1$d or greater</string>
     <string name="tile_operand_dialog_title">Choose operand</string>
+    <string name="tile_operand_usage_addition_hint">Addition usage hint</string>
+    <string name="tile_operand_usage_multiplication_hint">Multiplication usage hint</string>
+    <string name="tile_operand_usage_state_available">Available</string>
+    <string name="tile_operand_usage_state_used">Used</string>
     <string name="tile_operator_dialog_title">Choose operator</string>
     <string name="tile_operator_option_addition">Addition (+)</string>
     <string name="tile_operator_option_multiplication">Multiplication (×)</string>

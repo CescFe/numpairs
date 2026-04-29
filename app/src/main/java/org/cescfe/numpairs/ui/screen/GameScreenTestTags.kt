@@ -24,7 +24,13 @@ object GameScreenTestTags {
 
     fun tileOperator(index: Int): String = "tile_operator_$index"
 
-    fun tileOperandOption(index: Int, value: Int): String = "tile_operand_option_${index}_$value"
+    fun tileOperandOption(entryId: Int): String = "tile_operand_option_$entryId"
+
+    fun tileOperandUsageHint(entryId: Int, operator: Operator): String = when (operator) {
+        Operator.Addition -> "tile_operand_usage_hint_${entryId}_addition"
+        Operator.Multiplication -> "tile_operand_usage_hint_${entryId}_multiplication"
+        Operator.Hidden -> error("Hidden operator does not have an operand usage hint.")
+    }
 
     fun tileOperatorOption(operator: Operator): String = when (operator) {
         Operator.Addition -> "tile_operator_option_addition"

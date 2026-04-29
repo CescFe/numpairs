@@ -11,12 +11,14 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,6 +48,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -75,9 +78,17 @@ private val TILE_OPERATOR_MENU_OPTION_VERTICAL_PADDING = 8.dp
 private val TILE_OPERAND_SHEET_MAX_HEIGHT = 320.dp
 private val TILE_OPERAND_SHEET_PADDING = 20.dp
 private val TILE_OPERAND_SHEET_GRID_SPACING = 12.dp
-private val TILE_OPERAND_SHEET_OPTION_MIN_WIDTH = 88.dp
-private val TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT = 56.dp
+private val TILE_OPERAND_SHEET_OPTION_MIN_WIDTH = 72.dp
+private val TILE_OPERAND_SHEET_OPTION_CARD_MIN_WIDTH = 56.dp
+private val TILE_OPERAND_SHEET_OPTION_CARD_MAX_WIDTH = 76.dp
+private val TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT = 50.dp
 private val TILE_OPERAND_SHEET_OPTION_CORNER_RADIUS = 18.dp
+private val TILE_OPERAND_HINT_OVERLAY_LIFT = 8.dp
+private val TILE_OPERAND_HINT_EDGE_INSET = 8.dp
+private val TILE_OPERAND_HINT_CORNER_RADIUS = 999.dp
+private val TILE_OPERAND_HINT_HORIZONTAL_PADDING = 6.dp
+private val TILE_OPERAND_HINT_VERTICAL_PADDING = 2.dp
+private val TILE_OPERAND_HINT_TEXT_WEIGHT = FontWeight.Medium
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -263,58 +274,150 @@ private fun TileOperandSelectionSheet(
             horizontalArrangement = Arrangement.spacedBy(TILE_OPERAND_SHEET_GRID_SPACING),
             verticalArrangement = Arrangement.spacedBy(TILE_OPERAND_SHEET_GRID_SPACING)
         ) {
-            itemsIndexed(dialogUiState.availableOperands) { index, operand ->
-                val isSelected = dialogUiState.initialOperandEntryId == operand.stripEntryId
+            items(
+                items = dialogUiState.availableOperands,
+                key = TileOperandOptionUiState::stripEntryId
+            ) { operand ->
                 val operandSelectionLabel = operand.value.toString()
 
-                Surface(
-                    onClick = { onConfirm(operand.stripEntryId) },
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .defaultMinSize(minHeight = TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT)
-                        .testTag(GameScreenTestTags.tileOperandOption(index, operand.value))
-                        .semantics {
-                            contentDescription = operandSelectionLabel
-                            selected = isSelected
-                        },
-                    shape = RoundedCornerShape(TILE_OPERAND_SHEET_OPTION_CORNER_RADIUS),
-                    color = if (isSelected) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surface
-                    },
-                    contentColor = if (isSelected) {
-                        MaterialTheme.colorScheme.onPrimaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    },
-                    border = BorderStroke(
-                        width = 1.dp,
-                        color = if (isSelected) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.outlineVariant
-                        }
-                    )
+                        .padding(top = TILE_OPERAND_HINT_OVERLAY_LIFT),
+                    contentAlignment = Alignment.TopCenter
                 ) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = operandSelectionLabel,
-                            modifier = Modifier.padding(vertical = 12.dp),
-                            fontWeight = if (isSelected) {
-                                FontWeight.SemiBold
-                            } else {
-                                FontWeight.Normal
+                    Box {
+                        Surface(
+                            onClick = { onConfirm(operand.stripEntryId) },
+                            modifier = Modifier
+                                .widthIn(
+                                    min = TILE_OPERAND_SHEET_OPTION_CARD_MIN_WIDTH,
+                                    max = TILE_OPERAND_SHEET_OPTION_CARD_MAX_WIDTH
+                                )
+                                .defaultMinSize(minHeight = TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT)
+                                .testTag(GameScreenTestTags.tileOperandOption(operand.stripEntryId))
+                                .semantics {
+                                    contentDescription = operandSelectionLabel
+                                },
+                            shape = RoundedCornerShape(TILE_OPERAND_SHEET_OPTION_CORNER_RADIUS),
+                            color = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            border = BorderStroke(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.outlineVariant
+                            )
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = operandSelectionLabel,
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
                             }
+                        }
+                        OperandUsageHintBadge(
+                            operator = Operator.ADDITION,
+                            usageState = operand.usageStateFor(Operator.ADDITION),
+                            stripEntryId = operand.stripEntryId,
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(start = TILE_OPERAND_HINT_EDGE_INSET)
+                                .offset(y = -TILE_OPERAND_HINT_OVERLAY_LIFT)
+                        )
+                        OperandUsageHintBadge(
+                            operator = Operator.MULTIPLICATION,
+                            usageState = operand.usageStateFor(Operator.MULTIPLICATION),
+                            stripEntryId = operand.stripEntryId,
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(end = TILE_OPERAND_HINT_EDGE_INSET)
+                                .offset(y = -TILE_OPERAND_HINT_OVERLAY_LIFT)
                         )
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun OperandUsageHintBadge(
+    operator: Operator,
+    usageState: OperandUsageHintState,
+    stripEntryId: Int,
+    modifier: Modifier = Modifier
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    val hintContentDescription = when (operator) {
+        Operator.Addition -> stringResource(R.string.tile_operand_usage_addition_hint)
+        Operator.Multiplication -> stringResource(R.string.tile_operand_usage_multiplication_hint)
+        Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
+    }
+    val hintStateDescription = stringResource(usageState.stateDescriptionResId)
+    val (containerColor, contentColor, borderColor) = when (usageState) {
+        OperandUsageHintState.AVAILABLE -> Triple(
+            colorScheme.surface,
+            colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
+            colorScheme.outlineVariant.copy(alpha = 0.9f)
+        )
+
+        OperandUsageHintState.USED -> when (operator) {
+            Operator.Addition,
+            Operator.Multiplication -> Triple(
+                colorScheme.primaryContainer,
+                colorScheme.onPrimaryContainer,
+                colorScheme.primary
+            )
+
+            Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
+        }
+    }
+
+    Surface(
+        modifier = modifier
+            .testTag(GameScreenTestTags.tileOperandUsageHint(stripEntryId, operator))
+            .semantics {
+                contentDescription = hintContentDescription
+                stateDescription = hintStateDescription
+            },
+        shape = RoundedCornerShape(TILE_OPERAND_HINT_CORNER_RADIUS),
+        color = containerColor,
+        contentColor = contentColor,
+        border = BorderStroke(width = 1.dp, color = borderColor)
+    ) {
+        Text(
+            text = operator.symbol,
+            modifier = Modifier.padding(
+                horizontal = TILE_OPERAND_HINT_HORIZONTAL_PADDING,
+                vertical = TILE_OPERAND_HINT_VERTICAL_PADDING
+            ),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = TILE_OPERAND_HINT_TEXT_WEIGHT
+        )
+    }
+}
+
+private fun TileOperandOptionUiState.usageStateFor(operator: Operator): OperandUsageHintState = when (operator) {
+    Operator.Addition -> when {
+        additionUsed -> OperandUsageHintState.USED
+        else -> OperandUsageHintState.AVAILABLE
+    }
+
+    Operator.Multiplication -> when {
+        multiplicationUsed -> OperandUsageHintState.USED
+        else -> OperandUsageHintState.AVAILABLE
+    }
+
+    Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
+}
+
+private enum class OperandUsageHintState(val stateDescriptionResId: Int) {
+    AVAILABLE(R.string.tile_operand_usage_state_available),
+    USED(R.string.tile_operand_usage_state_used)
 }
 
 @Composable

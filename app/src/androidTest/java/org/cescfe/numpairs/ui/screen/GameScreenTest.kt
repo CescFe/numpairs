@@ -228,15 +228,15 @@ class GameScreenTest {
             .assertIsDisplayed()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(index = 0, value = 6), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 2), useUnmergedTree = true)
             .assertIsDisplayed()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(index = 1, value = 25), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 4), useUnmergedTree = true)
             .assertIsDisplayed()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(index = 2, value = 222), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 7), useUnmergedTree = true)
             .assertIsDisplayed()
     }
 
@@ -278,7 +278,7 @@ class GameScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(index = 0, value = 2), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 1), useUnmergedTree = true)
             .assertIsDisplayed()
     }
 
@@ -293,7 +293,7 @@ class GameScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(index = 0, value = 6), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 2), useUnmergedTree = true)
             .performClick()
 
         composeTestRule
@@ -306,7 +306,7 @@ class GameScreenTest {
     }
 
     @Test
-    fun tappingFilledLeftTileOperandReopensBottomSheetSelectorWithTheCurrentOptionSelected() {
+    fun tappingFilledLeftTileOperandReopensBottomSheetSelectorWithoutSelectedOperandEmphasis() {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.BOARD)
             .performScrollTo()
@@ -316,7 +316,7 @@ class GameScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(index = 0, value = 6), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 2), useUnmergedTree = true)
             .performClick()
 
         composeTestRule
@@ -328,8 +328,11 @@ class GameScreenTest {
             .assertIsDisplayed()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(index = 0, value = 6), useUnmergedTree = true)
-            .assertIsSelected()
+            .onAllNodes(
+                SemanticsMatcher.expectValue(SemanticsProperties.Selected, true),
+                useUnmergedTree = true
+            )
+            .assertCountEquals(0)
     }
 
     @Test
@@ -343,7 +346,7 @@ class GameScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(index = 0, value = 6), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 2), useUnmergedTree = true)
             .performClick()
 
         composeTestRule
@@ -366,7 +369,7 @@ class GameScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(index = 0, value = 6), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 2), useUnmergedTree = true)
             .performClick()
 
         composeTestRule
@@ -374,7 +377,7 @@ class GameScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(index = 1, value = 25), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 4), useUnmergedTree = true)
             .performClick()
 
         composeTestRule
@@ -414,7 +417,7 @@ class GameScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(index = 0, value = 6), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 2), useUnmergedTree = true)
             .performClick()
 
         composeTestRule
@@ -426,6 +429,70 @@ class GameScreenTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
             .assert(hasAnyDescendant(hasText("6")))
+    }
+
+    @Test
+    fun operandSelectorShowsOperatorSpecificUsageHintsWithoutVerboseText() {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.BOARD)
+            .performScrollTo()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 2), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.ADDITION), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(1), useUnmergedTree = true)
+            .performClick()
+
+        assertOperandUsageHintState(
+            operator = Operator.ADDITION,
+            stateDescription = composeTestRule.activity.getString(R.string.tile_operand_usage_state_used)
+        )
+        assertOperandUsageHintState(
+            operator = Operator.MULTIPLICATION,
+            stateDescription = composeTestRule.activity.getString(R.string.tile_operand_usage_state_available)
+        )
+    }
+
+    @Test
+    fun operandSelectorDoesNotMarkUsageHintsUntilTheTileOperatorIsKnown() {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.BOARD)
+            .performScrollTo()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 2), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(1), useUnmergedTree = true)
+            .performClick()
+
+        assertOperandUsageHintState(
+            operator = Operator.ADDITION,
+            stateDescription = composeTestRule.activity.getString(R.string.tile_operand_usage_state_available)
+        )
+        assertOperandUsageHintState(
+            operator = Operator.MULTIPLICATION,
+            stateDescription = composeTestRule.activity.getString(R.string.tile_operand_usage_state_available)
+        )
     }
 
     @Test
@@ -570,7 +637,7 @@ class GameScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(index = 0, value = 1), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 1), useUnmergedTree = true)
             .performClick()
 
         composeTestRule
@@ -586,7 +653,21 @@ class GameScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(index = 3, value = 222), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 7), useUnmergedTree = true)
             .performClick()
+    }
+
+    private fun assertOperandUsageHintState(operator: Operator, stateDescription: String) {
+        composeTestRule
+            .onNodeWithTag(
+                GameScreenTestTags.tileOperandUsageHint(entryId = 2, operator = operator),
+                useUnmergedTree = true
+            )
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.StateDescription,
+                    stateDescription
+                )
+            )
     }
 }

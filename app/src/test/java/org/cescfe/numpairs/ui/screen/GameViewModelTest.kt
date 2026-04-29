@@ -138,7 +138,7 @@ class GameViewModelTest {
     }
 
     @Test
-    fun tapping_a_filled_left_tile_operand_reopens_the_selection_dialog_with_the_current_operand() {
+    fun tapping_a_filled_left_tile_operand_reopens_the_selection_dialog_with_the_current_operand_still_available() {
         val viewModel = GameViewModel()
 
         viewModel.onTileLeftOperandTapped(index = 0)
@@ -153,15 +153,14 @@ class GameViewModelTest {
                     operandOption(stripEntryId = 2, value = 6),
                     operandOption(stripEntryId = 4, value = 25),
                     operandOption(stripEntryId = 7, value = 222)
-                ),
-                initialOperandEntryId = 2
+                )
             ),
             viewModel.uiState.value.tileOperandSelectionDialog
         )
     }
 
     @Test
-    fun tapping_a_filled_right_tile_operand_reopens_the_selection_dialog_with_the_current_operand() {
+    fun tapping_a_filled_right_tile_operand_reopens_the_selection_dialog_with_the_current_operand_still_available() {
         val viewModel = GameViewModel()
 
         viewModel.onTileRightOperandTapped(index = 0)
@@ -176,8 +175,7 @@ class GameViewModelTest {
                     operandOption(stripEntryId = 2, value = 6),
                     operandOption(stripEntryId = 4, value = 25),
                     operandOption(stripEntryId = 7, value = 222)
-                ),
-                initialOperandEntryId = 2
+                )
             ),
             viewModel.uiState.value.tileOperandSelectionDialog
         )
@@ -593,12 +591,10 @@ private fun operandOption(
     stripEntryId: Int,
     value: Int,
     additionUsed: Boolean = false,
-    multiplicationUsed: Boolean = false,
-    hasUnresolvedUsage: Boolean = false
+    multiplicationUsed: Boolean = false
 ): TileOperandOptionUiState = TileOperandOptionUiState(
     stripEntryId = stripEntryId,
     value = value,
     additionUsed = additionUsed,
-    multiplicationUsed = multiplicationUsed,
-    hasUnresolvedUsage = hasUnresolvedUsage
+    multiplicationUsed = multiplicationUsed
 )

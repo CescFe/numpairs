@@ -54,11 +54,10 @@ data class Strip(val entries: List<StripEntry>) {
         return copy(entries = updatedEntries)
     }
 
-    fun visibleEntries(): List<VisibleStripEntry> = entries.mapIndexedNotNull { index, stripEntry ->
+    fun visibleEntries(): List<VisibleStripEntry> = entries.mapIndexedNotNull { _, stripEntry ->
         stripEntry.item.visibleValue?.let { visibleValue ->
             VisibleStripEntry(
                 entryId = stripEntry.id,
-                stripIndex = index,
                 value = visibleValue
             )
         }
@@ -72,7 +71,6 @@ data class Strip(val entries: List<StripEntry>) {
         ?.let { indexedEntry ->
             VisibleStripEntry(
                 entryId = indexedEntry.value.id,
-                stripIndex = indexedEntry.index,
                 value = indexedEntry.value.item.visibleValue ?: error("Visible strip entry must expose a value.")
             )
         }
