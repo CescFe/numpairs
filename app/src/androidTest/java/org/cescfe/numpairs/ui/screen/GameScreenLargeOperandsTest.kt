@@ -3,6 +3,7 @@ package org.cescfe.numpairs.ui.screen
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -47,15 +48,6 @@ class GameScreenLargeOperandsTest {
         var operatorClicks = 0
         var rightOperandClicks = 0
 
-        val referenceDoubleDigitInkWidth = captureReferenceInkWidth(
-            text = "22",
-            testTag = REFERENCE_DOUBLE_DIGIT_TAG
-        )
-        val referenceTripleDigitInkWidth = captureReferenceInkWidth(
-            text = "222",
-            testTag = REFERENCE_TRIPLE_DIGIT_TAG
-        )
-
         composeTestRule.setContent {
             NumPairsTheme {
                 Box(
@@ -68,6 +60,11 @@ class GameScreenLargeOperandsTest {
                         onTileLeftOperandTapped = { leftOperandClicks += 1 },
                         onTileOperatorTapped = { operatorClicks += 1 },
                         onTileRightOperandTapped = { rightOperandClicks += 1 }
+                    )
+                    ReferenceOperandSamples(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(12.dp)
                     )
                 }
             }
@@ -99,6 +96,8 @@ class GameScreenLargeOperandsTest {
             assertEquals(1, rightOperandClicks)
         }
 
+        val referenceDoubleDigitInkWidth = captureReferenceInkWidth(REFERENCE_DOUBLE_DIGIT_TAG)
+        val referenceTripleDigitInkWidth = captureReferenceInkWidth(REFERENCE_TRIPLE_DIGIT_TAG)
         val visibleTripleDigitInkWidth = composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileRightOperand(0), useUnmergedTree = true)
             .captureToImage()
@@ -146,16 +145,7 @@ class GameScreenLargeOperandsTest {
     }
 }
 
-private fun GameScreenLargeOperandsTest.captureReferenceInkWidth(text: String, testTag: String): Int {
-    composeTestRule.setContent {
-        NumPairsTheme {
-            ReferenceOperandSample(
-                text = text,
-                testTag = testTag
-            )
-        }
-    }
-
+private fun GameScreenLargeOperandsTest.captureReferenceInkWidth(testTag: String): Int {
     composeTestRule
         .onNodeWithTag(testTag, useUnmergedTree = true)
         .assertIsDisplayed()
@@ -167,9 +157,33 @@ private fun GameScreenLargeOperandsTest.captureReferenceInkWidth(text: String, t
 }
 
 @Composable
-private fun ReferenceOperandSample(text: String, testTag: String) {
+private fun ReferenceOperandSamples(modifier: Modifier = Modifier) {
     Surface(
-        modifier = Modifier.testTag(testTag),
+        modifier = modifier,
+        color = MaterialTheme.colorScheme.surface
+    ) {
+        Box {
+            ReferenceOperandSample(
+                text = "22",
+                testTag = REFERENCE_DOUBLE_DIGIT_TAG
+            )
+            ReferenceOperandSample(
+                text = "222",
+                testTag = REFERENCE_TRIPLE_DIGIT_TAG,
+                modifier = Modifier.padding(top = 44.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ReferenceOperandSample(
+    text: String,
+    testTag: String,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.testTag(testTag),
         color = MaterialTheme.colorScheme.surface
     ) {
         Box(
