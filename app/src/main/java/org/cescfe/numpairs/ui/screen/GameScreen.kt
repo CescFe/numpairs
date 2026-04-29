@@ -366,16 +366,11 @@ private fun OperandUsageHintBadge(
         )
 
         OperandUsageHintState.USED -> when (operator) {
-            Operator.Addition -> Triple(
+            Operator.Addition,
+            Operator.Multiplication -> Triple(
                 colorScheme.primaryContainer,
                 colorScheme.onPrimaryContainer,
                 colorScheme.primary
-            )
-
-            Operator.Multiplication -> Triple(
-                colorScheme.secondaryContainer,
-                colorScheme.onSecondaryContainer,
-                colorScheme.secondary
             )
 
             Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
