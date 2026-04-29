@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -78,13 +78,13 @@ private val TILE_OPERAND_SHEET_MAX_HEIGHT = 320.dp
 private val TILE_OPERAND_SHEET_PADDING = 20.dp
 private val TILE_OPERAND_SHEET_GRID_SPACING = 12.dp
 private val TILE_OPERAND_SHEET_OPTION_MIN_WIDTH = 88.dp
-private val TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT = 64.dp
+private val TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT = 52.dp
 private val TILE_OPERAND_SHEET_OPTION_CORNER_RADIUS = 18.dp
-private val TILE_OPERAND_SHEET_OPTION_CONTENT_SPACING = 10.dp
-private val TILE_OPERAND_HINT_ROW_SPACING = 6.dp
+private val TILE_OPERAND_HINT_OVERLAY_LIFT = 8.dp
+private val TILE_OPERAND_HINT_EDGE_INSET = 10.dp
 private val TILE_OPERAND_HINT_CORNER_RADIUS = 999.dp
-private val TILE_OPERAND_HINT_HORIZONTAL_PADDING = 7.dp
-private val TILE_OPERAND_HINT_VERTICAL_PADDING = 3.dp
+private val TILE_OPERAND_HINT_HORIZONTAL_PADDING = 6.dp
+private val TILE_OPERAND_HINT_VERTICAL_PADDING = 2.dp
 private val TILE_OPERAND_HINT_TEXT_WEIGHT = FontWeight.Medium
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -277,56 +277,58 @@ private fun TileOperandSelectionSheet(
             ) { operand ->
                 val operandSelectionLabel = operand.value.toString()
 
-                Surface(
-                    onClick = { onConfirm(operand.stripEntryId) },
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .defaultMinSize(minHeight = TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT)
-                        .testTag(GameScreenTestTags.tileOperandOption(operand.stripEntryId))
-                        .semantics {
-                            contentDescription = operandSelectionLabel
-                        },
-                    shape = RoundedCornerShape(TILE_OPERAND_SHEET_OPTION_CORNER_RADIUS),
-                    color = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    border = BorderStroke(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant
-                    )
+                        .padding(top = TILE_OPERAND_HINT_OVERLAY_LIFT)
                 ) {
-                    Column(
+                    Surface(
+                        onClick = { onConfirm(operand.stripEntryId) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 10.dp),
-                        verticalArrangement = Arrangement.spacedBy(TILE_OPERAND_SHEET_OPTION_CONTENT_SPACING)
+                            .defaultMinSize(minHeight = TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT)
+                            .testTag(GameScreenTestTags.tileOperandOption(operand.stripEntryId))
+                            .semantics {
+                                contentDescription = operandSelectionLabel
+                            },
+                        shape = RoundedCornerShape(TILE_OPERAND_SHEET_OPTION_CORNER_RADIUS),
+                        color = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                        border = BorderStroke(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.outlineVariant
+                        )
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            OperandUsageHintBadge(
-                                operator = Operator.ADDITION,
-                                usageState = operand.usageStateFor(Operator.ADDITION),
-                                stripEntryId = operand.stripEntryId
-                            )
-                            Box(modifier = Modifier.size(TILE_OPERAND_HINT_ROW_SPACING))
-                            OperandUsageHintBadge(
-                                operator = Operator.MULTIPLICATION,
-                                usageState = operand.usageStateFor(Operator.MULTIPLICATION),
-                                stripEntryId = operand.stripEntryId
-                            )
-                        }
                         Box(
                             modifier = Modifier.fillMaxWidth(),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = operandSelectionLabel,
+                                modifier = Modifier.padding(vertical = 10.dp),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
                     }
+                    OperandUsageHintBadge(
+                        operator = Operator.ADDITION,
+                        usageState = operand.usageStateFor(Operator.ADDITION),
+                        stripEntryId = operand.stripEntryId,
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(start = TILE_OPERAND_HINT_EDGE_INSET)
+                            .offset(y = -TILE_OPERAND_HINT_OVERLAY_LIFT)
+                    )
+                    OperandUsageHintBadge(
+                        operator = Operator.MULTIPLICATION,
+                        usageState = operand.usageStateFor(Operator.MULTIPLICATION),
+                        stripEntryId = operand.stripEntryId,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(end = TILE_OPERAND_HINT_EDGE_INSET)
+                            .offset(y = -TILE_OPERAND_HINT_OVERLAY_LIFT)
+                    )
                 }
             }
         }
@@ -337,7 +339,8 @@ private fun TileOperandSelectionSheet(
 private fun OperandUsageHintBadge(
     operator: Operator,
     usageState: OperandUsageHintState,
-    stripEntryId: Int
+    stripEntryId: Int,
+    modifier: Modifier = Modifier
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val hintContentDescription = when (operator) {
@@ -377,7 +380,7 @@ private fun OperandUsageHintBadge(
     }
 
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .testTag(GameScreenTestTags.tileOperandUsageHint(stripEntryId, operator))
             .semantics {
                 contentDescription = hintContentDescription
