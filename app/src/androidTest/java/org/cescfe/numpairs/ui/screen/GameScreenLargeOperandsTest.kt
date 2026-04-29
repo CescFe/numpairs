@@ -1,12 +1,8 @@
 package org.cescfe.numpairs.ui.screen
 
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -51,22 +47,28 @@ class GameScreenLargeOperandsTest {
         var operatorClicks = 0
         var rightOperandClicks = 0
 
+        val referenceDoubleDigitInkWidth = captureReferenceInkWidth(
+            text = "22",
+            testTag = REFERENCE_DOUBLE_DIGIT_TAG
+        )
+        val referenceTripleDigitInkWidth = captureReferenceInkWidth(
+            text = "222",
+            testTag = REFERENCE_TRIPLE_DIGIT_TAG
+        )
+
         composeTestRule.setContent {
             NumPairsTheme {
-                Row {
-                    Box(
-                        modifier = Modifier
-                            .width(392.dp)
-                            .height(800.dp)
-                    ) {
-                        GameScreen(
-                            uiState = largeOperandBoardUiState(),
-                            onTileLeftOperandTapped = { leftOperandClicks += 1 },
-                            onTileOperatorTapped = { operatorClicks += 1 },
-                            onTileRightOperandTapped = { rightOperandClicks += 1 }
-                        )
-                    }
-                    ReferenceOperandSamples()
+                Box(
+                    modifier = Modifier
+                        .width(392.dp)
+                        .height(800.dp)
+                ) {
+                    GameScreen(
+                        uiState = largeOperandBoardUiState(),
+                        onTileLeftOperandTapped = { leftOperandClicks += 1 },
+                        onTileOperatorTapped = { operatorClicks += 1 },
+                        onTileRightOperandTapped = { rightOperandClicks += 1 }
+                    )
                 }
             }
         }
@@ -99,14 +101,6 @@ class GameScreenLargeOperandsTest {
 
         val visibleTripleDigitInkWidth = composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileRightOperand(0), useUnmergedTree = true)
-            .captureToImage()
-            .inkWidthPx()
-        val referenceDoubleDigitInkWidth = composeTestRule
-            .onNodeWithTag(REFERENCE_DOUBLE_DIGIT_TAG, useUnmergedTree = true)
-            .captureToImage()
-            .inkWidthPx()
-        val referenceTripleDigitInkWidth = composeTestRule
-            .onNodeWithTag(REFERENCE_TRIPLE_DIGIT_TAG, useUnmergedTree = true)
             .captureToImage()
             .inkWidthPx()
 
@@ -152,23 +146,24 @@ class GameScreenLargeOperandsTest {
     }
 }
 
-@Composable
-private fun ReferenceOperandSamples() {
-    Surface(color = MaterialTheme.colorScheme.surface) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+private fun GameScreenLargeOperandsTest.captureReferenceInkWidth(text: String, testTag: String): Int {
+    composeTestRule.setContent {
+        NumPairsTheme {
             ReferenceOperandSample(
-                text = "22",
-                testTag = REFERENCE_DOUBLE_DIGIT_TAG
-            )
-            ReferenceOperandSample(
-                text = "222",
-                testTag = REFERENCE_TRIPLE_DIGIT_TAG
+                text = text,
+                testTag = testTag
             )
         }
     }
+
+    composeTestRule
+        .onNodeWithTag(testTag, useUnmergedTree = true)
+        .assertIsDisplayed()
+
+    return composeTestRule
+        .onNodeWithTag(testTag, useUnmergedTree = true)
+        .captureToImage()
+        .inkWidthPx()
 }
 
 @Composable
@@ -180,12 +175,12 @@ private fun ReferenceOperandSample(text: String, testTag: String) {
         Box(
             modifier = Modifier
                 .width(72.dp)
-                .height(40.dp)
-                .padding(horizontal = 2.dp),
+                .height(40.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = text,
+                modifier = Modifier.width(68.dp),
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.titleSmall
             )
