@@ -468,7 +468,7 @@ class GameScreenTest {
     }
 
     @Test
-    fun operandSelectorShowsAmbiguousUsageHintsWhenTheAssignedTileOperatorIsStillHidden() {
+    fun operandSelectorDoesNotMarkUsageHintsUntilTheTileOperatorIsKnown() {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.BOARD)
             .performScrollTo()
@@ -487,11 +487,11 @@ class GameScreenTest {
 
         assertOperandUsageHintState(
             operator = Operator.ADDITION,
-            stateDescription = composeTestRule.activity.getString(R.string.tile_operand_usage_state_possibly_used)
+            stateDescription = composeTestRule.activity.getString(R.string.tile_operand_usage_state_available)
         )
         assertOperandUsageHintState(
             operator = Operator.MULTIPLICATION,
-            stateDescription = composeTestRule.activity.getString(R.string.tile_operand_usage_state_possibly_used)
+            stateDescription = composeTestRule.activity.getString(R.string.tile_operand_usage_state_available)
         )
     }
 

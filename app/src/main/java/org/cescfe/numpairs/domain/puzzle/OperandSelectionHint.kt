@@ -4,8 +4,7 @@ data class VisibleStripEntry(val entryId: Int, val value: Int)
 
 data class NumberUsageByOperator(
     val additionUsageCount: Int = 0,
-    val multiplicationUsageCount: Int = 0,
-    val unresolvedUsageCount: Int = 0
+    val multiplicationUsageCount: Int = 0
 ) {
     init {
         require(additionUsageCount >= 0) {
@@ -14,9 +13,6 @@ data class NumberUsageByOperator(
         require(multiplicationUsageCount >= 0) {
             "Multiplication usage count cannot be negative."
         }
-        require(unresolvedUsageCount >= 0) {
-            "Unresolved usage count cannot be negative."
-        }
     }
 
     val additionUsed: Boolean
@@ -24,9 +20,6 @@ data class NumberUsageByOperator(
 
     val multiplicationUsed: Boolean
         get() = multiplicationUsageCount > 0
-
-    val hasUnresolvedUsage: Boolean
-        get() = unresolvedUsageCount > 0
 }
 
 data class OperandSelectionHint(val stripEntry: VisibleStripEntry, val usageByOperator: NumberUsageByOperator)
@@ -42,8 +35,7 @@ fun Puzzle.operandSelectionHintsFor(tileIndex: Int, slot: OperandSlot): List<Ope
                 multiplicationUsageCount = assignments.count { assignment ->
                     assignment.operator ==
                         Operator.MULTIPLICATION
-                },
-                unresolvedUsageCount = assignments.count { assignment -> assignment.operator == Operator.Hidden }
+                }
             )
         }
 

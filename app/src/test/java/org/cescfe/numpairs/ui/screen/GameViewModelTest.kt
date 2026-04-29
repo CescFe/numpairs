@@ -591,12 +591,10 @@ private fun operandOption(
     stripEntryId: Int,
     value: Int,
     additionUsed: Boolean = false,
-    multiplicationUsed: Boolean = false,
-    hasUnresolvedUsage: Boolean = false
+    multiplicationUsed: Boolean = false
 ): TileOperandOptionUiState = TileOperandOptionUiState(
     stripEntryId = stripEntryId,
     value = value,
     additionUsed = additionUsed,
-    multiplicationUsed = multiplicationUsed,
-    hasUnresolvedUsage = hasUnresolvedUsage
+    multiplicationUsed = multiplicationUsed
 )

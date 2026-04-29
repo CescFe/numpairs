@@ -92,7 +92,7 @@ class OperandSelectionHintTest {
     }
 
     @Test
-    fun selection_hints_track_assignments_with_hidden_operators_as_unresolved_usage() {
+    fun selection_hints_ignore_assignments_when_the_operator_is_still_hidden() {
         val puzzle = PuzzleSamples.prototype
             .withTile(
                 index = 0,
@@ -102,7 +102,7 @@ class OperandSelectionHintTest {
 
         assertEquals(
             listOf(
-                selectionHint(entryId = 2, value = 6, hasUnresolvedUsage = true),
+                selectionHint(entryId = 2, value = 6),
                 selectionHint(entryId = 4, value = 25),
                 selectionHint(entryId = 7, value = 222)
             ),
@@ -115,8 +115,7 @@ private fun selectionHint(
     entryId: Int,
     value: Int,
     additionUsed: Boolean = false,
-    multiplicationUsed: Boolean = false,
-    hasUnresolvedUsage: Boolean = false
+    multiplicationUsed: Boolean = false
 ): OperandSelectionHint = OperandSelectionHint(
     stripEntry = VisibleStripEntry(
         entryId = entryId,
@@ -124,8 +123,7 @@ private fun selectionHint(
     ),
     usageByOperator = NumberUsageByOperator(
         additionUsageCount = if (additionUsed) 1 else 0,
-        multiplicationUsageCount = if (multiplicationUsed) 1 else 0,
-        unresolvedUsageCount = if (hasUnresolvedUsage) 1 else 0
+        multiplicationUsageCount = if (multiplicationUsed) 1 else 0
     )
 )
 

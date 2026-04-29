@@ -152,7 +152,6 @@ The contextual selector is the primary interaction used to edit the grid.
 - The selector does not specially highlight the currently assigned operand when reopened
 - Each visible strip entry shows subtle `+` and `×` usage hints derived from the current board state
 - These hints are informational only and do not block selection
-- A hint may appear as ambiguous when the strip entry is already assigned inside a tile whose operator is still hidden
 
 Selector logic should treat strip entries as unique entities rather than grouping options only by numeric value. Any future operand-usage hinting must therefore be computed per strip entry.
 

@@ -10,7 +10,6 @@
     <string name="tile_operand_usage_addition_hint">Addition usage hint</string>
     <string name="tile_operand_usage_multiplication_hint">Multiplication usage hint</string>
     <string name="tile_operand_usage_state_available">Available</string>
-    <string name="tile_operand_usage_state_possibly_used">Possibly used</string>
     <string name="tile_operand_usage_state_used">Used</string>
     <string name="tile_operator_dialog_title">Choose operator</string>
     <string name="tile_operator_option_addition">Addition (+)</string>

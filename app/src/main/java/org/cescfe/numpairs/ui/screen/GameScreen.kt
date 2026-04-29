@@ -365,12 +365,6 @@ private fun OperandUsageHintBadge(
             colorScheme.outlineVariant.copy(alpha = 0.9f)
         )
 
-        OperandUsageHintState.POSSIBLY_USED -> Triple(
-            colorScheme.surfaceVariant,
-            colorScheme.onSurfaceVariant,
-            colorScheme.outline
-        )
-
         OperandUsageHintState.USED -> when (operator) {
             Operator.Addition -> Triple(
                 colorScheme.primaryContainer,
@@ -415,13 +409,11 @@ private fun OperandUsageHintBadge(
 private fun TileOperandOptionUiState.usageStateFor(operator: Operator): OperandUsageHintState = when (operator) {
     Operator.Addition -> when {
         additionUsed -> OperandUsageHintState.USED
-        hasUnresolvedUsage -> OperandUsageHintState.POSSIBLY_USED
         else -> OperandUsageHintState.AVAILABLE
     }
 
     Operator.Multiplication -> when {
         multiplicationUsed -> OperandUsageHintState.USED
-        hasUnresolvedUsage -> OperandUsageHintState.POSSIBLY_USED
         else -> OperandUsageHintState.AVAILABLE
     }
 
@@ -430,7 +422,6 @@ private fun TileOperandOptionUiState.usageStateFor(operator: Operator): OperandU
 
 private enum class OperandUsageHintState(val stateDescriptionResId: Int) {
     AVAILABLE(R.string.tile_operand_usage_state_available),
-    POSSIBLY_USED(R.string.tile_operand_usage_state_possibly_used),
     USED(R.string.tile_operand_usage_state_used)
 }
 
