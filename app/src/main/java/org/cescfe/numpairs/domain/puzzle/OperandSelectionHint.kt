@@ -2,10 +2,7 @@ package org.cescfe.numpairs.domain.puzzle
 
 data class VisibleStripEntry(val entryId: Int, val value: Int)
 
-data class NumberUsageByOperator(
-    val additionUsageCount: Int = 0,
-    val multiplicationUsageCount: Int = 0
-) {
+data class NumberUsageByOperator(val additionUsageCount: Int = 0, val multiplicationUsageCount: Int = 0) {
     init {
         require(additionUsageCount >= 0) {
             "Addition usage count cannot be negative."
