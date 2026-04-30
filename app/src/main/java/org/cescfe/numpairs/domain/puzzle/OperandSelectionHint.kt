@@ -17,9 +17,18 @@ data class NumberUsageByOperator(val additionUsageCount: Int = 0, val multiplica
 
     val multiplicationUsed: Boolean
         get() = multiplicationUsageCount > 0
+
+    val totalAssignmentCount: Int
+        get() = additionUsageCount + multiplicationUsageCount
 }
 
-data class OperandSelectionHint(val stripEntry: VisibleStripEntry, val usageByOperator: NumberUsageByOperator)
+data class OperandSelectionHint(val stripEntry: VisibleStripEntry, val usageByOperator: NumberUsageByOperator) {
+    val totalAssignmentCount: Int
+        get() = usageByOperator.totalAssignmentCount
+
+    val isSelectable: Boolean
+        get() = totalAssignmentCount < MAX_ASSIGNMENTS_PER_STRIP_ENTRY
+}
 
 fun Puzzle.operandSelectionHintsFor(tileIndex: Int, slot: OperandSlot): List<OperandSelectionHint> {
     val usageByEntryId = board.tiles
@@ -79,3 +88,5 @@ private val Expression.Operand.stripEntryId: Int?
         Expression.Operand.Hidden -> null
         is Expression.Operand.Known -> this.stripEntryId
     }
+
+private const val MAX_ASSIGNMENTS_PER_STRIP_ENTRY = 2
