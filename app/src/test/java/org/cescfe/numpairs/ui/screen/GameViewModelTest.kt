@@ -824,7 +824,7 @@ private fun incompletePuzzleOneOperatorSelectionAwayFromMismatchedCompletion(): 
     board = Board(
         tiles = listOf(
             tileWithAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
-            tileWithHiddenOperator(leftEntryId = 0, rightEntryId = 2, resultOperator = Operator.MULTIPLICATION),
+            tileWithHiddenOperator(resultOperator = Operator.MULTIPLICATION),
             tileWithAssignment(leftEntryId = 2, operator = Operator.ADDITION, rightEntryId = 3),
             tileWithAssignment(leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 3),
             tileWithAssignment(leftEntryId = 4, operator = Operator.ADDITION, rightEntryId = 5),
@@ -867,16 +867,19 @@ private fun tileWithAssignment(
     rightValue = rightEntryId + 1
 )
 
-private fun tileWithHiddenOperator(
-    leftEntryId: Int,
-    rightEntryId: Int,
-    resultOperator: Operator
-): Tile = tileWithKnownOperands(
-    leftEntryId = leftEntryId,
-    leftValue = leftEntryId + 1,
-    rightEntryId = rightEntryId,
-    rightValue = rightEntryId + 1,
-    result = resultOperator.apply(leftEntryId + 1, rightEntryId + 1)
+private fun tileWithHiddenOperator(resultOperator: Operator): Tile = Tile(
+    expression = Expression(
+        leftOperand = Expression.Operand.Known(
+            value = 1,
+            stripEntryId = 0
+        ),
+        operator = Operator.Hidden,
+        rightOperand = Expression.Operand.Known(
+            value = 3,
+            stripEntryId = 2
+        )
+    ),
+    result = resultOperator.apply(1, 3)
 )
 
 private fun tileWithAssignment(
@@ -899,25 +902,4 @@ private fun tileWithAssignment(
         )
     ),
     result = result ?: operator.apply(leftValue, rightValue)
-)
-
-private fun tileWithKnownOperands(
-    leftEntryId: Int,
-    leftValue: Int,
-    rightEntryId: Int,
-    rightValue: Int,
-    result: Int
-): Tile = Tile(
-    expression = Expression(
-        leftOperand = Expression.Operand.Known(
-            value = leftValue,
-            stripEntryId = leftEntryId
-        ),
-        operator = Operator.Hidden,
-        rightOperand = Expression.Operand.Known(
-            value = rightValue,
-            stripEntryId = rightEntryId
-        )
-    ),
-    result = result
 )
