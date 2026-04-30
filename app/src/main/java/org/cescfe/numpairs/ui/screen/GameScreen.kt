@@ -26,6 +26,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +44,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -55,6 +59,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
@@ -89,6 +94,7 @@ private val TILE_OPERAND_HINT_CORNER_RADIUS = 999.dp
 private val TILE_OPERAND_HINT_HORIZONTAL_PADDING = 6.dp
 private val TILE_OPERAND_HINT_VERTICAL_PADDING = 2.dp
 private val TILE_OPERAND_HINT_TEXT_WEIGHT = FontWeight.Medium
+private const val DISABLED_OPERAND_OPTION_ALPHA = 0.56f
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -279,6 +285,7 @@ private fun TileOperandSelectionSheet(
                 key = TileOperandOptionUiState::stripEntryId
             ) { operand ->
                 val operandSelectionLabel = operand.value.toString()
+                val optionAlpha = if (operand.isSelectable) 1f else DISABLED_OPERAND_OPTION_ALPHA
 
                 Box(
                     modifier = Modifier
@@ -289,7 +296,9 @@ private fun TileOperandSelectionSheet(
                     Box {
                         Surface(
                             onClick = { onConfirm(operand.stripEntryId) },
+                            enabled = operand.isSelectable,
                             modifier = Modifier
+                                .alpha(optionAlpha)
                                 .widthIn(
                                     min = TILE_OPERAND_SHEET_OPTION_CARD_MIN_WIDTH,
                                     max = TILE_OPERAND_SHEET_OPTION_CARD_MAX_WIDTH
@@ -323,7 +332,9 @@ private fun TileOperandSelectionSheet(
                             operator = Operator.ADDITION,
                             usageState = operand.usageStateFor(Operator.ADDITION),
                             stripEntryId = operand.stripEntryId,
+                            enabled = operand.isSelectable,
                             modifier = Modifier
+                                .zIndex(1f)
                                 .align(Alignment.TopStart)
                                 .padding(start = TILE_OPERAND_HINT_EDGE_INSET)
                                 .offset(y = -TILE_OPERAND_HINT_OVERLAY_LIFT)
@@ -332,7 +343,9 @@ private fun TileOperandSelectionSheet(
                             operator = Operator.MULTIPLICATION,
                             usageState = operand.usageStateFor(Operator.MULTIPLICATION),
                             stripEntryId = operand.stripEntryId,
+                            enabled = operand.isSelectable,
                             modifier = Modifier
+                                .zIndex(1f)
                                 .align(Alignment.TopEnd)
                                 .padding(end = TILE_OPERAND_HINT_EDGE_INSET)
                                 .offset(y = -TILE_OPERAND_HINT_OVERLAY_LIFT)
@@ -346,10 +359,11 @@ private fun TileOperandSelectionSheet(
 
 @Composable
 private fun OperandUsageHintBadge(
+    modifier: Modifier = Modifier,
     operator: Operator,
     usageState: OperandUsageHintState,
     stripEntryId: Int,
-    modifier: Modifier = Modifier
+    enabled: Boolean = true
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val hintContentDescription = when (operator) {
@@ -358,23 +372,12 @@ private fun OperandUsageHintBadge(
         Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
     }
     val hintStateDescription = stringResource(usageState.stateDescriptionResId)
-    val (containerColor, contentColor, borderColor) = when (usageState) {
-        OperandUsageHintState.AVAILABLE -> Triple(
-            colorScheme.surface,
-            colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
-            colorScheme.outlineVariant.copy(alpha = 0.9f)
-        )
-
-        OperandUsageHintState.USED -> when (operator) {
-            Operator.Addition,
-            Operator.Multiplication -> Triple(
-                colorScheme.primaryContainer,
-                colorScheme.onPrimaryContainer,
-                colorScheme.primary
-            )
-
-            Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
-        }
+    val resolvedColors = baseHintBadgeColors(
+        usageState = usageState,
+        operator = operator,
+        colorScheme = colorScheme
+    ).let { colors ->
+        if (enabled) colors else colors.disabled(colorScheme)
     }
 
     Surface(
@@ -385,9 +388,9 @@ private fun OperandUsageHintBadge(
                 stateDescription = hintStateDescription
             },
         shape = RoundedCornerShape(TILE_OPERAND_HINT_CORNER_RADIUS),
-        color = containerColor,
-        contentColor = contentColor,
-        border = BorderStroke(width = 1.dp, color = borderColor)
+        color = resolvedColors.container,
+        contentColor = resolvedColors.content,
+        border = BorderStroke(width = 1.dp, color = resolvedColors.border)
     ) {
         Text(
             text = operator.symbol,
@@ -400,6 +403,37 @@ private fun OperandUsageHintBadge(
         )
     }
 }
+
+private data class HintBadgeColors(val container: Color, val content: Color, val border: Color)
+
+private fun baseHintBadgeColors(
+    usageState: OperandUsageHintState,
+    operator: Operator,
+    colorScheme: ColorScheme
+): HintBadgeColors = when (usageState) {
+    OperandUsageHintState.AVAILABLE -> HintBadgeColors(
+        container = colorScheme.surface,
+        content = colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
+        border = colorScheme.outlineVariant.copy(alpha = 0.9f)
+    )
+
+    OperandUsageHintState.USED -> when (operator) {
+        Operator.Addition,
+        Operator.Multiplication -> HintBadgeColors(
+            container = colorScheme.primaryContainer,
+            content = colorScheme.onPrimaryContainer,
+            border = colorScheme.primary
+        )
+
+        Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
+    }
+}
+
+private fun HintBadgeColors.disabled(colorScheme: ColorScheme): HintBadgeColors = HintBadgeColors(
+    container = lerp(container, colorScheme.surfaceVariant, 1f - DISABLED_OPERAND_OPTION_ALPHA),
+    content = lerp(content, colorScheme.onSurfaceVariant, 1f - DISABLED_OPERAND_OPTION_ALPHA),
+    border = lerp(border, colorScheme.outlineVariant, 1f - DISABLED_OPERAND_OPTION_ALPHA)
+)
 
 private fun TileOperandOptionUiState.usageStateFor(operator: Operator): OperandUsageHintState = when (operator) {
     Operator.Addition -> when {

@@ -8,6 +8,7 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasAnyDescendant
@@ -496,6 +497,34 @@ class GameScreenTest {
     }
 
     @Test
+    fun exhausted_operand_options_are_rendered_disabled_in_the_picker() {
+        assignEntryTwoToLeftOperand(tileIndex = 0, operator = Operator.ADDITION)
+        assignEntryTwoToLeftOperand(tileIndex = 1, operator = Operator.MULTIPLICATION)
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(2), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 2), useUnmergedTree = true)
+            .assertIsNotEnabled()
+    }
+
+    @Test
+    fun reopening_a_slot_keeps_its_current_exhausted_operand_enabled() {
+        assignEntryTwoToLeftOperand(tileIndex = 0, operator = Operator.ADDITION)
+        assignEntryTwoToLeftOperand(tileIndex = 1, operator = Operator.MULTIPLICATION)
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 2), useUnmergedTree = true)
+            .assertIsEnabled()
+    }
+
+    @Test
     fun selectingAnOperatorOptionCompletesTheHiddenTileOperatorImmediately() {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.BOARD)
@@ -654,6 +683,28 @@ class GameScreenTest {
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 7), useUnmergedTree = true)
+            .performClick()
+    }
+
+    private fun assignEntryTwoToLeftOperand(tileIndex: Int, operator: Operator) {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.BOARD)
+            .performScrollTo()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(tileIndex), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 2), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(tileIndex), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(operator), useUnmergedTree = true)
             .performClick()
     }
 
