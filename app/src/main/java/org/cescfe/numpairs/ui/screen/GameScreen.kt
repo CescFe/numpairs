@@ -42,6 +42,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -56,6 +57,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
@@ -330,6 +332,7 @@ private fun TileOperandSelectionSheet(
                             stripEntryId = operand.stripEntryId,
                             enabled = operand.isSelectable,
                             modifier = Modifier
+                                .zIndex(1f)
                                 .align(Alignment.TopStart)
                                 .padding(start = TILE_OPERAND_HINT_EDGE_INSET)
                                 .offset(y = -TILE_OPERAND_HINT_OVERLAY_LIFT)
@@ -340,6 +343,7 @@ private fun TileOperandSelectionSheet(
                             stripEntryId = operand.stripEntryId,
                             enabled = operand.isSelectable,
                             modifier = Modifier
+                                .zIndex(1f)
                                 .align(Alignment.TopEnd)
                                 .padding(end = TILE_OPERAND_HINT_EDGE_INSET)
                                 .offset(y = -TILE_OPERAND_HINT_OVERLAY_LIFT)
@@ -384,7 +388,21 @@ private fun OperandUsageHintBadge(
             Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
         }
     }
-    val disabledAlpha = if (enabled) 1f else DISABLED_OPERAND_OPTION_ALPHA
+    val resolvedContainerColor = if (enabled) {
+        containerColor
+    } else {
+        lerp(containerColor, colorScheme.surfaceVariant, 1f - DISABLED_OPERAND_OPTION_ALPHA)
+    }
+    val resolvedContentColor = if (enabled) {
+        contentColor
+    } else {
+        lerp(contentColor, colorScheme.onSurfaceVariant, 1f - DISABLED_OPERAND_OPTION_ALPHA)
+    }
+    val resolvedBorderColor = if (enabled) {
+        borderColor
+    } else {
+        lerp(borderColor, colorScheme.outlineVariant, 1f - DISABLED_OPERAND_OPTION_ALPHA)
+    }
 
     Surface(
         modifier = modifier
@@ -394,9 +412,9 @@ private fun OperandUsageHintBadge(
                 stateDescription = hintStateDescription
             },
         shape = RoundedCornerShape(TILE_OPERAND_HINT_CORNER_RADIUS),
-        color = containerColor.copy(alpha = containerColor.alpha * disabledAlpha),
-        contentColor = contentColor.copy(alpha = contentColor.alpha * disabledAlpha),
-        border = BorderStroke(width = 1.dp, color = borderColor.copy(alpha = borderColor.alpha * disabledAlpha))
+        color = resolvedContainerColor,
+        contentColor = resolvedContentColor,
+        border = BorderStroke(width = 1.dp, color = resolvedBorderColor)
     ) {
         Text(
             text = operator.symbol,
