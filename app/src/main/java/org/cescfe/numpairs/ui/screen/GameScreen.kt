@@ -280,12 +280,12 @@ private fun TileOperandSelectionSheet(
                 key = TileOperandOptionUiState::stripEntryId
             ) { operand ->
                 val operandSelectionLabel = operand.value.toString()
+                val optionAlpha = if (operand.isSelectable) 1f else 0.56f
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = TILE_OPERAND_HINT_OVERLAY_LIFT)
-                        .alpha(if (operand.isSelectable) 1f else 0.56f),
+                        .padding(top = TILE_OPERAND_HINT_OVERLAY_LIFT),
                     contentAlignment = Alignment.TopCenter
                 ) {
                     Box {
@@ -293,6 +293,7 @@ private fun TileOperandSelectionSheet(
                             onClick = { onConfirm(operand.stripEntryId) },
                             enabled = operand.isSelectable,
                             modifier = Modifier
+                                .alpha(optionAlpha)
                                 .widthIn(
                                     min = TILE_OPERAND_SHEET_OPTION_CARD_MIN_WIDTH,
                                     max = TILE_OPERAND_SHEET_OPTION_CARD_MAX_WIDTH
@@ -327,6 +328,7 @@ private fun TileOperandSelectionSheet(
                             usageState = operand.usageStateFor(Operator.ADDITION),
                             stripEntryId = operand.stripEntryId,
                             modifier = Modifier
+                                .alpha(optionAlpha)
                                 .align(Alignment.TopStart)
                                 .padding(start = TILE_OPERAND_HINT_EDGE_INSET)
                                 .offset(y = -TILE_OPERAND_HINT_OVERLAY_LIFT)
@@ -336,6 +338,7 @@ private fun TileOperandSelectionSheet(
                             usageState = operand.usageStateFor(Operator.MULTIPLICATION),
                             stripEntryId = operand.stripEntryId,
                             modifier = Modifier
+                                .alpha(optionAlpha)
                                 .align(Alignment.TopEnd)
                                 .padding(end = TILE_OPERAND_HINT_EDGE_INSET)
                                 .offset(y = -TILE_OPERAND_HINT_OVERLAY_LIFT)
