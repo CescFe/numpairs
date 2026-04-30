@@ -1,6 +1,8 @@
 package org.cescfe.numpairs.domain.puzzle
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class OperandSelectionHintTest {
@@ -108,6 +110,56 @@ class OperandSelectionHintTest {
             ),
             puzzle.operandSelectionHintsFor(tileIndex = 1, slot = OperandSlot.LEFT)
         )
+    }
+
+    @Test
+    fun selection_hints_mark_entries_as_unavailable_when_they_are_already_assigned_twice_elsewhere() {
+        val puzzle = puzzleWithRepeatedSixes()
+            .withTile(
+                index = 0,
+                tile = hiddenTile(result = 12)
+                    .withLeftOperand(value = 6, stripEntryId = 0)
+                    .withOperator(Operator.ADDITION)
+            )
+            .withTile(
+                index = 1,
+                tile = hiddenTile(result = 36)
+                    .withLeftOperand(value = 6, stripEntryId = 0)
+                    .withOperator(Operator.MULTIPLICATION)
+            )
+
+        val hints = puzzle.operandSelectionHintsFor(tileIndex = 2, slot = OperandSlot.LEFT)
+        val exhaustedHint = hints.first { hint -> hint.stripEntry.entryId == 0 }
+        val stillAvailableRepeatedValueHint = hints.first { hint -> hint.stripEntry.entryId == 1 }
+
+        assertEquals(2, exhaustedHint.totalAssignmentCount)
+        assertFalse(exhaustedHint.isSelectable)
+        assertEquals(0, stillAvailableRepeatedValueHint.totalAssignmentCount)
+        assertTrue(stillAvailableRepeatedValueHint.isSelectable)
+    }
+
+    @Test
+    fun selection_hints_exclude_the_current_slot_assignment_when_reopening_an_already_filled_operand() {
+        val puzzle = puzzleWithRepeatedSixes()
+            .withTile(
+                index = 0,
+                tile = hiddenTile(result = 12)
+                    .withLeftOperand(value = 6, stripEntryId = 0)
+                    .withOperator(Operator.ADDITION)
+            )
+            .withTile(
+                index = 1,
+                tile = hiddenTile(result = 36)
+                    .withLeftOperand(value = 6, stripEntryId = 0)
+                    .withOperator(Operator.MULTIPLICATION)
+            )
+
+        val reopenedHint = puzzle.operandSelectionHintsFor(tileIndex = 0, slot = OperandSlot.LEFT)
+            .first { hint -> hint.stripEntry.entryId == 0 }
+
+        assertEquals(1, reopenedHint.usageByOperator.multiplicationUsageCount)
+        assertEquals(1, reopenedHint.totalAssignmentCount)
+        assertTrue(reopenedHint.isSelectable)
     }
 }
 
