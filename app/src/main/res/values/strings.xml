@@ -15,6 +15,13 @@
     <string name="tile_operator_option_addition">Addition (+)</string>
     <string name="tile_operator_option_multiplication">Multiplication (×)</string>
     <string name="tile_state_incorrect">Incorrect tile</string>
+    <string name="puzzle_outcome_solved_title">Solved</string>
+    <string name="puzzle_outcome_solved_message">Each addition tile matches its multiplication pair.</string>
+    <string name="puzzle_outcome_invalid_title">Completed, but not solved</string>
+    <string name="puzzle_outcome_invalid_tiles_message">At least one completed tile is incorrect.</string>
+    <string name="puzzle_outcome_missing_identities_message">Some completed tiles are missing their strip-entry identities.</string>
+    <string name="puzzle_outcome_mismatched_pairings_message">Addition and multiplication tiles do not use the same strip-entry pairs.</string>
+    <string name="puzzle_outcome_invalid_usage_message">Each strip entry must be used exactly once in addition and once in multiplication.</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
 </resources>

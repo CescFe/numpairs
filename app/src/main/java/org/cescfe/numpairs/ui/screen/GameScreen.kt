@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Operator
+import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
 import org.cescfe.numpairs.ui.components.AvailableNumberChip
 import org.cescfe.numpairs.ui.components.AvailableNumberChipStyle
@@ -94,6 +95,9 @@ private val TILE_OPERAND_HINT_CORNER_RADIUS = 999.dp
 private val TILE_OPERAND_HINT_HORIZONTAL_PADDING = 6.dp
 private val TILE_OPERAND_HINT_VERTICAL_PADDING = 2.dp
 private val TILE_OPERAND_HINT_TEXT_WEIGHT = FontWeight.Medium
+private val PUZZLE_OUTCOME_CORNER_RADIUS = 24.dp
+private val PUZZLE_OUTCOME_HORIZONTAL_PADDING = 16.dp
+private val PUZZLE_OUTCOME_VERTICAL_PADDING = 14.dp
 private const val DISABLED_OPERAND_OPTION_ALPHA = 0.56f
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -137,6 +141,12 @@ fun GameScreen(
                 onStripItemTapped = onStripItemTapped,
                 modifier = Modifier.fillMaxWidth()
             )
+            uiState.puzzleOutcome?.let { puzzleOutcome ->
+                PuzzleOutcomeBanner(
+                    puzzleOutcome = puzzleOutcome,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
             BoardSection(
                 tiles = uiState.tiles,
                 onTileLeftOperandTapped = onTileLeftOperandTapped,
@@ -163,6 +173,56 @@ fun GameScreen(
             onDismiss = onTileOperandSelectionDismissed,
             onConfirm = onTileOperandSelectionConfirmed
         )
+    }
+}
+
+@Composable
+private fun PuzzleOutcomeBanner(
+    puzzleOutcome: PuzzleOutcomeUiState,
+    modifier: Modifier = Modifier
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    val containerColor = when (puzzleOutcome) {
+        PuzzleOutcomeUiState.Solved -> colorScheme.primaryContainer
+        is PuzzleOutcomeUiState.Invalid -> colorScheme.errorContainer
+    }
+    val contentColor = when (puzzleOutcome) {
+        PuzzleOutcomeUiState.Solved -> colorScheme.onPrimaryContainer
+        is PuzzleOutcomeUiState.Invalid -> colorScheme.onErrorContainer
+    }
+    val borderColor = when (puzzleOutcome) {
+        PuzzleOutcomeUiState.Solved -> colorScheme.primary
+        is PuzzleOutcomeUiState.Invalid -> colorScheme.error
+    }
+
+    Surface(
+        modifier = modifier.testTag(GameScreenTestTags.PUZZLE_OUTCOME),
+        shape = RoundedCornerShape(PUZZLE_OUTCOME_CORNER_RADIUS),
+        color = containerColor,
+        contentColor = contentColor,
+        border = BorderStroke(width = 1.dp, color = borderColor)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = PUZZLE_OUTCOME_HORIZONTAL_PADDING,
+                    vertical = PUZZLE_OUTCOME_VERTICAL_PADDING
+                ),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = puzzleOutcome.title(),
+                modifier = Modifier.testTag(GameScreenTestTags.PUZZLE_OUTCOME_TITLE),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = puzzleOutcome.message(),
+                modifier = Modifier.testTag(GameScreenTestTags.PUZZLE_OUTCOME_MESSAGE),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
     }
 }
 
@@ -687,6 +747,28 @@ private fun Operator.selectionLabel(): String = when (this) {
     Operator.Addition -> stringResource(R.string.tile_operator_option_addition)
     Operator.Multiplication -> stringResource(R.string.tile_operator_option_multiplication)
     Operator.Hidden -> error("Hidden operator is not a selectable option.")
+}
+
+@Composable
+private fun PuzzleOutcomeUiState.title(): String = when (this) {
+    PuzzleOutcomeUiState.Solved -> stringResource(R.string.puzzle_outcome_solved_title)
+    is PuzzleOutcomeUiState.Invalid -> stringResource(R.string.puzzle_outcome_invalid_title)
+}
+
+@Composable
+private fun PuzzleOutcomeUiState.message(): String = when (this) {
+    PuzzleOutcomeUiState.Solved -> stringResource(R.string.puzzle_outcome_solved_message)
+    is PuzzleOutcomeUiState.Invalid -> when (completionState) {
+        PuzzleCompletionState.INCORRECT_TILES -> stringResource(R.string.puzzle_outcome_invalid_tiles_message)
+        PuzzleCompletionState.MISSING_STRIP_ENTRY_IDENTITIES ->
+            stringResource(R.string.puzzle_outcome_missing_identities_message)
+        PuzzleCompletionState.MISMATCHED_SUM_PRODUCT_PAIRINGS ->
+            stringResource(R.string.puzzle_outcome_mismatched_pairings_message)
+        PuzzleCompletionState.INVALID_STRIP_ENTRY_USAGE ->
+            stringResource(R.string.puzzle_outcome_invalid_usage_message)
+        PuzzleCompletionState.INCOMPLETE,
+        PuzzleCompletionState.SOLVED -> error("Invalid outcome must represent a completed unsolved puzzle.")
+    }
 }
 
 @Preview(showBackground = true)
