@@ -177,10 +177,7 @@ fun GameScreen(
 }
 
 @Composable
-private fun PuzzleOutcomeBanner(
-    puzzleOutcome: PuzzleOutcomeUiState,
-    modifier: Modifier = Modifier
-) {
+private fun PuzzleOutcomeBanner(puzzleOutcome: PuzzleOutcomeUiState, modifier: Modifier = Modifier) {
     val colorScheme = MaterialTheme.colorScheme
     val containerColor = when (puzzleOutcome) {
         PuzzleOutcomeUiState.Solved -> colorScheme.primaryContainer

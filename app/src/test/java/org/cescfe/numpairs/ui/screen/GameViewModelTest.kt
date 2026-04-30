@@ -855,11 +855,7 @@ private fun puzzleWithKnownStripAndAssignments(
     strip = Strip.fromItems(items = stripValues.map(StripItem::Known))
 )
 
-private fun tileWithAssignment(
-    leftEntryId: Int,
-    operator: Operator,
-    rightEntryId: Int
-): Tile = tileWithAssignment(
+private fun tileWithAssignment(leftEntryId: Int, operator: Operator, rightEntryId: Int): Tile = tileWithAssignment(
     leftEntryId = leftEntryId,
     leftValue = leftEntryId + 1,
     operator = operator,
