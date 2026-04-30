@@ -270,10 +270,7 @@ private fun SuccessOverlay(onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun PuzzleOutcomeBanner(
-    puzzleOutcome: PuzzleOutcomeUiState.Invalid,
-    modifier: Modifier = Modifier
-) {
+private fun PuzzleOutcomeBanner(puzzleOutcome: PuzzleOutcomeUiState.Invalid, modifier: Modifier = Modifier) {
     val colorScheme = MaterialTheme.colorScheme
 
     Surface(
@@ -832,16 +829,16 @@ private fun Operator.selectionLabel(): String = when (this) {
 
 @Composable
 private fun PuzzleOutcomeUiState.Invalid.message(): String = when (completionState) {
-        PuzzleCompletionState.INCORRECT_TILES -> stringResource(R.string.puzzle_outcome_invalid_tiles_message)
-        PuzzleCompletionState.MISSING_STRIP_ENTRY_IDENTITIES ->
-            stringResource(R.string.puzzle_outcome_missing_identities_message)
-        PuzzleCompletionState.MISMATCHED_SUM_PRODUCT_PAIRINGS ->
-            stringResource(R.string.puzzle_outcome_mismatched_pairings_message)
-        PuzzleCompletionState.INVALID_STRIP_ENTRY_USAGE ->
-            stringResource(R.string.puzzle_outcome_invalid_usage_message)
-        PuzzleCompletionState.INCOMPLETE,
-        PuzzleCompletionState.SOLVED -> error("Invalid outcome must represent a completed unsolved puzzle.")
-    }
+    PuzzleCompletionState.INCORRECT_TILES -> stringResource(R.string.puzzle_outcome_invalid_tiles_message)
+    PuzzleCompletionState.MISSING_STRIP_ENTRY_IDENTITIES ->
+        stringResource(R.string.puzzle_outcome_missing_identities_message)
+    PuzzleCompletionState.MISMATCHED_SUM_PRODUCT_PAIRINGS ->
+        stringResource(R.string.puzzle_outcome_mismatched_pairings_message)
+    PuzzleCompletionState.INVALID_STRIP_ENTRY_USAGE ->
+        stringResource(R.string.puzzle_outcome_invalid_usage_message)
+    PuzzleCompletionState.INCOMPLETE,
+    PuzzleCompletionState.SOLVED -> error("Invalid outcome must represent a completed unsolved puzzle.")
+}
 
 @Preview(showBackground = true)
 @Composable
