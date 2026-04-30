@@ -104,7 +104,7 @@ private val TILE_OPERAND_HINT_TEXT_WEIGHT = FontWeight.Medium
 private val PUZZLE_OUTCOME_CORNER_RADIUS = 24.dp
 private val PUZZLE_OUTCOME_HORIZONTAL_PADDING = 16.dp
 private val PUZZLE_OUTCOME_VERTICAL_PADDING = 14.dp
-private val SUCCESS_OVERLAY_SCRIM_ALPHA = 0.44f
+private const val SUCCESS_OVERLAY_SCRIM_ALPHA = 0.44f
 private val SUCCESS_OVERLAY_CARD_MAX_WIDTH = 280.dp
 private val SUCCESS_OVERLAY_HORIZONTAL_PADDING = 24.dp
 private val SUCCESS_OVERLAY_VERTICAL_PADDING = 22.dp
@@ -293,7 +293,7 @@ private fun PuzzleOutcomeBanner(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
-                text = puzzleOutcome.title(),
+                text = stringResource(R.string.puzzle_outcome_invalid_title),
                 modifier = Modifier.testTag(GameScreenTestTags.PUZZLE_OUTCOME_TITLE),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
@@ -829,9 +829,6 @@ private fun Operator.selectionLabel(): String = when (this) {
     Operator.Multiplication -> stringResource(R.string.tile_operator_option_multiplication)
     Operator.Hidden -> error("Hidden operator is not a selectable option.")
 }
-
-@Composable
-private fun PuzzleOutcomeUiState.Invalid.title(): String = stringResource(R.string.puzzle_outcome_invalid_title)
 
 @Composable
 private fun PuzzleOutcomeUiState.Invalid.message(): String = when (completionState) {
