@@ -81,10 +81,6 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
     }
 
     fun onTileLeftOperandTapped(index: Int) {
-        if (isSuccessOverlayVisible()) {
-            return
-        }
-
         onTileOperandTapped(
             index = index,
             slot = OperandSlot.LEFT
@@ -92,10 +88,6 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
     }
 
     fun onTileRightOperandTapped(index: Int) {
-        if (isSuccessOverlayVisible()) {
-            return
-        }
-
         onTileOperandTapped(
             index = index,
             slot = OperandSlot.RIGHT
@@ -208,6 +200,10 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
     }
 
     private fun onTileOperandTapped(index: Int, slot: OperandSlot) {
+        if (isSuccessOverlayVisible()) {
+            return
+        }
+
         if (puzzle.board.tiles.getOrNull(index) == null) {
             return
         }
