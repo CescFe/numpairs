@@ -39,13 +39,27 @@ class GameScreenTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private lateinit var viewModel: GameViewModel
+    private var useSolvedOverlayFixture by mutableStateOf(false)
+    private var isSolvedOverlayVisible by mutableStateOf(false)
 
     @Before
     fun setUp() {
         viewModel = GameViewModel()
+        useSolvedOverlayFixture = false
+        isSolvedOverlayVisible = false
 
         composeTestRule.setContent {
-            val uiState by viewModel.uiState.collectAsState()
+            val viewModelUiState by viewModel.uiState.collectAsState()
+            val uiState = if (useSolvedOverlayFixture) {
+                solvedOverlayUiState(isSuccessOverlayVisible = isSolvedOverlayVisible)
+            } else {
+                viewModelUiState
+            }
+            val onSuccessOverlayDismissed = if (useSolvedOverlayFixture) {
+                { isSolvedOverlayVisible = false }
+            } else {
+                viewModel::onSuccessOverlayDismissed
+            }
 
             NumPairsTheme {
                 GameScreen(
@@ -60,7 +74,7 @@ class GameScreenTest {
                     onTileOperatorTapped = viewModel::onTileOperatorTapped,
                     onTileOperatorSelectionDismissed = viewModel::onTileOperatorSelectionDismissed,
                     onTileOperatorSelectionConfirmed = viewModel::onTileOperatorSelectionConfirmed,
-                    onSuccessOverlayDismissed = viewModel::onSuccessOverlayDismissed
+                    onSuccessOverlayDismissed = onSuccessOverlayDismissed
                 )
             }
         }
@@ -672,16 +686,7 @@ class GameScreenTest {
 
     @Test
     fun solvedPuzzleShowsSuccessOverlayWhileKeepingTheBoardVisible() {
-        var isOverlayVisible by mutableStateOf(true)
-
-        composeTestRule.setContent {
-            NumPairsTheme {
-                GameScreen(
-                    uiState = solvedOverlayUiState(isSuccessOverlayVisible = isOverlayVisible),
-                    onSuccessOverlayDismissed = { isOverlayVisible = false }
-                )
-            }
-        }
+        showSolvedOverlayFixture()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.BOARD)
@@ -699,16 +704,7 @@ class GameScreenTest {
 
     @Test
     fun successOverlayCanBeDismissedWithBack() {
-        var isOverlayVisible by mutableStateOf(true)
-
-        composeTestRule.setContent {
-            NumPairsTheme {
-                GameScreen(
-                    uiState = solvedOverlayUiState(isSuccessOverlayVisible = isOverlayVisible),
-                    onSuccessOverlayDismissed = { isOverlayVisible = false }
-                )
-            }
-        }
+        showSolvedOverlayFixture()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
@@ -723,16 +719,7 @@ class GameScreenTest {
 
     @Test
     fun successOverlayCanBeDismissedByTap() {
-        var isOverlayVisible by mutableStateOf(true)
-
-        composeTestRule.setContent {
-            NumPairsTheme {
-                GameScreen(
-                    uiState = solvedOverlayUiState(isSuccessOverlayVisible = isOverlayVisible),
-                    onSuccessOverlayDismissed = { isOverlayVisible = false }
-                )
-            }
-        }
+        showSolvedOverlayFixture()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
@@ -819,6 +806,13 @@ class GameScreenTest {
                     stateDescription
                 )
             )
+    }
+
+    private fun showSolvedOverlayFixture() {
+        composeTestRule.runOnIdle {
+            useSolvedOverlayFixture = true
+            isSolvedOverlayVisible = true
+        }
     }
 }
 
