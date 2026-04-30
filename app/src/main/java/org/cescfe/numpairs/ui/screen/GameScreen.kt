@@ -90,6 +90,7 @@ private val TILE_OPERAND_HINT_CORNER_RADIUS = 999.dp
 private val TILE_OPERAND_HINT_HORIZONTAL_PADDING = 6.dp
 private val TILE_OPERAND_HINT_VERTICAL_PADDING = 2.dp
 private val TILE_OPERAND_HINT_TEXT_WEIGHT = FontWeight.Medium
+private const val DISABLED_OPERAND_OPTION_ALPHA = 0.56f
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -280,7 +281,7 @@ private fun TileOperandSelectionSheet(
                 key = TileOperandOptionUiState::stripEntryId
             ) { operand ->
                 val operandSelectionLabel = operand.value.toString()
-                val optionAlpha = if (operand.isSelectable) 1f else 0.56f
+                val optionAlpha = if (operand.isSelectable) 1f else DISABLED_OPERAND_OPTION_ALPHA
 
                 Box(
                     modifier = Modifier
@@ -327,8 +328,8 @@ private fun TileOperandSelectionSheet(
                             operator = Operator.ADDITION,
                             usageState = operand.usageStateFor(Operator.ADDITION),
                             stripEntryId = operand.stripEntryId,
+                            enabled = operand.isSelectable,
                             modifier = Modifier
-                                .alpha(optionAlpha)
                                 .align(Alignment.TopStart)
                                 .padding(start = TILE_OPERAND_HINT_EDGE_INSET)
                                 .offset(y = -TILE_OPERAND_HINT_OVERLAY_LIFT)
@@ -337,8 +338,8 @@ private fun TileOperandSelectionSheet(
                             operator = Operator.MULTIPLICATION,
                             usageState = operand.usageStateFor(Operator.MULTIPLICATION),
                             stripEntryId = operand.stripEntryId,
+                            enabled = operand.isSelectable,
                             modifier = Modifier
-                                .alpha(optionAlpha)
                                 .align(Alignment.TopEnd)
                                 .padding(end = TILE_OPERAND_HINT_EDGE_INSET)
                                 .offset(y = -TILE_OPERAND_HINT_OVERLAY_LIFT)
@@ -352,10 +353,11 @@ private fun TileOperandSelectionSheet(
 
 @Composable
 private fun OperandUsageHintBadge(
+    modifier: Modifier = Modifier,
     operator: Operator,
     usageState: OperandUsageHintState,
     stripEntryId: Int,
-    modifier: Modifier = Modifier
+    enabled: Boolean = true,
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val hintContentDescription = when (operator) {
@@ -382,6 +384,7 @@ private fun OperandUsageHintBadge(
             Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
         }
     }
+    val disabledAlpha = if (enabled) 1f else DISABLED_OPERAND_OPTION_ALPHA
 
     Surface(
         modifier = modifier
@@ -391,9 +394,9 @@ private fun OperandUsageHintBadge(
                 stateDescription = hintStateDescription
             },
         shape = RoundedCornerShape(TILE_OPERAND_HINT_CORNER_RADIUS),
-        color = containerColor,
-        contentColor = contentColor,
-        border = BorderStroke(width = 1.dp, color = borderColor)
+        color = containerColor.copy(alpha = containerColor.alpha * disabledAlpha),
+        contentColor = contentColor.copy(alpha = contentColor.alpha * disabledAlpha),
+        border = BorderStroke(width = 1.dp, color = borderColor.copy(alpha = borderColor.alpha * disabledAlpha))
     ) {
         Text(
             text = operator.symbol,
