@@ -41,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -283,12 +284,14 @@ private fun TileOperandSelectionSheet(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = TILE_OPERAND_HINT_OVERLAY_LIFT),
+                        .padding(top = TILE_OPERAND_HINT_OVERLAY_LIFT)
+                        .alpha(if (operand.isSelectable) 1f else 0.56f),
                     contentAlignment = Alignment.TopCenter
                 ) {
                     Box {
                         Surface(
                             onClick = { onConfirm(operand.stripEntryId) },
+                            enabled = operand.isSelectable,
                             modifier = Modifier
                                 .widthIn(
                                     min = TILE_OPERAND_SHEET_OPTION_CARD_MIN_WIDTH,

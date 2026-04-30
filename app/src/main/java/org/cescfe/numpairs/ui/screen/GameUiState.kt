@@ -125,13 +125,15 @@ data class TileOperandOptionUiState(
     val stripEntryId: Int,
     val value: Int,
     val additionUsed: Boolean,
-    val multiplicationUsed: Boolean
+    val multiplicationUsed: Boolean,
+    val isSelectable: Boolean
 ) {
     constructor(operandSelectionHint: OperandSelectionHint) : this(
         stripEntryId = operandSelectionHint.stripEntry.entryId,
         value = operandSelectionHint.stripEntry.value,
         additionUsed = operandSelectionHint.usageByOperator.additionUsed,
-        multiplicationUsed = operandSelectionHint.usageByOperator.multiplicationUsed
+        multiplicationUsed = operandSelectionHint.usageByOperator.multiplicationUsed,
+        isSelectable = operandSelectionHint.isSelectable
     )
 }
 

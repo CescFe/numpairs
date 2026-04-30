@@ -10,6 +10,7 @@ import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
 import org.cescfe.numpairs.domain.puzzle.StripItem
+import org.cescfe.numpairs.domain.puzzle.operandSelectionHintsFor
 
 class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel() {
     private var puzzle: Puzzle = initialPuzzle
@@ -117,9 +118,15 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
     fun onTileOperandSelectionConfirmed(stripEntryId: Int) {
         val target = tileOperandSelectionTarget ?: return
         val currentTile = puzzle.board.tiles.getOrNull(target.tileIndex) ?: return
+        val selectionHint = puzzle.operandSelectionHintsFor(
+            tileIndex = target.tileIndex,
+            slot = target.slot
+        ).firstOrNull { hint ->
+            hint.stripEntry.entryId == stripEntryId
+        }
         val selectedEntry = puzzle.strip.visibleEntryWithId(stripEntryId)
 
-        if (selectedEntry == null) {
+        if (selectionHint == null || !selectionHint.isSelectable || selectedEntry == null) {
             publishUiState()
             return
         }
