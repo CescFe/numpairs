@@ -151,7 +151,9 @@ The contextual selector is the primary interaction used to edit the grid.
 - Closing the selector without choosing a value leaves the slot unchanged
 - The selector does not specially highlight the currently assigned operand when reopened
 - Each visible strip entry shows subtle `+` and `×` usage hints derived from the current board state
-- These hints are informational only and do not block selection
+- A strip entry becomes unavailable once it is already assigned twice anywhere on the board, even if one or both assignments still belong to tiles whose operator is hidden
+- Reopening a slot keeps that slot's current strip entry selectable for reassignment there, even if the entry is otherwise exhausted
+- The `+` and `×` hints remain informational; disabled options are driven by strip-entry availability rather than by the badges alone
 
 Selector logic should treat strip entries as unique entities rather than grouping options only by numeric value. Any future operand-usage hinting must therefore be computed per strip entry.
 
