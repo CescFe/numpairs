@@ -5,6 +5,7 @@ import org.cescfe.numpairs.domain.puzzle.OperandSelectionHint
 import org.cescfe.numpairs.domain.puzzle.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
+import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.StripEntryRange
 import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.domain.puzzle.Tile
@@ -14,6 +15,7 @@ import org.cescfe.numpairs.domain.puzzle.operandSelectionHintsFor
 data class GameUiState(
     val stripItems: List<StripItemUiState>,
     val tiles: List<TileUiState>,
+    val puzzleOutcome: PuzzleOutcomeUiState? = null,
     val stripItemEntryDialog: StripItemEntryDialogUiState? = null,
     val tileOperatorSelectionDialog: TileOperatorSelectionDialogUiState? = null,
     val tileOperandSelectionDialog: TileOperandSelectionDialogUiState? = null
@@ -27,6 +29,7 @@ data class GameUiState(
         ): GameUiState = GameUiState(
             stripItems = puzzle.strip.items.map(::StripItemUiState),
             tiles = puzzle.board.tiles.map(::TileUiState),
+            puzzleOutcome = puzzle.outcomeUiState,
             stripItemEntryDialog = stripItemEntryDialogIndex?.let { stripItemIndex ->
                 val stripItem = puzzle.strip.items[stripItemIndex]
 
@@ -72,6 +75,21 @@ data class GameUiState(
                     )
                 }
         )
+    }
+}
+
+sealed interface PuzzleOutcomeUiState {
+    data object Solved : PuzzleOutcomeUiState
+
+    data class Invalid(val completionState: PuzzleCompletionState) : PuzzleOutcomeUiState {
+        init {
+            require(completionState != PuzzleCompletionState.INCOMPLETE) {
+                "Invalid puzzle outcomes require a completed puzzle."
+            }
+            require(completionState != PuzzleCompletionState.SOLVED) {
+                "Solved puzzles must use the solved outcome."
+            }
+        }
     }
 }
 
@@ -159,4 +177,16 @@ private val Expression.Operand.label: String
     get() = when (this) {
         Expression.Operand.Hidden -> "?"
         is Expression.Operand.Known -> value.toString()
+    }
+
+private val Puzzle.outcomeUiState: PuzzleOutcomeUiState?
+    get() = when (completionState) {
+        PuzzleCompletionState.INCOMPLETE -> null
+        PuzzleCompletionState.SOLVED -> PuzzleOutcomeUiState.Solved
+        PuzzleCompletionState.INCORRECT_TILES,
+        PuzzleCompletionState.MISSING_STRIP_ENTRY_IDENTITIES,
+        PuzzleCompletionState.MISMATCHED_SUM_PRODUCT_PAIRINGS,
+        PuzzleCompletionState.INVALID_STRIP_ENTRY_USAGE -> PuzzleOutcomeUiState.Invalid(
+            completionState = completionState
+        )
     }

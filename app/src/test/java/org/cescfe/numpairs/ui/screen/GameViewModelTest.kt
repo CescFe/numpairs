@@ -1,11 +1,16 @@
 package org.cescfe.numpairs.ui.screen
 
+import org.cescfe.numpairs.domain.puzzle.Board
+import org.cescfe.numpairs.domain.puzzle.Expression
 import org.cescfe.numpairs.domain.puzzle.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.Operator
+import org.cescfe.numpairs.domain.puzzle.Puzzle
+import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
 import org.cescfe.numpairs.domain.puzzle.Strip
 import org.cescfe.numpairs.domain.puzzle.StripEntryRange
 import org.cescfe.numpairs.domain.puzzle.StripItem
+import org.cescfe.numpairs.domain.puzzle.Tile
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -33,6 +38,7 @@ class GameViewModelTest {
         )
         assertEquals(8, uiState.tiles.size)
         assertEquals(TileUiState("?", "?", "?", "223"), uiState.tiles.first())
+        assertNull(uiState.puzzleOutcome)
         assertNull(uiState.stripItemEntryDialog)
         assertNull(uiState.tileOperatorSelectionDialog)
         assertNull(uiState.tileOperandSelectionDialog)
@@ -549,6 +555,33 @@ class GameViewModelTest {
     }
 
     @Test
+    fun solved_puzzle_emits_a_success_completion_outcome() {
+        val viewModel = GameViewModel(
+            initialPuzzle = solvedPuzzleWithKnownStripAndAssignments()
+        )
+
+        assertEquals(PuzzleOutcomeUiState.Solved, viewModel.uiState.value.puzzleOutcome)
+    }
+
+    @Test
+    fun completing_the_board_with_mismatched_pairings_emits_an_invalid_outcome_instead_of_success() {
+        val viewModel = GameViewModel(
+            initialPuzzle = incompletePuzzleOneOperatorSelectionAwayFromMismatchedCompletion()
+        )
+
+        assertNull(viewModel.uiState.value.puzzleOutcome)
+
+        viewModel.onTileOperatorTapped(index = 1)
+        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.MULTIPLICATION)
+
+        assertEquals(
+            PuzzleOutcomeUiState.Invalid(PuzzleCompletionState.MISMATCHED_SUM_PRODUCT_PAIRINGS),
+            viewModel.uiState.value.puzzleOutcome
+        )
+        assertFalse(viewModel.uiState.value.puzzleOutcome == PuzzleOutcomeUiState.Solved)
+    }
+
+    @Test
     fun confirming_the_entry_dialog_completes_the_hidden_strip_item() {
         val viewModel = GameViewModel()
 
@@ -767,3 +800,102 @@ private fun assignEntryTwoToLeftOperand(index: Int, operator: Operator, viewMode
     viewModel.onTileOperatorTapped(index = index)
     viewModel.onTileOperatorSelectionConfirmed(operator = operator)
 }
+
+private data class CompletionTileAssignment(
+    val leftEntryId: Int,
+    val operator: Operator,
+    val rightEntryId: Int,
+    val result: Int? = null
+)
+
+private fun solvedPuzzleWithKnownStripAndAssignments(): Puzzle = puzzleWithKnownStripAndAssignments(
+    stripValues = listOf(1, 2, 3, 4, 5, 6, 7, 8),
+    CompletionTileAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
+    CompletionTileAssignment(leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 0),
+    CompletionTileAssignment(leftEntryId = 2, operator = Operator.ADDITION, rightEntryId = 3),
+    CompletionTileAssignment(leftEntryId = 3, operator = Operator.MULTIPLICATION, rightEntryId = 2),
+    CompletionTileAssignment(leftEntryId = 4, operator = Operator.ADDITION, rightEntryId = 5),
+    CompletionTileAssignment(leftEntryId = 5, operator = Operator.MULTIPLICATION, rightEntryId = 4),
+    CompletionTileAssignment(leftEntryId = 6, operator = Operator.ADDITION, rightEntryId = 7),
+    CompletionTileAssignment(leftEntryId = 7, operator = Operator.MULTIPLICATION, rightEntryId = 6)
+)
+
+private fun incompletePuzzleOneOperatorSelectionAwayFromMismatchedCompletion(): Puzzle = Puzzle(
+    board = Board(
+        tiles = listOf(
+            tileWithAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
+            tileWithHiddenOperator(resultOperator = Operator.MULTIPLICATION),
+            tileWithAssignment(leftEntryId = 2, operator = Operator.ADDITION, rightEntryId = 3),
+            tileWithAssignment(leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 3),
+            tileWithAssignment(leftEntryId = 4, operator = Operator.ADDITION, rightEntryId = 5),
+            tileWithAssignment(leftEntryId = 5, operator = Operator.MULTIPLICATION, rightEntryId = 4),
+            tileWithAssignment(leftEntryId = 6, operator = Operator.ADDITION, rightEntryId = 7),
+            tileWithAssignment(leftEntryId = 7, operator = Operator.MULTIPLICATION, rightEntryId = 6)
+        )
+    ),
+    strip = Strip.fromItems(items = (1..8).map(StripItem::Known))
+)
+
+private fun puzzleWithKnownStripAndAssignments(
+    stripValues: List<Int>,
+    vararg tileAssignments: CompletionTileAssignment
+): Puzzle = Puzzle(
+    board = Board(
+        tiles = tileAssignments.map { assignment ->
+            tileWithAssignment(
+                leftEntryId = assignment.leftEntryId,
+                leftValue = stripValues[assignment.leftEntryId],
+                operator = assignment.operator,
+                rightEntryId = assignment.rightEntryId,
+                rightValue = stripValues[assignment.rightEntryId],
+                result = assignment.result
+            )
+        }
+    ),
+    strip = Strip.fromItems(items = stripValues.map(StripItem::Known))
+)
+
+private fun tileWithAssignment(leftEntryId: Int, operator: Operator, rightEntryId: Int): Tile = tileWithAssignment(
+    leftEntryId = leftEntryId,
+    leftValue = leftEntryId + 1,
+    operator = operator,
+    rightEntryId = rightEntryId,
+    rightValue = rightEntryId + 1
+)
+
+private fun tileWithHiddenOperator(resultOperator: Operator): Tile = Tile(
+    expression = Expression(
+        leftOperand = Expression.Operand.Known(
+            value = 1,
+            stripEntryId = 0
+        ),
+        operator = Operator.Hidden,
+        rightOperand = Expression.Operand.Known(
+            value = 3,
+            stripEntryId = 2
+        )
+    ),
+    result = resultOperator.apply(1, 3)
+)
+
+private fun tileWithAssignment(
+    leftEntryId: Int,
+    leftValue: Int,
+    operator: Operator,
+    rightEntryId: Int,
+    rightValue: Int,
+    result: Int? = null
+): Tile = Tile(
+    expression = Expression(
+        leftOperand = Expression.Operand.Known(
+            value = leftValue,
+            stripEntryId = leftEntryId
+        ),
+        operator = operator,
+        rightOperand = Expression.Operand.Known(
+            value = rightValue,
+            stripEntryId = rightEntryId
+        )
+    ),
+    result = result ?: operator.apply(leftValue, rightValue)
+)
