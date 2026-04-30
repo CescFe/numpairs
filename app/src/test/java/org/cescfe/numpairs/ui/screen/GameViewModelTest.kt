@@ -378,6 +378,34 @@ class GameViewModelTest {
     }
 
     @Test
+    fun provisionally_exhausted_operand_options_are_exposed_as_unavailable_in_ui_state() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
+        viewModel.onTileLeftOperandTapped(index = 1)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
+        viewModel.onTileLeftOperandTapped(index = 2)
+
+        assertEquals(
+            TileOperandSelectionDialogUiState(
+                tileIndex = 2,
+                slot = OperandSlot.LEFT,
+                availableOperands = listOf(
+                    operandOption(
+                        stripEntryId = 2,
+                        value = 6,
+                        isSelectable = false
+                    ),
+                    operandOption(stripEntryId = 4, value = 25),
+                    operandOption(stripEntryId = 7, value = 222)
+                )
+            ),
+            viewModel.uiState.value.tileOperandSelectionDialog
+        )
+    }
+
+    @Test
     fun reopening_a_slot_keeps_its_current_exhausted_operand_selectable_for_that_same_slot() {
         val viewModel = GameViewModel()
 

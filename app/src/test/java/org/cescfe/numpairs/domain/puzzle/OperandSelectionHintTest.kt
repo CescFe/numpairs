@@ -94,7 +94,7 @@ class OperandSelectionHintTest {
     }
 
     @Test
-    fun selection_hints_ignore_assignments_when_the_operator_is_still_hidden() {
+    fun selection_hints_count_assignments_when_the_operator_is_still_hidden() {
         val puzzle = PuzzleSamples.prototype
             .withTile(
                 index = 0,
@@ -104,7 +104,7 @@ class OperandSelectionHintTest {
 
         assertEquals(
             listOf(
-                selectionHint(entryId = 2, value = 6),
+                selectionHint(entryId = 2, value = 6, provisionalUsed = 1),
                 selectionHint(entryId = 4, value = 25),
                 selectionHint(entryId = 7, value = 222)
             ),
@@ -139,6 +139,32 @@ class OperandSelectionHintTest {
     }
 
     @Test
+    fun selection_hints_mark_entries_as_unavailable_when_they_are_already_assigned_twice_provisionally() {
+        val puzzle = puzzleWithRepeatedSixes()
+            .withTile(
+                index = 0,
+                tile = hiddenTile(result = 12)
+                    .withLeftOperand(value = 6, stripEntryId = 0)
+            )
+            .withTile(
+                index = 1,
+                tile = hiddenTile(result = 36)
+                    .withLeftOperand(value = 6, stripEntryId = 0)
+            )
+
+        val hints = puzzle.operandSelectionHintsFor(tileIndex = 2, slot = OperandSlot.LEFT)
+        val exhaustedHint = hints.first { hint -> hint.stripEntry.entryId == 0 }
+        val stillAvailableRepeatedValueHint = hints.first { hint -> hint.stripEntry.entryId == 1 }
+
+        assertEquals(2, exhaustedHint.totalAssignmentCount)
+        assertFalse(exhaustedHint.isSelectable)
+        assertEquals(0, exhaustedHint.usageByOperator.additionUsageCount)
+        assertEquals(0, exhaustedHint.usageByOperator.multiplicationUsageCount)
+        assertEquals(0, stillAvailableRepeatedValueHint.totalAssignmentCount)
+        assertTrue(stillAvailableRepeatedValueHint.isSelectable)
+    }
+
+    @Test
     fun selection_hints_exclude_the_current_slot_assignment_when_reopening_an_already_filled_operand() {
         val puzzle = puzzleWithRepeatedSixes()
             .withTile(
@@ -163,6 +189,29 @@ class OperandSelectionHintTest {
     }
 
     @Test
+    fun selection_hints_exclude_the_current_slot_assignment_when_reopening_a_provisionally_exhausted_operand() {
+        val puzzle = puzzleWithRepeatedSixes()
+            .withTile(
+                index = 0,
+                tile = hiddenTile(result = 12)
+                    .withLeftOperand(value = 6, stripEntryId = 0)
+            )
+            .withTile(
+                index = 1,
+                tile = hiddenTile(result = 36)
+                    .withLeftOperand(value = 6, stripEntryId = 0)
+            )
+
+        val reopenedHint = puzzle.operandSelectionHintsFor(tileIndex = 0, slot = OperandSlot.LEFT)
+            .first { hint -> hint.stripEntry.entryId == 0 }
+
+        assertEquals(0, reopenedHint.usageByOperator.additionUsageCount)
+        assertEquals(0, reopenedHint.usageByOperator.multiplicationUsageCount)
+        assertEquals(1, reopenedHint.totalAssignmentCount)
+        assertTrue(reopenedHint.isSelectable)
+    }
+
+    @Test
     fun selection_hints_mark_the_opposite_slot_strip_entry_as_unavailable_for_the_current_tile() {
         val puzzle = PuzzleSamples.prototype
             .withTile(
@@ -174,7 +223,7 @@ class OperandSelectionHintTest {
         val blockedHint = puzzle.operandSelectionHintsFor(tileIndex = 0, slot = OperandSlot.RIGHT)
             .first { hint -> hint.stripEntry.entryId == 2 }
 
-        assertEquals(0, blockedHint.totalAssignmentCount)
+        assertEquals(1, blockedHint.totalAssignmentCount)
         assertFalse(blockedHint.isSelectable)
     }
 
@@ -202,6 +251,7 @@ private fun selectionHint(
     value: Int,
     additionUsed: Boolean = false,
     multiplicationUsed: Boolean = false,
+    provisionalUsed: Int = 0,
     isSelectable: Boolean? = null
 ): OperandSelectionHint = OperandSelectionHint(
     stripEntry = VisibleStripEntry(
@@ -210,9 +260,10 @@ private fun selectionHint(
     ),
     usageByOperator = NumberUsageByOperator(
         additionUsageCount = if (additionUsed) 1 else 0,
-        multiplicationUsageCount = if (multiplicationUsed) 1 else 0
+        multiplicationUsageCount = if (multiplicationUsed) 1 else 0,
+        provisionalUsageCount = provisionalUsed
     ),
-    isSelectable = isSelectable ?: (!additionUsed || !multiplicationUsed)
+    isSelectable = isSelectable ?: (listOf(additionUsed, multiplicationUsed).count { used -> used } + provisionalUsed < 2)
 )
 
 private fun puzzleWithRepeatedSixes(): Puzzle = PuzzleSamples.prototype.copy(
