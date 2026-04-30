@@ -22,12 +22,13 @@ data class NumberUsageByOperator(val additionUsageCount: Int = 0, val multiplica
         get() = additionUsageCount + multiplicationUsageCount
 }
 
-data class OperandSelectionHint(val stripEntry: VisibleStripEntry, val usageByOperator: NumberUsageByOperator) {
+data class OperandSelectionHint(
+    val stripEntry: VisibleStripEntry,
+    val usageByOperator: NumberUsageByOperator,
+    val isSelectable: Boolean = usageByOperator.totalAssignmentCount < MAX_ASSIGNMENTS_PER_STRIP_ENTRY
+) {
     val totalAssignmentCount: Int
         get() = usageByOperator.totalAssignmentCount
-
-    val isSelectable: Boolean
-        get() = totalAssignmentCount < MAX_ASSIGNMENTS_PER_STRIP_ENTRY
 }
 
 fun Puzzle.operandSelectionHintsFor(tileIndex: Int, slot: OperandSlot): List<OperandSelectionHint> {
@@ -44,11 +45,18 @@ fun Puzzle.operandSelectionHintsFor(tileIndex: Int, slot: OperandSlot): List<Ope
                 }
             )
         }
+    val oppositeSlotEntryId = board.tiles
+        .getOrNull(tileIndex)
+        ?.assignedStripEntryId(slot.opposite())
 
     return strip.visibleEntries().map { visibleEntry ->
+        val usage = usageByEntryId.getOrDefault(visibleEntry.entryId, NumberUsageByOperator())
+
         OperandSelectionHint(
             stripEntry = visibleEntry,
-            usageByOperator = usageByEntryId.getOrDefault(visibleEntry.entryId, NumberUsageByOperator())
+            usageByOperator = usage,
+            isSelectable = usage.totalAssignmentCount < MAX_ASSIGNMENTS_PER_STRIP_ENTRY &&
+                visibleEntry.entryId != oppositeSlotEntryId
         )
     }
 }
@@ -83,10 +91,20 @@ private fun Tile.assignedStripEntries(tileIndex: Int): List<AssignedStripEntry> 
     }
 }
 
+private fun Tile.assignedStripEntryId(slot: OperandSlot): Int? = when (slot) {
+    OperandSlot.LEFT -> expression.leftOperand.stripEntryId
+    OperandSlot.RIGHT -> expression.rightOperand.stripEntryId
+}
+
 private val Expression.Operand.stripEntryId: Int?
     get() = when (this) {
         Expression.Operand.Hidden -> null
         is Expression.Operand.Known -> this.stripEntryId
     }
+
+private fun OperandSlot.opposite(): OperandSlot = when (this) {
+    OperandSlot.LEFT -> OperandSlot.RIGHT
+    OperandSlot.RIGHT -> OperandSlot.LEFT
+}
 
 private const val MAX_ASSIGNMENTS_PER_STRIP_ENTRY = 2

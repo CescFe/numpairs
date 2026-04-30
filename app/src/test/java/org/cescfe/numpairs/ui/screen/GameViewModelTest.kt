@@ -205,6 +205,28 @@ class GameViewModelTest {
     }
 
     @Test
+    fun selecting_the_opposite_operand_slot_surfaces_the_current_tile_entry_as_unavailable() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
+        viewModel.onTileRightOperandTapped(index = 0)
+
+        assertEquals(
+            TileOperandSelectionDialogUiState(
+                tileIndex = 0,
+                slot = OperandSlot.RIGHT,
+                availableOperands = listOf(
+                    operandOption(stripEntryId = 2, value = 6, isSelectable = false),
+                    operandOption(stripEntryId = 4, value = 25),
+                    operandOption(stripEntryId = 7, value = 222)
+                )
+            ),
+            viewModel.uiState.value.tileOperandSelectionDialog
+        )
+    }
+
+    @Test
     fun confirming_the_selection_dialog_replaces_a_filled_left_tile_operand() {
         val viewModel = GameViewModel()
 
@@ -217,6 +239,46 @@ class GameViewModelTest {
 
         assertEquals(TileUiState("25", "?", "?", "223"), uiState.tiles.first())
         assertNull(uiState.tileOperandSelectionDialog)
+    }
+
+    @Test
+    fun reopening_a_slot_keeps_its_current_operand_selectable_while_blocking_the_opposite_slot_entry() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
+        viewModel.onTileRightOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 4)
+        viewModel.onTileLeftOperandTapped(index = 0)
+
+        assertEquals(
+            TileOperandSelectionDialogUiState(
+                tileIndex = 0,
+                slot = OperandSlot.LEFT,
+                availableOperands = listOf(
+                    operandOption(stripEntryId = 2, value = 6),
+                    operandOption(stripEntryId = 4, value = 25, isSelectable = false),
+                    operandOption(stripEntryId = 7, value = 222)
+                )
+            ),
+            viewModel.uiState.value.tileOperandSelectionDialog
+        )
+    }
+
+    @Test
+    fun confirming_the_opposite_slot_current_entry_is_rejected_without_mutating_the_tile() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
+        viewModel.onTileRightOperandTapped(index = 0)
+
+        val beforeAttempt = viewModel.uiState.value
+
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
+
+        assertEquals(beforeAttempt.tileOperandSelectionDialog, viewModel.uiState.value.tileOperandSelectionDialog)
+        assertEquals(beforeAttempt.tiles.first(), viewModel.uiState.value.tiles.first())
     }
 
     @Test
