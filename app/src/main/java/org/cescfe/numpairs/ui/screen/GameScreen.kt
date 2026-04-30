@@ -1,6 +1,10 @@
 package org.cescfe.numpairs.ui.screen
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -21,6 +25,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -40,6 +45,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -98,6 +104,14 @@ private val TILE_OPERAND_HINT_TEXT_WEIGHT = FontWeight.Medium
 private val PUZZLE_OUTCOME_CORNER_RADIUS = 24.dp
 private val PUZZLE_OUTCOME_HORIZONTAL_PADDING = 16.dp
 private val PUZZLE_OUTCOME_VERTICAL_PADDING = 14.dp
+private const val SUCCESS_OVERLAY_SCRIM_ALPHA = 0.44f
+private val SUCCESS_OVERLAY_CARD_MAX_WIDTH = 280.dp
+private val SUCCESS_OVERLAY_HORIZONTAL_PADDING = 24.dp
+private val SUCCESS_OVERLAY_VERTICAL_PADDING = 22.dp
+private val SUCCESS_OVERLAY_CARD_CORNER_RADIUS = 28.dp
+private val SUCCESS_OVERLAY_BADGE_SIZE = 44.dp
+private val SUCCESS_OVERLAY_SUCCESS_GREEN = Color(0xFF2E7D32)
+private val SUCCESS_OVERLAY_SUCCESS_GREEN_SOFT = Color(0xFFE6F4EA)
 private const val DISABLED_OPERAND_OPTION_ALPHA = 0.56f
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,49 +128,58 @@ fun GameScreen(
     onTileOperandSelectionConfirmed: (Int) -> Unit = {},
     onTileOperatorTapped: (Int) -> Unit = {},
     onTileOperatorSelectionDismissed: () -> Unit = {},
-    onTileOperatorSelectionConfirmed: (Operator) -> Unit = {}
+    onTileOperatorSelectionConfirmed: (Operator) -> Unit = {},
+    onSuccessOverlayDismissed: () -> Unit = {}
 ) {
-    Scaffold(
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .testTag(GameScreenTestTags.SCREEN),
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = stringResource(R.string.app_name))
+            .testTag(GameScreenTestTags.SCREEN)
+    ) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(text = stringResource(R.string.app_name))
+                    }
+                )
+            }
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(innerPadding)
+                    .padding(horizontal = 16.dp, vertical = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                StripSection(
+                    stripItems = uiState.stripItems,
+                    onStripItemTapped = onStripItemTapped,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                (uiState.puzzleOutcome as? PuzzleOutcomeUiState.Invalid)?.let { puzzleOutcome ->
+                    PuzzleOutcomeBanner(
+                        puzzleOutcome = puzzleOutcome,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
-            )
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp, vertical = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            StripSection(
-                stripItems = uiState.stripItems,
-                onStripItemTapped = onStripItemTapped,
-                modifier = Modifier.fillMaxWidth()
-            )
-            uiState.puzzleOutcome?.let { puzzleOutcome ->
-                PuzzleOutcomeBanner(
-                    puzzleOutcome = puzzleOutcome,
+                BoardSection(
+                    tiles = uiState.tiles,
+                    onTileLeftOperandTapped = onTileLeftOperandTapped,
+                    onTileRightOperandTapped = onTileRightOperandTapped,
+                    onTileOperatorTapped = onTileOperatorTapped,
+                    tileOperatorSelectionDialog = uiState.tileOperatorSelectionDialog,
+                    onTileOperatorSelectionDismissed = onTileOperatorSelectionDismissed,
+                    onTileOperatorSelectionConfirmed = onTileOperatorSelectionConfirmed,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-            BoardSection(
-                tiles = uiState.tiles,
-                onTileLeftOperandTapped = onTileLeftOperandTapped,
-                onTileRightOperandTapped = onTileRightOperandTapped,
-                onTileOperatorTapped = onTileOperatorTapped,
-                tileOperatorSelectionDialog = uiState.tileOperatorSelectionDialog,
-                onTileOperatorSelectionDismissed = onTileOperatorSelectionDismissed,
-                onTileOperatorSelectionConfirmed = onTileOperatorSelectionConfirmed,
-                modifier = Modifier.fillMaxWidth()
-            )
+        }
+
+        if (uiState.isSuccessOverlayVisible && uiState.puzzleOutcome == PuzzleOutcomeUiState.Solved) {
+            SuccessOverlay(onDismiss = onSuccessOverlayDismissed)
         }
     }
 
@@ -177,27 +200,85 @@ fun GameScreen(
 }
 
 @Composable
-private fun PuzzleOutcomeBanner(puzzleOutcome: PuzzleOutcomeUiState, modifier: Modifier = Modifier) {
+private fun SuccessOverlay(onDismiss: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+
+    BackHandler(onBack = onDismiss)
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.scrim.copy(alpha = SUCCESS_OVERLAY_SCRIM_ALPHA))
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onDismiss
+            )
+            .testTag(GameScreenTestTags.SUCCESS_OVERLAY),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            modifier = Modifier
+                .padding(horizontal = 32.dp)
+                .widthIn(max = SUCCESS_OVERLAY_CARD_MAX_WIDTH),
+            shape = RoundedCornerShape(SUCCESS_OVERLAY_CARD_CORNER_RADIUS),
+            color = SUCCESS_OVERLAY_SUCCESS_GREEN_SOFT,
+            contentColor = SUCCESS_OVERLAY_SUCCESS_GREEN,
+            border = BorderStroke(width = 1.dp, color = SUCCESS_OVERLAY_SUCCESS_GREEN)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = SUCCESS_OVERLAY_HORIZONTAL_PADDING,
+                        vertical = SUCCESS_OVERLAY_VERTICAL_PADDING
+                    ),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = SUCCESS_OVERLAY_SUCCESS_GREEN.copy(alpha = 0.12f),
+                    contentColor = SUCCESS_OVERLAY_SUCCESS_GREEN
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(SUCCESS_OVERLAY_BADGE_SIZE)
+                            .heightIn(min = SUCCESS_OVERLAY_BADGE_SIZE),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "OK",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+                Text(
+                    text = stringResource(R.string.success_overlay_message),
+                    modifier = Modifier.testTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = stringResource(R.string.success_overlay_supporting_text),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PuzzleOutcomeBanner(puzzleOutcome: PuzzleOutcomeUiState.Invalid, modifier: Modifier = Modifier) {
     val colorScheme = MaterialTheme.colorScheme
-    val containerColor = when (puzzleOutcome) {
-        PuzzleOutcomeUiState.Solved -> colorScheme.primaryContainer
-        is PuzzleOutcomeUiState.Invalid -> colorScheme.errorContainer
-    }
-    val contentColor = when (puzzleOutcome) {
-        PuzzleOutcomeUiState.Solved -> colorScheme.onPrimaryContainer
-        is PuzzleOutcomeUiState.Invalid -> colorScheme.onErrorContainer
-    }
-    val borderColor = when (puzzleOutcome) {
-        PuzzleOutcomeUiState.Solved -> colorScheme.primary
-        is PuzzleOutcomeUiState.Invalid -> colorScheme.error
-    }
 
     Surface(
         modifier = modifier.testTag(GameScreenTestTags.PUZZLE_OUTCOME),
         shape = RoundedCornerShape(PUZZLE_OUTCOME_CORNER_RADIUS),
-        color = containerColor,
-        contentColor = contentColor,
-        border = BorderStroke(width = 1.dp, color = borderColor)
+        color = colorScheme.errorContainer,
+        contentColor = colorScheme.onErrorContainer,
+        border = BorderStroke(width = 1.dp, color = colorScheme.error)
     ) {
         Column(
             modifier = Modifier
@@ -209,7 +290,7 @@ private fun PuzzleOutcomeBanner(puzzleOutcome: PuzzleOutcomeUiState, modifier: M
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
-                text = puzzleOutcome.title(),
+                text = stringResource(R.string.puzzle_outcome_invalid_title),
                 modifier = Modifier.testTag(GameScreenTestTags.PUZZLE_OUTCOME_TITLE),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
@@ -747,25 +828,16 @@ private fun Operator.selectionLabel(): String = when (this) {
 }
 
 @Composable
-private fun PuzzleOutcomeUiState.title(): String = when (this) {
-    PuzzleOutcomeUiState.Solved -> stringResource(R.string.puzzle_outcome_solved_title)
-    is PuzzleOutcomeUiState.Invalid -> stringResource(R.string.puzzle_outcome_invalid_title)
-}
-
-@Composable
-private fun PuzzleOutcomeUiState.message(): String = when (this) {
-    PuzzleOutcomeUiState.Solved -> stringResource(R.string.puzzle_outcome_solved_message)
-    is PuzzleOutcomeUiState.Invalid -> when (completionState) {
-        PuzzleCompletionState.INCORRECT_TILES -> stringResource(R.string.puzzle_outcome_invalid_tiles_message)
-        PuzzleCompletionState.MISSING_STRIP_ENTRY_IDENTITIES ->
-            stringResource(R.string.puzzle_outcome_missing_identities_message)
-        PuzzleCompletionState.MISMATCHED_SUM_PRODUCT_PAIRINGS ->
-            stringResource(R.string.puzzle_outcome_mismatched_pairings_message)
-        PuzzleCompletionState.INVALID_STRIP_ENTRY_USAGE ->
-            stringResource(R.string.puzzle_outcome_invalid_usage_message)
-        PuzzleCompletionState.INCOMPLETE,
-        PuzzleCompletionState.SOLVED -> error("Invalid outcome must represent a completed unsolved puzzle.")
-    }
+private fun PuzzleOutcomeUiState.Invalid.message(): String = when (completionState) {
+    PuzzleCompletionState.INCORRECT_TILES -> stringResource(R.string.puzzle_outcome_invalid_tiles_message)
+    PuzzleCompletionState.MISSING_STRIP_ENTRY_IDENTITIES ->
+        stringResource(R.string.puzzle_outcome_missing_identities_message)
+    PuzzleCompletionState.MISMATCHED_SUM_PRODUCT_PAIRINGS ->
+        stringResource(R.string.puzzle_outcome_mismatched_pairings_message)
+    PuzzleCompletionState.INVALID_STRIP_ENTRY_USAGE ->
+        stringResource(R.string.puzzle_outcome_invalid_usage_message)
+    PuzzleCompletionState.INCOMPLETE,
+    PuzzleCompletionState.SOLVED -> error("Invalid outcome must represent a completed unsolved puzzle.")
 }
 
 @Preview(showBackground = true)

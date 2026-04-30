@@ -3,6 +3,8 @@ package org.cescfe.numpairs.ui.screen
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
@@ -37,13 +39,27 @@ class GameScreenTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private lateinit var viewModel: GameViewModel
+    private var useSolvedOverlayFixture by mutableStateOf(false)
+    private var isSolvedOverlayVisible by mutableStateOf(false)
 
     @Before
     fun setUp() {
         viewModel = GameViewModel()
+        useSolvedOverlayFixture = false
+        isSolvedOverlayVisible = false
 
         composeTestRule.setContent {
-            val uiState by viewModel.uiState.collectAsState()
+            val viewModelUiState by viewModel.uiState.collectAsState()
+            val uiState = if (useSolvedOverlayFixture) {
+                solvedOverlayUiState(isSuccessOverlayVisible = isSolvedOverlayVisible)
+            } else {
+                viewModelUiState
+            }
+            val onSuccessOverlayDismissed = if (useSolvedOverlayFixture) {
+                { isSolvedOverlayVisible = false }
+            } else {
+                viewModel::onSuccessOverlayDismissed
+            }
 
             NumPairsTheme {
                 GameScreen(
@@ -57,7 +73,8 @@ class GameScreenTest {
                     onTileOperandSelectionConfirmed = viewModel::onTileOperandSelectionConfirmed,
                     onTileOperatorTapped = viewModel::onTileOperatorTapped,
                     onTileOperatorSelectionDismissed = viewModel::onTileOperatorSelectionDismissed,
-                    onTileOperatorSelectionConfirmed = viewModel::onTileOperatorSelectionConfirmed
+                    onTileOperatorSelectionConfirmed = viewModel::onTileOperatorSelectionConfirmed,
+                    onSuccessOverlayDismissed = onSuccessOverlayDismissed
                 )
             }
         }
@@ -667,6 +684,52 @@ class GameScreenTest {
             )
     }
 
+    @Test
+    fun solvedPuzzleShowsSuccessOverlayWhileKeepingTheBoardVisible() {
+        showSolvedOverlayFixture()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.BOARD)
+            .performScrollTo()
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE, useUnmergedTree = true)
+            .assert(hasText(composeTestRule.activity.getString(R.string.success_overlay_message)))
+    }
+
+    @Test
+    fun successOverlayCanBeDismissedWithBack() {
+        showSolvedOverlayFixture()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .assertIsDisplayed()
+
+        pressBack()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .assertDoesNotExist()
+    }
+
+    @Test
+    fun successOverlayCanBeDismissedByTap() {
+        showSolvedOverlayFixture()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .assertDoesNotExist()
+    }
+
     private fun buildIncorrectFirstTile() {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.stripItem(1))
@@ -744,4 +807,35 @@ class GameScreenTest {
                 )
             )
     }
+
+    private fun showSolvedOverlayFixture() {
+        composeTestRule.runOnIdle {
+            useSolvedOverlayFixture = true
+            isSolvedOverlayVisible = true
+        }
+    }
 }
+
+private fun solvedOverlayUiState(isSuccessOverlayVisible: Boolean): GameUiState = GameUiState(
+    stripItems = List(8) { index ->
+        StripItemUiState(
+            label = (index + 1).toString(),
+            isEntryEnabled = false,
+            visualStyle = StripItemVisualStyle.KNOWN
+        )
+    },
+    tiles = List(8) { index ->
+        TileUiState(
+            leftOperandLabel = (index + 1).toString(),
+            operatorLabel = if (index % 2 == 0) "+" else "×",
+            rightOperandLabel = (index + 2).toString(),
+            resultLabel = if (index % 2 == 0) {
+                (index + 1 + index + 2).toString()
+            } else {
+                ((index + 1) * (index + 2)).toString()
+            }
+        )
+    },
+    puzzleOutcome = PuzzleOutcomeUiState.Solved,
+    isSuccessOverlayVisible = isSuccessOverlayVisible
+)

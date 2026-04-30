@@ -17,10 +17,12 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
     private var stripItemEntryDialogIndex: Int? = null
     private var tileOperatorSelectionDialogIndex: Int? = null
     private var tileOperandSelectionTarget: TileOperandSelectionTarget? = null
+    private var isSuccessOverlayDismissed: Boolean = false
 
     private val _uiState = MutableStateFlow(
         GameUiState.from(
             puzzle = puzzle,
+            isSuccessOverlayVisible = isSuccessOverlayVisible(),
             stripItemEntryDialogIndex = stripItemEntryDialogIndex,
             tileOperatorSelectionDialogIndex = tileOperatorSelectionDialogIndex,
             tileOperandSelectionTarget = tileOperandSelectionTarget
@@ -29,6 +31,10 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
 
     fun onStripItemTapped(index: Int) {
+        if (isSuccessOverlayVisible()) {
+            return
+        }
+
         val stripItem = puzzle.strip.items.getOrNull(index)
 
         if (stripItem != StripItem.Hidden && stripItem !is StripItem.PlayerEntered) {
@@ -51,6 +57,10 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
     }
 
     fun onTileOperatorTapped(index: Int) {
+        if (isSuccessOverlayVisible()) {
+            return
+        }
+
         if (puzzle.board.tiles.getOrNull(index) == null) {
             return
         }
@@ -84,6 +94,15 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
         )
     }
 
+    fun onSuccessOverlayDismissed() {
+        if (!isSuccessOverlayVisible()) {
+            return
+        }
+
+        isSuccessOverlayDismissed = true
+        publishUiState()
+    }
+
     fun onTileOperandSelectionDismissed() {
         if (tileOperandSelectionTarget == null) {
             return
@@ -110,7 +129,7 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
             return
         }
 
-        puzzle = puzzle.copy(strip = puzzle.strip.withUpdatedEntry(index = index, value = value))
+        replacePuzzle(puzzle.copy(strip = puzzle.strip.withUpdatedEntry(index = index, value = value)))
         stripItemEntryDialogIndex = null
         publishUiState()
     }
@@ -147,7 +166,7 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
             )
         }
 
-        puzzle = puzzle.copy(board = Board(updatedTiles))
+        replacePuzzle(puzzle.copy(board = Board(updatedTiles)))
         tileOperandSelectionTarget = null
         publishUiState()
     }
@@ -165,7 +184,7 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
             set(index, currentTile.withOperator(operator))
         }
 
-        puzzle = puzzle.copy(board = Board(updatedTiles))
+        replacePuzzle(puzzle.copy(board = Board(updatedTiles)))
         tileOperatorSelectionDialogIndex = null
         publishUiState()
     }
@@ -173,6 +192,7 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
     private fun publishUiState() {
         _uiState.value = GameUiState.from(
             puzzle = puzzle,
+            isSuccessOverlayVisible = isSuccessOverlayVisible(),
             stripItemEntryDialogIndex = stripItemEntryDialogIndex,
             tileOperatorSelectionDialogIndex = tileOperatorSelectionDialogIndex,
             tileOperandSelectionTarget = tileOperandSelectionTarget
@@ -180,6 +200,10 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
     }
 
     private fun onTileOperandTapped(index: Int, slot: OperandSlot) {
+        if (isSuccessOverlayVisible()) {
+            return
+        }
+
         if (puzzle.board.tiles.getOrNull(index) == null) {
             return
         }
@@ -192,4 +216,14 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
         )
         publishUiState()
     }
+
+    private fun replacePuzzle(updatedPuzzle: Puzzle) {
+        puzzle = updatedPuzzle
+
+        if (!puzzle.isSolved) {
+            isSuccessOverlayDismissed = false
+        }
+    }
+
+    private fun isSuccessOverlayVisible(): Boolean = puzzle.isSolved && !isSuccessOverlayDismissed
 }

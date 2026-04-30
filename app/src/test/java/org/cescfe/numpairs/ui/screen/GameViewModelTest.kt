@@ -39,6 +39,7 @@ class GameViewModelTest {
         assertEquals(8, uiState.tiles.size)
         assertEquals(TileUiState("?", "?", "?", "223"), uiState.tiles.first())
         assertNull(uiState.puzzleOutcome)
+        assertFalse(uiState.isSuccessOverlayVisible)
         assertNull(uiState.stripItemEntryDialog)
         assertNull(uiState.tileOperatorSelectionDialog)
         assertNull(uiState.tileOperandSelectionDialog)
@@ -561,6 +562,35 @@ class GameViewModelTest {
         )
 
         assertEquals(PuzzleOutcomeUiState.Solved, viewModel.uiState.value.puzzleOutcome)
+        assertTrue(viewModel.uiState.value.isSuccessOverlayVisible)
+    }
+
+    @Test
+    fun dismissing_the_success_overlay_hides_it_without_clearing_the_solved_outcome() {
+        val viewModel = GameViewModel(
+            initialPuzzle = solvedPuzzleWithKnownStripAndAssignments()
+        )
+
+        viewModel.onSuccessOverlayDismissed()
+
+        assertEquals(PuzzleOutcomeUiState.Solved, viewModel.uiState.value.puzzleOutcome)
+        assertFalse(viewModel.uiState.value.isSuccessOverlayVisible)
+    }
+
+    @Test
+    fun completing_the_board_successfully_shows_the_success_overlay() {
+        val viewModel = GameViewModel(
+            initialPuzzle = incompletePuzzleOneOperatorSelectionAwayFromSolvedCompletion()
+        )
+
+        assertNull(viewModel.uiState.value.puzzleOutcome)
+        assertFalse(viewModel.uiState.value.isSuccessOverlayVisible)
+
+        viewModel.onTileOperatorTapped(index = 1)
+        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.MULTIPLICATION)
+
+        assertEquals(PuzzleOutcomeUiState.Solved, viewModel.uiState.value.puzzleOutcome)
+        assertTrue(viewModel.uiState.value.isSuccessOverlayVisible)
     }
 
     @Test
@@ -578,6 +608,7 @@ class GameViewModelTest {
             PuzzleOutcomeUiState.Invalid(PuzzleCompletionState.MISMATCHED_SUM_PRODUCT_PAIRINGS),
             viewModel.uiState.value.puzzleOutcome
         )
+        assertFalse(viewModel.uiState.value.isSuccessOverlayVisible)
         assertFalse(viewModel.uiState.value.puzzleOutcome == PuzzleOutcomeUiState.Solved)
     }
 
@@ -836,6 +867,26 @@ private fun incompletePuzzleOneOperatorSelectionAwayFromMismatchedCompletion(): 
     strip = Strip.fromItems(items = (1..8).map(StripItem::Known))
 )
 
+private fun incompletePuzzleOneOperatorSelectionAwayFromSolvedCompletion(): Puzzle = Puzzle(
+    board = Board(
+        tiles = listOf(
+            tileWithAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
+            tileWithHiddenOperator(
+                resultOperator = Operator.MULTIPLICATION,
+                leftStripEntryId = 1,
+                rightStripEntryId = 0
+            ),
+            tileWithAssignment(leftEntryId = 2, operator = Operator.ADDITION, rightEntryId = 3),
+            tileWithAssignment(leftEntryId = 3, operator = Operator.MULTIPLICATION, rightEntryId = 2),
+            tileWithAssignment(leftEntryId = 4, operator = Operator.ADDITION, rightEntryId = 5),
+            tileWithAssignment(leftEntryId = 5, operator = Operator.MULTIPLICATION, rightEntryId = 4),
+            tileWithAssignment(leftEntryId = 6, operator = Operator.ADDITION, rightEntryId = 7),
+            tileWithAssignment(leftEntryId = 7, operator = Operator.MULTIPLICATION, rightEntryId = 6)
+        )
+    ),
+    strip = Strip.fromItems(items = (1..8).map(StripItem::Known))
+)
+
 private fun puzzleWithKnownStripAndAssignments(
     stripValues: List<Int>,
     vararg tileAssignments: CompletionTileAssignment
@@ -863,19 +914,23 @@ private fun tileWithAssignment(leftEntryId: Int, operator: Operator, rightEntryI
     rightValue = rightEntryId + 1
 )
 
-private fun tileWithHiddenOperator(resultOperator: Operator): Tile = Tile(
+private fun tileWithHiddenOperator(
+    resultOperator: Operator,
+    leftStripEntryId: Int = 0,
+    rightStripEntryId: Int = 2
+): Tile = Tile(
     expression = Expression(
         leftOperand = Expression.Operand.Known(
-            value = 1,
-            stripEntryId = 0
+            value = leftStripEntryId + 1,
+            stripEntryId = leftStripEntryId
         ),
         operator = Operator.Hidden,
         rightOperand = Expression.Operand.Known(
-            value = 3,
-            stripEntryId = 2
+            value = rightStripEntryId + 1,
+            stripEntryId = rightStripEntryId
         )
     ),
-    result = resultOperator.apply(1, 3)
+    result = resultOperator.apply(leftStripEntryId + 1, rightStripEntryId + 1)
 )
 
 private fun tileWithAssignment(
