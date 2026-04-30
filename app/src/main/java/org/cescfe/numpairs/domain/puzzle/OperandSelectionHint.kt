@@ -2,13 +2,20 @@ package org.cescfe.numpairs.domain.puzzle
 
 data class VisibleStripEntry(val entryId: Int, val value: Int)
 
-data class NumberUsageByOperator(val additionUsageCount: Int = 0, val multiplicationUsageCount: Int = 0) {
+data class NumberUsageByOperator(
+    val additionUsageCount: Int = 0,
+    val multiplicationUsageCount: Int = 0,
+    val provisionalUsageCount: Int = 0
+) {
     init {
         require(additionUsageCount >= 0) {
             "Addition usage count cannot be negative."
         }
         require(multiplicationUsageCount >= 0) {
             "Multiplication usage count cannot be negative."
+        }
+        require(provisionalUsageCount >= 0) {
+            "Provisional usage count cannot be negative."
         }
     }
 
@@ -19,7 +26,7 @@ data class NumberUsageByOperator(val additionUsageCount: Int = 0, val multiplica
         get() = multiplicationUsageCount > 0
 
     val totalAssignmentCount: Int
-        get() = additionUsageCount + multiplicationUsageCount
+        get() = additionUsageCount + multiplicationUsageCount + provisionalUsageCount
 }
 
 data class OperandSelectionHint(
@@ -42,7 +49,8 @@ fun Puzzle.operandSelectionHintsFor(tileIndex: Int, slot: OperandSlot): List<Ope
                 multiplicationUsageCount = assignments.count { assignment ->
                     assignment.operator ==
                         Operator.MULTIPLICATION
-                }
+                },
+                provisionalUsageCount = assignments.count { assignment -> assignment.operator == Operator.Hidden }
             )
         }
     val oppositeSlotEntryId = board.tiles
