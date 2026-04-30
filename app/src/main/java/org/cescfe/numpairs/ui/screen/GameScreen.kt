@@ -26,6 +26,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +43,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -370,38 +372,12 @@ private fun OperandUsageHintBadge(
         Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
     }
     val hintStateDescription = stringResource(usageState.stateDescriptionResId)
-    val (containerColor, contentColor, borderColor) = when (usageState) {
-        OperandUsageHintState.AVAILABLE -> Triple(
-            colorScheme.surface,
-            colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
-            colorScheme.outlineVariant.copy(alpha = 0.9f)
-        )
-
-        OperandUsageHintState.USED -> when (operator) {
-            Operator.Addition,
-            Operator.Multiplication -> Triple(
-                colorScheme.primaryContainer,
-                colorScheme.onPrimaryContainer,
-                colorScheme.primary
-            )
-
-            Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
-        }
-    }
-    val resolvedContainerColor = if (enabled) {
-        containerColor
-    } else {
-        lerp(containerColor, colorScheme.surfaceVariant, 1f - DISABLED_OPERAND_OPTION_ALPHA)
-    }
-    val resolvedContentColor = if (enabled) {
-        contentColor
-    } else {
-        lerp(contentColor, colorScheme.onSurfaceVariant, 1f - DISABLED_OPERAND_OPTION_ALPHA)
-    }
-    val resolvedBorderColor = if (enabled) {
-        borderColor
-    } else {
-        lerp(borderColor, colorScheme.outlineVariant, 1f - DISABLED_OPERAND_OPTION_ALPHA)
+    val resolvedColors = baseHintBadgeColors(
+        usageState = usageState,
+        operator = operator,
+        colorScheme = colorScheme
+    ).let { colors ->
+        if (enabled) colors else colors.disabled(colorScheme)
     }
 
     Surface(
@@ -412,9 +388,9 @@ private fun OperandUsageHintBadge(
                 stateDescription = hintStateDescription
             },
         shape = RoundedCornerShape(TILE_OPERAND_HINT_CORNER_RADIUS),
-        color = resolvedContainerColor,
-        contentColor = resolvedContentColor,
-        border = BorderStroke(width = 1.dp, color = resolvedBorderColor)
+        color = resolvedColors.container,
+        contentColor = resolvedColors.content,
+        border = BorderStroke(width = 1.dp, color = resolvedColors.border)
     ) {
         Text(
             text = operator.symbol,
@@ -427,6 +403,41 @@ private fun OperandUsageHintBadge(
         )
     }
 }
+
+private data class HintBadgeColors(
+    val container: Color,
+    val content: Color,
+    val border: Color
+)
+
+private fun baseHintBadgeColors(
+    usageState: OperandUsageHintState,
+    operator: Operator,
+    colorScheme: ColorScheme
+): HintBadgeColors = when (usageState) {
+    OperandUsageHintState.AVAILABLE -> HintBadgeColors(
+        container = colorScheme.surface,
+        content = colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
+        border = colorScheme.outlineVariant.copy(alpha = 0.9f)
+    )
+
+    OperandUsageHintState.USED -> when (operator) {
+        Operator.Addition,
+        Operator.Multiplication -> HintBadgeColors(
+            container = colorScheme.primaryContainer,
+            content = colorScheme.onPrimaryContainer,
+            border = colorScheme.primary
+        )
+
+        Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
+    }
+}
+
+private fun HintBadgeColors.disabled(colorScheme: ColorScheme): HintBadgeColors = HintBadgeColors(
+    container = lerp(container, colorScheme.surfaceVariant, 1f - DISABLED_OPERAND_OPTION_ALPHA),
+    content = lerp(content, colorScheme.onSurfaceVariant, 1f - DISABLED_OPERAND_OPTION_ALPHA),
+    border = lerp(border, colorScheme.outlineVariant, 1f - DISABLED_OPERAND_OPTION_ALPHA)
+)
 
 private fun TileOperandOptionUiState.usageStateFor(operator: Operator): OperandUsageHintState = when (operator) {
     Operator.Addition -> when {
