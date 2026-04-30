@@ -16,6 +16,7 @@ data class GameUiState(
     val stripItems: List<StripItemUiState>,
     val tiles: List<TileUiState>,
     val puzzleOutcome: PuzzleOutcomeUiState? = null,
+    val isSuccessOverlayVisible: Boolean = false,
     val stripItemEntryDialog: StripItemEntryDialogUiState? = null,
     val tileOperatorSelectionDialog: TileOperatorSelectionDialogUiState? = null,
     val tileOperandSelectionDialog: TileOperandSelectionDialogUiState? = null
@@ -23,6 +24,7 @@ data class GameUiState(
     companion object {
         fun from(
             puzzle: Puzzle,
+            isSuccessOverlayVisible: Boolean = false,
             stripItemEntryDialogIndex: Int? = null,
             tileOperatorSelectionDialogIndex: Int? = null,
             tileOperandSelectionTarget: TileOperandSelectionTarget? = null
@@ -30,6 +32,7 @@ data class GameUiState(
             stripItems = puzzle.strip.items.map(::StripItemUiState),
             tiles = puzzle.board.tiles.map(::TileUiState),
             puzzleOutcome = puzzle.outcomeUiState,
+            isSuccessOverlayVisible = isSuccessOverlayVisible,
             stripItemEntryDialog = stripItemEntryDialogIndex?.let { stripItemIndex ->
                 val stripItem = puzzle.strip.items[stripItemIndex]
 
