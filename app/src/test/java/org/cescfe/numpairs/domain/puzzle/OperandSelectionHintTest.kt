@@ -263,7 +263,8 @@ private fun selectionHint(
         multiplicationUsageCount = if (multiplicationUsed) 1 else 0,
         provisionalUsageCount = provisionalUsed
     ),
-    isSelectable = isSelectable ?: (listOf(additionUsed, multiplicationUsed).count { used -> used } + provisionalUsed < 2)
+    isSelectable =
+    isSelectable ?: (listOf(additionUsed, multiplicationUsed).count { used -> used } + provisionalUsed < 2)
 )
 
 private fun puzzleWithRepeatedSixes(): Puzzle = PuzzleSamples.prototype.copy(
