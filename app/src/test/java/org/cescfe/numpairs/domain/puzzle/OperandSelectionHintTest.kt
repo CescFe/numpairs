@@ -161,13 +161,48 @@ class OperandSelectionHintTest {
         assertEquals(1, reopenedHint.totalAssignmentCount)
         assertTrue(reopenedHint.isSelectable)
     }
+
+    @Test
+    fun selection_hints_mark_the_opposite_slot_strip_entry_as_unavailable_for_the_current_tile() {
+        val puzzle = PuzzleSamples.prototype
+            .withTile(
+                index = 0,
+                tile = hiddenTile(result = 12)
+                    .withLeftOperand(value = 6, stripEntryId = 2)
+            )
+
+        val blockedHint = puzzle.operandSelectionHintsFor(tileIndex = 0, slot = OperandSlot.RIGHT)
+            .first { hint -> hint.stripEntry.entryId == 2 }
+
+        assertEquals(0, blockedHint.totalAssignmentCount)
+        assertFalse(blockedHint.isSelectable)
+    }
+
+    @Test
+    fun selection_hints_keep_the_current_slot_assignment_selectable_when_the_opposite_slot_uses_another_entry() {
+        val puzzle = PuzzleSamples.prototype
+            .withTile(
+                index = 0,
+                tile = hiddenTile(result = 31)
+                    .withLeftOperand(value = 6, stripEntryId = 2)
+                    .withRightOperand(value = 25, stripEntryId = 4)
+            )
+
+        val hints = puzzle.operandSelectionHintsFor(tileIndex = 0, slot = OperandSlot.LEFT)
+        val currentSlotHint = hints.first { hint -> hint.stripEntry.entryId == 2 }
+        val oppositeSlotHint = hints.first { hint -> hint.stripEntry.entryId == 4 }
+
+        assertTrue(currentSlotHint.isSelectable)
+        assertFalse(oppositeSlotHint.isSelectable)
+    }
 }
 
 private fun selectionHint(
     entryId: Int,
     value: Int,
     additionUsed: Boolean = false,
-    multiplicationUsed: Boolean = false
+    multiplicationUsed: Boolean = false,
+    isSelectable: Boolean? = null
 ): OperandSelectionHint = OperandSelectionHint(
     stripEntry = VisibleStripEntry(
         entryId = entryId,
@@ -176,7 +211,8 @@ private fun selectionHint(
     usageByOperator = NumberUsageByOperator(
         additionUsageCount = if (additionUsed) 1 else 0,
         multiplicationUsageCount = if (multiplicationUsed) 1 else 0
-    )
+    ),
+    isSelectable = isSelectable ?: (!additionUsed || !multiplicationUsed)
 )
 
 private fun puzzleWithRepeatedSixes(): Puzzle = PuzzleSamples.prototype.copy(

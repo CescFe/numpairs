@@ -387,6 +387,29 @@ class GameScreenTest {
     }
 
     @Test
+    fun the_current_tile_entry_is_rendered_disabled_for_the_opposite_operand_slot() {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.BOARD)
+            .performScrollTo()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 2), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileRightOperand(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 2), useUnmergedTree = true)
+            .assertIsNotEnabled()
+    }
+
+    @Test
     fun dismissingTheOperandSelectorLeavesTheHiddenTileOperandUnchanged() {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.BOARD)
