@@ -42,11 +42,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -363,7 +363,7 @@ private fun OperandUsageHintBadge(
     operator: Operator,
     usageState: OperandUsageHintState,
     stripEntryId: Int,
-    enabled: Boolean = true,
+    enabled: Boolean = true
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val hintContentDescription = when (operator) {
@@ -404,11 +404,7 @@ private fun OperandUsageHintBadge(
     }
 }
 
-private data class HintBadgeColors(
-    val container: Color,
-    val content: Color,
-    val border: Color
-)
+private data class HintBadgeColors(val container: Color, val content: Color, val border: Color)
 
 private fun baseHintBadgeColors(
     usageState: OperandUsageHintState,
