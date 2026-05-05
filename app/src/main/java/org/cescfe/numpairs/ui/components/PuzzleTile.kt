@@ -52,7 +52,7 @@ private val TILE_OPERAND_TEXT_PADDING = 0.dp
 private val TILE_OPERATOR_SLOT_WIDTH = 28.dp
 private val TILE_RESET_ACTION_CONTAINER_SIZE = 28.dp
 private val TILE_RESET_ACTION_ICON_SIZE = 16.dp
-private val TILE_RESET_ACTION_PADDING = 8.dp
+private val TILE_RESET_ACTION_EDGE_INSET = 0.dp
 private const val LARGE_OPERAND_CHARACTER_COUNT = 3
 
 @Composable
@@ -147,7 +147,10 @@ fun PuzzleTile(
                 onClick = onResetClick,
                 modifier = resetModifier
                     .align(Alignment.TopEnd)
-                    .padding(TILE_RESET_ACTION_PADDING)
+                    .padding(
+                        top = TILE_RESET_ACTION_EDGE_INSET,
+                        end = TILE_RESET_ACTION_EDGE_INSET
+                    )
                     .size(TILE_RESET_ACTION_CONTAINER_SIZE),
                 shape = RoundedCornerShape(999.dp),
                 color = MaterialTheme.colorScheme.surface,
