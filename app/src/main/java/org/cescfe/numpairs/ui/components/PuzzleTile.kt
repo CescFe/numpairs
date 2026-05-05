@@ -145,10 +145,7 @@ fun PuzzleTile(
         }
 
         if (tile.canReset && onResetClick != null) {
-            val resetContentDescription = stringResource(R.string.tile_reset_content_description)
-
-            Surface(
-                onClick = onResetClick,
+            TileResetAction(
                 modifier = resetModifier
                     .align(Alignment.TopEnd)
                     .offset(
@@ -156,27 +153,38 @@ fun PuzzleTile(
                         y = -TILE_RESET_ACTION_CORNER_OFFSET
                     )
                     .size(TILE_RESET_ACTION_CONTAINER_SIZE),
-                shape = RoundedCornerShape(999.dp),
-                color = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.primary,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .semantics {
-                            stateDescription = resetContentDescription
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_replay),
-                        contentDescription = resetContentDescription,
-                        modifier = Modifier.size(TILE_RESET_ACTION_ICON_SIZE),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
+                onClick = onResetClick
+            )
+        }
+    }
+}
+
+@Composable
+private fun TileResetAction(modifier: Modifier = Modifier, onClick: () -> Unit) {
+    val resetContentDescription = stringResource(R.string.tile_reset_content_description)
+
+    Surface(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(999.dp),
+        color = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.primary,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .semantics {
+                    stateDescription = resetContentDescription
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_replay),
+                contentDescription = resetContentDescription,
+                modifier = Modifier.size(TILE_RESET_ACTION_ICON_SIZE),
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
