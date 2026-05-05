@@ -13,16 +13,15 @@ Build a simple Android app that allows users to view and play a Tetonor puzzle.
     - 8 grid with results
     - 8-number strip
 - Local editing feedback for fully-known incorrect tiles
+- Automatic prevention of incorrect tile assignments
+- Whole-puzzle validation and completion flow
 - No scoring
 - No persistence
 - No animations
 
 ## Out of Scope
-- Automatic prevention of incorrect tile assignments
-- Whole-puzzle validation and completion flow
 - Difficulty levels
 - Timer
-- Backend
 - User accounts
 
 ## Success Criteria
