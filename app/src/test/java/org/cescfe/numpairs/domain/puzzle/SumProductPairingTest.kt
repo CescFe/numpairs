@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -67,6 +68,7 @@ class SumProductPairingTest {
         )
 
         assertFalse(puzzle.hasMismatchedSumProductPairings)
+        assertEquals(emptyList<Int>(), puzzle.mismatchedSumProductPairingTileIndexes)
     }
 
     @Test
@@ -132,6 +134,85 @@ class SumProductPairingTest {
 
         assertTrue(puzzle.board.tiles.all { tile -> tile.resolutionState == TileResolutionState.CORRECT })
         assertTrue(puzzle.hasMismatchedSumProductPairings)
+        assertEquals(listOf(0, 1, 2, 3), puzzle.mismatchedSumProductPairingTileIndexes)
+    }
+
+    @Test
+    fun incomplete_puzzles_do_not_report_implicated_pairing_tiles() {
+        val puzzle = solvedPuzzleWithTiles(
+            tile(
+                leftEntryId = 0,
+                leftValue = 1,
+                operator = Operator.ADDITION,
+                rightEntryId = 1,
+                rightValue = 2
+            ),
+            tile(
+                leftEntryId = 1,
+                leftValue = 2,
+                operator = Operator.MULTIPLICATION,
+                rightEntryId = 0,
+                rightValue = 1
+            ),
+            tile(
+                leftEntryId = 2,
+                leftValue = 3,
+                operator = Operator.ADDITION,
+                rightEntryId = 3,
+                rightValue = 4
+            ),
+            tile(
+                leftEntryId = 3,
+                leftValue = 4,
+                operator = Operator.MULTIPLICATION,
+                rightEntryId = 2,
+                rightValue = 3
+            ),
+            tile(
+                leftEntryId = 4,
+                leftValue = 5,
+                operator = Operator.ADDITION,
+                rightEntryId = 5,
+                rightValue = 6
+            ),
+            tile(
+                leftEntryId = 5,
+                leftValue = 6,
+                operator = Operator.MULTIPLICATION,
+                rightEntryId = 4,
+                rightValue = 5
+            ),
+            tile(
+                leftEntryId = 6,
+                leftValue = 7,
+                operator = Operator.ADDITION,
+                rightEntryId = 7,
+                rightValue = 8
+            ),
+            tile(
+                leftEntryId = 7,
+                leftValue = 8,
+                operator = Operator.MULTIPLICATION,
+                rightEntryId = 6,
+                rightValue = 7
+            )
+        ).copy(
+            strip = Strip.fromItems(
+                items = listOf(
+                    StripItem.Known(1),
+                    StripItem.Hidden,
+                    StripItem.Known(3),
+                    StripItem.Known(4),
+                    StripItem.Known(5),
+                    StripItem.Known(6),
+                    StripItem.Known(7),
+                    StripItem.Known(8)
+                )
+            )
+        )
+
+        assertFalse(puzzle.hasMismatchedSumProductPairings)
+        assertEquals(emptyList<Int>(), puzzle.mismatchedSumProductPairingTileIndexes)
     }
 }
 

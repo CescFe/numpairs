@@ -1,33 +1,42 @@
 package org.cescfe.numpairs.domain.puzzle
 
 val Puzzle.hasMismatchedSumProductPairings: Boolean
+    get() = mismatchedSumProductPairingTileIndexes.isNotEmpty()
+
+val Puzzle.mismatchedSumProductPairingTileIndexes: List<Int>
     get() {
         if (isIncomplete) {
-            return false
+            return emptyList()
         }
 
         if (board.tiles.any { tile -> tile.resolutionState != TileResolutionState.CORRECT }) {
-            return false
+            return emptyList()
         }
 
         val resolvedAssignments = resolvedTileAssignments()
         if (resolvedAssignments.size != board.tiles.size) {
-            return false
+            return emptyList()
         }
 
-        val additionPairs = resolvedAssignments
-            .filter { assignment -> assignment.operator == Operator.ADDITION }
-            .map(IndexedResolvedTileAssignment::unorderedStripEntryPair)
-            .toSet()
-        val multiplicationPairs = resolvedAssignments
-            .filter { assignment -> assignment.operator == Operator.MULTIPLICATION }
-            .map(IndexedResolvedTileAssignment::unorderedStripEntryPair)
-            .toSet()
+        val additionPairs = resolvedAssignments.unorderedStripEntryPairsFor(operator = Operator.ADDITION)
+        val multiplicationPairs = resolvedAssignments.unorderedStripEntryPairsFor(
+            operator = Operator.MULTIPLICATION
+        )
+        val mismatchedPairs = (additionPairs - multiplicationPairs) + (multiplicationPairs - additionPairs)
 
-        return additionPairs != multiplicationPairs
+        return resolvedAssignments.filter { assignment ->
+            assignment.unorderedStripEntryPair in mismatchedPairs
+        }.map(IndexedResolvedTileAssignment::tileIndex)
     }
 
 private data class UnorderedStripEntryPair(val firstStripEntryId: Int, val secondStripEntryId: Int)
+
+private fun List<IndexedResolvedTileAssignment>.unorderedStripEntryPairsFor(
+    operator: Operator
+): Set<UnorderedStripEntryPair> = filter { assignment ->
+    assignment.operator == operator
+}.map(IndexedResolvedTileAssignment::unorderedStripEntryPair)
+    .toSet()
 
 private val IndexedResolvedTileAssignment.unorderedStripEntryPair: UnorderedStripEntryPair
     get() {
