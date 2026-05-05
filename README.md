@@ -83,6 +83,7 @@ docs/
 ## Documentation
 
 - Product Requirements Document (PRD): `docs/product/prd/prd-v0.md`
+- Product roadmap: `docs/product/roadmap.md`
 - UX decisions: `docs/product/ux-decisions.md`
 - Architectural Decision Records (ADR): `docs/technical/adr/`
 - Game rules: `docs/game-rules.md`
@@ -92,9 +93,9 @@ docs/
 
 ## Roadmap
 
-1. v0 - Playable prototype
-2. Add gameplay validation and scoring
-3. Improve presentation, polish, and game modes
+- Current baseline: `v0 - Playable Prototype`
+- Planned milestones: `v1 - Product Polish & Technical Hardening`, `v2 - Content & Session Flow`, `v3 - Game Modes, Guidance & Progression`
+- Canonical roadmap: `docs/product/roadmap.md`
 
 ---
 
