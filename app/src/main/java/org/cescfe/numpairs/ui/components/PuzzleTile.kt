@@ -55,6 +55,8 @@ private val TILE_RESET_ACTION_CONTAINER_SIZE = 28.dp
 private val TILE_RESET_ACTION_ICON_SIZE = 16.dp
 private val TILE_RESET_ACTION_CORNER_OVERLAP = TILE_RESET_ACTION_CONTAINER_SIZE / 2
 private val TILE_RESET_ACTION_CORNER_ADJUSTMENT = 4.dp
+private val TILE_RESET_ACTION_CORNER_OFFSET =
+    TILE_RESET_ACTION_CORNER_OVERLAP - TILE_RESET_ACTION_CORNER_ADJUSTMENT
 private const val LARGE_OPERAND_CHARACTER_COUNT = 3
 
 @Composable
@@ -150,8 +152,8 @@ fun PuzzleTile(
                 modifier = resetModifier
                     .align(Alignment.TopEnd)
                     .offset(
-                        x = TILE_RESET_ACTION_CORNER_OVERLAP - TILE_RESET_ACTION_CORNER_ADJUSTMENT,
-                        y = -(TILE_RESET_ACTION_CORNER_OVERLAP - TILE_RESET_ACTION_CORNER_ADJUSTMENT)
+                        x = TILE_RESET_ACTION_CORNER_OFFSET,
+                        y = -TILE_RESET_ACTION_CORNER_OFFSET
                     )
                     .size(TILE_RESET_ACTION_CONTAINER_SIZE),
                 shape = RoundedCornerShape(999.dp),
