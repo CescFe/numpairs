@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -52,7 +53,7 @@ private val TILE_OPERAND_TEXT_PADDING = 0.dp
 private val TILE_OPERATOR_SLOT_WIDTH = 28.dp
 private val TILE_RESET_ACTION_CONTAINER_SIZE = 28.dp
 private val TILE_RESET_ACTION_ICON_SIZE = 16.dp
-private val TILE_RESET_ACTION_EDGE_INSET = 0.dp
+private val TILE_RESET_ACTION_CORNER_OVERLAP = TILE_RESET_ACTION_CONTAINER_SIZE / 2
 private const val LARGE_OPERAND_CHARACTER_COUNT = 3
 
 @Composable
@@ -147,9 +148,9 @@ fun PuzzleTile(
                 onClick = onResetClick,
                 modifier = resetModifier
                     .align(Alignment.TopEnd)
-                    .padding(
-                        top = TILE_RESET_ACTION_EDGE_INSET,
-                        end = TILE_RESET_ACTION_EDGE_INSET
+                    .offset(
+                        x = TILE_RESET_ACTION_CORNER_OVERLAP,
+                        y = -TILE_RESET_ACTION_CORNER_OVERLAP
                     )
                     .size(TILE_RESET_ACTION_CONTAINER_SIZE),
                 shape = RoundedCornerShape(999.dp),
