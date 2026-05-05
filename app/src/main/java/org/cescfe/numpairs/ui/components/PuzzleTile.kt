@@ -34,6 +34,7 @@ import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
 import org.cescfe.numpairs.ui.screen.GameUiState
 import org.cescfe.numpairs.ui.screen.TileUiState
+import org.cescfe.numpairs.ui.screen.TileVisualState
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 private val TILE_CORNER_RADIUS = 20.dp
@@ -58,32 +59,40 @@ fun PuzzleTile(
     rightOperandModifier: Modifier = Modifier,
     onRightOperandClick: (() -> Unit)? = null
 ) {
-    val expressionColor = if (tile.isInvalid) {
-        MaterialTheme.colorScheme.error
-    } else {
-        Color.Unspecified
+    val expressionColor = when (tile.visualState) {
+        TileVisualState.INCORRECT -> MaterialTheme.colorScheme.error
+        TileVisualState.MISMATCHED_PAIRING,
+        TileVisualState.NORMAL -> Color.Unspecified
     }
-    val incorrectStateDescription = stringResource(R.string.tile_state_incorrect)
+    val tileStateDescription = when (tile.visualState) {
+        TileVisualState.INCORRECT -> stringResource(R.string.tile_state_incorrect)
+        TileVisualState.MISMATCHED_PAIRING -> stringResource(R.string.tile_state_mismatched_pairing)
+        TileVisualState.NORMAL -> null
+    }
+    val containerColor = when (tile.visualState) {
+        TileVisualState.INCORRECT -> MaterialTheme.colorScheme.error.copy(alpha = 0.08f)
+        TileVisualState.MISMATCHED_PAIRING -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.72f)
+        TileVisualState.NORMAL -> Color.Unspecified
+    }
+    val border = when (tile.visualState) {
+        TileVisualState.INCORRECT -> BorderStroke(1.5.dp, MaterialTheme.colorScheme.error)
+        TileVisualState.MISMATCHED_PAIRING -> BorderStroke(1.5.dp, MaterialTheme.colorScheme.tertiary)
+        TileVisualState.NORMAL -> null
+    }
 
     Card(
         modifier = modifier.semantics {
-            if (tile.isInvalid) {
-                stateDescription = incorrectStateDescription
+            if (tileStateDescription != null) {
+                stateDescription = tileStateDescription
             }
         },
         shape = RoundedCornerShape(TILE_CORNER_RADIUS),
-        colors = if (tile.isInvalid) {
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.08f)
-            )
-        } else {
+        colors = if (containerColor == Color.Unspecified) {
             CardDefaults.cardColors()
-        },
-        border = if (tile.isInvalid) {
-            BorderStroke(1.5.dp, MaterialTheme.colorScheme.error)
         } else {
-            null
-        }
+            CardDefaults.cardColors(containerColor = containerColor)
+        },
+        border = border
     ) {
         Column(
             modifier = Modifier
