@@ -1,6 +1,8 @@
 package org.cescfe.numpairs.domain.puzzle
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class TileTest {
@@ -169,5 +171,41 @@ class TileTest {
 
         assertEquals(Operator.MULTIPLICATION, updatedTile.expression.operator)
         assertEquals(TileResolutionState.CORRECT, updatedTile.resolutionState)
+    }
+
+    @Test
+    fun initial_tiles_do_not_expose_a_reset_action() {
+        val tile = Tile(
+            expression = Expression(
+                leftOperand = Expression.Operand.Hidden,
+                operator = Operator.Hidden,
+                rightOperand = Expression.Operand.Hidden
+            ),
+            result = 42
+        )
+
+        assertFalse(tile.canReset)
+    }
+
+    @Test
+    fun partially_or_fully_filled_tiles_can_be_reset_back_to_the_initial_expression_state() {
+        val tile = Tile(
+            expression = Expression(
+                leftOperand = Expression.Operand.Known(value = 2, stripEntryId = 1),
+                operator = Operator.MULTIPLICATION,
+                rightOperand = Expression.Operand.Known(value = 3, stripEntryId = 7)
+            ),
+            result = 6
+        )
+
+        val resetTile = tile.reset()
+
+        assertTrue(tile.canReset)
+        assertEquals(Expression.Operand.Hidden, resetTile.expression.leftOperand)
+        assertEquals(Operator.Hidden, resetTile.expression.operator)
+        assertEquals(Expression.Operand.Hidden, resetTile.expression.rightOperand)
+        assertEquals(6, resetTile.result)
+        assertEquals(TileResolutionState.UNRESOLVED, resetTile.resolutionState)
+        assertFalse(resetTile.canReset)
     }
 }

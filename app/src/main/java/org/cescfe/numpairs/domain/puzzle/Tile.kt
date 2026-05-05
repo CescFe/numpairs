@@ -1,6 +1,11 @@
 package org.cescfe.numpairs.domain.puzzle
 
 data class Tile(val expression: Expression, val result: Int) {
+    val canReset: Boolean
+        get() = expression.leftOperand is Expression.Operand.Known ||
+            expression.operator != Operator.Hidden ||
+            expression.rightOperand is Expression.Operand.Known
+
     val resolutionState: TileResolutionState
         get() = when {
             !expression.isFullyKnown -> TileResolutionState.UNRESOLVED
@@ -18,6 +23,14 @@ data class Tile(val expression: Expression, val result: Int) {
 
     fun withOperator(operator: Operator): Tile = copy(
         expression = expression.withOperator(operator)
+    )
+
+    fun reset(): Tile = copy(
+        expression = Expression(
+            leftOperand = Expression.Operand.Hidden,
+            operator = Operator.Hidden,
+            rightOperand = Expression.Operand.Hidden
+        )
     )
 }
 
