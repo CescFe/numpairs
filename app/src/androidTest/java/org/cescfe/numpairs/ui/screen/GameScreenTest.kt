@@ -72,6 +72,7 @@ class GameScreenTest {
                     onTileOperandSelectionDismissed = viewModel::onTileOperandSelectionDismissed,
                     onTileOperandSelectionConfirmed = viewModel::onTileOperandSelectionConfirmed,
                     onTileOperatorTapped = viewModel::onTileOperatorTapped,
+                    onTileResetTapped = viewModel::onTileResetTapped,
                     onTileOperatorSelectionDismissed = viewModel::onTileOperatorSelectionDismissed,
                     onTileOperatorSelectionConfirmed = viewModel::onTileOperatorSelectionConfirmed,
                     onSuccessOverlayDismissed = onSuccessOverlayDismissed
@@ -320,6 +321,64 @@ class GameScreenTest {
 
         composeTestRule
             .onAllNodesWithTag(GameScreenTestTags.TILE_OPERAND_SELECTOR, useUnmergedTree = true)
+            .assertCountEquals(0)
+    }
+
+    @Test
+    fun resetActionIsHiddenForInitialTilesAndShownAfterTheTileIsFilled() {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.BOARD)
+            .performScrollTo()
+
+        composeTestRule
+            .onAllNodesWithTag(GameScreenTestTags.tileReset(0), useUnmergedTree = true)
+            .assertCountEquals(0)
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 2), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileReset(0), useUnmergedTree = true)
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun tappingResetActionRestoresTheTileToItsInitialExpression() {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.BOARD)
+            .performScrollTo()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 2), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileReset(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
+            .assert(hasAnyDescendant(hasText("?")))
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
+            .assert(hasAnyDescendant(hasText("?")))
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileRightOperand(0), useUnmergedTree = true)
+            .assert(hasAnyDescendant(hasText("?")))
+
+        composeTestRule
+            .onAllNodesWithTag(GameScreenTestTags.tileReset(0), useUnmergedTree = true)
             .assertCountEquals(0)
     }
 
@@ -833,7 +892,8 @@ private fun solvedOverlayUiState(isSuccessOverlayVisible: Boolean): GameUiState 
                 (index + 1 + index + 2).toString()
             } else {
                 ((index + 1) * (index + 2)).toString()
-            }
+            },
+            canReset = true
         )
     },
     puzzleOutcome = PuzzleOutcomeUiState.Solved,

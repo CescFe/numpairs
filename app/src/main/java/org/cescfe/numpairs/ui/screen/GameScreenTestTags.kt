@@ -29,6 +29,8 @@ object GameScreenTestTags {
 
     fun tileOperator(index: Int): String = "tile_operator_$index"
 
+    fun tileReset(index: Int): String = "tile_reset_$index"
+
     fun tileOperandOption(entryId: Int): String = "tile_operand_option_$entryId"
 
     fun tileOperandUsageHint(entryId: Int, operator: Operator): String = when (operator) {

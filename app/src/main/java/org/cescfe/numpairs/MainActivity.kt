@@ -31,6 +31,7 @@ class MainActivity : ComponentActivity() {
                     onTileOperandSelectionDismissed = gameViewModel::onTileOperandSelectionDismissed,
                     onTileOperandSelectionConfirmed = gameViewModel::onTileOperandSelectionConfirmed,
                     onTileOperatorTapped = gameViewModel::onTileOperatorTapped,
+                    onTileResetTapped = gameViewModel::onTileResetTapped,
                     onTileOperatorSelectionDismissed = gameViewModel::onTileOperatorSelectionDismissed,
                     onTileOperatorSelectionConfirmed = gameViewModel::onTileOperatorSelectionConfirmed,
                     onSuccessOverlayDismissed = gameViewModel::onSuccessOverlayDismissed
