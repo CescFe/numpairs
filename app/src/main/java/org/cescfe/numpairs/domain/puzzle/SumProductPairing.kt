@@ -5,31 +5,35 @@ val Puzzle.hasMismatchedSumProductPairings: Boolean
 
 val Puzzle.mismatchedSumProductPairingTileIndexes: List<Int>
     get() {
-        if (isIncomplete) {
-            return emptyList()
+        val resolvedAssignments = resolvedAssignmentsForPairingCheck() ?: return emptyList()
+        val mismatchedPairs = resolvedAssignments.mismatchedUnorderedPairs()
+
+        return resolvedAssignments.mapNotNull { assignment ->
+            assignment.takeIf { it.unorderedStripEntryPair in mismatchedPairs }?.tileIndex
         }
-
-        if (board.tiles.any { tile -> tile.resolutionState != TileResolutionState.CORRECT }) {
-            return emptyList()
-        }
-
-        val resolvedAssignments = resolvedTileAssignments()
-        if (resolvedAssignments.size != board.tiles.size) {
-            return emptyList()
-        }
-
-        val additionPairs = resolvedAssignments.unorderedStripEntryPairsFor(operator = Operator.ADDITION)
-        val multiplicationPairs = resolvedAssignments.unorderedStripEntryPairsFor(
-            operator = Operator.MULTIPLICATION
-        )
-        val mismatchedPairs = (additionPairs - multiplicationPairs) + (multiplicationPairs - additionPairs)
-
-        return resolvedAssignments.filter { assignment ->
-            assignment.unorderedStripEntryPair in mismatchedPairs
-        }.map(IndexedResolvedTileAssignment::tileIndex)
     }
 
 private data class UnorderedStripEntryPair(val firstStripEntryId: Int, val secondStripEntryId: Int)
+
+private fun Puzzle.resolvedAssignmentsForPairingCheck(): List<IndexedResolvedTileAssignment>? {
+    if (isIncomplete) {
+        return null
+    }
+
+    if (board.tiles.any { tile -> tile.resolutionState != TileResolutionState.CORRECT }) {
+        return null
+    }
+
+    val resolvedAssignments = resolvedTileAssignments()
+    return resolvedAssignments.takeIf { assignments -> assignments.size == board.tiles.size }
+}
+
+private fun List<IndexedResolvedTileAssignment>.mismatchedUnorderedPairs(): Set<UnorderedStripEntryPair> {
+    val additionPairs = unorderedStripEntryPairsFor(operator = Operator.ADDITION)
+    val multiplicationPairs = unorderedStripEntryPairsFor(operator = Operator.MULTIPLICATION)
+
+    return (additionPairs - multiplicationPairs) + (multiplicationPairs - additionPairs)
+}
 
 private fun List<IndexedResolvedTileAssignment>.unorderedStripEntryPairsFor(
     operator: Operator
