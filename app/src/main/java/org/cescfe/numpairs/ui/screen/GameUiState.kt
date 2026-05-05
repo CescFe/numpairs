@@ -185,7 +185,8 @@ data class TileUiState(
     val operatorLabel: String,
     val rightOperandLabel: String,
     val resultLabel: String,
-    val visualState: TileVisualState = TileVisualState.NORMAL
+    val visualState: TileVisualState = TileVisualState.NORMAL,
+    val canReset: Boolean = false
 ) {
     val isInvalid: Boolean
         get() = visualState == TileVisualState.INCORRECT
@@ -198,7 +199,8 @@ data class TileUiState(
         operatorLabel = tile.expression.operator.symbol,
         rightOperandLabel = tile.expression.rightOperand.label,
         resultLabel = tile.result.toString(),
-        visualState = visualState
+        visualState = visualState,
+        canReset = tile.canReset
     )
 }
 

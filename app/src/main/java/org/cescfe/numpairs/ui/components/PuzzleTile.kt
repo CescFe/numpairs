@@ -8,19 +8,24 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -45,6 +50,9 @@ private val TILE_EXPRESSION_ITEM_MIN_WIDTH = 24.dp
 private val TILE_EXPRESSION_ITEM_MIN_HEIGHT = 40.dp
 private val TILE_OPERAND_TEXT_PADDING = 0.dp
 private val TILE_OPERATOR_SLOT_WIDTH = 28.dp
+private val TILE_RESET_ACTION_CONTAINER_SIZE = 28.dp
+private val TILE_RESET_ACTION_ICON_SIZE = 16.dp
+private val TILE_RESET_ACTION_PADDING = 8.dp
 private const val LARGE_OPERAND_CHARACTER_COUNT = 3
 
 @Composable
@@ -57,7 +65,9 @@ fun PuzzleTile(
     onOperatorClick: (() -> Unit)? = null,
     operatorOverlay: @Composable BoxScope.() -> Unit = {},
     rightOperandModifier: Modifier = Modifier,
-    onRightOperandClick: (() -> Unit)? = null
+    onRightOperandClick: (() -> Unit)? = null,
+    resetModifier: Modifier = Modifier,
+    onResetClick: (() -> Unit)? = null
 ) {
     val expressionColor = when (tile.visualState) {
         TileVisualState.INCORRECT -> MaterialTheme.colorScheme.error
@@ -80,50 +90,86 @@ fun PuzzleTile(
         TileVisualState.NORMAL -> null
     }
 
-    Card(
+    Box(
         modifier = modifier.semantics {
             if (tileStateDescription != null) {
                 stateDescription = tileStateDescription
             }
-        },
-        shape = RoundedCornerShape(TILE_CORNER_RADIUS),
-        colors = if (containerColor == Color.Unspecified) {
-            CardDefaults.cardColors()
-        } else {
-            CardDefaults.cardColors(containerColor = containerColor)
-        },
-        border = border
+        }
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = TILE_HORIZONTAL_PADDING, vertical = TILE_VERTICAL_PADDING),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Card(
+            modifier = Modifier,
+            shape = RoundedCornerShape(TILE_CORNER_RADIUS),
+            colors = if (containerColor == Color.Unspecified) {
+                CardDefaults.cardColors()
+            } else {
+                CardDefaults.cardColors(containerColor = containerColor)
+            },
+            border = border
         ) {
-            TileExpressionRow(
-                tile = tile,
-                leftOperandModifier = leftOperandModifier,
-                onLeftOperandClick = onLeftOperandClick,
-                operatorModifier = operatorModifier,
-                onOperatorClick = onOperatorClick,
-                operatorOverlay = operatorOverlay,
-                rightOperandModifier = rightOperandModifier,
-                onRightOperandClick = onRightOperandClick,
-                textColor = expressionColor,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Text(
-                text = tile.resultLabel,
-                modifier = Modifier.fillMaxWidth(),
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontSize = MaterialTheme.typography.bodyLarge.fontSize * 2,
-                    lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 2
-                ),
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = TILE_HORIZONTAL_PADDING, vertical = TILE_VERTICAL_PADDING),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                TileExpressionRow(
+                    tile = tile,
+                    leftOperandModifier = leftOperandModifier,
+                    onLeftOperandClick = onLeftOperandClick,
+                    operatorModifier = operatorModifier,
+                    onOperatorClick = onOperatorClick,
+                    operatorOverlay = operatorOverlay,
+                    rightOperandModifier = rightOperandModifier,
+                    onRightOperandClick = onRightOperandClick,
+                    textColor = expressionColor,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Text(
+                    text = tile.resultLabel,
+                    modifier = Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontSize = MaterialTheme.typography.bodyLarge.fontSize * 2,
+                        lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 2
+                    ),
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+
+        if (tile.canReset && onResetClick != null) {
+            val resetContentDescription = stringResource(R.string.tile_reset_content_description)
+
+            Surface(
+                onClick = onResetClick,
+                modifier = resetModifier
+                    .align(Alignment.TopEnd)
+                    .padding(TILE_RESET_ACTION_PADDING)
+                    .size(TILE_RESET_ACTION_CONTAINER_SIZE),
+                shape = RoundedCornerShape(999.dp),
+                color = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.primary,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .semantics {
+                            stateDescription = resetContentDescription
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_replay),
+                        contentDescription = resetContentDescription,
+                        modifier = Modifier.size(TILE_RESET_ACTION_ICON_SIZE),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
         }
     }
 }
