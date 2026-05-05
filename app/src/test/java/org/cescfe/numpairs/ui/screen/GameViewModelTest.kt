@@ -38,6 +38,7 @@ class GameViewModelTest {
         )
         assertEquals(8, uiState.tiles.size)
         assertEquals(TileUiState("?", "?", "?", "223"), uiState.tiles.first())
+        assertTrue(uiState.tiles.none { tile -> tile.isPairingMismatchHighlighted })
         assertNull(uiState.puzzleOutcome)
         assertFalse(uiState.isSuccessOverlayVisible)
         assertNull(uiState.stripItemEntryDialog)
@@ -531,7 +532,10 @@ class GameViewModelTest {
 
         val uiState = viewModel.uiState.value
 
-        assertEquals(TileUiState("1", "×", "222", "223", isInvalid = true), uiState.tiles.first())
+        assertEquals(
+            TileUiState("1", "×", "222", "223", visualState = TileVisualState.INCORRECT),
+            uiState.tiles.first()
+        )
         assertTrue(uiState.tiles.first().isInvalid)
         assertNull(uiState.tileOperandSelectionDialog)
         assertNull(uiState.tileOperatorSelectionDialog)
@@ -561,8 +565,11 @@ class GameViewModelTest {
             initialPuzzle = solvedPuzzleWithKnownStripAndAssignments()
         )
 
-        assertEquals(PuzzleOutcomeUiState.Solved, viewModel.uiState.value.puzzleOutcome)
-        assertTrue(viewModel.uiState.value.isSuccessOverlayVisible)
+        val uiState = viewModel.uiState.value
+
+        assertEquals(PuzzleOutcomeUiState.Solved, uiState.puzzleOutcome)
+        assertTrue(uiState.isSuccessOverlayVisible)
+        assertTrue(uiState.tiles.none { tile -> tile.isPairingMismatchHighlighted })
     }
 
     @Test
@@ -600,16 +607,24 @@ class GameViewModelTest {
         )
 
         assertNull(viewModel.uiState.value.puzzleOutcome)
+        assertTrue(viewModel.uiState.value.tiles.none { tile -> tile.isPairingMismatchHighlighted })
 
         viewModel.onTileOperatorTapped(index = 1)
         viewModel.onTileOperatorSelectionConfirmed(operator = Operator.MULTIPLICATION)
 
+        val uiState = viewModel.uiState.value
+        val highlightedTileIndexes = uiState.tiles.mapIndexedNotNull { index, tile ->
+            index.takeIf { tile.isPairingMismatchHighlighted }
+        }
+
         assertEquals(
             PuzzleOutcomeUiState.Invalid(PuzzleCompletionState.MISMATCHED_SUM_PRODUCT_PAIRINGS),
-            viewModel.uiState.value.puzzleOutcome
+            uiState.puzzleOutcome
         )
-        assertFalse(viewModel.uiState.value.isSuccessOverlayVisible)
-        assertFalse(viewModel.uiState.value.puzzleOutcome == PuzzleOutcomeUiState.Solved)
+        assertEquals(listOf(0, 1, 2, 3), highlightedTileIndexes)
+        assertFalse(uiState.tiles[0].isInvalid)
+        assertFalse(uiState.isSuccessOverlayVisible)
+        assertFalse(uiState.puzzleOutcome == PuzzleOutcomeUiState.Solved)
     }
 
     @Test
