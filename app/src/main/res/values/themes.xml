@@ -2,4 +2,10 @@
 <resources>
 
     <style name="Theme.NumPairs" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.NumPairs.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_numpairs</item>
+        <item name="windowSplashScreenBackground">@color/num_pairs_splash_background</item>
+        <item name="postSplashScreenTheme">@style/Theme.NumPairs</item>
+    </style>
 </resources>
