@@ -10,25 +10,11 @@ The project is being built iteratively, starting with a small playable prototype
 
 ### Version: v0 - Playable Prototype
 
-Current milestone focus:
+Completed: [prd-v0.md](./docs/product/prd/prd-v0.md)
 
-- Single Android screen
-- 8-tile puzzle board
-- 8-number strip
-- Responsive layout for strip and board
-- Bounded tile sizing to avoid stretched cards on wide screens
-- Larger visual emphasis for tile results
-- Initial puzzle domain model
-- Lightweight Compose UI instrumented tests for `GameScreen`
+### Active milestone: v1 - Product Polish & Technical Hardening
 
-Not included yet:
-
-- Scoring
-- Persistence
-- Animations
-- Difficulty levels
-- Multiple puzzles
-- Backend or user accounts
+Current implementation baseline: [prd-v1.md](./docs/product/prd/prd-v1.md)
 
 ---
 
@@ -82,20 +68,12 @@ docs/
 
 ## Documentation
 
-- Product Requirements Document (PRD): `docs/product/prd/prd-v0.md`
-- Product roadmap: `docs/product/roadmap.md`
+- Product Requirements Documents: `docs/product/prd/`
+- Product roadmap: [roadmap.md](./docs/product/roadmap.md)
 - UX decisions: `docs/product/ux-decisions.md`
-- Architectural Decision Records (ADR): `docs/technical/adr/`
+- Architectural Decision Records: `docs/technical/adr/`
 - Game rules: `docs/game-rules.md`
 - Ubiquitous Language: `docs/ubiquitous-language.md`
-
----
-
-## Roadmap
-
-- Current baseline: `v0 - Playable Prototype`
-- Planned milestones: `v1 - Product Polish & Technical Hardening`, `v2 - Content & Session Flow`, `v3 - Game Modes, Guidance & Progression`
-- Canonical roadmap: `docs/product/roadmap.md`
 
 ---
 
