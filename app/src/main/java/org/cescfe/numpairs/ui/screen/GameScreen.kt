@@ -127,6 +127,7 @@ fun GameScreen(
     onTileOperandSelectionDismissed: () -> Unit = {},
     onTileOperandSelectionConfirmed: (Int) -> Unit = {},
     onTileOperatorTapped: (Int) -> Unit = {},
+    onTileResetTapped: (Int) -> Unit = {},
     onTileOperatorSelectionDismissed: () -> Unit = {},
     onTileOperatorSelectionConfirmed: (Operator) -> Unit = {},
     onSuccessOverlayDismissed: () -> Unit = {}
@@ -170,6 +171,7 @@ fun GameScreen(
                     onTileLeftOperandTapped = onTileLeftOperandTapped,
                     onTileRightOperandTapped = onTileRightOperandTapped,
                     onTileOperatorTapped = onTileOperatorTapped,
+                    onTileResetTapped = onTileResetTapped,
                     tileOperatorSelectionDialog = uiState.tileOperatorSelectionDialog,
                     onTileOperatorSelectionDismissed = onTileOperatorSelectionDismissed,
                     onTileOperatorSelectionConfirmed = onTileOperatorSelectionConfirmed,
@@ -310,6 +312,7 @@ private fun BoardSection(
     onTileLeftOperandTapped: (Int) -> Unit,
     onTileRightOperandTapped: (Int) -> Unit,
     onTileOperatorTapped: (Int) -> Unit,
+    onTileResetTapped: (Int) -> Unit,
     tileOperatorSelectionDialog: TileOperatorSelectionDialogUiState?,
     onTileOperatorSelectionDismissed: () -> Unit,
     onTileOperatorSelectionConfirmed: (Operator) -> Unit,
@@ -368,7 +371,9 @@ private fun BoardSection(
                                     }
                                 },
                                 rightOperandModifier = Modifier.testTag(GameScreenTestTags.tileRightOperand(tileIndex)),
-                                onRightOperandClick = { onTileRightOperandTapped(tileIndex) }
+                                onRightOperandClick = { onTileRightOperandTapped(tileIndex) },
+                                resetModifier = Modifier.testTag(GameScreenTestTags.tileReset(tileIndex)),
+                                onResetClick = { onTileResetTapped(tileIndex) }
                             )
                         }
                     }

@@ -16,6 +16,7 @@
     <string name="tile_operator_option_multiplication">Multiplication (×)</string>
     <string name="tile_state_incorrect">Incorrect tile</string>
     <string name="tile_state_mismatched_pairing">Mismatched pairing tile</string>
+    <string name="tile_reset_content_description">Reset tile</string>
     <string name="success_overlay_message">Puzzle Completed!</string>
     <string name="success_overlay_supporting_text">All pairs matched.</string>
     <string name="puzzle_outcome_invalid_title">Completed, but not solved</string>

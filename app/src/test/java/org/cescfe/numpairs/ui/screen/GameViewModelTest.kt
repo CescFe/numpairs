@@ -198,7 +198,7 @@ class GameViewModelTest {
 
         val uiState = viewModel.uiState.value
 
-        assertEquals(TileUiState("6", "?", "?", "223"), uiState.tiles.first())
+        assertEquals(TileUiState("6", "?", "?", "223", canReset = true), uiState.tiles.first())
         assertNull(uiState.tileOperandSelectionDialog)
     }
 
@@ -245,7 +245,7 @@ class GameViewModelTest {
 
         val uiState = viewModel.uiState.value
 
-        assertEquals(TileUiState("25", "?", "?", "223"), uiState.tiles.first())
+        assertEquals(TileUiState("25", "?", "?", "223", canReset = true), uiState.tiles.first())
         assertNull(uiState.tileOperandSelectionDialog)
     }
 
@@ -300,7 +300,7 @@ class GameViewModelTest {
 
         val uiState = viewModel.uiState.value
 
-        assertEquals(TileUiState("6", "?", "?", "223"), uiState.tiles.first())
+        assertEquals(TileUiState("6", "?", "?", "223", canReset = true), uiState.tiles.first())
         assertNull(uiState.tileOperandSelectionDialog)
     }
 
@@ -464,7 +464,7 @@ class GameViewModelTest {
 
         val uiState = viewModel.uiState.value
 
-        assertEquals(TileUiState("?", "+", "?", "223"), uiState.tiles.first())
+        assertEquals(TileUiState("?", "+", "?", "223", canReset = true), uiState.tiles.first())
         assertNull(uiState.tileOperatorSelectionDialog)
     }
 
@@ -513,7 +513,7 @@ class GameViewModelTest {
 
         val uiState = viewModel.uiState.value
 
-        assertEquals(TileUiState("?", "×", "?", "223"), uiState.tiles.first())
+        assertEquals(TileUiState("?", "×", "?", "223", canReset = true), uiState.tiles.first())
         assertNull(uiState.tileOperatorSelectionDialog)
     }
 
@@ -533,7 +533,7 @@ class GameViewModelTest {
         val uiState = viewModel.uiState.value
 
         assertEquals(
-            TileUiState("1", "×", "222", "223", visualState = TileVisualState.INCORRECT),
+            TileUiState("1", "×", "222", "223", visualState = TileVisualState.INCORRECT, canReset = true),
             uiState.tiles.first()
         )
         assertTrue(uiState.tiles.first().isInvalid)
@@ -557,6 +557,83 @@ class GameViewModelTest {
         viewModel.onTileOperatorSelectionConfirmed(operator = Operator.ADDITION)
 
         assertFalse(viewModel.uiState.value.tiles.first().isInvalid)
+    }
+
+    @Test
+    fun partially_filled_tiles_expose_the_reset_action_in_ui_state() {
+        val viewModel = GameViewModel()
+
+        assertFalse(viewModel.uiState.value.tiles.first().canReset)
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
+
+        assertTrue(viewModel.uiState.value.tiles.first().canReset)
+    }
+
+    @Test
+    fun resetting_a_partially_filled_tile_restores_its_initial_state_without_touching_strip_or_other_tiles() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
+        viewModel.onTileOperatorTapped(index = 1)
+        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.ADDITION)
+
+        val stripLabelsBeforeReset = viewModel.uiState.value.stripItems.map { it.label }
+        val otherTileBeforeReset = viewModel.uiState.value.tiles[1]
+
+        viewModel.onTileResetTapped(index = 0)
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals(TileUiState("?", "?", "?", "223"), uiState.tiles.first())
+        assertFalse(uiState.tiles.first().canReset)
+        assertEquals(stripLabelsBeforeReset, uiState.stripItems.map { it.label })
+        assertEquals(otherTileBeforeReset, uiState.tiles[1])
+    }
+
+    @Test
+    fun resetting_an_incorrect_tile_clears_invalid_styling_and_restores_the_initial_expression() {
+        val viewModel = GameViewModel()
+
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryConfirmed(value = 1)
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 1)
+        viewModel.onTileOperatorTapped(index = 0)
+        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.MULTIPLICATION)
+        viewModel.onTileRightOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 7)
+
+        assertTrue(viewModel.uiState.value.tiles.first().isInvalid)
+
+        viewModel.onTileResetTapped(index = 0)
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals(TileUiState("?", "?", "?", "223"), uiState.tiles.first())
+        assertFalse(uiState.tiles.first().isInvalid)
+        assertFalse(uiState.tiles.first().canReset)
+    }
+
+    @Test
+    fun resetting_a_correct_tile_clears_solved_feedback_when_needed() {
+        val viewModel = GameViewModel(
+            initialPuzzle = solvedPuzzleWithKnownStripAndAssignments()
+        )
+
+        assertEquals(PuzzleOutcomeUiState.Solved, viewModel.uiState.value.puzzleOutcome)
+        assertTrue(viewModel.uiState.value.isSuccessOverlayVisible)
+
+        viewModel.onSuccessOverlayDismissed()
+        viewModel.onTileResetTapped(index = 0)
+
+        val uiState = viewModel.uiState.value
+
+        assertNull(uiState.puzzleOutcome)
+        assertFalse(uiState.isSuccessOverlayVisible)
+        assertEquals(TileUiState("?", "?", "?", "3"), uiState.tiles.first())
     }
 
     @Test

@@ -189,6 +189,27 @@ class GameViewModel(initialPuzzle: Puzzle = PuzzleSamples.prototype) : ViewModel
         publishUiState()
     }
 
+    fun onTileResetTapped(index: Int) {
+        if (isSuccessOverlayVisible()) {
+            return
+        }
+
+        val currentTile = puzzle.board.tiles.getOrNull(index) ?: return
+        if (!currentTile.canReset) {
+            return
+        }
+
+        val updatedTiles = puzzle.board.tiles.toMutableList().apply {
+            set(index, currentTile.reset())
+        }
+
+        stripItemEntryDialogIndex = null
+        tileOperatorSelectionDialogIndex = null
+        tileOperandSelectionTarget = null
+        replacePuzzle(puzzle.copy(board = Board(updatedTiles)))
+        publishUiState()
+    }
+
     private fun publishUiState() {
         _uiState.value = GameUiState.from(
             puzzle = puzzle,
