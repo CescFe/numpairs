@@ -8,10 +8,7 @@ sealed interface AppDestination {
 }
 
 @Composable
-fun AppNavigation(
-    modifier: Modifier = Modifier,
-    startDestination: AppDestination = AppDestination.Game
-) {
+fun AppNavigation(modifier: Modifier = Modifier, startDestination: AppDestination = AppDestination.Game) {
     when (startDestination) {
         AppDestination.Game -> GameRoute(modifier = modifier)
     }
