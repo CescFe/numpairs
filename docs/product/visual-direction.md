@@ -15,13 +15,22 @@ This visual direction belongs to the `v1 - Product Polish & Technical Hardening`
 
 ---
 
+## Asset References
+
+- Source of truth for the reusable app asset: [`ic_numpairs.xml`](../../app/src/main/res/drawable/ic_numpairs.xml)
+- PNG preview used in documentation: [`numpairs-logo-preview.png`](../assets/numpairs-logo-preview.png)
+
+The PNG is included here because standard Markdown renderers can preview PNG assets directly, while Android `VectorDrawable` XML files are not rendered as images in repository previews.
+
+---
+
 ## Product Context
 
 NumPairs is a native Android number puzzle game.
 
 The core interaction is based on solving puzzle tiles by completing number expressions that match a target result.
 
-The current prototype uses Android's default Material theme configuration, including dynamic colors and automatic light/dark mode adaptation based on the user's device settings.
+The current prototype uses Material 3 with light/dark theme adaptation and dynamic colors on Android 12+.
 
 Because of this, the visual identity should not depend on a fixed app color palette at this stage.
 
@@ -57,9 +66,9 @@ At this stage, the visual system intentionally avoids depending on one fixed bra
 
 ---
 
-# Primary Logo Direction
+## Primary Logo Direction
 
-## Core Concept
+### Core Concept
 
 The v1 NumPairs logo is based on the concept of an unresolved mathematical expression.
 
@@ -67,7 +76,7 @@ The logo intentionally avoids representing a specific solved Tile or a specific 
 
 Instead, the logo focuses on the universal structure shared by all puzzles:
 
-```text id="rjz8pb"
+```text
 ? [+×] ?
 ```
 
@@ -80,18 +89,20 @@ The central vertical operator element represents the two core game operations:
 
 This creates a logo that communicates:
 
-* unknown values
-* mathematical reasoning
-* multiple possible operations
-* puzzle resolution mechanics
+- unknown values
+- mathematical reasoning
+- multiple possible operations
+- puzzle resolution mechanics
 
 without depending on any specific puzzle example.
 
 ---
 
-# Logo Composition
+## Logo Composition
 
-![numpairs_logo](../../app/src/main/res/drawable/ic_numpairs.png)
+![NumPairs logo preview](../assets/numpairs-logo-preview.png)
+
+This preview uses the exported PNG for repository rendering. The reusable in-app asset remains the vector source at [`ic_numpairs.xml`](../../app/src/main/res/drawable/ic_numpairs.xml).
 
 The logo is composed of exactly three visual elements arranged horizontally:
 
@@ -107,85 +118,87 @@ The central operand group should visually read as a single combined symbol.
 
 The logo should feel:
 
-* balanced
-* minimal
-* modern
-* geometric
-* highly legible
+- balanced
+- minimal
+- modern
+- geometric
+- highly legible
 
 The composition should resemble a symbolic puzzle mark rather than a complete mathematical equation.
 
 ---
 
-# Visual Style
+## Visual Style
 
 The v1 logo should follow a minimalist monochrome style.
 
 Recommended characteristics:
 
-* flat design
-* no gradients
-* no shadows
-* no outlines
-* no decorative containers
-* no Tile borders
-* no divider lines
-* strong visual contrast
-* rounded geometric symbol shapes
+- flat design
+- no gradients
+- no shadows
+- no outlines
+- no decorative containers
+- no tile borders
+- no divider lines
+- strong visual contrast
+- rounded geometric symbol shapes
 
 The design should work correctly in:
 
-* black on white
-* white on black
-* monochrome environments
-* adaptive Android contexts
-* Typography Direction
+- black on white
+- white on black
+- monochrome environments
+- adaptive Android contexts
 
 ---
 
-# Typography Direction
+## Typography Direction
 
 The symbol itself acts as the primary logo mark.
 
 If a wordmark is used alongside the symbol (`NumPairs`), it should follow these principles:
 
-* clean
-* modern
-* rounded or slightly soft
-* highly readable
-* not overly playful
-* not overly technical
+- clean
+- modern
+- rounded or slightly soft
+- highly readable
+- not overly playful
+- not overly technical
 
 The visual tone should balance:
 
-* casual puzzle game
-* polished product
-* clarity-first interface
-* Color Direction
+- casual puzzle game
+- polished product
+- clarity-first interface
 
 ---
 
-# Color Direction
+## Color Direction
 
 NumPairs currently relies on Android dynamic theming.
 
 Because of this, the visual identity should remain recognizable independently of one mandatory palette.
 
-The logo should primarily exist as black characters on white background.
+The logo should primarily exist as black characters on a white background in documentation and as a monochrome mark in product assets when appropriate.
 
 The shape and composition are considered more important than palette consistency.
 
 ---
 
-# Launcher Icon Direction
+## Launcher Icon Direction
 
 The Android launcher icon should reuse the same symbolic language as the primary logo.
 
 An adaptive icon version should be prepared for Android.
 
+The launcher asset should not reuse the full white documentation canvas as-is. Instead, the adaptive icon foreground should use the symbol-only mark, centered with safe padding so it remains legible across Android launcher masks.
+
+If a monochrome launcher layer is provided, it should reuse the same simplified symbol.
+
 ---
 
-# Splash Screen Direction
+## Splash Screen Direction
 
 For v1, the Splash Screen should remain simple.
 
@@ -199,9 +212,9 @@ NumPairs
 
 The Splash Screen should prioritize:
 
-* clarity
-* immediate recognition
-* fast loading perception
+- clarity
+- immediate recognition
+- fast loading perception
 
 A future iteration may introduce subtle animation, transitioning from an unresolved expression to a resolved one.
 
@@ -209,26 +222,26 @@ Animations should remain elegant and minimal.
 
 ---
 
-# Accessibility and Legibility Requirements
+## Accessibility and Legibility Requirements
 
 The logo and icon should remain understandable at small sizes.
 
 The design should prioritize:
 
-* strong contrast
-* simple geometry
-* minimal detail
-* readable symbols
-* balanced spacing
-* recognizable silhouette
+- strong contrast
+- simple geometry
+- minimal detail
+- readable symbols
+- balanced spacing
+- recognizable silhouette
 
 The central operator group must remain distinguishable even at reduced sizes.
 
 ---
 
-# Alternatives Considered
+## Alternatives Considered
 
-## Solved Tile
+### Solved Tile
 
 ```
 2 × 4
@@ -239,17 +252,17 @@ This concept strongly represented the gameplay loop and puzzle resolution mechan
 
 However, it was discarded as the primary logo direction because:
 
-* it implied a specific puzzle result
-* it could create confusion with actual gameplay values
-* it tied the identity to one concrete example
+- it implied a specific puzzle result
+- it could create confusion with actual gameplay values
+- it tied the identity to one concrete example
 
 The concept may still remain useful for:
 
-* marketing assets
-* onboarding illustrations
-* future Splash Screen animation
+- marketing assets
+- onboarding illustrations
+- future Splash Screen animation
 
-## Mystery Tile
+### Mystery Tile
 
 ```
 ? × ?
@@ -260,12 +273,12 @@ This concept communicated hidden operands and puzzle solving.
 
 It was closer to the final direction, but the explicit result value was ultimately removed to avoid associating the brand with one specific solution.
 
-## Multi-Tile Board
+### Multi-Tile Board
 
 A small board composed of multiple Tiles was considered.
 
 This approach was rejected because:
 
-* it added too much visual complexity
-* it scaled poorly for launcher icon usage
-* it reduced legibility at small sizes
+- it added too much visual complexity
+- it scaled poorly for launcher icon usage
+- it reduced legibility at small sizes
