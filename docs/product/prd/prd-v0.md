@@ -1,7 +1,9 @@
-# PRD - Tetonor Android App (v0)
+# PRD - NumPairs (v0 Historical Snapshot)
+
+> Historical note: this document captures the original playable prototype scope and is superseded by [prd-v1.md](./prd-v1.md).
 
 ## Goal
-Build a simple Android app that allows users to view and play a Tetonor puzzle.
+Build a simple Android app that allows users to view and play a NumPairs puzzle.
 
 ## Target User
 - Casual puzzle players

@@ -37,21 +37,24 @@ Turn the prototype into a stable, clear, and maintainable foundation ready for f
 
 **High-level scope**
 
-- Improve feedback for correct puzzle completion
 - Improve feedback for incorrect tile and puzzle states
-- Add reset tile and reset puzzle interactions
+- Add reliable reset tile interaction
+- Design the first-pass NumPairs logo and launcher icon
+- Add a branded splash screen
 - Refine UI clarity, interaction flows, and accessibility semantics
+- Introduce AppNavigation to orchestrate app startup and future navigation flow
 - Refactor code for readability and maintainability
 - Clarify MVVM architecture boundaries
 - Improve test signal by increasing useful coverage and removing low-value tests
-- Update PRD and UI behavior documentation to match the implemented product
+- Update PRD and supporting product documentation to match the implemented product
 
 **Out of scope**
 
-- Scoring and timer
-- Persistence
+- Scoring system and timer
+- Persistence or save state
 - Difficulty modes
 - Multiple puzzles
+- Broader multiscreen content flows beyond splash-to-game startup
 
 ### v2 - Content & Session Flow
 
