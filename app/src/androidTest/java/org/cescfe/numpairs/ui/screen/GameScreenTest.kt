@@ -13,7 +13,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
-import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -122,6 +121,36 @@ class GameScreenTest {
             contentDescription = composeTestRule.activity.getString(
                 R.string.strip_item_known_content_description,
                 "6"
+            )
+        )
+    }
+
+    @Test
+    fun hiddenLeftOperandExposesAnAccessibleSlotLabel() {
+        assertTileSlotContentDescription(
+            testTag = GameScreenTestTags.tileLeftOperand(0),
+            contentDescription = composeTestRule.activity.getString(
+                R.string.tile_left_operand_hidden_content_description
+            )
+        )
+    }
+
+    @Test
+    fun hiddenRightOperandExposesAnAccessibleSlotLabel() {
+        assertTileSlotContentDescription(
+            testTag = GameScreenTestTags.tileRightOperand(0),
+            contentDescription = composeTestRule.activity.getString(
+                R.string.tile_right_operand_hidden_content_description
+            )
+        )
+    }
+
+    @Test
+    fun hiddenOperatorExposesAnAccessibleSlotLabel() {
+        assertTileSlotContentDescription(
+            testTag = GameScreenTestTags.tileOperator(0),
+            contentDescription = composeTestRule.activity.getString(
+                R.string.tile_operator_hidden_content_description
             )
         )
     }
@@ -343,9 +372,13 @@ class GameScreenTest {
             .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 2), useUnmergedTree = true)
             .performClick()
 
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
-            .assert(hasAnyDescendant(hasText("6")))
+        assertTileSlotContentDescription(
+            testTag = GameScreenTestTags.tileLeftOperand(0),
+            contentDescription = composeTestRule.activity.getString(
+                R.string.tile_left_operand_content_description,
+                "6"
+            )
+        )
 
         composeTestRule
             .onAllNodesWithTag(GameScreenTestTags.TILE_OPERAND_SELECTOR, useUnmergedTree = true)
@@ -393,17 +426,26 @@ class GameScreenTest {
             .onNodeWithTag(GameScreenTestTags.tileReset(0), useUnmergedTree = true)
             .performClick()
 
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
-            .assert(hasAnyDescendant(hasText("?")))
+        assertTileSlotContentDescription(
+            testTag = GameScreenTestTags.tileLeftOperand(0),
+            contentDescription = composeTestRule.activity.getString(
+                R.string.tile_left_operand_hidden_content_description
+            )
+        )
 
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
-            .assert(hasAnyDescendant(hasText("?")))
+        assertTileSlotContentDescription(
+            testTag = GameScreenTestTags.tileOperator(0),
+            contentDescription = composeTestRule.activity.getString(
+                R.string.tile_operator_hidden_content_description
+            )
+        )
 
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileRightOperand(0), useUnmergedTree = true)
-            .assert(hasAnyDescendant(hasText("?")))
+        assertTileSlotContentDescription(
+            testTag = GameScreenTestTags.tileRightOperand(0),
+            contentDescription = composeTestRule.activity.getString(
+                R.string.tile_right_operand_hidden_content_description
+            )
+        )
 
         composeTestRule
             .onAllNodesWithTag(GameScreenTestTags.tileReset(0), useUnmergedTree = true)
@@ -485,9 +527,13 @@ class GameScreenTest {
             .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId = 4), useUnmergedTree = true)
             .performClick()
 
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
-            .assert(hasAnyDescendant(hasText("25")))
+        assertTileSlotContentDescription(
+            testTag = GameScreenTestTags.tileLeftOperand(0),
+            contentDescription = composeTestRule.activity.getString(
+                R.string.tile_left_operand_content_description,
+                "25"
+            )
+        )
     }
 
     @Test
@@ -525,9 +571,12 @@ class GameScreenTest {
 
         pressBack()
 
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
-            .assert(hasAnyDescendant(hasText("?")))
+        assertTileSlotContentDescription(
+            testTag = GameScreenTestTags.tileLeftOperand(0),
+            contentDescription = composeTestRule.activity.getString(
+                R.string.tile_left_operand_hidden_content_description
+            )
+        )
 
         composeTestRule
             .onAllNodesWithTag(GameScreenTestTags.TILE_OPERAND_SELECTOR, useUnmergedTree = true)
@@ -554,9 +603,13 @@ class GameScreenTest {
 
         pressBack()
 
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
-            .assert(hasAnyDescendant(hasText("6")))
+        assertTileSlotContentDescription(
+            testTag = GameScreenTestTags.tileLeftOperand(0),
+            contentDescription = composeTestRule.activity.getString(
+                R.string.tile_left_operand_content_description,
+                "6"
+            )
+        )
     }
 
     @Test
@@ -665,9 +718,13 @@ class GameScreenTest {
             .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.ADDITION), useUnmergedTree = true)
             .performClick()
 
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
-            .assert(hasAnyDescendant(hasText("+")))
+        assertTileSlotContentDescription(
+            testTag = GameScreenTestTags.tileOperator(0),
+            contentDescription = composeTestRule.activity.getString(
+                R.string.tile_operator_content_description,
+                composeTestRule.activity.getString(R.string.tile_operator_option_addition)
+            )
+        )
 
         composeTestRule
             .onAllNodesWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR, useUnmergedTree = true)
@@ -686,9 +743,12 @@ class GameScreenTest {
 
         pressBack()
 
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
-            .assert(hasAnyDescendant(hasText("?")))
+        assertTileSlotContentDescription(
+            testTag = GameScreenTestTags.tileOperator(0),
+            contentDescription = composeTestRule.activity.getString(
+                R.string.tile_operator_hidden_content_description
+            )
+        )
 
         composeTestRule
             .onAllNodesWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR, useUnmergedTree = true)
@@ -725,9 +785,13 @@ class GameScreenTest {
             .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.MULTIPLICATION), useUnmergedTree = true)
             .performClick()
 
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
-            .assert(hasAnyDescendant(hasText("×")))
+        assertTileSlotContentDescription(
+            testTag = GameScreenTestTags.tileOperator(0),
+            contentDescription = composeTestRule.activity.getString(
+                R.string.tile_operator_content_description,
+                composeTestRule.activity.getString(R.string.tile_operator_option_multiplication)
+            )
+        )
     }
 
     @Test
@@ -898,6 +962,17 @@ class GameScreenTest {
     private fun assertStripItemContentDescription(index: Int, contentDescription: String) {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.stripItem(index))
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.ContentDescription,
+                    listOf(contentDescription)
+                )
+            )
+    }
+
+    private fun assertTileSlotContentDescription(testTag: String, contentDescription: String) {
+        composeTestRule
+            .onNodeWithTag(testTag)
             .assert(
                 SemanticsMatcher.expectValue(
                     SemanticsProperties.ContentDescription,
