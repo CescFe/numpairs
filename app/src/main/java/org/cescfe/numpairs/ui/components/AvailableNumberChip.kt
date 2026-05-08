@@ -13,6 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,13 +38,21 @@ fun AvailableNumberChip(
     label: String,
     modifier: Modifier = Modifier,
     style: AvailableNumberChipStyle = AvailableNumberChipStyle.KNOWN,
+    contentDescription: String? = null,
     onClick: (() -> Unit)? = null
 ) {
     val chipColors = chipColorsFor(style)
+    val chipModifier = if (contentDescription == null) {
+        modifier
+    } else {
+        modifier.semantics(mergeDescendants = true) {
+            this.contentDescription = contentDescription
+        }
+    }
 
     if (onClick == null) {
         Surface(
-            modifier = modifier,
+            modifier = chipModifier,
             shape = RoundedCornerShape(CHIP_CORNER_RADIUS),
             color = chipColors.containerColor,
             contentColor = chipColors.contentColor,
@@ -53,7 +63,7 @@ fun AvailableNumberChip(
         }
     } else {
         Surface(
-            modifier = modifier,
+            modifier = chipModifier,
             onClick = onClick,
             shape = RoundedCornerShape(CHIP_CORNER_RADIUS),
             color = chipColors.containerColor,
