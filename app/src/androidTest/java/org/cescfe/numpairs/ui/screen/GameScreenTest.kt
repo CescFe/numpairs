@@ -15,7 +15,7 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -106,6 +106,27 @@ class GameScreenTest {
     }
 
     @Test
+    fun hiddenStripItemExposesAnAccessibleChipLabel() {
+        assertStripItemContentDescription(
+            index = 1,
+            contentDescription = composeTestRule.activity.getString(
+                R.string.strip_item_hidden_content_description
+            )
+        )
+    }
+
+    @Test
+    fun knownStripItemExposesAnAccessibleChipLabel() {
+        assertStripItemContentDescription(
+            index = 2,
+            contentDescription = composeTestRule.activity.getString(
+                R.string.strip_item_known_content_description,
+                "6"
+            )
+        )
+    }
+
+    @Test
     fun tappingHiddenStripItemOpensEntryDialog() {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.stripItem(1))
@@ -142,9 +163,13 @@ class GameScreenTest {
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM)
             .performClick()
 
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.stripItem(1), useUnmergedTree = true)
-            .assert(hasAnyDescendant(hasText("2")))
+        assertStripItemContentDescription(
+            index = 1,
+            contentDescription = composeTestRule.activity.getString(
+                R.string.strip_item_player_entered_content_description,
+                "2"
+            )
+        )
     }
 
     @Test
@@ -204,9 +229,12 @@ class GameScreenTest {
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CANCEL)
             .performClick()
 
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.stripItem(1), useUnmergedTree = true)
-            .assert(hasAnyDescendant(hasText("?")))
+        assertStripItemContentDescription(
+            index = 1,
+            contentDescription = composeTestRule.activity.getString(
+                R.string.strip_item_hidden_content_description
+            )
+        )
     }
 
     @Test
@@ -863,6 +891,17 @@ class GameScreenTest {
                 SemanticsMatcher.expectValue(
                     SemanticsProperties.StateDescription,
                     stateDescription
+                )
+            )
+    }
+
+    private fun assertStripItemContentDescription(index: Int, contentDescription: String) {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(index))
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.ContentDescription,
+                    listOf(contentDescription)
                 )
             )
     }
