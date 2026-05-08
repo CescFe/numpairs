@@ -358,8 +358,10 @@ private fun BoardSection(
                                     .width(tileWidth)
                                     .wrapContentHeight(),
                                 leftOperandModifier = Modifier.testTag(GameScreenTestTags.tileLeftOperand(tileIndex)),
+                                leftOperandContentDescription = tileLeftOperandContentDescription(tile),
                                 onLeftOperandClick = { onTileLeftOperandTapped(tileIndex) },
                                 operatorModifier = Modifier.testTag(GameScreenTestTags.tileOperator(tileIndex)),
+                                operatorContentDescription = tileOperatorContentDescription(tile),
                                 onOperatorClick = { onTileOperatorTapped(tileIndex) },
                                 operatorOverlay = {
                                     tileOperatorSelectionUiState?.let { dialogUiState ->
@@ -371,6 +373,7 @@ private fun BoardSection(
                                     }
                                 },
                                 rightOperandModifier = Modifier.testTag(GameScreenTestTags.tileRightOperand(tileIndex)),
+                                rightOperandContentDescription = tileRightOperandContentDescription(tile),
                                 onRightOperandClick = { onTileRightOperandTapped(tileIndex) },
                                 resetModifier = Modifier.testTag(GameScreenTestTags.tileReset(tileIndex)),
                                 onResetClick = { onTileResetTapped(tileIndex) }
@@ -381,6 +384,37 @@ private fun BoardSection(
             }
         }
     }
+}
+
+@Composable
+private fun tileLeftOperandContentDescription(tile: TileUiState): String = if (tile.leftOperandLabel == "?") {
+    stringResource(R.string.tile_left_operand_hidden_content_description)
+} else {
+    stringResource(R.string.tile_left_operand_content_description, tile.leftOperandLabel)
+}
+
+@Composable
+private fun tileRightOperandContentDescription(tile: TileUiState): String = if (tile.rightOperandLabel == "?") {
+    stringResource(R.string.tile_right_operand_hidden_content_description)
+} else {
+    stringResource(R.string.tile_right_operand_content_description, tile.rightOperandLabel)
+}
+
+@Composable
+private fun tileOperatorContentDescription(tile: TileUiState): String = if (tile.operatorLabel == "?") {
+    stringResource(R.string.tile_operator_hidden_content_description)
+} else {
+    stringResource(
+        R.string.tile_operator_content_description,
+        tile.operatorAccessibilityLabel()
+    )
+}
+
+@Composable
+private fun TileUiState.operatorAccessibilityLabel(): String = when (operatorLabel) {
+    "+" -> stringResource(R.string.tile_operator_option_addition)
+    "×" -> stringResource(R.string.tile_operator_option_multiplication)
+    else -> operatorLabel
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

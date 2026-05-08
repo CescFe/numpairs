@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
@@ -64,11 +65,14 @@ fun PuzzleTile(
     tile: TileUiState,
     modifier: Modifier = Modifier,
     leftOperandModifier: Modifier = Modifier,
+    leftOperandContentDescription: String? = null,
     onLeftOperandClick: (() -> Unit)? = null,
     operatorModifier: Modifier = Modifier,
+    operatorContentDescription: String? = null,
     onOperatorClick: (() -> Unit)? = null,
     operatorOverlay: @Composable BoxScope.() -> Unit = {},
     rightOperandModifier: Modifier = Modifier,
+    rightOperandContentDescription: String? = null,
     onRightOperandClick: (() -> Unit)? = null,
     resetModifier: Modifier = Modifier,
     onResetClick: (() -> Unit)? = null
@@ -121,11 +125,14 @@ fun PuzzleTile(
                 TileExpressionRow(
                     tile = tile,
                     leftOperandModifier = leftOperandModifier,
+                    leftOperandContentDescription = leftOperandContentDescription,
                     onLeftOperandClick = onLeftOperandClick,
                     operatorModifier = operatorModifier,
+                    operatorContentDescription = operatorContentDescription,
                     onOperatorClick = onOperatorClick,
                     operatorOverlay = operatorOverlay,
                     rightOperandModifier = rightOperandModifier,
+                    rightOperandContentDescription = rightOperandContentDescription,
                     onRightOperandClick = onRightOperandClick,
                     textColor = expressionColor,
                     modifier = Modifier.fillMaxWidth()
@@ -194,11 +201,14 @@ private fun TileExpressionRow(
     tile: TileUiState,
     modifier: Modifier = Modifier,
     leftOperandModifier: Modifier = Modifier,
+    leftOperandContentDescription: String? = null,
     onLeftOperandClick: (() -> Unit)? = null,
     operatorModifier: Modifier = Modifier,
+    operatorContentDescription: String? = null,
     onOperatorClick: (() -> Unit)? = null,
     operatorOverlay: @Composable BoxScope.() -> Unit = {},
     rightOperandModifier: Modifier = Modifier,
+    rightOperandContentDescription: String? = null,
     onRightOperandClick: (() -> Unit)? = null,
     textColor: Color = Color.Unspecified
 ) {
@@ -212,6 +222,7 @@ private fun TileExpressionRow(
             modifier = Modifier
                 .weight(1f)
                 .then(leftOperandModifier),
+            contentDescription = leftOperandContentDescription,
             onClick = onLeftOperandClick,
             textColor = textColor,
             isOperand = true,
@@ -222,6 +233,7 @@ private fun TileExpressionRow(
             modifier = Modifier
                 .width(TILE_OPERATOR_SLOT_WIDTH)
                 .then(operatorModifier),
+            contentDescription = operatorContentDescription,
             onClick = onOperatorClick,
             textColor = textColor,
             overlayContent = operatorOverlay
@@ -231,6 +243,7 @@ private fun TileExpressionRow(
             modifier = Modifier
                 .weight(1f)
                 .then(rightOperandModifier),
+            contentDescription = rightOperandContentDescription,
             onClick = onRightOperandClick,
             textColor = textColor,
             isOperand = true,
@@ -243,14 +256,23 @@ private fun TileExpressionRow(
 private fun TileExpressionItem(
     text: String,
     modifier: Modifier = Modifier,
+    contentDescription: String? = null,
     onClick: (() -> Unit)? = null,
     textColor: Color = Color.Unspecified,
     isOperand: Boolean = false,
     horizontalTextPadding: Dp = 0.dp,
     overlayContent: @Composable BoxScope.() -> Unit = {}
 ) {
+    val slotModifier = if (contentDescription == null) {
+        modifier
+    } else {
+        modifier.semantics(mergeDescendants = true) {
+            this.contentDescription = contentDescription
+        }
+    }
+
     Box(
-        modifier = modifier
+        modifier = slotModifier
             .widthIn(min = TILE_EXPRESSION_ITEM_MIN_WIDTH)
             .defaultMinSize(minHeight = TILE_EXPRESSION_ITEM_MIN_HEIGHT)
             .let { currentModifier ->

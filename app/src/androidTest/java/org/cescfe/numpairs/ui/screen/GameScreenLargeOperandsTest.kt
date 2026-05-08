@@ -10,16 +10,16 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
-import androidx.compose.ui.test.hasAnyDescendant
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -77,17 +77,49 @@ class GameScreenLargeOperandsTest {
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
-            .assert(hasAnyDescendant(hasText("1")))
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.ContentDescription,
+                    listOf(
+                        composeTestRule.activity.getString(
+                            org.cescfe.numpairs.R.string.tile_left_operand_content_description,
+                            "1"
+                        )
+                    )
+                )
+            )
             .performClick()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
-            .assert(hasAnyDescendant(hasText("×")))
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.ContentDescription,
+                    listOf(
+                        composeTestRule.activity.getString(
+                            org.cescfe.numpairs.R.string.tile_operator_content_description,
+                            composeTestRule.activity.getString(
+                                org.cescfe.numpairs.R.string.tile_operator_option_multiplication
+                            )
+                        )
+                    )
+                )
+            )
             .performClick()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileRightOperand(0), useUnmergedTree = true)
-            .assert(hasAnyDescendant(hasText("222")))
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.ContentDescription,
+                    listOf(
+                        composeTestRule.activity.getString(
+                            org.cescfe.numpairs.R.string.tile_right_operand_content_description,
+                            "222"
+                        )
+                    )
+                )
+            )
             .performClick()
 
         composeTestRule.runOnIdle {
