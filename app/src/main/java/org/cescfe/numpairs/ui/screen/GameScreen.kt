@@ -633,11 +633,28 @@ private fun StripSection(
                 horizontalArrangement = Arrangement.spacedBy(STRIP_CHIP_SPACING)
             ) {
                 stripItems.forEachIndexed { index, stripItem ->
+                    val stripItemContentDescription = when (stripItem.visualStyle) {
+                        StripItemVisualStyle.KNOWN -> stringResource(
+                            R.string.strip_item_known_content_description,
+                            stripItem.label
+                        )
+
+                        StripItemVisualStyle.HIDDEN -> stringResource(
+                            R.string.strip_item_hidden_content_description
+                        )
+
+                        StripItemVisualStyle.PLAYER_ENTERED -> stringResource(
+                            R.string.strip_item_player_entered_content_description,
+                            stripItem.label
+                        )
+                    }
+
                     AvailableNumberChip(
                         label = stripItem.label,
                         modifier = Modifier
                             .width(chipWidth)
                             .testTag(GameScreenTestTags.stripItem(index)),
+                        contentDescription = stripItemContentDescription,
                         style = when (stripItem.visualStyle) {
                             StripItemVisualStyle.KNOWN -> AvailableNumberChipStyle.KNOWN
                             StripItemVisualStyle.HIDDEN -> AvailableNumberChipStyle.HIDDEN

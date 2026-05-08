@@ -2,6 +2,9 @@
     <string name="app_name">NumPairs</string>
     <string name="board_content_description">Board</string>
     <string name="strip_content_description">Strip</string>
+    <string name="strip_item_hidden_content_description">Hidden strip item</string>
+    <string name="strip_item_known_content_description">Known strip item, value %1$s</string>
+    <string name="strip_item_player_entered_content_description">Player-entered strip item, value %1$s</string>
     <string name="strip_entry_dialog_title">Enter number</string>
     <string name="strip_entry_input_label">Number</string>
     <string name="strip_entry_valid_range_bounded">Valid range: %1$d to %2$d</string>
