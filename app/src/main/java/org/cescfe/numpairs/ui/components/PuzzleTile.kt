@@ -173,11 +173,7 @@ private fun tileStatePalette(visualState: TileVisualState): TileStatePalette? {
     }
 }
 
-private data class TileStatePalette(
-    val containerColor: Color,
-    val contentColor: Color,
-    val border: BorderStroke
-)
+private data class TileStatePalette(val containerColor: Color, val contentColor: Color, val border: BorderStroke)
 
 @Composable
 private fun TileResetAction(modifier: Modifier = Modifier, onClick: () -> Unit) {
