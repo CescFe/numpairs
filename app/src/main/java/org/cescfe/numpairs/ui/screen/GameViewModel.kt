@@ -9,75 +9,49 @@ import org.cescfe.numpairs.domain.puzzle.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.StripItem
+import org.cescfe.numpairs.domain.puzzle.Tile
 import org.cescfe.numpairs.domain.puzzle.operandSelectionChoicesFor
 import org.cescfe.numpairs.initialPuzzle as defaultInitialPuzzle
 
 class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() {
     private var puzzle: Puzzle = initialPuzzle
-    private var stripItemEntryDialogIndex: Int? = null
-    private var tileOperatorSelectionDialogIndex: Int? = null
-    private var tileOperandSelectionTarget: TileOperandSelectionTarget? = null
-    private var isSuccessOverlayDismissed: Boolean = false
+    private var presentationState = GamePresentationState()
 
     private val _uiState = MutableStateFlow(
-        GameUiState.from(
-            puzzle = puzzle,
-            isSuccessOverlayVisible = isSuccessOverlayVisible(),
-            stripItemEntryDialogIndex = stripItemEntryDialogIndex,
-            tileOperatorSelectionDialogIndex = tileOperatorSelectionDialogIndex,
-            tileOperandSelectionTarget = tileOperandSelectionTarget
-        )
+        GameUiState.from(puzzle = puzzle, presentationState = presentationState)
     )
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
 
     fun onStripItemTapped(index: Int) {
-        if (isSuccessOverlayVisible()) {
+        if (!canInteractWithPuzzle()) {
             return
         }
 
-        val stripItem = puzzle.strip.items.getOrNull(index)
-
-        if (stripItem != StripItem.Hidden && stripItem !is StripItem.PlayerEntered) {
+        if (!canEditStripItem(index = index)) {
             return
         }
 
-        tileOperatorSelectionDialogIndex = null
-        tileOperandSelectionTarget = null
-        stripItemEntryDialogIndex = index
-        publishUiState()
+        commit { showStripItemEntry(index = index) }
     }
 
     fun onStripItemEntryDismissed() {
-        if (stripItemEntryDialogIndex == null) {
-            return
-        }
-
-        stripItemEntryDialogIndex = null
-        publishUiState()
+        commit { dismissStripItemEntry() }
     }
 
     fun onTileOperatorTapped(index: Int) {
-        if (isSuccessOverlayVisible()) {
+        if (!canInteractWithPuzzle()) {
             return
         }
 
-        if (puzzle.board.tiles.getOrNull(index) == null) {
+        if (!hasTile(index = index)) {
             return
         }
 
-        stripItemEntryDialogIndex = null
-        tileOperandSelectionTarget = null
-        tileOperatorSelectionDialogIndex = index
-        publishUiState()
+        commit { showTileOperatorSelection(tileIndex = index) }
     }
 
     fun onTileOperatorSelectionDismissed() {
-        if (tileOperatorSelectionDialogIndex == null) {
-            return
-        }
-
-        tileOperatorSelectionDialogIndex = null
-        publishUiState()
+        commit { dismissTileOperatorSelection() }
     }
 
     fun onTileLeftOperandTapped(index: Int) {
@@ -95,156 +69,193 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
     }
 
     fun onSuccessOverlayDismissed() {
-        if (!isSuccessOverlayVisible()) {
-            return
+        commit {
+            dismissSuccessOverlay(isPuzzleSolved = puzzle.isSolved)
         }
-
-        isSuccessOverlayDismissed = true
-        publishUiState()
     }
 
     fun onTileOperandSelectionDismissed() {
-        if (tileOperandSelectionTarget == null) {
-            return
-        }
-
-        tileOperandSelectionTarget = null
-        publishUiState()
+        commit { dismissTileOperandSelection() }
     }
 
     fun onStripItemEntryConfirmed(value: Int) {
-        val index = stripItemEntryDialogIndex ?: return
+        val index = (presentationState.modal as? GameModalState.StripItemEntry)?.index ?: return
         val currentStripItem = puzzle.strip.items.getOrNull(index) ?: return
 
         if (currentStripItem !is StripItem.Hidden && currentStripItem !is StripItem.PlayerEntered) {
-            stripItemEntryDialogIndex = null
-            publishUiState()
+            commit { dismissStripItemEntry() }
             return
         }
 
-        val validRange = puzzle.strip.validEntryRangeFor(index)
-
-        if (value !in validRange) {
-            publishUiState()
+        if (value !in puzzle.strip.validEntryRangeFor(index)) {
             return
         }
 
-        replacePuzzle(puzzle.copy(strip = puzzle.strip.withUpdatedEntry(index = index, value = value)))
-        stripItemEntryDialogIndex = null
-        publishUiState()
+        commit(
+            updatedPuzzle = puzzle.copy(
+                strip = puzzle.strip.withUpdatedEntry(
+                    index = index,
+                    value = value
+                )
+            )
+        ) {
+            dismissStripItemEntry()
+        }
     }
 
     fun onTileOperandSelectionConfirmed(stripEntryId: Int) {
-        val target = tileOperandSelectionTarget ?: return
-        val currentTile = puzzle.board.tiles.getOrNull(target.tileIndex) ?: return
-        val selectionChoice = puzzle.operandSelectionChoicesFor(
-            tileIndex = target.tileIndex,
-            slot = target.slot
-        ).firstOrNull { choice ->
-            choice.stripEntryId == stripEntryId
-        }
-        val selectedValue = puzzle.strip.visibleValueForEntry(stripEntryId)
+        val target = (presentationState.modal as? GameModalState.TileOperandSelection)?.target ?: return
+        val updatedPuzzle = puzzle.withSelectedOperand(
+            target = target,
+            stripEntryId = stripEntryId
+        ) ?: return
 
-        if (selectionChoice == null || !selectionChoice.canBeSelected || selectedValue == null) {
-            publishUiState()
-            return
+        commit(updatedPuzzle = updatedPuzzle) {
+            dismissTileOperandSelection()
         }
-
-        val updatedTiles = puzzle.board.tiles.toMutableList().apply {
-            set(
-                target.tileIndex,
-                when (target.slot) {
-                    OperandSlot.LEFT -> currentTile.withLeftOperand(
-                        value = selectedValue,
-                        stripEntryId = stripEntryId
-                    )
-                    OperandSlot.RIGHT -> currentTile.withRightOperand(
-                        value = selectedValue,
-                        stripEntryId = stripEntryId
-                    )
-                }
-            )
-        }
-
-        replacePuzzle(puzzle.copy(board = Board(updatedTiles)))
-        tileOperandSelectionTarget = null
-        publishUiState()
     }
 
     fun onTileOperatorSelectionConfirmed(operator: Operator) {
-        val index = tileOperatorSelectionDialogIndex ?: return
-        val currentTile = puzzle.board.tiles.getOrNull(index) ?: return
+        val tileIndex = (presentationState.modal as? GameModalState.TileOperatorSelection)?.tileIndex ?: return
+        val updatedPuzzle = puzzle.withSelectedOperator(
+            tileIndex = tileIndex,
+            operator = operator
+        ) ?: return
 
-        if (operator == Operator.Hidden) {
-            publishUiState()
-            return
+        commit(updatedPuzzle = updatedPuzzle) {
+            dismissTileOperatorSelection()
         }
-
-        val updatedTiles = puzzle.board.tiles.toMutableList().apply {
-            set(index, currentTile.withOperator(operator))
-        }
-
-        replacePuzzle(puzzle.copy(board = Board(updatedTiles)))
-        tileOperatorSelectionDialogIndex = null
-        publishUiState()
     }
 
     fun onTileResetTapped(index: Int) {
-        if (isSuccessOverlayVisible()) {
+        if (!canInteractWithPuzzle()) {
             return
         }
 
-        val currentTile = puzzle.board.tiles.getOrNull(index) ?: return
-        if (!currentTile.canReset) {
-            return
-        }
+        val updatedPuzzle = puzzle.withResetTile(tileIndex = index) ?: return
 
-        val updatedTiles = puzzle.board.tiles.toMutableList().apply {
-            set(index, currentTile.reset())
+        commit(updatedPuzzle = updatedPuzzle) {
+            clearModal()
         }
-
-        stripItemEntryDialogIndex = null
-        tileOperatorSelectionDialogIndex = null
-        tileOperandSelectionTarget = null
-        replacePuzzle(puzzle.copy(board = Board(updatedTiles)))
-        publishUiState()
     }
 
     private fun publishUiState() {
         _uiState.value = GameUiState.from(
             puzzle = puzzle,
-            isSuccessOverlayVisible = isSuccessOverlayVisible(),
-            stripItemEntryDialogIndex = stripItemEntryDialogIndex,
-            tileOperatorSelectionDialogIndex = tileOperatorSelectionDialogIndex,
-            tileOperandSelectionTarget = tileOperandSelectionTarget
+            presentationState = presentationState
         )
     }
 
     private fun onTileOperandTapped(index: Int, slot: OperandSlot) {
-        if (isSuccessOverlayVisible()) {
+        if (!canInteractWithPuzzle()) {
             return
         }
 
-        if (puzzle.board.tiles.getOrNull(index) == null) {
+        if (!hasTile(index = index)) {
             return
         }
 
-        stripItemEntryDialogIndex = null
-        tileOperatorSelectionDialogIndex = null
-        tileOperandSelectionTarget = TileOperandSelectionTarget(
-            tileIndex = index,
-            slot = slot
-        )
-        publishUiState()
+        commit {
+            showTileOperandSelection(
+                tileIndex = index,
+                slot = slot
+            )
+        }
     }
 
-    private fun replacePuzzle(updatedPuzzle: Puzzle) {
+    private fun commit(
+        updatedPuzzle: Puzzle = puzzle,
+        updatePresentation: GamePresentationState.() -> GamePresentationState = { this }
+    ) {
+        val nextPresentationState = presentationState
+            .updatePresentation()
+            .onPuzzleChanged(isPuzzleSolved = updatedPuzzle.isSolved)
+        val hasStateChanged = updatedPuzzle != puzzle || nextPresentationState != presentationState
+
         puzzle = updatedPuzzle
+        presentationState = nextPresentationState
 
-        if (!puzzle.isSolved) {
-            isSuccessOverlayDismissed = false
+        if (hasStateChanged) {
+            publishUiState()
         }
     }
 
-    private fun isSuccessOverlayVisible(): Boolean = puzzle.isSolved && !isSuccessOverlayDismissed
+    private fun canEditStripItem(index: Int): Boolean {
+        val stripItem = puzzle.strip.items.getOrNull(index)
+
+        return stripItem == StripItem.Hidden || stripItem is StripItem.PlayerEntered
+    }
+
+    private fun hasTile(index: Int): Boolean = puzzle.board.tiles.getOrNull(index) != null
+
+    private fun canInteractWithPuzzle(): Boolean =
+        !presentationState.isSuccessOverlayVisible(isPuzzleSolved = puzzle.isSolved)
+
+    private fun Puzzle.withSelectedOperand(
+        target: TileOperandSelectionTarget,
+        stripEntryId: Int
+    ): Puzzle? {
+        val currentTile = board.tiles.getOrNull(target.tileIndex) ?: return null
+        val selectionChoice = operandSelectionChoicesFor(
+            tileIndex = target.tileIndex,
+            slot = target.slot
+        ).firstOrNull { choice ->
+            choice.stripEntryId == stripEntryId
+        } ?: return null
+        val selectedValue = strip.visibleValueForEntry(stripEntryId) ?: return null
+
+        if (!selectionChoice.canBeSelected) {
+            return null
+        }
+
+        return withUpdatedTile(index = target.tileIndex) {
+            when (target.slot) {
+                OperandSlot.LEFT -> currentTile.withLeftOperand(
+                    value = selectedValue,
+                    stripEntryId = stripEntryId
+                )
+                OperandSlot.RIGHT -> currentTile.withRightOperand(
+                    value = selectedValue,
+                    stripEntryId = stripEntryId
+                )
+            }
+        }
+    }
+
+    private fun Puzzle.withSelectedOperator(tileIndex: Int, operator: Operator): Puzzle? {
+        if (operator == Operator.Hidden) {
+            return null
+        }
+
+        return withUpdatedTile(index = tileIndex) { tile ->
+            tile.withOperator(operator)
+        }
+    }
+
+    private fun Puzzle.withResetTile(tileIndex: Int): Puzzle? {
+        val currentTile = board.tiles.getOrNull(tileIndex) ?: return null
+
+        if (!currentTile.canReset) {
+            return null
+        }
+
+        return withUpdatedTile(index = tileIndex) { tile ->
+            tile.reset()
+        }
+    }
+
+    private inline fun Puzzle.withUpdatedTile(
+        index: Int,
+        update: (Tile) -> Tile
+    ): Puzzle? {
+        val currentTile = board.tiles.getOrNull(index) ?: return null
+
+        return copy(
+            board = Board(
+                tiles = board.tiles.toMutableList().apply {
+                    set(index, update(currentTile))
+                }
+            )
+        )
+    }
 }
