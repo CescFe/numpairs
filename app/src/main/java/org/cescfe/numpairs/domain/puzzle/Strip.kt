@@ -68,26 +68,10 @@ data class Strip private constructor(val entries: List<StripEntry>) {
         )
     }
 
-    fun visibleEntries(): List<VisibleStripEntry> = entries.mapIndexedNotNull { _, stripEntry ->
-        stripEntry.item.visibleValue?.let { visibleValue ->
-            VisibleStripEntry(
-                entryId = stripEntry.id,
-                value = visibleValue
-            )
-        }
-    }
-
-    fun visibleEntryWithId(entryId: Int): VisibleStripEntry? = entries
-        .withIndex()
-        .firstOrNull { indexedEntry ->
-            indexedEntry.value.id == entryId && indexedEntry.value.item.visibleValue != null
-        }
-        ?.let { indexedEntry ->
-            VisibleStripEntry(
-                entryId = indexedEntry.value.id,
-                value = indexedEntry.value.item.visibleValue ?: error("Visible strip entry must expose a value.")
-            )
-        }
+    fun visibleValueForEntry(entryId: Int): Int? = entries
+        .firstOrNull { stripEntry -> stripEntry.id == entryId }
+        ?.item
+        ?.visibleValue
 
     private fun editableRunContaining(index: Int): IntRange {
         requireEditableEntryAt(index)

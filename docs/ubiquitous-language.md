@@ -52,8 +52,22 @@ Supported operators:
 ## Strip
 The horizontal area containing the available numbers for the puzzle.
 
+## Strip Entry
+A unique game element within the strip.
+
+A strip entry has:
+- a stable identity
+- a current strip item
+
+Two strip entries may display the same numeric value and still remain distinct game elements.
+
+## Strip Entry Identity
+The stable identity attached to a strip entry across strip reordering.
+
+Tile operands reference strip entry identity rather than only a raw numeric value or a visual position.
+
 ## Strip Item
-A single position within the strip.
+A strip value state stored in a strip entry and displayed in one strip position.
 
 A strip item may be:
 - hidden
@@ -70,7 +84,14 @@ A strip item whose value is visible to the player at the beginning of the puzzle
 A strip item whose value was entered by the player after starting from a hidden state.
 
 ## Available Number
-A number contained in a strip item that can be used in tile expressions.
+A UI-facing shorthand for the visible numeric value exposed by a strip entry.
+
+Domain rules operate on strip entries and strip entry identity, not on raw numbers alone.
+
+## Visible Strip Entry
+A strip entry whose current strip item exposes a numeric value to the player.
+
+Visible strip entries can participate in operand selection.
 
 ## Operand Slot
 One editable operand position in the top row of a tile expression.
@@ -78,6 +99,23 @@ One editable operand position in the top row of a tile expression.
 A tile has:
 - left operand slot
 - right operand slot
+
+## Operand Selection Choice
+A domain representation of one selectable strip entry for a specific operand slot.
+
+An operand selection choice includes:
+- the strip entry identity
+- the currently visible value
+- operator-specific usage state
+- current availability for selection
+
+## Operand Selection Availability
+The current selection status of a strip entry for a specific operand slot.
+
+An operand selection choice may be:
+- available
+- exhausted
+- blocked by the opposite operand already assigned in the same tile
 
 ## Solution
 The correct assignment of operands and operators needed to solve the puzzle.

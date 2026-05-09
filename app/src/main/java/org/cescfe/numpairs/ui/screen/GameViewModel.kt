@@ -9,7 +9,7 @@ import org.cescfe.numpairs.domain.puzzle.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.StripItem
-import org.cescfe.numpairs.domain.puzzle.operandSelectionHintsFor
+import org.cescfe.numpairs.domain.puzzle.operandSelectionChoicesFor
 import org.cescfe.numpairs.initialPuzzle as defaultInitialPuzzle
 
 class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() {
@@ -137,15 +137,15 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
     fun onTileOperandSelectionConfirmed(stripEntryId: Int) {
         val target = tileOperandSelectionTarget ?: return
         val currentTile = puzzle.board.tiles.getOrNull(target.tileIndex) ?: return
-        val selectionHint = puzzle.operandSelectionHintsFor(
+        val selectionChoice = puzzle.operandSelectionChoicesFor(
             tileIndex = target.tileIndex,
             slot = target.slot
-        ).firstOrNull { hint ->
-            hint.stripEntry.entryId == stripEntryId
+        ).firstOrNull { choice ->
+            choice.stripEntryId == stripEntryId
         }
-        val selectedEntry = puzzle.strip.visibleEntryWithId(stripEntryId)
+        val selectedValue = puzzle.strip.visibleValueForEntry(stripEntryId)
 
-        if (selectionHint == null || !selectionHint.isSelectable || selectedEntry == null) {
+        if (selectionChoice == null || !selectionChoice.canBeSelected || selectedValue == null) {
             publishUiState()
             return
         }
@@ -155,12 +155,12 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
                 target.tileIndex,
                 when (target.slot) {
                     OperandSlot.LEFT -> currentTile.withLeftOperand(
-                        value = selectedEntry.value,
-                        stripEntryId = selectedEntry.entryId
+                        value = selectedValue,
+                        stripEntryId = stripEntryId
                     )
                     OperandSlot.RIGHT -> currentTile.withRightOperand(
-                        value = selectedEntry.value,
-                        stripEntryId = selectedEntry.entryId
+                        value = selectedValue,
+                        stripEntryId = stripEntryId
                     )
                 }
             )

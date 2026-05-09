@@ -1,8 +1,6 @@
 package org.cescfe.numpairs.domain.puzzle
 
-data class VisibleStripEntry(val entryId: Int, val value: Int)
-
-data class NumberUsageByOperator(
+data class StripEntryUsageByOperator(
     val additionUsageCount: Int = 0,
     val multiplicationUsageCount: Int = 0,
     val provisionalUsageCount: Int = 0
@@ -29,26 +27,44 @@ data class NumberUsageByOperator(
         get() = additionUsageCount + multiplicationUsageCount + provisionalUsageCount
 }
 
-data class OperandSelectionHint(
-    val stripEntry: VisibleStripEntry,
-    val usageByOperator: NumberUsageByOperator,
-    val isSelectable: Boolean = usageByOperator.totalAssignmentCount < MAX_ASSIGNMENTS_PER_STRIP_ENTRY
+enum class OperandSelectionAvailability {
+    AVAILABLE,
+    EXHAUSTED,
+    BLOCKED_BY_OPPOSITE_OPERAND
+}
+
+data class OperandSelectionChoice(
+    val stripEntryId: Int,
+    val value: Int,
+    val usageByOperator: StripEntryUsageByOperator,
+    val availability: OperandSelectionAvailability
 ) {
+    init {
+        require(stripEntryId >= 0) {
+            "Strip entry id must be non-negative."
+        }
+        require(value > 0) {
+            "Selectable operand values must be positive integers."
+        }
+    }
+
+    val canBeSelected: Boolean
+        get() = availability == OperandSelectionAvailability.AVAILABLE
+
     val totalAssignmentCount: Int
         get() = usageByOperator.totalAssignmentCount
 }
 
-fun Puzzle.operandSelectionHintsFor(tileIndex: Int, slot: OperandSlot): List<OperandSelectionHint> {
+fun Puzzle.operandSelectionChoicesFor(tileIndex: Int, slot: OperandSlot): List<OperandSelectionChoice> {
     val usageByEntryId = board.tiles
         .flatMapIndexed { indexedTile, tile -> tile.assignedStripEntries(tileIndex = indexedTile) }
         .filterNot { assignment -> assignment.tileIndex == tileIndex && assignment.slot == slot }
         .groupBy { assignment -> assignment.stripEntryId }
         .mapValues { (_, assignments) ->
-            NumberUsageByOperator(
+            StripEntryUsageByOperator(
                 additionUsageCount = assignments.count { assignment -> assignment.operator == Operator.ADDITION },
                 multiplicationUsageCount = assignments.count { assignment ->
-                    assignment.operator ==
-                        Operator.MULTIPLICATION
+                    assignment.operator == Operator.MULTIPLICATION
                 },
                 provisionalUsageCount = assignments.count { assignment -> assignment.operator == Operator.Hidden }
             )
@@ -57,15 +73,22 @@ fun Puzzle.operandSelectionHintsFor(tileIndex: Int, slot: OperandSlot): List<Ope
         .getOrNull(tileIndex)
         ?.assignedStripEntryId(slot.opposite())
 
-    return strip.visibleEntries().map { visibleEntry ->
-        val usage = usageByEntryId.getOrDefault(visibleEntry.entryId, NumberUsageByOperator())
+    return strip.entries.mapNotNull { stripEntry ->
+        stripEntry.item.visibleValue?.let { value ->
+            val usage = usageByEntryId.getOrDefault(stripEntry.id, StripEntryUsageByOperator())
 
-        OperandSelectionHint(
-            stripEntry = visibleEntry,
-            usageByOperator = usage,
-            isSelectable = usage.totalAssignmentCount < MAX_ASSIGNMENTS_PER_STRIP_ENTRY &&
-                visibleEntry.entryId != oppositeSlotEntryId
-        )
+            OperandSelectionChoice(
+                stripEntryId = stripEntry.id,
+                value = value,
+                usageByOperator = usage,
+                availability = when {
+                    stripEntry.id == oppositeSlotEntryId -> OperandSelectionAvailability.BLOCKED_BY_OPPOSITE_OPERAND
+                    usage.totalAssignmentCount >= MAX_ASSIGNMENTS_PER_STRIP_ENTRY ->
+                        OperandSelectionAvailability.EXHAUSTED
+                    else -> OperandSelectionAvailability.AVAILABLE
+                }
+            )
+        }
     }
 }
 
@@ -103,6 +126,13 @@ private fun Tile.assignedStripEntryId(slot: OperandSlot): Int? = when (slot) {
     OperandSlot.LEFT -> expression.leftOperand.stripEntryId
     OperandSlot.RIGHT -> expression.rightOperand.stripEntryId
 }
+
+private val StripItem.visibleValue: Int?
+    get() = when (this) {
+        StripItem.Hidden -> null
+        is StripItem.Known -> value
+        is StripItem.PlayerEntered -> value
+    }
 
 private val Expression.Operand.stripEntryId: Int?
     get() = when (this) {

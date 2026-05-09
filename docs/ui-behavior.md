@@ -16,7 +16,8 @@ This is intended as an implementation target for the prototype. It favors clear 
 
 ## Terminology
 
-- **Strip item**: one position in the number strip
+- **Strip item**: the visible chip and value state currently shown for one strip entry position in the number strip
+- **Strip entry**: the unique game element behind a strip item, with stable identity even if visible values reorder
 - **Editable run**: a contiguous strip segment made only of hidden and player-entered items, delimited by known items or strip edges
 - **Operand slot**: one editable operand position in the top row of a tile
 - **Operator slot**: the editable operator position in the top row of a tile
@@ -125,7 +126,7 @@ A tile as a whole may also be shown in one of these validation states:
 - Tapping a filled operator slot reopens the contextual selector so the value can be replaced
 - No strip item selection step is required before editing a grid slot
 
-This document defines only local tile-level correctness feedback. It does not define advanced prevention, hints, or whole-puzzle validation rules.
+This document defines local tile-level correctness feedback and operand/operator selection behavior. It does not define whole-puzzle validation feedback.
 
 ### Tile Validation Feedback
 
@@ -144,18 +145,18 @@ The contextual selector is the primary interaction used to edit the grid.
 
 - Opened by tapping a left or right operand slot
 - Uses a compact bottom sheet rather than a confirmation dialog
-- Shows the currently available numbers from the strip
+- Shows the currently visible strip entries from the strip
 - Repeated numeric values remain separate selectable options when they come from different strip entries
 - Hidden strip items are not shown as selectable values
 - Selecting a value immediately fills or replaces the operand slot and closes the sheet
 - Closing the selector without choosing a value leaves the slot unchanged
 - The selector does not specially highlight the currently assigned operand when reopened
-- Each visible strip entry shows subtle `+` and `×` usage hints derived from the current board state
+- Each visible strip entry shows subtle `+` and `×` usage indicators derived from the current board state
 - A strip entry becomes unavailable once it is already assigned twice anywhere on the board, even if one or both assignments still belong to tiles whose operator is hidden
 - Reopening a slot keeps that slot's current strip entry selectable for reassignment there, even if the entry is otherwise exhausted
-- The `+` and `×` hints remain informational; disabled options are driven by strip-entry availability rather than by the badges alone
+- The `+` and `×` indicators remain informational; disabled options are driven by strip-entry availability rather than by the badges alone
 
-Selector logic should treat strip entries as unique entities rather than grouping options only by numeric value. Any future operand-usage hinting must therefore be computed per strip entry.
+Operand selection logic should treat strip entries as unique entities rather than grouping options only by numeric value. Any future operator-usage indicators must therefore be computed per strip entry.
 
 ### Operator Slot Mode
 

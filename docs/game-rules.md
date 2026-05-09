@@ -22,7 +22,7 @@ The number strip is a sequence of positive integers with the following propertie
 - Some numbers may be hidden
 - Hidden numbers must be deduced by the player
 
-For prototype behavior, this means known strip items stay fixed while player-entered values may be reordered within adjacent editable positions so the strip remains sorted.
+For current behavior, this means known strip items stay fixed while player-entered values may be reordered within adjacent editable positions so the strip remains sorted.
 
 Example:
 
@@ -75,7 +75,7 @@ These values correspond to two results present in the grid.
 
 Usage is tracked per strip entry, not per numeric value. In other words, if the strip contains two visible `25` values, they are still two distinct usable entries.
 
-For prototype hinting and selection logic, each strip entry may be consumed:
+For operand selection and validation rules, each strip entry may be consumed:
 
 - once in an addition expression
 - once in a multiplication expression

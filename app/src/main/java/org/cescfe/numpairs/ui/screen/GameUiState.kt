@@ -1,7 +1,7 @@
 package org.cescfe.numpairs.ui.screen
 
 import org.cescfe.numpairs.domain.puzzle.Expression
-import org.cescfe.numpairs.domain.puzzle.OperandSelectionHint
+import org.cescfe.numpairs.domain.puzzle.OperandSelectionChoice
 import org.cescfe.numpairs.domain.puzzle.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
@@ -11,7 +11,7 @@ import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.domain.puzzle.Tile
 import org.cescfe.numpairs.domain.puzzle.TileResolutionState
 import org.cescfe.numpairs.domain.puzzle.mismatchedSumProductPairingTileIndexes
-import org.cescfe.numpairs.domain.puzzle.operandSelectionHintsFor
+import org.cescfe.numpairs.domain.puzzle.operandSelectionChoicesFor
 
 data class GameUiState(
     val stripItems: List<StripItemUiState>,
@@ -90,7 +90,7 @@ data class GameUiState(
                         TileOperandSelectionDialogUiState(
                             tileIndex = target.tileIndex,
                             slot = target.slot,
-                            availableOperands = puzzle.operandSelectionHintsFor(
+                            availableOperands = puzzle.operandSelectionChoicesFor(
                                 tileIndex = target.tileIndex,
                                 slot = target.slot
                             ).map(::TileOperandOptionUiState)
@@ -169,12 +169,12 @@ data class TileOperandOptionUiState(
     val multiplicationUsed: Boolean,
     val isSelectable: Boolean
 ) {
-    constructor(operandSelectionHint: OperandSelectionHint) : this(
-        stripEntryId = operandSelectionHint.stripEntry.entryId,
-        value = operandSelectionHint.stripEntry.value,
-        additionUsed = operandSelectionHint.usageByOperator.additionUsed,
-        multiplicationUsed = operandSelectionHint.usageByOperator.multiplicationUsed,
-        isSelectable = operandSelectionHint.isSelectable
+    constructor(choice: OperandSelectionChoice) : this(
+        stripEntryId = choice.stripEntryId,
+        value = choice.value,
+        additionUsed = choice.usageByOperator.additionUsed,
+        multiplicationUsed = choice.usageByOperator.multiplicationUsed,
+        isSelectable = choice.canBeSelected
     )
 }
 
