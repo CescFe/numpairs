@@ -6,7 +6,7 @@ The NumPairs prototype allows the player to:
 - reorder player-entered strip values inside editable runs to preserve ascending order
 - assign strip numbers to tile operands
 
-At the same time, repeated numeric values are allowed in the strip, and future selector guidance needs to express operator-specific usage:
+At the same time, repeated numeric values are allowed in the strip, and future operand-selection state needs to express operator-specific usage:
 - once in an addition expression
 - once in a multiplication expression
 
@@ -34,7 +34,7 @@ The tile stores only the selected number, for example `6`.
 
 #### Negative
 - Cannot distinguish repeated values such as two visible `25` entries
-- Cannot express usage hints per unique strip element
+- Cannot express operator-specific usage state per unique strip element
 - Teaches the wrong model if each strip entry is meant to be unique
 - Breaks down as soon as future rules care which repeated value was used
 
@@ -54,7 +54,7 @@ The tile stores the strip index, for example `index = 0`.
 #### Negative
 - Fails when player-entered values reorder inside editable runs
 - A tile would silently end up pointing to a different visible number after strip reorder
-- Makes selector hints follow positions instead of the actual strip element selected by the player
+- Makes operand-selection state follow positions instead of the actual strip element selected by the player
 - Creates tension between "selection follows the slot" and "selection follows the chosen strip number"
 
 #### Fit for NumPairs
@@ -68,7 +68,7 @@ The tile stores a stable strip entry id that survives visual movement inside the
 #### Positive
 - Correctly distinguishes repeated values
 - Remains correct after strip reordering
-- Supports operator-specific usage hints per actual strip element
+- Supports operator-specific usage state per actual strip element
 - Preserves a consistent relationship between a tile operand and the selected strip entry over time
 - Scales better for future rules and validation
 
@@ -90,8 +90,8 @@ This is the only option that supports all the current prototype constraints toge
 
 ### Positive
 - Operand selection remains semantically correct after strip reorder
-- Repeated values can be modeled and hinted independently
-- Domain logic can expose selector-ready usage hints without ambiguity
+- Repeated values can be modeled and surfaced independently
+- Domain logic can expose operand-selection choices and usage state without ambiguity
 - Future gameplay rules can build on explicit strip entry identity instead of inferring it from UI position
 
 ### Negative
@@ -105,7 +105,7 @@ The current implementation reflects this decision by:
 - keeping `Strip` immutable, while producing a new `Strip` on updates and reorders
 - preserving strip entry identity when player-entered values reorder
 - storing `stripEntryId` alongside assigned operand values in tile expressions
-- exposing operator-specific usage hints per visible strip entry
+- exposing operand-selection choices with operator-specific usage state per visible strip entry
 
 This means immutability and identity are treated as separate concerns:
 - immutability controls how state changes
@@ -116,5 +116,5 @@ If the product later removes strip reordering or intentionally treats repeated v
 
 Until then, stable strip entry identity should remain the reference model for:
 - operand selection
-- operand usage hints
+- operand-selection availability and usage state
 - future validation tied to strip-origin awareness
