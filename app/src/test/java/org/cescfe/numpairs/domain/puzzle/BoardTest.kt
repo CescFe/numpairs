@@ -2,6 +2,7 @@ package org.cescfe.numpairs.domain.puzzle
 
 import org.junit.Assert.assertThrows
 import org.junit.Test
+import org.cescfe.numpairs.domain.puzzle.support.additionTile
 
 class BoardTest {
     @Test
@@ -18,14 +19,10 @@ class BoardTest {
         Board(tiles = validTiles(Board.TILE_COUNT))
     }
 
-    private fun validTiles(count: Int): List<Tile> = (1..count).map(::validTile)
-
-    private fun validTile(leftOperand: Int): Tile = Tile(
-        expression = Expression(
+    private fun validTiles(count: Int): List<Tile> = (1..count).map { leftOperand ->
+        additionTile(
             leftOperand = leftOperand,
-            operator = Operator.ADDITION,
             rightOperand = 1
-        ),
-        result = leftOperand + 1
-    )
+        )
+    }
 }

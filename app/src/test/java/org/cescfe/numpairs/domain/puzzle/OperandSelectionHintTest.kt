@@ -4,11 +4,14 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.cescfe.numpairs.domain.puzzle.support.hiddenTile
+import org.cescfe.numpairs.domain.puzzle.support.prototypePuzzleWithRepeatedSixes
+import org.cescfe.numpairs.domain.puzzle.support.withTile
 
 class OperandSelectionHintTest {
     @Test
     fun selection_hints_mark_addition_usage_for_the_matching_strip_entry_only() {
-        val puzzle = puzzleWithRepeatedSixes()
+        val puzzle = prototypePuzzleWithRepeatedSixes()
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)
@@ -114,7 +117,7 @@ class OperandSelectionHintTest {
 
     @Test
     fun selection_hints_mark_entries_as_unavailable_when_they_are_already_assigned_twice_elsewhere() {
-        val puzzle = puzzleWithRepeatedSixes()
+        val puzzle = prototypePuzzleWithRepeatedSixes()
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)
@@ -140,7 +143,7 @@ class OperandSelectionHintTest {
 
     @Test
     fun selection_hints_mark_entries_as_unavailable_when_they_are_already_assigned_twice_provisionally() {
-        val puzzle = puzzleWithRepeatedSixes()
+        val puzzle = prototypePuzzleWithRepeatedSixes()
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)
@@ -166,7 +169,7 @@ class OperandSelectionHintTest {
 
     @Test
     fun selection_hints_exclude_the_current_slot_assignment_when_reopening_an_already_filled_operand() {
-        val puzzle = puzzleWithRepeatedSixes()
+        val puzzle = prototypePuzzleWithRepeatedSixes()
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)
@@ -190,7 +193,7 @@ class OperandSelectionHintTest {
 
     @Test
     fun selection_hints_exclude_the_current_slot_assignment_when_reopening_a_provisionally_exhausted_operand() {
-        val puzzle = puzzleWithRepeatedSixes()
+        val puzzle = prototypePuzzleWithRepeatedSixes()
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)
@@ -265,36 +268,4 @@ private fun selectionHint(
     ),
     isSelectable =
     isSelectable ?: (listOf(additionUsed, multiplicationUsed).count { used -> used } + provisionalUsed < 2)
-)
-
-private fun puzzleWithRepeatedSixes(): Puzzle = PuzzleSamples.prototype.copy(
-    strip = Strip.fromItems(
-        items = listOf(
-            StripItem.Known(6),
-            StripItem.Known(6),
-            StripItem.Hidden,
-            StripItem.Hidden,
-            StripItem.Known(25),
-            StripItem.Hidden,
-            StripItem.Hidden,
-            StripItem.Known(222)
-        )
-    )
-)
-
-private fun Puzzle.withTile(index: Int, tile: Tile): Puzzle = copy(
-    board = Board(
-        tiles = board.tiles.toMutableList().apply {
-            set(index, tile)
-        }
-    )
-)
-
-private fun hiddenTile(result: Int): Tile = Tile(
-    expression = Expression(
-        leftOperand = Expression.Operand.Hidden,
-        operator = Operator.Hidden,
-        rightOperand = Expression.Operand.Hidden
-    ),
-    result = result
 )

@@ -3,34 +3,31 @@ package org.cescfe.numpairs.domain.puzzle
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
+import org.cescfe.numpairs.domain.puzzle.support.stripOf
 
 class StripTest {
     @Test
     fun requires_eight_items() {
         assertThrows(IllegalArgumentException::class.java) {
-            Strip.fromItems(
-                items = listOf(
-                    StripItem.Known(1),
-                    StripItem.Known(2),
-                    StripItem.Known(3)
-                )
+            stripOf(
+                StripItem.Known(1),
+                StripItem.Known(2),
+                StripItem.Known(3)
             )
         }
     }
 
     @Test
     fun valid_entry_range_uses_the_nearest_known_values_on_both_sides() {
-        val strip = Strip.fromItems(
-            items = listOf(
-                StripItem.Known(1),
-                StripItem.Hidden,
-                StripItem.PlayerEntered(2),
-                StripItem.Hidden,
-                StripItem.Known(5),
-                StripItem.Hidden,
-                StripItem.Known(7),
-                StripItem.Known(9)
-            )
+        val strip = stripOf(
+            StripItem.Known(1),
+            StripItem.Hidden,
+            StripItem.PlayerEntered(2),
+            StripItem.Hidden,
+            StripItem.Known(5),
+            StripItem.Hidden,
+            StripItem.Known(7),
+            StripItem.Known(9)
         )
 
         assertEquals(
@@ -41,17 +38,15 @@ class StripTest {
 
     @Test
     fun valid_entry_range_uses_one_when_there_is_no_known_value_on_the_left() {
-        val strip = Strip.fromItems(
-            items = listOf(
-                StripItem.Hidden,
-                StripItem.Hidden,
-                StripItem.Known(3),
-                StripItem.Hidden,
-                StripItem.Known(5),
-                StripItem.Hidden,
-                StripItem.Known(7),
-                StripItem.Known(9)
-            )
+        val strip = stripOf(
+            StripItem.Hidden,
+            StripItem.Hidden,
+            StripItem.Known(3),
+            StripItem.Hidden,
+            StripItem.Known(5),
+            StripItem.Hidden,
+            StripItem.Known(7),
+            StripItem.Known(9)
         )
 
         assertEquals(
@@ -62,17 +57,15 @@ class StripTest {
 
     @Test
     fun valid_entry_range_has_no_upper_bound_when_there_is_no_known_value_on_the_right() {
-        val strip = Strip.fromItems(
-            items = listOf(
-                StripItem.Known(1),
-                StripItem.Hidden,
-                StripItem.Known(3),
-                StripItem.Hidden,
-                StripItem.Hidden,
-                StripItem.PlayerEntered(6),
-                StripItem.Hidden,
-                StripItem.Hidden
-            )
+        val strip = stripOf(
+            StripItem.Known(1),
+            StripItem.Hidden,
+            StripItem.Known(3),
+            StripItem.Hidden,
+            StripItem.Hidden,
+            StripItem.PlayerEntered(6),
+            StripItem.Hidden,
+            StripItem.Hidden
         )
 
         assertEquals(
@@ -83,17 +76,15 @@ class StripTest {
 
     @Test
     fun updating_an_adjacent_hidden_entry_reorders_player_entered_values_within_the_editable_run() {
-        val strip = Strip.fromItems(
-            items = listOf(
-                StripItem.PlayerEntered(5),
-                StripItem.Hidden,
-                StripItem.Known(6),
-                StripItem.Hidden,
-                StripItem.Known(8),
-                StripItem.Known(10),
-                StripItem.Known(12),
-                StripItem.Known(14)
-            )
+        val strip = stripOf(
+            StripItem.PlayerEntered(5),
+            StripItem.Hidden,
+            StripItem.Known(6),
+            StripItem.Hidden,
+            StripItem.Known(8),
+            StripItem.Known(10),
+            StripItem.Known(12),
+            StripItem.Known(14)
         )
 
         assertEquals(
@@ -113,17 +104,15 @@ class StripTest {
 
     @Test
     fun editing_an_entry_reorders_only_player_entered_values_and_keeps_hidden_positions_in_place() {
-        val strip = Strip.fromItems(
-            items = listOf(
-                StripItem.Known(1),
-                StripItem.PlayerEntered(5),
-                StripItem.Hidden,
-                StripItem.PlayerEntered(2),
-                StripItem.Known(6),
-                StripItem.Known(7),
-                StripItem.Known(8),
-                StripItem.Known(9)
-            )
+        val strip = stripOf(
+            StripItem.Known(1),
+            StripItem.PlayerEntered(5),
+            StripItem.Hidden,
+            StripItem.PlayerEntered(2),
+            StripItem.Known(6),
+            StripItem.Known(7),
+            StripItem.Known(8),
+            StripItem.Known(9)
         )
 
         assertEquals(
