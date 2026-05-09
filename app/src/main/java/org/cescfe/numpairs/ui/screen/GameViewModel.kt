@@ -191,10 +191,7 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
     private fun canInteractWithPuzzle(): Boolean =
         !presentationState.isSuccessOverlayVisible(isPuzzleSolved = puzzle.isSolved)
 
-    private fun Puzzle.withSelectedOperand(
-        target: TileOperandSelectionTarget,
-        stripEntryId: Int
-    ): Puzzle? {
+    private fun Puzzle.withSelectedOperand(target: TileOperandSelectionTarget, stripEntryId: Int): Puzzle? {
         val currentTile = board.tiles.getOrNull(target.tileIndex) ?: return null
         val selectionChoice = operandSelectionChoicesFor(
             tileIndex = target.tileIndex,
@@ -244,10 +241,7 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
         }
     }
 
-    private inline fun Puzzle.withUpdatedTile(
-        index: Int,
-        update: (Tile) -> Tile
-    ): Puzzle? {
+    private inline fun Puzzle.withUpdatedTile(index: Int, update: (Tile) -> Tile): Puzzle? {
         val currentTile = board.tiles.getOrNull(index) ?: return null
 
         return copy(

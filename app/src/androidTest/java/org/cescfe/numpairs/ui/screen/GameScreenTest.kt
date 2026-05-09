@@ -1093,11 +1093,7 @@ private fun instrumentedSolvedPuzzleWithKnownStripAndAssignments(): Puzzle = Puz
     )
 )
 
-private fun instrumentedAssignedTile(
-    leftEntryId: Int,
-    operator: Operator,
-    rightEntryId: Int
-): Tile {
+private fun instrumentedAssignedTile(leftEntryId: Int, operator: Operator, rightEntryId: Int): Tile {
     val leftValue = leftEntryId + 1
     val rightValue = rightEntryId + 1
 

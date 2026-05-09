@@ -14,10 +14,7 @@ internal object GameUiStateFactory {
         Operator.MULTIPLICATION
     )
 
-    fun create(
-        puzzle: Puzzle,
-        presentationState: GamePresentationState
-    ): GameUiState {
+    fun create(puzzle: Puzzle, presentationState: GamePresentationState): GameUiState {
         val completionState = puzzle.completionState
         val mismatchedPairingTileIndexes = completionState.mismatchedPairingTileIndexes(puzzle = puzzle)
 
@@ -51,10 +48,7 @@ internal object GameUiStateFactory {
         )
     }
 
-    private fun createStripItemEntryDialog(
-        puzzle: Puzzle,
-        modal: GameModalState?
-    ): StripItemEntryDialogUiState? {
+    private fun createStripItemEntryDialog(puzzle: Puzzle, modal: GameModalState?): StripItemEntryDialogUiState? {
         val stripItemIndex = (modal as? GameModalState.StripItemEntry)?.index ?: return null
         val stripItem = puzzle.strip.items.getOrNull(stripItemIndex) ?: return null
 

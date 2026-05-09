@@ -3,12 +3,12 @@ package org.cescfe.numpairs.ui.screen
 import org.cescfe.numpairs.domain.puzzle.Expression
 import org.cescfe.numpairs.domain.puzzle.OperandSelectionChoice
 import org.cescfe.numpairs.domain.puzzle.OperandSlot
+import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.StripEntryRange
 import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.domain.puzzle.Tile
-import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.TileResolutionState
 
 data class GameUiState(
@@ -21,13 +21,11 @@ data class GameUiState(
     val tileOperandSelectionDialog: TileOperandSelectionDialogUiState? = null
 ) {
     companion object {
-        fun from(
-            puzzle: Puzzle,
-            presentationState: GamePresentationState = GamePresentationState()
-        ): GameUiState = GameUiStateFactory.create(
-            puzzle = puzzle,
-            presentationState = presentationState
-        )
+        fun from(puzzle: Puzzle, presentationState: GamePresentationState = GamePresentationState()): GameUiState =
+            GameUiStateFactory.create(
+                puzzle = puzzle,
+                presentationState = presentationState
+            )
     }
 }
 
