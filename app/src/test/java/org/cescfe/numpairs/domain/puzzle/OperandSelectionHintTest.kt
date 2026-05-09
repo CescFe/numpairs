@@ -1,7 +1,7 @@
 package org.cescfe.numpairs.domain.puzzle
 
 import org.cescfe.numpairs.domain.puzzle.support.hiddenTile
-import org.cescfe.numpairs.domain.puzzle.support.prototypePuzzleWithRepeatedSixes
+import org.cescfe.numpairs.domain.puzzle.support.puzzleWithRepeatedSixes
 import org.cescfe.numpairs.domain.puzzle.support.withTile
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -11,7 +11,7 @@ import org.junit.Test
 class OperandSelectionHintTest {
     @Test
     fun selection_hints_mark_addition_usage_for_the_matching_strip_entry_only() {
-        val puzzle = prototypePuzzleWithRepeatedSixes()
+        val puzzle = puzzleWithRepeatedSixes()
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)
@@ -117,7 +117,7 @@ class OperandSelectionHintTest {
 
     @Test
     fun selection_hints_mark_entries_as_unavailable_when_they_are_already_assigned_twice_elsewhere() {
-        val puzzle = prototypePuzzleWithRepeatedSixes()
+        val puzzle = puzzleWithRepeatedSixes()
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)
@@ -143,7 +143,7 @@ class OperandSelectionHintTest {
 
     @Test
     fun selection_hints_mark_entries_as_unavailable_when_they_are_already_assigned_twice_provisionally() {
-        val puzzle = prototypePuzzleWithRepeatedSixes()
+        val puzzle = puzzleWithRepeatedSixes()
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)
@@ -169,7 +169,7 @@ class OperandSelectionHintTest {
 
     @Test
     fun selection_hints_exclude_the_current_slot_assignment_when_reopening_an_already_filled_operand() {
-        val puzzle = prototypePuzzleWithRepeatedSixes()
+        val puzzle = puzzleWithRepeatedSixes()
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)
@@ -193,7 +193,7 @@ class OperandSelectionHintTest {
 
     @Test
     fun selection_hints_exclude_the_current_slot_assignment_when_reopening_a_provisionally_exhausted_operand() {
-        val puzzle = prototypePuzzleWithRepeatedSixes()
+        val puzzle = puzzleWithRepeatedSixes()
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)

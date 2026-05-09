@@ -5,7 +5,7 @@ import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
 import org.cescfe.numpairs.domain.puzzle.Strip
 import org.cescfe.numpairs.domain.puzzle.StripItem
 
-fun prototypePuzzleWithRepeatedSixes(): Puzzle = PuzzleSamples.prototype.copy(
+fun puzzleWithRepeatedSixes(): Puzzle = PuzzleSamples.prototype.copy(
     strip = Strip.fromItems(
         items = listOf(
             StripItem.Known(6),

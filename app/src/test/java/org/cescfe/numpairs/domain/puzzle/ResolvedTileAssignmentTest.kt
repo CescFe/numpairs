@@ -2,7 +2,7 @@ package org.cescfe.numpairs.domain.puzzle
 
 import org.cescfe.numpairs.domain.puzzle.support.assignedTile
 import org.cescfe.numpairs.domain.puzzle.support.hiddenTile
-import org.cescfe.numpairs.domain.puzzle.support.prototypePuzzleWithRepeatedSixes
+import org.cescfe.numpairs.domain.puzzle.support.puzzleWithRepeatedSixes
 import org.cescfe.numpairs.domain.puzzle.support.withTile
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -90,7 +90,7 @@ class ResolvedTileAssignmentTest {
 
     @Test
     fun puzzle_resolved_assignments_preserve_distinct_entry_ids_for_repeated_values() {
-        val puzzle = prototypePuzzleWithRepeatedSixes()
+        val puzzle = puzzleWithRepeatedSixes()
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)
