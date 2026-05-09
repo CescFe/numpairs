@@ -1,12 +1,16 @@
 package org.cescfe.numpairs.domain.puzzle
 
-data class Strip(val entries: List<StripEntry>) {
+@ConsistentCopyVisibility
+data class Strip private constructor(val entries: List<StripEntry>) {
     init {
         require(entries.size == NUMBER_COUNT) {
             "Strip must contain exactly $NUMBER_COUNT items."
         }
         require(entries.map(StripEntry::id).toSet().size == entries.size) {
             "Strip entry ids must be unique."
+        }
+        require(entries.visibleValuesAreNonDecreasing()) {
+            "Visible strip values must be in non-decreasing order."
         }
     }
 
@@ -16,8 +20,38 @@ data class Strip(val entries: List<StripEntry>) {
     val hasHiddenEntries: Boolean
         get() = entries.any { stripEntry -> stripEntry.item == StripItem.Hidden }
 
-    fun validEntryRangeFor(index: Int): StripEntryRange {
+    fun validEntryRangeFor(index: Int): StripEntryRange = entryRangeFor(editableRunContaining(index))
+
+    fun withUpdatedEntry(index: Int, value: Int): Strip {
+        val currentStripEntry = requireEditableEntryAt(index)
         val editableRun = editableRunContaining(index)
+        val validRange = entryRangeFor(editableRun)
+
+        require(value in validRange) {
+            "Updated strip values must stay within the valid entry range."
+        }
+
+        val updatedEntries = entries.toMutableList().apply {
+            set(
+                index,
+                currentStripEntry.copy(
+                    item = currentStripEntry.item.completeWith(value)
+                )
+            )
+        }
+        val playerEnteredIndexes = editableRun.filter { updatedEntries[it].item is StripItem.PlayerEntered }
+        val sortedPlayerEnteredEntries = playerEnteredIndexes
+            .map { playerEnteredIndex -> updatedEntries[playerEnteredIndex] }
+            .sortedBy { playerEnteredEntry -> (playerEnteredEntry.item as StripItem.PlayerEntered).value }
+
+        playerEnteredIndexes.zip(sortedPlayerEnteredEntries).forEach { (playerEnteredIndex, playerEnteredEntry) ->
+            updatedEntries[playerEnteredIndex] = playerEnteredEntry
+        }
+
+        return Strip(entries = updatedEntries)
+    }
+
+    private fun entryRangeFor(editableRun: IntRange): StripEntryRange {
         val minimumValue = entries
             .getOrNull(editableRun.first - 1)
             ?.item
@@ -32,29 +66,6 @@ data class Strip(val entries: List<StripEntry>) {
             minimumValue = minimumValue,
             maximumValue = maximumValue
         )
-    }
-
-    fun withUpdatedEntry(index: Int, value: Int): Strip {
-        val currentStripEntry = requireEditableEntryAt(index)
-        val updatedEntries = entries.toMutableList().apply {
-            set(
-                index,
-                currentStripEntry.copy(
-                    item = currentStripEntry.item.completeWith(value)
-                )
-            )
-        }
-        val editableRun = editableRunContaining(index)
-        val playerEnteredIndexes = editableRun.filter { updatedEntries[it].item is StripItem.PlayerEntered }
-        val sortedPlayerEnteredEntries = playerEnteredIndexes
-            .map { playerEnteredIndex -> updatedEntries[playerEnteredIndex] }
-            .sortedBy { playerEnteredEntry -> (playerEnteredEntry.item as StripItem.PlayerEntered).value }
-
-        playerEnteredIndexes.zip(sortedPlayerEnteredEntries).forEach { (playerEnteredIndex, playerEnteredEntry) ->
-            updatedEntries[playerEnteredIndex] = playerEnteredEntry
-        }
-
-        return copy(entries = updatedEntries)
     }
 
     fun visibleEntries(): List<VisibleStripEntry> = entries.mapIndexedNotNull { _, stripEntry ->
@@ -109,6 +120,8 @@ data class Strip(val entries: List<StripEntry>) {
     companion object {
         const val NUMBER_COUNT = 8
 
+        fun fromEntries(entries: List<StripEntry>): Strip = Strip(entries = entries)
+
         fun fromItems(items: List<StripItem>): Strip = Strip(
             entries = items.mapIndexed { index, item ->
                 StripEntry(
@@ -118,6 +131,12 @@ data class Strip(val entries: List<StripEntry>) {
             }
         )
     }
+}
+
+private fun List<StripEntry>.visibleValuesAreNonDecreasing(): Boolean = mapNotNull { stripEntry ->
+    stripEntry.item.visibleValue
+}.zipWithNext().all { (leftValue, rightValue) ->
+    leftValue <= rightValue
 }
 
 private val StripItem.knownValue: Int?
