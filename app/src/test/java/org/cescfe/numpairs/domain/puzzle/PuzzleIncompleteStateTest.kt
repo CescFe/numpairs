@@ -1,11 +1,11 @@
 package org.cescfe.numpairs.domain.puzzle
 
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
 import org.cescfe.numpairs.domain.puzzle.support.additionTile
 import org.cescfe.numpairs.domain.puzzle.support.boardOf
 import org.cescfe.numpairs.domain.puzzle.support.stripOf
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
 
 class PuzzleIncompleteStateTest {
     @Test

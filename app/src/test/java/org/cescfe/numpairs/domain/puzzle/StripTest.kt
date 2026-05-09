@@ -1,9 +1,9 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.cescfe.numpairs.domain.puzzle.support.stripOf
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import org.cescfe.numpairs.domain.puzzle.support.stripOf
 
 class StripTest {
     @Test

@@ -1,13 +1,13 @@
 package org.cescfe.numpairs.domain.puzzle
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
 import org.cescfe.numpairs.domain.puzzle.support.defaultKnownStripValues
 import org.cescfe.numpairs.domain.puzzle.support.knownPuzzleWithAssignments
 import org.cescfe.numpairs.domain.puzzle.support.stripOf
 import org.cescfe.numpairs.domain.puzzle.support.tileAssignment
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
 
 class SumProductPairingTest {
     @Test

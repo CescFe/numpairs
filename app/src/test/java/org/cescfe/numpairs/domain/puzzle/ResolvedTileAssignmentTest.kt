@@ -1,13 +1,13 @@
 package org.cescfe.numpairs.domain.puzzle
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Test
 import org.cescfe.numpairs.domain.puzzle.support.assignedTile
 import org.cescfe.numpairs.domain.puzzle.support.boardOf
 import org.cescfe.numpairs.domain.puzzle.support.hiddenTile
 import org.cescfe.numpairs.domain.puzzle.support.prototypePuzzleWithRepeatedSixes
 import org.cescfe.numpairs.domain.puzzle.support.withTile
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Test
 
 class ResolvedTileAssignmentTest {
     @Test

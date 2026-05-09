@@ -1,12 +1,12 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.cescfe.numpairs.domain.puzzle.support.hiddenTile
+import org.cescfe.numpairs.domain.puzzle.support.prototypePuzzleWithRepeatedSixes
+import org.cescfe.numpairs.domain.puzzle.support.withTile
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.cescfe.numpairs.domain.puzzle.support.hiddenTile
-import org.cescfe.numpairs.domain.puzzle.support.prototypePuzzleWithRepeatedSixes
-import org.cescfe.numpairs.domain.puzzle.support.withTile
 
 class OperandSelectionHintTest {
     @Test

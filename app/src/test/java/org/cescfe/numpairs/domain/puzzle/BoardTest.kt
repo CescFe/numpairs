@@ -1,8 +1,8 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.cescfe.numpairs.domain.puzzle.support.additionTile
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import org.cescfe.numpairs.domain.puzzle.support.additionTile
 
 class BoardTest {
     @Test

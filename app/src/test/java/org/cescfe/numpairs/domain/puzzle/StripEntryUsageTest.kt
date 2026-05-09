@@ -1,10 +1,10 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.cescfe.numpairs.domain.puzzle.support.knownPuzzleWithAssignments
+import org.cescfe.numpairs.domain.puzzle.support.tileAssignment
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.cescfe.numpairs.domain.puzzle.support.knownPuzzleWithAssignments
-import org.cescfe.numpairs.domain.puzzle.support.tileAssignment
 
 class StripEntryUsageTest {
     @Test

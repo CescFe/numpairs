@@ -1,15 +1,15 @@
 package org.cescfe.numpairs.domain.puzzle
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
 import org.cescfe.numpairs.domain.puzzle.support.assignedTile
 import org.cescfe.numpairs.domain.puzzle.support.defaultKnownStripValues
 import org.cescfe.numpairs.domain.puzzle.support.knownPuzzleWithAssignments
 import org.cescfe.numpairs.domain.puzzle.support.stripOf
 import org.cescfe.numpairs.domain.puzzle.support.tileAssignment
 import org.cescfe.numpairs.domain.puzzle.support.tileWithoutStripIdentity
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
 
 class PuzzleCompletionStateTest {
     @Test
@@ -78,13 +78,55 @@ class PuzzleCompletionStateTest {
                         operator = Operator.ADDITION,
                         rightOperand = 2
                     ),
-                    assignedTile(leftEntryId = 1, leftValue = 2, operator = Operator.MULTIPLICATION, rightEntryId = 0, rightValue = 1),
-                    assignedTile(leftEntryId = 2, leftValue = 3, operator = Operator.ADDITION, rightEntryId = 3, rightValue = 4),
-                    assignedTile(leftEntryId = 3, leftValue = 4, operator = Operator.MULTIPLICATION, rightEntryId = 2, rightValue = 3),
-                    assignedTile(leftEntryId = 4, leftValue = 5, operator = Operator.ADDITION, rightEntryId = 5, rightValue = 6),
-                    assignedTile(leftEntryId = 5, leftValue = 6, operator = Operator.MULTIPLICATION, rightEntryId = 4, rightValue = 5),
-                    assignedTile(leftEntryId = 6, leftValue = 7, operator = Operator.ADDITION, rightEntryId = 7, rightValue = 8),
-                    assignedTile(leftEntryId = 7, leftValue = 8, operator = Operator.MULTIPLICATION, rightEntryId = 6, rightValue = 7)
+                    assignedTile(
+                        leftEntryId = 1,
+                        leftValue = 2,
+                        operator = Operator.MULTIPLICATION,
+                        rightEntryId = 0,
+                        rightValue = 1
+                    ),
+                    assignedTile(
+                        leftEntryId = 2,
+                        leftValue = 3,
+                        operator = Operator.ADDITION,
+                        rightEntryId = 3,
+                        rightValue = 4
+                    ),
+                    assignedTile(
+                        leftEntryId = 3,
+                        leftValue = 4,
+                        operator = Operator.MULTIPLICATION,
+                        rightEntryId = 2,
+                        rightValue = 3
+                    ),
+                    assignedTile(
+                        leftEntryId = 4,
+                        leftValue = 5,
+                        operator = Operator.ADDITION,
+                        rightEntryId = 5,
+                        rightValue = 6
+                    ),
+                    assignedTile(
+                        leftEntryId = 5,
+                        leftValue = 6,
+                        operator = Operator.MULTIPLICATION,
+                        rightEntryId = 4,
+                        rightValue = 5
+                    ),
+                    assignedTile(
+                        leftEntryId = 6,
+                        leftValue = 7,
+                        operator = Operator.ADDITION,
+                        rightEntryId = 7,
+                        rightValue = 8
+                    ),
+                    assignedTile(
+                        leftEntryId = 7,
+                        leftValue = 8,
+                        operator = Operator.MULTIPLICATION,
+                        rightEntryId = 6,
+                        rightValue = 7
+                    )
                 )
             ),
             strip = stripOf(

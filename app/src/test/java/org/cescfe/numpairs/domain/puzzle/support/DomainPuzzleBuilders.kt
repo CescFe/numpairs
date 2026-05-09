@@ -15,17 +15,13 @@ data class TileAssignmentSpec(
     val result: Int? = null
 )
 
-fun tileAssignment(
-    leftEntryId: Int,
-    operator: Operator,
-    rightEntryId: Int,
-    result: Int? = null
-): TileAssignmentSpec = TileAssignmentSpec(
-    leftEntryId = leftEntryId,
-    operator = operator,
-    rightEntryId = rightEntryId,
-    result = result
-)
+fun tileAssignment(leftEntryId: Int, operator: Operator, rightEntryId: Int, result: Int? = null): TileAssignmentSpec =
+    TileAssignmentSpec(
+        leftEntryId = leftEntryId,
+        operator = operator,
+        rightEntryId = rightEntryId,
+        result = result
+    )
 
 fun hiddenTile(result: Int): Tile = Tile(
     expression = Expression(
@@ -36,11 +32,7 @@ fun hiddenTile(result: Int): Tile = Tile(
     result = result
 )
 
-fun additionTile(
-    leftOperand: Int,
-    rightOperand: Int,
-    result: Int = leftOperand + rightOperand
-): Tile = Tile(
+fun additionTile(leftOperand: Int, rightOperand: Int, result: Int = leftOperand + rightOperand): Tile = Tile(
     expression = Expression(
         leftOperand = leftOperand,
         operator = Operator.ADDITION,
@@ -108,10 +100,7 @@ fun knownStrip(vararg values: Int): Strip = knownStrip(values = values.toList())
 
 fun knownStrip(values: List<Int>): Strip = Strip.fromItems(items = values.map(StripItem::Known))
 
-fun knownPuzzleWithAssignments(
-    stripValues: List<Int>,
-    vararg tileAssignments: TileAssignmentSpec
-): Puzzle = Puzzle(
+fun knownPuzzleWithAssignments(stripValues: List<Int>, vararg tileAssignments: TileAssignmentSpec): Puzzle = Puzzle(
     board = boardOf(
         *tileAssignments.map { assignment ->
             assignedTile(
