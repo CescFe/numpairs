@@ -50,7 +50,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.testTag
@@ -112,7 +111,6 @@ private val SUCCESS_OVERLAY_CARD_CORNER_RADIUS = 28.dp
 private val SUCCESS_OVERLAY_BADGE_SIZE = 44.dp
 private val SUCCESS_OVERLAY_SUCCESS_GREEN = Color(0xFF2E7D32)
 private val SUCCESS_OVERLAY_SUCCESS_GREEN_SOFT = Color(0xFFE6F4EA)
-private const val DISABLED_OPERAND_OPTION_ALPHA = 0.56f
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -462,7 +460,10 @@ private fun TileOperandSelectionSheet(
                 key = TileOperandOptionUiState::stripEntryId
             ) { operand ->
                 val operandSelectionLabel = operand.value.toString()
-                val optionAlpha = if (operand.isSelectable) 1f else DISABLED_OPERAND_OPTION_ALPHA
+                val optionColors = operandOptionColors(
+                    enabled = operand.isSelectable,
+                    colorScheme = MaterialTheme.colorScheme
+                )
 
                 Box(
                     modifier = Modifier
@@ -475,7 +476,6 @@ private fun TileOperandSelectionSheet(
                             onClick = { onConfirm(operand.stripEntryId) },
                             enabled = operand.isSelectable,
                             modifier = Modifier
-                                .alpha(optionAlpha)
                                 .widthIn(
                                     min = TILE_OPERAND_SHEET_OPTION_CARD_MIN_WIDTH,
                                     max = TILE_OPERAND_SHEET_OPTION_CARD_MAX_WIDTH
@@ -486,11 +486,11 @@ private fun TileOperandSelectionSheet(
                                     contentDescription = operandSelectionLabel
                                 },
                             shape = RoundedCornerShape(TILE_OPERAND_SHEET_OPTION_CORNER_RADIUS),
-                            color = MaterialTheme.colorScheme.surface,
-                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            color = optionColors.container,
+                            contentColor = optionColors.content,
                             border = BorderStroke(
                                 width = 1.dp,
-                                color = MaterialTheme.colorScheme.outlineVariant
+                                color = optionColors.border
                             )
                         ) {
                             Box(
@@ -589,9 +589,9 @@ private fun baseHintBadgeColors(
     colorScheme: ColorScheme
 ): HintBadgeColors = when (usageState) {
     OperandUsageHintState.AVAILABLE -> HintBadgeColors(
-        container = colorScheme.surface,
-        content = colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
-        border = colorScheme.outlineVariant.copy(alpha = 0.9f)
+        container = colorScheme.surfaceContainerHighest,
+        content = colorScheme.onSurfaceVariant,
+        border = colorScheme.outline
     )
 
     OperandUsageHintState.USED -> when (operator) {
@@ -607,10 +607,26 @@ private fun baseHintBadgeColors(
 }
 
 private fun HintBadgeColors.disabled(colorScheme: ColorScheme): HintBadgeColors = HintBadgeColors(
-    container = lerp(container, colorScheme.surfaceVariant, 1f - DISABLED_OPERAND_OPTION_ALPHA),
-    content = lerp(content, colorScheme.onSurfaceVariant, 1f - DISABLED_OPERAND_OPTION_ALPHA),
-    border = lerp(border, colorScheme.outlineVariant, 1f - DISABLED_OPERAND_OPTION_ALPHA)
+    container = lerp(container, colorScheme.surfaceContainerHigh, 0.35f),
+    content = lerp(content, colorScheme.onSurface, 0.20f),
+    border = lerp(border, colorScheme.outline, 0.35f)
 )
+
+private data class OperandOptionColors(val container: Color, val content: Color, val border: Color)
+
+private fun operandOptionColors(enabled: Boolean, colorScheme: ColorScheme): OperandOptionColors = if (enabled) {
+    OperandOptionColors(
+        container = colorScheme.surface,
+        content = colorScheme.onSurface,
+        border = colorScheme.outline
+    )
+} else {
+    OperandOptionColors(
+        container = colorScheme.surfaceContainerHigh,
+        content = colorScheme.onSurfaceVariant,
+        border = colorScheme.outline
+    )
+}
 
 private fun TileOperandOptionUiState.usageStateFor(operator: Operator): OperandUsageHintState = when (operator) {
     Operator.Addition -> when {

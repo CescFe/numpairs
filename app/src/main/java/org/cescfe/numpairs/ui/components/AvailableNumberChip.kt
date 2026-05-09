@@ -23,9 +23,7 @@ import org.cescfe.numpairs.ui.theme.NumPairsTheme
 private val CHIP_MIN_HEIGHT = 48.dp
 private val CHIP_CORNER_RADIUS = 14.dp
 private val KNOWN_CHIP_BORDER_WIDTH = 1.dp
-private const val HIDDEN_CHIP_CONTAINER_ALPHA = 0.10f
-private const val HIDDEN_CHIP_BORDER_ALPHA = 0.50f
-private val MODIFIABLE_CHIP_BORDER_WIDTH = 1.dp
+private val MODIFIABLE_CHIP_BORDER_WIDTH = 1.5.dp
 
 enum class AvailableNumberChipStyle {
     KNOWN,
@@ -96,10 +94,6 @@ private fun AvailableNumberChipLabel(label: String) {
 @Composable
 private fun chipColorsFor(style: AvailableNumberChipStyle): AvailableNumberChipColors {
     val colorScheme = MaterialTheme.colorScheme
-    val modifiableBorder = BorderStroke(
-        width = MODIFIABLE_CHIP_BORDER_WIDTH,
-        color = colorScheme.primary.copy(alpha = HIDDEN_CHIP_BORDER_ALPHA)
-    )
 
     return when (style) {
         AvailableNumberChipStyle.KNOWN -> AvailableNumberChipColors(
@@ -107,20 +101,26 @@ private fun chipColorsFor(style: AvailableNumberChipStyle): AvailableNumberChipC
             contentColor = colorScheme.onSurface,
             border = BorderStroke(
                 width = KNOWN_CHIP_BORDER_WIDTH,
-                color = colorScheme.outlineVariant.copy(alpha = 0.45f)
+                color = colorScheme.outline
             )
         )
 
         AvailableNumberChipStyle.HIDDEN -> AvailableNumberChipColors(
-            containerColor = colorScheme.primary.copy(alpha = HIDDEN_CHIP_CONTAINER_ALPHA),
-            contentColor = colorScheme.primary,
-            border = modifiableBorder
+            containerColor = colorScheme.secondaryContainer,
+            contentColor = colorScheme.onSecondaryContainer,
+            border = BorderStroke(
+                width = MODIFIABLE_CHIP_BORDER_WIDTH,
+                color = colorScheme.secondary
+            )
         )
 
         AvailableNumberChipStyle.PLAYER_ENTERED -> AvailableNumberChipColors(
-            containerColor = colorScheme.surface,
-            contentColor = colorScheme.primary,
-            border = modifiableBorder
+            containerColor = colorScheme.primaryContainer,
+            contentColor = colorScheme.onPrimaryContainer,
+            border = BorderStroke(
+                width = MODIFIABLE_CHIP_BORDER_WIDTH,
+                color = colorScheme.primary
+            )
         )
     }
 }
