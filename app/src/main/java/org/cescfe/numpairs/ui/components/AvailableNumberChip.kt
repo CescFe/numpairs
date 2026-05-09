@@ -106,20 +106,20 @@ private fun chipColorsFor(style: AvailableNumberChipStyle): AvailableNumberChipC
         )
 
         AvailableNumberChipStyle.HIDDEN -> AvailableNumberChipColors(
-            containerColor = colorScheme.secondaryContainer,
-            contentColor = colorScheme.onSecondaryContainer,
-            border = BorderStroke(
-                width = MODIFIABLE_CHIP_BORDER_WIDTH,
-                color = colorScheme.secondary
-            )
-        )
-
-        AvailableNumberChipStyle.PLAYER_ENTERED -> AvailableNumberChipColors(
             containerColor = colorScheme.primaryContainer,
             contentColor = colorScheme.onPrimaryContainer,
             border = BorderStroke(
                 width = MODIFIABLE_CHIP_BORDER_WIDTH,
                 color = colorScheme.primary
+            )
+        )
+
+        AvailableNumberChipStyle.PLAYER_ENTERED -> AvailableNumberChipColors(
+            containerColor = colorScheme.secondaryContainer,
+            contentColor = colorScheme.onSecondaryContainer,
+            border = BorderStroke(
+                width = MODIFIABLE_CHIP_BORDER_WIDTH,
+                color = colorScheme.secondary
             )
         )
     }
