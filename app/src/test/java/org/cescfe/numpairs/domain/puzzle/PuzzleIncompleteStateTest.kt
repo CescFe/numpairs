@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.cescfe.numpairs.domain.puzzle.support.additionTile
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -80,22 +81,13 @@ private fun fullyVisibleStrip(): Strip = Strip.fromItems(
 
 private fun resolvedBoard(): Board = Board(
     tiles = listOf(
-        resolvedTile(result = 2, leftOperand = 1, rightOperand = 1),
-        resolvedTile(result = 3, leftOperand = 1, rightOperand = 2),
-        resolvedTile(result = 4, leftOperand = 2, rightOperand = 2),
-        resolvedTile(result = 5, leftOperand = 2, rightOperand = 3),
-        resolvedTile(result = 6, leftOperand = 3, rightOperand = 3),
-        resolvedTile(result = 7, leftOperand = 3, rightOperand = 4),
-        resolvedTile(result = 8, leftOperand = 4, rightOperand = 4),
-        resolvedTile(result = 9, leftOperand = 4, rightOperand = 5)
+        additionTile(leftOperand = 1, rightOperand = 1, result = 2),
+        additionTile(leftOperand = 1, rightOperand = 2, result = 3),
+        additionTile(leftOperand = 2, rightOperand = 2, result = 4),
+        additionTile(leftOperand = 2, rightOperand = 3, result = 5),
+        additionTile(leftOperand = 3, rightOperand = 3, result = 6),
+        additionTile(leftOperand = 3, rightOperand = 4, result = 7),
+        additionTile(leftOperand = 4, rightOperand = 4, result = 8),
+        additionTile(leftOperand = 4, rightOperand = 5, result = 9)
     )
-)
-
-private fun resolvedTile(result: Int, leftOperand: Int, rightOperand: Int): Tile = Tile(
-    expression = Expression(
-        leftOperand = leftOperand,
-        operator = Operator.ADDITION,
-        rightOperand = rightOperand
-    ),
-    result = result
 )

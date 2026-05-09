@@ -1,5 +1,10 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.cescfe.numpairs.domain.puzzle.support.TileAssignment
+import org.cescfe.numpairs.domain.puzzle.support.assignedTile
+import org.cescfe.numpairs.domain.puzzle.support.defaultKnownStripValues
+import org.cescfe.numpairs.domain.puzzle.support.knownPuzzleWithAssignments
+import org.cescfe.numpairs.domain.puzzle.support.tileWithoutStripIdentity
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -8,16 +13,16 @@ import org.junit.Test
 class PuzzleCompletionStateTest {
     @Test
     fun solved_puzzle_reports_solved_completion_state() {
-        val puzzle = puzzleWithKnownStripAndAssignments(
-            stripValues = listOf(1, 2, 3, 4, 5, 6, 7, 8),
-            CompletionTileAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
-            CompletionTileAssignment(leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 0),
-            CompletionTileAssignment(leftEntryId = 2, operator = Operator.ADDITION, rightEntryId = 3),
-            CompletionTileAssignment(leftEntryId = 3, operator = Operator.MULTIPLICATION, rightEntryId = 2),
-            CompletionTileAssignment(leftEntryId = 4, operator = Operator.ADDITION, rightEntryId = 5),
-            CompletionTileAssignment(leftEntryId = 5, operator = Operator.MULTIPLICATION, rightEntryId = 4),
-            CompletionTileAssignment(leftEntryId = 6, operator = Operator.ADDITION, rightEntryId = 7),
-            CompletionTileAssignment(leftEntryId = 7, operator = Operator.MULTIPLICATION, rightEntryId = 6)
+        val puzzle = knownPuzzleWithAssignments(
+            stripValues = defaultKnownStripValues(),
+            TileAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
+            TileAssignment(leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 0),
+            TileAssignment(leftEntryId = 2, operator = Operator.ADDITION, rightEntryId = 3),
+            TileAssignment(leftEntryId = 3, operator = Operator.MULTIPLICATION, rightEntryId = 2),
+            TileAssignment(leftEntryId = 4, operator = Operator.ADDITION, rightEntryId = 5),
+            TileAssignment(leftEntryId = 5, operator = Operator.MULTIPLICATION, rightEntryId = 4),
+            TileAssignment(leftEntryId = 6, operator = Operator.ADDITION, rightEntryId = 7),
+            TileAssignment(leftEntryId = 7, operator = Operator.MULTIPLICATION, rightEntryId = 6)
         )
 
         assertEquals(PuzzleCompletionState.SOLVED, puzzle.completionState)
@@ -48,16 +53,16 @@ class PuzzleCompletionStateTest {
 
     @Test
     fun puzzle_with_incorrect_tiles_reports_incorrect_tiles_completion_state() {
-        val puzzle = puzzleWithKnownStripAndAssignments(
-            stripValues = listOf(1, 2, 3, 4, 5, 6, 7, 8),
-            CompletionTileAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1, result = 999),
-            CompletionTileAssignment(leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 0),
-            CompletionTileAssignment(leftEntryId = 2, operator = Operator.ADDITION, rightEntryId = 3),
-            CompletionTileAssignment(leftEntryId = 3, operator = Operator.MULTIPLICATION, rightEntryId = 2),
-            CompletionTileAssignment(leftEntryId = 4, operator = Operator.ADDITION, rightEntryId = 5),
-            CompletionTileAssignment(leftEntryId = 5, operator = Operator.MULTIPLICATION, rightEntryId = 4),
-            CompletionTileAssignment(leftEntryId = 6, operator = Operator.ADDITION, rightEntryId = 7),
-            CompletionTileAssignment(leftEntryId = 7, operator = Operator.MULTIPLICATION, rightEntryId = 6)
+        val puzzle = knownPuzzleWithAssignments(
+            stripValues = defaultKnownStripValues(),
+            TileAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1, result = 999),
+            TileAssignment(leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 0),
+            TileAssignment(leftEntryId = 2, operator = Operator.ADDITION, rightEntryId = 3),
+            TileAssignment(leftEntryId = 3, operator = Operator.MULTIPLICATION, rightEntryId = 2),
+            TileAssignment(leftEntryId = 4, operator = Operator.ADDITION, rightEntryId = 5),
+            TileAssignment(leftEntryId = 5, operator = Operator.MULTIPLICATION, rightEntryId = 4),
+            TileAssignment(leftEntryId = 6, operator = Operator.ADDITION, rightEntryId = 7),
+            TileAssignment(leftEntryId = 7, operator = Operator.MULTIPLICATION, rightEntryId = 6)
         )
 
         assertEquals(PuzzleCompletionState.INCORRECT_TILES, puzzle.completionState)
@@ -69,50 +74,54 @@ class PuzzleCompletionStateTest {
         val puzzle = Puzzle(
             board = Board(
                 tiles = listOf(
-                    tileWithoutStripIdentity(),
-                    tileWithAssignment(
+                    tileWithoutStripIdentity(
+                        leftOperand = 1,
+                        operator = Operator.ADDITION,
+                        rightOperand = 2
+                    ),
+                    assignedTile(
                         leftEntryId = 1,
                         leftValue = 2,
                         operator = Operator.MULTIPLICATION,
                         rightEntryId = 0,
                         rightValue = 1
                     ),
-                    tileWithAssignment(
+                    assignedTile(
                         leftEntryId = 2,
                         leftValue = 3,
                         operator = Operator.ADDITION,
                         rightEntryId = 3,
                         rightValue = 4
                     ),
-                    tileWithAssignment(
+                    assignedTile(
                         leftEntryId = 3,
                         leftValue = 4,
                         operator = Operator.MULTIPLICATION,
                         rightEntryId = 2,
                         rightValue = 3
                     ),
-                    tileWithAssignment(
+                    assignedTile(
                         leftEntryId = 4,
                         leftValue = 5,
                         operator = Operator.ADDITION,
                         rightEntryId = 5,
                         rightValue = 6
                     ),
-                    tileWithAssignment(
+                    assignedTile(
                         leftEntryId = 5,
                         leftValue = 6,
                         operator = Operator.MULTIPLICATION,
                         rightEntryId = 4,
                         rightValue = 5
                     ),
-                    tileWithAssignment(
+                    assignedTile(
                         leftEntryId = 6,
                         leftValue = 7,
                         operator = Operator.ADDITION,
                         rightEntryId = 7,
                         rightValue = 8
                     ),
-                    tileWithAssignment(
+                    assignedTile(
                         leftEntryId = 7,
                         leftValue = 8,
                         operator = Operator.MULTIPLICATION,
@@ -141,16 +150,16 @@ class PuzzleCompletionStateTest {
 
     @Test
     fun mismatched_pairings_report_mismatched_pairings_completion_state() {
-        val puzzle = puzzleWithKnownStripAndAssignments(
-            stripValues = listOf(1, 2, 3, 4, 5, 6, 7, 8),
-            CompletionTileAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
-            CompletionTileAssignment(leftEntryId = 0, operator = Operator.MULTIPLICATION, rightEntryId = 2),
-            CompletionTileAssignment(leftEntryId = 2, operator = Operator.ADDITION, rightEntryId = 3),
-            CompletionTileAssignment(leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 3),
-            CompletionTileAssignment(leftEntryId = 4, operator = Operator.ADDITION, rightEntryId = 5),
-            CompletionTileAssignment(leftEntryId = 5, operator = Operator.MULTIPLICATION, rightEntryId = 4),
-            CompletionTileAssignment(leftEntryId = 6, operator = Operator.ADDITION, rightEntryId = 7),
-            CompletionTileAssignment(leftEntryId = 7, operator = Operator.MULTIPLICATION, rightEntryId = 6)
+        val puzzle = knownPuzzleWithAssignments(
+            stripValues = defaultKnownStripValues(),
+            TileAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
+            TileAssignment(leftEntryId = 0, operator = Operator.MULTIPLICATION, rightEntryId = 2),
+            TileAssignment(leftEntryId = 2, operator = Operator.ADDITION, rightEntryId = 3),
+            TileAssignment(leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 3),
+            TileAssignment(leftEntryId = 4, operator = Operator.ADDITION, rightEntryId = 5),
+            TileAssignment(leftEntryId = 5, operator = Operator.MULTIPLICATION, rightEntryId = 4),
+            TileAssignment(leftEntryId = 6, operator = Operator.ADDITION, rightEntryId = 7),
+            TileAssignment(leftEntryId = 7, operator = Operator.MULTIPLICATION, rightEntryId = 6)
         )
 
         assertEquals(PuzzleCompletionState.MISMATCHED_SUM_PRODUCT_PAIRINGS, puzzle.completionState)
@@ -159,16 +168,16 @@ class PuzzleCompletionStateTest {
 
     @Test
     fun invalid_strip_entry_usage_reports_invalid_strip_entry_usage_completion_state() {
-        val puzzle = puzzleWithKnownStripAndAssignments(
+        val puzzle = knownPuzzleWithAssignments(
             stripValues = listOf(2, 2, 2, 2, 5, 5, 7, 7),
-            CompletionTileAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
-            CompletionTileAssignment(leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 0),
-            CompletionTileAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
-            CompletionTileAssignment(leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 0),
-            CompletionTileAssignment(leftEntryId = 4, operator = Operator.ADDITION, rightEntryId = 5),
-            CompletionTileAssignment(leftEntryId = 5, operator = Operator.MULTIPLICATION, rightEntryId = 4),
-            CompletionTileAssignment(leftEntryId = 6, operator = Operator.ADDITION, rightEntryId = 7),
-            CompletionTileAssignment(leftEntryId = 7, operator = Operator.MULTIPLICATION, rightEntryId = 6)
+            TileAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
+            TileAssignment(leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 0),
+            TileAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
+            TileAssignment(leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 0),
+            TileAssignment(leftEntryId = 4, operator = Operator.ADDITION, rightEntryId = 5),
+            TileAssignment(leftEntryId = 5, operator = Operator.MULTIPLICATION, rightEntryId = 4),
+            TileAssignment(leftEntryId = 6, operator = Operator.ADDITION, rightEntryId = 7),
+            TileAssignment(leftEntryId = 7, operator = Operator.MULTIPLICATION, rightEntryId = 6)
         )
 
         assertEquals(PuzzleCompletionState.INVALID_STRIP_ENTRY_USAGE, puzzle.completionState)
@@ -176,71 +185,14 @@ class PuzzleCompletionStateTest {
     }
 }
 
-private data class CompletionTileAssignment(
-    val leftEntryId: Int,
-    val operator: Operator,
-    val rightEntryId: Int,
-    val result: Int? = null
-)
-
-private fun solvedBoardWithAssignments(): Board = puzzleWithKnownStripAndAssignments(
-    stripValues = listOf(1, 2, 3, 4, 5, 6, 7, 8),
-    CompletionTileAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
-    CompletionTileAssignment(leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 0),
-    CompletionTileAssignment(leftEntryId = 2, operator = Operator.ADDITION, rightEntryId = 3),
-    CompletionTileAssignment(leftEntryId = 3, operator = Operator.MULTIPLICATION, rightEntryId = 2),
-    CompletionTileAssignment(leftEntryId = 4, operator = Operator.ADDITION, rightEntryId = 5),
-    CompletionTileAssignment(leftEntryId = 5, operator = Operator.MULTIPLICATION, rightEntryId = 4),
-    CompletionTileAssignment(leftEntryId = 6, operator = Operator.ADDITION, rightEntryId = 7),
-    CompletionTileAssignment(leftEntryId = 7, operator = Operator.MULTIPLICATION, rightEntryId = 6)
+private fun solvedBoardWithAssignments(): Board = knownPuzzleWithAssignments(
+    stripValues = defaultKnownStripValues(),
+    TileAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
+    TileAssignment(leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 0),
+    TileAssignment(leftEntryId = 2, operator = Operator.ADDITION, rightEntryId = 3),
+    TileAssignment(leftEntryId = 3, operator = Operator.MULTIPLICATION, rightEntryId = 2),
+    TileAssignment(leftEntryId = 4, operator = Operator.ADDITION, rightEntryId = 5),
+    TileAssignment(leftEntryId = 5, operator = Operator.MULTIPLICATION, rightEntryId = 4),
+    TileAssignment(leftEntryId = 6, operator = Operator.ADDITION, rightEntryId = 7),
+    TileAssignment(leftEntryId = 7, operator = Operator.MULTIPLICATION, rightEntryId = 6)
 ).board
-
-private fun puzzleWithKnownStripAndAssignments(
-    stripValues: List<Int>,
-    vararg tileAssignments: CompletionTileAssignment
-): Puzzle = Puzzle(
-    board = Board(
-        tiles = tileAssignments.map { assignment ->
-            tileWithAssignment(
-                leftEntryId = assignment.leftEntryId,
-                leftValue = stripValues[assignment.leftEntryId],
-                operator = assignment.operator,
-                rightEntryId = assignment.rightEntryId,
-                rightValue = stripValues[assignment.rightEntryId],
-                result = assignment.result
-            )
-        }
-    ),
-    strip = Strip.fromItems(items = stripValues.map(StripItem::Known))
-)
-
-private fun tileWithAssignment(
-    leftEntryId: Int,
-    leftValue: Int,
-    operator: Operator,
-    rightEntryId: Int,
-    rightValue: Int,
-    result: Int? = null
-): Tile = Tile(
-    expression = Expression(
-        leftOperand = Expression.Operand.Known(
-            value = leftValue,
-            stripEntryId = leftEntryId
-        ),
-        operator = operator,
-        rightOperand = Expression.Operand.Known(
-            value = rightValue,
-            stripEntryId = rightEntryId
-        )
-    ),
-    result = result ?: operator.apply(leftValue, rightValue)
-)
-
-private fun tileWithoutStripIdentity(): Tile = Tile(
-    expression = Expression(
-        leftOperand = Expression.Operand.Known(value = 1),
-        operator = Operator.ADDITION,
-        rightOperand = Expression.Operand.Known(value = 2)
-    ),
-    result = Operator.ADDITION.apply(leftOperand = 1, rightOperand = 2)
-)

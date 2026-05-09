@@ -1,5 +1,8 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.cescfe.numpairs.domain.puzzle.support.hiddenTile
+import org.cescfe.numpairs.domain.puzzle.support.puzzleWithRepeatedSixes
+import org.cescfe.numpairs.domain.puzzle.support.withTile
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -265,36 +268,4 @@ private fun selectionHint(
     ),
     isSelectable =
     isSelectable ?: (listOf(additionUsed, multiplicationUsed).count { used -> used } + provisionalUsed < 2)
-)
-
-private fun puzzleWithRepeatedSixes(): Puzzle = PuzzleSamples.prototype.copy(
-    strip = Strip.fromItems(
-        items = listOf(
-            StripItem.Known(6),
-            StripItem.Known(6),
-            StripItem.Hidden,
-            StripItem.Hidden,
-            StripItem.Known(25),
-            StripItem.Hidden,
-            StripItem.Hidden,
-            StripItem.Known(222)
-        )
-    )
-)
-
-private fun Puzzle.withTile(index: Int, tile: Tile): Puzzle = copy(
-    board = Board(
-        tiles = board.tiles.toMutableList().apply {
-            set(index, tile)
-        }
-    )
-)
-
-private fun hiddenTile(result: Int): Tile = Tile(
-    expression = Expression(
-        leftOperand = Expression.Operand.Hidden,
-        operator = Operator.Hidden,
-        rightOperand = Expression.Operand.Hidden
-    ),
-    result = result
 )
