@@ -1,9 +1,9 @@
 package org.cescfe.numpairs.ui.screen
 
+import org.cescfe.numpairs.initialPuzzle
 import org.cescfe.numpairs.domain.puzzle.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
-import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
 import org.cescfe.numpairs.domain.puzzle.Strip
 import org.cescfe.numpairs.domain.puzzle.StripEntryRange
 import org.cescfe.numpairs.domain.puzzle.StripItem
@@ -21,7 +21,7 @@ import org.junit.Test
 class GameUiStateFromTest {
     @Test
     fun maps_strip_items_to_labels_entry_enablement_and_visual_style() {
-        val puzzle = PuzzleSamples.prototype.copy(
+        val puzzle = initialPuzzle.copy(
             strip = Strip.fromItems(
                 items = listOf(
                     StripItem.Hidden,
@@ -54,7 +54,7 @@ class GameUiStateFromTest {
     @Test
     fun builds_create_mode_strip_item_dialog_for_hidden_entries() {
         val uiState = GameUiState.from(
-            puzzle = PuzzleSamples.prototype,
+            puzzle = initialPuzzle,
             stripItemEntryDialogIndex = 1
         )
 
@@ -71,7 +71,7 @@ class GameUiStateFromTest {
 
     @Test
     fun builds_edit_mode_strip_item_dialog_for_player_entered_entries() {
-        val puzzle = PuzzleSamples.prototype.copy(
+        val puzzle = initialPuzzle.copy(
             strip = Strip.fromItems(
                 items = listOf(
                     StripItem.Hidden,
@@ -166,7 +166,7 @@ class GameUiStateFromTest {
 
     @Test
     fun builds_an_operator_dialog_with_the_current_operator_selection() {
-        val puzzle = PuzzleSamples.prototype.withTile(
+        val puzzle = initialPuzzle.withTile(
             index = 0,
             tile = hiddenTile(result = 223).withOperator(Operator.MULTIPLICATION)
         )
@@ -249,7 +249,7 @@ class GameUiStateFromTest {
     @Test
     fun does_not_build_a_dialog_for_an_invalid_operator_selection_index() {
         val uiState = GameUiState.from(
-            puzzle = PuzzleSamples.prototype,
+            puzzle = initialPuzzle,
             tileOperatorSelectionDialogIndex = 999
         )
 

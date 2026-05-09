@@ -66,9 +66,9 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.initialPuzzle
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
-import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
 import org.cescfe.numpairs.ui.components.AvailableNumberChip
 import org.cescfe.numpairs.ui.components.AvailableNumberChipStyle
 import org.cescfe.numpairs.ui.components.PuzzleTile
@@ -917,7 +917,7 @@ private fun PuzzleOutcomeUiState.Invalid.message(): String = when (completionSta
 private fun GameScreenPreview() {
     NumPairsTheme {
         GameScreen(
-            uiState = GameUiState.from(PuzzleSamples.prototype)
+            uiState = GameUiState.from(initialPuzzle)
         )
     }
 }

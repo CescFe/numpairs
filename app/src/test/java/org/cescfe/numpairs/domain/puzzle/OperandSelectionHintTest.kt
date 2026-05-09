@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.cescfe.numpairs.initialPuzzle
 import org.cescfe.numpairs.domain.puzzle.support.hiddenTile
 import org.cescfe.numpairs.domain.puzzle.support.puzzleWithRepeatedSixes
 import org.cescfe.numpairs.domain.puzzle.support.withTile
@@ -32,7 +33,7 @@ class OperandSelectionHintTest {
 
     @Test
     fun selection_hints_mark_multiplication_usage_for_the_matching_strip_entry_only() {
-        val puzzle = PuzzleSamples.prototype
+        val puzzle = initialPuzzle
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)
@@ -52,7 +53,7 @@ class OperandSelectionHintTest {
 
     @Test
     fun selection_hints_mark_both_operator_families_when_the_same_strip_entry_is_reused() {
-        val puzzle = PuzzleSamples.prototype
+        val puzzle = initialPuzzle
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)
@@ -78,7 +79,7 @@ class OperandSelectionHintTest {
 
     @Test
     fun selection_hints_exclude_the_current_editing_slot_assignment_from_usage() {
-        val puzzle = PuzzleSamples.prototype
+        val puzzle = initialPuzzle
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)
@@ -98,7 +99,7 @@ class OperandSelectionHintTest {
 
     @Test
     fun selection_hints_count_assignments_when_the_operator_is_still_hidden() {
-        val puzzle = PuzzleSamples.prototype
+        val puzzle = initialPuzzle
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)
@@ -216,7 +217,7 @@ class OperandSelectionHintTest {
 
     @Test
     fun selection_hints_mark_the_opposite_slot_strip_entry_as_unavailable_for_the_current_tile() {
-        val puzzle = PuzzleSamples.prototype
+        val puzzle = initialPuzzle
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)
@@ -232,7 +233,7 @@ class OperandSelectionHintTest {
 
     @Test
     fun selection_hints_keep_the_current_slot_assignment_selectable_when_the_opposite_slot_uses_another_entry() {
-        val puzzle = PuzzleSamples.prototype
+        val puzzle = initialPuzzle
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 31)

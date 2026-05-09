@@ -1,6 +1,6 @@
 package org.cescfe.numpairs.ui.screen
 
-import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
+import org.cescfe.numpairs.initialPuzzle
 import org.cescfe.numpairs.domain.puzzle.Strip
 import org.cescfe.numpairs.domain.puzzle.StripEntryRange
 import org.cescfe.numpairs.domain.puzzle.StripItem
@@ -195,7 +195,7 @@ class GameViewModelStripEntryTest {
     @Test
     fun tapping_a_hidden_strip_item_without_a_known_value_on_the_left_uses_one_as_the_lower_bound() {
         val viewModel = GameViewModel(
-            initialPuzzle = PuzzleSamples.prototype.copy(
+            initialPuzzle = initialPuzzle.copy(
                 strip = Strip.fromItems(
                     items = listOf(
                         StripItem.Hidden,
