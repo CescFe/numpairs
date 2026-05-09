@@ -19,6 +19,24 @@ class StripTest {
     }
 
     @Test
+    fun requires_visible_values_to_be_non_decreasing() {
+        assertThrows(IllegalArgumentException::class.java) {
+            Strip.fromItems(
+                items = listOf(
+                    StripItem.Known(1),
+                    StripItem.PlayerEntered(5),
+                    StripItem.Hidden,
+                    StripItem.PlayerEntered(2),
+                    StripItem.Known(6),
+                    StripItem.Known(7),
+                    StripItem.Known(8),
+                    StripItem.Known(9)
+                )
+            )
+        }
+    }
+
+    @Test
     fun valid_entry_range_uses_the_nearest_known_values_on_both_sides() {
         val strip = Strip.fromItems(
             items = listOf(
@@ -116,9 +134,9 @@ class StripTest {
         val strip = Strip.fromItems(
             items = listOf(
                 StripItem.Known(1),
-                StripItem.PlayerEntered(5),
-                StripItem.Hidden,
                 StripItem.PlayerEntered(2),
+                StripItem.Hidden,
+                StripItem.PlayerEntered(5),
                 StripItem.Known(6),
                 StripItem.Known(7),
                 StripItem.Known(8),
@@ -129,21 +147,21 @@ class StripTest {
         assertEquals(
             listOf(
                 StripItem.Known(1),
-                StripItem.PlayerEntered(2),
+                StripItem.PlayerEntered(1),
                 StripItem.Hidden,
-                StripItem.PlayerEntered(4),
+                StripItem.PlayerEntered(2),
                 StripItem.Known(6),
                 StripItem.Known(7),
                 StripItem.Known(8),
                 StripItem.Known(9)
             ),
-            strip.withUpdatedEntry(index = 1, value = 4).items
+            strip.withUpdatedEntry(index = 3, value = 1).items
         )
     }
 
     @Test
     fun reordering_player_entered_values_moves_their_entry_ids_with_them() {
-        val strip = Strip(
+        val strip = Strip.fromEntries(
             entries = listOf(
                 StripEntry(10, StripItem.PlayerEntered(5)),
                 StripEntry(11, StripItem.Hidden),
@@ -160,5 +178,25 @@ class StripTest {
             listOf(11, 10, 12, 13, 14, 15, 16, 17),
             strip.withUpdatedEntry(index = 1, value = 2).entries.map(StripEntry::id)
         )
+    }
+
+    @Test
+    fun updating_an_entry_requires_a_value_within_the_valid_range() {
+        val strip = Strip.fromItems(
+            items = listOf(
+                StripItem.Known(3),
+                StripItem.Hidden,
+                StripItem.Known(5),
+                StripItem.Hidden,
+                StripItem.Known(7),
+                StripItem.Known(8),
+                StripItem.Known(9),
+                StripItem.Known(10)
+            )
+        )
+
+        assertThrows(IllegalArgumentException::class.java) {
+            strip.withUpdatedEntry(index = 1, value = 2)
+        }
     }
 }
