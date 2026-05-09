@@ -96,8 +96,6 @@ fun boardOf(vararg tiles: Tile): Board = Board(tiles = tiles.toList())
 
 fun stripOf(vararg items: StripItem): Strip = Strip.fromItems(items = items.toList())
 
-fun knownStrip(vararg values: Int): Strip = knownStrip(values = values.toList())
-
 fun knownStrip(values: List<Int>): Strip = Strip.fromItems(items = values.map(StripItem::Known))
 
 fun knownPuzzleWithAssignments(stripValues: List<Int>, vararg tileAssignments: TileAssignmentSpec): Puzzle = Puzzle(
