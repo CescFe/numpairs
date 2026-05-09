@@ -1,6 +1,5 @@
 package org.cescfe.numpairs.ui.screen
 
-import org.cescfe.numpairs.initialPuzzle
 import org.cescfe.numpairs.domain.puzzle.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
@@ -13,6 +12,7 @@ import org.cescfe.numpairs.domain.puzzle.support.hiddenTile
 import org.cescfe.numpairs.domain.puzzle.support.knownPuzzleWithAssignments
 import org.cescfe.numpairs.domain.puzzle.support.puzzleWithRepeatedSixes
 import org.cescfe.numpairs.domain.puzzle.support.withTile
+import org.cescfe.numpairs.initialPuzzle
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
