@@ -8,12 +8,7 @@ import org.cescfe.numpairs.domain.puzzle.Strip
 import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.domain.puzzle.Tile
 
-data class TileAssignment(
-    val leftEntryId: Int,
-    val operator: Operator,
-    val rightEntryId: Int,
-    val result: Int? = null
-)
+data class TileAssignment(val leftEntryId: Int, val operator: Operator, val rightEntryId: Int, val result: Int? = null)
 
 fun hiddenTile(result: Int): Tile = Tile(
     expression = Expression(
@@ -84,13 +79,9 @@ fun tileWithoutStripIdentity(
     result = result
 )
 
-fun boardOf(vararg tiles: Tile): Board = Board(tiles = tiles.toList())
-
-fun stripOf(vararg items: StripItem): Strip = Strip.fromItems(items = items.toList())
-
 fun knownPuzzleWithAssignments(stripValues: List<Int>, vararg tileAssignments: TileAssignment): Puzzle = Puzzle(
-    board = boardOf(
-        *tileAssignments.map { assignment ->
+    board = Board(
+        tiles = tileAssignments.map { assignment ->
             assignedTile(
                 stripValues = stripValues,
                 leftEntryId = assignment.leftEntryId,
@@ -98,7 +89,7 @@ fun knownPuzzleWithAssignments(stripValues: List<Int>, vararg tileAssignments: T
                 rightEntryId = assignment.rightEntryId,
                 result = assignment.result
             )
-        }.toTypedArray()
+        }
     ),
     strip = Strip.fromItems(items = stripValues.map(StripItem::Known))
 )

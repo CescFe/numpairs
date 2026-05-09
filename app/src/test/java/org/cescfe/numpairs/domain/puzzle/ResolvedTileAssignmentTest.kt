@@ -1,7 +1,6 @@
 package org.cescfe.numpairs.domain.puzzle
 
 import org.cescfe.numpairs.domain.puzzle.support.assignedTile
-import org.cescfe.numpairs.domain.puzzle.support.boardOf
 import org.cescfe.numpairs.domain.puzzle.support.hiddenTile
 import org.cescfe.numpairs.domain.puzzle.support.prototypePuzzleWithRepeatedSixes
 import org.cescfe.numpairs.domain.puzzle.support.withTile
@@ -43,29 +42,31 @@ class ResolvedTileAssignmentTest {
 
     @Test
     fun board_exposes_indexed_resolved_assignments_only_for_resolved_tiles() {
-        val board = boardOf(
-            assignedTile(
-                leftEntryId = 2,
-                leftValue = 6,
-                operator = Operator.ADDITION,
-                rightEntryId = 4,
-                rightValue = 25,
-                result = 31
-            ),
-            hiddenTile(result = 223),
-            hiddenTile(result = 222),
-            hiddenTile(result = 52),
-            hiddenTile(result = 100),
-            assignedTile(
-                leftEntryId = 2,
-                leftValue = 6,
-                operator = Operator.MULTIPLICATION,
-                rightEntryId = 4,
-                rightValue = 25,
-                result = 150
-            ),
-            hiddenTile(result = 35),
-            hiddenTile(result = 250)
+        val board = Board(
+            tiles = listOf(
+                assignedTile(
+                    leftEntryId = 2,
+                    leftValue = 6,
+                    operator = Operator.ADDITION,
+                    rightEntryId = 4,
+                    rightValue = 25,
+                    result = 31
+                ),
+                hiddenTile(result = 223),
+                hiddenTile(result = 222),
+                hiddenTile(result = 52),
+                hiddenTile(result = 100),
+                assignedTile(
+                    leftEntryId = 2,
+                    leftValue = 6,
+                    operator = Operator.MULTIPLICATION,
+                    rightEntryId = 4,
+                    rightValue = 25,
+                    result = 150
+                ),
+                hiddenTile(result = 35),
+                hiddenTile(result = 250)
+            )
         )
 
         assertEquals(

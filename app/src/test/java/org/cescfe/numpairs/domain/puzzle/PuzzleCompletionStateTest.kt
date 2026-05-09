@@ -1,10 +1,9 @@
 package org.cescfe.numpairs.domain.puzzle
 
-import org.cescfe.numpairs.domain.puzzle.support.assignedTile
 import org.cescfe.numpairs.domain.puzzle.support.TileAssignment
+import org.cescfe.numpairs.domain.puzzle.support.assignedTile
 import org.cescfe.numpairs.domain.puzzle.support.defaultKnownStripValues
 import org.cescfe.numpairs.domain.puzzle.support.knownPuzzleWithAssignments
-import org.cescfe.numpairs.domain.puzzle.support.stripOf
 import org.cescfe.numpairs.domain.puzzle.support.tileWithoutStripIdentity
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -34,15 +33,17 @@ class PuzzleCompletionStateTest {
     fun incomplete_puzzle_reports_incomplete_completion_state() {
         val puzzle = Puzzle(
             board = solvedBoardWithAssignments(),
-            strip = stripOf(
-                StripItem.Known(1),
-                StripItem.Hidden,
-                StripItem.Known(3),
-                StripItem.Known(4),
-                StripItem.Known(5),
-                StripItem.Known(6),
-                StripItem.Known(7),
-                StripItem.Known(8)
+            strip = Strip.fromItems(
+                items = listOf(
+                    StripItem.Known(1),
+                    StripItem.Hidden,
+                    StripItem.Known(3),
+                    StripItem.Known(4),
+                    StripItem.Known(5),
+                    StripItem.Known(6),
+                    StripItem.Known(7),
+                    StripItem.Known(8)
+                )
             )
         )
 
@@ -129,15 +130,17 @@ class PuzzleCompletionStateTest {
                     )
                 )
             ),
-            strip = stripOf(
-                StripItem.Known(1),
-                StripItem.Known(2),
-                StripItem.Known(3),
-                StripItem.Known(4),
-                StripItem.Known(5),
-                StripItem.Known(6),
-                StripItem.Known(7),
-                StripItem.Known(8)
+            strip = Strip.fromItems(
+                items = listOf(
+                    StripItem.Known(1),
+                    StripItem.Known(2),
+                    StripItem.Known(3),
+                    StripItem.Known(4),
+                    StripItem.Known(5),
+                    StripItem.Known(6),
+                    StripItem.Known(7),
+                    StripItem.Known(8)
+                )
             )
         )
 

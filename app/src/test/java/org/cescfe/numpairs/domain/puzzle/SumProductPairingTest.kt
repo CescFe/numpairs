@@ -3,7 +3,6 @@ package org.cescfe.numpairs.domain.puzzle
 import org.cescfe.numpairs.domain.puzzle.support.TileAssignment
 import org.cescfe.numpairs.domain.puzzle.support.defaultKnownStripValues
 import org.cescfe.numpairs.domain.puzzle.support.knownPuzzleWithAssignments
-import org.cescfe.numpairs.domain.puzzle.support.stripOf
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -60,15 +59,17 @@ class SumProductPairingTest {
             TileAssignment(leftEntryId = 6, operator = Operator.ADDITION, rightEntryId = 7),
             TileAssignment(leftEntryId = 7, operator = Operator.MULTIPLICATION, rightEntryId = 6)
         ).copy(
-            strip = stripOf(
-                StripItem.Known(1),
-                StripItem.Hidden,
-                StripItem.Known(3),
-                StripItem.Known(4),
-                StripItem.Known(5),
-                StripItem.Known(6),
-                StripItem.Known(7),
-                StripItem.Known(8)
+            strip = Strip.fromItems(
+                items = listOf(
+                    StripItem.Known(1),
+                    StripItem.Hidden,
+                    StripItem.Known(3),
+                    StripItem.Known(4),
+                    StripItem.Known(5),
+                    StripItem.Known(6),
+                    StripItem.Known(7),
+                    StripItem.Known(8)
+                )
             )
         )
 
