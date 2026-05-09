@@ -38,7 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.domain.puzzle.PuzzleSamples
+import org.cescfe.numpairs.initialPuzzle
 import org.cescfe.numpairs.ui.screen.GameUiState
 import org.cescfe.numpairs.ui.screen.TileUiState
 import org.cescfe.numpairs.ui.screen.TileVisualState
@@ -319,7 +319,7 @@ private fun expressionTextStyle(text: String, isOperand: Boolean) = when {
 private fun PuzzleTilePreview() {
     NumPairsTheme {
         PuzzleTile(
-            tile = GameUiState.from(PuzzleSamples.prototype).tiles.first()
+            tile = GameUiState.from(initialPuzzle).tiles.first()
         )
     }
 }
