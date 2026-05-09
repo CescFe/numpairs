@@ -25,7 +25,13 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.domain.puzzle.Board
+import org.cescfe.numpairs.domain.puzzle.Expression
 import org.cescfe.numpairs.domain.puzzle.Operator
+import org.cescfe.numpairs.domain.puzzle.Puzzle
+import org.cescfe.numpairs.domain.puzzle.Strip
+import org.cescfe.numpairs.domain.puzzle.StripItem
+import org.cescfe.numpairs.domain.puzzle.Tile
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Before
 import org.junit.Rule
@@ -881,6 +887,61 @@ class GameScreenTest {
             .assertDoesNotExist()
     }
 
+    @Test
+    fun successOverlayBlocksPuzzleInteractionsUntilItIsDismissed() {
+        viewModel = GameViewModel(
+            initialPuzzle = instrumentedSolvedPuzzleWithKnownStripAndAssignments()
+        )
+        useSolvedOverlayFixture = false
+        isSolvedOverlayVisible = false
+
+        composeTestRule.setContent {
+            val uiState by viewModel.uiState.collectAsState()
+
+            NumPairsTheme {
+                GameScreen(
+                    uiState = uiState,
+                    onStripItemTapped = viewModel::onStripItemTapped,
+                    onStripItemEntryDismissed = viewModel::onStripItemEntryDismissed,
+                    onStripItemEntryConfirmed = viewModel::onStripItemEntryConfirmed,
+                    onTileLeftOperandTapped = viewModel::onTileLeftOperandTapped,
+                    onTileRightOperandTapped = viewModel::onTileRightOperandTapped,
+                    onTileOperandSelectionDismissed = viewModel::onTileOperandSelectionDismissed,
+                    onTileOperandSelectionConfirmed = viewModel::onTileOperandSelectionConfirmed,
+                    onTileOperatorTapped = viewModel::onTileOperatorTapped,
+                    onTileResetTapped = viewModel::onTileResetTapped,
+                    onTileOperatorSelectionDismissed = viewModel::onTileOperatorSelectionDismissed,
+                    onTileOperatorSelectionConfirmed = viewModel::onTileOperatorSelectionConfirmed,
+                    onSuccessOverlayDismissed = viewModel::onSuccessOverlayDismissed
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.BOARD)
+            .performScrollTo()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onAllNodesWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR, useUnmergedTree = true)
+            .assertCountEquals(0)
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR, useUnmergedTree = true)
+            .assertIsDisplayed()
+    }
+
     private fun buildIncorrectFirstTile() {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.stripItem(1))
@@ -1013,3 +1074,44 @@ private fun solvedOverlayUiState(isSuccessOverlayVisible: Boolean): GameUiState 
     puzzleOutcome = PuzzleOutcomeUiState.Solved,
     isSuccessOverlayVisible = isSuccessOverlayVisible
 )
+
+private fun instrumentedSolvedPuzzleWithKnownStripAndAssignments(): Puzzle = Puzzle(
+    board = Board(
+        tiles = listOf(
+            instrumentedAssignedTile(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
+            instrumentedAssignedTile(leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 0),
+            instrumentedAssignedTile(leftEntryId = 2, operator = Operator.ADDITION, rightEntryId = 3),
+            instrumentedAssignedTile(leftEntryId = 3, operator = Operator.MULTIPLICATION, rightEntryId = 2),
+            instrumentedAssignedTile(leftEntryId = 4, operator = Operator.ADDITION, rightEntryId = 5),
+            instrumentedAssignedTile(leftEntryId = 5, operator = Operator.MULTIPLICATION, rightEntryId = 4),
+            instrumentedAssignedTile(leftEntryId = 6, operator = Operator.ADDITION, rightEntryId = 7),
+            instrumentedAssignedTile(leftEntryId = 7, operator = Operator.MULTIPLICATION, rightEntryId = 6)
+        )
+    ),
+    strip = Strip.fromItems(
+        items = (1..8).map(StripItem::Known)
+    )
+)
+
+private fun instrumentedAssignedTile(leftEntryId: Int, operator: Operator, rightEntryId: Int): Tile {
+    val leftValue = leftEntryId + 1
+    val rightValue = rightEntryId + 1
+
+    return Tile(
+        expression = Expression(
+            leftOperand = Expression.Operand.Known(
+                value = leftValue,
+                stripEntryId = leftEntryId
+            ),
+            operator = operator,
+            rightOperand = Expression.Operand.Known(
+                value = rightValue,
+                stripEntryId = rightEntryId
+            )
+        ),
+        result = operator.apply(
+            leftOperand = leftValue,
+            rightOperand = rightValue
+        )
+    )
+}

@@ -55,7 +55,7 @@ class GameUiStateFromTest {
     fun builds_create_mode_strip_item_dialog_for_hidden_entries() {
         val uiState = GameUiState.from(
             puzzle = initialPuzzle,
-            stripItemEntryDialogIndex = 1
+            presentationState = GamePresentationState().showStripItemEntry(index = 1)
         )
 
         assertEquals(
@@ -88,7 +88,7 @@ class GameUiStateFromTest {
 
         val uiState = GameUiState.from(
             puzzle = puzzle,
-            stripItemEntryDialogIndex = 1
+            presentationState = GamePresentationState().showStripItemEntry(index = 1)
         )
 
         assertEquals(
@@ -156,8 +156,7 @@ class GameUiStateFromTest {
     @Test
     fun maps_a_solved_puzzle_to_a_success_outcome() {
         val uiState = GameUiState.from(
-            puzzle = solvedPuzzleWithKnownStripAndAssignments(),
-            isSuccessOverlayVisible = true
+            puzzle = solvedPuzzleWithKnownStripAndAssignments()
         )
 
         assertEquals(PuzzleOutcomeUiState.Solved, uiState.puzzleOutcome)
@@ -173,7 +172,7 @@ class GameUiStateFromTest {
 
         val uiState = GameUiState.from(
             puzzle = puzzle,
-            tileOperatorSelectionDialogIndex = 0
+            presentationState = GamePresentationState().showTileOperatorSelection(tileIndex = 0)
         )
 
         assertEquals(
@@ -201,7 +200,7 @@ class GameUiStateFromTest {
 
         val uiState = GameUiState.from(
             puzzle = puzzle,
-            tileOperandSelectionTarget = TileOperandSelectionTarget(
+            presentationState = GamePresentationState().showTileOperandSelection(
                 tileIndex = 1,
                 slot = OperandSlot.LEFT
             )
@@ -250,7 +249,7 @@ class GameUiStateFromTest {
     fun does_not_build_a_dialog_for_an_invalid_operator_selection_index() {
         val uiState = GameUiState.from(
             puzzle = initialPuzzle,
-            tileOperatorSelectionDialogIndex = 999
+            presentationState = GamePresentationState().showTileOperatorSelection(tileIndex = 999)
         )
 
         assertNull(uiState.tileOperatorSelectionDialog)

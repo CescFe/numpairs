@@ -10,8 +10,6 @@ import org.cescfe.numpairs.domain.puzzle.StripEntryRange
 import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.domain.puzzle.Tile
 import org.cescfe.numpairs.domain.puzzle.TileResolutionState
-import org.cescfe.numpairs.domain.puzzle.mismatchedSumProductPairingTileIndexes
-import org.cescfe.numpairs.domain.puzzle.operandSelectionChoicesFor
 
 data class GameUiState(
     val stripItems: List<StripItemUiState>,
@@ -23,81 +21,11 @@ data class GameUiState(
     val tileOperandSelectionDialog: TileOperandSelectionDialogUiState? = null
 ) {
     companion object {
-        fun from(
-            puzzle: Puzzle,
-            isSuccessOverlayVisible: Boolean = false,
-            stripItemEntryDialogIndex: Int? = null,
-            tileOperatorSelectionDialogIndex: Int? = null,
-            tileOperandSelectionTarget: TileOperandSelectionTarget? = null
-        ): GameUiState {
-            val completionState = puzzle.completionState
-            val mismatchedPairingTileIndexes =
-                if (completionState == PuzzleCompletionState.MISMATCHED_SUM_PRODUCT_PAIRINGS) {
-                    puzzle.mismatchedSumProductPairingTileIndexes.toSet()
-                } else {
-                    emptySet()
-                }
-
-            return GameUiState(
-                stripItems = puzzle.strip.items.map(::StripItemUiState),
-                tiles = puzzle.board.tiles.mapIndexed { tileIndex, tile ->
-                    TileUiState(
-                        tile = tile,
-                        visualState = when {
-                            tile.resolutionState == TileResolutionState.INCORRECT -> TileVisualState.INCORRECT
-                            tileIndex in mismatchedPairingTileIndexes -> TileVisualState.MISMATCHED_PAIRING
-                            else -> TileVisualState.NORMAL
-                        }
-                    )
-                },
-                puzzleOutcome = completionState.outcomeUiState,
-                isSuccessOverlayVisible = isSuccessOverlayVisible,
-                stripItemEntryDialog = stripItemEntryDialogIndex?.let { stripItemIndex ->
-                    val stripItem = puzzle.strip.items[stripItemIndex]
-
-                    StripItemEntryDialogUiState(
-                        stripItemIndex = stripItemIndex,
-                        validRange = puzzle.strip.validEntryRangeFor(stripItemIndex),
-                        mode = when (stripItem) {
-                            StripItem.Hidden -> StripItemEntryDialogMode.CREATE
-                            is StripItem.PlayerEntered -> StripItemEntryDialogMode.EDIT
-                            is StripItem.Known -> error("Known strip items do not support entry dialogs.")
-                        },
-                        initialValue = when (stripItem) {
-                            StripItem.Hidden -> ""
-                            is StripItem.PlayerEntered -> stripItem.value.toString()
-                            is StripItem.Known -> error("Known strip items do not support entry dialogs.")
-                        }
-                    )
-                },
-                tileOperatorSelectionDialog = tileOperatorSelectionDialogIndex
-                    ?.takeIf { tileIndex -> tileIndex in puzzle.board.tiles.indices }
-                    ?.let { tileIndex ->
-                        val currentOperator = puzzle.board.tiles[tileIndex].expression.operator
-
-                        TileOperatorSelectionDialogUiState(
-                            tileIndex = tileIndex,
-                            availableOperators = listOf(
-                                Operator.ADDITION,
-                                Operator.MULTIPLICATION
-                            ),
-                            initialOperator = currentOperator.takeUnless { it == Operator.Hidden }
-                        )
-                    },
-                tileOperandSelectionDialog = tileOperandSelectionTarget
-                    ?.takeIf { target -> target.tileIndex in puzzle.board.tiles.indices }
-                    ?.let { target ->
-                        TileOperandSelectionDialogUiState(
-                            tileIndex = target.tileIndex,
-                            slot = target.slot,
-                            availableOperands = puzzle.operandSelectionChoicesFor(
-                                tileIndex = target.tileIndex,
-                                slot = target.slot
-                            ).map(::TileOperandOptionUiState)
-                        )
-                    }
+        fun from(puzzle: Puzzle, presentationState: GamePresentationState = GamePresentationState()): GameUiState =
+            GameUiStateFactory.create(
+                puzzle = puzzle,
+                presentationState = presentationState
             )
-        }
     }
 }
 
@@ -178,8 +106,6 @@ data class TileOperandOptionUiState(
     )
 }
 
-data class TileOperandSelectionTarget(val tileIndex: Int, val slot: OperandSlot)
-
 data class TileUiState(
     val leftOperandLabel: String,
     val operatorLabel: String,
@@ -223,7 +149,7 @@ private val Expression.Operand.label: String
         is Expression.Operand.Known -> value.toString()
     }
 
-private val PuzzleCompletionState.outcomeUiState: PuzzleOutcomeUiState?
+internal val PuzzleCompletionState.outcomeUiState: PuzzleOutcomeUiState?
     get() = when (this) {
         PuzzleCompletionState.INCOMPLETE -> null
         PuzzleCompletionState.SOLVED -> PuzzleOutcomeUiState.Solved
