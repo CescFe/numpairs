@@ -83,7 +83,8 @@ fun Puzzle.operandSelectionChoicesFor(tileIndex: Int, slot: OperandSlot): List<O
                 usageByOperator = usage,
                 availability = when {
                     stripEntry.id == oppositeSlotEntryId -> OperandSelectionAvailability.BLOCKED_BY_OPPOSITE_OPERAND
-                    usage.totalAssignmentCount >= MAX_ASSIGNMENTS_PER_STRIP_ENTRY -> OperandSelectionAvailability.EXHAUSTED
+                    usage.totalAssignmentCount >= MAX_ASSIGNMENTS_PER_STRIP_ENTRY ->
+                        OperandSelectionAvailability.EXHAUSTED
                     else -> OperandSelectionAvailability.AVAILABLE
                 }
             )
