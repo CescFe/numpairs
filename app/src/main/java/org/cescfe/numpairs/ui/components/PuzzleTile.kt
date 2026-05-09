@@ -77,24 +77,11 @@ fun PuzzleTile(
     resetModifier: Modifier = Modifier,
     onResetClick: (() -> Unit)? = null
 ) {
-    val expressionColor = when (tile.visualState) {
-        TileVisualState.INCORRECT -> MaterialTheme.colorScheme.error
-        TileVisualState.MISMATCHED_PAIRING,
-        TileVisualState.NORMAL -> Color.Unspecified
-    }
+    val statePalette = tileStatePalette(tile.visualState)
+    val expressionColor = statePalette?.contentColor ?: Color.Unspecified
     val tileStateDescription = when (tile.visualState) {
         TileVisualState.INCORRECT -> stringResource(R.string.tile_state_incorrect)
         TileVisualState.MISMATCHED_PAIRING -> stringResource(R.string.tile_state_mismatched_pairing)
-        TileVisualState.NORMAL -> null
-    }
-    val containerColor = when (tile.visualState) {
-        TileVisualState.INCORRECT -> MaterialTheme.colorScheme.error.copy(alpha = 0.08f)
-        TileVisualState.MISMATCHED_PAIRING -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.72f)
-        TileVisualState.NORMAL -> Color.Unspecified
-    }
-    val border = when (tile.visualState) {
-        TileVisualState.INCORRECT -> BorderStroke(1.5.dp, MaterialTheme.colorScheme.error)
-        TileVisualState.MISMATCHED_PAIRING -> BorderStroke(1.5.dp, MaterialTheme.colorScheme.tertiary)
         TileVisualState.NORMAL -> null
     }
 
@@ -108,12 +95,12 @@ fun PuzzleTile(
         Card(
             modifier = Modifier,
             shape = RoundedCornerShape(TILE_CORNER_RADIUS),
-            colors = if (containerColor == Color.Unspecified) {
+            colors = if (statePalette == null) {
                 CardDefaults.cardColors()
             } else {
-                CardDefaults.cardColors(containerColor = containerColor)
+                CardDefaults.cardColors(containerColor = statePalette.containerColor)
             },
-            border = border
+            border = statePalette?.border
         ) {
             Column(
                 modifier = Modifier
@@ -144,7 +131,7 @@ fun PuzzleTile(
                         fontSize = MaterialTheme.typography.bodyLarge.fontSize * 2,
                         lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 2
                     ),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = statePalette?.contentColor ?: MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Center
                 )
@@ -165,6 +152,28 @@ fun PuzzleTile(
         }
     }
 }
+
+@Composable
+private fun tileStatePalette(visualState: TileVisualState): TileStatePalette? {
+    val colorScheme = MaterialTheme.colorScheme
+
+    return when (visualState) {
+        TileVisualState.NORMAL -> null
+        TileVisualState.INCORRECT -> TileStatePalette(
+            containerColor = colorScheme.errorContainer,
+            contentColor = colorScheme.onErrorContainer,
+            border = BorderStroke(2.dp, colorScheme.error)
+        )
+
+        TileVisualState.MISMATCHED_PAIRING -> TileStatePalette(
+            containerColor = colorScheme.tertiaryContainer,
+            contentColor = colorScheme.onTertiaryContainer,
+            border = BorderStroke(2.dp, colorScheme.tertiary)
+        )
+    }
+}
+
+private data class TileStatePalette(val containerColor: Color, val contentColor: Color, val border: BorderStroke)
 
 @Composable
 private fun TileResetAction(modifier: Modifier = Modifier, onClick: () -> Unit) {
