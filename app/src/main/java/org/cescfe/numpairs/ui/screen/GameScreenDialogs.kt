@@ -37,17 +37,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Operator
 
@@ -105,10 +105,7 @@ internal fun TileOperandSelectionSheet(
 }
 
 @Composable
-private fun OperandSelectionOption(
-    operand: TileOperandOptionUiState,
-    onConfirm: (Int) -> Unit
-) {
+private fun OperandSelectionOption(operand: TileOperandOptionUiState, onConfirm: (Int) -> Unit) {
     val operandSelectionLabel = operand.value.toString()
     val optionColors = operandOptionColors(
         enabled = operand.isSelectable,

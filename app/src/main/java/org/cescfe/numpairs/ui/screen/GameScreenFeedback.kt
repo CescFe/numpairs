@@ -101,10 +101,7 @@ internal fun SuccessOverlay(onDismiss: () -> Unit) {
 }
 
 @Composable
-internal fun PuzzleOutcomeBanner(
-    puzzleOutcome: PuzzleOutcomeUiState.Invalid,
-    modifier: Modifier = Modifier
-) {
+internal fun PuzzleOutcomeBanner(puzzleOutcome: PuzzleOutcomeUiState.Invalid, modifier: Modifier = Modifier) {
     val colorScheme = MaterialTheme.colorScheme
 
     Surface(

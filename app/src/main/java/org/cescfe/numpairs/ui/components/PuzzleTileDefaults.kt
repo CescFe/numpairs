@@ -43,8 +43,4 @@ internal fun tileStatePalette(visualState: TileVisualState): TileStatePalette? {
     }
 }
 
-internal data class TileStatePalette(
-    val containerColor: Color,
-    val contentColor: Color,
-    val border: BorderStroke
-)
+internal data class TileStatePalette(val containerColor: Color, val contentColor: Color, val border: BorderStroke)
