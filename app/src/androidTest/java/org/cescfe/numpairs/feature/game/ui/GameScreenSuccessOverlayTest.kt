@@ -7,27 +7,19 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class GameScreenSuccessOverlayTest : GameScreenTestHost() {
     @Test
-    fun solvedPuzzleShowsSuccessOverlayWhileKeepingTheBoardVisible() {
+    fun solvedPuzzleShowsTheSuccessOverlayOverTheBoardAndBackDismissesIt() {
         showSolvedOverlayFixture()
 
         screen
             .assertBoardDisplayed()
             .assertSuccessOverlayVisible()
             .assertSuccessOverlayMessageDisplayed()
-    }
-
-    @Test
-    fun successOverlayCanBeDismissedWithBack() {
-        showSolvedOverlayFixture()
-
-        screen
-            .assertSuccessOverlayVisible()
             .pressBack()
             .assertSuccessOverlayHidden()
     }
 
     @Test
-    fun successOverlayCanBeDismissedByTap() {
+    fun tappingTheSuccessOverlayDismissesIt() {
         showSolvedOverlayFixture()
 
         screen

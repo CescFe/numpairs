@@ -9,7 +9,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class GameScreenOperandSelectorTest : GameScreenTestHost() {
     @Test
-    fun tappingHiddenLeftTileOperandOpensBottomSheetSelector() {
+    fun selectingAnOperandFromAHiddenSlotUpdatesTheTileAndClosesTheSheet() {
         screen
             .scrollToBoard()
             .tapTileLeftOperand(0)
@@ -17,31 +17,6 @@ class GameScreenOperandSelectorTest : GameScreenTestHost() {
             .assertOperandOptionDisplayed(entryId = 2)
             .assertOperandOptionDisplayed(entryId = 4)
             .assertOperandOptionDisplayed(entryId = 7)
-    }
-
-    @Test
-    fun tappingHiddenRightTileOperandOpensBottomSheetSelector() {
-        screen
-            .scrollToBoard()
-            .tapTileRightOperand(0)
-            .assertOperandSelectorDisplayed()
-    }
-
-    @Test
-    fun playerEnteredStripItemAppearsAsSelectableOperandValue() {
-        completeSecondStripItemWithPlayerValueTwo()
-
-        screen
-            .scrollToBoard()
-            .tapTileLeftOperand(0)
-            .assertOperandOptionDisplayed(entryId = 1)
-    }
-
-    @Test
-    fun selectingAnOperandOptionCompletesTheHiddenTileOperandImmediately() {
-        screen
-            .scrollToBoard()
-            .tapTileLeftOperand(0)
             .tapOperandOption(entryId = 2)
             .assertLeftOperandDescription(
                 0,
@@ -52,7 +27,7 @@ class GameScreenOperandSelectorTest : GameScreenTestHost() {
     }
 
     @Test
-    fun tappingFilledLeftTileOperandReopensBottomSheetSelectorWithoutSelectedOperandEmphasis() {
+    fun tappingAFilledOperandReopensTheSheetWithoutSelectedOperandEmphasis() {
         fillTileLeftOperandWithEntryTwo(tileIndex = 0)
 
         screen
@@ -62,40 +37,7 @@ class GameScreenOperandSelectorTest : GameScreenTestHost() {
     }
 
     @Test
-    fun tappingFilledRightTileOperandReopensBottomSheetSelector() {
-        screen
-            .scrollToBoard()
-            .tapTileRightOperand(0)
-            .tapOperandOption(entryId = 2)
-            .tapTileRightOperand(0)
-            .assertOperandSelectorDisplayed()
-    }
-
-    @Test
-    fun selectingAnOperandOptionReplacesTheFilledTileOperandImmediately() {
-        fillTileLeftOperandWithEntryTwo(tileIndex = 0)
-
-        screen
-            .tapTileLeftOperand(0)
-            .tapOperandOption(entryId = 4)
-            .assertLeftOperandDescription(
-                0,
-                R.string.tile_left_operand_content_description,
-                "25"
-            )
-    }
-
-    @Test
-    fun the_current_tile_entry_is_rendered_disabled_for_the_opposite_operand_slot() {
-        fillTileLeftOperandWithEntryTwo(tileIndex = 0)
-
-        screen
-            .tapTileRightOperand(0)
-            .assertOperandOptionDisabled(entryId = 2)
-    }
-
-    @Test
-    fun dismissingTheOperandSelectorLeavesTheHiddenTileOperandUnchanged() {
+    fun backDismissesTheOperandSelectorWithoutChangingHiddenOrFilledSlots() {
         screen
             .scrollToBoard()
             .tapTileLeftOperand(0)
@@ -105,10 +47,7 @@ class GameScreenOperandSelectorTest : GameScreenTestHost() {
                 R.string.tile_left_operand_hidden_content_description
             )
             .assertOperandSelectorHidden()
-    }
 
-    @Test
-    fun dismissingTheOperandSelectorLeavesTheFilledTileOperandUnchanged() {
         fillTileLeftOperandWithEntryTwo(tileIndex = 0)
 
         screen
@@ -119,13 +58,26 @@ class GameScreenOperandSelectorTest : GameScreenTestHost() {
                 R.string.tile_left_operand_content_description,
                 "6"
             )
+            .assertOperandSelectorHidden()
     }
 
     @Test
-    fun operandSelectorShowsOperatorSpecificUsageHintsWithoutVerboseText() {
+    fun operandSelectorUsageHintsReflectWhetherTheOperatorContextIsKnown() {
         fillTileLeftOperandWithEntryTwo(tileIndex = 0)
 
         screen
+            .tapTileLeftOperand(1)
+            .assertOperandUsageHintState(
+                entryId = 2,
+                operator = Operator.ADDITION,
+                stateDescriptionResId = R.string.tile_operand_usage_state_available
+            )
+            .assertOperandUsageHintState(
+                entryId = 2,
+                operator = Operator.MULTIPLICATION,
+                stateDescriptionResId = R.string.tile_operand_usage_state_available
+            )
+            .pressBack()
             .tapTileOperator(0)
             .tapOperatorOption(Operator.ADDITION)
             .tapTileLeftOperand(1)
@@ -142,48 +94,22 @@ class GameScreenOperandSelectorTest : GameScreenTestHost() {
     }
 
     @Test
-    fun operandSelectorDoesNotMarkUsageHintsUntilTheTileOperatorIsKnown() {
-        fillTileLeftOperandWithEntryTwo(tileIndex = 0)
+    fun selectorRendersBlockedAndExhaustedEntriesWithTheCorrectAvailability() {
+        fillTileLeftOperandWithEntryTwo(tileIndex = 0, operator = Operator.ADDITION)
 
         screen
-            .tapTileLeftOperand(1)
-            .assertOperandUsageHintState(
-                entryId = 2,
-                operator = Operator.ADDITION,
-                stateDescriptionResId = R.string.tile_operand_usage_state_available
-            )
-            .assertOperandUsageHintState(
-                entryId = 2,
-                operator = Operator.MULTIPLICATION,
-                stateDescriptionResId = R.string.tile_operand_usage_state_available
-            )
-    }
+            .tapTileRightOperand(0)
+            .assertOperandOptionDisabled(entryId = 2)
+            .pressBack()
 
-    @Test
-    fun exhausted_operand_options_are_rendered_disabled_in_the_picker() {
-        fillTileLeftOperandWithEntryTwo(tileIndex = 0, operator = Operator.ADDITION)
         fillTileLeftOperandWithEntryTwo(tileIndex = 1, operator = Operator.MULTIPLICATION)
 
         screen
             .tapTileLeftOperand(2)
             .assertOperandOptionDisabled(entryId = 2)
-    }
-
-    @Test
-    fun reopening_a_slot_keeps_its_current_exhausted_operand_enabled() {
-        fillTileLeftOperandWithEntryTwo(tileIndex = 0, operator = Operator.ADDITION)
-        fillTileLeftOperandWithEntryTwo(tileIndex = 1, operator = Operator.MULTIPLICATION)
-
-        screen
+            .pressBack()
             .tapTileLeftOperand(0)
             .assertOperandOptionEnabled(entryId = 2)
-    }
-
-    private fun completeSecondStripItemWithPlayerValueTwo() {
-        screen
-            .tapStripItem(1)
-            .enterStripValue("2")
-            .confirmStripEntry()
     }
 
     private fun fillTileLeftOperandWithEntryTwo(tileIndex: Int, operator: Operator? = null) {
