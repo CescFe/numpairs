@@ -159,16 +159,13 @@ class GameScreenRobot(
             .assertIsNotEnabled()
     }
 
-    fun assertStripItemDescription(
-        index: Int,
-        @StringRes stringResId: Int,
-        vararg formatArgs: Any
-    ): GameScreenRobot = apply {
-        assertContentDescription(
-            testTag = GameScreenTestTags.stripItem(index),
-            contentDescription = string(stringResId, *formatArgs)
-        )
-    }
+    fun assertStripItemDescription(index: Int, @StringRes stringResId: Int, vararg formatArgs: Any): GameScreenRobot =
+        apply {
+            assertContentDescription(
+                testTag = GameScreenTestTags.stripItem(index),
+                contentDescription = string(stringResId, *formatArgs)
+            )
+        }
 
     fun assertLeftOperandDescription(
         tileIndex: Int,
@@ -351,10 +348,9 @@ class GameScreenRobot(
             )
     }
 
-    private fun string(@StringRes stringResId: Int, vararg formatArgs: Any): String =
-        if (formatArgs.isEmpty()) {
-            activity.getString(stringResId)
-        } else {
-            activity.getString(stringResId, *formatArgs)
-        }
+    private fun string(@StringRes stringResId: Int, vararg formatArgs: Any): String = if (formatArgs.isEmpty()) {
+        activity.getString(stringResId)
+    } else {
+        activity.getString(stringResId, *formatArgs)
+    }
 }
