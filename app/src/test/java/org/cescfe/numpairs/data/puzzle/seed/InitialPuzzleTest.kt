@@ -33,6 +33,7 @@ class InitialPuzzleTest {
 
         Assert.assertEquals(
             listOf(223, 222, 52, 100, 31, 150, 35, 250),
-            boardTiles.map { it.result })
+            boardTiles.map { it.result }
+        )
     }
 }
