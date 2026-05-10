@@ -144,7 +144,7 @@ These expectations align with the detailed interaction rules defined in `docs/ui
 - Difficulty modes
 - Multiple puzzles
 - Content browsing or puzzle selection flows
-- Multi-screen product flows beyond the startup flow needed for splash-to-game entry
+- Multiscreen product flows beyond the startup flow needed for splash-to-game entry
 - Accounts, backend services, or social features
 
 ---
