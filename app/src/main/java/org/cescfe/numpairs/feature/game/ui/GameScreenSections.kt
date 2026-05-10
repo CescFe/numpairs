@@ -26,9 +26,9 @@ import org.cescfe.numpairs.feature.game.presentation.StripItemUiState
 import org.cescfe.numpairs.feature.game.presentation.StripItemVisualStyle
 import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState
 import org.cescfe.numpairs.feature.game.presentation.TileUiState
-import org.cescfe.numpairs.ui.components.AvailableNumberChip
-import org.cescfe.numpairs.ui.components.AvailableNumberChipStyle
-import org.cescfe.numpairs.ui.components.PuzzleTile
+import org.cescfe.numpairs.feature.game.ui.components.AvailableNumberChip
+import org.cescfe.numpairs.feature.game.ui.components.AvailableNumberChipStyle
+import org.cescfe.numpairs.feature.game.ui.components.PuzzleTile
 
 @Composable
 internal fun BoardSection(

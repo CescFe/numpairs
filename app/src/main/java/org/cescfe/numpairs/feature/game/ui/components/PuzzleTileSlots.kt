@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.ui.components
+package org.cescfe.numpairs.feature.game.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable

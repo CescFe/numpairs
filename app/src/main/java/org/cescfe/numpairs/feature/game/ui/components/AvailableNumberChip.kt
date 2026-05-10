@@ -1,10 +1,11 @@
-package org.cescfe.numpairs.ui.components
+package org.cescfe.numpairs.feature.game.ui.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -77,7 +78,7 @@ private fun AvailableNumberChipLabel(label: String) {
     ) {
         Text(
             text = label,
-            style = androidx.compose.material3.MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.titleSmall,
             textAlign = TextAlign.Center
         )
     }
