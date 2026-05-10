@@ -1,4 +1,4 @@
-package org.cescfe.numpairs
+package org.cescfe.numpairs.data.puzzle.seed
 
 import org.cescfe.numpairs.domain.puzzle.Board
 import org.cescfe.numpairs.domain.puzzle.Expression

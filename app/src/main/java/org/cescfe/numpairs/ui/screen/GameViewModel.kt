@@ -11,7 +11,7 @@ import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.domain.puzzle.Tile
 import org.cescfe.numpairs.domain.puzzle.operandSelectionChoicesFor
-import org.cescfe.numpairs.initialPuzzle as defaultInitialPuzzle
+import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle as defaultInitialPuzzle
 
 class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() {
     private var puzzle: Puzzle = initialPuzzle

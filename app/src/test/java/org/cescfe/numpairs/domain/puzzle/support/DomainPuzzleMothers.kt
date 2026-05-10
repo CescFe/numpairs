@@ -3,7 +3,7 @@ package org.cescfe.numpairs.domain.puzzle.support
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.Strip
 import org.cescfe.numpairs.domain.puzzle.StripItem
-import org.cescfe.numpairs.initialPuzzle
+import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
 
 fun puzzleWithRepeatedSixes(): Puzzle = initialPuzzle.copy(
     strip = Strip.fromItems(

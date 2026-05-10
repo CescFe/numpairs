@@ -26,7 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.initialPuzzle
+import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
 import org.cescfe.numpairs.ui.screen.GameUiState
 import org.cescfe.numpairs.ui.screen.TileUiState
 import org.cescfe.numpairs.ui.screen.TileVisualState

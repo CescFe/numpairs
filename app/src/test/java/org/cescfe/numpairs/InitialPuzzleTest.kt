@@ -1,5 +1,6 @@
 package org.cescfe.numpairs
 
+import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
 import org.cescfe.numpairs.domain.puzzle.Expression
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.StripItem
