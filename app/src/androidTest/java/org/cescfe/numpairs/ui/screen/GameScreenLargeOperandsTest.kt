@@ -15,18 +15,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.test.SemanticsMatcher
-import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlin.math.abs
+import org.cescfe.numpairs.R
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -70,57 +66,23 @@ class GameScreenLargeOperandsTest {
             }
         }
 
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.BOARD)
-            .performScrollTo()
-            .assertIsDisplayed()
+        val screen = GameScreenRobot(
+            activity = composeTestRule.activity,
+            interactions = composeTestRule
+        )
 
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
-            .assert(
-                SemanticsMatcher.expectValue(
-                    SemanticsProperties.ContentDescription,
-                    listOf(
-                        composeTestRule.activity.getString(
-                            org.cescfe.numpairs.R.string.tile_left_operand_content_description,
-                            "1"
-                        )
-                    )
-                )
+        screen
+            .assertBoardDisplayed()
+            .assertLeftOperandDescription(0, R.string.tile_left_operand_content_description, "1")
+            .tapTileLeftOperand(0)
+            .assertOperatorDescription(
+                0,
+                R.string.tile_operator_content_description,
+                composeTestRule.activity.getString(R.string.tile_operator_option_multiplication)
             )
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
-            .assert(
-                SemanticsMatcher.expectValue(
-                    SemanticsProperties.ContentDescription,
-                    listOf(
-                        composeTestRule.activity.getString(
-                            org.cescfe.numpairs.R.string.tile_operator_content_description,
-                            composeTestRule.activity.getString(
-                                org.cescfe.numpairs.R.string.tile_operator_option_multiplication
-                            )
-                        )
-                    )
-                )
-            )
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileRightOperand(0), useUnmergedTree = true)
-            .assert(
-                SemanticsMatcher.expectValue(
-                    SemanticsProperties.ContentDescription,
-                    listOf(
-                        composeTestRule.activity.getString(
-                            org.cescfe.numpairs.R.string.tile_right_operand_content_description,
-                            "222"
-                        )
-                    )
-                )
-            )
-            .performClick()
+            .tapTileOperator(0)
+            .assertRightOperandDescription(0, R.string.tile_right_operand_content_description, "222")
+            .tapTileRightOperand(0)
 
         composeTestRule.runOnIdle {
             assertEquals(1, leftOperandClicks)
@@ -260,63 +222,3 @@ private fun Color.isInkAgainst(backgroundColor: Color): Boolean {
 
     return channelDistance > 0.20f
 }
-
-private fun largeOperandBoardUiState(): GameUiState = GameUiState(
-    stripItems = List(8) { index ->
-        StripItemUiState(
-            label = (index + 1).toString(),
-            isEntryEnabled = false,
-            visualStyle = StripItemVisualStyle.KNOWN
-        )
-    },
-    tiles = listOf(
-        TileUiState(
-            leftOperandLabel = "1",
-            operatorLabel = "×",
-            rightOperandLabel = "222",
-            resultLabel = "222"
-        ),
-        TileUiState(
-            leftOperandLabel = "8",
-            operatorLabel = "+",
-            rightOperandLabel = "9",
-            resultLabel = "17"
-        ),
-        TileUiState(
-            leftOperandLabel = "7",
-            operatorLabel = "×",
-            rightOperandLabel = "6",
-            resultLabel = "42"
-        ),
-        TileUiState(
-            leftOperandLabel = "12",
-            operatorLabel = "+",
-            rightOperandLabel = "5",
-            resultLabel = "17"
-        ),
-        TileUiState(
-            leftOperandLabel = "3",
-            operatorLabel = "×",
-            rightOperandLabel = "4",
-            resultLabel = "12"
-        ),
-        TileUiState(
-            leftOperandLabel = "16",
-            operatorLabel = "+",
-            rightOperandLabel = "2",
-            resultLabel = "18"
-        ),
-        TileUiState(
-            leftOperandLabel = "10",
-            operatorLabel = "×",
-            rightOperandLabel = "2",
-            resultLabel = "20"
-        ),
-        TileUiState(
-            leftOperandLabel = "9",
-            operatorLabel = "+",
-            rightOperandLabel = "1",
-            resultLabel = "10"
-        )
-    )
-)
