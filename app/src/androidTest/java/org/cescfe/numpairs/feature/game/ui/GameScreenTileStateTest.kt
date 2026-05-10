@@ -9,21 +9,13 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class GameScreenTileStateTest : GameScreenTestHost() {
     @Test
-    fun resetActionIsHiddenForInitialTilesAndShownAfterTheTileIsFilled() {
+    fun fillingATileShowsTheResetActionAndResetRestoresTheInitialExpression() {
         screen
             .scrollToBoard()
             .assertResetHidden(tileIndex = 0)
             .tapTileLeftOperand(0)
             .tapOperandOption(entryId = 2)
             .assertResetVisible(tileIndex = 0)
-    }
-
-    @Test
-    fun tappingResetActionRestoresTheTileToItsInitialExpression() {
-        screen
-            .scrollToBoard()
-            .tapTileLeftOperand(0)
-            .tapOperandOption(entryId = 2)
             .tapTileReset(0)
             .assertLeftOperandDescription(
                 0,
@@ -41,7 +33,7 @@ class GameScreenTileStateTest : GameScreenTestHost() {
     }
 
     @Test
-    fun fullyKnownIncorrectTilesAreMarkedInvalidAndRemainEditable() {
+    fun incorrectTilesExposeInvalidStateAndCanBeCorrectedFromTheUi() {
         buildIncorrectFirstTile()
 
         screen
@@ -51,14 +43,6 @@ class GameScreenTileStateTest : GameScreenTestHost() {
             )
             .tapTileOperator(0)
             .assertOperatorSelectorDisplayed()
-    }
-
-    @Test
-    fun correctingAnIncorrectTileClearsItsInvalidState() {
-        buildIncorrectFirstTile()
-
-        screen
-            .tapTileOperator(0)
             .tapOperatorOption(Operator.ADDITION)
             .assertTileHasNoStateDescription(tileIndex = 0)
     }

@@ -9,20 +9,13 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class GameScreenOperatorSelectorTest : GameScreenTestHost() {
     @Test
-    fun tappingHiddenTileOperatorOpensContextualSelector() {
+    fun tappingAHiddenTileOperatorOpensTheSelectorAndSelectionUpdatesTheTile() {
         screen
             .scrollToBoard()
             .tapTileOperator(0)
             .assertOperatorSelectorDisplayed()
             .assertOperatorOptionDisplayed(Operator.ADDITION)
             .assertOperatorOptionDisplayed(Operator.MULTIPLICATION)
-    }
-
-    @Test
-    fun selectingAnOperatorOptionCompletesTheHiddenTileOperatorImmediately() {
-        screen
-            .scrollToBoard()
-            .tapTileOperator(0)
             .tapOperatorOption(Operator.ADDITION)
             .assertOperatorDescription(
                 0,
@@ -33,7 +26,7 @@ class GameScreenOperatorSelectorTest : GameScreenTestHost() {
     }
 
     @Test
-    fun dismissingTheOperatorSelectorLeavesTheHiddenTileOperatorUnchanged() {
+    fun backDismissesTheHiddenOperatorSelectorWithoutChangingTheTile() {
         screen
             .scrollToBoard()
             .tapTileOperator(0)
@@ -46,7 +39,7 @@ class GameScreenOperatorSelectorTest : GameScreenTestHost() {
     }
 
     @Test
-    fun tappingFilledTileOperatorReopensTheSelectorWithTheCurrentOptionSelectedAndAllowsReassignment() {
+    fun tappingAFilledTileOperatorReopensTheSelectorWithTheCurrentOptionSelectedAndAllowsReassignment() {
         screen
             .scrollToBoard()
             .tapTileOperator(0)

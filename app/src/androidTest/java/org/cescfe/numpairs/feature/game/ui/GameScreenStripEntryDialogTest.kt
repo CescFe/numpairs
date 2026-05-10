@@ -8,17 +8,11 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class GameScreenStripEntryDialogTest : GameScreenTestHost() {
     @Test
-    fun tappingHiddenStripItemOpensEntryDialog() {
+    fun hiddenStripItemsOpenTheDialogWithTheExpectedRangeAndCanBeConfirmed() {
         screen
             .tapStripItem(1)
             .assertStripEntryDialogDisplayed()
             .assertStripEntryValidRange(minimum = 1, maximum = 6)
-    }
-
-    @Test
-    fun confirmingEntryDialogCompletesTheHiddenStripItem() {
-        screen
-            .tapStripItem(1)
             .enterStripValue("2")
             .confirmStripEntry()
             .assertStripItemDescription(
@@ -29,7 +23,7 @@ class GameScreenStripEntryDialogTest : GameScreenTestHost() {
     }
 
     @Test
-    fun tappingPlayerEnteredStripItemReopensEntryDialogWithPrefilledValue() {
+    fun tappingAPlayerEnteredStripItemReopensTheDialogWithItsPrefilledValue() {
         screen
             .tapStripItem(1)
             .enterStripValue("2")
@@ -39,18 +33,11 @@ class GameScreenStripEntryDialogTest : GameScreenTestHost() {
     }
 
     @Test
-    fun confirmingEntryDialogIsDisabledForOutOfRangeValues() {
+    fun invalidValuesDisableConfirmationAndCancelLeavesTheStripUnchanged() {
         screen
             .tapStripItem(1)
             .enterStripValue("9")
             .assertStripEntryConfirmDisabled()
-    }
-
-    @Test
-    fun cancellingEntryDialogLeavesTheHiddenStripItemUnchanged() {
-        screen
-            .tapStripItem(1)
-            .enterStripValue("9")
             .cancelStripEntry()
             .assertStripItemDescription(
                 1,
