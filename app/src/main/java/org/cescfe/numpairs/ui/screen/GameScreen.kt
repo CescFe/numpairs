@@ -19,8 +19,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
 import org.cescfe.numpairs.domain.puzzle.Operator
-import org.cescfe.numpairs.initialPuzzle
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
