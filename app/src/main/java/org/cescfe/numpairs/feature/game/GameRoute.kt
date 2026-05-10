@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.ui.navigation
+package org.cescfe.numpairs.feature.game
 
 import android.content.Context
 import android.content.ContextWrapper
