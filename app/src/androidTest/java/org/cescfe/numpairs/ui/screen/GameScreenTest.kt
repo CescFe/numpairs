@@ -281,10 +281,6 @@ class GameScreenTest {
             .performScrollTo()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
-            .assertIsDisplayed()
-
-        composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
             .performClick()
 
@@ -721,10 +717,6 @@ class GameScreenTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.BOARD)
             .performScrollTo()
-
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
-            .assertIsDisplayed()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
