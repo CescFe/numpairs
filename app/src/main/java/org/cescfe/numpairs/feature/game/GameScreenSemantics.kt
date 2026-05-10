@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.ui.screen
+package org.cescfe.numpairs.feature.game
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource

@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.ui.screen
+package org.cescfe.numpairs.feature.game
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
