@@ -1,0 +1,43 @@
+package org.cescfe.numpairs.ui.screen
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+
+internal const val BOARD_MAX_VISUAL_COLUMN_COUNT = 4
+internal val BOARD_TILE_MIN_WIDTH = 112.dp
+internal val BOARD_TILE_MAX_WIDTH = 144.dp
+internal val BOARD_TILE_SPACING = 12.dp
+internal val STRIP_CHIP_SPACING = 4.dp
+internal val STRIP_HORIZONTAL_PADDING = 8.dp
+internal val STRIP_VERTICAL_PADDING = 14.dp
+internal val TILE_OPERATOR_MENU_CORNER_RADIUS = 16.dp
+internal val TILE_OPERATOR_MENU_PADDING = 8.dp
+internal val TILE_OPERATOR_MENU_OPTION_SPACING = 8.dp
+internal val TILE_OPERATOR_MENU_OPTION_HORIZONTAL_PADDING = 12.dp
+internal val TILE_OPERATOR_MENU_OPTION_VERTICAL_PADDING = 8.dp
+internal val TILE_OPERAND_SHEET_MAX_HEIGHT = 320.dp
+internal val TILE_OPERAND_SHEET_PADDING = 20.dp
+internal val TILE_OPERAND_SHEET_GRID_SPACING = 12.dp
+internal val TILE_OPERAND_SHEET_OPTION_MIN_WIDTH = 72.dp
+internal val TILE_OPERAND_SHEET_OPTION_CARD_MIN_WIDTH = 56.dp
+internal val TILE_OPERAND_SHEET_OPTION_CARD_MAX_WIDTH = 76.dp
+internal val TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT = 50.dp
+internal val TILE_OPERAND_SHEET_OPTION_CORNER_RADIUS = 18.dp
+internal val TILE_OPERAND_HINT_OVERLAY_LIFT = 8.dp
+internal val TILE_OPERAND_HINT_EDGE_INSET = 8.dp
+internal val TILE_OPERAND_HINT_CORNER_RADIUS = 999.dp
+internal val TILE_OPERAND_HINT_HORIZONTAL_PADDING = 6.dp
+internal val TILE_OPERAND_HINT_VERTICAL_PADDING = 2.dp
+internal val TILE_OPERAND_HINT_TEXT_WEIGHT = FontWeight.Medium
+internal val PUZZLE_OUTCOME_CORNER_RADIUS = 24.dp
+internal val PUZZLE_OUTCOME_HORIZONTAL_PADDING = 16.dp
+internal val PUZZLE_OUTCOME_VERTICAL_PADDING = 14.dp
+internal const val SUCCESS_OVERLAY_SCRIM_ALPHA = 0.44f
+internal val SUCCESS_OVERLAY_CARD_MAX_WIDTH = 280.dp
+internal val SUCCESS_OVERLAY_HORIZONTAL_PADDING = 24.dp
+internal val SUCCESS_OVERLAY_VERTICAL_PADDING = 22.dp
+internal val SUCCESS_OVERLAY_CARD_CORNER_RADIUS = 28.dp
+internal val SUCCESS_OVERLAY_BADGE_SIZE = 44.dp
+internal val SUCCESS_OVERLAY_SUCCESS_GREEN = Color(0xFF2E7D32)
+internal val SUCCESS_OVERLAY_SUCCESS_GREEN_SOFT = Color(0xFFE6F4EA)
