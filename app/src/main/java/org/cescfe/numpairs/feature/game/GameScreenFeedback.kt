@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.ui.screen
+package org.cescfe.numpairs.feature.game
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke

@@ -2,6 +2,7 @@ package org.cescfe.numpairs.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import org.cescfe.numpairs.feature.game.GameRoute
 
 sealed interface AppDestination {
     data object Game : AppDestination

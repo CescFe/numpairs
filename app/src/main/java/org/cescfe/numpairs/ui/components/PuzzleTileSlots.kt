@@ -32,7 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.ui.screen.TileUiState
+import org.cescfe.numpairs.feature.game.TileUiState
 
 @Composable
 internal fun TileResetAction(modifier: Modifier = Modifier, onClick: () -> Unit) {

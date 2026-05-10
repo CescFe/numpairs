@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.ui.screen
+package org.cescfe.numpairs.feature.game
 
 internal fun solvedOverlayUiState(isSuccessOverlayVisible: Boolean): GameUiState = GameUiState(
     stripItems = List(8) { index ->

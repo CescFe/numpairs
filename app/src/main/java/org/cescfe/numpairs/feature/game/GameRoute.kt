@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.ui.navigation
+package org.cescfe.numpairs.feature.game
 
 import android.content.Context
 import android.content.ContextWrapper
@@ -10,8 +10,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModelProvider
-import org.cescfe.numpairs.ui.screen.GameScreen
-import org.cescfe.numpairs.ui.screen.GameViewModel
 
 @Composable
 fun GameRoute(modifier: Modifier = Modifier) {
