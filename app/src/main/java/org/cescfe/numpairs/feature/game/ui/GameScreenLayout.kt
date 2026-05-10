@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.feature.game
+package org.cescfe.numpairs.feature.game.ui
 
 import androidx.compose.ui.unit.Dp
 

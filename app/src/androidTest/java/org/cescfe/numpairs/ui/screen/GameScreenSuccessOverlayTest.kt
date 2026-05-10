@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.feature.game
+package org.cescfe.numpairs.feature.game.ui
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Test

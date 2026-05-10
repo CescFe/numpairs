@@ -1,8 +1,11 @@
-package org.cescfe.numpairs.feature.game
+package org.cescfe.numpairs.feature.game.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.feature.game.presentation.StripItemUiState
+import org.cescfe.numpairs.feature.game.presentation.StripItemVisualStyle
+import org.cescfe.numpairs.feature.game.presentation.TileUiState
 
 @Composable
 internal fun stripItemContentDescription(stripItem: StripItemUiState): String = when (stripItem.visualStyle) {

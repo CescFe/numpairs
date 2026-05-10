@@ -1,4 +1,10 @@
-package org.cescfe.numpairs.feature.game
+package org.cescfe.numpairs.feature.game.ui
+
+import org.cescfe.numpairs.feature.game.presentation.GameUiState
+import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
+import org.cescfe.numpairs.feature.game.presentation.StripItemUiState
+import org.cescfe.numpairs.feature.game.presentation.StripItemVisualStyle
+import org.cescfe.numpairs.feature.game.presentation.TileUiState
 
 internal fun solvedOverlayUiState(isSuccessOverlayVisible: Boolean): GameUiState = GameUiState(
     stripItems = List(8) { index ->

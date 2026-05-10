@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.feature.game
+package org.cescfe.numpairs.feature.game.presentation
 
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
 import org.junit.Assert.assertEquals
