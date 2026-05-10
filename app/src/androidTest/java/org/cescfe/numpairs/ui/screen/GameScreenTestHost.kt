@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.feature.game
+package org.cescfe.numpairs.feature.game.ui
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.collectAsState
@@ -7,6 +7,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import org.cescfe.numpairs.domain.puzzle.Operator
+import org.cescfe.numpairs.feature.game.presentation.GameUiState
+import org.cescfe.numpairs.feature.game.presentation.GameViewModel
+import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Before
 import org.junit.Rule

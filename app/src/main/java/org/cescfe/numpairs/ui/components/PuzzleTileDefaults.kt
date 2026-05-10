@@ -5,7 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import org.cescfe.numpairs.feature.game.TileVisualState
+import org.cescfe.numpairs.feature.game.presentation.TileVisualState
 
 internal val TILE_CORNER_RADIUS = 20.dp
 internal val TILE_HORIZONTAL_PADDING = 10.dp

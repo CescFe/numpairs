@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.feature.game
+package org.cescfe.numpairs.feature.game.presentation
 
 import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
 import org.cescfe.numpairs.domain.puzzle.Strip

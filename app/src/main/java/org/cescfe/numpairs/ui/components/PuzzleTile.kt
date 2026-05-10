@@ -27,9 +27,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
-import org.cescfe.numpairs.feature.game.GameUiState
-import org.cescfe.numpairs.feature.game.TileUiState
-import org.cescfe.numpairs.feature.game.TileVisualState
+import org.cescfe.numpairs.feature.game.presentation.GameUiState
+import org.cescfe.numpairs.feature.game.presentation.TileUiState
+import org.cescfe.numpairs.feature.game.presentation.TileVisualState
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable

@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.feature.game
+package org.cescfe.numpairs.feature.game.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -50,6 +50,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Operator
+import org.cescfe.numpairs.feature.game.presentation.StripItemEntryDialogUiState
+import org.cescfe.numpairs.feature.game.presentation.TileOperandOptionUiState
+import org.cescfe.numpairs.feature.game.presentation.TileOperandSelectionDialogUiState
+import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

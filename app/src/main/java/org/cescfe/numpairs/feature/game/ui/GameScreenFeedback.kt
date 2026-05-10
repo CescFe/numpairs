@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.feature.game
+package org.cescfe.numpairs.feature.game.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
+import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
 
 @Composable
 internal fun SuccessOverlay(onDismiss: () -> Unit) {

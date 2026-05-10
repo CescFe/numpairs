@@ -10,6 +10,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModelProvider
+import org.cescfe.numpairs.feature.game.presentation.GameViewModel
+import org.cescfe.numpairs.feature.game.ui.GameScreen
 
 @Composable
 fun GameRoute(modifier: Modifier = Modifier) {
