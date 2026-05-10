@@ -48,21 +48,30 @@ Current core concepts:
 app/
 ├── src/main/java/org/cescfe/numpairs/
 │   ├── MainActivity.kt
+│   ├── data/puzzle/seed/
 │   ├── domain/puzzle/
+│   ├── feature/game/
+│   │   ├── GameRoute.kt
+│   │   ├── presentation/
+│   │   └── ui/
+│   │       └── components/
 │   └── ui/
-│       ├── components/
-│       ├── screen/
+│       ├── navigation/
 │       └── theme/
-├── src/test/java/org/cescfe/numpairs/
-│   └── domain/puzzle/
-└── src/androidTest/java/org/cescfe/numpairs/
-    └── ui/screen/
 docs/
 ├── product/
 ├── technical/adr/
 ├── game-rules.md
 └── ubiquitous-language.md
 ```
+
+Current responsibilities are split as follows:
+
+- `data/puzzle/seed`: bootstrap puzzle data used by the current prototype.
+- `domain/puzzle`: puzzle rules, validation, assignments, and core domain types.
+- `feature/game`: the Game feature entry point plus its `presentation` and `ui` subpackages.
+- `feature/game/ui/components`: Game-specific Compose building blocks such as tiles and chips.
+- `ui/navigation` and `ui/theme`: app-level navigation wiring and shared theming.
 
 ---
 
