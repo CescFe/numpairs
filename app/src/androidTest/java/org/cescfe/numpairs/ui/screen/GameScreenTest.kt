@@ -25,13 +25,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.domain.puzzle.Board
-import org.cescfe.numpairs.domain.puzzle.Expression
 import org.cescfe.numpairs.domain.puzzle.Operator
-import org.cescfe.numpairs.domain.puzzle.Puzzle
-import org.cescfe.numpairs.domain.puzzle.Strip
-import org.cescfe.numpairs.domain.puzzle.StripItem
-import org.cescfe.numpairs.domain.puzzle.Tile
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Before
 import org.junit.Rule
@@ -43,43 +37,51 @@ class GameScreenTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
-    private lateinit var viewModel: GameViewModel
+    private var viewModel by mutableStateOf(GameViewModel())
+    private var uiStateOverride: GameUiState? by mutableStateOf(null)
+    private var tileOperatorTapOverride: ((Int) -> Unit)? by mutableStateOf(null)
+    private var successOverlayDismissOverride: (() -> Unit)? by mutableStateOf(null)
     private var useSolvedOverlayFixture by mutableStateOf(false)
     private var isSolvedOverlayVisible by mutableStateOf(false)
 
     @Before
     fun setUp() {
         viewModel = GameViewModel()
+        uiStateOverride = null
+        tileOperatorTapOverride = null
+        successOverlayDismissOverride = null
         useSolvedOverlayFixture = false
         isSolvedOverlayVisible = false
 
         composeTestRule.setContent {
-            val viewModelUiState by viewModel.uiState.collectAsState()
-            val uiState = if (useSolvedOverlayFixture) {
+            val currentViewModel = viewModel
+            val viewModelUiState by currentViewModel.uiState.collectAsState()
+            val uiState = uiStateOverride ?: if (useSolvedOverlayFixture) {
                 solvedOverlayUiState(isSuccessOverlayVisible = isSolvedOverlayVisible)
             } else {
                 viewModelUiState
             }
-            val onSuccessOverlayDismissed = if (useSolvedOverlayFixture) {
+            val onSuccessOverlayDismissed = successOverlayDismissOverride ?: if (useSolvedOverlayFixture) {
                 { isSolvedOverlayVisible = false }
             } else {
-                viewModel::onSuccessOverlayDismissed
+                currentViewModel::onSuccessOverlayDismissed
             }
+            val onTileOperatorTapped = tileOperatorTapOverride ?: currentViewModel::onTileOperatorTapped
 
             NumPairsTheme {
                 GameScreen(
                     uiState = uiState,
-                    onStripItemTapped = viewModel::onStripItemTapped,
-                    onStripItemEntryDismissed = viewModel::onStripItemEntryDismissed,
-                    onStripItemEntryConfirmed = viewModel::onStripItemEntryConfirmed,
-                    onTileLeftOperandTapped = viewModel::onTileLeftOperandTapped,
-                    onTileRightOperandTapped = viewModel::onTileRightOperandTapped,
-                    onTileOperandSelectionDismissed = viewModel::onTileOperandSelectionDismissed,
-                    onTileOperandSelectionConfirmed = viewModel::onTileOperandSelectionConfirmed,
-                    onTileOperatorTapped = viewModel::onTileOperatorTapped,
-                    onTileResetTapped = viewModel::onTileResetTapped,
-                    onTileOperatorSelectionDismissed = viewModel::onTileOperatorSelectionDismissed,
-                    onTileOperatorSelectionConfirmed = viewModel::onTileOperatorSelectionConfirmed,
+                    onStripItemTapped = currentViewModel::onStripItemTapped,
+                    onStripItemEntryDismissed = currentViewModel::onStripItemEntryDismissed,
+                    onStripItemEntryConfirmed = currentViewModel::onStripItemEntryConfirmed,
+                    onTileLeftOperandTapped = currentViewModel::onTileLeftOperandTapped,
+                    onTileRightOperandTapped = currentViewModel::onTileRightOperandTapped,
+                    onTileOperandSelectionDismissed = currentViewModel::onTileOperandSelectionDismissed,
+                    onTileOperandSelectionConfirmed = currentViewModel::onTileOperandSelectionConfirmed,
+                    onTileOperatorTapped = onTileOperatorTapped,
+                    onTileResetTapped = currentViewModel::onTileResetTapped,
+                    onTileOperatorSelectionDismissed = currentViewModel::onTileOperatorSelectionDismissed,
+                    onTileOperatorSelectionConfirmed = currentViewModel::onTileOperatorSelectionConfirmed,
                     onSuccessOverlayDismissed = onSuccessOverlayDismissed
                 )
             }
@@ -277,6 +279,10 @@ class GameScreenTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.BOARD)
             .performScrollTo()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .assertIsDisplayed()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
@@ -717,6 +723,10 @@ class GameScreenTest {
             .performScrollTo()
 
         composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .assertIsDisplayed()
+
+        composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
             .performClick()
 
@@ -889,37 +899,15 @@ class GameScreenTest {
 
     @Test
     fun successOverlayBlocksPuzzleInteractionsUntilItIsDismissed() {
-        viewModel = GameViewModel(
-            initialPuzzle = instrumentedSolvedPuzzleWithKnownStripAndAssignments()
-        )
-        useSolvedOverlayFixture = false
-        isSolvedOverlayVisible = false
-
-        composeTestRule.setContent {
-            val uiState by viewModel.uiState.collectAsState()
-
-            NumPairsTheme {
-                GameScreen(
-                    uiState = uiState,
-                    onStripItemTapped = viewModel::onStripItemTapped,
-                    onStripItemEntryDismissed = viewModel::onStripItemEntryDismissed,
-                    onStripItemEntryConfirmed = viewModel::onStripItemEntryConfirmed,
-                    onTileLeftOperandTapped = viewModel::onTileLeftOperandTapped,
-                    onTileRightOperandTapped = viewModel::onTileRightOperandTapped,
-                    onTileOperandSelectionDismissed = viewModel::onTileOperandSelectionDismissed,
-                    onTileOperandSelectionConfirmed = viewModel::onTileOperandSelectionConfirmed,
-                    onTileOperatorTapped = viewModel::onTileOperatorTapped,
-                    onTileResetTapped = viewModel::onTileResetTapped,
-                    onTileOperatorSelectionDismissed = viewModel::onTileOperatorSelectionDismissed,
-                    onTileOperatorSelectionConfirmed = viewModel::onTileOperatorSelectionConfirmed,
-                    onSuccessOverlayDismissed = viewModel::onSuccessOverlayDismissed
-                )
-            }
-        }
+        showInteractiveSuccessOverlayFixture()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.BOARD)
             .performScrollTo()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .assertIsDisplayed()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
@@ -931,7 +919,7 @@ class GameScreenTest {
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
-            .performClick()
+            .assertDoesNotExist()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
@@ -1048,6 +1036,26 @@ class GameScreenTest {
             isSolvedOverlayVisible = true
         }
     }
+
+    private fun showInteractiveSuccessOverlayFixture() {
+        composeTestRule.runOnIdle {
+            uiStateOverride = solvedOverlayUiState(isSuccessOverlayVisible = true)
+            tileOperatorTapOverride = { tileIndex ->
+                uiStateOverride = uiStateOverride?.copy(
+                    tileOperatorSelectionDialog = TileOperatorSelectionDialogUiState(
+                        tileIndex = tileIndex,
+                        availableOperators = listOf(
+                            Operator.ADDITION,
+                            Operator.MULTIPLICATION
+                        )
+                    )
+                )
+            }
+            successOverlayDismissOverride = {
+                uiStateOverride = uiStateOverride?.copy(isSuccessOverlayVisible = false)
+            }
+        }
+    }
 }
 
 private fun solvedOverlayUiState(isSuccessOverlayVisible: Boolean): GameUiState = GameUiState(
@@ -1074,44 +1082,3 @@ private fun solvedOverlayUiState(isSuccessOverlayVisible: Boolean): GameUiState 
     puzzleOutcome = PuzzleOutcomeUiState.Solved,
     isSuccessOverlayVisible = isSuccessOverlayVisible
 )
-
-private fun instrumentedSolvedPuzzleWithKnownStripAndAssignments(): Puzzle = Puzzle(
-    board = Board(
-        tiles = listOf(
-            instrumentedAssignedTile(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
-            instrumentedAssignedTile(leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 0),
-            instrumentedAssignedTile(leftEntryId = 2, operator = Operator.ADDITION, rightEntryId = 3),
-            instrumentedAssignedTile(leftEntryId = 3, operator = Operator.MULTIPLICATION, rightEntryId = 2),
-            instrumentedAssignedTile(leftEntryId = 4, operator = Operator.ADDITION, rightEntryId = 5),
-            instrumentedAssignedTile(leftEntryId = 5, operator = Operator.MULTIPLICATION, rightEntryId = 4),
-            instrumentedAssignedTile(leftEntryId = 6, operator = Operator.ADDITION, rightEntryId = 7),
-            instrumentedAssignedTile(leftEntryId = 7, operator = Operator.MULTIPLICATION, rightEntryId = 6)
-        )
-    ),
-    strip = Strip.fromItems(
-        items = (1..8).map(StripItem::Known)
-    )
-)
-
-private fun instrumentedAssignedTile(leftEntryId: Int, operator: Operator, rightEntryId: Int): Tile {
-    val leftValue = leftEntryId + 1
-    val rightValue = rightEntryId + 1
-
-    return Tile(
-        expression = Expression(
-            leftOperand = Expression.Operand.Known(
-                value = leftValue,
-                stripEntryId = leftEntryId
-            ),
-            operator = operator,
-            rightOperand = Expression.Operand.Known(
-                value = rightValue,
-                stripEntryId = rightEntryId
-            )
-        ),
-        result = operator.apply(
-            leftOperand = leftValue,
-            rightOperand = rightValue
-        )
-    )
-}
