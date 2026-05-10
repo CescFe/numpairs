@@ -58,13 +58,6 @@ app/
 │   └── ui/
 │       ├── navigation/
 │       └── theme/
-├── src/test/java/org/cescfe/numpairs/
-│   ├── data/puzzle/seed/
-│   ├── domain/puzzle/
-│   └── ui/screen/
-└── src/androidTest/java/org/cescfe/numpairs/
-    ├── ExampleInstrumentedTest.kt
-    └── ui/screen/
 docs/
 ├── product/
 ├── technical/adr/
@@ -79,8 +72,6 @@ Current responsibilities are split as follows:
 - `feature/game`: the Game feature entry point plus its `presentation` and `ui` subpackages.
 - `feature/game/ui/components`: Game-specific Compose building blocks such as tiles and chips.
 - `ui/navigation` and `ui/theme`: app-level navigation wiring and shared theming.
-
-The test source sets still keep the existing physical `ui/screen` folders for Game-related tests, even though the production code has already been reorganized under `feature/game`.
 
 ---
 
