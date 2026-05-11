@@ -315,6 +315,24 @@ class GameScreenRobot(
             )
     }
 
+    fun assertPuzzleOutcomeVisible(): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.PUZZLE_OUTCOME)
+            .assertIsDisplayed()
+    }
+
+    fun assertPuzzleOutcomeTitleDisplayed(): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.PUZZLE_OUTCOME_TITLE, useUnmergedTree = true)
+            .assert(hasText(string(R.string.puzzle_outcome_invalid_title)))
+    }
+
+    fun assertPuzzleOutcomeMessageDisplayed(@StringRes stringResId: Int): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.PUZZLE_OUTCOME_MESSAGE, useUnmergedTree = true)
+            .assert(hasText(string(stringResId)))
+    }
+
     fun assertSuccessOverlayVisible(): GameScreenRobot = apply {
         interactions
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
