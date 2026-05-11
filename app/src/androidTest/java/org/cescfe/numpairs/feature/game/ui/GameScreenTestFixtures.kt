@@ -137,17 +137,15 @@ internal fun repeatedOperandSelectorUiState(): GameUiState = GameUiState.from(in
     )
 )
 
-internal fun stripEntryDialogUiState(
-    validRange: StripEntryRange,
-    initialValue: String = ""
-): GameUiState = GameUiState.from(initialPuzzle).copy(
-    stripItemEntryDialog = StripItemEntryDialogUiState(
-        stripItemIndex = 6,
-        validRange = validRange,
-        mode = StripItemEntryDialogMode.CREATE,
-        initialValue = initialValue
+internal fun stripEntryDialogUiState(validRange: StripEntryRange, initialValue: String = ""): GameUiState =
+    GameUiState.from(initialPuzzle).copy(
+        stripItemEntryDialog = StripItemEntryDialogUiState(
+            stripItemIndex = 6,
+            validRange = validRange,
+            mode = StripItemEntryDialogMode.CREATE,
+            initialValue = initialValue
+        )
     )
-)
 
 private fun completedStripItems(): List<StripItemUiState> = List(8) { index ->
     StripItemUiState(
