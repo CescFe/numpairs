@@ -254,4 +254,19 @@ class GameUiStateFromTest {
 
         assertNull(uiState.tileOperatorSelectionDialog)
     }
+
+    @Test
+    fun does_not_build_a_dialog_for_invalid_operand_selection_indexes() {
+        listOf(-1, 999).forEach { invalidTileIndex ->
+            val uiState = GameUiState.from(
+                puzzle = initialPuzzle,
+                presentationState = GamePresentationState().showTileOperandSelection(
+                    tileIndex = invalidTileIndex,
+                    slot = OperandSlot.LEFT
+                )
+            )
+
+            assertNull(uiState.tileOperandSelectionDialog)
+        }
+    }
 }

@@ -117,6 +117,16 @@ class ExpressionTest {
     }
 
     @Test
+    fun known_operands_require_non_negative_strip_entry_ids_when_present() {
+        assertThrows(IllegalArgumentException::class.java) {
+            Expression.Operand.Known(
+                value = 1,
+                stripEntryId = -1
+            )
+        }
+    }
+
+    @Test
     fun domain_operator_assignment_requires_a_concrete_operator() {
         val expression = Expression(
             leftOperand = Expression.Operand.Known(2),

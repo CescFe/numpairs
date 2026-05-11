@@ -19,6 +19,24 @@ class StripTest {
     }
 
     @Test
+    fun requires_unique_strip_entry_ids() {
+        assertThrows(IllegalArgumentException::class.java) {
+            Strip.fromEntries(
+                entries = listOf(
+                    StripEntry(0, StripItem.Hidden),
+                    StripEntry(0, StripItem.Hidden),
+                    StripEntry(2, StripItem.Known(6)),
+                    StripEntry(3, StripItem.Hidden),
+                    StripEntry(4, StripItem.Known(25)),
+                    StripEntry(5, StripItem.Hidden),
+                    StripEntry(6, StripItem.Hidden),
+                    StripEntry(7, StripItem.Known(222))
+                )
+            )
+        }
+    }
+
+    @Test
     fun requires_visible_values_to_be_non_decreasing() {
         assertThrows(IllegalArgumentException::class.java) {
             Strip.fromItems(
@@ -32,6 +50,55 @@ class StripTest {
                     StripItem.Known(8),
                     StripItem.Known(9)
                 )
+            )
+        }
+    }
+
+    @Test
+    fun valid_entry_range_requires_an_editable_index_within_bounds() {
+        val strip = Strip.fromItems(
+            items = listOf(
+                StripItem.Hidden,
+                StripItem.Hidden,
+                StripItem.Known(6),
+                StripItem.Hidden,
+                StripItem.Known(25),
+                StripItem.Hidden,
+                StripItem.Hidden,
+                StripItem.Known(222)
+            )
+        )
+
+        listOf(-1, Strip.NUMBER_COUNT).forEach { invalidIndex ->
+            assertThrows(IllegalArgumentException::class.java) {
+                strip.validEntryRangeFor(index = invalidIndex)
+            }
+        }
+    }
+
+    @Test
+    fun known_entries_are_not_editable() {
+        val strip = Strip.fromItems(
+            items = listOf(
+                StripItem.Known(1),
+                StripItem.Hidden,
+                StripItem.Known(3),
+                StripItem.Hidden,
+                StripItem.Known(5),
+                StripItem.Hidden,
+                StripItem.Known(7),
+                StripItem.Known(9)
+            )
+        )
+
+        assertThrows(IllegalArgumentException::class.java) {
+            strip.validEntryRangeFor(index = 0)
+        }
+
+        assertThrows(IllegalArgumentException::class.java) {
+            strip.withUpdatedEntry(
+                index = 0,
+                value = 2
             )
         }
     }
@@ -97,6 +164,31 @@ class StripTest {
             StripEntryRange(minimumValue = 3, maximumValue = null),
             strip.validEntryRangeFor(index = 6)
         )
+    }
+
+    @Test
+    fun updating_an_entry_requires_an_index_within_the_strip_bounds() {
+        val strip = Strip.fromItems(
+            items = listOf(
+                StripItem.Hidden,
+                StripItem.Hidden,
+                StripItem.Known(6),
+                StripItem.Hidden,
+                StripItem.Known(25),
+                StripItem.Hidden,
+                StripItem.Hidden,
+                StripItem.Known(222)
+            )
+        )
+
+        listOf(-1, Strip.NUMBER_COUNT).forEach { invalidIndex ->
+            assertThrows(IllegalArgumentException::class.java) {
+                strip.withUpdatedEntry(
+                    index = invalidIndex,
+                    value = 1
+                )
+            }
+        }
     }
 
     @Test
