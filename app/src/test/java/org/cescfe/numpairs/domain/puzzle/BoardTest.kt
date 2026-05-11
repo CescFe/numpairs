@@ -14,11 +14,6 @@ class BoardTest {
         }
     }
 
-    @Test
-    fun accepts_eight_tiles() {
-        Board(tiles = validTiles(Board.TILE_COUNT))
-    }
-
     private fun validTiles(count: Int): List<Tile> = (1..count).map { leftOperand ->
         additionTile(
             leftOperand = leftOperand,

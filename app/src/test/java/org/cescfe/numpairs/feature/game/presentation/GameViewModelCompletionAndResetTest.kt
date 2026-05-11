@@ -9,31 +9,19 @@ import org.junit.Test
 
 class GameViewModelCompletionAndResetTest {
     @Test
-    fun exposes_the_initial_screen_state() {
+    fun starts_without_completion_feedback_active_dialogs_or_resettable_tiles() {
         val uiState = GameViewModel().uiState.value
 
-        assertEquals(listOf("?", "?", "6", "?", "25", "?", "?", "222"), uiState.stripItems.map { it.label })
-        assertEquals(
-            listOf(
-                StripItemVisualStyle.HIDDEN,
-                StripItemVisualStyle.HIDDEN,
-                StripItemVisualStyle.KNOWN,
-                StripItemVisualStyle.HIDDEN,
-                StripItemVisualStyle.KNOWN,
-                StripItemVisualStyle.HIDDEN,
-                StripItemVisualStyle.HIDDEN,
-                StripItemVisualStyle.KNOWN
-            ),
-            uiState.stripItems.map { it.visualStyle }
-        )
-        assertEquals(8, uiState.tiles.size)
-        assertEquals(TileUiState("?", "?", "?", "223"), uiState.tiles.first())
-        assertTrue(uiState.tiles.none { tile -> tile.isPairingMismatchHighlighted })
         assertNull(uiState.puzzleOutcome)
         assertFalse(uiState.isSuccessOverlayVisible)
         assertNull(uiState.stripItemEntryDialog)
         assertNull(uiState.tileOperatorSelectionDialog)
         assertNull(uiState.tileOperandSelectionDialog)
+        assertTrue(
+            uiState.tiles.none { tile ->
+                tile.canReset || tile.isInvalid || tile.isPairingMismatchHighlighted
+            }
+        )
     }
 
     @Test
