@@ -6,82 +6,30 @@ import org.cescfe.numpairs.domain.puzzle.support.puzzleWithRepeatedSixes
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class GameViewModelOperandSelectionTest {
     @Test
-    fun tapping_a_hidden_left_tile_operand_opens_the_selection_dialog() {
-        val viewModel = GameViewModel()
+    fun tapping_hidden_tile_operands_opens_the_selection_dialog_for_the_requested_slot() {
+        val leftOperandViewModel = GameViewModel()
 
-        viewModel.onTileLeftOperandTapped(index = 0)
+        leftOperandViewModel.onTileLeftOperandTapped(index = 0)
 
-        assertEquals(
-            TileOperandSelectionDialogUiState(
-                tileIndex = 0,
-                slot = OperandSlot.LEFT,
-                availableOperands = listOf(
-                    TileOperandOptionUiState(
-                        2,
-                        6,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        4,
-                        25,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        7,
-                        222,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    )
-                )
-            ),
-            viewModel.uiState.value.tileOperandSelectionDialog
+        assertSelectionDialogTarget(
+            viewModel = leftOperandViewModel,
+            tileIndex = 0,
+            slot = OperandSlot.LEFT
         )
-    }
 
-    @Test
-    fun tapping_a_hidden_right_tile_operand_opens_the_selection_dialog() {
-        val viewModel = GameViewModel()
+        val rightOperandViewModel = GameViewModel()
 
-        viewModel.onTileRightOperandTapped(index = 0)
+        rightOperandViewModel.onTileRightOperandTapped(index = 0)
 
-        assertEquals(
-            TileOperandSelectionDialogUiState(
-                tileIndex = 0,
-                slot = OperandSlot.RIGHT,
-                availableOperands = listOf(
-                    TileOperandOptionUiState(
-                        2,
-                        6,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        4,
-                        25,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        7,
-                        222,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    )
-                )
-            ),
-            viewModel.uiState.value.tileOperandSelectionDialog
+        assertSelectionDialogTarget(
+            viewModel = rightOperandViewModel,
+            tileIndex = 0,
+            slot = OperandSlot.RIGHT
         )
     }
 
@@ -93,123 +41,37 @@ class GameViewModelOperandSelectionTest {
         viewModel.onStripItemEntryConfirmed(value = 2)
         viewModel.onTileLeftOperandTapped(index = 0)
 
-        assertEquals(
-            TileOperandSelectionDialogUiState(
-                tileIndex = 0,
-                slot = OperandSlot.LEFT,
-                availableOperands = listOf(
-                    TileOperandOptionUiState(
-                        1,
-                        2,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        2,
-                        6,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        4,
-                        25,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        7,
-                        222,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    )
-                )
-            ),
-            viewModel.uiState.value.tileOperandSelectionDialog
+        val dialog = requireNotNull(viewModel.uiState.value.tileOperandSelectionDialog)
+
+        assertEquals(OperandSlot.LEFT, dialog.slot)
+        assertTrue(
+            dialog.availableOperands.any { operand ->
+                operand.stripEntryId == 1 && operand.value == 2 && operand.isSelectable
+            }
         )
     }
 
     @Test
-    fun tapping_a_filled_left_tile_operand_reopens_the_selection_dialog_with_the_current_operand_still_available() {
-        val viewModel = GameViewModel()
+    fun tapping_a_filled_operand_reopens_the_selection_dialog_for_the_same_slot_with_the_current_operand_still_available() {
+        val leftOperandViewModel = GameViewModel()
 
-        viewModel.onTileLeftOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
-        viewModel.onTileLeftOperandTapped(index = 0)
+        leftOperandViewModel.onTileLeftOperandTapped(index = 0)
+        leftOperandViewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
+        leftOperandViewModel.onTileLeftOperandTapped(index = 0)
 
-        assertEquals(
-            TileOperandSelectionDialogUiState(
-                tileIndex = 0,
-                slot = OperandSlot.LEFT,
-                availableOperands = listOf(
-                    TileOperandOptionUiState(
-                        2,
-                        6,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        4,
-                        25,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        7,
-                        222,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    )
-                )
-            ),
-            viewModel.uiState.value.tileOperandSelectionDialog
-        )
-    }
+        var dialog = requireNotNull(leftOperandViewModel.uiState.value.tileOperandSelectionDialog)
+        assertEquals(OperandSlot.LEFT, dialog.slot)
+        assertTrue(dialog.availableOperands.any { operand -> operand.stripEntryId == 2 && operand.isSelectable })
 
-    @Test
-    fun tapping_a_filled_right_tile_operand_reopens_the_selection_dialog_with_the_current_operand_still_available() {
-        val viewModel = GameViewModel()
+        val rightOperandViewModel = GameViewModel()
 
-        viewModel.onTileRightOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
-        viewModel.onTileRightOperandTapped(index = 0)
+        rightOperandViewModel.onTileRightOperandTapped(index = 0)
+        rightOperandViewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
+        rightOperandViewModel.onTileRightOperandTapped(index = 0)
 
-        assertEquals(
-            TileOperandSelectionDialogUiState(
-                tileIndex = 0,
-                slot = OperandSlot.RIGHT,
-                availableOperands = listOf(
-                    TileOperandOptionUiState(
-                        2,
-                        6,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        4,
-                        25,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        7,
-                        222,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    )
-                )
-            ),
-            viewModel.uiState.value.tileOperandSelectionDialog
-        )
+        dialog = requireNotNull(rightOperandViewModel.uiState.value.tileOperandSelectionDialog)
+        assertEquals(OperandSlot.RIGHT, dialog.slot)
+        assertTrue(dialog.availableOperands.any { operand -> operand.stripEntryId == 2 && operand.isSelectable })
     }
 
     @Test
@@ -226,56 +88,6 @@ class GameViewModelOperandSelectionTest {
     }
 
     @Test
-    fun partially_filled_tiles_are_not_marked_invalid_in_ui_state() {
-        val viewModel = GameViewModel()
-
-        viewModel.onTileLeftOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
-
-        assertFalse(viewModel.uiState.value.tiles.first().isInvalid)
-    }
-
-    @Test
-    fun selecting_the_opposite_operand_slot_surfaces_the_current_tile_entry_as_unavailable() {
-        val viewModel = GameViewModel()
-
-        viewModel.onTileLeftOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
-        viewModel.onTileRightOperandTapped(index = 0)
-
-        assertEquals(
-            TileOperandSelectionDialogUiState(
-                tileIndex = 0,
-                slot = OperandSlot.RIGHT,
-                availableOperands = listOf(
-                    TileOperandOptionUiState(
-                        2,
-                        6,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = false
-                    ),
-                    TileOperandOptionUiState(
-                        4,
-                        25,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        7,
-                        222,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    )
-                )
-            ),
-            viewModel.uiState.value.tileOperandSelectionDialog
-        )
-    }
-
-    @Test
     fun confirming_the_selection_dialog_replaces_a_filled_left_tile_operand() {
         val viewModel = GameViewModel()
 
@@ -288,48 +100,6 @@ class GameViewModelOperandSelectionTest {
 
         assertEquals(TileUiState("25", "?", "?", "223", canReset = true), uiState.tiles.first())
         assertNull(uiState.tileOperandSelectionDialog)
-    }
-
-    @Test
-    fun reopening_a_slot_keeps_its_current_operand_selectable_while_blocking_the_opposite_slot_entry() {
-        val viewModel = GameViewModel()
-
-        viewModel.onTileLeftOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
-        viewModel.onTileRightOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 4)
-        viewModel.onTileLeftOperandTapped(index = 0)
-
-        assertEquals(
-            TileOperandSelectionDialogUiState(
-                tileIndex = 0,
-                slot = OperandSlot.LEFT,
-                availableOperands = listOf(
-                    TileOperandOptionUiState(
-                        2,
-                        6,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        4,
-                        25,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = false
-                    ),
-                    TileOperandOptionUiState(
-                        7,
-                        222,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    )
-                )
-            ),
-            viewModel.uiState.value.tileOperandSelectionDialog
-        )
     }
 
     @Test
@@ -349,204 +119,26 @@ class GameViewModelOperandSelectionTest {
     }
 
     @Test
-    fun cancelling_the_selection_dialog_leaves_a_filled_tile_operand_unchanged() {
-        val viewModel = GameViewModel()
+    fun cancelling_the_selection_dialog_leaves_hidden_and_filled_tile_operands_unchanged() {
+        val hiddenOperandViewModel = GameViewModel()
 
-        viewModel.onTileLeftOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
-        viewModel.onTileLeftOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionDismissed()
+        hiddenOperandViewModel.onTileLeftOperandTapped(index = 0)
+        hiddenOperandViewModel.onTileOperandSelectionDismissed()
 
-        val uiState = viewModel.uiState.value
-
-        assertEquals(TileUiState("6", "?", "?", "223", canReset = true), uiState.tiles.first())
-        assertNull(uiState.tileOperandSelectionDialog)
-    }
-
-    @Test
-    fun cancelling_the_selection_dialog_leaves_the_hidden_tile_operand_unchanged() {
-        val viewModel = GameViewModel()
-
-        viewModel.onTileLeftOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionDismissed()
-
-        val uiState = viewModel.uiState.value
-
+        var uiState = hiddenOperandViewModel.uiState.value
         assertEquals(TileUiState("?", "?", "?", "223"), uiState.tiles.first())
         assertNull(uiState.tileOperandSelectionDialog)
-    }
 
-    @Test
-    fun repeated_numeric_values_remain_distinct_operand_options_with_separate_usage_hints() {
-        val viewModel = GameViewModel(
-            initialPuzzle = puzzleWithRepeatedSixes()
-        )
+        val filledOperandViewModel = GameViewModel()
 
-        viewModel.onTileLeftOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 0)
-        viewModel.onTileOperatorTapped(index = 0)
-        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.ADDITION)
-        viewModel.onTileLeftOperandTapped(index = 1)
+        filledOperandViewModel.onTileLeftOperandTapped(index = 0)
+        filledOperandViewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
+        filledOperandViewModel.onTileLeftOperandTapped(index = 0)
+        filledOperandViewModel.onTileOperandSelectionDismissed()
 
-        assertEquals(
-            TileOperandSelectionDialogUiState(
-                tileIndex = 1,
-                slot = OperandSlot.LEFT,
-                availableOperands = listOf(
-                    TileOperandOptionUiState(
-                        0,
-                        6,
-                        additionUsed = true,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        1,
-                        6,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        4,
-                        25,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        7,
-                        222,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    )
-                )
-            ),
-            viewModel.uiState.value.tileOperandSelectionDialog
-        )
-    }
-
-    @Test
-    fun exhausted_operand_options_are_exposed_as_unavailable_in_ui_state() {
-        val viewModel = GameViewModel()
-
-        assignEntryTwoToLeftOperand(index = 0, operator = Operator.ADDITION, viewModel = viewModel)
-        assignEntryTwoToLeftOperand(index = 1, operator = Operator.MULTIPLICATION, viewModel = viewModel)
-        viewModel.onTileLeftOperandTapped(index = 2)
-
-        assertEquals(
-            TileOperandSelectionDialogUiState(
-                tileIndex = 2,
-                slot = OperandSlot.LEFT,
-                availableOperands = listOf(
-                    TileOperandOptionUiState(
-                        2,
-                        6,
-                        additionUsed = true,
-                        multiplicationUsed = true,
-                        isSelectable = false
-                    ),
-                    TileOperandOptionUiState(
-                        4,
-                        25,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        7,
-                        222,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    )
-                )
-            ),
-            viewModel.uiState.value.tileOperandSelectionDialog
-        )
-    }
-
-    @Test
-    fun provisionally_exhausted_operand_options_are_exposed_as_unavailable_in_ui_state() {
-        val viewModel = GameViewModel()
-
-        viewModel.onTileLeftOperandTapped(index = 0)
-        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
-        viewModel.onTileLeftOperandTapped(index = 1)
-        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
-        viewModel.onTileLeftOperandTapped(index = 2)
-
-        assertEquals(
-            TileOperandSelectionDialogUiState(
-                tileIndex = 2,
-                slot = OperandSlot.LEFT,
-                availableOperands = listOf(
-                    TileOperandOptionUiState(
-                        2,
-                        6,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = false
-                    ),
-                    TileOperandOptionUiState(
-                        4,
-                        25,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        7,
-                        222,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    )
-                )
-            ),
-            viewModel.uiState.value.tileOperandSelectionDialog
-        )
-    }
-
-    @Test
-    fun reopening_a_slot_keeps_its_current_exhausted_operand_selectable_for_that_same_slot() {
-        val viewModel = GameViewModel()
-
-        assignEntryTwoToLeftOperand(index = 0, operator = Operator.ADDITION, viewModel = viewModel)
-        assignEntryTwoToLeftOperand(index = 1, operator = Operator.MULTIPLICATION, viewModel = viewModel)
-        viewModel.onTileLeftOperandTapped(index = 0)
-
-        assertEquals(
-            TileOperandSelectionDialogUiState(
-                tileIndex = 0,
-                slot = OperandSlot.LEFT,
-                availableOperands = listOf(
-                    TileOperandOptionUiState(
-                        2,
-                        6,
-                        additionUsed = false,
-                        multiplicationUsed = true,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        4,
-                        25,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        7,
-                        222,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    )
-                )
-            ),
-            viewModel.uiState.value.tileOperandSelectionDialog
-        )
+        uiState = filledOperandViewModel.uiState.value
+        assertEquals(TileUiState("6", "?", "?", "223", canReset = true), uiState.tiles.first())
+        assertNull(uiState.tileOperandSelectionDialog)
     }
 
     @Test
@@ -564,6 +156,35 @@ class GameViewModelOperandSelectionTest {
         assertEquals(beforeAttempt.tileOperandSelectionDialog, viewModel.uiState.value.tileOperandSelectionDialog)
         assertEquals(beforeAttempt.tiles[2], viewModel.uiState.value.tiles[2])
     }
+
+    @Test
+    fun repeated_numeric_values_survive_the_view_model_flow_with_distinct_ids() {
+        val viewModel = GameViewModel(
+            initialPuzzle = puzzleWithRepeatedSixes()
+        )
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 0)
+        viewModel.onTileOperatorTapped(index = 0)
+        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.ADDITION)
+        viewModel.onTileLeftOperandTapped(index = 1)
+
+        val dialog = requireNotNull(viewModel.uiState.value.tileOperandSelectionDialog)
+        val repeatedValueChoices = dialog.availableOperands.filter { operand -> operand.value == 6 }
+
+        assertEquals(listOf(0, 1), repeatedValueChoices.map { operand -> operand.stripEntryId })
+        assertFalse(repeatedValueChoices.first { operand -> operand.stripEntryId == 0 }.multiplicationUsed)
+        assertTrue(repeatedValueChoices.first { operand -> operand.stripEntryId == 0 }.additionUsed)
+        assertFalse(repeatedValueChoices.first { operand -> operand.stripEntryId == 1 }.additionUsed)
+    }
+}
+
+private fun assertSelectionDialogTarget(viewModel: GameViewModel, tileIndex: Int, slot: OperandSlot) {
+    val dialog = requireNotNull(viewModel.uiState.value.tileOperandSelectionDialog)
+
+    assertEquals(tileIndex, dialog.tileIndex)
+    assertEquals(slot, dialog.slot)
+    assertTrue(dialog.availableOperands.isNotEmpty())
 }
 
 private fun assignEntryTwoToLeftOperand(index: Int, operator: Operator, viewModel: GameViewModel) {

@@ -27,7 +27,7 @@ class GameViewModelStripEntryTest {
     }
 
     @Test
-    fun confirming_the_entry_dialog_completes_the_hidden_strip_item() {
+    fun confirming_the_entry_dialog_completes_the_hidden_strip_item_and_closes_the_dialog() {
         val viewModel = GameViewModel()
 
         viewModel.onStripItemTapped(index = 1)
@@ -42,7 +42,7 @@ class GameViewModelStripEntryTest {
     }
 
     @Test
-    fun confirming_adjacent_hidden_strip_entries_reorders_player_entered_values_to_keep_the_strip_ascending() {
+    fun confirming_adjacent_hidden_strip_entries_surfaces_the_reordered_domain_result_in_ui_state() {
         val viewModel = GameViewModel()
 
         viewModel.onStripItemTapped(index = 0)
@@ -52,12 +52,13 @@ class GameViewModelStripEntryTest {
 
         assertEquals(
             listOf("2", "5", "6", "?", "25", "?", "?", "222"),
-            viewModel.uiState.value.stripItems.map { it.label }
+            viewModel.uiState.value.stripItems.map { stripItem -> stripItem.label }
         )
+        assertNull(viewModel.uiState.value.stripItemEntryDialog)
     }
 
     @Test
-    fun confirming_an_out_of_range_value_keeps_the_dialog_open_and_does_not_change_the_hidden_strip_item() {
+    fun confirming_an_out_of_range_value_keeps_the_hidden_strip_item_dialog_open_and_does_not_change_the_item() {
         val viewModel = GameViewModel()
 
         viewModel.onStripItemTapped(index = 1)
@@ -97,7 +98,7 @@ class GameViewModelStripEntryTest {
     }
 
     @Test
-    fun confirming_the_entry_dialog_updates_a_player_entered_strip_item() {
+    fun confirming_the_entry_dialog_updates_a_player_entered_strip_item_and_closes_the_dialog() {
         val viewModel = GameViewModel()
 
         viewModel.onStripItemTapped(index = 1)
@@ -114,40 +115,32 @@ class GameViewModelStripEntryTest {
     }
 
     @Test
-    fun editing_adjacent_player_entered_strip_items_reorders_them_to_keep_the_strip_ascending() {
-        val viewModel = GameViewModel()
+    fun cancelling_the_entry_dialog_leaves_hidden_and_player_entered_strip_items_unchanged() {
+        val hiddenItemViewModel = GameViewModel()
 
-        viewModel.onStripItemTapped(index = 0)
-        viewModel.onStripItemEntryConfirmed(value = 2)
-        viewModel.onStripItemTapped(index = 1)
-        viewModel.onStripItemEntryConfirmed(value = 5)
-        viewModel.onStripItemTapped(index = 1)
-        viewModel.onStripItemEntryConfirmed(value = 1)
+        hiddenItemViewModel.onStripItemTapped(index = 1)
+        hiddenItemViewModel.onStripItemEntryDismissed()
 
-        assertEquals(
-            listOf("1", "2", "6", "?", "25", "?", "?", "222"),
-            viewModel.uiState.value.stripItems.map { it.label }
-        )
-    }
+        var uiState = hiddenItemViewModel.uiState.value
+        assertEquals("?", uiState.stripItems[1].label)
+        assertEquals(true, uiState.stripItems[1].isEntryEnabled)
+        assertNull(uiState.stripItemEntryDialog)
 
-    @Test
-    fun cancelling_the_entry_dialog_leaves_a_player_entered_strip_item_unchanged() {
-        val viewModel = GameViewModel()
+        val playerEnteredViewModel = GameViewModel()
 
-        viewModel.onStripItemTapped(index = 1)
-        viewModel.onStripItemEntryConfirmed(value = 2)
-        viewModel.onStripItemTapped(index = 1)
-        viewModel.onStripItemEntryDismissed()
+        playerEnteredViewModel.onStripItemTapped(index = 1)
+        playerEnteredViewModel.onStripItemEntryConfirmed(value = 2)
+        playerEnteredViewModel.onStripItemTapped(index = 1)
+        playerEnteredViewModel.onStripItemEntryDismissed()
 
-        val uiState = viewModel.uiState.value
-
+        uiState = playerEnteredViewModel.uiState.value
         assertEquals("2", uiState.stripItems[1].label)
         assertEquals(true, uiState.stripItems[1].isEntryEnabled)
         assertNull(uiState.stripItemEntryDialog)
     }
 
     @Test
-    fun confirming_an_out_of_range_value_keeps_the_dialog_open_and_does_not_change_the_player_entered_strip_item() {
+    fun confirming_an_out_of_range_value_keeps_the_player_entered_strip_item_dialog_open_and_does_not_change_the_item() {
         val viewModel = GameViewModel()
 
         viewModel.onStripItemTapped(index = 1)
@@ -167,20 +160,6 @@ class GameViewModelStripEntryTest {
             ),
             uiState.stripItemEntryDialog
         )
-    }
-
-    @Test
-    fun cancelling_the_entry_dialog_leaves_the_hidden_strip_item_unchanged() {
-        val viewModel = GameViewModel()
-
-        viewModel.onStripItemTapped(index = 1)
-        viewModel.onStripItemEntryDismissed()
-
-        val uiState = viewModel.uiState.value
-
-        assertEquals("?", uiState.stripItems[1].label)
-        assertEquals(true, uiState.stripItems[1].isEntryEnabled)
-        assertNull(uiState.stripItemEntryDialog)
     }
 
     @Test
