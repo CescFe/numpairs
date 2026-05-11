@@ -49,10 +49,7 @@ class GameScreenInvalidFeedbackTest : GameScreenTestHost() {
             .assertOperatorSelectorDisplayed()
     }
 
-    private fun assertInvalidOutcomeBanner(
-        completionState: PuzzleCompletionState,
-        messageResId: Int
-    ) {
+    private fun assertInvalidOutcomeBanner(completionState: PuzzleCompletionState, messageResId: Int) {
         showInvalidOutcomeFixture(completionState = completionState)
 
         screen

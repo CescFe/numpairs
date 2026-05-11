@@ -5,8 +5,8 @@ import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
 import org.cescfe.numpairs.feature.game.presentation.StripItemUiState
 import org.cescfe.numpairs.feature.game.presentation.StripItemVisualStyle
-import org.cescfe.numpairs.feature.game.presentation.TileVisualState
 import org.cescfe.numpairs.feature.game.presentation.TileUiState
+import org.cescfe.numpairs.feature.game.presentation.TileVisualState
 
 internal fun solvedOverlayUiState(isSuccessOverlayVisible: Boolean): GameUiState = GameUiState(
     stripItems = completedStripItems(),
