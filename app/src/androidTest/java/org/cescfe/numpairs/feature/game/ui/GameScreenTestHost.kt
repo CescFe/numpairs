@@ -126,4 +126,10 @@ abstract class GameScreenTestHost {
             }
         }
     }
+
+    protected fun showUiStateFixture(uiState: GameUiState) {
+        composeTestRule.runOnIdle {
+            uiStateOverride = uiState
+        }
+    }
 }

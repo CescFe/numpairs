@@ -2,6 +2,7 @@ package org.cescfe.numpairs.feature.game.ui
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.domain.puzzle.StripEntryRange
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -43,5 +44,47 @@ class GameScreenStripEntryDialogTest : GameScreenTestHost() {
                 1,
                 R.string.strip_item_hidden_content_description
             )
+    }
+
+    @Test
+    fun stripEntryDialogDisplaysAnUnboundedRangeWhenNoUpperBoundExists() {
+        showUiStateFixture(
+            stripEntryDialogUiState(
+                validRange = StripEntryRange(minimumValue = 3, maximumValue = null)
+            )
+        )
+
+        screen
+            .assertStripEntryDialogDisplayed()
+            .assertStripEntryValidRange(minimum = 3)
+    }
+
+    @Test
+    fun nonDigitInputIsFilteredOutByTheComposeTextField() {
+        showUiStateFixture(
+            stripEntryDialogUiState(
+                validRange = StripEntryRange(minimumValue = 1, maximumValue = 6)
+            )
+        )
+
+        screen
+            .assertStripEntryDialogDisplayed()
+            .enterStripValue("2a!")
+            .assertStripEntryInputValue("2")
+    }
+
+    @Test
+    fun invalidMixedInputRemainsDisabledAfterFilteringThroughTheDialogField() {
+        showUiStateFixture(
+            stripEntryDialogUiState(
+                validRange = StripEntryRange(minimumValue = 1, maximumValue = 6)
+            )
+        )
+
+        screen
+            .assertStripEntryDialogDisplayed()
+            .enterStripValue("9a!")
+            .assertStripEntryInputValue("9")
+            .assertStripEntryConfirmDisabled()
     }
 }

@@ -128,16 +128,23 @@ class GameScreenRobot(
             .assertIsDisplayed()
     }
 
-    fun assertStripEntryValidRange(minimum: Int, maximum: Int): GameScreenRobot = apply {
+    fun assertStripEntryValidRange(minimum: Int, maximum: Int? = null): GameScreenRobot = apply {
         interactions
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_RANGE, useUnmergedTree = true)
             .assert(
                 hasText(
-                    string(
-                        R.string.strip_entry_valid_range_bounded,
-                        minimum,
-                        maximum
-                    )
+                    if (maximum == null) {
+                        string(
+                            R.string.strip_entry_valid_range_unbounded,
+                            minimum
+                        )
+                    } else {
+                        string(
+                            R.string.strip_entry_valid_range_bounded,
+                            minimum,
+                            maximum
+                        )
+                    }
                 )
             )
     }
@@ -231,6 +238,14 @@ class GameScreenRobot(
         interactions
             .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId), useUnmergedTree = true)
             .assertIsDisplayed()
+    }
+
+    fun assertOperandOptionDescription(entryId: Int, value: String): GameScreenRobot = apply {
+        assertContentDescription(
+            testTag = GameScreenTestTags.tileOperandOption(entryId),
+            contentDescription = value,
+            useUnmergedTree = true
+        )
     }
 
     fun assertOperandOptionEnabled(entryId: Int): GameScreenRobot = apply {

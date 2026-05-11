@@ -112,6 +112,38 @@ class GameScreenOperandSelectorTest : GameScreenTestHost() {
             .assertOperandOptionEnabled(entryId = 2)
     }
 
+    @Test
+    fun repeatedNumericOperandValuesAreRenderedAsDistinctOptionsWithPerEntryUsageHints() {
+        showUiStateFixture(repeatedOperandSelectorUiState())
+
+        screen
+            .assertOperandSelectorDisplayed()
+            .assertOperandOptionDisplayed(entryId = 0)
+            .assertOperandOptionDescription(entryId = 0, value = "6")
+            .assertOperandOptionDisplayed(entryId = 1)
+            .assertOperandOptionDescription(entryId = 1, value = "6")
+            .assertOperandUsageHintState(
+                entryId = 0,
+                operator = Operator.ADDITION,
+                stateDescriptionResId = R.string.tile_operand_usage_state_used
+            )
+            .assertOperandUsageHintState(
+                entryId = 1,
+                operator = Operator.ADDITION,
+                stateDescriptionResId = R.string.tile_operand_usage_state_available
+            )
+            .assertOperandUsageHintState(
+                entryId = 0,
+                operator = Operator.MULTIPLICATION,
+                stateDescriptionResId = R.string.tile_operand_usage_state_available
+            )
+            .assertOperandUsageHintState(
+                entryId = 1,
+                operator = Operator.MULTIPLICATION,
+                stateDescriptionResId = R.string.tile_operand_usage_state_available
+            )
+    }
+
     private fun fillTileLeftOperandWithEntryTwo(tileIndex: Int, operator: Operator? = null) {
         screen
             .scrollToBoard()
