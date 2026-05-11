@@ -140,7 +140,7 @@ class GameViewModelStripEntryTest {
     }
 
     @Test
-    fun confirming_an_out_of_range_value_keeps_the_player_entered_strip_item_dialog_open_and_does_not_change_the_item() {
+    fun confirming_an_out_of_range_value_keeps_the_player_entered_item_dialog_open_and_preserves_the_item() {
         val viewModel = GameViewModel()
 
         viewModel.onStripItemTapped(index = 1)

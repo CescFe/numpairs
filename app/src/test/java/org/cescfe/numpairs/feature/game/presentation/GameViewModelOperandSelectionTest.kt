@@ -50,7 +50,7 @@ class GameViewModelOperandSelectionTest {
     }
 
     @Test
-    fun tapping_a_filled_operand_reopens_the_selection_dialog_for_the_same_slot_with_the_current_operand_still_available() {
+    fun reopening_a_filled_operand_dialog_keeps_the_current_entry_selectable_for_that_slot() {
         val leftOperandViewModel = GameViewModel()
 
         leftOperandViewModel.onTileLeftOperandTapped(index = 0)
@@ -59,7 +59,11 @@ class GameViewModelOperandSelectionTest {
 
         var dialog = requireNotNull(leftOperandViewModel.uiState.value.tileOperandSelectionDialog)
         assertEquals(OperandSlot.LEFT, dialog.slot)
-        assertTrue(dialog.availableOperands.any { operand -> operand.stripEntryId == 2 && operand.isSelectable })
+        assertTrue(
+            dialog.availableOperands.any { operand ->
+                operand.stripEntryId == 2 && operand.isSelectable
+            }
+        )
 
         val rightOperandViewModel = GameViewModel()
 
@@ -69,7 +73,11 @@ class GameViewModelOperandSelectionTest {
 
         dialog = requireNotNull(rightOperandViewModel.uiState.value.tileOperandSelectionDialog)
         assertEquals(OperandSlot.RIGHT, dialog.slot)
-        assertTrue(dialog.availableOperands.any { operand -> operand.stripEntryId == 2 && operand.isSelectable })
+        assertTrue(
+            dialog.availableOperands.any { operand ->
+                operand.stripEntryId == 2 && operand.isSelectable
+            }
+        )
     }
 
     @Test
