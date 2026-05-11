@@ -16,9 +16,8 @@ class GameViewModelOperandSelectionTest {
 
         leftOperandViewModel.onTileLeftOperandTapped(index = 0)
 
-        assertSelectionDialogTarget(
+        assertSelectionDialogTargetForFirstTile(
             viewModel = leftOperandViewModel,
-            tileIndex = 0,
             slot = OperandSlot.LEFT
         )
 
@@ -26,9 +25,8 @@ class GameViewModelOperandSelectionTest {
 
         rightOperandViewModel.onTileRightOperandTapped(index = 0)
 
-        assertSelectionDialogTarget(
+        assertSelectionDialogTargetForFirstTile(
             viewModel = rightOperandViewModel,
-            tileIndex = 0,
             slot = OperandSlot.RIGHT
         )
     }
@@ -179,10 +177,10 @@ class GameViewModelOperandSelectionTest {
     }
 }
 
-private fun assertSelectionDialogTarget(viewModel: GameViewModel, tileIndex: Int, slot: OperandSlot) {
+private fun assertSelectionDialogTargetForFirstTile(viewModel: GameViewModel, slot: OperandSlot) {
     val dialog = requireNotNull(viewModel.uiState.value.tileOperandSelectionDialog)
 
-    assertEquals(tileIndex, dialog.tileIndex)
+    assertEquals(0, dialog.tileIndex)
     assertEquals(slot, dialog.slot)
     assertTrue(dialog.availableOperands.isNotEmpty())
 }
