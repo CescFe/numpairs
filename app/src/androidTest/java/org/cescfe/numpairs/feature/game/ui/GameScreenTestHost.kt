@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import org.cescfe.numpairs.domain.puzzle.Operator
+import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.GameViewModel
 import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState
@@ -99,6 +100,29 @@ abstract class GameScreenTestHost {
             }
             onSuccessOverlayDismissedOverride = {
                 uiStateOverride = uiStateOverride?.copy(isSuccessOverlayVisible = false)
+            }
+        }
+    }
+
+    protected fun showInvalidOutcomeFixture(completionState: PuzzleCompletionState) {
+        composeTestRule.runOnIdle {
+            uiStateOverride = invalidOutcomeUiState(completionState = completionState)
+        }
+    }
+
+    protected fun showInteractiveMismatchedPairingFixture() {
+        composeTestRule.runOnIdle {
+            uiStateOverride = mismatchedPairingUiState()
+            onTileOperatorTappedOverride = { tileIndex ->
+                uiStateOverride = uiStateOverride?.copy(
+                    tileOperatorSelectionDialog = TileOperatorSelectionDialogUiState(
+                        tileIndex = tileIndex,
+                        availableOperators = listOf(
+                            Operator.ADDITION,
+                            Operator.MULTIPLICATION
+                        )
+                    )
+                )
             }
         }
     }
