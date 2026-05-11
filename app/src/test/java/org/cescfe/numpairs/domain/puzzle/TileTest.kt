@@ -7,8 +7,8 @@ import org.junit.Test
 
 class TileTest {
     @Test
-    fun fully_known_correct_expressions_are_reported_as_correct() {
-        val tile = Tile(
+    fun fully_known_expressions_report_correct_and_incorrect_resolution_states() {
+        val correctTile = Tile(
             expression = Expression(
                 leftOperand = 2,
                 operator = Operator.MULTIPLICATION,
@@ -16,27 +16,15 @@ class TileTest {
             ),
             result = 6
         )
+        val incorrectTile = correctTile.copy(result = 5)
 
-        assertEquals(TileResolutionState.CORRECT, tile.resolutionState)
+        assertEquals(TileResolutionState.CORRECT, correctTile.resolutionState)
+        assertEquals(TileResolutionState.INCORRECT, incorrectTile.resolutionState)
     }
 
     @Test
-    fun fully_known_incorrect_expressions_are_reported_as_incorrect() {
-        val tile = Tile(
-            expression = Expression(
-                leftOperand = 2,
-                operator = Operator.MULTIPLICATION,
-                rightOperand = 3
-            ),
-            result = 5
-        )
-
-        assertEquals(TileResolutionState.INCORRECT, tile.resolutionState)
-    }
-
-    @Test
-    fun allows_hidden_operands_in_tile_expressions() {
-        val tile = Tile(
+    fun tile_expressions_support_hidden_operands_and_hidden_operators() {
+        val hiddenOperandTile = Tile(
             expression = Expression(
                 leftOperand = Expression.Operand.Hidden,
                 operator = Operator.MULTIPLICATION,
@@ -44,15 +32,7 @@ class TileTest {
             ),
             result = 6
         )
-
-        assertEquals(Expression.Operand.Hidden, tile.expression.leftOperand)
-        assertEquals(6, tile.result)
-        assertEquals(TileResolutionState.UNRESOLVED, tile.resolutionState)
-    }
-
-    @Test
-    fun allows_hidden_operators_in_tile_expressions() {
-        val tile = Tile(
+        val hiddenOperatorTile = Tile(
             expression = Expression(
                 leftOperand = Expression.Operand.Known(2),
                 operator = Operator.Hidden,
@@ -61,13 +41,14 @@ class TileTest {
             result = 999
         )
 
-        assertEquals(Operator.Hidden, tile.expression.operator)
-        assertEquals(999, tile.result)
-        assertEquals(TileResolutionState.UNRESOLVED, tile.resolutionState)
+        assertEquals(Expression.Operand.Hidden, hiddenOperandTile.expression.leftOperand)
+        assertEquals(TileResolutionState.UNRESOLVED, hiddenOperandTile.resolutionState)
+        assertEquals(Operator.Hidden, hiddenOperatorTile.expression.operator)
+        assertEquals(TileResolutionState.UNRESOLVED, hiddenOperatorTile.resolutionState)
     }
 
     @Test
-    fun assigning_a_left_tile_operand_can_transition_from_unresolved_to_correct() {
+    fun assigning_a_left_tile_operand_recomputes_resolution_state() {
         val tile = Tile(
             expression = Expression(
                 leftOperand = Expression.Operand.Hidden,
@@ -77,32 +58,17 @@ class TileTest {
             result = 5
         )
 
-        val updatedTile = tile.withLeftOperand(2)
+        val correctTile = tile.withLeftOperand(2)
+        val incorrectTile = correctTile.withLeftOperand(4)
 
-        assertEquals(Expression.Operand.Known(2), updatedTile.expression.leftOperand)
-        assertEquals(5, updatedTile.result)
-        assertEquals(TileResolutionState.CORRECT, updatedTile.resolutionState)
+        assertEquals(Expression.Operand.Known(2), correctTile.expression.leftOperand)
+        assertEquals(TileResolutionState.CORRECT, correctTile.resolutionState)
+        assertEquals(Expression.Operand.Known(4), incorrectTile.expression.leftOperand)
+        assertEquals(TileResolutionState.INCORRECT, incorrectTile.resolutionState)
     }
 
     @Test
-    fun assigning_a_left_tile_operand_can_transition_from_correct_to_incorrect() {
-        val tile = Tile(
-            expression = Expression(
-                leftOperand = Expression.Operand.Hidden,
-                operator = Operator.ADDITION,
-                rightOperand = Expression.Operand.Known(3)
-            ),
-            result = 5
-        ).withLeftOperand(2)
-
-        val updatedTile = tile.withLeftOperand(4)
-
-        assertEquals(Expression.Operand.Known(4), updatedTile.expression.leftOperand)
-        assertEquals(TileResolutionState.INCORRECT, updatedTile.resolutionState)
-    }
-
-    @Test
-    fun assigning_a_right_tile_operand_can_transition_from_unresolved_to_correct() {
+    fun assigning_a_right_tile_operand_recomputes_resolution_state() {
         val tile = Tile(
             expression = Expression(
                 leftOperand = Expression.Operand.Known(2),
@@ -112,33 +78,18 @@ class TileTest {
             result = 5
         )
 
-        val updatedTile = tile.withRightOperand(3)
+        val correctTile = tile.withRightOperand(3)
+        val incorrectTile = correctTile.withRightOperand(4)
 
-        assertEquals(Expression.Operand.Known(3), updatedTile.expression.rightOperand)
-        assertEquals(5, updatedTile.result)
-        assertEquals(TileResolutionState.CORRECT, updatedTile.resolutionState)
+        assertEquals(Expression.Operand.Known(3), correctTile.expression.rightOperand)
+        assertEquals(TileResolutionState.CORRECT, correctTile.resolutionState)
+        assertEquals(Expression.Operand.Known(4), incorrectTile.expression.rightOperand)
+        assertEquals(TileResolutionState.INCORRECT, incorrectTile.resolutionState)
     }
 
     @Test
-    fun assigning_a_right_tile_operand_can_transition_from_correct_to_incorrect() {
-        val tile = Tile(
-            expression = Expression(
-                leftOperand = Expression.Operand.Known(2),
-                operator = Operator.ADDITION,
-                rightOperand = Expression.Operand.Hidden
-            ),
-            result = 5
-        ).withRightOperand(3)
-
-        val updatedTile = tile.withRightOperand(4)
-
-        assertEquals(Expression.Operand.Known(4), updatedTile.expression.rightOperand)
-        assertEquals(TileResolutionState.INCORRECT, updatedTile.resolutionState)
-    }
-
-    @Test
-    fun assigning_a_tile_operator_can_transition_from_unresolved_to_correct() {
-        val tile = Tile(
+    fun assigning_a_tile_operator_recomputes_resolution_state() {
+        val unresolvedTile = Tile(
             expression = Expression(
                 leftOperand = Expression.Operand.Known(2),
                 operator = Operator.Hidden,
@@ -146,31 +97,14 @@ class TileTest {
             ),
             result = 5
         )
+        val incorrectTile = unresolvedTile.withOperator(Operator.ADDITION).copy(result = 6)
 
-        val updatedTile = tile.withOperator(Operator.ADDITION)
-
-        assertEquals(Operator.ADDITION, updatedTile.expression.operator)
-        assertEquals(5, updatedTile.result)
-        assertEquals(TileResolutionState.CORRECT, updatedTile.resolutionState)
-    }
-
-    @Test
-    fun assigning_a_tile_operator_can_transition_from_incorrect_to_correct() {
-        val tile = Tile(
-            expression = Expression(
-                leftOperand = Expression.Operand.Known(2),
-                operator = Operator.Hidden,
-                rightOperand = Expression.Operand.Known(3)
-            ),
-            result = 6
-        ).withOperator(Operator.ADDITION)
-
-        assertEquals(TileResolutionState.INCORRECT, tile.resolutionState)
-
-        val updatedTile = tile.withOperator(Operator.MULTIPLICATION)
-
-        assertEquals(Operator.MULTIPLICATION, updatedTile.expression.operator)
-        assertEquals(TileResolutionState.CORRECT, updatedTile.resolutionState)
+        assertEquals(TileResolutionState.CORRECT, unresolvedTile.withOperator(Operator.ADDITION).resolutionState)
+        assertEquals(TileResolutionState.INCORRECT, incorrectTile.resolutionState)
+        assertEquals(
+            TileResolutionState.CORRECT,
+            incorrectTile.withOperator(Operator.MULTIPLICATION).resolutionState
+        )
     }
 
     @Test
