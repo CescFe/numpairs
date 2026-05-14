@@ -8,13 +8,13 @@ The project is being built iteratively, starting with a small playable prototype
 
 ## Current Status
 
-### Version: v0 - Playable Prototype
+### Implemented baseline: v1 - Product Polish & Technical Hardening
 
-Completed: [prd-v0.md](./docs/product/prd/prd-v0.md)
+Historical snapshots: [prd-v0.md](./docs/product/prd/prd-v0.md), [prd-v1.md](./docs/product/prd/prd-v1.md)
 
-### Active milestone: v1 - Product Polish & Technical Hardening
+### Active product milestone: v2 - Puzzle Generation & Replay Loop
 
-Current implementation baseline: [prd-v1.md](./docs/product/prd/prd-v1.md)
+Canonical product reference: [prd-v2.md](./docs/product/prd/prd-v2.md)
 
 ---
 
@@ -67,7 +67,7 @@ docs/
 
 Current responsibilities are split as follows:
 
-- `data/puzzle/seed`: bootstrap puzzle data used by the current prototype.
+- `data/puzzle/seed`: handcrafted puzzle data used by the current baseline and future tutorial-mode foundation.
 - `domain/puzzle`: puzzle rules, validation, assignments, and core domain types.
 - `feature/game`: the Game feature entry point plus its `presentation` and `ui` subpackages.
 - `feature/game/ui/components`: Game-specific Compose building blocks such as tiles and chips.
@@ -77,6 +77,7 @@ Current responsibilities are split as follows:
 
 ## Documentation
 
+- Canonical PRD: [prd-v2.md](./docs/product/prd/prd-v2.md)
 - Product Requirements Documents: `docs/product/prd/`
 - Product roadmap: [roadmap.md](./docs/product/roadmap.md)
 - UX decisions: `docs/product/ux-decisions.md`
