@@ -24,10 +24,7 @@ import org.cescfe.numpairs.R
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
-fun MenuScreen(
-    modifier: Modifier = Modifier,
-    onTutorialSelected: () -> Unit = {}
-) {
+fun MenuScreen(modifier: Modifier = Modifier, onTutorialSelected: () -> Unit = {}) {
     Scaffold(
         modifier = modifier
             .fillMaxSize()
