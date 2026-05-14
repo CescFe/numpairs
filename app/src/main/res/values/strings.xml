@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">NumPairs</string>
+    <string name="menu_title">Choose a mode</string>
+    <string name="menu_supporting_text">Start with the handcrafted tutorial puzzle.</string>
+    <string name="menu_tutorial_button">Tutorial</string>
     <string name="board_content_description">Board</string>
     <string name="strip_content_description">Strip</string>
     <string name="strip_item_hidden_content_description">Hidden strip item</string>
