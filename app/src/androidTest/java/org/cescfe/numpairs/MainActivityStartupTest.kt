@@ -3,6 +3,7 @@ package org.cescfe.numpairs
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.feature.game.ui.GameScreenTestTags
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
@@ -16,7 +17,7 @@ class MainActivityStartupTest {
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun coldStartShowsMenuAfterSplashWithTutorialAsTheFirstActionableEntryPoint() {
+    fun coldStartShowsMenuAfterSplashAndTutorialStartsTheGame() {
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.SCREEN)
             .assertIsDisplayed()
@@ -24,10 +25,14 @@ class MainActivityStartupTest {
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
             .assertIsDisplayed()
+            .performClick()
 
         composeTestRule
-        composeTestRule
             .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.SCREEN)
             .assertDoesNotExist()
     }
 }

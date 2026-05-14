@@ -12,7 +12,6 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -218,8 +217,8 @@ class GameScreenRobot(
 
     fun assertOperandSelectorHidden(): GameScreenRobot = apply {
         interactions
-            .onAllNodesWithTag(GameScreenTestTags.TILE_OPERAND_SELECTOR, useUnmergedTree = true)
-            .assertCountEquals(0)
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERAND_SELECTOR, useUnmergedTree = true)
+            .assertDoesNotExist()
     }
 
     fun assertOperatorSelectorDisplayed(): GameScreenRobot = apply {
@@ -230,8 +229,8 @@ class GameScreenRobot(
 
     fun assertOperatorSelectorHidden(): GameScreenRobot = apply {
         interactions
-            .onAllNodesWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR, useUnmergedTree = true)
-            .assertCountEquals(0)
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR, useUnmergedTree = true)
+            .assertDoesNotExist()
     }
 
     fun assertOperandOptionDisplayed(entryId: Int): GameScreenRobot = apply {
@@ -301,8 +300,8 @@ class GameScreenRobot(
 
     fun assertResetHidden(tileIndex: Int): GameScreenRobot = apply {
         interactions
-            .onAllNodesWithTag(GameScreenTestTags.tileReset(tileIndex), useUnmergedTree = true)
-            .assertCountEquals(0)
+            .onNodeWithTag(GameScreenTestTags.tileReset(tileIndex), useUnmergedTree = true)
+            .assertDoesNotExist()
     }
 
     fun assertResetVisible(tileIndex: Int): GameScreenRobot = apply {
