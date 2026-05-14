@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This roadmap defines the next product iterations after the current `v1 - Product Polish & Technical Hardening` baseline.
+This roadmap defines the remaining work in `v2 - Puzzle Generation & Replay Loop` and the product iterations that follow the current early v2 implementation baseline.
 
 It is intentionally high-level, outcome-focused, and easy to update as implementation, feedback, and product priorities evolve.
 
@@ -10,13 +10,14 @@ It is intentionally high-level, outcome-focused, and easy to update as implement
 
 ## Current Baseline
 
-### v1 - Product Polish & Technical Hardening
+### Early v2 implementation
 
 - Branded launch experience with splash support
-- AppNavigation-backed startup flow into the game screen
-- Single handcrafted playable puzzle with local tile validation and completion feedback
+- `Splash -> Menu -> Tutorial -> Game` startup flow
+- `Tutorial` uses the handcrafted seed puzzle as the current playable entry point
+- Local tile validation and completion feedback remain in the existing game screen
 - Improved UI clarity, accessibility semantics, and reset behavior
-- No menu, generated puzzles, persistence, or multiple playable modes yet
+- No generated puzzles, replay loop from completion, persistence, or multiple playable modes yet
 
 ---
 
@@ -49,6 +50,10 @@ Introduce the first replayable NumPairs gameplay loop through puzzle generation,
 - Isolate generation and validation logic from the UI layer
 - Add tests for solver correctness and generated puzzle validity
 - Update PRD and supporting product documentation to match the replayable gameplay loop
+
+**Implementation note**
+
+The menu-driven startup path and `Tutorial` entry point are already part of the current baseline. The remaining v2 focus is generated puzzle content, validation architecture, and replay actions after completion.
 
 **Out of scope**
 
