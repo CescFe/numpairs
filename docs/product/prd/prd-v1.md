@@ -1,10 +1,10 @@
-# PRD - NumPairs (v1)
+# PRD - NumPairs (v1 Historical Snapshot)
 
 ## Document Status
 
-- Status: canonical PRD for the `v1 - Product Polish & Technical Hardening` milestone
-- Supersedes: `docs/product/prd/prd-v0.md`
-- Current implementation baseline: `v0 - Playable Prototype`
+- Status: historical PRD snapshot for the `v1 - Product Polish & Technical Hardening` milestone
+- Superseded by: `docs/product/prd/prd-v2.md`
+- Current implementation baseline at time of writing: `v0 - Playable Prototype`
 - Related references:
   - `README.md`
   - `docs/product/roadmap.md`
@@ -13,9 +13,9 @@
   - `docs/game-rules.md`
   - `docs/ubiquitous-language.md`
 
-This document defines the product baseline that v1 is intended to standardize.
+This document defines the product baseline that v1 was intended to standardize.
 
-`prd-v0.md` remains in the repository as the historical prototype snapshot. `prd-v1.md` is the canonical reference for current product intent, scope, and documentation alignment.
+`prd-v0.md` and `prd-v1.md` remain in the repository as historical milestone snapshots. `prd-v2.md` is the canonical reference for the current product direction, scope, and documentation alignment.
 
 ---
 

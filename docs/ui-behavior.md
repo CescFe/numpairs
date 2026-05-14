@@ -1,8 +1,8 @@
-# Num Pairs Puzzle - UI Behavior
+# NumPairs UI Behavior
 
 ## Overview
 
-This document defines the current interaction model for the Num Pairs UI.
+This document defines the current in-puzzle interaction model for NumPairs.
 
 It complements the game rules described in [game-rules.md](./game-rules.md) and focuses on:
 
@@ -10,7 +10,9 @@ It complements the game rules described in [game-rules.md](./game-rules.md) and 
 2. Result grid behavior
 3. Contextual editing flows
 
-This is intended as an implementation target for the prototype. It favors clear and discoverable mobile interactions over advanced validation or optimization.
+This is the interaction baseline shared by the handcrafted tutorial puzzle and future generated puzzles in the `4 Pairs` mode.
+
+It intentionally focuses on in-puzzle behavior. Splash, menu, and replay routing are defined at the product level in `docs/product/prd/prd-v2.md`.
 
 ---
 
@@ -126,7 +128,7 @@ A tile as a whole may also be shown in one of these validation states:
 - Tapping a filled operator slot reopens the contextual selector so the value can be replaced
 - No strip item selection step is required before editing a grid slot
 
-This document defines local tile-level correctness feedback and operand/operator selection behavior. It does not define whole-puzzle validation feedback.
+This document defines local tile-level correctness feedback and operand/operator selection behavior. It does not define whole-puzzle validation feedback, splash, menu, or completion-routing behavior.
 
 ### Tile Validation Feedback
 

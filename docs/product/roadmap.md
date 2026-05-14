@@ -1,8 +1,8 @@
-# NumPairs Product Roadmap (v1 -> v3)
+# NumPairs Product Roadmap (v2 -> v3)
 
 ## Purpose
 
-This roadmap defines the next product iterations after the current `v0 - Playable Prototype`.
+This roadmap defines the next product iterations after the current `v1 - Product Polish & Technical Hardening` baseline.
 
 It is intentionally high-level, outcome-focused, and easy to update as implementation, feedback, and product priorities evolve.
 
@@ -10,12 +10,13 @@ It is intentionally high-level, outcome-focused, and easy to update as implement
 
 ## Current Baseline
 
-### v0 - Playable Prototype
+### v1 - Product Polish & Technical Hardening
 
-- Single-screen playable puzzle
-- Local tile validation and completion flow
-- Initial domain model and Compose UI foundation
-- No persistence, scoring, multiple puzzles, or game modes yet
+- Branded launch experience with splash support
+- AppNavigation-backed startup flow into the game screen
+- Single handcrafted playable puzzle with local tile validation and completion feedback
+- Improved UI clarity, accessibility semantics, and reset behavior
+- No menu, generated puzzles, persistence, or multiple playable modes yet
 
 ---
 
@@ -29,74 +30,60 @@ It is intentionally high-level, outcome-focused, and easy to update as implement
 
 ## Upcoming Milestones
 
-### v1 - Product Polish & Technical Hardening
+### v2 - Puzzle Generation & Replay Loop
 
 **Goal**
 
-Turn the prototype into a stable, clear, and maintainable foundation ready for feature expansion.
+Introduce the first replayable NumPairs gameplay loop through puzzle generation, mode selection, and completion routing.
 
 **High-level scope**
 
-- Improve feedback for incorrect tile and puzzle states
-- Add reliable reset tile interaction
-- Design the first-pass NumPairs logo and launcher icon
-- Add a branded splash screen
-- Refine UI clarity, interaction flows, and accessibility semantics
-- Introduce AppNavigation to orchestrate app startup and future navigation flow
-- Refactor code for readability and maintainability
-- Clarify MVVM architecture boundaries
-- Improve test signal by increasing useful coverage and removing low-value tests
-- Update PRD and supporting product documentation to match the implemented product
+- Add a menu screen after the splash screen
+- Add navigation flow between menu and game screens
+- Keep the existing handcrafted puzzle as a `Tutorial` mode
+- Add a generated `4 Pairs` mode
+- Add replay and return-to-menu actions from the completion flow
+- Define low-difficulty generation rules for `4 Pairs`
+- Establish an initial low-difficulty classification model
+- Implement a generator plus validation and solver services
+- Isolate generation and validation logic from the UI layer
+- Add tests for solver correctness and generated puzzle validity
+- Update PRD and supporting product documentation to match the replayable gameplay loop
 
 **Out of scope**
 
-- Scoring system and timer
 - Persistence or save state
-- Difficulty modes
-- Multiple puzzles
-- Broader multiscreen content flows beyond splash-to-game startup
-
-### v2 - Content & Session Flow
-
-**Goal**
-
-Expand NumPairs from a single isolated puzzle into a reusable play loop with navigable content and session continuity.
-
-**High-level scope**
-
-- Add navigation between the main product screens
-- Support multiple puzzles and puzzle selection or browsing
-- Introduce puzzle generation or another scalable content pipeline
-- Persist in-progress and completed puzzles
-- Establish an initial difficulty classification model
-
-**Roadmap note**
-
-If puzzle generation becomes too large for the milestone, it can be split without changing the main goal of navigation, content continuity, and replayable sessions.
+- User progression systems
+- Scoring systems and timer
+- Daily puzzles
+- Online features
+- Advanced puzzle balancing
+- Guaranteed unique puzzle solutions
+- Additional puzzle modes beyond generated `4 Pairs`
+- Full onboarding beyond the lightweight tutorial entry point
 
 ### v3 - Game Modes, Guidance & Progression
 
 **Goal**
 
-Increase depth, onboarding, and long-term engagement once the core content loop is stable.
+Build on the v2 loop with broader content systems, stronger guidance, and longer-term engagement mechanics once generation and replay are stable.
 
 **High-level scope**
 
-- Add distinct game modes built on the core puzzle loop
-- Introduce tutorial and contextual help flows
-- Add support tools such as an integrated calculator or prime-number reference
-- Add timer and scoring where they strengthen the selected game modes
-- Add progression and lightweight gamification systems
-- Refine how difficulty supports mode selection and progression pacing
+- Expand beyond `4 Pairs` into additional modes or puzzle sizes
+- Introduce contextual help, onboarding refinement, and deeper tutorial support
+- Add persistence or save state if replay sessions benefit from it
+- Introduce difficulty progression, scoring, timer, or daily content where they strengthen the selected modes
+- Add lightweight progression systems if product testing shows they improve retention
 
 **Roadmap note**
 
-The exact game mode set, scoring model, and progression depth should be validated after v2 establishes the broader puzzle flow.
+The exact game mode set, persistence needs, and progression depth should be validated after v2 proves the replayable puzzle loop.
 
 ---
 
 ## Review Triggers
 
-- Move tutorial or help features earlier if onboarding becomes the main blocker after v1
-- Split puzzle generation from v2 if content creation complexity slows delivery
-- Reprioritize progression features based on real usage and playtesting feedback
+- Move persistence earlier if lack of session continuity becomes the main blocker after v2
+- Split puzzle generation depth from v2 if replay and navigation can ship first with a narrower low-difficulty generator
+- Reprioritize progression or scoring features based on playtesting feedback from the generated `4 Pairs` loop

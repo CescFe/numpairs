@@ -1,4 +1,4 @@
-# Num Pairs Puzzle - Game Rules
+# NumPairs Game Rules
 
 ## Overview
 
