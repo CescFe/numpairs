@@ -44,7 +44,7 @@ class AppNavigationTest {
     }
 
     @Test
-    fun defaultStartDestinationRemainsGame() {
+    fun defaultStartDestinationIsMenu() {
         composeTestRule.setContent {
             NumPairsTheme {
                 AppNavigation()
@@ -52,7 +52,11 @@ class AppNavigationTest {
         }
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .onNodeWithTag(MenuScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
             .assertIsDisplayed()
     }
 }

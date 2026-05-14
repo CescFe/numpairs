@@ -15,7 +15,7 @@ sealed interface AppDestination {
 }
 
 @Composable
-fun AppNavigation(modifier: Modifier = Modifier, startDestination: AppDestination = AppDestination.Game) {
+fun AppNavigation(modifier: Modifier = Modifier, startDestination: AppDestination = AppDestination.Menu) {
     var currentDestination by remember(startDestination) {
         mutableStateOf(startDestination)
     }
