@@ -129,7 +129,7 @@ private fun GameScreenTopBar(onNavigateBack: () -> Unit) {
             }
         },
         title = {
-            Text(text = stringResource(R.string.app_name))
+            Text(text = stringResource(R.string.tutorial_screen_title))
         }
     )
 }

@@ -28,7 +28,7 @@ class GameScreenRobot(
 ) {
     fun assertTitleDisplayed(): GameScreenRobot = apply {
         interactions
-            .onNodeWithText(string(R.string.app_name))
+            .onNodeWithText(string(R.string.tutorial_screen_title))
             .assertIsDisplayed()
     }
 

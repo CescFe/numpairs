@@ -2,6 +2,7 @@
     <string name="app_name">NumPairs</string>
     <string name="back_button_content_description">Back</string>
     <string name="menu_tutorial_button">Tutorial</string>
+    <string name="tutorial_screen_title">Tutorial</string>
     <string name="menu_four_pairs_button">4 pairs</string>
     <string name="four_pairs_screen_title">4 pairs</string>
     <string name="board_content_description">Board</string>
