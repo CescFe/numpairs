@@ -2,6 +2,7 @@ package org.cescfe.numpairs.feature.fourpairs.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -23,8 +24,12 @@ fun FourPairsScreen(modifier: Modifier = Modifier) {
         topBar = {
             FourPairsScreenTopBar()
         }
-    ) { _ ->
-        Box(modifier = Modifier.fillMaxSize())
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        )
     }
 }
 
