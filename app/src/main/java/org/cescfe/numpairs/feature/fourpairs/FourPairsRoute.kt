@@ -5,6 +5,9 @@ import androidx.compose.ui.Modifier
 import org.cescfe.numpairs.feature.fourpairs.ui.FourPairsScreen
 
 @Composable
-fun FourPairsRoute(modifier: Modifier = Modifier) {
-    FourPairsScreen(modifier = modifier)
+fun FourPairsRoute(modifier: Modifier = Modifier, onNavigateBack: () -> Unit = {}) {
+    FourPairsScreen(
+        modifier = modifier,
+        onNavigateBack = onNavigateBack
+    )
 }

@@ -9,12 +9,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -29,6 +32,7 @@ import org.cescfe.numpairs.ui.theme.NumPairsTheme
 fun GameScreen(
     uiState: GameUiState,
     modifier: Modifier = Modifier,
+    onNavigateBack: () -> Unit = {},
     onStripItemTapped: (Int) -> Unit = {},
     onStripItemEntryDismissed: () -> Unit = {},
     onStripItemEntryConfirmed: (Int) -> Unit = {},
@@ -50,7 +54,7 @@ fun GameScreen(
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                GameScreenTopBar()
+                GameScreenTopBar(onNavigateBack = onNavigateBack)
             }
         ) { innerPadding ->
             Column(
@@ -109,10 +113,23 @@ fun GameScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun GameScreenTopBar() {
+private fun GameScreenTopBar(onNavigateBack: () -> Unit) {
+    val backButtonContentDescription = stringResource(R.string.back_button_content_description)
+
     TopAppBar(
+        navigationIcon = {
+            IconButton(
+                onClick = onNavigateBack,
+                modifier = Modifier.testTag(GameScreenTestTags.BACK_BUTTON)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_chevron_left),
+                    contentDescription = backButtonContentDescription
+                )
+            }
+        },
         title = {
-            Text(text = stringResource(R.string.app_name))
+            Text(text = stringResource(R.string.tutorial_screen_title))
         }
     )
 }

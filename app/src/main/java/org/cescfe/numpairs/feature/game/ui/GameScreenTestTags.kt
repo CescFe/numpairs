@@ -4,6 +4,7 @@ import org.cescfe.numpairs.domain.puzzle.Operator
 
 object GameScreenTestTags {
     const val SCREEN = "game_screen"
+    const val BACK_BUTTON = "game_back_button"
     const val SUCCESS_OVERLAY = "success_overlay"
     const val SUCCESS_OVERLAY_MESSAGE = "success_overlay_message"
     const val PUZZLE_OUTCOME = "puzzle_outcome"
