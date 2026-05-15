@@ -24,7 +24,11 @@ import org.cescfe.numpairs.R
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
-fun MenuScreen(modifier: Modifier = Modifier, onTutorialSelected: () -> Unit = {}) {
+fun MenuScreen(
+    modifier: Modifier = Modifier,
+    onTutorialSelected: () -> Unit = {},
+    onFourPairsSelected: () -> Unit = {}
+) {
     Scaffold(
         modifier = modifier
             .fillMaxSize()
@@ -52,6 +56,16 @@ fun MenuScreen(modifier: Modifier = Modifier, onTutorialSelected: () -> Unit = {
                 ) {
                     Text(
                         text = stringResource(R.string.menu_tutorial_button),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                OutlinedButton(
+                    onClick = onFourPairsSelected,
+                    modifier = Modifier.testTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(
+                        text = stringResource(R.string.menu_four_pairs_button),
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
