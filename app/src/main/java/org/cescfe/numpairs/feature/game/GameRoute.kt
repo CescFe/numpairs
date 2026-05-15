@@ -14,13 +14,14 @@ import org.cescfe.numpairs.feature.game.presentation.GameViewModel
 import org.cescfe.numpairs.feature.game.ui.GameScreen
 
 @Composable
-fun GameRoute(modifier: Modifier = Modifier) {
+fun GameRoute(modifier: Modifier = Modifier, onNavigateBack: () -> Unit = {}) {
     val gameViewModel = rememberGameViewModel()
     val uiState by gameViewModel.uiState.collectAsState()
 
     GameScreen(
         uiState = uiState,
         modifier = modifier,
+        onNavigateBack = onNavigateBack,
         onStripItemTapped = gameViewModel::onStripItemTapped,
         onStripItemEntryDismissed = gameViewModel::onStripItemEntryDismissed,
         onStripItemEntryConfirmed = gameViewModel::onStripItemEntryConfirmed,

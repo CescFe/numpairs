@@ -22,9 +22,12 @@ fun AppNavigation(modifier: Modifier = Modifier, startDestination: AppDestinatio
     var currentDestination by remember(startDestination) {
         mutableStateOf(startDestination)
     }
+    val navigateToMenu: () -> Unit = {
+        currentDestination = AppDestination.Menu
+    }
 
     BackHandler(enabled = currentDestination != AppDestination.Menu) {
-        currentDestination = AppDestination.Menu
+        navigateToMenu()
     }
 
     when (currentDestination) {
@@ -37,7 +40,13 @@ fun AppNavigation(modifier: Modifier = Modifier, startDestination: AppDestinatio
                 currentDestination = AppDestination.FourPairs
             }
         )
-        AppDestination.Game -> GameRoute(modifier = modifier)
-        AppDestination.FourPairs -> FourPairsRoute(modifier = modifier)
+        AppDestination.Game -> GameRoute(
+            modifier = modifier,
+            onNavigateBack = navigateToMenu
+        )
+        AppDestination.FourPairs -> FourPairsRoute(
+            modifier = modifier,
+            onNavigateBack = navigateToMenu
+        )
     }
 }
