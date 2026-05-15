@@ -5,9 +5,14 @@ import androidx.compose.ui.Modifier
 import org.cescfe.numpairs.feature.menu.ui.MenuScreen
 
 @Composable
-fun MenuRoute(modifier: Modifier = Modifier, onTutorialSelected: () -> Unit = {}) {
+fun MenuRoute(
+    modifier: Modifier = Modifier,
+    onTutorialSelected: () -> Unit = {},
+    onFourPairsSelected: () -> Unit = {}
+) {
     MenuScreen(
         modifier = modifier,
-        onTutorialSelected = onTutorialSelected
+        onTutorialSelected = onTutorialSelected,
+        onFourPairsSelected = onFourPairsSelected
     )
 }
