@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.feature.fourpairs.ui.FourPairsScreenTestTags
 import org.cescfe.numpairs.feature.game.ui.GameScreenTestTags
@@ -18,7 +19,7 @@ class MainActivityStartupTest {
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun coldStartShowsMenuAfterSplashAndTutorialStartsTheGame() {
+    fun coldStartShowsMenuAfterSplashAndSystemBackFromTutorialReturnsToTheMenu() {
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.SCREEN)
             .assertIsDisplayed()
@@ -35,10 +36,20 @@ class MainActivityStartupTest {
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.SCREEN)
             .assertDoesNotExist()
+
+        pressBack()
+
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertDoesNotExist()
     }
 
     @Test
-    fun coldStartShowsMenuAndFourPairsStartsFourPairsScreen() {
+    fun coldStartShowsMenuAndSystemBackFromFourPairsReturnsToTheMenu() {
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.SCREEN)
             .assertIsDisplayed()
@@ -54,6 +65,16 @@ class MainActivityStartupTest {
 
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.SCREEN)
+            .assertDoesNotExist()
+
+        pressBack()
+
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(FourPairsScreenTestTags.SCREEN)
             .assertDoesNotExist()
     }
 }

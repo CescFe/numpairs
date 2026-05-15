@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.ui.navigation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,6 +21,10 @@ sealed interface AppDestination {
 fun AppNavigation(modifier: Modifier = Modifier, startDestination: AppDestination = AppDestination.Menu) {
     var currentDestination by remember(startDestination) {
         mutableStateOf(startDestination)
+    }
+
+    BackHandler(enabled = currentDestination != AppDestination.Menu) {
+        currentDestination = AppDestination.Menu
     }
 
     when (currentDestination) {
