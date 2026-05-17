@@ -2,27 +2,7 @@ package org.cescfe.numpairs.domain.fourpairs
 
 import org.cescfe.numpairs.domain.puzzle.Board
 import org.cescfe.numpairs.domain.puzzle.IndexedResolvedTileAssignment
-import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.Strip
-
-data class FourPairsGenerationRequest(
-    val seed: Long? = null,
-    val difficulty: FourPairsDifficulty = FourPairsDifficulty.LOW
-)
-
-data class FourPairsGeneratedPuzzle(
-    val initialPuzzle: Puzzle,
-    val solution: FourPairsSolution,
-    val difficulty: FourPairsDifficulty
-) {
-    init {
-        val initialStripEntryIds = initialPuzzle.strip.entries.map { stripEntry -> stripEntry.id }.toSet()
-
-        require(solution.stripEntryIds == initialStripEntryIds) {
-            "Generated puzzle solution must reference the same strip entry ids as the initial puzzle."
-        }
-    }
-}
 
 data class FourPairsSolution(
     val stripEntries: List<FourPairsSolvedStripEntry>,
@@ -74,32 +54,4 @@ data class FourPairsSolvedStripEntry(val stripEntryId: Int, val value: Int) {
             "Solved strip entry value must be a positive integer."
         }
     }
-}
-
-enum class FourPairsDifficulty {
-    LOW
-}
-
-sealed interface FourPairsValidationResult {
-    val isValid: Boolean
-
-    data object Valid : FourPairsValidationResult {
-        override val isValid: Boolean = true
-    }
-
-    data class Invalid(val failures: Set<FourPairsValidationFailure>) : FourPairsValidationResult {
-        init {
-            require(failures.isNotEmpty()) {
-                "Invalid Four Pairs validation results require at least one failure."
-            }
-        }
-
-        override val isValid: Boolean = false
-    }
-}
-
-enum class FourPairsValidationFailure {
-    NO_SOLUTION,
-    INVALID_SOLUTION,
-    OUTSIDE_LOW_DIFFICULTY_PROFILE
 }
