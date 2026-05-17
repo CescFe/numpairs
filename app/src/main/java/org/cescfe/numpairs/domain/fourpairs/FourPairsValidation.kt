@@ -20,6 +20,5 @@ sealed interface FourPairsValidationResult {
 
 enum class FourPairsValidationFailure {
     NO_SOLUTION,
-    INVALID_SOLUTION,
     OUTSIDE_LOW_DIFFICULTY_PROFILE
 }

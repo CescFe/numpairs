@@ -2,10 +2,8 @@ package org.cescfe.numpairs.domain.fourpairs
 
 import org.cescfe.numpairs.domain.puzzle.Board
 import org.cescfe.numpairs.domain.puzzle.Expression
-import org.cescfe.numpairs.domain.puzzle.IndexedResolvedTileAssignment
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
-import org.cescfe.numpairs.domain.puzzle.ResolvedOperandAssignment
 import org.cescfe.numpairs.domain.puzzle.Strip
 import org.cescfe.numpairs.domain.puzzle.StripEntry
 import org.cescfe.numpairs.domain.puzzle.StripItem
@@ -57,63 +55,9 @@ class FourPairsContractsTest {
     }
 
     @Test
-    fun solution_requires_eight_unique_strip_entry_ids() {
+    fun solution_requires_a_solved_puzzle() {
         assertThrows(IllegalArgumentException::class.java) {
-            validSolution(
-                stripEntries = solvedStripEntries().dropLast(1)
-            )
-        }
-
-        assertThrows(IllegalArgumentException::class.java) {
-            validSolution(
-                stripEntries = solvedStripEntries().toMutableList().apply {
-                    set(7, FourPairsSolvedStripEntry(stripEntryId = 6, value = 8))
-                }
-            )
-        }
-    }
-
-    @Test
-    fun solution_requires_one_assignment_for_each_tile_index() {
-        assertThrows(IllegalArgumentException::class.java) {
-            validSolution(
-                tileAssignments = validTileAssignments().dropLast(1)
-            )
-        }
-
-        assertThrows(IllegalArgumentException::class.java) {
-            validSolution(
-                tileAssignments = validTileAssignments().toMutableList().apply {
-                    set(
-                        7,
-                        tileAssignment(
-                            tileIndex = 6,
-                            leftEntryId = 6,
-                            operator = Operator.MULTIPLICATION,
-                            rightEntryId = 7
-                        )
-                    )
-                }
-            )
-        }
-    }
-
-    @Test
-    fun solution_requires_tile_assignments_to_reference_solution_strip_entry_ids() {
-        assertThrows(IllegalArgumentException::class.java) {
-            validSolution(
-                tileAssignments = validTileAssignments().toMutableList().apply {
-                    set(
-                        0,
-                        tileAssignment(
-                            tileIndex = 0,
-                            leftEntryId = 0,
-                            operator = Operator.ADDITION,
-                            rightEntryId = 99
-                        )
-                    )
-                }
-            )
+            FourPairsSolution(solvedPuzzle = initialPuzzle())
         }
     }
 
@@ -127,17 +71,6 @@ class FourPairsContractsTest {
                 solution = validSolution(),
                 difficulty = FourPairsDifficulty.LOW
             )
-        }
-    }
-
-    @Test
-    fun solved_strip_entries_require_valid_identity_and_value() {
-        assertThrows(IllegalArgumentException::class.java) {
-            FourPairsSolvedStripEntry(stripEntryId = -1, value = 1)
-        }
-
-        assertThrows(IllegalArgumentException::class.java) {
-            FourPairsSolvedStripEntry(stripEntryId = 0, value = 0)
         }
     }
 
@@ -156,47 +89,46 @@ class FourPairsContractsTest {
     }
 }
 
-private fun validSolution(
-    stripEntries: List<FourPairsSolvedStripEntry> = solvedStripEntries(),
-    tileAssignments: List<IndexedResolvedTileAssignment> = validTileAssignments()
-): FourPairsSolution = FourPairsSolution(
-    stripEntries = stripEntries,
-    tileAssignments = tileAssignments
-)
+private fun validSolution(): FourPairsSolution = FourPairsSolution(solvedPuzzle = solvedPuzzle())
 
-private fun solvedStripEntries(): List<FourPairsSolvedStripEntry> = (0 until Strip.NUMBER_COUNT).map { stripEntryId ->
-    FourPairsSolvedStripEntry(
-        stripEntryId = stripEntryId,
-        value = stripEntryId + 1
-    )
-}
-
-private fun validTileAssignments(): List<IndexedResolvedTileAssignment> = listOf(
-    tileAssignment(tileIndex = 0, leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
-    tileAssignment(tileIndex = 1, leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 0),
-    tileAssignment(tileIndex = 2, leftEntryId = 2, operator = Operator.ADDITION, rightEntryId = 3),
-    tileAssignment(tileIndex = 3, leftEntryId = 3, operator = Operator.MULTIPLICATION, rightEntryId = 2),
-    tileAssignment(tileIndex = 4, leftEntryId = 4, operator = Operator.ADDITION, rightEntryId = 5),
-    tileAssignment(tileIndex = 5, leftEntryId = 5, operator = Operator.MULTIPLICATION, rightEntryId = 4),
-    tileAssignment(tileIndex = 6, leftEntryId = 6, operator = Operator.ADDITION, rightEntryId = 7),
-    tileAssignment(tileIndex = 7, leftEntryId = 7, operator = Operator.MULTIPLICATION, rightEntryId = 6)
-)
-
-private fun tileAssignment(
-    tileIndex: Int,
-    leftEntryId: Int,
-    operator: Operator,
-    rightEntryId: Int
-): IndexedResolvedTileAssignment = IndexedResolvedTileAssignment(
-    tileIndex = tileIndex,
-    leftOperand = ResolvedOperandAssignment(
-        stripEntryId = leftEntryId,
-        value = leftEntryId + 1
+private fun tileAssignment(leftEntryId: Int, operator: Operator, rightEntryId: Int): Tile = Tile(
+    expression = Expression(
+        leftOperand = Expression.Operand.Known(
+            value = leftEntryId + 1,
+            stripEntryId = leftEntryId
+        ),
+        operator = operator,
+        rightOperand = Expression.Operand.Known(
+            value = rightEntryId + 1,
+            stripEntryId = rightEntryId
+        )
     ),
-    operator = operator,
-    rightOperand = ResolvedOperandAssignment(
-        stripEntryId = rightEntryId,
-        value = rightEntryId + 1
+    result = operator.apply(
+        leftOperand = leftEntryId + 1,
+        rightOperand = rightEntryId + 1
+    )
+)
+
+private fun solvedPuzzle(): Puzzle = Puzzle(
+    board = Board(
+        tiles = listOf(
+            tileAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
+            tileAssignment(leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 0),
+            tileAssignment(leftEntryId = 2, operator = Operator.ADDITION, rightEntryId = 3),
+            tileAssignment(leftEntryId = 3, operator = Operator.MULTIPLICATION, rightEntryId = 2),
+            tileAssignment(leftEntryId = 4, operator = Operator.ADDITION, rightEntryId = 5),
+            tileAssignment(leftEntryId = 5, operator = Operator.MULTIPLICATION, rightEntryId = 4),
+            tileAssignment(leftEntryId = 6, operator = Operator.ADDITION, rightEntryId = 7),
+            tileAssignment(leftEntryId = 7, operator = Operator.MULTIPLICATION, rightEntryId = 6)
+        )
+    ),
+    strip = Strip.fromEntries(
+        entries = (0 until Strip.NUMBER_COUNT).map { stripEntryId ->
+            StripEntry(
+                id = stripEntryId,
+                item = StripItem.Known(stripEntryId + 1)
+            )
+        }
     )
 )
 
