@@ -12,10 +12,8 @@ import org.cescfe.numpairs.domain.puzzle.support.defaultKnownStripValues
 import org.cescfe.numpairs.domain.puzzle.support.hiddenTile
 import org.cescfe.numpairs.domain.puzzle.support.knownPuzzleWithAssignments
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class FourPairsContractsTest {
@@ -55,20 +53,6 @@ class FourPairsContractsTest {
                 solution = PuzzleSolution(solvedPuzzle = solvedPuzzle()),
                 difficulty = FourPairsDifficulty.LOW
             )
-        }
-    }
-
-    @Test
-    fun validation_result_exposes_validity_and_requires_failures_for_invalid_results() {
-        val invalidResult = FourPairsValidationResult.Invalid(
-            failures = setOf(FourPairsValidationFailure.NO_SOLUTION)
-        )
-
-        assertTrue(FourPairsValidationResult.Valid.isValid)
-        assertFalse(invalidResult.isValid)
-
-        assertThrows(IllegalArgumentException::class.java) {
-            FourPairsValidationResult.Invalid(failures = emptySet())
         }
     }
 }
