@@ -1,13 +1,16 @@
 package org.cescfe.numpairs.domain.fourpairs
 
 import org.cescfe.numpairs.domain.puzzle.Board
-import org.cescfe.numpairs.domain.puzzle.Expression
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
+import org.cescfe.numpairs.domain.puzzle.PuzzleSolution
 import org.cescfe.numpairs.domain.puzzle.Strip
 import org.cescfe.numpairs.domain.puzzle.StripEntry
 import org.cescfe.numpairs.domain.puzzle.StripItem
-import org.cescfe.numpairs.domain.puzzle.Tile
+import org.cescfe.numpairs.domain.puzzle.support.TileAssignment
+import org.cescfe.numpairs.domain.puzzle.support.defaultKnownStripValues
+import org.cescfe.numpairs.domain.puzzle.support.hiddenTile
+import org.cescfe.numpairs.domain.puzzle.support.knownPuzzleWithAssignments
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -26,8 +29,8 @@ class FourPairsContractsTest {
 
     @Test
     fun generated_puzzle_exposes_initial_puzzle_solution_and_difficulty() {
-        val initialPuzzle = initialPuzzle()
-        val solution = validSolution()
+        val initialPuzzle = initialPuzzleFor(solvedPuzzle())
+        val solution = PuzzleSolution(solvedPuzzle = solvedPuzzle())
         val generatedPuzzle = FourPairsGeneratedPuzzle(
             initialPuzzle = initialPuzzle,
             solution = solution,
@@ -40,35 +43,16 @@ class FourPairsContractsTest {
     }
 
     @Test
-    fun solution_preserves_strip_entry_ids_and_indexed_tile_assignments() {
-        val solution = validSolution()
-
-        assertEquals((0 until Strip.NUMBER_COUNT).toSet(), solution.stripEntryIds)
-        assertEquals(
-            (0 until Board.TILE_COUNT).toList(),
-            solution.tileAssignments.map { assignment ->
-                assignment.tileIndex
-            }
+    fun generated_puzzle_requires_the_solution_to_solve_the_initial_puzzle() {
+        val incompatibleInitialPuzzle = initialPuzzleFor(
+            solvedPuzzle = solvedPuzzle(),
+            tileResults = List(Board.TILE_COUNT) { index -> index + 100 }
         )
-        assertEquals(0, solution.tileAssignments.first().leftOperand.stripEntryId)
-        assertEquals(1, solution.tileAssignments.first().rightOperand.stripEntryId)
-    }
-
-    @Test
-    fun solution_requires_a_solved_puzzle() {
-        assertThrows(IllegalArgumentException::class.java) {
-            FourPairsSolution(solvedPuzzle = initialPuzzle())
-        }
-    }
-
-    @Test
-    fun generated_puzzle_requires_solution_strip_entry_ids_to_match_the_initial_puzzle() {
-        val initialPuzzle = initialPuzzle(stripEntryIds = (10 until 18).toList())
 
         assertThrows(IllegalArgumentException::class.java) {
             FourPairsGeneratedPuzzle(
-                initialPuzzle = initialPuzzle,
-                solution = validSolution(),
+                initialPuzzle = incompatibleInitialPuzzle,
+                solution = PuzzleSolution(solvedPuzzle = solvedPuzzle()),
                 difficulty = FourPairsDifficulty.LOW
             )
         }
@@ -89,68 +73,44 @@ class FourPairsContractsTest {
     }
 }
 
-private fun validSolution(): FourPairsSolution = FourPairsSolution(solvedPuzzle = solvedPuzzle())
-
-private fun tileAssignment(leftEntryId: Int, operator: Operator, rightEntryId: Int): Tile = Tile(
-    expression = Expression(
-        leftOperand = Expression.Operand.Known(
-            value = leftEntryId + 1,
-            stripEntryId = leftEntryId
-        ),
-        operator = operator,
-        rightOperand = Expression.Operand.Known(
-            value = rightEntryId + 1,
-            stripEntryId = rightEntryId
-        )
-    ),
-    result = operator.apply(
-        leftOperand = leftEntryId + 1,
-        rightOperand = rightEntryId + 1
-    )
+private fun solvedPuzzle(): Puzzle = knownPuzzleWithAssignments(
+    stripValues = defaultKnownStripValues(),
+    *solvedTileAssignments().toTypedArray()
 )
 
-private fun solvedPuzzle(): Puzzle = Puzzle(
-    board = Board(
-        tiles = listOf(
-            tileAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
-            tileAssignment(leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 0),
-            tileAssignment(leftEntryId = 2, operator = Operator.ADDITION, rightEntryId = 3),
-            tileAssignment(leftEntryId = 3, operator = Operator.MULTIPLICATION, rightEntryId = 2),
-            tileAssignment(leftEntryId = 4, operator = Operator.ADDITION, rightEntryId = 5),
-            tileAssignment(leftEntryId = 5, operator = Operator.MULTIPLICATION, rightEntryId = 4),
-            tileAssignment(leftEntryId = 6, operator = Operator.ADDITION, rightEntryId = 7),
-            tileAssignment(leftEntryId = 7, operator = Operator.MULTIPLICATION, rightEntryId = 6)
-        )
-    ),
+private fun solvedTileAssignments(): List<TileAssignment> = listOf(
+    TileAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),
+    TileAssignment(leftEntryId = 1, operator = Operator.MULTIPLICATION, rightEntryId = 0),
+    TileAssignment(leftEntryId = 2, operator = Operator.ADDITION, rightEntryId = 3),
+    TileAssignment(leftEntryId = 3, operator = Operator.MULTIPLICATION, rightEntryId = 2),
+    TileAssignment(leftEntryId = 4, operator = Operator.ADDITION, rightEntryId = 5),
+    TileAssignment(leftEntryId = 5, operator = Operator.MULTIPLICATION, rightEntryId = 4),
+    TileAssignment(leftEntryId = 6, operator = Operator.ADDITION, rightEntryId = 7),
+    TileAssignment(leftEntryId = 7, operator = Operator.MULTIPLICATION, rightEntryId = 6)
+)
+
+private fun initialPuzzleFor(
+    solvedPuzzle: Puzzle,
+    tileResults: List<Int> = solvedPuzzle.board.tiles.map { tile -> tile.result }
+): Puzzle = Puzzle(
+    board = Board(tiles = tileResults.map(::hiddenTile)),
     strip = Strip.fromEntries(
-        entries = (0 until Strip.NUMBER_COUNT).map { stripEntryId ->
+        entries = initialStripItems().mapIndexed { index, stripItem ->
             StripEntry(
-                id = stripEntryId,
-                item = StripItem.Known(stripEntryId + 1)
+                id = index,
+                item = stripItem
             )
         }
     )
 )
 
-private fun initialPuzzle(stripEntryIds: List<Int> = (0 until Strip.NUMBER_COUNT).toList()): Puzzle = Puzzle(
-    board = Board(
-        tiles = List(Board.TILE_COUNT) { tileIndex ->
-            Tile(
-                expression = Expression(
-                    leftOperand = Expression.Operand.Hidden,
-                    operator = Operator.Hidden,
-                    rightOperand = Expression.Operand.Hidden
-                ),
-                result = tileIndex + 1
-            )
-        }
-    ),
-    strip = Strip.fromEntries(
-        entries = stripEntryIds.mapIndexed { index, stripEntryId ->
-            StripEntry(
-                id = stripEntryId,
-                item = StripItem.Known(index + 1)
-            )
-        }
-    )
+private fun initialStripItems(): List<StripItem> = listOf(
+    StripItem.Hidden,
+    StripItem.Hidden,
+    StripItem.Known(3),
+    StripItem.Hidden,
+    StripItem.Hidden,
+    StripItem.Known(6),
+    StripItem.Hidden,
+    StripItem.Known(8)
 )

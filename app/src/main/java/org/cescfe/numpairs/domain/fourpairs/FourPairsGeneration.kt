@@ -1,6 +1,7 @@
 package org.cescfe.numpairs.domain.fourpairs
 
 import org.cescfe.numpairs.domain.puzzle.Puzzle
+import org.cescfe.numpairs.domain.puzzle.PuzzleSolution
 
 data class FourPairsGenerationRequest(
     val seed: Long? = null,
@@ -9,14 +10,12 @@ data class FourPairsGenerationRequest(
 
 data class FourPairsGeneratedPuzzle(
     val initialPuzzle: Puzzle,
-    val solution: FourPairsSolution,
+    val solution: PuzzleSolution,
     val difficulty: FourPairsDifficulty
 ) {
     init {
-        val initialStripEntryIds = initialPuzzle.strip.entries.map { stripEntry -> stripEntry.id }.toSet()
-
-        require(solution.stripEntryIds == initialStripEntryIds) {
-            "Generated puzzle solution must reference the same strip entry ids as the initial puzzle."
+        require(solution.isSolutionFor(initialPuzzle)) {
+            "Generated puzzle solution must solve the initial puzzle."
         }
     }
 }
