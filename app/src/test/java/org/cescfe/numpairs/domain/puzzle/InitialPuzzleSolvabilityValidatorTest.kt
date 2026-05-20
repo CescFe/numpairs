@@ -8,19 +8,7 @@ import org.junit.Test
 class InitialPuzzleSolvabilityValidatorTest {
     @Test
     fun solvable_initial_puzzle_with_known_strip_is_valid() {
-        val puzzle = initialPuzzle(
-            stripItems = knownStripItems(1, 2, 6, 10, 25, 25, 50, 222),
-            results = listOf(
-                223,
-                222,
-                52,
-                100,
-                31,
-                150,
-                35,
-                250
-            )
-        )
+        val puzzle = InitialPuzzleMother.solvableKnownStripPuzzle()
 
         val result = InitialPuzzleSolvabilityValidator.validate(puzzle)
 
@@ -30,8 +18,7 @@ class InitialPuzzleSolvabilityValidatorTest {
 
     @Test
     fun unsolvable_result_set_is_invalid() {
-        val puzzle = initialPuzzle(
-            stripItems = knownStripItems(1, 2, 6, 10, 25, 25, 50, 222),
+        val puzzle = InitialPuzzleMother.knownStripPuzzleWithResults(
             results = listOf(
                 224,
                 222,
@@ -74,18 +61,7 @@ class InitialPuzzleSolvabilityValidatorTest {
 
     @Test
     fun hidden_strip_entries_are_unsupported_for_the_first_iteration() {
-        val puzzle = initialPuzzle(
-            stripItems = listOf(
-                StripItem.Known(1),
-                StripItem.Known(2),
-                StripItem.Known(6),
-                StripItem.Known(10),
-                StripItem.Known(25),
-                StripItem.Hidden,
-                StripItem.Known(50),
-                StripItem.Known(222)
-            )
-        )
+        val puzzle = InitialPuzzleMother.puzzleWithHiddenStripEntry()
 
         assertEquals(
             InitialPuzzleValidationResult.UNSUPPORTED_INPUT_SHAPE,
@@ -95,28 +71,52 @@ class InitialPuzzleSolvabilityValidatorTest {
 
     @Test
     fun non_hidden_tile_expressions_are_unsupported_for_initial_puzzle_validation() {
-        val puzzle = initialPuzzle(
-            stripItems = knownStripItems(1, 2, 6, 10, 25, 25, 50, 222)
-        ).copy(
-            board = Board(
-                tiles = initialPuzzleResults().map(::hiddenTile).toMutableList().apply {
-                    set(
-                        0,
-                        hiddenTile(result = 223)
-                            .withLeftOperand(
-                                value = 1,
-                                stripEntryId = 0
-                            )
-                    )
-                }
-            )
-        )
+        val puzzle = InitialPuzzleMother.puzzleWithNonHiddenTileExpression()
 
         assertEquals(
             InitialPuzzleValidationResult.UNSUPPORTED_INPUT_SHAPE,
             InitialPuzzleSolvabilityValidator.validate(puzzle)
         )
     }
+}
+
+private object InitialPuzzleMother {
+    fun solvableKnownStripPuzzle(): Puzzle = knownStripPuzzleWithResults(
+        results = initialPuzzleResults()
+    )
+
+    fun knownStripPuzzleWithResults(results: List<Int>): Puzzle = initialPuzzle(
+        stripItems = knownStripItems(1, 2, 6, 10, 25, 25, 50, 222),
+        results = results
+    )
+
+    fun puzzleWithHiddenStripEntry(): Puzzle = initialPuzzle(
+        stripItems = listOf(
+            StripItem.Known(1),
+            StripItem.Known(2),
+            StripItem.Known(6),
+            StripItem.Known(10),
+            StripItem.Known(25),
+            StripItem.Hidden,
+            StripItem.Known(50),
+            StripItem.Known(222)
+        )
+    )
+
+    fun puzzleWithNonHiddenTileExpression(): Puzzle = solvableKnownStripPuzzle().copy(
+        board = Board(
+            tiles = initialPuzzleResults().map(::hiddenTile).toMutableList().apply {
+                set(
+                    0,
+                    hiddenTile(result = 223)
+                        .withLeftOperand(
+                            value = 1,
+                            stripEntryId = 0
+                        )
+                )
+            }
+        )
+    )
 }
 
 private fun initialPuzzle(stripItems: List<StripItem>, results: List<Int> = initialPuzzleResults()): Puzzle = Puzzle(
