@@ -8,6 +8,7 @@
 - Related references:
   - `README.md`
   - `docs/product/roadmap.md`
+  - `docs/product/puzzle-generation.md`
   - `docs/ui-behavior.md`
   - `docs/product/ux-decisions.md`
   - `docs/game-rules.md`
@@ -131,6 +132,7 @@ That baseline does not yet include:
 - Define generation rules for the `4 Pairs` mode
 - Implement a basic generator for low-difficulty puzzles
 - Establish an initial low-difficulty classification model for generated puzzles
+- Use `docs/product/puzzle-generation.md` as the v2 reference for generation flow, low-difficulty rules, and solved-to-initial puzzle masking
 - Implement a puzzle validation and solver service
 - Validate generated puzzles before presenting them to the player
 - Support deterministic generation where useful for tests and debugging
@@ -192,6 +194,7 @@ That baseline does not yet include:
 
 - `README.md` should identify `prd-v2.md` as the canonical product reference while still distinguishing the implemented v1 baseline from the active v2 milestone
 - `docs/product/roadmap.md` should treat `v1 - Product Polish & Technical Hardening` as the current implemented baseline and `v2 - Puzzle Generation & Replay Loop` as the next milestone
+- `docs/product/puzzle-generation.md` should define the generated `4 Pairs` construction process, low-difficulty constraints, and initial-state masking rules
 - `docs/ui-behavior.md` should remain the source of truth for in-puzzle interaction behavior shared by tutorial and generated modes; it intentionally does not define splash, menu, or replay routing
 - `docs/product/ux-decisions.md` continues to capture layout and visual rationale that applies to the puzzle screen carried forward into v2
 - `docs/game-rules.md` and `docs/ubiquitous-language.md` remain the source of truth for the core rules and terminology used by both handcrafted and generated puzzles
