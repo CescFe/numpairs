@@ -18,15 +18,21 @@ class FourPairsLowDifficultyPuzzleGenerator(
     private val random: Random = Random.Default,
     private val maxAttempts: Int = DEFAULT_MAX_ATTEMPTS
 ) {
+    init {
+        require(maxAttempts > 0) {
+            "Maximum generation attempts must be positive."
+        }
+    }
+
     constructor(seed: Int) : this(random = Random(seed))
 
-    fun generate(): Puzzle = generatePuzzle().initialPuzzle
+    fun generate(): Puzzle = generateWithSolution().initialPuzzle
 
-    fun generatePuzzle(): FourPairsGeneratedPuzzle {
+    fun generateWithSolution(): FourPairsGeneratedPuzzle {
         repeat(maxAttempts) {
             val entries = generateSolvedEntries()
             val pairs = generatePairs(entries = entries) ?: return@repeat
-            val knownEntryIds = selectKnownEntryIds(pairs = pairs) ?: return@repeat
+            val knownAnchorEntryIds = selectKnownAnchorEntryIds(pairs = pairs) ?: return@repeat
             val solvedPuzzle = buildSolvedPuzzle(
                 entries = entries,
                 pairs = pairs
@@ -34,7 +40,7 @@ class FourPairsLowDifficultyPuzzleGenerator(
             val generatedPuzzle = FourPairsGeneratedPuzzle(
                 initialPuzzle = buildInitialPuzzle(
                     solvedPuzzle = solvedPuzzle,
-                    knownEntryIds = knownEntryIds
+                    knownEntryIds = knownAnchorEntryIds
                 ),
                 solvedPuzzle = solvedPuzzle
             )
@@ -86,12 +92,7 @@ class FourPairsLowDifficultyPuzzleGenerator(
             }
 
         candidatePairs.forEach { candidatePair ->
-            val candidateResults = setOf(candidatePair.sum, candidatePair.product)
-
-            if (candidatePair.product > FourPairsLowDifficultyRules.MAX_MULTIPLICATION_RESULT) {
-                return@forEach
-            }
-            if (candidateResults.size != 2 || candidateResults.any { result -> result in usedResults }) {
+            if (!candidatePair.canBeAddedTo(usedResults = usedResults)) {
                 return@forEach
             }
 
@@ -100,7 +101,7 @@ class FourPairsLowDifficultyPuzzleGenerator(
                     entry.id == candidatePair.firstEntry.id || entry.id == candidatePair.secondEntry.id
                 },
                 selectedPairs = selectedPairs + candidatePair,
-                usedResults = usedResults + candidateResults
+                usedResults = usedResults + candidatePair.resultValues
             )
 
             if (nextPairs != null) {
@@ -127,13 +128,13 @@ class FourPairsLowDifficultyPuzzleGenerator(
         strip = solvedPuzzle.strip.withKnownEntriesOnly(knownEntryIds = knownEntryIds)
     )
 
-    private fun selectKnownEntryIds(pairs: List<FourPairsEntryPair>): Set<Int>? {
+    private fun selectKnownAnchorEntryIds(pairs: List<FourPairsEntryPair>): Set<Int>? {
         val pairKeyByEntryId = pairs.flatMap { pair ->
             pair.entryIds.map { entryId -> entryId to pair.key }
         }.toMap()
 
-        val candidates = knownEntryIdCandidates().filter { knownEntryIds ->
-            knownEntryIds
+        val candidates = knownAnchorCandidates().filter { knownAnchorEntryIds ->
+            knownAnchorEntryIds
                 .map { entryId -> pairKeyByEntryId.getValue(entryId) }
                 .toSet()
                 .size == FourPairsLowDifficultyRules.KNOWN_STRIP_ENTRY_COUNT
@@ -142,18 +143,18 @@ class FourPairsLowDifficultyPuzzleGenerator(
         return candidates.randomOrNull()
     }
 
-    private fun knownEntryIdCandidates(): List<Set<Int>> {
+    private fun knownAnchorCandidates(): List<Set<Int>> {
         val highestEntryId = Strip.NUMBER_COUNT - 1
         val candidates = mutableListOf<Set<Int>>()
 
         for (firstKnownEntryId in 0 until highestEntryId) {
             for (secondKnownEntryId in firstKnownEntryId + 1 until highestEntryId) {
-                val knownEntryIds = setOf(firstKnownEntryId, secondKnownEntryId, highestEntryId)
+                val knownAnchorEntryIds = setOf(firstKnownEntryId, secondKnownEntryId, highestEntryId)
 
-                if (knownEntryIds.maxConsecutiveHiddenEntries() <=
+                if (knownAnchorEntryIds.maxConsecutiveHiddenEntries() <=
                     FourPairsLowDifficultyRules.MAX_CONSECUTIVE_HIDDEN_ENTRIES
                 ) {
-                    candidates += knownEntryIds
+                    candidates += knownAnchorEntryIds
                 }
             }
         }
@@ -161,31 +162,56 @@ class FourPairsLowDifficultyPuzzleGenerator(
         return candidates
     }
 
-    private fun FourPairsGeneratedPuzzle.isValidLowDifficultyPuzzle(pairs: List<FourPairsEntryPair>): Boolean {
-        val solvedStripValues = solvedPuzzle.strip.entries.mapNotNull { entry ->
-            (entry.item as? StripItem.Known)?.value
-        }
-        val initialKnownEntryIds = initialPuzzle.strip.entries
-            .filter { entry -> entry.item is StripItem.Known }
-            .map { entry -> entry.id }
-            .toSet()
+    private fun FourPairsGeneratedPuzzle.isValidLowDifficultyPuzzle(pairs: List<FourPairsEntryPair>): Boolean =
+        solvedPuzzle.completionState == PuzzleCompletionState.SOLVED &&
+            initialPuzzle.hasHiddenTileExpressions() &&
+            hasMatchingBoardResults() &&
+            solvedPuzzle.hasLowDifficultyStripValues() &&
+            solvedPuzzle.hasDistinctBoardResults() &&
+            pairs.all { pair -> pair.hasLowDifficultyProduct() } &&
+            initialPuzzle.hasExpectedStripMask()
 
-        return solvedPuzzle.completionState == PuzzleCompletionState.SOLVED &&
-            initialPuzzle.board.tiles.all { tile -> tile.hasHiddenExpression() } &&
-            initialPuzzle.board.tiles.map(Tile::result) == solvedPuzzle.board.tiles.map(Tile::result) &&
-            solvedStripValues.size == Strip.NUMBER_COUNT &&
-            solvedStripValues == solvedStripValues.sorted() &&
-            solvedStripValues.toSet().size == Strip.NUMBER_COUNT &&
-            solvedStripValues.all { value -> value in FourPairsLowDifficultyRules.stripValueRange } &&
-            solvedPuzzle.board.tiles.map(Tile::result).toSet().size == Board.TILE_COUNT &&
-            pairs.all { pair -> pair.product <= FourPairsLowDifficultyRules.MAX_MULTIPLICATION_RESULT } &&
-            initialKnownEntryIds.size == FourPairsLowDifficultyRules.KNOWN_STRIP_ENTRY_COUNT &&
-            initialPuzzle.strip.entries.count { entry -> entry.item == StripItem.Hidden } ==
+    private fun FourPairsGeneratedPuzzle.hasMatchingBoardResults(): Boolean =
+        initialPuzzle.board.tiles.map(Tile::result) == solvedPuzzle.board.tiles.map(Tile::result)
+
+    private fun Puzzle.hasHiddenTileExpressions(): Boolean = board.tiles.all { tile ->
+        tile.hasHiddenExpression()
+    }
+
+    private fun Puzzle.hasLowDifficultyStripValues(): Boolean {
+        val values = knownStripValues()
+
+        return values.size == Strip.NUMBER_COUNT &&
+            values == values.sorted() &&
+            values.toSet().size == Strip.NUMBER_COUNT &&
+            values.all { value -> value in FourPairsLowDifficultyRules.stripValueRange }
+    }
+
+    private fun Puzzle.knownStripValues(): List<Int> = strip.entries.mapNotNull { entry ->
+        (entry.item as? StripItem.Known)?.value
+    }
+
+    private fun Puzzle.hasDistinctBoardResults(): Boolean =
+        board.tiles.map(Tile::result).toSet().size == Board.TILE_COUNT
+
+    private fun FourPairsEntryPair.hasLowDifficultyProduct(): Boolean =
+        product <= FourPairsLowDifficultyRules.MAX_MULTIPLICATION_RESULT
+
+    private fun Puzzle.hasExpectedStripMask(): Boolean {
+        val knownAnchorEntryIds = knownStripEntryIds()
+
+        return knownAnchorEntryIds.size == FourPairsLowDifficultyRules.KNOWN_STRIP_ENTRY_COUNT &&
+            strip.entries.count { entry -> entry.item == StripItem.Hidden } ==
             FourPairsLowDifficultyRules.HIDDEN_STRIP_ENTRY_COUNT &&
-            initialKnownEntryIds.contains(Strip.NUMBER_COUNT - 1) &&
-            initialKnownEntryIds.maxConsecutiveHiddenEntries() <=
+            knownAnchorEntryIds.contains(Strip.NUMBER_COUNT - 1) &&
+            knownAnchorEntryIds.maxConsecutiveHiddenEntries() <=
             FourPairsLowDifficultyRules.MAX_CONSECUTIVE_HIDDEN_ENTRIES
     }
+
+    private fun Puzzle.knownStripEntryIds(): Set<Int> = strip.entries
+        .filter { entry -> entry.item is StripItem.Known }
+        .map { entry -> entry.id }
+        .toSet()
 
     private fun FourPairsEntryPair.solvedTiles(): List<Tile> = listOf(
         solvedTile(operator = Operator.ADDITION),
@@ -222,11 +248,17 @@ private data class FourPairsStripEntry(val id: Int, val value: Int)
 private data class FourPairsEntryPair(val firstEntry: FourPairsStripEntry, val secondEntry: FourPairsStripEntry) {
     val sum: Int = firstEntry.value + secondEntry.value
     val product: Int = firstEntry.value * secondEntry.value
+    val resultValues: Set<Int> = setOf(sum, product)
     val entryIds: Set<Int> = setOf(firstEntry.id, secondEntry.id)
     val key: FourPairsEntryPairKey = FourPairsEntryPairKey(
         firstEntryId = minOf(firstEntry.id, secondEntry.id),
         secondEntryId = maxOf(firstEntry.id, secondEntry.id)
     )
+
+    fun canBeAddedTo(usedResults: Set<Int>): Boolean =
+        product <= FourPairsLowDifficultyRules.MAX_MULTIPLICATION_RESULT &&
+            resultValues.size == 2 &&
+            resultValues.none { result -> result in usedResults }
 }
 
 private data class FourPairsEntryPairKey(val firstEntryId: Int, val secondEntryId: Int)

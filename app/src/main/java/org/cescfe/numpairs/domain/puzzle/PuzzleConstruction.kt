@@ -6,11 +6,6 @@ fun hiddenExpression(): Expression = Expression(
     rightOperand = Expression.Operand.Hidden
 )
 
-fun hiddenExpressionTile(result: Int): Tile = Tile(
-    expression = hiddenExpression(),
-    result = result
-)
-
 fun resolvedTile(
     leftOperand: ResolvedOperandAssignment,
     operator: Operator,

@@ -11,13 +11,14 @@ import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.domain.puzzle.Tile
 import org.cescfe.numpairs.domain.puzzle.resolvedTileAssignments
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class FourPairsLowDifficultyPuzzleGeneratorTest {
     @Test
     fun generate_returns_the_initial_player_facing_puzzle() {
-        val generatedPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 2026).generatePuzzle()
+        val generatedPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 2026).generateWithSolution()
         val initialPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 2026).generate()
 
         assertEquals(generatedPuzzle.initialPuzzle, initialPuzzle)
@@ -27,7 +28,7 @@ class FourPairsLowDifficultyPuzzleGeneratorTest {
 
     @Test
     fun generated_puzzle_satisfies_low_difficulty_constraints() {
-        val generatedPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 42).generatePuzzle()
+        val generatedPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 42).generateWithSolution()
         val solvedPuzzle = generatedPuzzle.solvedPuzzle
         val initialPuzzle = generatedPuzzle.initialPuzzle
         val solvedStripValues = solvedPuzzle.requireKnownStripValues()
@@ -50,15 +51,15 @@ class FourPairsLowDifficultyPuzzleGeneratorTest {
 
     @Test
     fun generated_puzzles_are_deterministic_for_the_same_seed() {
-        val firstPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 1234).generatePuzzle()
-        val secondPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 1234).generatePuzzle()
+        val firstPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 1234).generateWithSolution()
+        val secondPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 1234).generateWithSolution()
 
         assertEquals(firstPuzzle, secondPuzzle)
     }
 
     @Test
     fun solved_puzzle_uses_matching_addition_and_multiplication_pairs() {
-        val solvedPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 81).generatePuzzle().solvedPuzzle
+        val solvedPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 81).generateWithSolution().solvedPuzzle
         val additionPairs = solvedPuzzle.pairKeysFor(operator = Operator.ADDITION)
         val multiplicationPairs = solvedPuzzle.pairKeysFor(operator = Operator.MULTIPLICATION)
 
@@ -68,8 +69,15 @@ class FourPairsLowDifficultyPuzzleGeneratorTest {
     }
 
     @Test
+    fun generator_rejects_non_positive_max_attempts() {
+        assertThrows(IllegalArgumentException::class.java) {
+            FourPairsLowDifficultyPuzzleGenerator(maxAttempts = 0)
+        }
+    }
+
+    @Test
     fun known_strip_anchors_are_distributed_and_belong_to_different_pairs() {
-        val generatedPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 99).generatePuzzle()
+        val generatedPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 99).generateWithSolution()
         val initialKnownEntryIds = generatedPuzzle.initialPuzzle.knownEntryIds()
         val highestEntryId = Strip.NUMBER_COUNT - 1
         val pairKeyByEntryId = generatedPuzzle.solvedPuzzle.pairKeyByEntryId()
