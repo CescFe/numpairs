@@ -80,8 +80,23 @@ class FourPairsLowDifficultyPuzzleGenerator(
             return selectedPairs.takeIf { pairs -> pairs.size == FourPairsLowDifficultyRules.PAIR_COUNT }
         }
 
-        val firstEntry = remainingEntries.first()
-        val candidatePairs = remainingEntries
+        return candidatePairsFor(entries = remainingEntries).firstNotNullOfOrNull { candidatePair ->
+            if (!candidatePair.canBeAddedTo(usedResults = usedResults)) {
+                return@firstNotNullOfOrNull null
+            }
+
+            choosePairs(
+                remainingEntries = remainingEntries.without(candidatePair),
+                selectedPairs = selectedPairs + candidatePair,
+                usedResults = usedResults + candidatePair.resultValues
+            )
+        }
+    }
+
+    private fun candidatePairsFor(entries: List<FourPairsStripEntry>): List<FourPairsEntryPair> {
+        val firstEntry = entries.first()
+
+        return entries
             .drop(1)
             .shuffled(random)
             .map { secondEntry ->
@@ -90,26 +105,6 @@ class FourPairsLowDifficultyPuzzleGenerator(
                     secondEntry = secondEntry
                 )
             }
-
-        candidatePairs.forEach { candidatePair ->
-            if (!candidatePair.canBeAddedTo(usedResults = usedResults)) {
-                return@forEach
-            }
-
-            val nextPairs = choosePairs(
-                remainingEntries = remainingEntries.filterNot { entry ->
-                    entry.id == candidatePair.firstEntry.id || entry.id == candidatePair.secondEntry.id
-                },
-                selectedPairs = selectedPairs + candidatePair,
-                usedResults = usedResults + candidatePair.resultValues
-            )
-
-            if (nextPairs != null) {
-                return nextPairs
-            }
-        }
-
-        return null
     }
 
     private fun buildSolvedPuzzle(entries: List<FourPairsStripEntry>, pairs: List<FourPairsEntryPair>): Puzzle = Puzzle(
@@ -239,7 +234,7 @@ class FourPairsLowDifficultyPuzzleGenerator(
     }
 
     companion object {
-        private const val DEFAULT_MAX_ATTEMPTS = 1_000
+        private const val DEFAULT_MAX_ATTEMPTS = 50
     }
 }
 
@@ -259,7 +254,14 @@ private data class FourPairsEntryPair(val firstEntry: FourPairsStripEntry, val s
         product <= FourPairsLowDifficultyRules.MAX_MULTIPLICATION_RESULT &&
             resultValues.size == 2 &&
             resultValues.none { result -> result in usedResults }
+
+    fun contains(entry: FourPairsStripEntry): Boolean = entry.id == firstEntry.id || entry.id == secondEntry.id
 }
+
+private fun List<FourPairsStripEntry>.without(pair: FourPairsEntryPair): List<FourPairsStripEntry> =
+    filterNot { entry ->
+        pair.contains(entry)
+    }
 
 private data class FourPairsEntryPairKey(val firstEntryId: Int, val secondEntryId: Int)
 
