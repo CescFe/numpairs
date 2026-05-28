@@ -26,9 +26,11 @@ class GameScreenRobot(
     private val activity: ComponentActivity,
     private val interactions: SemanticsNodeInteractionsProvider
 ) {
-    fun assertTitleDisplayed(): GameScreenRobot = apply {
+    fun assertTitleDisplayed(): GameScreenRobot = assertTitleDisplayed(string(R.string.tutorial_screen_title))
+
+    fun assertTitleDisplayed(title: String): GameScreenRobot = apply {
         interactions
-            .onNodeWithText(string(R.string.tutorial_screen_title))
+            .onNodeWithText(title)
             .assertIsDisplayed()
     }
 

@@ -5,7 +5,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
@@ -54,6 +56,7 @@ abstract class GameScreenTestHost {
 
             NumPairsTheme {
                 GameScreen(
+                    title = stringResource(R.string.tutorial_screen_title),
                     uiState = uiState,
                     onStripItemTapped = currentViewModel::onStripItemTapped,
                     onStripItemEntryDismissed = currentViewModel::onStripItemEntryDismissed,
