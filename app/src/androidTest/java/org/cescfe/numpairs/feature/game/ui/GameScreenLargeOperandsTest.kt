@@ -52,6 +52,7 @@ class GameScreenLargeOperandsTest {
                         .height(800.dp)
                 ) {
                     GameScreen(
+                        title = "Large operands",
                         uiState = largeOperandBoardUiState(),
                         onTileLeftOperandTapped = { leftOperandClicks += 1 },
                         onTileOperatorTapped = { operatorClicks += 1 },

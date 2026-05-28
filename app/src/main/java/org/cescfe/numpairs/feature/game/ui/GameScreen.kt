@@ -30,6 +30,7 @@ import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
 fun GameScreen(
+    title: String,
     uiState: GameUiState,
     modifier: Modifier = Modifier,
     onNavigateBack: () -> Unit = {},
@@ -54,7 +55,10 @@ fun GameScreen(
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                GameScreenTopBar(onNavigateBack = onNavigateBack)
+                GameScreenTopBar(
+                    title = title,
+                    onNavigateBack = onNavigateBack
+                )
             }
         ) { innerPadding ->
             Column(
@@ -113,7 +117,7 @@ fun GameScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun GameScreenTopBar(onNavigateBack: () -> Unit) {
+private fun GameScreenTopBar(title: String, onNavigateBack: () -> Unit) {
     val backButtonContentDescription = stringResource(R.string.back_button_content_description)
 
     TopAppBar(
@@ -129,7 +133,7 @@ private fun GameScreenTopBar(onNavigateBack: () -> Unit) {
             }
         },
         title = {
-            Text(text = stringResource(R.string.tutorial_screen_title))
+            Text(text = title)
         }
     )
 }
@@ -139,6 +143,7 @@ private fun GameScreenTopBar(onNavigateBack: () -> Unit) {
 private fun GameScreenPreview() {
     NumPairsTheme {
         GameScreen(
+            title = stringResource(R.string.tutorial_screen_title),
             uiState = GameUiState.from(initialPuzzle)
         )
     }
