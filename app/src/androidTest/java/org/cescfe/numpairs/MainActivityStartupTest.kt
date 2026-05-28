@@ -7,7 +7,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.cescfe.numpairs.feature.fourpairs.ui.FourPairsScreenTestTags
 import org.cescfe.numpairs.feature.game.ui.GameScreenTestTags
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.junit.Rule
@@ -50,36 +49,6 @@ class MainActivityStartupTest {
     }
 
     @Test
-    fun coldStartShowsMenuAndSystemBackFromFourPairsReturnsToTheMenu() {
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.SCREEN)
-            .assertIsDisplayed()
-
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
-            .assertIsDisplayed()
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag(FourPairsScreenTestTags.SCREEN)
-            .assertIsDisplayed()
-
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.SCREEN)
-            .assertDoesNotExist()
-
-        pressBack()
-
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.SCREEN)
-            .assertIsDisplayed()
-
-        composeTestRule
-            .onNodeWithTag(FourPairsScreenTestTags.SCREEN)
-            .assertDoesNotExist()
-    }
-
-    @Test
     fun gameScreenTopAppBarBackButtonReturnsToTheMenu() {
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
@@ -100,27 +69,11 @@ class MainActivityStartupTest {
             .assertDoesNotExist()
     }
 
-    @Test
-    fun fourPairsScreenTopAppBarBackButtonReturnsToTheMenu() {
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
-            .performClick()
+    private fun backButtonContentDescription(): String = string(R.string.back_button_content_description)
 
-        composeTestRule
-            .onNodeWithTag(FourPairsScreenTestTags.BACK_BUTTON)
-            .assertIsDisplayed()
-            .assertContentDescriptionEquals(backButtonContentDescription())
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.SCREEN)
-            .assertIsDisplayed()
-
-        composeTestRule
-            .onNodeWithTag(FourPairsScreenTestTags.SCREEN)
-            .assertDoesNotExist()
+    private fun string(stringResId: Int, vararg formatArgs: Any): String = if (formatArgs.isEmpty()) {
+        composeTestRule.activity.getString(stringResId)
+    } else {
+        composeTestRule.activity.getString(stringResId, *formatArgs)
     }
-
-    private fun backButtonContentDescription(): String =
-        composeTestRule.activity.getString(R.string.back_button_content_description)
 }

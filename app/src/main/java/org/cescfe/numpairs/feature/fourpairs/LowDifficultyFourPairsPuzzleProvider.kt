@@ -12,3 +12,9 @@ class LowDifficultyFourPairsPuzzleProvider private constructor(
 
     override fun nextPuzzle(): Puzzle = generator.generate()
 }
+
+object DefaultFourPairsPuzzleProvider : FourPairsPuzzleProvider {
+    private val delegate = LowDifficultyFourPairsPuzzleProvider()
+
+    override fun nextPuzzle(): Puzzle = delegate.nextPuzzle()
+}
