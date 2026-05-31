@@ -133,10 +133,23 @@ That baseline does not yet include:
 - Implement a basic generator for low-difficulty puzzles
 - Establish an initial low-difficulty classification model for generated puzzles
 - Use `docs/product/puzzle-generation.md` as the v2 reference for generation flow, low-difficulty rules, and solved-to-initial puzzle masking
-- Implement a puzzle validation and solver service
+- Implement an internal puzzle validation and solver service
 - Validate generated puzzles before presenting them to the player
 - Support deterministic generation where useful for tests and debugging
 - Prepare the model so future difficulty expansion does not require UI-layer redesign
+
+The v2 generated `4 Pairs` profile is intentionally narrow:
+
+- 8 strip entries and 8 board tiles
+- 4 solution pairs
+- one addition tile and one multiplication tile per solution pair
+- distinct strip values in the inclusive range `2..20`
+- multiplication results no greater than `150`
+- distinct board results
+- all tile expressions hidden in the initial player-facing puzzle
+- exactly 3 known strip entries and 5 hidden strip entries in the initial player-facing puzzle
+
+Generation starts from a solved puzzle, derives the initial player-facing puzzle by hiding tile expressions and masking strip entries, and validates the result before presentation. The solved puzzle and solver remain internal implementation details; v2 does not expose solutions or solver output to the player.
 
 ### Architecture
 
@@ -170,6 +183,7 @@ That baseline does not yet include:
 - Online or backend features
 - Advanced puzzle balancing
 - Guaranteed unique puzzle solutions
+- Player-facing solver, hints, or solution reveal
 - Advanced animations or transitions
 - Full onboarding flows beyond the lightweight tutorial mode entry point
 - Additional puzzle modes beyond generated `4 Pairs`

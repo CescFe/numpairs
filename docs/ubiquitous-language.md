@@ -3,6 +3,21 @@
 ## Puzzle
 A complete game instance containing a board and a strip of available numbers.
 
+## Generated Puzzle
+A puzzle produced by a generator rather than authored by hand.
+
+Generated puzzles are used by the `4 Pairs` mode.
+
+## Initial Puzzle
+The player-facing puzzle state shown at the start of play.
+
+For generated `4 Pairs`, the initial puzzle is derived from a solved puzzle by hiding tile expressions and masking selected strip entries.
+
+## Solved Puzzle
+The fully resolved puzzle used internally as the source of truth for generation and validation.
+
+A solved puzzle is not exposed directly to the player in v2.
+
 ## Board
 The main area where the puzzle tiles are displayed.
 
@@ -119,3 +134,21 @@ An operand selection choice may be:
 
 ## Solution
 The correct assignment of operands and operators needed to solve the puzzle.
+
+## Solution Pair
+An unordered pair of strip entries that produces one addition tile and one multiplication tile in `4 Pairs`.
+
+The addition and multiplication tiles for a solution pair must reference the same two strip entry identities.
+
+## Puzzle Generator
+A domain service that creates generated puzzles.
+
+The v2 `4 Pairs` generator builds a solved puzzle first, derives the initial puzzle from it, and validates the generated result before it can be shown to the player.
+
+## Puzzle Validator
+A domain service or validation rule set that checks whether a puzzle is internally consistent and satisfies the expected generation constraints.
+
+## Solver
+An internal domain service used for validation and confidence in generated or handcrafted puzzles.
+
+The solver is not a player-facing feature in v2. It does not imply hints, solution reveal, or guaranteed unique solutions.
