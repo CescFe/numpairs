@@ -2,8 +2,11 @@ package org.cescfe.numpairs.feature.fourpairs
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -20,6 +23,7 @@ import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,6 +38,7 @@ class FourPairsCompletionActionsTest {
         val firstSolvedPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 2026).generateWithSolution().solvedPuzzle
         val firstPuzzle = firstSolvedPuzzle.withHiddenOperatorAt(tileIndex = 0)
         val secondPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 42).generate()
+        assertNotEquals(firstPuzzle.board.tiles[0].result, secondPuzzle.board.tiles[0].result)
         val puzzleProvider = QueueFourPairsPuzzleProvider(firstPuzzle, secondPuzzle)
 
         setContent(puzzleProvider = puzzleProvider)
@@ -64,6 +69,7 @@ class FourPairsCompletionActionsTest {
         assertEquals(3, stripMask.knownEntryIds.size)
         assertEquals(5, stripMask.hiddenEntryIds.size)
         assertFirstTileExpressionIsHidden()
+        assertFirstTileShowsResult(secondPuzzle.board.tiles[0].result)
     }
 
     @Test
@@ -133,6 +139,12 @@ class FourPairsCompletionActionsTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileRightOperand(0), useUnmergedTree = true)
             .assertContentDescriptionEquals(string(R.string.tile_right_operand_hidden_content_description))
+    }
+
+    private fun assertFirstTileShowsResult(result: Int) {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tile(0), useUnmergedTree = true)
+            .assert(hasAnyDescendant(hasText(result.toString())))
     }
 
     private fun currentStripMask(): StripMask {
