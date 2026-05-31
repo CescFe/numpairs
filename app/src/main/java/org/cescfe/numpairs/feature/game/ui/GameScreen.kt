@@ -3,6 +3,7 @@ package org.cescfe.numpairs.feature.game.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -47,7 +48,8 @@ fun GameScreen(
     onTileOperatorSelectionDismissed: () -> Unit = {},
     onTileOperatorSelectionConfirmed: (Operator) -> Unit = {},
     onSuccessOverlayDismissed: () -> Unit = {},
-    completionActions: GameCompletionActions? = null
+    completionActions: GameCompletionActions? = null,
+    topBarActions: @Composable RowScope.() -> Unit = {}
 ) {
     Box(
         modifier = modifier
@@ -59,7 +61,8 @@ fun GameScreen(
             topBar = {
                 GameScreenTopBar(
                     title = title,
-                    onNavigateBack = onNavigateBack
+                    onNavigateBack = onNavigateBack,
+                    actions = topBarActions
                 )
             }
         ) { innerPadding ->
@@ -122,7 +125,7 @@ fun GameScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun GameScreenTopBar(title: String, onNavigateBack: () -> Unit) {
+private fun GameScreenTopBar(title: String, onNavigateBack: () -> Unit, actions: @Composable RowScope.() -> Unit) {
     val backButtonContentDescription = stringResource(R.string.back_button_content_description)
 
     TopAppBar(
@@ -139,7 +142,8 @@ private fun GameScreenTopBar(title: String, onNavigateBack: () -> Unit) {
         },
         title = {
             Text(text = title)
-        }
+        },
+        actions = actions
     )
 }
 
@@ -150,6 +154,22 @@ private fun GameScreenPreview() {
         GameScreen(
             title = stringResource(R.string.tutorial_screen_title),
             uiState = GameUiState.from(initialPuzzle)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun GameScreenWithTopBarActionPreview() {
+    NumPairsTheme {
+        GameScreen(
+            title = stringResource(R.string.tutorial_screen_title),
+            uiState = GameUiState.from(initialPuzzle),
+            topBarActions = {
+                IconButton(onClick = {}) {
+                    Text(text = "A")
+                }
+            }
         )
     }
 }
