@@ -60,7 +60,7 @@ private fun RulesHelperTitle(onDismiss: () -> Unit) {
             modifier = Modifier.testTag(GameScreenTestTags.RULES_HELPER_CLOSE_BUTTON)
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_close_small),
+                painter = painterResource(R.drawable.ic_close),
                 contentDescription = stringResource(R.string.rules_helper_close_content_description)
             )
         }
