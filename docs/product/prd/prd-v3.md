@@ -8,6 +8,7 @@
 - Related references:
   - `README.md`
   - `docs/product/roadmap.md`
+  - `docs/product/rules-helper.md`
   - `docs/product/puzzle-generation.md`
   - `docs/ui-behavior.md`
   - `docs/product/ux-decisions.md`
@@ -167,6 +168,7 @@ That baseline does not yet include:
 ### Documentation
 
 - Document the rules helper content and intended behavior
+- Use `docs/product/rules-helper.md` as the v3 reference for helper availability, presentation, content scope, and non-goals
 - Document the first tutorial MVP and possible future tutorial iterations
 - Update UI behavior documentation with top bar helper behavior
 - Keep `docs/game-rules.md` as the source of truth for actual rules
@@ -207,6 +209,7 @@ That baseline does not yet include:
 
 - `README.md` should identify `prd-v3.md` as the canonical product reference while treating v2 as the implemented baseline
 - `docs/product/roadmap.md` should treat `v2 - Puzzle Generation & Replay Loop` as the completed baseline and `v3 - Guided Play & Rules Onboarding` as the active milestone
+- `docs/product/rules-helper.md` should define the rules helper requirements, top app bar entry point, dialog behavior, content scope, and open questions
 - `docs/game-rules.md` should remain the source of truth for the underlying puzzle rules
 - `docs/ui-behavior.md` should remain the source of truth for in-puzzle interaction behavior and should be extended when the rules helper interaction is implemented
 - `docs/product/puzzle-generation.md` should remain focused on generated `4 Pairs` construction and validation, not tutorial authorship

@@ -86,6 +86,7 @@ Current responsibilities are split as follows:
 - Canonical PRD: [prd-v3.md](./docs/product/prd/prd-v3.md)
 - Product Requirements Documents: `docs/product/prd/`
 - Product roadmap: [roadmap.md](./docs/product/roadmap.md)
+- Rules helper requirements: [rules-helper.md](./docs/product/rules-helper.md)
 - Puzzle generation: [puzzle-generation.md](./docs/product/puzzle-generation.md)
 - UX decisions: `docs/product/ux-decisions.md`
 - Future in-game calculator proposal: [in-game-calculator.md](./docs/product/in-game-calculator.md)

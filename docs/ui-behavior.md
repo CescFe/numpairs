@@ -9,10 +9,11 @@ It complements the game rules described in [game-rules.md](./game-rules.md) and 
 1. Number strip behavior
 2. Result grid behavior
 3. Contextual editing flows
+4. Gameplay top bar helper behavior
 
-This is the interaction baseline shared by the handcrafted tutorial puzzle and future generated puzzles in the `4 Pairs` mode.
+This is the interaction baseline shared by Tutorial and generated `4 Pairs` gameplay.
 
-It intentionally focuses on in-puzzle behavior. Splash, menu, and replay routing are defined at the product level in `docs/product/prd/prd-v2.md`.
+It intentionally focuses on in-puzzle behavior. Splash, menu, and replay routing are defined at the product level in `docs/product/prd/prd-v3.md`.
 
 ---
 
@@ -25,6 +26,7 @@ It intentionally focuses on in-puzzle behavior. Splash, menu, and replay routing
 - **Operator slot**: the editable operator position in the top row of a tile
 - **Contextual selector**: a small anchored popover or bubble used to choose a value for a grid slot
 - **Entry dialog**: the dialog used to enter or edit a number in the strip
+- **Rules helper**: an informational dialog opened from the game top app bar to explain core game rules
 
 In this document, strip items are rendered as chips.
 
@@ -37,6 +39,31 @@ In this document, strip items are rendered as chips.
 - Grid editing happens directly from the tapped slot
 - No prior strip selection is required to edit the grid
 - Slot editing should use a small contextual selector instead of a full-screen flow whenever possible
+- Rules help should explain the game without changing the current puzzle state
+
+---
+
+## Game Top Bar
+
+Gameplay screens should show:
+
+- a back navigation action
+- the current mode title
+- an optional rules helper action
+
+The rules helper action should be available in Tutorial and generated `4 Pairs` for v3. It is intentionally not part of the menu screen in the first implementation.
+
+### Rules Helper Behavior
+
+- Tapping the rules helper action opens a modal dialog.
+- The helper dialog explains core rules using concise, player-facing language.
+- The helper is informational only and must not reveal puzzle-specific answers, hidden values, pairings, hints, or solver output.
+- The helper can be closed by tapping a visible close icon.
+- Tapping outside the dialog closes the helper.
+- System back closes the helper before triggering the route-level back behavior.
+- Closing the helper preserves the current puzzle state.
+
+For content scope and product boundaries, see `docs/product/rules-helper.md`.
 
 ---
 

@@ -16,7 +16,7 @@ For generated `4 Pairs`, the initial puzzle is derived from a solved puzzle by h
 ## Solved Puzzle
 The fully resolved puzzle used internally as the source of truth for generation and validation.
 
-A solved puzzle is not exposed directly to the player in v2.
+A solved puzzle is not exposed directly to the player.
 
 ## Board
 The main area where the puzzle tiles are displayed.
@@ -151,4 +151,9 @@ A domain service or validation rule set that checks whether a puzzle is internal
 ## Solver
 An internal domain service used for validation and confidence in generated or handcrafted puzzles.
 
-The solver is not a player-facing feature in v2. It does not imply hints, solution reveal, or guaranteed unique solutions.
+The solver is not a player-facing feature. It does not imply hints, solution reveal, or guaranteed unique solutions.
+
+## Rules Helper
+An informational gameplay UI surface that explains the core NumPairs rules.
+
+The rules helper is not a hint system, tutorial engine, solver, or answer reveal feature.
