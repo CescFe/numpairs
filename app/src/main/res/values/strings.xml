@@ -33,6 +33,8 @@
     <string name="tile_reset_content_description">Reset tile</string>
     <string name="success_overlay_message">Puzzle Completed!</string>
     <string name="success_overlay_supporting_text">All pairs matched.</string>
+    <string name="success_overlay_new_puzzle_button">New puzzle</string>
+    <string name="success_overlay_return_to_menu_button">Menu</string>
     <string name="puzzle_outcome_invalid_title">Completed, but not solved</string>
     <string name="puzzle_outcome_invalid_tiles_message">At least one completed tile is incorrect.</string>
     <string name="puzzle_outcome_missing_identities_message">Some completed tiles are missing their strip-entry identities.</string>

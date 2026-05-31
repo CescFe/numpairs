@@ -1,12 +1,15 @@
 package org.cescfe.numpairs.feature.fourpairs
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import java.util.concurrent.atomic.AtomicInteger
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Puzzle
+import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.GameRoute
 
 @Composable
@@ -15,22 +18,38 @@ fun FourPairsRoute(
     puzzleProvider: FourPairsPuzzleProvider = DefaultFourPairsPuzzleProvider,
     onNavigateBack: () -> Unit = {}
 ) {
-    val gameSession = remember(puzzleProvider) {
-        GeneratedFourPairsGameSession(
-            initialPuzzle = puzzleProvider.nextPuzzle(),
-            gameSessionKey = "four-pairs-${nextFourPairsGameSessionId.incrementAndGet()}"
-        )
+    val gameSessionFactory = remember(puzzleProvider) {
+        FourPairsGameSessionFactory(puzzleProvider = puzzleProvider)
+    }
+    var gameSession by remember(gameSessionFactory) {
+        mutableStateOf(gameSessionFactory.create())
     }
 
     GameRoute(
         title = stringResource(R.string.four_pairs_screen_title),
         initialPuzzle = gameSession.initialPuzzle,
         modifier = modifier,
-        gameSessionKey = gameSession.gameSessionKey,
+        gameSessionKey = FOUR_PAIRS_GAME_SESSION_KEY,
+        puzzleResetKey = gameSession.id,
+        completionActions = GameCompletionActions(
+            onNewPuzzleRequested = {
+                gameSession = gameSessionFactory.create()
+            },
+            onReturnToMenuRequested = onNavigateBack
+        ),
         onNavigateBack = onNavigateBack
     )
 }
 
-private data class GeneratedFourPairsGameSession(val initialPuzzle: Puzzle, val gameSessionKey: String)
+private data class GeneratedFourPairsGameSession(val id: Int, val initialPuzzle: Puzzle)
 
-private val nextFourPairsGameSessionId = AtomicInteger()
+private class FourPairsGameSessionFactory(private val puzzleProvider: FourPairsPuzzleProvider) {
+    private var nextGameSessionId = 0
+
+    fun create(): GeneratedFourPairsGameSession = GeneratedFourPairsGameSession(
+        id = nextGameSessionId++,
+        initialPuzzle = puzzleProvider.nextPuzzle()
+    )
+}
+
+private const val FOUR_PAIRS_GAME_SESSION_KEY = "four-pairs"

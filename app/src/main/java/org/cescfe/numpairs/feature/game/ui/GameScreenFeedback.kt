@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,24 +31,36 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
+import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
 
 @Composable
-internal fun SuccessOverlay(onDismiss: () -> Unit) {
+internal fun SuccessOverlay(onDismiss: () -> Unit, completionActions: GameCompletionActions? = null) {
     val interactionSource = remember { MutableInteractionSource() }
+    val overlayModifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.scrim.copy(alpha = SUCCESS_OVERLAY_SCRIM_ALPHA))
+        .testTag(GameScreenTestTags.SUCCESS_OVERLAY)
+    val dismissibleOverlayModifier = if (completionActions == null) {
+        overlayModifier.clickable(
+            interactionSource = interactionSource,
+            indication = null,
+            onClick = onDismiss
+        )
+    } else {
+        overlayModifier.clickable(
+            interactionSource = interactionSource,
+            indication = null,
+            onClick = {}
+        )
+    }
 
-    BackHandler(onBack = onDismiss)
+    BackHandler(
+        onBack = completionActions?.onReturnToMenuRequested ?: onDismiss
+    )
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.scrim.copy(alpha = SUCCESS_OVERLAY_SCRIM_ALPHA))
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onDismiss
-            )
-            .testTag(GameScreenTestTags.SUCCESS_OVERLAY),
+        modifier = dismissibleOverlayModifier,
         contentAlignment = Alignment.Center
     ) {
         Surface(
@@ -96,6 +110,29 @@ internal fun SuccessOverlay(onDismiss: () -> Unit) {
                     text = stringResource(R.string.success_overlay_supporting_text),
                     style = MaterialTheme.typography.bodyMedium
                 )
+                completionActions?.let { actions ->
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Button(
+                            onClick = actions.onNewPuzzleRequested,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag(GameScreenTestTags.SUCCESS_OVERLAY_NEW_PUZZLE)
+                        ) {
+                            Text(text = stringResource(R.string.success_overlay_new_puzzle_button))
+                        }
+                        OutlinedButton(
+                            onClick = actions.onReturnToMenuRequested,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag(GameScreenTestTags.SUCCESS_OVERLAY_RETURN_TO_MENU)
+                        ) {
+                            Text(text = stringResource(R.string.success_overlay_return_to_menu_button))
+                        }
+                    }
+                }
             }
         }
     }

@@ -10,6 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
+import org.cescfe.numpairs.feature.fourpairs.DefaultFourPairsPuzzleProvider
+import org.cescfe.numpairs.feature.fourpairs.FourPairsPuzzleProvider
 import org.cescfe.numpairs.feature.fourpairs.FourPairsRoute
 import org.cescfe.numpairs.feature.game.GameRoute
 import org.cescfe.numpairs.feature.menu.MenuRoute
@@ -21,7 +23,11 @@ sealed interface AppDestination {
 }
 
 @Composable
-fun AppNavigation(modifier: Modifier = Modifier, startDestination: AppDestination = AppDestination.Menu) {
+fun AppNavigation(
+    modifier: Modifier = Modifier,
+    startDestination: AppDestination = AppDestination.Menu,
+    fourPairsPuzzleProvider: FourPairsPuzzleProvider = DefaultFourPairsPuzzleProvider
+) {
     var currentDestination by remember(startDestination) {
         mutableStateOf(startDestination)
     }
@@ -52,6 +58,7 @@ fun AppNavigation(modifier: Modifier = Modifier, startDestination: AppDestinatio
         )
         AppDestination.FourPairs -> FourPairsRoute(
             modifier = modifier,
+            puzzleProvider = fourPairsPuzzleProvider,
             onNavigateBack = navigateToMenu
         )
     }
