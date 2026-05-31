@@ -1,6 +1,6 @@
 # PRD - NumPairs (v0 Historical Snapshot)
 
-> Historical note: this document captures the original playable prototype scope. It remains as a historical snapshot and was later superseded by [prd-v1.md](./prd-v1.md) and [prd-v2.md](./prd-v2.md).
+> Historical note: this document captures the original playable prototype scope. It remains as a historical snapshot and was later superseded by [prd-v1.md](./prd-v1.md), [prd-v2.md](./prd-v2.md), and [prd-v3.md](./prd-v3.md).
 
 ## Goal
 Build a simple Android app that allows users to view and play a NumPairs puzzle.

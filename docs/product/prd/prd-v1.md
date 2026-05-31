@@ -15,7 +15,7 @@
 
 This document defines the product baseline that v1 was intended to standardize.
 
-`prd-v0.md` and `prd-v1.md` remain in the repository as historical milestone snapshots. `prd-v2.md` is the canonical reference for the current product direction, scope, and documentation alignment.
+`prd-v0.md`, `prd-v1.md`, and `prd-v2.md` remain in the repository as historical milestone snapshots. `prd-v3.md` is the canonical reference for the current product direction, scope, and documentation alignment.
 
 ---
 

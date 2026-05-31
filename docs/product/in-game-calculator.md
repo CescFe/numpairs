@@ -3,13 +3,14 @@
 ## Document Status
 
 - Status: future product/UX proposal
-- Suggested milestone: post-v2 gameplay usability polish
+- Suggested milestone: future gameplay usability polish
 - Related references:
   - `docs/product/prd/prd-v2.md`
+  - `docs/product/prd/prd-v3.md`
   - `docs/ui-behavior.md`
   - `docs/product/ux-decisions.md`
 
-This document captures a potential future improvement for generated `4 Pairs` mode. It is not part of the v2 acceptance baseline.
+This document captures a potential future improvement for generated `4 Pairs` mode. It is not part of the v3 guided play scope.
 
 ---
 
@@ -28,12 +29,12 @@ The calculator should be treated as a convenience tool, not as a hint system or 
 It should:
 
 - help players perform arithmetic they choose to enter
-- remain independent from puzzle state
+- remain independent of puzzle state
 - avoid suggesting solution pairs
 - avoid reading or auto-filling tile or strip values
 - avoid exposing solver output
 
-This keeps the feature aligned with the v2 boundary that player-facing solvers, hints, and solution reveal are out of scope.
+This keeps the feature aligned with the product boundary that player-facing solvers, hints, and solution reveal are out of scope.
 
 ---
 
