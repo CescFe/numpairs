@@ -63,7 +63,7 @@ class FourPairsCompletionActionsTest {
         val stripMask = currentStripMask()
         assertEquals(3, stripMask.knownEntryIds.size)
         assertEquals(5, stripMask.hiddenEntryIds.size)
-        assertHiddenTileExpression(tileIndex = 0)
+        assertFirstTileExpressionIsHidden()
     }
 
     @Test
@@ -120,18 +120,18 @@ class FourPairsCompletionActionsTest {
             .assertIsDisplayed()
     }
 
-    private fun assertHiddenTileExpression(tileIndex: Int) {
+    private fun assertFirstTileExpressionIsHidden() {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.BOARD)
             .performScrollTo()
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(tileIndex), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
             .assertContentDescriptionEquals(string(R.string.tile_left_operand_hidden_content_description))
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperator(tileIndex), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
             .assertContentDescriptionEquals(string(R.string.tile_operator_hidden_content_description))
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileRightOperand(tileIndex), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tileRightOperand(0), useUnmergedTree = true)
             .assertContentDescriptionEquals(string(R.string.tile_right_operand_hidden_content_description))
     }
 
