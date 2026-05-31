@@ -1,8 +1,8 @@
-# NumPairs Product Roadmap (v2 -> v3)
+# NumPairs Product Roadmap (v3 -> v4)
 
 ## Purpose
 
-This roadmap defines the remaining work in `v2 - Puzzle Generation & Replay Loop` and the product iterations that follow the current early v2 implementation baseline.
+This roadmap defines the active `v3 - Guided Play & Rules Onboarding` milestone and the product iterations that may follow the completed v2 replayable gameplay loop.
 
 It is intentionally high-level, outcome-focused, and easy to update as implementation, feedback, and product priorities evolve.
 
@@ -10,85 +10,93 @@ It is intentionally high-level, outcome-focused, and easy to update as implement
 
 ## Current Baseline
 
-### Early v2 implementation
+### Completed v2 implementation
 
 - Branded launch experience with splash support
-- `Splash -> Menu -> Tutorial -> Game` startup flow
-- `Tutorial` uses the handcrafted seed puzzle as the current playable entry point
-- Local tile validation and completion feedback remain in the existing game screen
-- Improved UI clarity, accessibility semantics, and reset behavior
-- No generated puzzles, replay loop from completion, persistence, or multiple playable modes yet
+- `Splash -> Menu` startup flow
+- Mode selection between `Tutorial` and generated `4 Pairs`
+- Reusable game route and screen shared by tutorial and generated modes
+- `Tutorial` currently uses the handcrafted prototype seed puzzle
+- Generated low-difficulty `4 Pairs` puzzles
+- Internal generation, validation, and solver services for generated puzzles
+- Generated puzzle replay from the completion flow
+- Return-to-menu action from generated puzzle completion
+- Isolated game state between tutorial and generated modes
+
+The current baseline does not yet include a gameplay rules helper or an authored tutorial learning path.
 
 ---
 
 ## Roadmap Principles
 
-- Prioritize a polished and stable core before adding retention systems
+- Teach the core game clearly before expanding content depth
 - Group work by product outcomes rather than detailed task lists
+- Keep generated puzzle architecture isolated from tutorial content
+- Avoid introducing hints, answer reveal, or progression systems until the learning experience is clearer
 - Revisit milestone scope at the end of each iteration
 
 ---
 
 ## Upcoming Milestones
 
-### v2 - Puzzle Generation & Replay Loop
+### v3 - Guided Play & Rules Onboarding
 
 **Goal**
 
-Introduce the first replayable NumPairs gameplay loop through puzzle generation, mode selection, and completion routing.
+Improve first-time player understanding by adding accessible rule help across game modes and replacing the prototype tutorial entry with a real guided tutorial experience.
 
 **High-level scope**
 
-- Add a menu screen after the splash screen
-- Add navigation flow between menu and game screens
-- Keep the existing handcrafted puzzle as a `Tutorial` mode
-- Add a generated `4 Pairs` mode
-- Add replay and return-to-menu actions from the completion flow
-- Define low-difficulty generation rules for `4 Pairs`
-- Establish an initial low-difficulty classification model
-- Implement a generator plus validation and solver services
-- Isolate generation and validation logic from the UI layer
-- Add tests for solver correctness and generated puzzle validity
-- Update PRD and supporting product documentation to match the replayable gameplay loop
-
-**Implementation note**
-
-The menu-driven startup path and `Tutorial` entry point are already part of the current baseline. The remaining v2 focus is generated puzzle content, validation architecture, and replay actions after completion.
+- Add a rules/help action to the game screen top bar
+- Make the helper available in Tutorial and generated `4 Pairs`
+- Explain strip numbers, hidden values, board tiles, operands, operators, pair relationships, and completion validation
+- Keep the helper informational only, without puzzle-specific hints or solver output
+- Replace the current prototype tutorial puzzle with a basic authored tutorial puzzle
+- Clarify the difference between Tutorial and generated `4 Pairs`
+- Keep tutorial behavior isolated from generated mode state
+- Keep rules helper content reusable across modes
+- Keep tutorial puzzle/content separate from generated puzzle providers
+- Add tests for helper availability, helper dismissal, state preservation, and tutorial entry content
+- Update PRD and supporting product documentation to match the guided play scope
 
 **Out of scope**
 
+- New puzzle modes beyond `4 Pairs`
+- Additional difficulty levels
+- Adaptive hints
+- Solver-backed help
+- Puzzle-specific answer reveal
+- User progression
+- Scoring
 - Persistence or save state
-- User progression systems
-- Scoring systems and timer
-- Daily puzzles
-- Online features
-- Advanced puzzle balancing
-- Guaranteed unique puzzle solutions
-- Additional puzzle modes beyond generated `4 Pairs`
-- Full onboarding beyond the lightweight tutorial entry point
+- Full multi-step onboarding system
+- Advanced tutorial animations
 
-### v3 - Game Modes, Guidance & Progression
+### v4 - Difficulty And Mode Expansion (Provisional)
 
 **Goal**
 
-Build on the v2 loop with broader content systems, stronger guidance, and longer-term engagement mechanics once generation and replay are stable.
+Build on the v3 learning foundation by expanding content depth once players can understand and replay the core game loop.
 
-**High-level scope**
+**Possible scope**
 
-- Expand beyond `4 Pairs` into additional modes or puzzle sizes
-- Introduce contextual help, onboarding refinement, and deeper tutorial support
-- Add persistence or save state if replay sessions benefit from it
-- Introduce difficulty progression, scoring, timer, or daily content where they strengthen the selected modes
-- Add lightweight progression systems if product testing shows they improve retention
+- Add additional difficulty profiles for generated `4 Pairs`
+- Explore additional puzzle sizes or modes
+- Improve puzzle balancing and reveal policies
+- Revisit whether generated puzzles should require stronger solution uniqueness guarantees
+- Consider progression, scoring, timer, daily puzzles, or persistence if playtesting shows they strengthen the selected modes
+- Reassess convenience tools such as the in-game calculator proposal
 
 **Roadmap note**
 
-The exact game mode set, persistence needs, and progression depth should be validated after v2 proves the replayable puzzle loop.
+The exact v4 shape should be decided after v3 confirms whether rules help and the tutorial MVP are enough for new players to start generated `4 Pairs` confidently.
 
 ---
 
 ## Review Triggers
 
-- Move persistence earlier if lack of session continuity becomes the main blocker after v2
-- Split puzzle generation depth from v2 if replay and navigation can ship first with a narrower low-difficulty generator
-- Reprioritize progression or scoring features based on playtesting feedback from the generated `4 Pairs` loop
+- Keep onboarding work in focus if players still fail to understand strip entries, pair relationships, or completion validation after v3
+- Prioritize difficulty expansion if v3 makes the game clear but generated `4 Pairs` feels too shallow
+- Prioritize additional modes if playtesting shows that different puzzle shapes are more valuable than deeper `4 Pairs`
+- Move persistence earlier only if lack of session continuity becomes the main blocker
+- Keep solver-backed hints and answer reveal out of scope unless they become a deliberate product direction, not a helper feature

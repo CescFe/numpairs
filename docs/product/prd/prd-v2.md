@@ -2,9 +2,9 @@
 
 ## Document Status
 
-- Status: canonical PRD for the `v2 - Puzzle Generation & Replay Loop` milestone
-- Supersedes: `docs/product/prd/prd-v1.md`
-- Current implementation baseline: `v1 - Product Polish & Technical Hardening`
+- Status: historical PRD snapshot for the `v2 - Puzzle Generation & Replay Loop` milestone
+- Superseded by: `docs/product/prd/prd-v3.md`
+- Current implementation baseline at time of writing: `v1 - Product Polish & Technical Hardening`
 - Related references:
   - `README.md`
   - `docs/product/roadmap.md`
@@ -14,9 +14,9 @@
   - `docs/game-rules.md`
   - `docs/ubiquitous-language.md`
 
-This document defines the product baseline that v2 is intended to establish.
+This document defines the product baseline that v2 was intended to establish.
 
-`prd-v0.md` and `prd-v1.md` remain in the repository as historical milestone snapshots. `prd-v2.md` is the canonical reference for the current NumPairs product direction, scope, and documentation alignment.
+`prd-v0.md`, `prd-v1.md`, and `prd-v2.md` remain in the repository as historical milestone snapshots. `prd-v3.md` is the canonical reference for the current NumPairs product direction, scope, and documentation alignment.
 
 ---
 
