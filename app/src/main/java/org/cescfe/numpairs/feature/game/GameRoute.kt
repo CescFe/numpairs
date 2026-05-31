@@ -3,6 +3,7 @@ package org.cescfe.numpairs.feature.game
 import android.content.Context
 import android.content.ContextWrapper
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -24,6 +25,7 @@ fun GameRoute(
     gameSessionKey: String = defaultGameSessionKey(title = title, initialPuzzle = initialPuzzle),
     puzzleResetKey: Any = initialPuzzle,
     completionActions: GameCompletionActions? = null,
+    topBarActions: @Composable RowScope.() -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
     val gameViewModel = rememberGameViewModel(
@@ -53,7 +55,8 @@ fun GameRoute(
         onTileOperatorSelectionDismissed = gameViewModel::onTileOperatorSelectionDismissed,
         onTileOperatorSelectionConfirmed = gameViewModel::onTileOperatorSelectionConfirmed,
         onSuccessOverlayDismissed = gameViewModel::onSuccessOverlayDismissed,
-        completionActions = completionActions
+        completionActions = completionActions,
+        topBarActions = topBarActions
     )
 }
 

@@ -1,10 +1,16 @@
 package org.cescfe.numpairs.feature.game
 
 import androidx.activity.ComponentActivity
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
@@ -21,6 +27,31 @@ import org.junit.runner.RunWith
 class GameRouteTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun renders_caller_top_bar_actions() {
+        composeTestRule.setContent {
+            NumPairsTheme {
+                GameRoute(
+                    title = "Tutorial",
+                    initialPuzzle = initialPuzzle,
+                    gameSessionKey = "top-bar-action",
+                    topBarActions = {
+                        IconButton(onClick = {}) {
+                            Text(
+                                text = "A",
+                                modifier = Modifier.testTag(TOP_BAR_ACTION_TAG)
+                            )
+                        }
+                    }
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TOP_BAR_ACTION_TAG)
+            .assertIsDisplayed()
+    }
 
     @Test
     fun displays_the_caller_title_and_initial_puzzle() {
@@ -109,6 +140,8 @@ private enum class GameRouteMode {
     TUTORIAL,
     FOUR_PAIRS
 }
+
+private const val TOP_BAR_ACTION_TAG = "game_route_top_bar_action"
 
 private fun Puzzle.withStripItem(index: Int, item: StripItem): Puzzle = copy(
     strip = Strip.fromItems(
