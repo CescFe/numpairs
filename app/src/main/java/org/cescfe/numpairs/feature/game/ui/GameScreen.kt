@@ -16,6 +16,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -51,6 +55,8 @@ fun GameScreen(
     completionActions: GameCompletionActions? = null,
     topBarActions: @Composable RowScope.() -> Unit = {}
 ) {
+    var isRulesHelperVisible by rememberSaveable { mutableStateOf(false) }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -62,6 +68,9 @@ fun GameScreen(
                 GameScreenTopBar(
                     title = title,
                     onNavigateBack = onNavigateBack,
+                    onRulesHelperClick = {
+                        isRulesHelperVisible = true
+                    },
                     actions = topBarActions
                 )
             }
@@ -121,11 +130,23 @@ fun GameScreen(
             onConfirm = onTileOperandSelectionConfirmed
         )
     }
+    if (isRulesHelperVisible) {
+        RulesHelperDialog(
+            onDismiss = {
+                isRulesHelperVisible = false
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun GameScreenTopBar(title: String, onNavigateBack: () -> Unit, actions: @Composable RowScope.() -> Unit) {
+private fun GameScreenTopBar(
+    title: String,
+    onNavigateBack: () -> Unit,
+    onRulesHelperClick: () -> Unit,
+    actions: @Composable RowScope.() -> Unit
+) {
     val backButtonContentDescription = stringResource(R.string.back_button_content_description)
 
     TopAppBar(
@@ -143,8 +164,24 @@ private fun GameScreenTopBar(title: String, onNavigateBack: () -> Unit, actions:
         title = {
             Text(text = title)
         },
-        actions = actions
+        actions = {
+            RulesHelperAction(onClick = onRulesHelperClick)
+            actions()
+        }
     )
+}
+
+@Composable
+private fun RulesHelperAction(onClick: () -> Unit) {
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier.testTag(GameScreenTestTags.RULES_HELPER_ACTION)
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_help),
+            contentDescription = stringResource(R.string.rules_helper_action_content_description)
+        )
+    }
 }
 
 @Preview(showBackground = true)

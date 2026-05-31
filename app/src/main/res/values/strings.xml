@@ -35,6 +35,7 @@
     <string name="success_overlay_supporting_text">All pairs matched.</string>
     <string name="success_overlay_new_puzzle_button">New puzzle</string>
     <string name="success_overlay_return_to_menu_button">Menu</string>
+    <string name="rules_helper_action_content_description">Rules help</string>
     <string name="rules_helper_title">How to play</string>
     <string name="rules_helper_close_content_description">Close rules help</string>
     <string name="rules_helper_strip_title">Strip numbers</string>
