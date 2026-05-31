@@ -21,6 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
@@ -35,7 +36,11 @@ internal fun RulesHelperDialog(onDismiss: () -> Unit, modifier: Modifier = Modif
         text = {
             RulesHelperContent()
         },
-        confirmButton = {}
+        confirmButton = {},
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true
+        )
     )
 }
 
@@ -55,7 +60,7 @@ private fun RulesHelperTitle(onDismiss: () -> Unit) {
             modifier = Modifier.testTag(GameScreenTestTags.RULES_HELPER_CLOSE_BUTTON)
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_close_small),
+                painter = painterResource(R.drawable.ic_close),
                 contentDescription = stringResource(R.string.rules_helper_close_content_description)
             )
         }

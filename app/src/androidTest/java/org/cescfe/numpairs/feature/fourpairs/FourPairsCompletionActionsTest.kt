@@ -11,6 +11,7 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyPuzzleGenerator
@@ -94,6 +95,57 @@ class FourPairsCompletionActionsTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SCREEN)
             .assertDoesNotExist()
+    }
+
+    @Test
+    fun rulesHelperOpensAndDismissesInFourPairsWithoutRegeneratingPuzzle() {
+        val initialPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 1234).generate()
+        val puzzleProvider = QueueFourPairsPuzzleProvider(initialPuzzle)
+
+        setContent(puzzleProvider = puzzleProvider)
+
+        navigateToFourPairs()
+        val initialStripMask = currentStripMask()
+        assertEquals(1, puzzleProvider.requestCount)
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
+            .assertIsDisplayed()
+            .assertContentDescriptionEquals(string(R.string.rules_helper_action_content_description))
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_DIALOG)
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_CLOSE_BUTTON)
+            .assertIsDisplayed()
+            .assertContentDescriptionEquals(string(R.string.rules_helper_close_content_description))
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_DIALOG)
+            .assertDoesNotExist()
+        assertEquals(1, puzzleProvider.requestCount)
+        assertEquals(initialStripMask, currentStripMask())
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
+            .performClick()
+        pressBack()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_DIALOG)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.SCREEN)
+            .assertDoesNotExist()
+        assertEquals(1, puzzleProvider.requestCount)
+        assertEquals(initialStripMask, currentStripMask())
     }
 
     private fun setContent(puzzleProvider: FourPairsPuzzleProvider) {
