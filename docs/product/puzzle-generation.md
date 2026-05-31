@@ -91,6 +91,8 @@ The distributed known entries act as anchors for deduction. They should make the
 
 Generated puzzles must be validated before presentation.
 
+Validation and solver behavior are internal generation safeguards. They are not player-facing v2 features and do not imply hints, solution reveal, or any UI for inspecting solver output.
+
 Validation should confirm that:
 
 - The strip has exactly 8 entries.
@@ -103,7 +105,7 @@ Validation should confirm that:
 - The initial puzzle exposes exactly 3 known strip entries and hides exactly 5 strip entries.
 - The generated puzzle satisfies the v2 low-difficulty rules.
 
-Guaranteed unique solutions are not required for v2, but generated puzzles should never be shown if they fail internal consistency validation.
+Guaranteed unique solutions are not required for v2. The solver may validate internal consistency and solveability, but uniqueness is explicitly out of scope. Generated puzzles should never be shown if they fail internal consistency validation.
 
 ---
 
