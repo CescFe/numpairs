@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
 import org.cescfe.numpairs.domain.puzzle.Operator
+import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
@@ -45,7 +46,8 @@ fun GameScreen(
     onTileResetTapped: (Int) -> Unit = {},
     onTileOperatorSelectionDismissed: () -> Unit = {},
     onTileOperatorSelectionConfirmed: (Operator) -> Unit = {},
-    onSuccessOverlayDismissed: () -> Unit = {}
+    onSuccessOverlayDismissed: () -> Unit = {},
+    completionActions: GameCompletionActions? = null
 ) {
     Box(
         modifier = modifier
@@ -95,7 +97,10 @@ fun GameScreen(
         }
 
         if (uiState.isSuccessOverlayVisible && uiState.puzzleOutcome == PuzzleOutcomeUiState.Solved) {
-            SuccessOverlay(onDismiss = onSuccessOverlayDismissed)
+            SuccessOverlay(
+                onDismiss = onSuccessOverlayDismissed,
+                completionActions = completionActions
+            )
         }
     }
 

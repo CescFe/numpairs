@@ -22,6 +22,12 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
     )
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
 
+    fun reset(initialPuzzle: Puzzle) {
+        puzzle = initialPuzzle
+        presentationState = GamePresentationState()
+        publishUiState()
+    }
+
     fun onStripItemTapped(index: Int) {
         if (!canInteractWithPuzzle()) {
             return

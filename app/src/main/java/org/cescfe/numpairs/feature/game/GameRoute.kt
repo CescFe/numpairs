@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -21,6 +22,8 @@ fun GameRoute(
     initialPuzzle: Puzzle,
     modifier: Modifier = Modifier,
     gameSessionKey: String = defaultGameSessionKey(title = title, initialPuzzle = initialPuzzle),
+    puzzleResetKey: Any = initialPuzzle,
+    completionActions: GameCompletionActions? = null,
     onNavigateBack: () -> Unit = {}
 ) {
     val gameViewModel = rememberGameViewModel(
@@ -28,6 +31,10 @@ fun GameRoute(
         gameSessionKey = gameSessionKey
     )
     val uiState by gameViewModel.uiState.collectAsState()
+
+    LaunchedEffect(gameViewModel, puzzleResetKey) {
+        gameViewModel.reset(initialPuzzle = initialPuzzle)
+    }
 
     GameScreen(
         title = title,
@@ -45,7 +52,8 @@ fun GameRoute(
         onTileResetTapped = gameViewModel::onTileResetTapped,
         onTileOperatorSelectionDismissed = gameViewModel::onTileOperatorSelectionDismissed,
         onTileOperatorSelectionConfirmed = gameViewModel::onTileOperatorSelectionConfirmed,
-        onSuccessOverlayDismissed = gameViewModel::onSuccessOverlayDismissed
+        onSuccessOverlayDismissed = gameViewModel::onSuccessOverlayDismissed,
+        completionActions = completionActions
     )
 }
 

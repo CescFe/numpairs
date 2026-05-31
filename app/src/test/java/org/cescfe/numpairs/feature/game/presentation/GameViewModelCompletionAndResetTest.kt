@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.feature.game.presentation
 
+import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -124,6 +125,28 @@ class GameViewModelCompletionAndResetTest {
 
         assertEquals(PuzzleOutcomeUiState.Solved, viewModel.uiState.value.puzzleOutcome)
         assertFalse(viewModel.uiState.value.isSuccessOverlayVisible)
+    }
+
+    @Test
+    fun resetting_the_game_replaces_the_puzzle_and_clears_completion_feedback_and_dialogs() {
+        val viewModel = GameViewModel(
+            initialPuzzle = solvedPuzzleWithKnownStripAndAssignments()
+        )
+
+        viewModel.onSuccessOverlayDismissed()
+        viewModel.onTileOperatorTapped(index = 0)
+        assertEquals(0, viewModel.uiState.value.tileOperatorSelectionDialog?.tileIndex)
+
+        viewModel.reset(initialPuzzle = initialPuzzle)
+
+        val uiState = viewModel.uiState.value
+
+        assertNull(uiState.puzzleOutcome)
+        assertFalse(uiState.isSuccessOverlayVisible)
+        assertNull(uiState.stripItemEntryDialog)
+        assertNull(uiState.tileOperatorSelectionDialog)
+        assertNull(uiState.tileOperandSelectionDialog)
+        assertEquals(TileUiState("?", "?", "?", "223"), uiState.tiles.first())
     }
 
     @Test
