@@ -21,6 +21,9 @@ object GameScreenTestTags {
     const val STRIP_ENTRY_CANCEL = "strip_entry_cancel"
     const val TILE_OPERAND_SELECTOR = "tile_operand_selector"
     const val TILE_OPERATOR_SELECTOR = "tile_operator_selector"
+    const val RULES_HELPER_DIALOG = "rules_helper_dialog"
+    const val RULES_HELPER_CLOSE_BUTTON = "rules_helper_close_button"
+    const val RULES_HELPER_CONTENT = "rules_helper_content"
 
     fun stripItem(index: Int): String = "strip_item_$index"
 
