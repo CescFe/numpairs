@@ -77,39 +77,64 @@ private fun RulesHelperContent() {
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         RulesHelperSection(
+            title = stringResource(R.string.rules_helper_objective_title),
+            bullets = listOf(
+                stringResource(R.string.rules_helper_objective_complete),
+                stringResource(R.string.rules_helper_objective_pairs)
+            )
+        )
+        RulesHelperSection(
+            title = stringResource(R.string.rules_helper_elements_title),
+            bullets = listOf(
+                stringResource(R.string.rules_helper_elements_strip),
+                stringResource(R.string.rules_helper_elements_grid)
+            )
+        )
+        RulesHelperSection(
             title = stringResource(R.string.rules_helper_strip_title),
-            body = stringResource(R.string.rules_helper_strip_body)
+            bullets = listOf(
+                stringResource(R.string.rules_helper_strip_known),
+                stringResource(R.string.rules_helper_strip_hidden)
+            )
         )
         RulesHelperSection(
-            title = stringResource(R.string.rules_helper_board_title),
-            body = stringResource(R.string.rules_helper_board_body)
-        )
-        RulesHelperSection(
-            title = stringResource(R.string.rules_helper_expression_title),
-            body = stringResource(R.string.rules_helper_expression_body)
-        )
-        RulesHelperSection(
-            title = stringResource(R.string.rules_helper_pairs_title),
-            body = stringResource(R.string.rules_helper_pairs_body)
-        )
-        RulesHelperSection(
-            title = stringResource(R.string.rules_helper_completion_title),
-            body = stringResource(R.string.rules_helper_completion_body)
+            title = stringResource(R.string.rules_helper_grid_title),
+            bullets = listOf(
+                stringResource(R.string.rules_helper_grid_expression),
+                stringResource(R.string.rules_helper_grid_pair_usage),
+                stringResource(R.string.rules_helper_grid_completion)
+            )
         )
     }
 }
 
 @Composable
-private fun RulesHelperSection(title: String, body: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+private fun RulesHelperSection(title: String, bullets: List<String>) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface
         )
+        bullets.forEach { bullet ->
+            RulesHelperBullet(text = bullet)
+        }
+    }
+}
+
+@Composable
+private fun RulesHelperBullet(text: String) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            text = body,
-            modifier = Modifier.padding(end = 4.dp),
+            text = BULLET,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = text,
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 4.dp),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -125,3 +150,4 @@ private fun RulesHelperDialogPreview() {
 }
 
 private val RULES_HELPER_CONTENT_MAX_HEIGHT = 360.dp
+private const val BULLET = "\u2022"
