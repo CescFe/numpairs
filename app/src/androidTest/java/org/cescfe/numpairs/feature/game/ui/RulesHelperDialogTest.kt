@@ -44,17 +44,14 @@ class RulesHelperDialogTest {
         assertRulesHelperTextExists(R.string.rules_helper_title)
         assertRulesHelperTextExists(R.string.rules_helper_objective_title)
         assertRulesHelperTextExists(R.string.rules_helper_objective_complete)
-        assertRulesHelperTextExists(R.string.rules_helper_objective_pairs)
         assertRulesHelperTextExists(R.string.rules_helper_elements_title)
         assertRulesHelperTextExists(R.string.rules_helper_elements_strip)
         assertRulesHelperTextExists(R.string.rules_helper_elements_grid)
         assertRulesHelperTextExists(R.string.rules_helper_strip_title)
-        assertRulesHelperTextExists(R.string.rules_helper_strip_known)
         assertRulesHelperTextExists(R.string.rules_helper_strip_hidden)
         assertRulesHelperTextExists(R.string.rules_helper_grid_title)
         assertRulesHelperTextExists(R.string.rules_helper_grid_expression)
         assertRulesHelperTextExists(R.string.rules_helper_grid_pair_usage)
-        assertRulesHelperTextExists(R.string.rules_helper_grid_completion)
     }
 
     @Test

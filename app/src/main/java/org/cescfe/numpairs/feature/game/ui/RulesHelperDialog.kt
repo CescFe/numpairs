@@ -106,8 +106,7 @@ private fun RulesHelperContent(containerColor: Color) {
             RulesHelperSection(
                 title = stringResource(R.string.rules_helper_objective_title),
                 bullets = listOf(
-                    stringResource(R.string.rules_helper_objective_complete),
-                    stringResource(R.string.rules_helper_objective_pairs)
+                    stringResource(R.string.rules_helper_objective_complete)
                 )
             )
             RulesHelperSection(
@@ -120,7 +119,6 @@ private fun RulesHelperContent(containerColor: Color) {
             RulesHelperSection(
                 title = stringResource(R.string.rules_helper_strip_title),
                 bullets = listOf(
-                    stringResource(R.string.rules_helper_strip_known),
                     stringResource(R.string.rules_helper_strip_hidden)
                 )
             )
@@ -129,7 +127,6 @@ private fun RulesHelperContent(containerColor: Color) {
                 bullets = listOf(
                     stringResource(R.string.rules_helper_grid_expression),
                     stringResource(R.string.rules_helper_grid_pair_usage),
-                    stringResource(R.string.rules_helper_grid_completion)
                 )
             )
         }
