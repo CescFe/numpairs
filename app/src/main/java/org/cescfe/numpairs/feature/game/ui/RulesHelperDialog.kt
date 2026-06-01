@@ -96,11 +96,7 @@ private fun RulesHelperContent(containerColor: Color) {
     ) {
         Column(
             modifier = Modifier
-                .verticalScroll(scrollState)
-                .padding(
-                    top = if (hasContentAbove) RULES_HELPER_FADE_HEIGHT else 0.dp,
-                    bottom = if (hasContentBelow) RULES_HELPER_FADE_HEIGHT else 0.dp
-                ),
+                .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             RulesHelperSection(
