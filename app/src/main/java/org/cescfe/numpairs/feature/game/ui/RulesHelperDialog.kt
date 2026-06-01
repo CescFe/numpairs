@@ -18,6 +18,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -79,8 +82,12 @@ private fun RulesHelperTitle(onDismiss: () -> Unit) {
 @Composable
 private fun RulesHelperContent(containerColor: Color) {
     val scrollState = rememberScrollState()
-    val hasContentAbove = scrollState.value > 0
-    val hasContentBelow = scrollState.value < scrollState.maxValue
+    val hasContentAbove by remember {
+        derivedStateOf { scrollState.value > 0 }
+    }
+    val hasContentBelow by remember {
+        derivedStateOf { scrollState.value < scrollState.maxValue }
+    }
 
     Box(
         modifier = Modifier
