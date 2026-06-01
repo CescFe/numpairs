@@ -42,16 +42,16 @@ class RulesHelperDialogTest {
             .assertIsDisplayed()
 
         assertRulesHelperTextExists(R.string.rules_helper_title)
+        assertRulesHelperTextExists(R.string.rules_helper_objective_title)
+        assertRulesHelperTextExists(R.string.rules_helper_objective_complete)
+        assertRulesHelperTextExists(R.string.rules_helper_elements_title)
+        assertRulesHelperTextExists(R.string.rules_helper_elements_strip)
+        assertRulesHelperTextExists(R.string.rules_helper_elements_grid)
         assertRulesHelperTextExists(R.string.rules_helper_strip_title)
-        assertRulesHelperTextExists(R.string.rules_helper_strip_body)
-        assertRulesHelperTextExists(R.string.rules_helper_board_title)
-        assertRulesHelperTextExists(R.string.rules_helper_board_body)
-        assertRulesHelperTextExists(R.string.rules_helper_expression_title)
-        assertRulesHelperTextExists(R.string.rules_helper_expression_body)
-        assertRulesHelperTextExists(R.string.rules_helper_pairs_title)
-        assertRulesHelperTextExists(R.string.rules_helper_pairs_body)
-        assertRulesHelperTextExists(R.string.rules_helper_completion_title)
-        assertRulesHelperTextExists(R.string.rules_helper_completion_body)
+        assertRulesHelperTextExists(R.string.rules_helper_strip_hidden)
+        assertRulesHelperTextExists(R.string.rules_helper_grid_title)
+        assertRulesHelperTextExists(R.string.rules_helper_grid_expression)
+        assertRulesHelperTextExists(R.string.rules_helper_grid_pair_usage)
     }
 
     @Test
