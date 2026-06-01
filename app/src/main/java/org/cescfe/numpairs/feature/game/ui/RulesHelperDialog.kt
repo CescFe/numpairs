@@ -126,7 +126,7 @@ private fun RulesHelperContent(containerColor: Color) {
                 title = stringResource(R.string.rules_helper_grid_title),
                 bullets = listOf(
                     stringResource(R.string.rules_helper_grid_expression),
-                    stringResource(R.string.rules_helper_grid_pair_usage),
+                    stringResource(R.string.rules_helper_grid_pair_usage)
                 )
             )
         }
@@ -212,6 +212,6 @@ private fun RulesHelperDialogPreview() {
     }
 }
 
-private val RULES_HELPER_CONTENT_MAX_HEIGHT = 300.dp
+private val RULES_HELPER_CONTENT_MAX_HEIGHT = 420.dp
 private val RULES_HELPER_FADE_HEIGHT = 36.dp
 private const val BULLET = "\u2022"
