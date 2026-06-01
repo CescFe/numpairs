@@ -1,9 +1,13 @@
 package org.cescfe.numpairs.feature.game.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -16,6 +20,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -27,14 +33,17 @@ import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
 internal fun RulesHelperDialog(onDismiss: () -> Unit, modifier: Modifier = Modifier) {
+    val containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+
     AlertDialog(
         modifier = modifier.testTag(GameScreenTestTags.RULES_HELPER_DIALOG),
         onDismissRequest = onDismiss,
+        containerColor = containerColor,
         title = {
             RulesHelperTitle(onDismiss = onDismiss)
         },
         text = {
-            RulesHelperContent()
+            RulesHelperContent(containerColor = containerColor)
         },
         confirmButton = {},
         properties = DialogProperties(
@@ -68,43 +77,68 @@ private fun RulesHelperTitle(onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun RulesHelperContent() {
-    Column(
+private fun RulesHelperContent(containerColor: Color) {
+    val scrollState = rememberScrollState()
+    val hasContentAbove = scrollState.value > 0
+    val hasContentBelow = scrollState.value < scrollState.maxValue
+
+    Box(
         modifier = Modifier
             .heightIn(max = RULES_HELPER_CONTENT_MAX_HEIGHT)
-            .verticalScroll(rememberScrollState())
-            .testTag(GameScreenTestTags.RULES_HELPER_CONTENT),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+            .testTag(GameScreenTestTags.RULES_HELPER_CONTENT)
     ) {
-        RulesHelperSection(
-            title = stringResource(R.string.rules_helper_objective_title),
-            bullets = listOf(
-                stringResource(R.string.rules_helper_objective_complete),
-                stringResource(R.string.rules_helper_objective_pairs)
+        Column(
+            modifier = Modifier
+                .verticalScroll(scrollState)
+                .padding(
+                    top = if (hasContentAbove) RULES_HELPER_FADE_HEIGHT else 0.dp,
+                    bottom = if (hasContentBelow) RULES_HELPER_FADE_HEIGHT else 0.dp
+                ),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            RulesHelperSection(
+                title = stringResource(R.string.rules_helper_objective_title),
+                bullets = listOf(
+                    stringResource(R.string.rules_helper_objective_complete),
+                    stringResource(R.string.rules_helper_objective_pairs)
+                )
             )
-        )
-        RulesHelperSection(
-            title = stringResource(R.string.rules_helper_elements_title),
-            bullets = listOf(
-                stringResource(R.string.rules_helper_elements_strip),
-                stringResource(R.string.rules_helper_elements_grid)
+            RulesHelperSection(
+                title = stringResource(R.string.rules_helper_elements_title),
+                bullets = listOf(
+                    stringResource(R.string.rules_helper_elements_strip),
+                    stringResource(R.string.rules_helper_elements_grid)
+                )
             )
-        )
-        RulesHelperSection(
-            title = stringResource(R.string.rules_helper_strip_title),
-            bullets = listOf(
-                stringResource(R.string.rules_helper_strip_known),
-                stringResource(R.string.rules_helper_strip_hidden)
+            RulesHelperSection(
+                title = stringResource(R.string.rules_helper_strip_title),
+                bullets = listOf(
+                    stringResource(R.string.rules_helper_strip_known),
+                    stringResource(R.string.rules_helper_strip_hidden)
+                )
             )
-        )
-        RulesHelperSection(
-            title = stringResource(R.string.rules_helper_grid_title),
-            bullets = listOf(
-                stringResource(R.string.rules_helper_grid_expression),
-                stringResource(R.string.rules_helper_grid_pair_usage),
-                stringResource(R.string.rules_helper_grid_completion)
+            RulesHelperSection(
+                title = stringResource(R.string.rules_helper_grid_title),
+                bullets = listOf(
+                    stringResource(R.string.rules_helper_grid_expression),
+                    stringResource(R.string.rules_helper_grid_pair_usage),
+                    stringResource(R.string.rules_helper_grid_completion)
+                )
             )
-        )
+        }
+
+        if (hasContentAbove) {
+            RulesHelperScrollFade(
+                containerColor = containerColor,
+                edge = RulesHelperScrollEdge.Top
+            )
+        }
+        if (hasContentBelow) {
+            RulesHelperScrollFade(
+                containerColor = containerColor,
+                edge = RulesHelperScrollEdge.Bottom
+            )
+        }
     }
 }
 
@@ -141,6 +175,31 @@ private fun RulesHelperBullet(text: String) {
     }
 }
 
+@Composable
+private fun BoxScope.RulesHelperScrollFade(containerColor: Color, edge: RulesHelperScrollEdge) {
+    val colors = when (edge) {
+        RulesHelperScrollEdge.Top -> listOf(containerColor, Color.Transparent)
+        RulesHelperScrollEdge.Bottom -> listOf(Color.Transparent, containerColor)
+    }
+    val alignment = when (edge) {
+        RulesHelperScrollEdge.Top -> Alignment.TopCenter
+        RulesHelperScrollEdge.Bottom -> Alignment.BottomCenter
+    }
+
+    Box(
+        modifier = Modifier
+            .align(alignment)
+            .fillMaxWidth()
+            .height(RULES_HELPER_FADE_HEIGHT)
+            .background(Brush.verticalGradient(colors = colors))
+    )
+}
+
+private enum class RulesHelperScrollEdge {
+    Top,
+    Bottom
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun RulesHelperDialogPreview() {
@@ -149,5 +208,6 @@ private fun RulesHelperDialogPreview() {
     }
 }
 
-private val RULES_HELPER_CONTENT_MAX_HEIGHT = 360.dp
+private val RULES_HELPER_CONTENT_MAX_HEIGHT = 300.dp
+private val RULES_HELPER_FADE_HEIGHT = 36.dp
 private const val BULLET = "\u2022"
