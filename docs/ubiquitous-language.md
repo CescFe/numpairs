@@ -8,6 +8,16 @@ A puzzle produced by a generator rather than authored by hand.
 
 Generated puzzles are used by the `4 Pairs` mode.
 
+## Tutorial
+A gameplay mode that teaches the core NumPairs rules through authored content and guided player practice.
+
+Tutorial is a learning surface, not generated replayable content, a rules helper, a hint system, or an answer reveal feature.
+
+## Authored Tutorial Puzzle
+A handcrafted puzzle selected for teaching clarity in Tutorial mode.
+
+An authored tutorial puzzle may share core game rules and UI interactions with generated `4 Pairs`, but its content is chosen by design rather than produced by the puzzle generator.
+
 ## Initial Puzzle
 The player-facing puzzle state shown at the start of play.
 

@@ -52,6 +52,7 @@ Improve first-time player understanding by adding accessible rule help across ga
 - Explain strip numbers, hidden values, board tiles, operands, operators, pair relationships, and completion validation
 - Keep the helper informational only, without puzzle-specific hints or solver output
 - Replace the current prototype tutorial puzzle with a basic authored tutorial puzzle
+- Use `docs/product/tutorial.md` as the reference for the Tutorial MVP learning path
 - Clarify the difference between Tutorial and generated `4 Pairs`
 - Keep tutorial behavior isolated from generated mode state
 - Keep rules helper content reusable across modes
