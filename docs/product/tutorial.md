@@ -342,20 +342,155 @@ Out of scope for the first Tutorial MVP:
 
 The following ideas are intentionally out of scope for the MVP. They are preserved here so they can be revisited after the first tutorial has been implemented and playtested.
 
-Possible future iterations:
-
-- additional worked examples for repeated values, duplicate results, or less obvious pairs
-- separate lessons for strip deduction, operand selection, operator selection, and pair reasoning
-- richer step-by-step guidance that reacts to incorrect player actions
-- optional explanation panels that show why a pair creates both a sum and a product
-- lightweight progress markers across multiple tutorial lessons
-- completion feedback specific to Tutorial
-- replayable tutorial variants that practice the same concept with different numbers
-- accessibility-focused tutorial settings, such as slower transitions or persistent instruction text
-- lightweight gamification, such as lesson completion checks or optional challenges
-- onboarding copy that introduces generated `4 Pairs` after Tutorial completion
-
 These ideas should not be treated as acceptance criteria for the first Tutorial MVP.
+
+Future tutorial work should be considered only after the MVP confirms where players still struggle. The default direction should be to improve learning through clearer puzzle design and contextual feedback before adding heavier progression or gamification systems.
+
+### Future Iteration Principles
+
+Future tutorial iterations should:
+
+- keep the player solving real puzzle states, not reading long explanations
+- prefer learning by doing over separate instructional screens
+- make the rule being taught visible through focused puzzle examples
+- explain mistakes by referencing the rule, not by revealing the answer
+- preserve normal gameplay interactions wherever possible
+- stay separate from generated `4 Pairs` content and generator rules
+- avoid adding rewards, scoring, or progression until there is evidence that they improve comprehension or retention
+
+### Invisible Learning Through Puzzle Design
+
+The strongest future direction is to make early learning feel like normal play.
+
+Possible improvements:
+
+- authored tutorial puzzles where the next useful move is naturally discoverable from the visible state
+- examples where strip order makes one hidden value obvious without extra explanation
+- early sum and product tiles that use the same pair in a way the player can infer
+- gradual reduction of instructional copy as the player demonstrates understanding
+- short confirmation copy after a correct action to name the rule the player just applied
+
+This should not mean hiding the learning goal completely. The player should still understand why a move was correct so the knowledge transfers to generated `4 Pairs`.
+
+### Concept-Focused Lessons
+
+A later version may split Tutorial into small authored lessons instead of one walkthrough.
+
+Candidate lesson topics:
+
+- completing hidden strip values
+- selecting operands from visible strip entries
+- choosing between addition and multiplication
+- recognizing that one pair creates one sum and one product
+- solving repeated values or visually similar values
+- finishing a full puzzle with limited guidance
+
+Each lesson should remain short and focused. Multiple lessons should not become mandatory before a player can try generated `4 Pairs` unless playtesting shows the single MVP tutorial is not enough.
+
+### Contextual Feedback
+
+Future guidance may react to incorrect or incomplete actions.
+
+Possible feedback patterns:
+
+- if a strip value breaks ascending order, explain the ordering rule
+- if a completed expression does not match the tile result, point back to the result and operator
+- if a player uses unrelated operands across sum and product tiles, remind them that one pair creates both results
+- if the player repeatedly tries exhausted operands, explain strip entry usage at a high level
+
+Feedback should not reveal hidden strip values, correct pairings, exact next moves, or solver output.
+
+### Graduated Guidance
+
+A later Tutorial could use guidance levels that fade over time.
+
+Possible model:
+
+- first authored puzzle: guided highlights and required practice actions
+- second authored puzzle: fewer highlights, feedback only after mistakes
+- third authored puzzle: mostly normal gameplay with optional reminders
+
+This would let Tutorial become a bridge between the first walkthrough and generated `4 Pairs` without requiring a full progression system.
+
+### Lightweight Gamification
+
+Gamification may help if it reinforces learning, but it is easy to overcomplicate the tutorial.
+
+Lower-risk options:
+
+- concept completion checks such as "Strip completed" or "First pair found"
+- a final readiness message after Tutorial completion
+- optional lesson completion markers if multiple lessons exist later
+- optional challenge prompts after the player has already learned the rule
+
+Higher-risk options that should remain deferred:
+
+- scoring
+- timers
+- stars or grades
+- streaks
+- badges
+- reward loops
+- locked progression
+
+Rationale:
+
+- early tutorial pressure can distract from understanding
+- reward systems add product and implementation complexity
+- visible scores may imply performance evaluation instead of learning support
+
+### Bridge To Generated `4 Pairs`
+
+Future Tutorial completion may introduce generated `4 Pairs` more explicitly.
+
+Possible improvements:
+
+- post-tutorial copy explaining that generated `4 Pairs` uses the same rules with new puzzles every time
+- a direct action to start generated `4 Pairs`
+- an optional "practice again" action for players who want another guided attempt
+- a first generated puzzle with optional reminder copy, if later research shows the transition is still difficult
+
+This bridge should not make generated `4 Pairs` depend on tutorial completion.
+
+### Accessibility And Pacing
+
+Future iterations may add controls that make guidance easier to consume.
+
+Possible improvements:
+
+- persistent instruction text that can be reopened during a step
+- manual step advancement after correct actions
+- slower or reduced highlight transitions
+- clearer focus order for assistive technologies
+- tutorial-specific labels for highlighted areas
+- a way to replay the current instruction without resetting puzzle state
+
+### Replayable Practice Variants
+
+Later versions may add more authored practice content without using the generated puzzle provider.
+
+Possible improvements:
+
+- alternate tutorial puzzles that teach the same concept with different numbers
+- targeted practice puzzles for weak concepts found during playtesting
+- authored examples for repeated values, duplicate results, or less obvious pair relationships
+- optional review puzzles after Tutorial completion
+
+These variants should remain authored and intentional. They should not become generated `4 Pairs` with tutorial labels unless a future product decision defines a separate guided generated-practice mode.
+
+### Promotion Criteria
+
+A future tutorial idea should move into milestone scope only when it has a clear reason.
+
+Possible triggers:
+
+- players complete the MVP tutorial but still fail to understand pair relationships in generated `4 Pairs`
+- players understand grid expressions but struggle with hidden strip values
+- players abandon Tutorial because instruction copy is too dense or too passive
+- players need more practice before generated `4 Pairs`, but a full onboarding framework is still unnecessary
+- accessibility review shows that the guided sequence needs better pacing or focus behavior
+
+If no clear learning problem is identified, future work should favor keeping Tutorial small.
 
 ---
 
