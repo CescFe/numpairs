@@ -51,7 +51,7 @@ Gameplay screens should show:
 - the current mode title
 - an optional rules helper action
 
-The rules helper action should be available in Tutorial and generated `4 Pairs` for v3. It is intentionally not part of the menu screen in the first implementation.
+The rules helper action should be available in generated `4 Pairs` for v3. It should not be shown in Tutorial because Tutorial has its own guided instructional surface. It is intentionally not part of the menu screen in the first implementation.
 
 ### Rules Helper Behavior
 

@@ -3,7 +3,7 @@
 ## Document Status
 
 - Status: v3 product/UI reference for the gameplay rules helper
-- Applies to: Tutorial and generated `4 Pairs` gameplay modes
+- Applies to: generated `4 Pairs` gameplay mode
 - Related references:
   - `docs/product/prd/prd-v3.md`
   - `docs/game-rules.md`
@@ -39,8 +39,8 @@ Documentation boundaries:
 
 ## Resolved Decisions
 
-- The helper should appear inside gameplay modes only for the first implementation, not in the menu.
-- Tutorial and generated `4 Pairs` should both expose the helper because they share the reusable game screen.
+- The helper should appear inside generated `4 Pairs` gameplay only for the first implementation, not in the menu.
+- Tutorial should not expose the helper for the MVP because Tutorial already has its own guided instructional surface.
 - Tutorial behavior is independent of the helper. Persistent tutorial instructions, tutorial puzzle sizing, multistep tutorial structure, and future tutorial evolution belong to tutorial documentation, not this helper scope.
 - There should not be a separate pre-puzzle `How to play` screen for this helper. The future authored tutorial should act as the deeper how-to-play experience.
 - The helper should primarily describe rules without concrete numeric examples. A small example may be added only if a rule is otherwise unclear.
@@ -51,18 +51,18 @@ Documentation boundaries:
 
 ## Availability
 
-The helper should be available from gameplay modes through a game top app bar action.
+The helper should be available from generated `4 Pairs` gameplay through a game top app bar action.
 
 Initial availability:
 
-- Tutorial: included
+- Tutorial: excluded for the MVP
 - generated `4 Pairs`: included
 - Menu: excluded for the first implementation
 
 Rationale:
 
-- Tutorial and generated `4 Pairs` already share the reusable game screen.
-- Adding the helper to `GameScreen` keeps the first implementation small and mode-consistent.
+- Tutorial should show only one instructional surface at a time, and the guided Tutorial content is the primary instructional surface for that mode.
+- Adding the helper to generated `4 Pairs` keeps the first implementation focused on on-demand help for replayable gameplay.
 - `MenuScreen` has its own top bar and does not currently host gameplay context, so adding menu-level help would expand the surface area without being required for v3.
 
 The helper should not be tied to generated puzzle internals or tutorial-specific state. It should be reusable from gameplay modes that opt into the shared game screen.

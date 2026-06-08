@@ -90,9 +90,9 @@ That baseline currently includes:
 
 That baseline does not yet include:
 
-- a gameplay rules helper
+- a gameplay rules helper for generated `4 Pairs`
 - rule help accessible from the game top bar
-- an authored tutorial puzzle designed as a learning path
+- authored tutorial puzzle scenarios designed as a learning path
 - tutorial-specific guidance content
 - adaptive hints, answer reveal, or solver-backed help
 - additional difficulty levels or puzzle modes
@@ -113,7 +113,7 @@ That baseline does not yet include:
 
 ## Core UX Expectations
 
-- Players can open basic rules help from any gameplay mode
+- Players can open basic rules help from generated `4 Pairs`
 - The helper is reachable from the game screen top bar
 - The helper explains the rules without changing puzzle state
 - The helper does not reveal puzzle-specific answers, pairings, or solver output
@@ -129,7 +129,7 @@ That baseline does not yet include:
 ### Rules Help
 
 - Add a rules/help action to the game screen top bar
-- Make the helper available in all gameplay modes
+- Make the helper available in generated `4 Pairs`
 - Show a concise explanation of:
   - strip numbers
   - hidden values
@@ -143,7 +143,7 @@ That baseline does not yet include:
 
 ### Tutorial Mode
 
-- Replace the current prototype tutorial experience with a basic authored tutorial puzzle
+- Replace the current prototype tutorial experience with basic authored tutorial puzzle scenarios
 - Design tutorial content around teaching the core rules step by step
 - Clarify the difference between Tutorial and generated `4 Pairs`
 - Ensure tutorial behavior remains isolated from generated mode state
@@ -152,8 +152,8 @@ That baseline does not yet include:
 
 ### Architecture
 
-- Keep rules helper content reusable across modes
-- Keep tutorial puzzle and tutorial content separate from generated puzzle providers
+- Keep rules helper content reusable for gameplay modes that opt into it
+- Keep tutorial puzzle scenarios and tutorial content separate from generated puzzle providers
 - Avoid coupling tutorial-specific guidance to generated `4 Pairs`
 - Keep generated puzzle generation and validation unchanged unless a tutorial requirement explicitly needs a shared abstraction
 - Prepare room for future guided onboarding without building a full onboarding framework in v3
@@ -161,9 +161,10 @@ That baseline does not yet include:
 ### Testing
 
 - Add UI tests for opening and closing the rules helper
-- Verify the helper is available in Tutorial and generated `4 Pairs`
+- Verify the helper is available in generated `4 Pairs`
+- Verify the helper is not shown in Tutorial
 - Verify helper content does not alter game state
-- Add tests for Tutorial entry using the authored tutorial puzzle
+- Add tests for Tutorial entry using authored tutorial puzzle scenarios
 - Preserve existing generated `4 Pairs` replay tests
 
 ### Documentation
@@ -197,9 +198,9 @@ That baseline does not yet include:
 
 ## Success Criteria
 
-- Users can open basic rules help from any gameplay mode
+- Users can open basic rules help from generated `4 Pairs`
 - Rules help explains the game without revealing puzzle-specific answers
-- Tutorial mode uses an intentional authored learning puzzle, not the old prototype seed by accident
+- Tutorial mode uses intentional authored learning puzzle scenarios, not the old prototype seed by accident
 - Tutorial mode teaches the core NumPairs mechanics clearly enough to prepare users for generated `4 Pairs`
 - Generated `4 Pairs` behavior from v2 remains unchanged
 - Tutorial and generated mode state remain isolated

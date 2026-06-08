@@ -43,21 +43,21 @@ The current baseline does not yet include a gameplay rules helper or an authored
 
 **Goal**
 
-Improve first-time player understanding by adding accessible rule help across game modes and replacing the prototype tutorial entry with a real guided tutorial experience.
+Improve first-time player understanding by adding accessible rule help to generated `4 Pairs` and replacing the prototype tutorial entry with a real guided tutorial experience.
 
 **High-level scope**
 
 - Add a rules/help action to the game screen top bar
-- Make the helper available in Tutorial and generated `4 Pairs`
+- Make the helper available in generated `4 Pairs`
 - Explain strip numbers, hidden values, board tiles, operands, operators, pair relationships, and completion validation
 - Keep the helper informational only, without puzzle-specific hints or solver output
-- Replace the current prototype tutorial puzzle with a basic authored tutorial puzzle
+- Replace the current prototype tutorial puzzle with basic authored tutorial puzzle scenarios
 - Use `docs/product/tutorial.md` as the reference for the Tutorial MVP learning path
 - Clarify the difference between Tutorial and generated `4 Pairs`
 - Keep tutorial behavior isolated from generated mode state
-- Keep rules helper content reusable across modes
+- Keep rules helper content reusable for gameplay modes that opt into it
 - Keep tutorial puzzle/content separate from generated puzzle providers
-- Add tests for helper availability, helper dismissal, state preservation, and tutorial entry content
+- Add tests for generated helper availability, helper dismissal, state preservation, and tutorial entry content
 - Update PRD and supporting product documentation to match the guided play scope
 
 **Out of scope**

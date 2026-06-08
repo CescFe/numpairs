@@ -16,7 +16,7 @@ Tutorial is a learning surface, not generated replayable content, a rules helper
 ## Authored Tutorial Puzzle
 A handcrafted puzzle selected for teaching clarity in Tutorial mode.
 
-An authored tutorial puzzle may share core game rules and UI interactions with generated `4 Pairs`, but its content is chosen by design rather than produced by the puzzle generator.
+An authored tutorial puzzle may use custom tutorial composition rules and may share core game rules and UI interactions with generated `4 Pairs`, but its content is chosen by design rather than produced by the puzzle generator.
 
 ## Initial Puzzle
 The player-facing puzzle state shown at the start of play.
