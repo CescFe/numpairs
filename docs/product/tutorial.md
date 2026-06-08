@@ -22,7 +22,7 @@ No tutorial implementation is included in this documentation ticket.
 
 Tutorial should become an intentional learning path for first-time NumPairs players.
 
-The first version should teach by having the player practice the core rules inside a controlled authored puzzle. It should not be only a renamed puzzle, a static rules page, a hint system, or a generated `4 Pairs` puzzle with special labeling.
+The first version should teach by having the player practice the core rules inside controlled authored puzzle scenarios. It should not be only a renamed puzzle, a static rules page, a hint system, or a generated `4 Pairs` puzzle with special labeling.
 
 Rules helper and Tutorial have different jobs:
 
@@ -36,6 +36,8 @@ Rules helper and Tutorial have different jobs:
 `docs/game-rules.md` remains the source of truth for the actual puzzle rules.
 
 Tutorial documentation defines the authored learning experience around those rules. It does not redefine arithmetic rules, validation behavior, operand usage, or generated puzzle construction.
+
+Tutorial-specific domain rules may be added only when they are needed for custom tutorial puzzle compositions. Those rules should be explicitly scoped to Tutorial and must not leak into generated `4 Pairs` behavior.
 
 Documentation boundaries:
 
@@ -69,17 +71,20 @@ The MVP should teach these concepts through guided interaction, not through a lo
 
 ## MVP Summary
 
-The first Tutorial should be a single authored puzzle with a short guided walkthrough.
+The first Tutorial should be a short guided sequence of authored puzzle scenarios.
 
 Expected shape:
 
-- one fixed puzzle authored for teaching clarity
+- a small set of fixed tutorial puzzle scenarios authored for teaching clarity
+- custom puzzle compositions that can be smaller than generated `4 Pairs`
 - normal game screen, strip, grid, operand selection, operator selection, and validation wherever possible
 - lightweight guidance that highlights relevant puzzle elements and presents short copy
 - player actions that complete real parts of the puzzle instead of passively reading instructions
-- a final unguided section where the player finishes the remaining puzzle using normal gameplay
+- manual step navigation so the player can move forward and backward through the tutorial
+- guided action steps where the player can perform only the action currently being taught
+- a final easy `4 Pairs` puzzle where the player finishes the remaining puzzle using normal gameplay
 
-The authored tutorial puzzle may use the same broad `4 Pairs` puzzle shape as generated mode because that is the first replayable mode players need to learn. It is still tutorial content, not generated content.
+The tutorial may use the same broad `4 Pairs` puzzle shape where that helps prepare the player for generated mode. It may also use smaller custom compositions, such as one-pair or two-pair tutorial scenarios, when those compositions teach a concept more clearly.
 
 Exact puzzle values can be finalized during implementation. The values should be selected for teaching clarity, low arithmetic load, and unambiguous examples of the rules below.
 
@@ -95,13 +100,17 @@ Each tutorial step should combine three pieces:
 
 Highlights should guide attention to the current lesson. They should not reveal answers by themselves.
 
+The MVP should use manual step navigation. Correct actions should not force an automatic advance; the player should be able to review previous steps and move forward when ready.
+
+During guided action steps, the tutorial should expose only the action required by the current step. This avoids needing tutorial-specific error feedback for unrelated actions in the first implementation.
+
 The player should perform normal interactions where possible:
 
 - entering a hidden strip value
 - selecting operands from the strip
 - choosing an operator
 - completing tile expressions
-- correcting incomplete or incorrect entries through existing gameplay controls
+- finishing the final easy puzzle through normal gameplay controls
 
 The Tutorial MVP may include non-interactive continue steps for orientation, but the core learning should come from doing the puzzle.
 
@@ -110,6 +119,12 @@ The Tutorial MVP may include non-interactive continue steps for orientation, but
 ## Tutorial Step Sequence
 
 ### 1. Introduce The Objective
+
+Recommended puzzle scenario:
+
+- one-pair orientation scenario
+- 2-entry strip with one known value and one hidden value
+- two grid tiles representing the pair's sum and product
 
 Focus:
 
@@ -122,7 +137,7 @@ Copy:
 
 Player action:
 
-- continue after seeing what counts as unknown
+- manually continue after seeing what counts as unknown
 
 Purpose:
 
@@ -130,6 +145,10 @@ Purpose:
 - connect the tutorial to the first bullet in the current `How to play` content
 
 ### 2. Identify Screen Elements
+
+Recommended puzzle scenario:
+
+- same one-pair orientation scenario as step 1
 
 Focus:
 
@@ -143,13 +162,18 @@ Copy:
 
 Player action:
 
-- continue after each focused area, or advance through a short combined orientation step
+- manually move forward or backward after each focused area
 
 Purpose:
 
 - make the two main puzzle areas explicit before asking the player to solve anything
 
 ### 3. Complete A Hidden Strip Value
+
+Recommended puzzle scenario:
+
+- small two-pair tutorial scenario
+- at least one hidden strip value that is easy to infer from the visible order
 
 Focus:
 
@@ -175,6 +199,11 @@ Content requirement:
 
 ### 4. Complete A First Grid Expression
 
+Recommended puzzle scenario:
+
+- small two-pair tutorial scenario
+- one highlighted tile with obvious arithmetic
+
 Focus:
 
 - one simple grid tile
@@ -189,6 +218,7 @@ Copy:
 Player action:
 
 - select the operands and operator that complete the highlighted tile
+- unrelated interactions should be unavailable during this guided action
 
 Purpose:
 
@@ -201,6 +231,11 @@ Content requirement:
 - the expression should be simple enough that the player can focus on the interaction model
 
 ### 5. Teach The Pair Relationship
+
+Recommended puzzle scenario:
+
+- small two-pair tutorial scenario
+- one pair whose sum and product are both easy to spot
 
 Focus:
 
@@ -215,6 +250,7 @@ Copy:
 Player action:
 
 - complete the complementary tile using the same pair and the other operator
+- unrelated interactions should be unavailable during this guided action
 
 Purpose:
 
@@ -227,6 +263,12 @@ Content requirement:
 - the guided step should make the relationship visible without solving the rest of the puzzle for the player
 
 ### 6. Finish The Puzzle Normally
+
+Recommended puzzle scenario:
+
+- very easy `4 Pairs` tutorial scenario
+- 8-entry strip with 5 known values and 3 hidden values
+- low arithmetic load and clear pair relationships
 
 Focus:
 
@@ -252,22 +294,40 @@ Content requirement:
 
 ---
 
+## MVP Puzzle Progression
+
+The MVP should use a small sequence of tutorial puzzle scenarios rather than forcing every teaching step into one board.
+
+Recommended progression:
+
+- Steps 1 and 2: one-pair orientation scenario that introduces unknowns, strip, and grid with minimal noise.
+- Step 3: two-pair scenario that teaches hidden strip value deduction.
+- Steps 4 and 5: two-pair scenario that teaches expression completion and the sum/product pair relationship.
+- Step 6: very easy `4 Pairs` scenario with 5 known strip values and 3 hidden strip values.
+
+This progression keeps each early lesson small while still ending on the real replayable shape players will see in generated `4 Pairs`.
+
+---
+
 ## Authored Puzzle Requirements
 
-The Tutorial MVP should use a deliberately authored puzzle instead of the old prototype seed.
+The Tutorial MVP should use deliberately authored puzzle scenarios instead of the old prototype seed.
 
-The authored puzzle should:
+The authored puzzle scenarios should:
 
 - support every tutorial step above
+- use custom puzzle compositions where they make the lesson clearer
 - include hidden strip values and hidden tile expressions
 - use small positive integers
 - keep arithmetic easy enough for first-time players
 - include at least one clear strip-order deduction
 - include at least one clear pair where the same two strip entries produce one sum tile and one product tile
-- leave a small amount of remaining work for the player to solve independently
-- be internally valid under the core game rules
+- end with a very easy `4 Pairs` scenario that leaves a small amount of work for the player to solve independently
+- be internally valid under the core game rules or documented tutorial-specific domain rules
 
-The authored puzzle does not need to follow the generated `4 Pairs` masking profile exactly. For example, generated `4 Pairs` currently has exactly 3 known strip entries and 5 hidden strip entries, but Tutorial may choose a different reveal pattern if that better supports the learning path.
+The authored tutorial scenarios do not need to follow generated `4 Pairs` puzzle size or masking rules. For example, generated `4 Pairs` currently has exactly 3 known strip entries and 5 hidden strip entries, but Tutorial may use one-pair, two-pair, or easier `4 Pairs` reveal patterns if they better support the learning path.
+
+Tutorial-specific domain rules may be introduced only for Tutorial content and should remain clearly separated from generated `4 Pairs` generation, validation, and difficulty rules.
 
 ---
 
@@ -297,7 +357,8 @@ Tutorial should remain separate from generated `4 Pairs` in these ways:
 - Tutorial content is authored by hand for learning.
 - Generated `4 Pairs` content is produced by the puzzle generator for replayability.
 - Tutorial should not call the generated puzzle provider to decide its teaching content.
-- Tutorial should not inherit generated masking constraints unless they also serve the lesson.
+- Tutorial should not inherit generated puzzle size or masking constraints unless they also serve the lesson.
+- Tutorial-specific domain rules should remain scoped to Tutorial.
 - Tutorial state should remain isolated from generated mode state and generated replay identity.
 - Changes to Tutorial content should not require changes to generated puzzle construction.
 - Changes to generated `4 Pairs` difficulty profiles should not automatically change the Tutorial MVP.
@@ -310,22 +371,29 @@ Shared implementation can still exist where it is genuinely common, such as the 
 
 In scope for the first Tutorial MVP:
 
-- one authored tutorial puzzle
+- a small sequence of authored tutorial puzzle scenarios
+- custom one-pair and two-pair tutorial compositions when they teach concepts more clearly
+- one final very easy `4 Pairs` tutorial scenario
 - short guided step sequence
 - focused visual attention on relevant puzzle elements
 - concise instructional copy tied to the current step
 - active player interactions for at least strip completion, tile completion, and pair relationship practice
+- manual forward and backward step navigation
+- guided steps that allow only the action currently being taught
 - normal puzzle completion after guided steps
-- rules helper availability if the shared game screen already exposes it
+- no rules helper action inside Tutorial
 - no changes to generated `4 Pairs` content or generation rules
 
 Out of scope for the first Tutorial MVP:
 
-- multiple tutorial lessons
+- open-ended tutorial lesson libraries
 - branching tutorial paths
+- automatic step advancement
 - adaptive hints
 - solver-backed suggestions
 - answer reveal
+- tutorial-specific error feedback for unrelated guided-step actions
+- rules helper access inside Tutorial
 - full onboarding framework
 - user progression
 - scoring
@@ -494,10 +562,14 @@ If no clear learning problem is identified, future work should favor keeping Tut
 
 ---
 
-## Remaining Open Questions
+## Resolved MVP Decisions
 
-- Should the first Tutorial puzzle use the same 8-entry strip and 8-tile board as generated `4 Pairs`, or may it use a smaller authored layout if the game screen supports it later?
-- Should Tutorial guidance advance automatically after correct actions, or should the player explicitly tap to continue after each completed step?
-- Should incorrect actions during guided steps show tutorial-specific feedback, or rely only on existing validation states for the MVP?
-- Should the rules helper remain available during guided Tutorial overlays, or should only one instructional surface be open at a time?
-- What exact puzzle values best support the step sequence without revealing too much too early?
+- Tutorial may use custom puzzle compositions instead of the generated `4 Pairs` shape for every step.
+- Custom tutorial puzzles should be based on domain rules. New domain rules may be added only when they are scoped to the Tutorial context.
+- Tutorial guidance should use manual forward and backward navigation for the first version.
+- Guided steps should allow only the action required by the current step, so unrelated incorrect actions are unavailable rather than handled with tutorial-specific feedback.
+- Tutorial should show only one instructional surface at a time.
+- The rules helper should not be shown inside Tutorial for the MVP.
+- Tutorial should start with simple, small puzzle scenarios such as one-pair or two-pair puzzles.
+- Tutorial should end with a very easy `4 Pairs` scenario, preferably with 5 known strip values and 3 hidden strip values.
+- Exact numeric values should be chosen during implementation for clarity, small arithmetic, and low ambiguity.
