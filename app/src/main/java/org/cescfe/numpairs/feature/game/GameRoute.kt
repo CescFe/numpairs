@@ -25,6 +25,7 @@ fun GameRoute(
     gameSessionKey: String = defaultGameSessionKey(title = title, initialPuzzle = initialPuzzle),
     puzzleResetKey: Any = initialPuzzle,
     completionActions: GameCompletionActions? = null,
+    isRulesHelperEnabled: Boolean = false,
     topBarActions: @Composable RowScope.() -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
@@ -56,6 +57,7 @@ fun GameRoute(
         onTileOperatorSelectionConfirmed = gameViewModel::onTileOperatorSelectionConfirmed,
         onSuccessOverlayDismissed = gameViewModel::onSuccessOverlayDismissed,
         completionActions = completionActions,
+        isRulesHelperEnabled = isRulesHelperEnabled,
         topBarActions = topBarActions
     )
 }
