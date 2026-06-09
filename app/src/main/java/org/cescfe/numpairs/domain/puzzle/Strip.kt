@@ -3,9 +3,6 @@ package org.cescfe.numpairs.domain.puzzle
 @ConsistentCopyVisibility
 data class Strip private constructor(val entries: List<StripEntry>) {
     init {
-        require(entries.size == NUMBER_COUNT) {
-            "Strip must contain exactly $NUMBER_COUNT items."
-        }
         require(entries.map(StripEntry::id).toSet().size == entries.size) {
             "Strip entry ids must be unique."
         }
@@ -102,8 +99,6 @@ data class Strip private constructor(val entries: List<StripEntry>) {
     }
 
     companion object {
-        const val NUMBER_COUNT = 8
-
         fun fromEntries(entries: List<StripEntry>): Strip = Strip(entries = entries)
 
         fun fromItems(items: List<StripItem>): Strip = Strip(

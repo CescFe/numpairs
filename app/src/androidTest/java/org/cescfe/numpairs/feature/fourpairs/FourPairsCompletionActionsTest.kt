@@ -15,10 +15,10 @@ import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyPuzzleGenerator
+import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyRules
 import org.cescfe.numpairs.domain.puzzle.Board
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
-import org.cescfe.numpairs.domain.puzzle.Strip
 import org.cescfe.numpairs.feature.game.ui.GameScreenTestTags
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.ui.navigation.AppNavigation
@@ -212,7 +212,7 @@ class FourPairsCompletionActionsTest {
             .onNodeWithTag(GameScreenTestTags.STRIP)
             .performScrollTo()
 
-        repeat(Strip.NUMBER_COUNT) { index ->
+        repeat(FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT) { index ->
             val contentDescriptions = composeTestRule
                 .onNodeWithTag(GameScreenTestTags.stripItem(index))
                 .fetchSemanticsNode()

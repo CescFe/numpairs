@@ -1,11 +1,10 @@
 package org.cescfe.numpairs.feature.fourpairs
 
 import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyPuzzleGenerator
-import org.cescfe.numpairs.domain.puzzle.Board
+import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyRules
 import org.cescfe.numpairs.domain.puzzle.Expression
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
-import org.cescfe.numpairs.domain.puzzle.Strip
 import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.domain.puzzle.Tile
 import org.junit.Assert.assertEquals
@@ -18,8 +17,8 @@ class LowDifficultyFourPairsPuzzleProviderTest {
     fun returns_a_generated_initial_puzzle() {
         val puzzle = LowDifficultyFourPairsPuzzleProvider(seed = 2026).nextPuzzle()
 
-        assertEquals(Board.TILE_COUNT, puzzle.board.tiles.size)
-        assertEquals(Strip.NUMBER_COUNT, puzzle.strip.entries.size)
+        assertEquals(FourPairsLowDifficultyRules.BOARD_TILE_COUNT, puzzle.board.tiles.size)
+        assertEquals(FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT, puzzle.strip.entries.size)
         assertEquals(PuzzleCompletionState.INCOMPLETE, puzzle.completionState)
         assertTrue(puzzle.board.tiles.all(Tile::hasHiddenExpression))
         assertEquals(3, puzzle.strip.entries.count { entry -> entry.item is StripItem.Known })

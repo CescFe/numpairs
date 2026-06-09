@@ -94,7 +94,7 @@ fun knownPuzzleWithAssignments(stripValues: List<Int>, vararg tileAssignments: T
     strip = Strip.fromItems(items = stripValues.map(StripItem::Known))
 )
 
-fun defaultKnownStripValues(): List<Int> = (1..Strip.NUMBER_COUNT).toList()
+fun defaultKnownStripValues(pairCount: Int = 4): List<Int> = (1..(pairCount * 2)).toList()
 
 fun Puzzle.withTile(index: Int, tile: Tile): Puzzle = copy(
     board = Board(
