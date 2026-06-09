@@ -37,11 +37,11 @@ class GameRouteTest {
                     initialPuzzle = initialPuzzle,
                     gameSessionKey = "top-bar-action",
                     topBarActions = {
-                        IconButton(onClick = {}) {
-                            Text(
-                                text = "A",
-                                modifier = Modifier.testTag(TOP_BAR_ACTION_TAG)
-                            )
+                        IconButton(
+                            onClick = {},
+                            modifier = Modifier.testTag(TOP_BAR_ACTION_TAG)
+                        ) {
+                            Text(text = "A")
                         }
                     }
                 )
