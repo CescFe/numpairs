@@ -37,6 +37,7 @@ fun FourPairsRoute(
             },
             onReturnToMenuRequested = onNavigateBack
         ),
+        isRulesHelperEnabled = true,
         onNavigateBack = onNavigateBack
     )
 }

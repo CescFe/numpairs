@@ -11,7 +11,7 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.test.espresso.Espresso.pressBack
+import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyPuzzleGenerator
@@ -133,7 +133,11 @@ class FourPairsCompletionActionsTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
             .performClick()
-        pressBack()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_DIALOG)
+            .assertIsDisplayed()
+
+        pressBackUnconditionally()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.RULES_HELPER_DIALOG)

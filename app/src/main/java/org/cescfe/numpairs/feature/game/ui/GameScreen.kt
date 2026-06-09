@@ -53,6 +53,7 @@ fun GameScreen(
     onTileOperatorSelectionConfirmed: (Operator) -> Unit = {},
     onSuccessOverlayDismissed: () -> Unit = {},
     completionActions: GameCompletionActions? = null,
+    isRulesHelperEnabled: Boolean = false,
     topBarActions: @Composable RowScope.() -> Unit = {}
 ) {
     var isRulesHelperVisible by rememberSaveable { mutableStateOf(false) }
@@ -71,6 +72,7 @@ fun GameScreen(
                     onRulesHelperClick = {
                         isRulesHelperVisible = true
                     },
+                    isRulesHelperEnabled = isRulesHelperEnabled,
                     actions = topBarActions
                 )
             }
@@ -130,7 +132,7 @@ fun GameScreen(
             onConfirm = onTileOperandSelectionConfirmed
         )
     }
-    if (isRulesHelperVisible) {
+    if (isRulesHelperEnabled && isRulesHelperVisible) {
         RulesHelperDialog(
             onDismiss = {
                 isRulesHelperVisible = false
@@ -145,6 +147,7 @@ private fun GameScreenTopBar(
     title: String,
     onNavigateBack: () -> Unit,
     onRulesHelperClick: () -> Unit,
+    isRulesHelperEnabled: Boolean,
     actions: @Composable RowScope.() -> Unit
 ) {
     val backButtonContentDescription = stringResource(R.string.back_button_content_description)
@@ -165,7 +168,9 @@ private fun GameScreenTopBar(
             Text(text = title)
         },
         actions = {
-            RulesHelperAction(onClick = onRulesHelperClick)
+            if (isRulesHelperEnabled) {
+                RulesHelperAction(onClick = onRulesHelperClick)
+            }
             actions()
         }
     )
