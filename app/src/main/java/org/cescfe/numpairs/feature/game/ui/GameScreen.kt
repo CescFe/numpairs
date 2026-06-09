@@ -3,6 +3,7 @@ package org.cescfe.numpairs.feature.game.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -54,7 +55,8 @@ fun GameScreen(
     onSuccessOverlayDismissed: () -> Unit = {},
     completionActions: GameCompletionActions? = null,
     isRulesHelperEnabled: Boolean = false,
-    topBarActions: @Composable RowScope.() -> Unit = {}
+    topBarActions: @Composable RowScope.() -> Unit = {},
+    contentBeforePuzzle: @Composable ColumnScope.() -> Unit = {}
 ) {
     var isRulesHelperVisible by rememberSaveable { mutableStateOf(false) }
 
@@ -85,6 +87,7 @@ fun GameScreen(
                     .padding(horizontal = 16.dp, vertical = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
+                contentBeforePuzzle()
                 StripSection(
                     stripItems = uiState.stripItems,
                     onStripItemTapped = onStripItemTapped,
