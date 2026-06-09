@@ -1,12 +1,10 @@
 package org.cescfe.numpairs.domain.fourpairs
 
-import org.cescfe.numpairs.domain.puzzle.Board
 import org.cescfe.numpairs.domain.puzzle.Expression
 import org.cescfe.numpairs.domain.puzzle.IndexedResolvedTileAssignment
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
-import org.cescfe.numpairs.domain.puzzle.Strip
 import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.domain.puzzle.Tile
 import org.cescfe.numpairs.domain.puzzle.resolvedTileAssignments
@@ -34,8 +32,8 @@ class FourPairsLowDifficultyPuzzleGeneratorTest {
         val solvedStripValues = solvedPuzzle.requireKnownStripValues()
 
         assertEquals(PuzzleCompletionState.SOLVED, solvedPuzzle.completionState)
-        assertEquals(Board.TILE_COUNT, solvedPuzzle.board.tiles.size)
-        assertEquals(Strip.NUMBER_COUNT, solvedPuzzle.strip.entries.size)
+        assertEquals(FourPairsLowDifficultyRules.BOARD_TILE_COUNT, solvedPuzzle.board.tiles.size)
+        assertEquals(FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT, solvedPuzzle.strip.entries.size)
         assertEquals(solvedStripValues.sorted(), solvedStripValues)
         assertEquals(solvedStripValues.size, solvedStripValues.toSet().size)
         assertTrue(solvedStripValues.all { value -> value in FourPairsLowDifficultyRules.stripValueRange })
@@ -44,7 +42,10 @@ class FourPairsLowDifficultyPuzzleGeneratorTest {
                 tile.result <= FourPairsLowDifficultyRules.MAX_MULTIPLICATION_RESULT
             }
         )
-        assertEquals(Board.TILE_COUNT, solvedPuzzle.board.tiles.map(Tile::result).toSet().size)
+        assertEquals(
+            FourPairsLowDifficultyRules.BOARD_TILE_COUNT,
+            solvedPuzzle.board.tiles.map(Tile::result).toSet().size
+        )
         assertEquals(solvedPuzzle.board.tiles.map(Tile::result), initialPuzzle.board.tiles.map(Tile::result))
         assertInitialPuzzleMask(initialPuzzle)
     }
@@ -79,7 +80,7 @@ class FourPairsLowDifficultyPuzzleGeneratorTest {
     fun known_strip_anchors_are_distributed_and_belong_to_different_pairs() {
         val generatedPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 99).generateWithSolution()
         val initialKnownEntryIds = generatedPuzzle.initialPuzzle.knownEntryIds()
-        val highestEntryId = Strip.NUMBER_COUNT - 1
+        val highestEntryId = FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT - 1
         val pairKeyByEntryId = generatedPuzzle.solvedPuzzle.pairKeyByEntryId()
 
         assertEquals(FourPairsLowDifficultyRules.KNOWN_STRIP_ENTRY_COUNT, initialKnownEntryIds.size)
@@ -150,7 +151,7 @@ private fun Set<Int>.maxConsecutiveHiddenEntries(): Int {
     var currentHiddenCount = 0
     var maxHiddenCount = 0
 
-    repeat(Strip.NUMBER_COUNT) { entryId ->
+    repeat(FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT) { entryId ->
         if (entryId in this) {
             currentHiddenCount = 0
         } else {

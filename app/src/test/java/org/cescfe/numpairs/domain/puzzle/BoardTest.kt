@@ -1,16 +1,17 @@
 package org.cescfe.numpairs.domain.puzzle
 
 import org.cescfe.numpairs.domain.puzzle.support.additionTile
-import org.junit.Assert.assertThrows
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class BoardTest {
     @Test
-    fun requires_exactly_eight_tiles() {
-        listOf(0, 7, 9).forEach { tileCount ->
-            assertThrows(IllegalArgumentException::class.java) {
-                Board(tiles = validTiles(tileCount))
-            }
+    fun supports_variable_tile_counts() {
+        listOf(2, 4, 8).forEach { tileCount ->
+            assertEquals(
+                tileCount,
+                Board(tiles = validTiles(tileCount)).tiles.size
+            )
         }
     }
 

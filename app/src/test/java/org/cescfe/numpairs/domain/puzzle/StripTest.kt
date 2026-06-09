@@ -6,16 +6,15 @@ import org.junit.Test
 
 class StripTest {
     @Test
-    fun requires_eight_items() {
-        assertThrows(IllegalArgumentException::class.java) {
-            Strip.fromItems(
-                items = listOf(
-                    StripItem.Known(1),
-                    StripItem.Known(2),
-                    StripItem.Known(3)
-                )
+    fun supports_variable_item_counts_and_assigns_stable_entry_ids() {
+        val strip = Strip.fromItems(
+            items = listOf(
+                StripItem.Known(1),
+                StripItem.Hidden
             )
-        }
+        )
+
+        assertEquals(listOf(0, 1), strip.entries.map(StripEntry::id))
     }
 
     @Test
@@ -69,7 +68,7 @@ class StripTest {
             )
         )
 
-        listOf(-1, Strip.NUMBER_COUNT).forEach { invalidIndex ->
+        listOf(-1, strip.entries.size).forEach { invalidIndex ->
             assertThrows(IllegalArgumentException::class.java) {
                 strip.validEntryRangeFor(index = invalidIndex)
             }
@@ -181,7 +180,7 @@ class StripTest {
             )
         )
 
-        listOf(-1, Strip.NUMBER_COUNT).forEach { invalidIndex ->
+        listOf(-1, strip.entries.size).forEach { invalidIndex ->
             assertThrows(IllegalArgumentException::class.java) {
                 strip.withUpdatedEntry(
                     index = invalidIndex,

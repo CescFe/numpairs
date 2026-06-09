@@ -2,6 +2,8 @@ package org.cescfe.numpairs.domain.fourpairs
 
 object FourPairsLowDifficultyRules {
     const val PAIR_COUNT = 4
+    const val STRIP_ENTRY_COUNT = PAIR_COUNT * 2
+    const val BOARD_TILE_COUNT = PAIR_COUNT * 2
     const val KNOWN_STRIP_ENTRY_COUNT = 3
     const val HIDDEN_STRIP_ENTRY_COUNT = 5
     const val MIN_STRIP_VALUE = 2

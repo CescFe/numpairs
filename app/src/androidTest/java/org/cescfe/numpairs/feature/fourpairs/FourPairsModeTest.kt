@@ -12,9 +12,8 @@ import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.MainActivity
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.domain.puzzle.Board
+import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyRules
 import org.cescfe.numpairs.domain.puzzle.Operator
-import org.cescfe.numpairs.domain.puzzle.Strip
 import org.cescfe.numpairs.feature.game.ui.GameScreenTestTags
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.junit.Assert.assertEquals
@@ -39,7 +38,7 @@ class FourPairsModeTest {
             .onNodeWithTag(GameScreenTestTags.STRIP)
             .assertIsDisplayed()
 
-        repeat(Strip.NUMBER_COUNT) { index ->
+        repeat(FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT) { index ->
             composeTestRule
                 .onNodeWithTag(GameScreenTestTags.stripItem(index))
                 .fetchSemanticsNode()
@@ -54,7 +53,7 @@ class FourPairsModeTest {
             .performScrollTo()
             .assertIsDisplayed()
 
-        repeat(Board.TILE_COUNT) { tileIndex ->
+        repeat(FourPairsLowDifficultyRules.BOARD_TILE_COUNT) { tileIndex ->
             composeTestRule
                 .onNodeWithTag(GameScreenTestTags.tile(tileIndex))
                 .fetchSemanticsNode()
@@ -177,7 +176,7 @@ class FourPairsModeTest {
         val knownEntryIds = mutableListOf<Int>()
         val hiddenEntryIds = mutableListOf<Int>()
 
-        repeat(Strip.NUMBER_COUNT) { index ->
+        repeat(FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT) { index ->
             val contentDescriptions = composeTestRule
                 .onNodeWithTag(GameScreenTestTags.stripItem(index))
                 .fetchSemanticsNode()

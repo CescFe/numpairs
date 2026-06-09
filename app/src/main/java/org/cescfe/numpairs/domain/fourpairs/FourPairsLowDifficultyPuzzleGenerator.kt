@@ -56,7 +56,7 @@ class FourPairsLowDifficultyPuzzleGenerator(
     private fun generateSolvedEntries(): List<FourPairsStripEntry> = FourPairsLowDifficultyRules.stripValueRange
         .toList()
         .shuffled(random)
-        .take(Strip.NUMBER_COUNT)
+        .take(FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT)
         .sorted()
         .mapIndexed { index, value ->
             FourPairsStripEntry(
@@ -139,7 +139,7 @@ class FourPairsLowDifficultyPuzzleGenerator(
     }
 
     private fun knownAnchorCandidates(): List<Set<Int>> {
-        val highestEntryId = Strip.NUMBER_COUNT - 1
+        val highestEntryId = FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT - 1
         val candidates = mutableListOf<Set<Int>>()
 
         for (firstKnownEntryId in 0 until highestEntryId) {
@@ -176,9 +176,9 @@ class FourPairsLowDifficultyPuzzleGenerator(
     private fun Puzzle.hasLowDifficultyStripValues(): Boolean {
         val values = knownStripValues()
 
-        return values.size == Strip.NUMBER_COUNT &&
+        return values.size == FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT &&
             values == values.sorted() &&
-            values.toSet().size == Strip.NUMBER_COUNT &&
+            values.toSet().size == FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT &&
             values.all { value -> value in FourPairsLowDifficultyRules.stripValueRange }
     }
 
@@ -187,7 +187,7 @@ class FourPairsLowDifficultyPuzzleGenerator(
     }
 
     private fun Puzzle.hasDistinctBoardResults(): Boolean =
-        board.tiles.map(Tile::result).toSet().size == Board.TILE_COUNT
+        board.tiles.map(Tile::result).toSet().size == FourPairsLowDifficultyRules.BOARD_TILE_COUNT
 
     private fun FourPairsEntryPair.hasLowDifficultyProduct(): Boolean =
         product <= FourPairsLowDifficultyRules.MAX_MULTIPLICATION_RESULT
@@ -198,7 +198,7 @@ class FourPairsLowDifficultyPuzzleGenerator(
         return knownAnchorEntryIds.size == FourPairsLowDifficultyRules.KNOWN_STRIP_ENTRY_COUNT &&
             strip.entries.count { entry -> entry.item == StripItem.Hidden } ==
             FourPairsLowDifficultyRules.HIDDEN_STRIP_ENTRY_COUNT &&
-            knownAnchorEntryIds.contains(Strip.NUMBER_COUNT - 1) &&
+            knownAnchorEntryIds.contains(FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT - 1) &&
             knownAnchorEntryIds.maxConsecutiveHiddenEntries() <=
             FourPairsLowDifficultyRules.MAX_CONSECUTIVE_HIDDEN_ENTRIES
     }
@@ -269,7 +269,7 @@ private fun Set<Int>.maxConsecutiveHiddenEntries(): Int {
     var currentHiddenCount = 0
     var maxHiddenCount = 0
 
-    repeat(Strip.NUMBER_COUNT) { entryId ->
+    repeat(FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT) { entryId ->
         if (entryId in this) {
             currentHiddenCount = 0
         } else {
