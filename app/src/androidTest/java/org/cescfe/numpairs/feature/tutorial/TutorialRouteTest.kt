@@ -309,7 +309,7 @@ class TutorialRouteTest {
         composeTestRule
             .onNodeWithTag(TutorialScreenTestTags.STEP_COPY)
             .performScrollTo()
-            .assert(hasText(step.playerFacingCopy))
+            .assert(hasText(string(step.playerFacingCopyResId)))
     }
 
     private fun assertNoInternalStepButtons() {
@@ -386,7 +386,7 @@ class TutorialRouteTest {
 
         composeTestRule.waitUntil(timeoutMillis = TUTORIAL_STEP_WAIT_TIMEOUT_MS) {
             composeTestRule
-                .onAllNodes(hasText(step.playerFacingCopy))
+                .onAllNodes(hasText(string(step.playerFacingCopyResId)))
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }

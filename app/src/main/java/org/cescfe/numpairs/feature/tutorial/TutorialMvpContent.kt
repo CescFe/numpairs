@@ -1,5 +1,7 @@
 package org.cescfe.numpairs.feature.tutorial
 
+import androidx.annotation.StringRes
+import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Board
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
@@ -24,8 +26,7 @@ object TutorialMvpContent {
         TutorialStep(
             order = 1,
             scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
-            playerFacingCopy = "The main objective is to discover all unknown elements. " +
-                "Guess hidden values to complete an ascending list of positive integers.",
+            playerFacingCopyResId = R.string.tutorial_step_one_copy,
             highlightedTargets = listOf(
                 TutorialHighlightTarget.StripEntries(indexes = listOf(1))
             ),
@@ -41,9 +42,7 @@ object TutorialMvpContent {
         TutorialStep(
             order = 2,
             scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
-            playerFacingCopy = "Combine two numbers from the strip to form a mathematical expression " +
-                "that evaluates to the tile's visible result. " +
-                "Fill the highlighted tile with two operands and one operator.",
+            playerFacingCopyResId = R.string.tutorial_step_two_copy,
             highlightedTargets = listOf(
                 TutorialHighlightTarget.Tiles(indexes = listOf(0)),
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0)
@@ -64,8 +63,7 @@ object TutorialMvpContent {
         TutorialStep(
             order = 3,
             scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
-            playerFacingCopy = "Each pair must form one sum and one product. " +
-                "Use the same pair to complete its product tile.",
+            playerFacingCopyResId = R.string.tutorial_step_three_copy,
             highlightedTargets = listOf(
                 TutorialHighlightTarget.Tiles(indexes = listOf(1)),
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 1)
@@ -86,7 +84,7 @@ object TutorialMvpContent {
         TutorialStep(
             order = 4,
             scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
-            playerFacingCopy = "Finish this practice puzzle.",
+            playerFacingCopyResId = R.string.tutorial_step_four_copy,
             highlightedTargets = listOf(
                 TutorialHighlightTarget.Tiles(indexes = listOf(2, 3)),
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 2),
@@ -98,7 +96,7 @@ object TutorialMvpContent {
         TutorialStep(
             order = 5,
             scenarioId = TutorialScenarioId.FINAL_EASY_FOUR_PAIRS,
-            playerFacingCopy = "Now finish the full tutorial puzzle.",
+            playerFacingCopyResId = R.string.tutorial_step_five_copy,
             highlightedTargets = listOf(
                 TutorialHighlightTarget.HiddenStripEntries,
                 TutorialHighlightTarget.HiddenTileExpressions
@@ -159,7 +157,7 @@ data class TutorialIntendedPair(val firstStripEntryId: Int, val secondStripEntry
 data class TutorialStep(
     val order: Int,
     val scenarioId: TutorialScenarioId,
-    val playerFacingCopy: String,
+    @param:StringRes val playerFacingCopyResId: Int,
     val highlightedTargets: List<TutorialHighlightTarget>,
     val requiredAction: TutorialRequiredAction,
     val completionPredicate: TutorialStepCompletionPredicate
@@ -168,8 +166,8 @@ data class TutorialStep(
         require(order > 0) {
             "Tutorial step order must be positive."
         }
-        require(playerFacingCopy.isNotBlank()) {
-            "Tutorial step copy must not be blank."
+        require(playerFacingCopyResId != 0) {
+            "Tutorial step copy string resource must be defined."
         }
         require(highlightedTargets.isNotEmpty()) {
             "Tutorial step must define at least one highlighted target."

@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.feature.tutorial
 
+import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Board
 import org.cescfe.numpairs.domain.puzzle.Expression
 import org.cescfe.numpairs.domain.puzzle.Operator
@@ -208,17 +209,13 @@ class TutorialMvpContentTest {
         )
         assertEquals(
             listOf(
-                "The main objective is to discover all unknown elements. " +
-                    "Guess hidden values to complete an ascending list of positive integers.",
-                "Combine two numbers from the strip to form a mathematical expression " +
-                    "that evaluates to the tile's visible result. " +
-                    "Fill the highlighted tile with two operands and one operator.",
-                "Each pair must form one sum and one product. " +
-                    "Use the same pair to complete its product tile.",
-                "Finish this practice puzzle.",
-                "Now finish the full tutorial puzzle."
+                R.string.tutorial_step_one_copy,
+                R.string.tutorial_step_two_copy,
+                R.string.tutorial_step_three_copy,
+                R.string.tutorial_step_four_copy,
+                R.string.tutorial_step_five_copy
             ),
-            steps.map(TutorialStep::playerFacingCopy)
+            steps.map(TutorialStep::playerFacingCopyResId)
         )
     }
 

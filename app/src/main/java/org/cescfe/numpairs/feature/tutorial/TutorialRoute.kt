@@ -94,7 +94,7 @@ private fun TutorialInstructionSurface(currentStep: TutorialStep, totalSteps: In
                 style = MaterialTheme.typography.labelLarge
             )
             Text(
-                text = currentStep.playerFacingCopy,
+                text = stringResource(currentStep.playerFacingCopyResId),
                 modifier = Modifier.testTag(TutorialScreenTestTags.STEP_COPY),
                 style = MaterialTheme.typography.bodyLarge
             )
