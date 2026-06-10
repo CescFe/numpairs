@@ -229,16 +229,13 @@ class TutorialMvpContentTest {
                 ),
                 listOf(
                     TutorialHighlightTarget.Tiles(indexes = listOf(0)),
-                    TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0),
-                    TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1))
+                    TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0)
                 ),
                 listOf(
-                    TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1)),
-                    TutorialHighlightTarget.Tiles(indexes = listOf(0, 1)),
+                    TutorialHighlightTarget.Tiles(indexes = listOf(1)),
                     TutorialHighlightTarget.TileExpressionSlots(tileIndex = 1)
                 ),
                 listOf(
-                    TutorialHighlightTarget.StripEntries(indexes = listOf(2, 3)),
                     TutorialHighlightTarget.Tiles(indexes = listOf(2, 3)),
                     TutorialHighlightTarget.TileExpressionSlots(tileIndex = 2),
                     TutorialHighlightTarget.TileExpressionSlots(tileIndex = 3)
