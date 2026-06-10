@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.feature.game.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -30,20 +31,25 @@ import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.TileUiState
 import org.cescfe.numpairs.feature.game.presentation.TileVisualState
+import org.cescfe.numpairs.feature.game.ui.gameHighlightSemantics
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
 fun PuzzleTile(
     tile: TileUiState,
     modifier: Modifier = Modifier,
+    isHighlighted: Boolean = false,
     leftOperandModifier: Modifier = Modifier,
+    isLeftOperandHighlighted: Boolean = false,
     leftOperandContentDescription: String? = null,
     onLeftOperandClick: (() -> Unit)? = null,
     operatorModifier: Modifier = Modifier,
+    isOperatorHighlighted: Boolean = false,
     operatorContentDescription: String? = null,
     onOperatorClick: (() -> Unit)? = null,
     operatorOverlay: @Composable BoxScope.() -> Unit = {},
     rightOperandModifier: Modifier = Modifier,
+    isRightOperandHighlighted: Boolean = false,
     rightOperandContentDescription: String? = null,
     onRightOperandClick: (() -> Unit)? = null,
     resetModifier: Modifier = Modifier,
@@ -51,6 +57,11 @@ fun PuzzleTile(
 ) {
     val statePalette = tileStatePalette(tile.visualState)
     val expressionColor = statePalette?.contentColor ?: Color.Unspecified
+    val tileBorder = statePalette?.border ?: if (isHighlighted) {
+        BorderStroke(width = HIGHLIGHTED_TILE_BORDER_WIDTH, color = MaterialTheme.colorScheme.tertiary)
+    } else {
+        null
+    }
     val tileStateDescription = when (tile.visualState) {
         TileVisualState.INCORRECT -> stringResource(R.string.tile_state_incorrect)
         TileVisualState.MISMATCHED_PAIRING -> stringResource(R.string.tile_state_mismatched_pairing)
@@ -58,11 +69,13 @@ fun PuzzleTile(
     }
 
     Box(
-        modifier = modifier.semantics {
-            if (tileStateDescription != null) {
-                stateDescription = tileStateDescription
+        modifier = modifier
+            .semantics {
+                if (tileStateDescription != null) {
+                    stateDescription = tileStateDescription
+                }
             }
-        }
+            .gameHighlightSemantics(isHighlighted)
     ) {
         Card(
             modifier = Modifier,
@@ -72,7 +85,7 @@ fun PuzzleTile(
             } else {
                 CardDefaults.cardColors(containerColor = statePalette.containerColor)
             },
-            border = statePalette?.border
+            border = tileBorder
         ) {
             Column(
                 modifier = Modifier
@@ -84,13 +97,16 @@ fun PuzzleTile(
                 TileExpressionRow(
                     tile = tile,
                     leftOperandModifier = leftOperandModifier,
+                    isLeftOperandHighlighted = isLeftOperandHighlighted,
                     leftOperandContentDescription = leftOperandContentDescription,
                     onLeftOperandClick = onLeftOperandClick,
                     operatorModifier = operatorModifier,
+                    isOperatorHighlighted = isOperatorHighlighted,
                     operatorContentDescription = operatorContentDescription,
                     onOperatorClick = onOperatorClick,
                     operatorOverlay = operatorOverlay,
                     rightOperandModifier = rightOperandModifier,
+                    isRightOperandHighlighted = isRightOperandHighlighted,
                     rightOperandContentDescription = rightOperandContentDescription,
                     onRightOperandClick = onRightOperandClick,
                     textColor = expressionColor,

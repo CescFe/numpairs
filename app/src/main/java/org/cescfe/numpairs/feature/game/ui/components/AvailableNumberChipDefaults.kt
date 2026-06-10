@@ -10,6 +10,7 @@ internal val CHIP_MIN_HEIGHT = 48.dp
 internal val CHIP_CORNER_RADIUS = 14.dp
 internal val KNOWN_CHIP_BORDER_WIDTH = 1.dp
 internal val MODIFIABLE_CHIP_BORDER_WIDTH = 1.5.dp
+internal val HIGHLIGHTED_CHIP_BORDER_WIDTH = 3.dp
 
 @Composable
 internal fun chipColorsFor(style: AvailableNumberChipStyle): AvailableNumberChipColors {

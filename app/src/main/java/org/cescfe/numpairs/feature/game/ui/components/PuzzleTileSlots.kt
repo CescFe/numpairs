@@ -1,6 +1,7 @@
 package org.cescfe.numpairs.feature.game.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.feature.game.presentation.TileUiState
+import org.cescfe.numpairs.feature.game.ui.gameHighlightSemantics
 
 @Composable
 internal fun TileResetAction(modifier: Modifier = Modifier, onClick: () -> Unit) {
@@ -69,13 +71,16 @@ internal fun TileExpressionRow(
     tile: TileUiState,
     modifier: Modifier = Modifier,
     leftOperandModifier: Modifier = Modifier,
+    isLeftOperandHighlighted: Boolean = false,
     leftOperandContentDescription: String? = null,
     onLeftOperandClick: (() -> Unit)? = null,
     operatorModifier: Modifier = Modifier,
+    isOperatorHighlighted: Boolean = false,
     operatorContentDescription: String? = null,
     onOperatorClick: (() -> Unit)? = null,
     operatorOverlay: @Composable BoxScope.() -> Unit = {},
     rightOperandModifier: Modifier = Modifier,
+    isRightOperandHighlighted: Boolean = false,
     rightOperandContentDescription: String? = null,
     onRightOperandClick: (() -> Unit)? = null,
     textColor: Color = Color.Unspecified
@@ -91,6 +96,7 @@ internal fun TileExpressionRow(
                 .weight(1f)
                 .then(leftOperandModifier),
             contentDescription = leftOperandContentDescription,
+            isHighlighted = isLeftOperandHighlighted,
             onClick = onLeftOperandClick,
             textColor = textColor,
             isOperand = true,
@@ -102,6 +108,7 @@ internal fun TileExpressionRow(
                 .width(TILE_OPERATOR_SLOT_WIDTH)
                 .then(operatorModifier),
             contentDescription = operatorContentDescription,
+            isHighlighted = isOperatorHighlighted,
             onClick = onOperatorClick,
             textColor = textColor,
             overlayContent = operatorOverlay
@@ -112,6 +119,7 @@ internal fun TileExpressionRow(
                 .weight(1f)
                 .then(rightOperandModifier),
             contentDescription = rightOperandContentDescription,
+            isHighlighted = isRightOperandHighlighted,
             onClick = onRightOperandClick,
             textColor = textColor,
             isOperand = true,
@@ -125,6 +133,7 @@ private fun TileExpressionItem(
     text: String,
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
+    isHighlighted: Boolean = false,
     onClick: (() -> Unit)? = null,
     textColor: Color = Color.Unspecified,
     isOperand: Boolean = false,
@@ -143,6 +152,8 @@ private fun TileExpressionItem(
         modifier = slotModifier
             .widthIn(min = TILE_EXPRESSION_ITEM_MIN_WIDTH)
             .defaultMinSize(minHeight = TILE_EXPRESSION_ITEM_MIN_HEIGHT)
+            .highlightBorder(isHighlighted)
+            .gameHighlightSemantics(isHighlighted)
             .let { currentModifier ->
                 if (onClick == null) {
                     currentModifier
@@ -165,6 +176,19 @@ private fun TileExpressionItem(
         )
         overlayContent()
     }
+}
+
+@Composable
+private fun Modifier.highlightBorder(isHighlighted: Boolean): Modifier = if (isHighlighted) {
+    border(
+        border = BorderStroke(
+            width = HIGHLIGHTED_TILE_EXPRESSION_SLOT_BORDER_WIDTH,
+            color = MaterialTheme.colorScheme.tertiary
+        ),
+        shape = RoundedCornerShape(HIGHLIGHTED_TILE_EXPRESSION_SLOT_CORNER_RADIUS)
+    )
+} else {
+    this
 }
 
 @Composable
