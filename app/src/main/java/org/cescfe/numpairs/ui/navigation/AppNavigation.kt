@@ -7,18 +7,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import org.cescfe.numpairs.R
-import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
 import org.cescfe.numpairs.feature.fourpairs.DefaultFourPairsPuzzleProvider
 import org.cescfe.numpairs.feature.fourpairs.FourPairsPuzzleProvider
 import org.cescfe.numpairs.feature.fourpairs.FourPairsRoute
-import org.cescfe.numpairs.feature.game.GameRoute
 import org.cescfe.numpairs.feature.menu.MenuRoute
+import org.cescfe.numpairs.feature.tutorial.TutorialRoute
 
 sealed interface AppDestination {
     data object Menu : AppDestination
-    data object Game : AppDestination
+    data object Tutorial : AppDestination
     data object FourPairs : AppDestination
 }
 
@@ -43,17 +40,14 @@ fun AppNavigation(
         AppDestination.Menu -> MenuRoute(
             modifier = modifier,
             onTutorialSelected = {
-                currentDestination = AppDestination.Game
+                currentDestination = AppDestination.Tutorial
             },
             onFourPairsSelected = {
                 currentDestination = AppDestination.FourPairs
             }
         )
-        AppDestination.Game -> GameRoute(
-            title = stringResource(R.string.tutorial_screen_title),
-            initialPuzzle = initialPuzzle,
+        AppDestination.Tutorial -> TutorialRoute(
             modifier = modifier,
-            gameSessionKey = "tutorial",
             onNavigateBack = navigateToMenu
         )
         AppDestination.FourPairs -> FourPairsRoute(
