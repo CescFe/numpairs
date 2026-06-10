@@ -280,7 +280,12 @@ class TutorialRouteTest {
             .assertContentDescriptionEquals(string(R.string.tile_left_operand_content_description, "1"))
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperator(tileIndex), useUnmergedTree = true)
-            .assertContentDescriptionEquals(string(R.string.tile_operator_content_description, operator.symbol))
+            .assertContentDescriptionEquals(
+                string(
+                    R.string.tile_operator_content_description,
+                    operator.accessibilityLabel()
+                )
+            )
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileRightOperand(tileIndex), useUnmergedTree = true)
             .assertContentDescriptionEquals(string(R.string.tile_right_operand_content_description, "2"))
@@ -391,6 +396,12 @@ class TutorialRouteTest {
         composeTestRule.activity.getString(stringResId)
     } else {
         composeTestRule.activity.getString(stringResId, *formatArgs)
+    }
+
+    private fun Operator.accessibilityLabel(): String = when (this) {
+        Operator.Addition -> string(R.string.tile_operator_option_addition)
+        Operator.Multiplication -> string(R.string.tile_operator_option_multiplication)
+        Operator.Hidden -> symbol
     }
 
     private companion object {
