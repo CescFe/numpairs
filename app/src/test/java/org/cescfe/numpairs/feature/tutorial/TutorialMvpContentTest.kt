@@ -1,12 +1,15 @@
 package org.cescfe.numpairs.feature.tutorial
 
+import org.cescfe.numpairs.domain.puzzle.Board
 import org.cescfe.numpairs.domain.puzzle.Expression
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.domain.puzzle.Tile
+import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -15,49 +18,10 @@ class TutorialMvpContentTest {
     fun defines_the_authored_tutorial_scenarios() {
         assertEquals(
             listOf(
-                TutorialScenarioId.ONE_PAIR_ORIENTATION,
                 TutorialScenarioId.TWO_PAIR_PRACTICE,
                 TutorialScenarioId.FINAL_EASY_FOUR_PAIRS
             ),
             TutorialMvpContent.scenarios.map(TutorialScenario::id)
-        )
-    }
-
-    @Test
-    fun defines_the_one_pair_orientation_scenario() {
-        val scenario = TutorialMvpContent.scenario(TutorialScenarioId.ONE_PAIR_ORIENTATION)
-
-        assertEquals(listOf(2, 3), scenario.stripValues)
-        assertEquals(
-            listOf(
-                StripItem.Known(2),
-                StripItem.Hidden
-            ),
-            scenario.initialPuzzle.strip.items
-        )
-        assertEquals(listOf(5, 6), scenario.initialPuzzle.board.tiles.map(Tile::result))
-        assertAllTilesHaveHiddenExpressions(scenario.initialPuzzle)
-        assertEquals(
-            listOf(TutorialIntendedPair(firstStripEntryId = 0, secondStripEntryId = 1)),
-            scenario.intendedPairs
-        )
-        scenario.assertSolvedTiles(
-            ExpectedSolvedTile(
-                leftValue = 2,
-                leftStripEntryId = 0,
-                operator = Operator.ADDITION,
-                rightValue = 3,
-                rightStripEntryId = 1,
-                result = 5
-            ),
-            ExpectedSolvedTile(
-                leftValue = 2,
-                leftStripEntryId = 0,
-                operator = Operator.MULTIPLICATION,
-                rightValue = 3,
-                rightStripEntryId = 1,
-                result = 6
-            )
         )
     }
 
@@ -228,14 +192,13 @@ class TutorialMvpContentTest {
     }
 
     @Test
-    fun maps_steps_one_to_six_to_the_documented_tutorial_scenarios() {
+    fun maps_steps_one_to_five_to_the_active_tutorial_scenarios() {
         val steps = TutorialMvpContent.steps
 
-        assertEquals(listOf(1, 2, 3, 4, 5, 6), steps.map(TutorialStep::order))
+        assertEquals(listOf(1, 2, 3, 4, 5), steps.map(TutorialStep::order))
         assertEquals(
             listOf(
-                TutorialScenarioId.ONE_PAIR_ORIENTATION,
-                TutorialScenarioId.ONE_PAIR_ORIENTATION,
+                TutorialScenarioId.TWO_PAIR_PRACTICE,
                 TutorialScenarioId.TWO_PAIR_PRACTICE,
                 TutorialScenarioId.TWO_PAIR_PRACTICE,
                 TutorialScenarioId.TWO_PAIR_PRACTICE,
@@ -245,14 +208,11 @@ class TutorialMvpContentTest {
         )
         assertEquals(
             listOf(
-                "Guess all the unknown elements.",
-                "Strip: numbers available to solve the puzzle. " +
-                    "Grid: tiles with a visible result and an unknown expression.",
                 "Guess hidden values to complete an ascending list of positive integers.",
-                "Fill each tile with two operands and one operator.",
-                "Pair strip numbers so each pair creates one sum and one product " +
-                    "that match two grid results.",
-                "Now finish the remaining unknowns."
+                "Fill the highlighted tile with two operands and one operator.",
+                "Use the same pair to complete its product tile.",
+                "Finish this practice puzzle.",
+                "Now finish the full tutorial puzzle."
             ),
             steps.map(TutorialStep::playerFacingCopy)
         )
@@ -265,14 +225,6 @@ class TutorialMvpContentTest {
         assertEquals(
             listOf(
                 listOf(
-                    TutorialHighlightTarget.HiddenStripEntries,
-                    TutorialHighlightTarget.HiddenTileExpressions
-                ),
-                listOf(
-                    TutorialHighlightTarget.StripArea,
-                    TutorialHighlightTarget.GridArea
-                ),
-                listOf(
                     TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1, 2))
                 ),
                 listOf(
@@ -282,7 +234,14 @@ class TutorialMvpContentTest {
                 ),
                 listOf(
                     TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1)),
-                    TutorialHighlightTarget.Tiles(indexes = listOf(0, 1))
+                    TutorialHighlightTarget.Tiles(indexes = listOf(0, 1)),
+                    TutorialHighlightTarget.TileExpressionSlots(tileIndex = 1)
+                ),
+                listOf(
+                    TutorialHighlightTarget.StripEntries(indexes = listOf(2, 3)),
+                    TutorialHighlightTarget.Tiles(indexes = listOf(2, 3)),
+                    TutorialHighlightTarget.TileExpressionSlots(tileIndex = 2),
+                    TutorialHighlightTarget.TileExpressionSlots(tileIndex = 3)
                 ),
                 listOf(
                     TutorialHighlightTarget.HiddenStripEntries,
@@ -293,8 +252,6 @@ class TutorialMvpContentTest {
         )
         assertEquals(
             listOf(
-                null,
-                null,
                 TutorialRequiredAction.EnterStripValue(stripEntryIndex = 1, value = 2),
                 TutorialRequiredAction.CompleteTileExpression(
                     tileIndex = 0,
@@ -308,10 +265,71 @@ class TutorialMvpContentTest {
                     operator = Operator.MULTIPLICATION,
                     rightStripEntryId = 1
                 ),
+                TutorialRequiredAction.CompleteScenario,
                 TutorialRequiredAction.CompleteScenario
             ),
             steps.map(TutorialStep::requiredAction)
         )
+    }
+
+    @Test
+    fun defines_completion_predicates_for_auto_advancing_steps() {
+        val steps = TutorialMvpContent.steps
+
+        assertEquals(
+            listOf(
+                TutorialStepCompletionPredicate.StripValueEntered(stripEntryIndex = 1, value = 2),
+                TutorialStepCompletionPredicate.TileExpressionCompleted(
+                    tileIndex = 0,
+                    leftValue = 1,
+                    operator = Operator.ADDITION,
+                    rightValue = 2
+                ),
+                TutorialStepCompletionPredicate.TileExpressionCompleted(
+                    tileIndex = 1,
+                    leftValue = 1,
+                    operator = Operator.MULTIPLICATION,
+                    rightValue = 2
+                ),
+                TutorialStepCompletionPredicate.ScenarioSolved,
+                TutorialStepCompletionPredicate.ScenarioSolved
+            ),
+            steps.map(TutorialStep::completionPredicate)
+        )
+    }
+
+    @Test
+    fun completion_predicates_match_the_expected_game_ui_state() {
+        val steps = TutorialMvpContent.steps
+        val twoPairScenario = TutorialMvpContent.scenario(TutorialScenarioId.TWO_PAIR_PRACTICE)
+        val finalScenario = TutorialMvpContent.scenario(TutorialScenarioId.FINAL_EASY_FOUR_PAIRS)
+
+        assertFalse(steps[0].isComplete(GameUiState.from(twoPairScenario.initialPuzzle)))
+        assertTrue(
+            steps[0].isComplete(
+                GameUiState.from(twoPairScenario.initialPuzzle.withStripValue(index = 1, value = 2))
+            )
+        )
+
+        assertFalse(steps[1].isComplete(GameUiState.from(twoPairScenario.initialPuzzle)))
+        assertTrue(
+            steps[1].isComplete(
+                GameUiState.from(twoPairScenario.initialPuzzle.withSolvedScenarioTiles(twoPairScenario, 0))
+            )
+        )
+
+        assertFalse(steps[2].isComplete(GameUiState.from(twoPairScenario.initialPuzzle)))
+        assertTrue(
+            steps[2].isComplete(
+                GameUiState.from(twoPairScenario.initialPuzzle.withSolvedScenarioTiles(twoPairScenario, 1))
+            )
+        )
+
+        assertFalse(steps[3].isComplete(GameUiState.from(twoPairScenario.initialPuzzle)))
+        assertTrue(steps[3].isComplete(GameUiState.from(twoPairScenario.solvedPuzzle)))
+
+        assertFalse(steps[4].isComplete(GameUiState.from(finalScenario.initialPuzzle)))
+        assertTrue(steps[4].isComplete(GameUiState.from(finalScenario.solvedPuzzle)))
     }
 }
 
@@ -333,6 +351,20 @@ private fun assertAllTilesHaveHiddenExpressions(puzzle: Puzzle) {
         }
     )
 }
+
+private fun Puzzle.withStripValue(index: Int, value: Int): Puzzle = copy(
+    strip = strip.withUpdatedEntry(index = index, value = value)
+)
+
+private fun Puzzle.withSolvedScenarioTiles(scenario: TutorialScenario, vararg tileIndexes: Int): Puzzle = copy(
+    board = Board(
+        tiles = board.tiles.toMutableList().apply {
+            tileIndexes.forEach { tileIndex ->
+                set(tileIndex, scenario.solvedPuzzle.board.tiles[tileIndex])
+            }
+        }
+    )
+)
 
 private fun TutorialScenario.assertSolvedTiles(vararg expectedTiles: ExpectedSolvedTile) {
     assertEquals(expectedTiles.size, solvedPuzzle.board.tiles.size)
