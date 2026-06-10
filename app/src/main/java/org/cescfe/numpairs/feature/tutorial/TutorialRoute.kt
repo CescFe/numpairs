@@ -196,4 +196,4 @@ private fun expressionSlotHighlights(tileIndex: Int): Set<GameTileExpressionSlot
 )
 
 private const val TUTORIAL_GAME_SESSION_KEY = "tutorial-walkthrough"
-private val TUTORIAL_STEP_ADVANCE_DELAY = 500.milliseconds
+private val TUTORIAL_STEP_ADVANCE_DELAY = 350.milliseconds
