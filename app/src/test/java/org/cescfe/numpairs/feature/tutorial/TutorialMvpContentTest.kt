@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.feature.tutorial
 
+import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Board
 import org.cescfe.numpairs.domain.puzzle.Expression
 import org.cescfe.numpairs.domain.puzzle.Operator
@@ -208,13 +209,13 @@ class TutorialMvpContentTest {
         )
         assertEquals(
             listOf(
-                "Guess hidden values to complete an ascending list of positive integers.",
-                "Fill the highlighted tile with two operands and one operator.",
-                "Use the same pair to complete its product tile.",
-                "Finish this practice puzzle.",
-                "Now finish the full tutorial puzzle."
+                R.string.tutorial_step_one_copy,
+                R.string.tutorial_step_two_copy,
+                R.string.tutorial_step_three_copy,
+                R.string.tutorial_step_four_copy,
+                R.string.tutorial_step_five_copy
             ),
-            steps.map(TutorialStep::playerFacingCopy)
+            steps.map(TutorialStep::playerFacingCopyResId)
         )
     }
 
@@ -225,20 +226,17 @@ class TutorialMvpContentTest {
         assertEquals(
             listOf(
                 listOf(
-                    TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1, 2))
+                    TutorialHighlightTarget.StripEntries(indexes = listOf(1))
                 ),
                 listOf(
                     TutorialHighlightTarget.Tiles(indexes = listOf(0)),
-                    TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0),
-                    TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1))
+                    TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0)
                 ),
                 listOf(
-                    TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1)),
-                    TutorialHighlightTarget.Tiles(indexes = listOf(0, 1)),
+                    TutorialHighlightTarget.Tiles(indexes = listOf(1)),
                     TutorialHighlightTarget.TileExpressionSlots(tileIndex = 1)
                 ),
                 listOf(
-                    TutorialHighlightTarget.StripEntries(indexes = listOf(2, 3)),
                     TutorialHighlightTarget.Tiles(indexes = listOf(2, 3)),
                     TutorialHighlightTarget.TileExpressionSlots(tileIndex = 2),
                     TutorialHighlightTarget.TileExpressionSlots(tileIndex = 3)

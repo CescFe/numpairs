@@ -4,6 +4,11 @@
     <string name="menu_tutorial_button">Tutorial</string>
     <string name="tutorial_screen_title">Tutorial</string>
     <string name="tutorial_step_indicator">Step %1$d of %2$d</string>
+    <string name="tutorial_step_one_copy">The main objective is to discover all unknown elements. Guess hidden values to complete an ascending list of positive integers.</string>
+    <string name="tutorial_step_two_copy">Combine two numbers from the strip to form a mathematical expression that evaluates to the visible tile result. Fill the highlighted tile with two operands and one operator.</string>
+    <string name="tutorial_step_three_copy">Each pair must form one sum and one product. Use the same pair to complete its product tile.</string>
+    <string name="tutorial_step_four_copy">Finish this practice puzzle.</string>
+    <string name="tutorial_step_five_copy">Now finish the full tutorial puzzle.</string>
     <string name="tutorial_previous_step_button">Back</string>
     <string name="tutorial_next_step_button">Next</string>
     <string name="menu_four_pairs_button">4 pairs</string>
