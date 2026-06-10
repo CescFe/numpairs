@@ -64,7 +64,8 @@ object TutorialMvpContent {
         TutorialStep(
             order = 3,
             scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
-            playerFacingCopy = "Use the same pair to complete its product tile.",
+            playerFacingCopy = "Each pair must form one sum and one product. " +
+                "Use the same pair to complete its product tile.",
             highlightedTargets = listOf(
                 TutorialHighlightTarget.Tiles(indexes = listOf(1)),
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 1)

@@ -213,7 +213,8 @@ class TutorialMvpContentTest {
                 "Combine two numbers from the strip to form a mathematical expression " +
                     "that evaluates to the tile's visible result. " +
                     "Fill the highlighted tile with two operands and one operator.",
-                "Use the same pair to complete its product tile.",
+                "Each pair must form one sum and one product. " +
+                    "Use the same pair to complete its product tile.",
                 "Finish this practice puzzle.",
                 "Now finish the full tutorial puzzle."
             ),
