@@ -10,11 +10,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import org.cescfe.numpairs.domain.puzzle.Puzzle
+import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.GameViewModel
 import org.cescfe.numpairs.feature.game.ui.GameScreen
 
@@ -27,10 +29,12 @@ fun GameRoute(
     puzzleResetKey: Any = initialPuzzle,
     completionActions: GameCompletionActions? = null,
     isRulesHelperEnabled: Boolean = false,
+    isSuccessOverlayEnabled: Boolean = true,
     interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
     highlightState: GameHighlightState = GameHighlightState.None,
     topBarActions: @Composable RowScope.() -> Unit = {},
     contentBeforePuzzle: @Composable ColumnScope.() -> Unit = {},
+    onGameUiStateChanged: (GameUiState) -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
     val gameViewModel = rememberGameViewModel(
@@ -38,9 +42,14 @@ fun GameRoute(
         gameSessionKey = gameSessionKey
     )
     val uiState by gameViewModel.uiState.collectAsState()
+    val currentOnGameUiStateChanged by rememberUpdatedState(onGameUiStateChanged)
 
     LaunchedEffect(gameViewModel, puzzleResetKey) {
         gameViewModel.reset(initialPuzzle = initialPuzzle)
+    }
+
+    LaunchedEffect(uiState) {
+        currentOnGameUiStateChanged(uiState)
     }
 
     GameScreen(
@@ -100,6 +109,7 @@ fun GameRoute(
         onSuccessOverlayDismissed = gameViewModel::onSuccessOverlayDismissed,
         completionActions = completionActions,
         isRulesHelperEnabled = isRulesHelperEnabled,
+        isSuccessOverlayEnabled = isSuccessOverlayEnabled,
         interactionPolicy = interactionPolicy,
         highlightState = highlightState,
         topBarActions = topBarActions,

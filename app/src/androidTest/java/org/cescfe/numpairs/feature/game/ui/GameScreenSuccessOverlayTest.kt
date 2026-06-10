@@ -28,6 +28,16 @@ class GameScreenSuccessOverlayTest : GameScreenTestHost() {
     }
 
     @Test
+    fun solvedPuzzleDoesNotShowSuccessOverlayWhenItIsDisabled() {
+        disableSuccessOverlay()
+        showSolvedOverlayFixture()
+
+        screen
+            .assertBoardDisplayed()
+            .assertSuccessOverlayHidden()
+    }
+
+    @Test
     fun successOverlayBlocksPuzzleInteractionsUntilItIsDismissed() {
         showInteractiveSuccessOverlayFixture()
 

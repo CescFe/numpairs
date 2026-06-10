@@ -61,6 +61,7 @@ fun GameScreen(
     onSuccessOverlayDismissed: () -> Unit = {},
     completionActions: GameCompletionActions? = null,
     isRulesHelperEnabled: Boolean = false,
+    isSuccessOverlayEnabled: Boolean = true,
     interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
     highlightState: GameHighlightState = GameHighlightState.None,
     topBarActions: @Composable RowScope.() -> Unit = {},
@@ -127,7 +128,11 @@ fun GameScreen(
             }
         }
 
-        if (uiState.isSuccessOverlayVisible && uiState.puzzleOutcome == PuzzleOutcomeUiState.Solved) {
+        if (
+            isSuccessOverlayEnabled &&
+            uiState.isSuccessOverlayVisible &&
+            uiState.puzzleOutcome == PuzzleOutcomeUiState.Solved
+        ) {
             SuccessOverlay(
                 onDismiss = onSuccessOverlayDismissed,
                 completionActions = completionActions
