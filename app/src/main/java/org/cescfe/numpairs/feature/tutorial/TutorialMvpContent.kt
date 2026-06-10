@@ -10,10 +10,12 @@ import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.domain.puzzle.Tile
 import org.cescfe.numpairs.domain.puzzle.hiddenExpression
 import org.cescfe.numpairs.domain.puzzle.resolvedTile
+import org.cescfe.numpairs.feature.game.presentation.GameUiState
+import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
+import org.cescfe.numpairs.feature.game.presentation.StripItemVisualStyle
 
 object TutorialMvpContent {
     val scenarios: List<TutorialScenario> = listOf(
-        onePairOrientationScenario(),
         twoPairPracticeScenario(),
         finalEasyFourPairsScenario()
     )
@@ -21,27 +23,6 @@ object TutorialMvpContent {
     val steps: List<TutorialStep> = listOf(
         TutorialStep(
             order = 1,
-            scenarioId = TutorialScenarioId.ONE_PAIR_ORIENTATION,
-            playerFacingCopy = "Guess all the unknown elements.",
-            highlightedTargets = listOf(
-                TutorialHighlightTarget.HiddenStripEntries,
-                TutorialHighlightTarget.HiddenTileExpressions
-            ),
-            requiredAction = null
-        ),
-        TutorialStep(
-            order = 2,
-            scenarioId = TutorialScenarioId.ONE_PAIR_ORIENTATION,
-            playerFacingCopy = "Strip: numbers available to solve the puzzle. " +
-                "Grid: tiles with a visible result and an unknown expression.",
-            highlightedTargets = listOf(
-                TutorialHighlightTarget.StripArea,
-                TutorialHighlightTarget.GridArea
-            ),
-            requiredAction = null
-        ),
-        TutorialStep(
-            order = 3,
             scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
             playerFacingCopy = "Guess hidden values to complete an ascending list of positive integers.",
             highlightedTargets = listOf(
@@ -50,12 +31,16 @@ object TutorialMvpContent {
             requiredAction = TutorialRequiredAction.EnterStripValue(
                 stripEntryIndex = 1,
                 value = 2
+            ),
+            completionPredicate = TutorialStepCompletionPredicate.StripValueEntered(
+                stripEntryIndex = 1,
+                value = 2
             )
         ),
         TutorialStep(
-            order = 4,
+            order = 2,
             scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
-            playerFacingCopy = "Fill each tile with two operands and one operator.",
+            playerFacingCopy = "Fill the highlighted tile with two operands and one operator.",
             highlightedTargets = listOf(
                 TutorialHighlightTarget.Tiles(indexes = listOf(0)),
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0),
@@ -66,33 +51,59 @@ object TutorialMvpContent {
                 leftStripEntryId = 0,
                 operator = Operator.ADDITION,
                 rightStripEntryId = 1
+            ),
+            completionPredicate = TutorialStepCompletionPredicate.TileExpressionCompleted(
+                tileIndex = 0,
+                leftValue = 1,
+                operator = Operator.ADDITION,
+                rightValue = 2
             )
         ),
         TutorialStep(
-            order = 5,
+            order = 3,
             scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
-            playerFacingCopy = "Pair strip numbers so each pair creates one sum and one product " +
-                "that match two grid results.",
+            playerFacingCopy = "Use the same pair to complete its product tile.",
             highlightedTargets = listOf(
                 TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1)),
-                TutorialHighlightTarget.Tiles(indexes = listOf(0, 1))
+                TutorialHighlightTarget.Tiles(indexes = listOf(0, 1)),
+                TutorialHighlightTarget.TileExpressionSlots(tileIndex = 1)
             ),
             requiredAction = TutorialRequiredAction.CompleteTileExpression(
                 tileIndex = 1,
                 leftStripEntryId = 0,
                 operator = Operator.MULTIPLICATION,
                 rightStripEntryId = 1
+            ),
+            completionPredicate = TutorialStepCompletionPredicate.TileExpressionCompleted(
+                tileIndex = 1,
+                leftValue = 1,
+                operator = Operator.MULTIPLICATION,
+                rightValue = 2
             )
         ),
         TutorialStep(
-            order = 6,
+            order = 4,
+            scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
+            playerFacingCopy = "Finish this practice puzzle.",
+            highlightedTargets = listOf(
+                TutorialHighlightTarget.StripEntries(indexes = listOf(2, 3)),
+                TutorialHighlightTarget.Tiles(indexes = listOf(2, 3)),
+                TutorialHighlightTarget.TileExpressionSlots(tileIndex = 2),
+                TutorialHighlightTarget.TileExpressionSlots(tileIndex = 3)
+            ),
+            requiredAction = TutorialRequiredAction.CompleteScenario,
+            completionPredicate = TutorialStepCompletionPredicate.ScenarioSolved
+        ),
+        TutorialStep(
+            order = 5,
             scenarioId = TutorialScenarioId.FINAL_EASY_FOUR_PAIRS,
-            playerFacingCopy = "Now finish the remaining unknowns.",
+            playerFacingCopy = "Now finish the full tutorial puzzle.",
             highlightedTargets = listOf(
                 TutorialHighlightTarget.HiddenStripEntries,
                 TutorialHighlightTarget.HiddenTileExpressions
             ),
-            requiredAction = TutorialRequiredAction.CompleteScenario
+            requiredAction = TutorialRequiredAction.CompleteScenario,
+            completionPredicate = TutorialStepCompletionPredicate.ScenarioSolved
         )
     )
 
@@ -126,7 +137,6 @@ data class TutorialScenario(
 }
 
 enum class TutorialScenarioId {
-    ONE_PAIR_ORIENTATION,
     TWO_PAIR_PRACTICE,
     FINAL_EASY_FOUR_PAIRS
 }
@@ -150,7 +160,8 @@ data class TutorialStep(
     val scenarioId: TutorialScenarioId,
     val playerFacingCopy: String,
     val highlightedTargets: List<TutorialHighlightTarget>,
-    val requiredAction: TutorialRequiredAction?
+    val requiredAction: TutorialRequiredAction,
+    val completionPredicate: TutorialStepCompletionPredicate
 ) {
     init {
         require(order > 0) {
@@ -163,6 +174,8 @@ data class TutorialStep(
             "Tutorial step must define at least one highlighted target."
         }
     }
+
+    fun isComplete(uiState: GameUiState): Boolean = completionPredicate.isSatisfiedBy(uiState)
 }
 
 sealed interface TutorialHighlightTarget {
@@ -242,30 +255,60 @@ sealed interface TutorialRequiredAction {
     data object CompleteScenario : TutorialRequiredAction
 }
 
-private fun onePairOrientationScenario(): TutorialScenario {
-    val stripValues = listOf(2, 3)
+sealed interface TutorialStepCompletionPredicate {
+    fun isSatisfiedBy(uiState: GameUiState): Boolean
 
-    return TutorialScenario(
-        id = TutorialScenarioId.ONE_PAIR_ORIENTATION,
-        stripValues = stripValues,
-        initialPuzzle = puzzle(
-            stripItems = listOf(
-                StripItem.Known(2),
-                StripItem.Hidden
-            ),
-            tiles = hiddenTiles(results = listOf(5, 6))
-        ),
-        solvedPuzzle = solvedPuzzle(
-            stripValues = stripValues,
-            tileDefinitions = listOf(
-                TileDefinition(leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1),
-                TileDefinition(leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1)
-            )
-        ),
-        intendedPairs = listOf(
-            TutorialIntendedPair(firstStripEntryId = 0, secondStripEntryId = 1)
-        )
-    )
+    data class StripValueEntered(val stripEntryIndex: Int, val value: Int) : TutorialStepCompletionPredicate {
+        init {
+            require(stripEntryIndex >= 0) {
+                "Tutorial strip completion index must be non-negative."
+            }
+            require(value > 0) {
+                "Tutorial strip completion value must be positive."
+            }
+        }
+
+        override fun isSatisfiedBy(uiState: GameUiState): Boolean {
+            val stripItem = uiState.stripItems.getOrNull(stripEntryIndex) ?: return false
+
+            return stripItem.label == value.toString() &&
+                stripItem.visualStyle == StripItemVisualStyle.PLAYER_ENTERED
+        }
+    }
+
+    data class TileExpressionCompleted(
+        val tileIndex: Int,
+        val leftValue: Int,
+        val operator: Operator,
+        val rightValue: Int
+    ) : TutorialStepCompletionPredicate {
+        init {
+            require(tileIndex >= 0) {
+                "Tutorial tile completion index must be non-negative."
+            }
+            require(leftValue > 0) {
+                "Tutorial left completion value must be positive."
+            }
+            require(rightValue > 0) {
+                "Tutorial right completion value must be positive."
+            }
+            require(operator != Operator.Hidden) {
+                "Tutorial tile completion requires a concrete operator."
+            }
+        }
+
+        override fun isSatisfiedBy(uiState: GameUiState): Boolean {
+            val tile = uiState.tiles.getOrNull(tileIndex) ?: return false
+
+            return tile.leftOperandLabel == leftValue.toString() &&
+                tile.operatorLabel == operator.symbol &&
+                tile.rightOperandLabel == rightValue.toString()
+        }
+    }
+
+    data object ScenarioSolved : TutorialStepCompletionPredicate {
+        override fun isSatisfiedBy(uiState: GameUiState): Boolean = uiState.puzzleOutcome == PuzzleOutcomeUiState.Solved
+    }
 }
 
 private fun twoPairPracticeScenario(): TutorialScenario {
