@@ -26,7 +26,7 @@ object TutorialMvpContent {
             scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
             playerFacingCopy = "Guess hidden values to complete an ascending list of positive integers.",
             highlightedTargets = listOf(
-                TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1, 2))
+                TutorialHighlightTarget.StripEntries(indexes = listOf(1))
             ),
             requiredAction = TutorialRequiredAction.EnterStripValue(
                 stripEntryIndex = 1,
@@ -43,8 +43,7 @@ object TutorialMvpContent {
             playerFacingCopy = "Fill the highlighted tile with two operands and one operator.",
             highlightedTargets = listOf(
                 TutorialHighlightTarget.Tiles(indexes = listOf(0)),
-                TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0),
-                TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1))
+                TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0)
             ),
             requiredAction = TutorialRequiredAction.CompleteTileExpression(
                 tileIndex = 0,
@@ -64,8 +63,7 @@ object TutorialMvpContent {
             scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
             playerFacingCopy = "Use the same pair to complete its product tile.",
             highlightedTargets = listOf(
-                TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1)),
-                TutorialHighlightTarget.Tiles(indexes = listOf(0, 1)),
+                TutorialHighlightTarget.Tiles(indexes = listOf(1)),
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 1)
             ),
             requiredAction = TutorialRequiredAction.CompleteTileExpression(
@@ -86,7 +84,6 @@ object TutorialMvpContent {
             scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
             playerFacingCopy = "Finish this practice puzzle.",
             highlightedTargets = listOf(
-                TutorialHighlightTarget.StripEntries(indexes = listOf(2, 3)),
                 TutorialHighlightTarget.Tiles(indexes = listOf(2, 3)),
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 2),
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 3)

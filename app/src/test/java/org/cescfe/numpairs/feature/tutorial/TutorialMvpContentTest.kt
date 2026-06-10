@@ -225,7 +225,7 @@ class TutorialMvpContentTest {
         assertEquals(
             listOf(
                 listOf(
-                    TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1, 2))
+                    TutorialHighlightTarget.StripEntries(indexes = listOf(1))
                 ),
                 listOf(
                     TutorialHighlightTarget.Tiles(indexes = listOf(0)),
