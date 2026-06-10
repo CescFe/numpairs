@@ -29,6 +29,7 @@ abstract class GameScreenTestHost {
     private var onTileOperatorTappedOverride: ((Int) -> Unit)? by mutableStateOf(null)
     private var onSuccessOverlayDismissedOverride: (() -> Unit)? by mutableStateOf(null)
     private var highlightState by mutableStateOf(GameHighlightState.None)
+    private var isSuccessOverlayEnabled by mutableStateOf(true)
     private var useSolvedOverlayFixture by mutableStateOf(false)
     private var isSolvedOverlayVisible by mutableStateOf(false)
 
@@ -39,6 +40,7 @@ abstract class GameScreenTestHost {
         onTileOperatorTappedOverride = null
         onSuccessOverlayDismissedOverride = null
         highlightState = GameHighlightState.None
+        isSuccessOverlayEnabled = true
         useSolvedOverlayFixture = false
         isSolvedOverlayVisible = false
 
@@ -73,6 +75,7 @@ abstract class GameScreenTestHost {
                     onTileOperatorSelectionDismissed = currentViewModel::onTileOperatorSelectionDismissed,
                     onTileOperatorSelectionConfirmed = currentViewModel::onTileOperatorSelectionConfirmed,
                     onSuccessOverlayDismissed = onSuccessOverlayDismissed,
+                    isSuccessOverlayEnabled = isSuccessOverlayEnabled,
                     highlightState = highlightState
                 )
             }
@@ -143,6 +146,12 @@ abstract class GameScreenTestHost {
     protected fun showHighlightState(highlightState: GameHighlightState) {
         composeTestRule.runOnIdle {
             this.highlightState = highlightState
+        }
+    }
+
+    protected fun disableSuccessOverlay() {
+        composeTestRule.runOnIdle {
+            isSuccessOverlayEnabled = false
         }
     }
 }
