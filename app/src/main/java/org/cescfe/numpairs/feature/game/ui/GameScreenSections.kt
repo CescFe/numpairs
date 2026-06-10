@@ -22,6 +22,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Operator
+import org.cescfe.numpairs.feature.game.GameInteractionPolicy
 import org.cescfe.numpairs.feature.game.presentation.StripItemUiState
 import org.cescfe.numpairs.feature.game.presentation.StripItemVisualStyle
 import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState
@@ -32,6 +33,7 @@ import org.cescfe.numpairs.feature.game.ui.components.PuzzleTile
 
 @Composable
 internal fun BoardSection(
+    modifier: Modifier = Modifier,
     tiles: List<TileUiState>,
     onTileLeftOperandTapped: (Int) -> Unit,
     onTileRightOperandTapped: (Int) -> Unit,
@@ -40,7 +42,7 @@ internal fun BoardSection(
     tileOperatorSelectionDialog: TileOperatorSelectionDialogUiState?,
     onTileOperatorSelectionDismissed: () -> Unit,
     onTileOperatorSelectionConfirmed: (Operator) -> Unit,
-    modifier: Modifier = Modifier
+    interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll
 ) {
     val boardContentDescription = stringResource(R.string.board_content_description)
 
@@ -83,10 +85,18 @@ internal fun BoardSection(
                                     .wrapContentHeight(),
                                 leftOperandModifier = Modifier.testTag(GameScreenTestTags.tileLeftOperand(tileIndex)),
                                 leftOperandContentDescription = tileLeftOperandContentDescription(tile),
-                                onLeftOperandClick = { onTileLeftOperandTapped(tileIndex) },
+                                onLeftOperandClick = if (interactionPolicy.canTapTileLeftOperand(tileIndex)) {
+                                    { onTileLeftOperandTapped(tileIndex) }
+                                } else {
+                                    null
+                                },
                                 operatorModifier = Modifier.testTag(GameScreenTestTags.tileOperator(tileIndex)),
                                 operatorContentDescription = tileOperatorContentDescription(tile),
-                                onOperatorClick = { onTileOperatorTapped(tileIndex) },
+                                onOperatorClick = if (interactionPolicy.canTapTileOperator(tileIndex)) {
+                                    { onTileOperatorTapped(tileIndex) }
+                                } else {
+                                    null
+                                },
                                 operatorOverlay = {
                                     tileOperatorSelectionUiState?.let { dialogUiState ->
                                         TileOperatorSelectionMenu(
@@ -98,9 +108,17 @@ internal fun BoardSection(
                                 },
                                 rightOperandModifier = Modifier.testTag(GameScreenTestTags.tileRightOperand(tileIndex)),
                                 rightOperandContentDescription = tileRightOperandContentDescription(tile),
-                                onRightOperandClick = { onTileRightOperandTapped(tileIndex) },
+                                onRightOperandClick = if (interactionPolicy.canTapTileRightOperand(tileIndex)) {
+                                    { onTileRightOperandTapped(tileIndex) }
+                                } else {
+                                    null
+                                },
                                 resetModifier = Modifier.testTag(GameScreenTestTags.tileReset(tileIndex)),
-                                onResetClick = { onTileResetTapped(tileIndex) }
+                                onResetClick = if (interactionPolicy.canTapTileReset(tileIndex)) {
+                                    { onTileResetTapped(tileIndex) }
+                                } else {
+                                    null
+                                }
                             )
                         }
                     }
@@ -112,9 +130,10 @@ internal fun BoardSection(
 
 @Composable
 internal fun StripSection(
+    modifier: Modifier = Modifier,
     stripItems: List<StripItemUiState>,
     onStripItemTapped: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    isStripItemEnabled: (Int) -> Boolean = { true }
 ) {
     val stripContentDescription = stringResource(R.string.strip_content_description)
 
@@ -157,7 +176,7 @@ internal fun StripSection(
                             StripItemVisualStyle.HIDDEN -> AvailableNumberChipStyle.HIDDEN
                             StripItemVisualStyle.PLAYER_ENTERED -> AvailableNumberChipStyle.PLAYER_ENTERED
                         },
-                        onClick = if (stripItem.isEntryEnabled) {
+                        onClick = if (stripItem.isEntryEnabled && isStripItemEnabled(index)) {
                             { onStripItemTapped(index) }
                         } else {
                             null

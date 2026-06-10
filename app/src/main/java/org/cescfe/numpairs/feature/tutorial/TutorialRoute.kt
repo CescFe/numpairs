@@ -20,6 +20,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.domain.puzzle.OperandSlot
+import org.cescfe.numpairs.feature.game.GameInteractionPolicy
 import org.cescfe.numpairs.feature.game.GameRoute
 import org.cescfe.numpairs.feature.tutorial.ui.TutorialScreenTestTags
 
@@ -36,6 +38,7 @@ fun TutorialRoute(modifier: Modifier = Modifier, onNavigateBack: () -> Unit = {}
         modifier = modifier,
         gameSessionKey = TUTORIAL_GAME_SESSION_KEY,
         puzzleResetKey = currentScenario.id,
+        interactionPolicy = currentStep.requiredAction.toInteractionPolicy(),
         contentBeforePuzzle = {
             TutorialInstructionSurface(
                 currentStep = currentStep,
@@ -115,5 +118,53 @@ private fun TutorialInstructionSurface(
         }
     }
 }
+
+private fun TutorialRequiredAction?.toInteractionPolicy(): GameInteractionPolicy = when (this) {
+    null -> noPuzzleInteractionPolicy()
+    is TutorialRequiredAction.EnterStripValue -> GameInteractionPolicy(
+        canTapStripItem = { index -> index == stripEntryIndex },
+        canConfirmStripItemEntry = { index, value ->
+            index == stripEntryIndex && value == this.value
+        },
+        canTapTileLeftOperand = { false },
+        canTapTileRightOperand = { false },
+        canTapTileOperator = { false },
+        canTapTileReset = { false },
+        canConfirmTileOperand = { _, _, _ -> false },
+        canConfirmTileOperator = { _, _ -> false }
+    )
+    is TutorialRequiredAction.CompleteTileExpression -> GameInteractionPolicy(
+        canTapStripItem = { false },
+        canConfirmStripItemEntry = { _, _ -> false },
+        canTapTileLeftOperand = { index -> index == tileIndex },
+        canTapTileRightOperand = { index -> index == tileIndex },
+        canTapTileOperator = { index -> index == tileIndex },
+        canTapTileReset = { false },
+        canConfirmTileOperand = { index, slot, stripEntryId ->
+            index == tileIndex && stripEntryId == requiredStripEntryIdFor(slot = slot)
+        },
+        canConfirmTileOperator = { index, operator ->
+            index == tileIndex && operator == this.operator
+        }
+    )
+    TutorialRequiredAction.CompleteScenario -> GameInteractionPolicy.AllowAll
+}
+
+private fun noPuzzleInteractionPolicy(): GameInteractionPolicy = GameInteractionPolicy(
+    canTapStripItem = { false },
+    canConfirmStripItemEntry = { _, _ -> false },
+    canTapTileLeftOperand = { false },
+    canTapTileRightOperand = { false },
+    canTapTileOperator = { false },
+    canTapTileReset = { false },
+    canConfirmTileOperand = { _, _, _ -> false },
+    canConfirmTileOperator = { _, _ -> false }
+)
+
+private fun TutorialRequiredAction.CompleteTileExpression.requiredStripEntryIdFor(slot: OperandSlot): Int =
+    when (slot) {
+        OperandSlot.LEFT -> leftStripEntryId
+        OperandSlot.RIGHT -> rightStripEntryId
+    }
 
 private const val TUTORIAL_GAME_SESSION_KEY = "tutorial-walkthrough"

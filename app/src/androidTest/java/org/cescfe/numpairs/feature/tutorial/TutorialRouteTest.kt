@@ -3,6 +3,7 @@ package org.cescfe.numpairs.feature.tutorial
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertContentDescriptionEquals
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -16,6 +17,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.feature.game.ui.GameScreenTestTags
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.feature.tutorial.ui.TutorialScreenTestTags
@@ -72,12 +74,12 @@ class TutorialRouteTest {
         setContent()
         navigateToTutorial()
 
-        enterFirstScenarioHiddenStripValue()
         tapNextStep()
         tapNextStep()
 
         assertStepDisplayed(stepIndex = 2)
         assertTwoPairPracticeScenarioDisplayed()
+        enterStripValue(index = 1, value = "2")
 
         repeat(3) {
             tapNextStep()
@@ -90,6 +92,157 @@ class TutorialRouteTest {
         }
         assertStepDisplayed(stepIndex = 0)
         assertOnePairOrientationScenarioDisplayed()
+
+        repeat(2) {
+            tapNextStep()
+        }
+        assertStepDisplayed(stepIndex = 2)
+        assertTwoPairPracticeScenarioDisplayed()
+    }
+
+    @Test
+    fun stepThreeOnlyAllowsTheRequiredStripEntryAndValue() {
+        setContent()
+        navigateToTutorial()
+        navigateToStep(stepIndex = 2)
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
+            .performScrollTo()
+            .assertHasNoClickAction()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(1))
+            .performScrollTo()
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
+            .performTextInput("1")
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM)
+            .assertIsNotEnabled()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CANCEL)
+            .performClick()
+
+        enterStripValue(index = 1, value = "2")
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(1))
+            .assertContentDescriptionEquals(
+                string(
+                    R.string.strip_item_player_entered_content_description,
+                    "2"
+                )
+            )
+    }
+
+    @Test
+    fun stepFourOnlyAllowsCompletingTheFirstAdditionExpression() {
+        setContent()
+        navigateToTutorial()
+        completeStepThree()
+        tapNextStep()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(1), useUnmergedTree = true)
+            .performScrollTo()
+            .assertHasNoClickAction()
+
+        chooseTileOperand(tileIndex = 0, isLeftOperand = true, stripEntryId = 0)
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(1), useUnmergedTree = true)
+            .assertIsNotEnabled()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERAND_SELECTOR, useUnmergedTree = true)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(0), useUnmergedTree = true)
+            .performClick()
+
+        chooseTileOperand(tileIndex = 0, isLeftOperand = false, stripEntryId = 1)
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(0), useUnmergedTree = true)
+            .assertIsNotEnabled()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(1), useUnmergedTree = true)
+            .performClick()
+
+        openTileOperatorMenu(tileIndex = 0)
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.MULTIPLICATION), useUnmergedTree = true)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.ADDITION), useUnmergedTree = true)
+            .performClick()
+
+        assertTileExpression(
+            tileIndex = 0,
+            operator = Operator.ADDITION
+        )
+    }
+
+    @Test
+    fun stepFiveOnlyAllowsCompletingTheComplementaryMultiplicationExpression() {
+        setContent()
+        navigateToTutorial()
+        completeStepThree()
+        tapNextStep()
+        completeFirstAdditionTile()
+        tapNextStep()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileReset(0), useUnmergedTree = true)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tile(0), useUnmergedTree = true)
+            .performScrollTo()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
+            .assertHasNoClickAction()
+
+        chooseTileOperand(tileIndex = 1, isLeftOperand = true, stripEntryId = 0)
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(0), useUnmergedTree = true)
+            .performClick()
+        chooseTileOperand(tileIndex = 1, isLeftOperand = false, stripEntryId = 1)
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(1), useUnmergedTree = true)
+            .performClick()
+        openTileOperatorMenu(tileIndex = 1)
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.ADDITION), useUnmergedTree = true)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.MULTIPLICATION), useUnmergedTree = true)
+            .performClick()
+
+        assertTileExpression(
+            tileIndex = 1,
+            operator = Operator.MULTIPLICATION
+        )
+    }
+
+    @Test
+    fun finalTutorialScenarioCanBeCompletedWithNormalGameplay() {
+        setContent()
+        navigateToTutorial()
+        navigateToStep(stepIndex = 5)
+
+        enterStripValue(index = 1, value = "2")
+        enterStripValue(index = 4, value = "5")
+        enterStripValue(index = 6, value = "7")
+        completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
+        completeTile(tileIndex = 1, leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1)
+        completeTile(tileIndex = 2, leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3)
+        completeTile(tileIndex = 3, leftStripEntryId = 2, operator = Operator.MULTIPLICATION, rightStripEntryId = 3)
+        completeTile(tileIndex = 4, leftStripEntryId = 4, operator = Operator.ADDITION, rightStripEntryId = 5)
+        completeTile(tileIndex = 5, leftStripEntryId = 4, operator = Operator.MULTIPLICATION, rightStripEntryId = 5)
+        completeTile(tileIndex = 6, leftStripEntryId = 6, operator = Operator.ADDITION, rightStripEntryId = 7)
+        completeTile(tileIndex = 7, leftStripEntryId = 6, operator = Operator.MULTIPLICATION, rightStripEntryId = 7)
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .assertIsDisplayed()
     }
 
     @Test
@@ -140,25 +293,111 @@ class TutorialRouteTest {
             .performClick()
     }
 
-    private fun enterFirstScenarioHiddenStripValue() {
+    private fun navigateToStep(stepIndex: Int) {
+        repeat(stepIndex) {
+            tapNextStep()
+        }
+    }
+
+    private fun completeStepThree() {
+        navigateToStep(stepIndex = 2)
+        enterStripValue(index = 1, value = "2")
+    }
+
+    private fun completeFirstAdditionTile() {
+        completeTile(
+            tileIndex = 0,
+            leftStripEntryId = 0,
+            operator = Operator.ADDITION,
+            rightStripEntryId = 1
+        )
+    }
+
+    private fun enterStripValue(index: Int, value: String) {
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.stripItem(1))
+            .onNodeWithTag(GameScreenTestTags.stripItem(index))
             .performScrollTo()
             .performClick()
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
-            .performTextInput("3")
+            .performTextInput(value)
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM)
             .performClick()
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.stripItem(1))
+            .onNodeWithTag(GameScreenTestTags.stripItem(index))
             .assertContentDescriptionEquals(
                 string(
                     R.string.strip_item_player_entered_content_description,
-                    "3"
+                    value
                 )
             )
+    }
+
+    private fun completeTile(tileIndex: Int, leftStripEntryId: Int, operator: Operator, rightStripEntryId: Int) {
+        chooseTileOperand(
+            tileIndex = tileIndex,
+            isLeftOperand = true,
+            stripEntryId = leftStripEntryId
+        )
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(leftStripEntryId), useUnmergedTree = true)
+            .performClick()
+        chooseTileOperand(
+            tileIndex = tileIndex,
+            isLeftOperand = false,
+            stripEntryId = rightStripEntryId
+        )
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(rightStripEntryId), useUnmergedTree = true)
+            .performClick()
+        openTileOperatorMenu(tileIndex = tileIndex)
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(operator), useUnmergedTree = true)
+            .performClick()
+    }
+
+    private fun chooseTileOperand(tileIndex: Int, isLeftOperand: Boolean, stripEntryId: Int) {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tile(tileIndex), useUnmergedTree = true)
+            .performScrollTo()
+        composeTestRule
+            .onNodeWithTag(
+                if (isLeftOperand) {
+                    GameScreenTestTags.tileLeftOperand(tileIndex)
+                } else {
+                    GameScreenTestTags.tileRightOperand(tileIndex)
+                },
+                useUnmergedTree = true
+            )
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(stripEntryId), useUnmergedTree = true)
+            .assertIsEnabled()
+    }
+
+    private fun openTileOperatorMenu(tileIndex: Int) {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tile(tileIndex), useUnmergedTree = true)
+            .performScrollTo()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(tileIndex), useUnmergedTree = true)
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR, useUnmergedTree = true)
+            .assertIsDisplayed()
+    }
+
+    private fun assertTileExpression(tileIndex: Int, operator: Operator) {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(tileIndex), useUnmergedTree = true)
+            .assertContentDescriptionEquals(string(R.string.tile_left_operand_content_description, "1"))
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(tileIndex), useUnmergedTree = true)
+            .assertContentDescriptionEquals(string(R.string.tile_operator_content_description, operator.symbol))
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileRightOperand(tileIndex), useUnmergedTree = true)
+            .assertContentDescriptionEquals(string(R.string.tile_right_operand_content_description, "2"))
     }
 
     private fun assertStepDisplayed(stepIndex: Int) {
@@ -250,6 +489,7 @@ class TutorialRouteTest {
             .performScrollTo()
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tile(tileIndex), useUnmergedTree = true)
+            .performScrollTo()
             .assert(hasAnyDescendant(hasText(result.toString())))
     }
 
