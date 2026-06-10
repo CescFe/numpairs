@@ -24,7 +24,8 @@ object TutorialMvpContent {
         TutorialStep(
             order = 1,
             scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
-            playerFacingCopy = "Guess hidden values to complete an ascending list of positive integers.",
+            playerFacingCopy = "The main objective is to discover all unknown elements. " +
+                "Guess hidden values to complete an ascending list of positive integers.",
             highlightedTargets = listOf(
                 TutorialHighlightTarget.StripEntries(indexes = listOf(1))
             ),
@@ -40,7 +41,9 @@ object TutorialMvpContent {
         TutorialStep(
             order = 2,
             scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
-            playerFacingCopy = "Fill the highlighted tile with two operands and one operator.",
+            playerFacingCopy = "Combine two numbers from the strip to form a mathematical expression " +
+                "that evaluates to the tile's visible result. " +
+                "Fill the highlighted tile with two operands and one operator.",
             highlightedTargets = listOf(
                 TutorialHighlightTarget.Tiles(indexes = listOf(0)),
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0)
