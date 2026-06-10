@@ -27,6 +27,7 @@ fun GameRoute(
     puzzleResetKey: Any = initialPuzzle,
     completionActions: GameCompletionActions? = null,
     isRulesHelperEnabled: Boolean = false,
+    interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
     topBarActions: @Composable RowScope.() -> Unit = {},
     contentBeforePuzzle: @Composable ColumnScope.() -> Unit = {},
     onNavigateBack: () -> Unit = {}
@@ -46,20 +47,59 @@ fun GameRoute(
         uiState = uiState,
         modifier = modifier,
         onNavigateBack = onNavigateBack,
-        onStripItemTapped = gameViewModel::onStripItemTapped,
+        onStripItemTapped = { index ->
+            if (interactionPolicy.canTapStripItem(index)) {
+                gameViewModel.onStripItemTapped(index)
+            }
+        },
         onStripItemEntryDismissed = gameViewModel::onStripItemEntryDismissed,
-        onStripItemEntryConfirmed = gameViewModel::onStripItemEntryConfirmed,
-        onTileLeftOperandTapped = gameViewModel::onTileLeftOperandTapped,
-        onTileRightOperandTapped = gameViewModel::onTileRightOperandTapped,
+        onStripItemEntryConfirmed = onStripItemEntryConfirmed@{ value ->
+            val stripItemIndex = uiState.stripItemEntryDialog?.stripItemIndex ?: return@onStripItemEntryConfirmed
+
+            if (interactionPolicy.canConfirmStripItemEntry(stripItemIndex, value)) {
+                gameViewModel.onStripItemEntryConfirmed(value)
+            }
+        },
+        onTileLeftOperandTapped = { index ->
+            if (interactionPolicy.canTapTileLeftOperand(index)) {
+                gameViewModel.onTileLeftOperandTapped(index)
+            }
+        },
+        onTileRightOperandTapped = { index ->
+            if (interactionPolicy.canTapTileRightOperand(index)) {
+                gameViewModel.onTileRightOperandTapped(index)
+            }
+        },
         onTileOperandSelectionDismissed = gameViewModel::onTileOperandSelectionDismissed,
-        onTileOperandSelectionConfirmed = gameViewModel::onTileOperandSelectionConfirmed,
-        onTileOperatorTapped = gameViewModel::onTileOperatorTapped,
-        onTileResetTapped = gameViewModel::onTileResetTapped,
+        onTileOperandSelectionConfirmed = onTileOperandSelectionConfirmed@{ stripEntryId ->
+            val dialog = uiState.tileOperandSelectionDialog ?: return@onTileOperandSelectionConfirmed
+
+            if (interactionPolicy.canConfirmTileOperand(dialog.tileIndex, dialog.slot, stripEntryId)) {
+                gameViewModel.onTileOperandSelectionConfirmed(stripEntryId)
+            }
+        },
+        onTileOperatorTapped = { index ->
+            if (interactionPolicy.canTapTileOperator(index)) {
+                gameViewModel.onTileOperatorTapped(index)
+            }
+        },
+        onTileResetTapped = { index ->
+            if (interactionPolicy.canTapTileReset(index)) {
+                gameViewModel.onTileResetTapped(index)
+            }
+        },
         onTileOperatorSelectionDismissed = gameViewModel::onTileOperatorSelectionDismissed,
-        onTileOperatorSelectionConfirmed = gameViewModel::onTileOperatorSelectionConfirmed,
+        onTileOperatorSelectionConfirmed = onTileOperatorSelectionConfirmed@{ operator ->
+            val tileIndex = uiState.tileOperatorSelectionDialog?.tileIndex ?: return@onTileOperatorSelectionConfirmed
+
+            if (interactionPolicy.canConfirmTileOperator(tileIndex, operator)) {
+                gameViewModel.onTileOperatorSelectionConfirmed(operator)
+            }
+        },
         onSuccessOverlayDismissed = gameViewModel::onSuccessOverlayDismissed,
         completionActions = completionActions,
         isRulesHelperEnabled = isRulesHelperEnabled,
+        interactionPolicy = interactionPolicy,
         topBarActions = topBarActions,
         contentBeforePuzzle = contentBeforePuzzle
     )

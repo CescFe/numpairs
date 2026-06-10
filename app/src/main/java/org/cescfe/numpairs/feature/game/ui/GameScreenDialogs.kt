@@ -299,7 +299,8 @@ private enum class OperandUsageHintState(val stateDescriptionResId: Int) {
 internal fun StripItemEntryDialog(
     dialogUiState: StripItemEntryDialogUiState,
     onDismiss: () -> Unit,
-    onConfirm: (Int) -> Unit
+    onConfirm: (Int) -> Unit,
+    canConfirm: (Int) -> Boolean = { true }
 ) {
     var enteredValue by rememberSaveable(
         dialogUiState.stripItemIndex,
@@ -309,8 +310,9 @@ internal fun StripItemEntryDialog(
         mutableStateOf(dialogUiState.initialValue)
     }
     val parsedValue = enteredValue.toIntOrNull()
-    val confirmedValue = parsedValue?.takeIf { it in dialogUiState.validRange }
-    val isInputInvalid = enteredValue.isNotEmpty() && confirmedValue == null
+    val valueInRange = parsedValue?.takeIf { value -> value in dialogUiState.validRange }
+    val confirmedValue = valueInRange?.takeIf(canConfirm)
+    val isInputInvalid = enteredValue.isNotEmpty() && parsedValue != null && valueInRange == null
     val validRangeText = dialogUiState.validRange.maximumValue?.let { maximumValue ->
         stringResource(
             R.string.strip_entry_valid_range_bounded,

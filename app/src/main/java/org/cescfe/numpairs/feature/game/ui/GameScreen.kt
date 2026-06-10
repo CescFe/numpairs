@@ -29,10 +29,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
+import org.cescfe.numpairs.domain.puzzle.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.feature.game.GameCompletionActions
+import org.cescfe.numpairs.feature.game.GameInteractionPolicy
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
+import org.cescfe.numpairs.feature.game.presentation.TileOperandOptionUiState
+import org.cescfe.numpairs.feature.game.presentation.TileOperandSelectionDialogUiState
+import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
@@ -55,6 +60,7 @@ fun GameScreen(
     onSuccessOverlayDismissed: () -> Unit = {},
     completionActions: GameCompletionActions? = null,
     isRulesHelperEnabled: Boolean = false,
+    interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
     topBarActions: @Composable RowScope.() -> Unit = {},
     contentBeforePuzzle: @Composable ColumnScope.() -> Unit = {}
 ) {
@@ -91,6 +97,7 @@ fun GameScreen(
                 StripSection(
                     stripItems = uiState.stripItems,
                     onStripItemTapped = onStripItemTapped,
+                    isStripItemEnabled = interactionPolicy.canTapStripItem,
                     modifier = Modifier.fillMaxWidth()
                 )
                 (uiState.puzzleOutcome as? PuzzleOutcomeUiState.Invalid)?.let { puzzleOutcome ->
@@ -105,9 +112,12 @@ fun GameScreen(
                     onTileRightOperandTapped = onTileRightOperandTapped,
                     onTileOperatorTapped = onTileOperatorTapped,
                     onTileResetTapped = onTileResetTapped,
-                    tileOperatorSelectionDialog = uiState.tileOperatorSelectionDialog,
+                    tileOperatorSelectionDialog = uiState.tileOperatorSelectionDialog.restrictedBy(
+                        interactionPolicy = interactionPolicy
+                    ),
                     onTileOperatorSelectionDismissed = onTileOperatorSelectionDismissed,
                     onTileOperatorSelectionConfirmed = onTileOperatorSelectionConfirmed,
+                    interactionPolicy = interactionPolicy,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -125,12 +135,15 @@ fun GameScreen(
         StripItemEntryDialog(
             dialogUiState = dialogUiState,
             onDismiss = onStripItemEntryDismissed,
-            onConfirm = onStripItemEntryConfirmed
+            onConfirm = onStripItemEntryConfirmed,
+            canConfirm = { value ->
+                interactionPolicy.canConfirmStripItemEntry(dialogUiState.stripItemIndex, value)
+            }
         )
     }
     uiState.tileOperandSelectionDialog?.let { dialogUiState ->
         TileOperandSelectionSheet(
-            dialogUiState = dialogUiState,
+            dialogUiState = dialogUiState.restrictedBy(interactionPolicy = interactionPolicy),
             onDismiss = onTileOperandSelectionDismissed,
             onConfirm = onTileOperandSelectionConfirmed
         )
@@ -143,6 +156,42 @@ fun GameScreen(
         )
     }
 }
+
+private fun TileOperatorSelectionDialogUiState?.restrictedBy(
+    interactionPolicy: GameInteractionPolicy
+): TileOperatorSelectionDialogUiState? = this?.let { dialog ->
+    dialog.copy(
+        availableOperators = dialog.availableOperators.filter { operator ->
+            interactionPolicy.canConfirmTileOperator(dialog.tileIndex, operator)
+        }
+    ).takeIf { restrictedDialog ->
+        restrictedDialog.availableOperators.isNotEmpty()
+    }
+}
+
+private fun TileOperandSelectionDialogUiState.restrictedBy(
+    interactionPolicy: GameInteractionPolicy
+): TileOperandSelectionDialogUiState = copy(
+    availableOperands = availableOperands.map { operand ->
+        operand.restrictedBy(
+            tileIndex = tileIndex,
+            slot = slot,
+            interactionPolicy = interactionPolicy
+        )
+    }
+)
+
+private fun TileOperandOptionUiState.restrictedBy(
+    tileIndex: Int,
+    slot: OperandSlot,
+    interactionPolicy: GameInteractionPolicy
+): TileOperandOptionUiState = copy(
+    isSelectable = isSelectable && interactionPolicy.canConfirmTileOperand(
+        tileIndex,
+        slot,
+        stripEntryId
+    )
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
