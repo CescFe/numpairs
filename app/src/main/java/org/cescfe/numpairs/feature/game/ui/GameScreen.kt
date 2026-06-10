@@ -32,6 +32,7 @@ import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
 import org.cescfe.numpairs.domain.puzzle.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.feature.game.GameCompletionActions
+import org.cescfe.numpairs.feature.game.GameHighlightState
 import org.cescfe.numpairs.feature.game.GameInteractionPolicy
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
@@ -61,6 +62,7 @@ fun GameScreen(
     completionActions: GameCompletionActions? = null,
     isRulesHelperEnabled: Boolean = false,
     interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
+    highlightState: GameHighlightState = GameHighlightState.None,
     topBarActions: @Composable RowScope.() -> Unit = {},
     contentBeforePuzzle: @Composable ColumnScope.() -> Unit = {}
 ) {
@@ -98,6 +100,7 @@ fun GameScreen(
                     stripItems = uiState.stripItems,
                     onStripItemTapped = onStripItemTapped,
                     isStripItemEnabled = interactionPolicy.canTapStripItem,
+                    highlightState = highlightState,
                     modifier = Modifier.fillMaxWidth()
                 )
                 (uiState.puzzleOutcome as? PuzzleOutcomeUiState.Invalid)?.let { puzzleOutcome ->
@@ -118,6 +121,7 @@ fun GameScreen(
                     onTileOperatorSelectionDismissed = onTileOperatorSelectionDismissed,
                     onTileOperatorSelectionConfirmed = onTileOperatorSelectionConfirmed,
                     interactionPolicy = interactionPolicy,
+                    highlightState = highlightState,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -186,11 +190,12 @@ private fun TileOperandOptionUiState.restrictedBy(
     slot: OperandSlot,
     interactionPolicy: GameInteractionPolicy
 ): TileOperandOptionUiState = copy(
-    isSelectable = isSelectable && interactionPolicy.canConfirmTileOperand(
-        tileIndex,
-        slot,
-        stripEntryId
-    )
+    isSelectable = isSelectable &&
+        interactionPolicy.canConfirmTileOperand(
+            tileIndex,
+            slot,
+            stripEntryId
+        )
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

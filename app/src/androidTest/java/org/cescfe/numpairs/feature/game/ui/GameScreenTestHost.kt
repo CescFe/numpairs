@@ -10,6 +10,7 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
+import org.cescfe.numpairs.feature.game.GameHighlightState
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.GameViewModel
 import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState
@@ -27,6 +28,7 @@ abstract class GameScreenTestHost {
     private var uiStateOverride: GameUiState? by mutableStateOf(null)
     private var onTileOperatorTappedOverride: ((Int) -> Unit)? by mutableStateOf(null)
     private var onSuccessOverlayDismissedOverride: (() -> Unit)? by mutableStateOf(null)
+    private var highlightState by mutableStateOf(GameHighlightState.None)
     private var useSolvedOverlayFixture by mutableStateOf(false)
     private var isSolvedOverlayVisible by mutableStateOf(false)
 
@@ -36,6 +38,7 @@ abstract class GameScreenTestHost {
         uiStateOverride = null
         onTileOperatorTappedOverride = null
         onSuccessOverlayDismissedOverride = null
+        highlightState = GameHighlightState.None
         useSolvedOverlayFixture = false
         isSolvedOverlayVisible = false
 
@@ -69,7 +72,8 @@ abstract class GameScreenTestHost {
                     onTileResetTapped = currentViewModel::onTileResetTapped,
                     onTileOperatorSelectionDismissed = currentViewModel::onTileOperatorSelectionDismissed,
                     onTileOperatorSelectionConfirmed = currentViewModel::onTileOperatorSelectionConfirmed,
-                    onSuccessOverlayDismissed = onSuccessOverlayDismissed
+                    onSuccessOverlayDismissed = onSuccessOverlayDismissed,
+                    highlightState = highlightState
                 )
             }
         }
@@ -133,6 +137,12 @@ abstract class GameScreenTestHost {
     protected fun showUiStateFixture(uiState: GameUiState) {
         composeTestRule.runOnIdle {
             uiStateOverride = uiState
+        }
+    }
+
+    protected fun showHighlightState(highlightState: GameHighlightState) {
+        composeTestRule.runOnIdle {
+            this.highlightState = highlightState
         }
     }
 }

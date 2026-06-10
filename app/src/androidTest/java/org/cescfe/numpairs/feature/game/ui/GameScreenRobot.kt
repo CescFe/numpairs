@@ -331,6 +331,64 @@ class GameScreenRobot(
             )
     }
 
+    fun assertStripItemHighlighted(index: Int): GameScreenRobot = apply {
+        assertHighlighted(testTag = GameScreenTestTags.stripItem(index))
+    }
+
+    fun assertStripItemNotHighlighted(index: Int): GameScreenRobot = apply {
+        assertNotHighlighted(testTag = GameScreenTestTags.stripItem(index))
+    }
+
+    fun assertTileHighlighted(index: Int): GameScreenRobot = apply {
+        assertHighlighted(testTag = GameScreenTestTags.tile(index))
+    }
+
+    fun assertTileNotHighlighted(index: Int): GameScreenRobot = apply {
+        assertNotHighlighted(testTag = GameScreenTestTags.tile(index))
+    }
+
+    fun assertLeftOperandHighlighted(tileIndex: Int): GameScreenRobot = apply {
+        assertHighlighted(
+            testTag = GameScreenTestTags.tileLeftOperand(tileIndex),
+            useUnmergedTree = true
+        )
+    }
+
+    fun assertLeftOperandNotHighlighted(tileIndex: Int): GameScreenRobot = apply {
+        assertNotHighlighted(
+            testTag = GameScreenTestTags.tileLeftOperand(tileIndex),
+            useUnmergedTree = true
+        )
+    }
+
+    fun assertOperatorHighlighted(tileIndex: Int): GameScreenRobot = apply {
+        assertHighlighted(
+            testTag = GameScreenTestTags.tileOperator(tileIndex),
+            useUnmergedTree = true
+        )
+    }
+
+    fun assertOperatorNotHighlighted(tileIndex: Int): GameScreenRobot = apply {
+        assertNotHighlighted(
+            testTag = GameScreenTestTags.tileOperator(tileIndex),
+            useUnmergedTree = true
+        )
+    }
+
+    fun assertRightOperandHighlighted(tileIndex: Int): GameScreenRobot = apply {
+        assertHighlighted(
+            testTag = GameScreenTestTags.tileRightOperand(tileIndex),
+            useUnmergedTree = true
+        )
+    }
+
+    fun assertRightOperandNotHighlighted(tileIndex: Int): GameScreenRobot = apply {
+        assertNotHighlighted(
+            testTag = GameScreenTestTags.tileRightOperand(tileIndex),
+            useUnmergedTree = true
+        )
+    }
+
     fun assertPuzzleOutcomeVisible(): GameScreenRobot = apply {
         interactions
             .onNodeWithTag(GameScreenTestTags.PUZZLE_OUTCOME)
@@ -379,6 +437,25 @@ class GameScreenRobot(
                     SemanticsProperties.ContentDescription,
                     listOf(contentDescription)
                 )
+            )
+    }
+
+    private fun assertHighlighted(testTag: String, useUnmergedTree: Boolean = false) {
+        interactions
+            .onNodeWithTag(testTag, useUnmergedTree = useUnmergedTree)
+            .assert(
+                SemanticsMatcher.expectValue(
+                    GameHighlightedKey,
+                    true
+                )
+            )
+    }
+
+    private fun assertNotHighlighted(testTag: String, useUnmergedTree: Boolean = false) {
+        interactions
+            .onNodeWithTag(testTag, useUnmergedTree = useUnmergedTree)
+            .assert(
+                SemanticsMatcher.keyNotDefined(GameHighlightedKey)
             )
     }
 

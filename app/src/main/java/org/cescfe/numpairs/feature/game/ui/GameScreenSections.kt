@@ -22,7 +22,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Operator
+import org.cescfe.numpairs.feature.game.GameHighlightState
 import org.cescfe.numpairs.feature.game.GameInteractionPolicy
+import org.cescfe.numpairs.feature.game.GameTileExpressionSlot
 import org.cescfe.numpairs.feature.game.presentation.StripItemUiState
 import org.cescfe.numpairs.feature.game.presentation.StripItemVisualStyle
 import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState
@@ -42,7 +44,8 @@ internal fun BoardSection(
     tileOperatorSelectionDialog: TileOperatorSelectionDialogUiState?,
     onTileOperatorSelectionDismissed: () -> Unit,
     onTileOperatorSelectionConfirmed: (Operator) -> Unit,
-    interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll
+    interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
+    highlightState: GameHighlightState = GameHighlightState.None
 ) {
     val boardContentDescription = stringResource(R.string.board_content_description)
 
@@ -79,10 +82,15 @@ internal fun BoardSection(
 
                             PuzzleTile(
                                 tile = tile,
+                                isHighlighted = highlightState.isTileHighlighted(tileIndex),
                                 modifier = Modifier
                                     .testTag(GameScreenTestTags.tile(tileIndex))
                                     .width(tileWidth)
                                     .wrapContentHeight(),
+                                isLeftOperandHighlighted = highlightState.isTileExpressionSlotHighlighted(
+                                    tileIndex = tileIndex,
+                                    slot = GameTileExpressionSlot.LEFT_OPERAND
+                                ),
                                 leftOperandModifier = Modifier.testTag(GameScreenTestTags.tileLeftOperand(tileIndex)),
                                 leftOperandContentDescription = tileLeftOperandContentDescription(tile),
                                 onLeftOperandClick = if (interactionPolicy.canTapTileLeftOperand(tileIndex)) {
@@ -90,6 +98,10 @@ internal fun BoardSection(
                                 } else {
                                     null
                                 },
+                                isOperatorHighlighted = highlightState.isTileExpressionSlotHighlighted(
+                                    tileIndex = tileIndex,
+                                    slot = GameTileExpressionSlot.OPERATOR
+                                ),
                                 operatorModifier = Modifier.testTag(GameScreenTestTags.tileOperator(tileIndex)),
                                 operatorContentDescription = tileOperatorContentDescription(tile),
                                 onOperatorClick = if (interactionPolicy.canTapTileOperator(tileIndex)) {
@@ -106,6 +118,10 @@ internal fun BoardSection(
                                         )
                                     }
                                 },
+                                isRightOperandHighlighted = highlightState.isTileExpressionSlotHighlighted(
+                                    tileIndex = tileIndex,
+                                    slot = GameTileExpressionSlot.RIGHT_OPERAND
+                                ),
                                 rightOperandModifier = Modifier.testTag(GameScreenTestTags.tileRightOperand(tileIndex)),
                                 rightOperandContentDescription = tileRightOperandContentDescription(tile),
                                 onRightOperandClick = if (interactionPolicy.canTapTileRightOperand(tileIndex)) {
@@ -133,7 +149,8 @@ internal fun StripSection(
     modifier: Modifier = Modifier,
     stripItems: List<StripItemUiState>,
     onStripItemTapped: (Int) -> Unit,
-    isStripItemEnabled: (Int) -> Boolean = { true }
+    isStripItemEnabled: (Int) -> Boolean = { true },
+    highlightState: GameHighlightState = GameHighlightState.None
 ) {
     val stripContentDescription = stringResource(R.string.strip_content_description)
 
@@ -171,6 +188,7 @@ internal fun StripSection(
                             .width(chipWidth)
                             .testTag(GameScreenTestTags.stripItem(index)),
                         contentDescription = stripItemContentDescription(stripItem),
+                        isHighlighted = highlightState.isStripEntryHighlighted(index),
                         style = when (stripItem.visualStyle) {
                             StripItemVisualStyle.KNOWN -> AvailableNumberChipStyle.KNOWN
                             StripItemVisualStyle.HIDDEN -> AvailableNumberChipStyle.HIDDEN

@@ -28,6 +28,7 @@ fun GameRoute(
     completionActions: GameCompletionActions? = null,
     isRulesHelperEnabled: Boolean = false,
     interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
+    highlightState: GameHighlightState = GameHighlightState.None,
     topBarActions: @Composable RowScope.() -> Unit = {},
     contentBeforePuzzle: @Composable ColumnScope.() -> Unit = {},
     onNavigateBack: () -> Unit = {}
@@ -100,6 +101,7 @@ fun GameRoute(
         completionActions = completionActions,
         isRulesHelperEnabled = isRulesHelperEnabled,
         interactionPolicy = interactionPolicy,
+        highlightState = highlightState,
         topBarActions = topBarActions,
         contentBeforePuzzle = contentBeforePuzzle
     )

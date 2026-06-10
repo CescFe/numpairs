@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.feature.game.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +17,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.cescfe.numpairs.feature.game.ui.gameHighlightSemantics
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 enum class AvailableNumberChipStyle {
@@ -30,16 +32,22 @@ fun AvailableNumberChip(
     modifier: Modifier = Modifier,
     style: AvailableNumberChipStyle = AvailableNumberChipStyle.KNOWN,
     contentDescription: String? = null,
+    isHighlighted: Boolean = false,
     onClick: (() -> Unit)? = null
 ) {
     val chipColors = chipColorsFor(style)
+    val chipBorder = if (isHighlighted) {
+        BorderStroke(width = HIGHLIGHTED_CHIP_BORDER_WIDTH, color = MaterialTheme.colorScheme.tertiary)
+    } else {
+        chipColors.border
+    }
     val chipModifier = if (contentDescription == null) {
         modifier
     } else {
         modifier.semantics(mergeDescendants = true) {
             this.contentDescription = contentDescription
         }
-    }
+    }.gameHighlightSemantics(isHighlighted)
 
     if (onClick == null) {
         Surface(
@@ -47,7 +55,7 @@ fun AvailableNumberChip(
             shape = RoundedCornerShape(CHIP_CORNER_RADIUS),
             color = chipColors.containerColor,
             contentColor = chipColors.contentColor,
-            border = chipColors.border,
+            border = chipBorder,
             tonalElevation = 1.dp
         ) {
             AvailableNumberChipLabel(label = label)
@@ -59,7 +67,7 @@ fun AvailableNumberChip(
             shape = RoundedCornerShape(CHIP_CORNER_RADIUS),
             color = chipColors.containerColor,
             contentColor = chipColors.contentColor,
-            border = chipColors.border,
+            border = chipBorder,
             tonalElevation = 1.dp
         ) {
             AvailableNumberChipLabel(label = label)
