@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.OperandSlot
@@ -43,7 +44,7 @@ fun TutorialRoute(modifier: Modifier = Modifier, onNavigateBack: () -> Unit = {}
         val uiState = latestGameUiState ?: return@LaunchedEffect
 
         if (currentStepIndex < steps.lastIndex && currentStep.isComplete(uiState)) {
-            delay(TUTORIAL_STEP_ADVANCE_DELAY_MS)
+            delay(TUTORIAL_STEP_ADVANCE_DELAY)
             currentStepIndex = (currentStepIndex + 1).coerceAtMost(steps.lastIndex)
         }
     }
@@ -195,4 +196,4 @@ private fun expressionSlotHighlights(tileIndex: Int): Set<GameTileExpressionSlot
 )
 
 private const val TUTORIAL_GAME_SESSION_KEY = "tutorial-walkthrough"
-private const val TUTORIAL_STEP_ADVANCE_DELAY_MS = 500L
+private val TUTORIAL_STEP_ADVANCE_DELAY = 500.milliseconds
