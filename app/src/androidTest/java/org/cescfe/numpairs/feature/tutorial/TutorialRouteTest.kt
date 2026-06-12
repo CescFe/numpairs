@@ -55,6 +55,16 @@ class TutorialRouteTest {
     }
 
     @Test
+    fun selectingPracticeFullPuzzleFromMenuOpensTheFullTutorialPuzzle() {
+        setContent()
+
+        navigateToPracticeFullPuzzleTutorial()
+
+        assertStepDisplayed(stepIndex = 0, mode = TutorialMode.PRACTICE_FULL_PUZZLE)
+        assertFinalEasyFourPairsScenarioDisplayed()
+    }
+
+    @Test
     fun tutorialDoesNotAdvanceBeforeTheRequiredActionIsCompleted() {
         setContent()
         navigateToTutorial()
@@ -187,6 +197,25 @@ class TutorialRouteTest {
     private fun navigateToTutorial() {
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
+            .assertIsDisplayed()
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_LEARN_BASICS_BUTTON)
+            .assertIsDisplayed()
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+    }
+
+    private fun navigateToPracticeFullPuzzleTutorial() {
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
+            .assertIsDisplayed()
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_PRACTICE_FULL_PUZZLE_BUTTON)
             .assertIsDisplayed()
             .performClick()
 

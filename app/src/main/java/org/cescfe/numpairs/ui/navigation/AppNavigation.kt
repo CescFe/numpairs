@@ -11,11 +11,12 @@ import org.cescfe.numpairs.feature.fourpairs.DefaultFourPairsPuzzleProvider
 import org.cescfe.numpairs.feature.fourpairs.FourPairsPuzzleProvider
 import org.cescfe.numpairs.feature.fourpairs.FourPairsRoute
 import org.cescfe.numpairs.feature.menu.MenuRoute
+import org.cescfe.numpairs.feature.tutorial.TutorialMode
 import org.cescfe.numpairs.feature.tutorial.TutorialRoute
 
 sealed interface AppDestination {
     data object Menu : AppDestination
-    data object Tutorial : AppDestination
+    data class Tutorial(val mode: TutorialMode) : AppDestination
     data object FourPairs : AppDestination
 }
 
@@ -36,18 +37,22 @@ fun AppNavigation(
         navigateToMenu()
     }
 
-    when (currentDestination) {
+    when (val destination = currentDestination) {
         AppDestination.Menu -> MenuRoute(
             modifier = modifier,
-            onTutorialSelected = {
-                currentDestination = AppDestination.Tutorial
+            onLearnBasicsTutorialSelected = {
+                currentDestination = AppDestination.Tutorial(mode = TutorialMode.LEARN_BASICS)
+            },
+            onPracticeFullPuzzleTutorialSelected = {
+                currentDestination = AppDestination.Tutorial(mode = TutorialMode.PRACTICE_FULL_PUZZLE)
             },
             onFourPairsSelected = {
                 currentDestination = AppDestination.FourPairs
             }
         )
-        AppDestination.Tutorial -> TutorialRoute(
+        is AppDestination.Tutorial -> TutorialRoute(
             modifier = modifier,
+            mode = destination.mode,
             onNavigateBack = navigateToMenu
         )
         AppDestination.FourPairs -> FourPairsRoute(

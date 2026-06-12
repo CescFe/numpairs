@@ -7,12 +7,14 @@ import org.cescfe.numpairs.feature.menu.ui.MenuScreen
 @Composable
 fun MenuRoute(
     modifier: Modifier = Modifier,
-    onTutorialSelected: () -> Unit = {},
+    onLearnBasicsTutorialSelected: () -> Unit = {},
+    onPracticeFullPuzzleTutorialSelected: () -> Unit = {},
     onFourPairsSelected: () -> Unit = {}
 ) {
     MenuScreen(
         modifier = modifier,
-        onTutorialSelected = onTutorialSelected,
+        onLearnBasicsTutorialSelected = onLearnBasicsTutorialSelected,
+        onPracticeFullPuzzleTutorialSelected = onPracticeFullPuzzleTutorialSelected,
         onFourPairsSelected = onFourPairsSelected
     )
 }

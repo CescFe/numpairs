@@ -28,6 +28,10 @@ class MainActivityStartupTest {
             .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
             .assertIsDisplayed()
             .performClick()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_LEARN_BASICS_BUTTON)
+            .assertIsDisplayed()
+            .performClick()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SCREEN)
@@ -50,9 +54,7 @@ class MainActivityStartupTest {
 
     @Test
     fun gameScreenTopAppBarBackButtonReturnsToTheMenu() {
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
-            .performClick()
+        openLearnBasicsTutorialFromMenu()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.BACK_BUTTON)
@@ -75,17 +77,64 @@ class MainActivityStartupTest {
             .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
             .assertDoesNotExist()
 
+        openLearnBasicsTutorialFromMenu()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
+            .assertDoesNotExist()
+    }
+
+    @Test
+    fun tutorialButtonTogglesInlineModeSubmenuAndKeepsFourPairsVisible() {
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_LEARN_BASICS_BUTTON)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_PRACTICE_FULL_PUZZLE_BUTTON)
+            .assertDoesNotExist()
+
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
+            .assertIsDisplayed()
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_LEARN_BASICS_BUTTON)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_PRACTICE_FULL_PUZZLE_BUTTON)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+            .assertIsDisplayed()
+
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
             .performClick()
 
         composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_LEARN_BASICS_BUTTON)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_PRACTICE_FULL_PUZZLE_BUTTON)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+            .assertIsDisplayed()
+    }
+
+    private fun openLearnBasicsTutorialFromMenu() {
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
+            .assertIsDisplayed()
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_LEARN_BASICS_BUTTON)
+            .assertIsDisplayed()
+            .performClick()
+        composeTestRule
             .onNodeWithTag(GameScreenTestTags.SCREEN)
             .assertIsDisplayed()
-
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
-            .assertDoesNotExist()
     }
 
     private fun backButtonContentDescription(): String = string(R.string.back_button_content_description)

@@ -8,12 +8,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -26,9 +31,12 @@ import org.cescfe.numpairs.ui.theme.NumPairsTheme
 @Composable
 fun MenuScreen(
     modifier: Modifier = Modifier,
-    onTutorialSelected: () -> Unit = {},
+    onLearnBasicsTutorialSelected: () -> Unit = {},
+    onPracticeFullPuzzleTutorialSelected: () -> Unit = {},
     onFourPairsSelected: () -> Unit = {}
 ) {
+    var isTutorialSubmenuExpanded by rememberSaveable { mutableStateOf(false) }
+
     Scaffold(
         modifier = modifier
             .fillMaxSize()
@@ -49,15 +57,36 @@ fun MenuScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                OutlinedButton(
-                    onClick = onTutorialSelected,
-                    modifier = Modifier.testTag(MenuScreenTestTags.TUTORIAL_BUTTON),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text = stringResource(R.string.menu_tutorial_button),
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    OutlinedButton(
+                        onClick = {
+                            isTutorialSubmenuExpanded = !isTutorialSubmenuExpanded
+                        },
+                        modifier = Modifier.testTag(MenuScreenTestTags.TUTORIAL_BUTTON),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.menu_tutorial_button),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    if (isTutorialSubmenuExpanded) {
+                        FilledTonalButton(
+                            onClick = onLearnBasicsTutorialSelected,
+                            modifier = Modifier.testTag(MenuScreenTestTags.TUTORIAL_LEARN_BASICS_BUTTON)
+                        ) {
+                            Text(text = stringResource(R.string.menu_tutorial_learn_basics_button))
+                        }
+                        FilledTonalButton(
+                            onClick = onPracticeFullPuzzleTutorialSelected,
+                            modifier = Modifier.testTag(MenuScreenTestTags.TUTORIAL_PRACTICE_FULL_PUZZLE_BUTTON)
+                        ) {
+                            Text(text = stringResource(R.string.menu_tutorial_practice_full_puzzle_button))
+                        }
+                    }
                 }
                 OutlinedButton(
                     onClick = onFourPairsSelected,
