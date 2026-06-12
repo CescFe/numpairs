@@ -106,7 +106,20 @@ object TutorialMvpContent {
         )
     )
 
+    val learnBasicsSteps: List<TutorialStep> = steps.take(4)
+    val practiceFullPuzzleSteps: List<TutorialStep> = steps.drop(4)
+
+    fun stepsFor(mode: TutorialMode): List<TutorialStep> = when (mode) {
+        TutorialMode.LEARN_BASICS -> learnBasicsSteps
+        TutorialMode.PRACTICE_FULL_PUZZLE -> practiceFullPuzzleSteps
+    }
+
     fun scenario(id: TutorialScenarioId): TutorialScenario = scenarios.first { scenario -> scenario.id == id }
+}
+
+enum class TutorialMode {
+    LEARN_BASICS,
+    PRACTICE_FULL_PUZZLE
 }
 
 data class TutorialScenario(

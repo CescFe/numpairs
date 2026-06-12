@@ -33,10 +33,14 @@ import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.tutorial.ui.TutorialScreenTestTags
 
 @Composable
-fun TutorialRoute(modifier: Modifier = Modifier, onNavigateBack: () -> Unit = {}) {
-    val steps = TutorialMvpContent.steps
-    var currentStepIndex by rememberSaveable { mutableIntStateOf(0) }
-    var latestGameUiState by remember { mutableStateOf<GameUiState?>(null) }
+fun TutorialRoute(
+    modifier: Modifier = Modifier,
+    mode: TutorialMode = TutorialMode.LEARN_BASICS,
+    onNavigateBack: () -> Unit = {}
+) {
+    val steps = TutorialMvpContent.stepsFor(mode)
+    var currentStepIndex by rememberSaveable(mode) { mutableIntStateOf(0) }
+    var latestGameUiState by remember(mode) { mutableStateOf<GameUiState?>(null) }
     val currentStep = steps[currentStepIndex]
     val currentScenario = TutorialMvpContent.scenario(currentStep.scenarioId)
 
@@ -53,14 +57,15 @@ fun TutorialRoute(modifier: Modifier = Modifier, onNavigateBack: () -> Unit = {}
         title = stringResource(R.string.tutorial_screen_title),
         initialPuzzle = currentScenario.initialPuzzle,
         modifier = modifier,
-        gameSessionKey = "$TUTORIAL_GAME_SESSION_KEY:${currentScenario.id}",
-        puzzleResetKey = currentScenario.id,
+        gameSessionKey = "$TUTORIAL_GAME_SESSION_KEY:$mode:${currentScenario.id}",
+        puzzleResetKey = mode to currentScenario.id,
         isSuccessOverlayEnabled = currentStep.scenarioId == TutorialScenarioId.FINAL_EASY_FOUR_PAIRS,
         interactionPolicy = currentStep.requiredAction.toInteractionPolicy(),
         highlightState = currentStep.toHighlightState(scenario = currentScenario),
         contentBeforePuzzle = {
             TutorialInstructionSurface(
                 currentStep = currentStep,
+                currentStepNumber = currentStepIndex + 1,
                 totalSteps = steps.size,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -73,7 +78,12 @@ fun TutorialRoute(modifier: Modifier = Modifier, onNavigateBack: () -> Unit = {}
 }
 
 @Composable
-private fun TutorialInstructionSurface(currentStep: TutorialStep, totalSteps: Int, modifier: Modifier = Modifier) {
+private fun TutorialInstructionSurface(
+    currentStep: TutorialStep,
+    currentStepNumber: Int,
+    totalSteps: Int,
+    modifier: Modifier = Modifier
+) {
     Surface(
         modifier = modifier.testTag(TutorialScreenTestTags.INSTRUCTION_SURFACE),
         shape = MaterialTheme.shapes.medium,
@@ -87,7 +97,7 @@ private fun TutorialInstructionSurface(currentStep: TutorialStep, totalSteps: In
             Text(
                 text = stringResource(
                     R.string.tutorial_step_indicator,
-                    currentStep.order,
+                    currentStepNumber,
                     totalSteps
                 ),
                 modifier = Modifier.testTag(TutorialScreenTestTags.STEP_INDICATOR),

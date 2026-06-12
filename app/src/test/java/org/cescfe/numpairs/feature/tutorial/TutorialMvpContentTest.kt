@@ -193,7 +193,7 @@ class TutorialMvpContentTest {
     }
 
     @Test
-    fun maps_steps_one_to_five_to_the_active_tutorial_scenarios() {
+    fun maps_steps_one_to_five_to_the_authored_tutorial_scenarios() {
         val steps = TutorialMvpContent.steps
 
         assertEquals(listOf(1, 2, 3, 4, 5), steps.map(TutorialStep::order))
@@ -216,6 +216,33 @@ class TutorialMvpContentTest {
                 R.string.tutorial_step_five_copy
             ),
             steps.map(TutorialStep::playerFacingCopyResId)
+        )
+    }
+
+    @Test
+    fun exposes_mode_specific_tutorial_step_lists() {
+        assertEquals(
+            listOf(
+                TutorialMode.LEARN_BASICS,
+                TutorialMode.PRACTICE_FULL_PUZZLE
+            ),
+            TutorialMode.entries.toList()
+        )
+        assertEquals(
+            listOf(1, 2, 3, 4),
+            TutorialMvpContent.stepsFor(TutorialMode.LEARN_BASICS).map(TutorialStep::order)
+        )
+        assertEquals(
+            listOf(5),
+            TutorialMvpContent.stepsFor(TutorialMode.PRACTICE_FULL_PUZZLE).map(TutorialStep::order)
+        )
+        assertEquals(
+            TutorialMvpContent.learnBasicsSteps,
+            TutorialMvpContent.stepsFor(TutorialMode.LEARN_BASICS)
+        )
+        assertEquals(
+            TutorialMvpContent.practiceFullPuzzleSteps,
+            TutorialMvpContent.stepsFor(TutorialMode.PRACTICE_FULL_PUZZLE)
         )
     }
 
