@@ -19,30 +19,25 @@ class MainActivityStartupTest {
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun systemBackFromFourPairsReturnsToTheMenu() {
+    fun fourPairsStartupFlowSupportsHelpAndBackNavigation() {
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
+            .assertDoesNotExist()
+
         openFourPairsFromMenu()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
             .assertIsDisplayed()
-
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.SCREEN)
-            .assertDoesNotExist()
 
         pressBack()
 
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.SCREEN)
-            .assertIsDisplayed()
+        assertMenuIsDisplayed()
 
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SCREEN)
-            .assertDoesNotExist()
-    }
-
-    @Test
-    fun gameScreenTopAppBarBackButtonReturnsToTheMenu() {
         openFourPairsFromMenu()
 
         composeTestRule
@@ -51,26 +46,7 @@ class MainActivityStartupTest {
             .assertContentDescriptionEquals(backButtonContentDescription())
             .performClick()
 
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.SCREEN)
-            .assertIsDisplayed()
-
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SCREEN)
-            .assertDoesNotExist()
-    }
-
-    @Test
-    fun fourPairsShowsRulesHelperAction() {
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
-            .assertDoesNotExist()
-
-        openFourPairsFromMenu()
-
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
-            .assertIsDisplayed()
+        assertMenuIsDisplayed()
     }
 
     private fun openFourPairsFromMenu() {
@@ -83,6 +59,15 @@ class MainActivityStartupTest {
             .assertIsDisplayed()
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.SCREEN)
+            .assertDoesNotExist()
+    }
+
+    private fun assertMenuIsDisplayed() {
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
             .assertDoesNotExist()
     }
 
