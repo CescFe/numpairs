@@ -45,6 +45,7 @@
     <string name="rules_helper_action_content_description">Rules help</string>
     <string name="rules_helper_title">How to play</string>
     <string name="rules_helper_close_content_description">Close rules help</string>
+    <string name="rules_helper_play_tutorial_button">Play tutorial</string>
     <string name="rules_helper_objective_title">Objective</string>
     <string name="rules_helper_objective_complete">Guess all the unknown elements.</string>
     <string name="rules_helper_elements_title">Screen elements</string>

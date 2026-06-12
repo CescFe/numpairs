@@ -52,6 +52,10 @@ class RulesHelperDialogTest {
         assertRulesHelperTextExists(R.string.rules_helper_grid_title)
         assertRulesHelperTextExists(R.string.rules_helper_grid_expression)
         assertRulesHelperTextExists(R.string.rules_helper_grid_pair_usage)
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_PLAY_TUTORIAL_BUTTON)
+            .assertDoesNotExist()
     }
 
     @Test
@@ -81,6 +85,48 @@ class RulesHelperDialogTest {
             .assertDoesNotExist()
         composeTestRule.runOnIdle {
             assertEquals(1, dismissCount)
+        }
+    }
+
+    @Test
+    fun playTutorialActionDismissesRulesHelperDialogAndInvokesCallback() {
+        var isDialogVisible by mutableStateOf(true)
+        var dismissCount = 0
+        var playTutorialRequestCount = 0
+
+        composeTestRule.setContent {
+            NumPairsTheme {
+                if (isDialogVisible) {
+                    RulesHelperDialog(
+                        onDismiss = {
+                            dismissCount += 1
+                            isDialogVisible = false
+                        },
+                        onPlayTutorialRequested = {
+                            playTutorialRequestCount += 1
+                        }
+                    )
+                }
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_PLAY_TUTORIAL_BUTTON)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(string(R.string.rules_helper_play_tutorial_button))
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_PLAY_TUTORIAL_BUTTON)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_DIALOG)
+            .assertDoesNotExist()
+        composeTestRule.runOnIdle {
+            assertEquals(1, dismissCount)
+            assertEquals(1, playTutorialRequestCount)
         }
     }
 

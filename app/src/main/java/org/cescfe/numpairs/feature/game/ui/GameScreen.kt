@@ -61,6 +61,7 @@ fun GameScreen(
     onSuccessOverlayDismissed: () -> Unit = {},
     completionActions: GameCompletionActions? = null,
     isRulesHelperEnabled: Boolean = false,
+    onRulesHelperPlayTutorialRequested: (() -> Unit)? = null,
     isSuccessOverlayEnabled: Boolean = true,
     interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
     highlightState: GameHighlightState = GameHighlightState.None,
@@ -161,7 +162,8 @@ fun GameScreen(
         RulesHelperDialog(
             onDismiss = {
                 isRulesHelperVisible = false
-            }
+            },
+            onPlayTutorialRequested = onRulesHelperPlayTutorialRequested
         )
     }
 }
