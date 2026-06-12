@@ -19,40 +19,26 @@ class MainActivityStartupTest {
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun coldStartShowsMenuAfterSplashAndSystemBackFromTutorialReturnsToTheMenu() {
+    fun fourPairsStartupFlowSupportsHelpAndBackNavigation() {
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.SCREEN)
             .assertIsDisplayed()
 
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
-            .assertIsDisplayed()
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SCREEN)
-            .assertIsDisplayed()
-
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.SCREEN)
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
             .assertDoesNotExist()
+
+        openFourPairsFromMenu()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
+            .assertIsDisplayed()
 
         pressBack()
 
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.SCREEN)
-            .assertIsDisplayed()
+        assertMenuIsDisplayed()
 
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SCREEN)
-            .assertDoesNotExist()
-    }
-
-    @Test
-    fun gameScreenTopAppBarBackButtonReturnsToTheMenu() {
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
-            .performClick()
+        openFourPairsFromMenu()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.BACK_BUTTON)
@@ -60,31 +46,28 @@ class MainActivityStartupTest {
             .assertContentDescriptionEquals(backButtonContentDescription())
             .performClick()
 
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.SCREEN)
-            .assertIsDisplayed()
+        assertMenuIsDisplayed()
+    }
 
+    private fun openFourPairsFromMenu() {
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+            .assertIsDisplayed()
+            .performClick()
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.SCREEN)
             .assertDoesNotExist()
     }
 
-    @Test
-    fun tutorialDoesNotShowRulesHelperAction() {
+    private fun assertMenuIsDisplayed() {
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
-            .assertDoesNotExist()
-
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
-            .performClick()
-
+            .onNodeWithTag(MenuScreenTestTags.SCREEN)
+            .assertIsDisplayed()
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SCREEN)
-            .assertIsDisplayed()
-
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
             .assertDoesNotExist()
     }
 

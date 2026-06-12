@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">NumPairs</string>
     <string name="back_button_content_description">Back</string>
-    <string name="menu_tutorial_button">Tutorial</string>
     <string name="tutorial_screen_title">Tutorial</string>
     <string name="tutorial_step_indicator">Step %1$d of %2$d</string>
     <string name="tutorial_step_one_copy">The main objective is to discover all unknown elements. Guess hidden values to complete an ascending list of positive integers.</string>
