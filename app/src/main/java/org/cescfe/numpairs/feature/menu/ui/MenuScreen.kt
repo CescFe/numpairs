@@ -50,22 +50,22 @@ fun MenuScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 OutlinedButton(
-                    onClick = onTutorialSelected,
-                    modifier = Modifier.testTag(MenuScreenTestTags.TUTORIAL_BUTTON),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
-                ) {
-                    Text(
-                        text = stringResource(R.string.menu_tutorial_button),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                OutlinedButton(
                     onClick = onFourPairsSelected,
                     modifier = Modifier.testTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
                 ) {
                     Text(
                         text = stringResource(R.string.menu_four_pairs_button),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                OutlinedButton(
+                    onClick = onTutorialSelected,
+                    modifier = Modifier.testTag(MenuScreenTestTags.TUTORIAL_BUTTON),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(
+                        text = stringResource(R.string.menu_tutorial_button),
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
