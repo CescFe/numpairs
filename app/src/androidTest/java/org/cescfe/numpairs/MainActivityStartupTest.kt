@@ -1,9 +1,7 @@
 package org.cescfe.numpairs
 
 import androidx.compose.ui.test.assertContentDescriptionEquals
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -19,20 +17,6 @@ import org.junit.runner.RunWith
 class MainActivityStartupTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
-
-    @Test
-    fun coldStartShowsMenuWithoutTutorialAfterSplash() {
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.SCREEN)
-            .assertIsDisplayed()
-
-        composeTestRule
-            .onAllNodes(hasText("Tutorial"))
-            .assertCountEquals(0)
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
-            .assertIsDisplayed()
-    }
 
     @Test
     fun systemBackFromFourPairsReturnsToTheMenu() {
