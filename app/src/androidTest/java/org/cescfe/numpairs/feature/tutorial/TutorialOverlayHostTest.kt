@@ -50,8 +50,8 @@ class TutorialOverlayHostTest {
             }
         }
 
-        enterStripValue(index = 1, value = "2")
-        assertStripItemPlayerEntered(index = 1, value = "2")
+        enterPreservedStripValue()
+        assertPreservedStripItemPlayerEntered()
         assertEquals(1, puzzleProvider.requestCount)
 
         composeTestRule.runOnIdle {
@@ -61,7 +61,7 @@ class TutorialOverlayHostTest {
         composeTestRule
             .onNodeWithTag(TutorialScreenTestTags.FULL_SCREEN_OVERLAY)
             .assertIsDisplayed()
-        assertStepIndicatorDisplayed(mode = TutorialMode.PRACTICE_FULL_PUZZLE)
+        assertPracticeFullPuzzleStepIndicatorDisplayed()
 
         pressBackUnconditionally()
 
@@ -71,37 +71,37 @@ class TutorialOverlayHostTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SCREEN)
             .assertIsDisplayed()
-        assertStripItemPlayerEntered(index = 1, value = "2")
+        assertPreservedStripItemPlayerEntered()
         assertEquals(1, puzzleProvider.requestCount)
     }
 
-    private fun enterStripValue(index: Int, value: String) {
+    private fun enterPreservedStripValue() {
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.stripItem(index))
+            .onNodeWithTag(GameScreenTestTags.stripItem(PRESERVED_STRIP_ITEM_INDEX))
             .performScrollTo()
             .performClick()
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
-            .performTextInput(value)
+            .performTextInput(PRESERVED_STRIP_ITEM_VALUE)
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM)
             .performClick()
     }
 
-    private fun assertStripItemPlayerEntered(index: Int, value: String) {
+    private fun assertPreservedStripItemPlayerEntered() {
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.stripItem(index))
+            .onNodeWithTag(GameScreenTestTags.stripItem(PRESERVED_STRIP_ITEM_INDEX))
             .performScrollTo()
             .assertContentDescriptionEquals(
                 string(
                     R.string.strip_item_player_entered_content_description,
-                    value
+                    PRESERVED_STRIP_ITEM_VALUE
                 )
             )
     }
 
-    private fun assertStepIndicatorDisplayed(mode: TutorialMode) {
-        val steps = TutorialMvpContent.stepsFor(mode)
+    private fun assertPracticeFullPuzzleStepIndicatorDisplayed() {
+        val steps = TutorialMvpContent.stepsFor(TutorialMode.PRACTICE_FULL_PUZZLE)
 
         composeTestRule
             .onNodeWithTag(TutorialScreenTestTags.STEP_INDICATOR)
@@ -131,5 +131,10 @@ class TutorialOverlayHostTest {
             requestCount += 1
             return puzzle
         }
+    }
+
+    private companion object {
+        const val PRESERVED_STRIP_ITEM_INDEX = 1
+        const val PRESERVED_STRIP_ITEM_VALUE = "2"
     }
 }
