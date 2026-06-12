@@ -84,7 +84,7 @@ class TutorialRouteTest {
                     "2"
                 )
             )
-        assertNotHighlighted(testTag = GameScreenTestTags.tile(0), useUnmergedTree = true)
+        assertUnmergedNodeNotHighlighted(testTag = GameScreenTestTags.tile(0))
         assertHighlighted(testTag = GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
         assertHighlighted(testTag = GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
         assertHighlighted(testTag = GameScreenTestTags.tileRightOperand(0), useUnmergedTree = true)
@@ -127,7 +127,7 @@ class TutorialRouteTest {
 
     @Test
     fun practiceFullPuzzleTutorialScenarioCanBeCompletedWithNormalGameplay() {
-        setTutorialContent(mode = TutorialMode.PRACTICE_FULL_PUZZLE)
+        setPracticeFullPuzzleTutorialContent()
 
         assertStepDisplayed(stepIndex = 0, mode = TutorialMode.PRACTICE_FULL_PUZZLE)
         assertFinalEasyFourPairsScenarioDisplayed()
@@ -172,10 +172,10 @@ class TutorialRouteTest {
         }
     }
 
-    private fun setTutorialContent(mode: TutorialMode) {
+    private fun setPracticeFullPuzzleTutorialContent() {
         composeTestRule.setContent {
             NumPairsTheme {
-                TutorialRoute(mode = mode)
+                TutorialRoute(mode = TutorialMode.PRACTICE_FULL_PUZZLE)
             }
         }
 
@@ -392,9 +392,9 @@ class TutorialRouteTest {
             )
     }
 
-    private fun assertNotHighlighted(testTag: String, useUnmergedTree: Boolean = false) {
+    private fun assertUnmergedNodeNotHighlighted(testTag: String) {
         composeTestRule
-            .onNodeWithTag(testTag, useUnmergedTree = useUnmergedTree)
+            .onNodeWithTag(testTag, useUnmergedTree = true)
             .assert(
                 SemanticsMatcher.expectValue(
                     GameHighlightedKey,
