@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -43,13 +44,17 @@ fun MenuScreen(
             contentAlignment = Alignment.Center
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .widthIn(max = MENU_CONTENT_MAX_WIDTH),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Button(
                     onClick = onFourPairsSelected,
-                    modifier = Modifier.testTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
                 ) {
                     Text(
                         text = stringResource(R.string.menu_four_pairs_button)
@@ -57,7 +62,9 @@ fun MenuScreen(
                 }
                 Button(
                     onClick = onTutorialSelected,
-                    modifier = Modifier.testTag(MenuScreenTestTags.TUTORIAL_BUTTON)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(MenuScreenTestTags.TUTORIAL_BUTTON)
                 ) {
                     Text(
                         text = stringResource(R.string.menu_tutorial_button)
@@ -85,3 +92,5 @@ private fun MenuScreenPreview() {
         MenuScreen()
     }
 }
+
+private val MENU_CONTENT_MAX_WIDTH = 360.dp
