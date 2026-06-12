@@ -1,15 +1,13 @@
 package org.cescfe.numpairs.feature.menu.ui
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -49,24 +47,20 @@ fun MenuScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                OutlinedButton(
+                Button(
                     onClick = onFourPairsSelected,
-                    modifier = Modifier.testTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                    modifier = Modifier.testTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
                 ) {
                     Text(
-                        text = stringResource(R.string.menu_four_pairs_button),
-                        color = MaterialTheme.colorScheme.primary
+                        text = stringResource(R.string.menu_four_pairs_button)
                     )
                 }
-                OutlinedButton(
+                Button(
                     onClick = onTutorialSelected,
-                    modifier = Modifier.testTag(MenuScreenTestTags.TUTORIAL_BUTTON),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                    modifier = Modifier.testTag(MenuScreenTestTags.TUTORIAL_BUTTON)
                 ) {
                     Text(
-                        text = stringResource(R.string.menu_tutorial_button),
-                        color = MaterialTheme.colorScheme.primary
+                        text = stringResource(R.string.menu_tutorial_button)
                     )
                 }
             }
