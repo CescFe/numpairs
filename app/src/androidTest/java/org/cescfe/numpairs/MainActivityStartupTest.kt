@@ -9,6 +9,7 @@ import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.feature.game.ui.GameScreenTestTags
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
+import org.cescfe.numpairs.feature.tutorial.ui.TutorialScreenTestTags
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -19,7 +20,7 @@ class MainActivityStartupTest {
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun fourPairsStartupFlowSupportsHelpAndBackNavigation() {
+    fun startupFlowSupportsTutorialFourPairsAndBackNavigation() {
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.SCREEN)
             .assertIsDisplayed()
@@ -27,6 +28,16 @@ class MainActivityStartupTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
             .assertDoesNotExist()
+
+        openTutorialFromMenu()
+
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.INSTRUCTION_SURFACE)
+            .assertIsDisplayed()
+
+        pressBack()
+
+        assertMenuIsDisplayed()
 
         openFourPairsFromMenu()
 
@@ -47,6 +58,19 @@ class MainActivityStartupTest {
             .performClick()
 
         assertMenuIsDisplayed()
+    }
+
+    private fun openTutorialFromMenu() {
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
+            .assertIsDisplayed()
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.SCREEN)
+            .assertDoesNotExist()
     }
 
     private fun openFourPairsFromMenu() {
