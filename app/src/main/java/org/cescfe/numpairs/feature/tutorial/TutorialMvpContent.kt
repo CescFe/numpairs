@@ -44,7 +44,6 @@ object TutorialMvpContent {
             scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
             playerFacingCopyResId = R.string.tutorial_step_two_copy,
             highlightedTargets = listOf(
-                TutorialHighlightTarget.Tiles(indexes = listOf(0)),
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0)
             ),
             requiredAction = TutorialRequiredAction.CompleteTileExpression(
@@ -65,7 +64,6 @@ object TutorialMvpContent {
             scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
             playerFacingCopyResId = R.string.tutorial_step_three_copy,
             highlightedTargets = listOf(
-                TutorialHighlightTarget.Tiles(indexes = listOf(1)),
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 1)
             ),
             requiredAction = TutorialRequiredAction.CompleteTileExpression(
@@ -86,7 +84,6 @@ object TutorialMvpContent {
             scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
             playerFacingCopyResId = R.string.tutorial_step_four_copy,
             highlightedTargets = listOf(
-                TutorialHighlightTarget.Tiles(indexes = listOf(2, 3)),
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 2),
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 3)
             ),
@@ -106,7 +103,20 @@ object TutorialMvpContent {
         )
     )
 
+    val learnBasicsSteps: List<TutorialStep> = steps.take(4)
+    val practiceFullPuzzleSteps: List<TutorialStep> = steps.drop(4)
+
+    fun stepsFor(mode: TutorialMode): List<TutorialStep> = when (mode) {
+        TutorialMode.LEARN_BASICS -> learnBasicsSteps
+        TutorialMode.PRACTICE_FULL_PUZZLE -> practiceFullPuzzleSteps
+    }
+
     fun scenario(id: TutorialScenarioId): TutorialScenario = scenarios.first { scenario -> scenario.id == id }
+}
+
+enum class TutorialMode {
+    LEARN_BASICS,
+    PRACTICE_FULL_PUZZLE
 }
 
 data class TutorialScenario(

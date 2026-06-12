@@ -84,7 +84,7 @@ class TutorialRouteTest {
                     "2"
                 )
             )
-        assertHighlighted(testTag = GameScreenTestTags.tile(0), useUnmergedTree = true)
+        assertUnmergedNodeNotHighlighted(testTag = GameScreenTestTags.tile(0))
         assertHighlighted(testTag = GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
         assertHighlighted(testTag = GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
         assertHighlighted(testTag = GameScreenTestTags.tileRightOperand(0), useUnmergedTree = true)
@@ -113,26 +113,24 @@ class TutorialRouteTest {
     }
 
     @Test
-    fun finishingTheTwoPairPracticePuzzleSwitchesToTheFinalScenario() {
+    fun finishingTheTwoPairPracticePuzzleStaysOnTheLearnBasicsCompletionStep() {
         setContent()
         navigateToTutorial()
 
         completeGuidedTwoPairSteps()
         completeTwoPairPracticeRemainder()
+        composeTestRule.mainClock.advanceTimeBy(TUTORIAL_AUTO_ADVANCE_TEST_WAIT_MS)
 
-        waitForStep(stepIndex = 4)
-        assertStepDisplayed(stepIndex = 4)
-        assertFinalEasyFourPairsScenarioDisplayed()
+        assertStepDisplayed(stepIndex = 3)
+        assertTwoPairPracticeScenarioDisplayed()
     }
 
     @Test
-    fun finalTutorialScenarioCanBeCompletedWithNormalGameplay() {
-        setContent()
-        navigateToTutorial()
+    fun practiceFullPuzzleTutorialScenarioCanBeCompletedWithNormalGameplay() {
+        setPracticeFullPuzzleTutorialContent()
 
-        completeGuidedTwoPairSteps()
-        completeTwoPairPracticeRemainder()
-        waitForStep(stepIndex = 4)
+        assertStepDisplayed(stepIndex = 0, mode = TutorialMode.PRACTICE_FULL_PUZZLE)
+        assertFinalEasyFourPairsScenarioDisplayed()
 
         enterStripValue(index = 1, value = "2")
         enterStripValue(index = 4, value = "5")
@@ -172,6 +170,18 @@ class TutorialRouteTest {
                 AppNavigation()
             }
         }
+    }
+
+    private fun setPracticeFullPuzzleTutorialContent() {
+        composeTestRule.setContent {
+            NumPairsTheme {
+                TutorialRoute(mode = TutorialMode.PRACTICE_FULL_PUZZLE)
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertIsDisplayed()
     }
 
     private fun navigateToTutorial() {
@@ -291,8 +301,9 @@ class TutorialRouteTest {
             .assertContentDescriptionEquals(string(R.string.tile_right_operand_content_description, "2"))
     }
 
-    private fun assertStepDisplayed(stepIndex: Int) {
-        val step = TutorialMvpContent.steps[stepIndex]
+    private fun assertStepDisplayed(stepIndex: Int, mode: TutorialMode = TutorialMode.LEARN_BASICS) {
+        val steps = TutorialMvpContent.stepsFor(mode)
+        val step = steps[stepIndex]
 
         composeTestRule
             .onNodeWithTag(TutorialScreenTestTags.STEP_INDICATOR)
@@ -301,8 +312,8 @@ class TutorialRouteTest {
                 hasText(
                     string(
                         R.string.tutorial_step_indicator,
-                        step.order,
-                        TutorialMvpContent.steps.size
+                        stepIndex + 1,
+                        steps.size
                     )
                 )
             )
@@ -381,8 +392,19 @@ class TutorialRouteTest {
             )
     }
 
-    private fun waitForStep(stepIndex: Int) {
-        val step = TutorialMvpContent.steps[stepIndex]
+    private fun assertUnmergedNodeNotHighlighted(testTag: String) {
+        composeTestRule
+            .onNodeWithTag(testTag, useUnmergedTree = true)
+            .assert(
+                SemanticsMatcher.expectValue(
+                    GameHighlightedKey,
+                    false
+                )
+            )
+    }
+
+    private fun waitForStep(stepIndex: Int, mode: TutorialMode = TutorialMode.LEARN_BASICS) {
+        val step = TutorialMvpContent.stepsFor(mode)[stepIndex]
 
         composeTestRule.waitUntil(timeoutMillis = TUTORIAL_STEP_WAIT_TIMEOUT_MS) {
             composeTestRule

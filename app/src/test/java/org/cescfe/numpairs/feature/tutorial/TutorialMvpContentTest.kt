@@ -193,7 +193,7 @@ class TutorialMvpContentTest {
     }
 
     @Test
-    fun maps_steps_one_to_five_to_the_active_tutorial_scenarios() {
+    fun maps_steps_one_to_five_to_the_authored_tutorial_scenarios() {
         val steps = TutorialMvpContent.steps
 
         assertEquals(listOf(1, 2, 3, 4, 5), steps.map(TutorialStep::order))
@@ -220,6 +220,33 @@ class TutorialMvpContentTest {
     }
 
     @Test
+    fun exposes_mode_specific_tutorial_step_lists() {
+        assertEquals(
+            listOf(
+                TutorialMode.LEARN_BASICS,
+                TutorialMode.PRACTICE_FULL_PUZZLE
+            ),
+            TutorialMode.entries.toList()
+        )
+        assertEquals(
+            listOf(1, 2, 3, 4),
+            TutorialMvpContent.stepsFor(TutorialMode.LEARN_BASICS).map(TutorialStep::order)
+        )
+        assertEquals(
+            listOf(5),
+            TutorialMvpContent.stepsFor(TutorialMode.PRACTICE_FULL_PUZZLE).map(TutorialStep::order)
+        )
+        assertEquals(
+            TutorialMvpContent.learnBasicsSteps,
+            TutorialMvpContent.stepsFor(TutorialMode.LEARN_BASICS)
+        )
+        assertEquals(
+            TutorialMvpContent.practiceFullPuzzleSteps,
+            TutorialMvpContent.stepsFor(TutorialMode.PRACTICE_FULL_PUZZLE)
+        )
+    }
+
+    @Test
     fun defines_step_highlights_and_required_actions_for_the_guided_ui() {
         val steps = TutorialMvpContent.steps
 
@@ -229,15 +256,12 @@ class TutorialMvpContentTest {
                     TutorialHighlightTarget.StripEntries(indexes = listOf(1))
                 ),
                 listOf(
-                    TutorialHighlightTarget.Tiles(indexes = listOf(0)),
                     TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0)
                 ),
                 listOf(
-                    TutorialHighlightTarget.Tiles(indexes = listOf(1)),
                     TutorialHighlightTarget.TileExpressionSlots(tileIndex = 1)
                 ),
                 listOf(
-                    TutorialHighlightTarget.Tiles(indexes = listOf(2, 3)),
                     TutorialHighlightTarget.TileExpressionSlots(tileIndex = 2),
                     TutorialHighlightTarget.TileExpressionSlots(tileIndex = 3)
                 ),
