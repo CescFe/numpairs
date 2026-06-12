@@ -11,11 +11,15 @@ import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.GameRoute
+import org.cescfe.numpairs.feature.tutorial.TutorialMode
+import org.cescfe.numpairs.feature.tutorial.TutorialOverlayHost
 
 @Composable
 fun FourPairsRoute(
     modifier: Modifier = Modifier,
     puzzleProvider: FourPairsPuzzleProvider = DefaultFourPairsPuzzleProvider,
+    tutorialOverlayMode: TutorialMode? = null,
+    onTutorialOverlayClosed: () -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
     val gameSessionFactory = remember(puzzleProvider) {
@@ -25,21 +29,26 @@ fun FourPairsRoute(
         mutableStateOf(gameSessionFactory.create())
     }
 
-    GameRoute(
-        title = stringResource(R.string.four_pairs_screen_title),
-        initialPuzzle = gameSession.initialPuzzle,
-        modifier = modifier,
-        gameSessionKey = FOUR_PAIRS_GAME_SESSION_KEY,
-        puzzleResetKey = gameSession.id,
-        completionActions = GameCompletionActions(
-            onNewPuzzleRequested = {
-                gameSession = gameSessionFactory.create()
-            },
-            onReturnToMenuRequested = onNavigateBack
-        ),
-        isRulesHelperEnabled = true,
-        onNavigateBack = onNavigateBack
-    )
+    TutorialOverlayHost(
+        tutorialMode = tutorialOverlayMode,
+        onTutorialClosed = onTutorialOverlayClosed,
+        modifier = modifier
+    ) {
+        GameRoute(
+            title = stringResource(R.string.four_pairs_screen_title),
+            initialPuzzle = gameSession.initialPuzzle,
+            gameSessionKey = FOUR_PAIRS_GAME_SESSION_KEY,
+            puzzleResetKey = gameSession.id,
+            completionActions = GameCompletionActions(
+                onNewPuzzleRequested = {
+                    gameSession = gameSessionFactory.create()
+                },
+                onReturnToMenuRequested = onNavigateBack
+            ),
+            isRulesHelperEnabled = true,
+            onNavigateBack = onNavigateBack
+        )
+    }
 }
 
 private data class GeneratedFourPairsGameSession(val id: Int, val initialPuzzle: Puzzle)
