@@ -84,7 +84,7 @@ class TutorialRouteTest {
                     "2"
                 )
             )
-        assertHighlighted(testTag = GameScreenTestTags.tile(0), useUnmergedTree = true)
+        assertNotHighlighted(testTag = GameScreenTestTags.tile(0), useUnmergedTree = true)
         assertHighlighted(testTag = GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
         assertHighlighted(testTag = GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
         assertHighlighted(testTag = GameScreenTestTags.tileRightOperand(0), useUnmergedTree = true)
@@ -388,6 +388,17 @@ class TutorialRouteTest {
                 SemanticsMatcher.expectValue(
                     GameHighlightedKey,
                     true
+                )
+            )
+    }
+
+    private fun assertNotHighlighted(testTag: String, useUnmergedTree: Boolean = false) {
+        composeTestRule
+            .onNodeWithTag(testTag, useUnmergedTree = useUnmergedTree)
+            .assert(
+                SemanticsMatcher.expectValue(
+                    GameHighlightedKey,
+                    false
                 )
             )
     }
