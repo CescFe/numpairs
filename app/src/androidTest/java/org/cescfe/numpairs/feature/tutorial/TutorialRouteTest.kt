@@ -14,15 +14,12 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
-import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.feature.game.ui.GameHighlightedKey
 import org.cescfe.numpairs.feature.game.ui.GameScreenTestTags
-import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.feature.tutorial.ui.TutorialScreenTestTags
-import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Rule
 import org.junit.Test
@@ -34,10 +31,8 @@ class TutorialRouteTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun selectingTutorialFromMenuOpensTheActiveWalkthroughOnStepOne() {
+    fun learnBasicsTutorialOpensOnStepOne() {
         setContent()
-
-        navigateToTutorial()
 
         composeTestRule
             .onNodeWithTag(TutorialScreenTestTags.INSTRUCTION_SURFACE)
@@ -57,7 +52,6 @@ class TutorialRouteTest {
     @Test
     fun tutorialDoesNotAdvanceBeforeTheRequiredActionIsCompleted() {
         setContent()
-        navigateToTutorial()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
@@ -71,7 +65,6 @@ class TutorialRouteTest {
     @Test
     fun guidedActionsAdvanceAutomaticallyAndPreserveTheTwoPairPracticeState() {
         setContent()
-        navigateToTutorial()
 
         enterStripValue(index = 1, value = "2")
         waitForStep(stepIndex = 1)
@@ -115,7 +108,6 @@ class TutorialRouteTest {
     @Test
     fun finishingTheTwoPairPracticePuzzleStaysOnTheLearnBasicsCompletionStep() {
         setContent()
-        navigateToTutorial()
 
         completeGuidedTwoPairSteps()
         completeTwoPairPracticeRemainder()
@@ -149,27 +141,16 @@ class TutorialRouteTest {
             .assertIsDisplayed()
     }
 
-    @Test
-    fun routeLevelBackFromTutorialReturnsToTheMenu() {
-        setContent()
-        navigateToTutorial()
-
-        pressBackUnconditionally()
-
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.SCREEN)
-            .assertIsDisplayed()
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SCREEN)
-            .assertDoesNotExist()
-    }
-
     private fun setContent() {
         composeTestRule.setContent {
             NumPairsTheme {
-                AppNavigation()
+                TutorialRoute()
             }
         }
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertIsDisplayed()
     }
 
     private fun setPracticeFullPuzzleTutorialContent() {
@@ -178,17 +159,6 @@ class TutorialRouteTest {
                 TutorialRoute(mode = TutorialMode.PRACTICE_FULL_PUZZLE)
             }
         }
-
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SCREEN)
-            .assertIsDisplayed()
-    }
-
-    private fun navigateToTutorial() {
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
-            .assertIsDisplayed()
-            .performClick()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SCREEN)

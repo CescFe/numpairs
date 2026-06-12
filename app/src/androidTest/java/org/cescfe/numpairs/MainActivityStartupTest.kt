@@ -1,7 +1,9 @@
 package org.cescfe.numpairs
 
 import androidx.compose.ui.test.assertContentDescriptionEquals
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -19,15 +21,22 @@ class MainActivityStartupTest {
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun coldStartShowsMenuAfterSplashAndSystemBackFromTutorialReturnsToTheMenu() {
+    fun coldStartShowsMenuWithoutTutorialAfterSplash() {
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.SCREEN)
             .assertIsDisplayed()
 
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
+            .onAllNodes(hasText("Tutorial"))
+            .assertCountEquals(0)
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
             .assertIsDisplayed()
-            .performClick()
+    }
+
+    @Test
+    fun systemBackFromFourPairsReturnsToTheMenu() {
+        openFourPairsFromMenu()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SCREEN)
@@ -50,9 +59,7 @@ class MainActivityStartupTest {
 
     @Test
     fun gameScreenTopAppBarBackButtonReturnsToTheMenu() {
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
-            .performClick()
+        openFourPairsFromMenu()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.BACK_BUTTON)
@@ -70,21 +77,28 @@ class MainActivityStartupTest {
     }
 
     @Test
-    fun tutorialDoesNotShowRulesHelperAction() {
+    fun fourPairsShowsRulesHelperAction() {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
             .assertDoesNotExist()
 
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SCREEN)
-            .assertIsDisplayed()
+        openFourPairsFromMenu()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
+            .assertIsDisplayed()
+    }
+
+    private fun openFourPairsFromMenu() {
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+            .assertIsDisplayed()
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.SCREEN)
             .assertDoesNotExist()
     }
 
