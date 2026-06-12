@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -28,10 +29,17 @@ fun FourPairsRoute(
     var gameSession by remember(gameSessionFactory) {
         mutableStateOf(gameSessionFactory.create())
     }
+    var requestedTutorialOverlayMode by rememberSaveable {
+        mutableStateOf<TutorialMode?>(null)
+    }
+    val activeTutorialOverlayMode = tutorialOverlayMode ?: requestedTutorialOverlayMode
 
     TutorialOverlayHost(
-        tutorialMode = tutorialOverlayMode,
-        onTutorialClosed = onTutorialOverlayClosed,
+        tutorialMode = activeTutorialOverlayMode,
+        onTutorialClosed = {
+            requestedTutorialOverlayMode = null
+            onTutorialOverlayClosed()
+        },
         modifier = modifier
     ) {
         GameRoute(
@@ -46,6 +54,9 @@ fun FourPairsRoute(
                 onReturnToMenuRequested = onNavigateBack
             ),
             isRulesHelperEnabled = true,
+            onRulesHelperPlayTutorialRequested = {
+                requestedTutorialOverlayMode = TutorialMode.LEARN_BASICS
+            },
             onNavigateBack = onNavigateBack
         )
     }

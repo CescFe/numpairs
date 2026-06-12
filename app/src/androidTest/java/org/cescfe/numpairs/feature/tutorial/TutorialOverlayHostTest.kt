@@ -61,7 +61,7 @@ class TutorialOverlayHostTest {
         composeTestRule
             .onNodeWithTag(TutorialScreenTestTags.FULL_SCREEN_OVERLAY)
             .assertIsDisplayed()
-        assertPracticeFullPuzzleStepIndicatorDisplayed()
+        assertStepIndicatorDisplayed(mode = TutorialMode.PRACTICE_FULL_PUZZLE)
 
         pressBackUnconditionally()
 
@@ -72,6 +72,39 @@ class TutorialOverlayHostTest {
             .onNodeWithTag(GameScreenTestTags.SCREEN)
             .assertIsDisplayed()
         assertPreservedStripItemPlayerEntered()
+        assertEquals(1, puzzleProvider.requestCount)
+    }
+
+    @Test
+    fun playTutorialFromRulesHelperDismissesDialogAndOpensLearnBasicsOverlay() {
+        val puzzleProvider = QueueFourPairsPuzzleProvider(initialPuzzle)
+
+        composeTestRule.setContent {
+            NumPairsTheme {
+                FourPairsRoute(puzzleProvider = puzzleProvider)
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
+            .assertIsDisplayed()
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_DIALOG)
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_PLAY_TUTORIAL_BUTTON)
+            .assertIsDisplayed()
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_DIALOG)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.FULL_SCREEN_OVERLAY)
+            .assertIsDisplayed()
+        assertStepIndicatorDisplayed(mode = TutorialMode.LEARN_BASICS)
         assertEquals(1, puzzleProvider.requestCount)
     }
 
@@ -100,8 +133,8 @@ class TutorialOverlayHostTest {
             )
     }
 
-    private fun assertPracticeFullPuzzleStepIndicatorDisplayed() {
-        val steps = TutorialMvpContent.stepsFor(TutorialMode.PRACTICE_FULL_PUZZLE)
+    private fun assertStepIndicatorDisplayed(mode: TutorialMode) {
+        val steps = TutorialMvpContent.stepsFor(mode)
 
         composeTestRule
             .onNodeWithTag(TutorialScreenTestTags.STEP_INDICATOR)

@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -35,7 +36,11 @@ import org.cescfe.numpairs.R
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
-internal fun RulesHelperDialog(onDismiss: () -> Unit, modifier: Modifier = Modifier) {
+internal fun RulesHelperDialog(
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    onPlayTutorialRequested: (() -> Unit)? = null
+) {
     val containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
 
     AlertDialog(
@@ -48,7 +53,19 @@ internal fun RulesHelperDialog(onDismiss: () -> Unit, modifier: Modifier = Modif
         text = {
             RulesHelperContent(containerColor = containerColor)
         },
-        confirmButton = {},
+        confirmButton = {
+            onPlayTutorialRequested?.let { onPlayTutorial ->
+                TextButton(
+                    onClick = {
+                        onDismiss()
+                        onPlayTutorial()
+                    },
+                    modifier = Modifier.testTag(GameScreenTestTags.RULES_HELPER_PLAY_TUTORIAL_BUTTON)
+                ) {
+                    Text(text = stringResource(R.string.rules_helper_play_tutorial_button))
+                }
+            }
+        },
         properties = DialogProperties(
             dismissOnBackPress = true,
             dismissOnClickOutside = true
