@@ -76,7 +76,7 @@ class TutorialOverlayHostTest {
     }
 
     @Test
-    fun playTutorialFromRulesHelperDismissesDialogAndOpensLearnBasicsOverlay() {
+    fun playTutorialFromRulesHelperDismissesDialogOpensLearnBasicsOverlayAndReturnsToGame() {
         val puzzleProvider = QueueFourPairsPuzzleProvider(initialPuzzle)
 
         composeTestRule.setContent {
@@ -84,6 +84,9 @@ class TutorialOverlayHostTest {
                 FourPairsRoute(puzzleProvider = puzzleProvider)
             }
         }
+
+        enterPreservedStripValue()
+        assertPreservedStripItemPlayerEntered()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
@@ -105,6 +108,16 @@ class TutorialOverlayHostTest {
             .onNodeWithTag(TutorialScreenTestTags.FULL_SCREEN_OVERLAY)
             .assertIsDisplayed()
         assertStepIndicatorDisplayed(mode = TutorialMode.LEARN_BASICS)
+
+        pressBackUnconditionally()
+
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.FULL_SCREEN_OVERLAY)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+        assertPreservedStripItemPlayerEntered()
         assertEquals(1, puzzleProvider.requestCount)
     }
 
