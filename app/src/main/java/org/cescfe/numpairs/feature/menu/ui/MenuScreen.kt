@@ -2,11 +2,12 @@ package org.cescfe.numpairs.feature.menu.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -43,32 +44,38 @@ fun MenuScreen(
                 .padding(horizontal = 24.dp, vertical = 20.dp),
             contentAlignment = Alignment.Center
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .widthIn(max = MENU_CONTENT_MAX_WIDTH),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Button(
-                    onClick = onFourPairsSelected,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
-                ) {
-                    Text(
-                        text = stringResource(R.string.menu_four_pairs_button)
-                    )
+            BoxWithConstraints {
+                val contentWidth = if (maxWidth < MENU_CONTENT_MAX_WIDTH) {
+                    maxWidth
+                } else {
+                    MENU_CONTENT_MAX_WIDTH
                 }
-                Button(
-                    onClick = onTutorialSelected,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag(MenuScreenTestTags.TUTORIAL_BUTTON)
+
+                Column(
+                    modifier = Modifier.width(contentWidth),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text(
-                        text = stringResource(R.string.menu_tutorial_button)
-                    )
+                    Button(
+                        onClick = onFourPairsSelected,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.menu_four_pairs_button)
+                        )
+                    }
+                    Button(
+                        onClick = onTutorialSelected,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag(MenuScreenTestTags.TUTORIAL_BUTTON)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.menu_tutorial_button)
+                        )
+                    }
                 }
             }
         }
