@@ -1,15 +1,15 @@
 package org.cescfe.numpairs.feature.menu.ui
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -24,7 +24,11 @@ import org.cescfe.numpairs.R
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
-fun MenuScreen(modifier: Modifier = Modifier, onFourPairsSelected: () -> Unit = {}) {
+fun MenuScreen(
+    modifier: Modifier = Modifier,
+    onTutorialSelected: () -> Unit = {},
+    onFourPairsSelected: () -> Unit = {}
+) {
     Scaffold(
         modifier = modifier
             .fillMaxSize()
@@ -40,20 +44,38 @@ fun MenuScreen(modifier: Modifier = Modifier, onFourPairsSelected: () -> Unit = 
                 .padding(horizontal = 24.dp, vertical = 20.dp),
             contentAlignment = Alignment.Center
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                OutlinedButton(
-                    onClick = onFourPairsSelected,
-                    modifier = Modifier.testTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+            BoxWithConstraints {
+                val contentWidth = if (maxWidth < MENU_CONTENT_MAX_WIDTH) {
+                    maxWidth
+                } else {
+                    MENU_CONTENT_MAX_WIDTH
+                }
+
+                Column(
+                    modifier = Modifier.width(contentWidth),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text(
-                        text = stringResource(R.string.menu_four_pairs_button),
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    Button(
+                        onClick = onFourPairsSelected,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.menu_four_pairs_button)
+                        )
+                    }
+                    Button(
+                        onClick = onTutorialSelected,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag(MenuScreenTestTags.TUTORIAL_BUTTON)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.menu_tutorial_button)
+                        )
+                    }
                 }
             }
         }
@@ -77,3 +99,5 @@ private fun MenuScreenPreview() {
         MenuScreen()
     }
 }
+
+private val MENU_CONTENT_MAX_WIDTH = 360.dp

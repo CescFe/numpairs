@@ -10,6 +10,7 @@
     <string name="tutorial_step_five_copy">Now finish the full tutorial puzzle.</string>
     <string name="tutorial_previous_step_button">Back</string>
     <string name="tutorial_next_step_button">Next</string>
+    <string name="menu_tutorial_button">Tutorial</string>
     <string name="menu_four_pairs_button">4 pairs</string>
     <string name="four_pairs_screen_title">4 pairs</string>
     <string name="board_content_description">Board</string>
