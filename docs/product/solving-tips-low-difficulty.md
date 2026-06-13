@@ -49,6 +49,80 @@ This tip is strongly aligned with current low-difficulty puzzles because the val
 
 ---
 
+## Static Dialog Tips For Low Difficulty
+
+The first low-difficulty Solving tips dialog should show concise strategy guidance. These tips should be framed as player-facing heuristics, not guarantees that inspect the current puzzle.
+
+### Prime Results Are Addition Tiles
+
+Current low-difficulty strip values start at `2`, so there is no `1`.
+
+If a visible grid result is prime, it cannot be made by multiplying two strip values. The player should treat it as an addition tile.
+
+### Large Results Are Usually Product Tiles
+
+Current low-difficulty strip values are small, so addition results stay relatively small.
+
+Very large grid results are strong product candidates. This should be written as a practical shortcut rather than as a formal numeric threshold.
+
+### Products Can Be Checked By Factors
+
+A multiplication tile can only use strip values that divide the result exactly.
+
+If a visible strip value is not a factor of the grid result, that strip entry cannot belong to that product tile.
+
+### Hidden Strip Values Must Fit The Sorted Strip
+
+The strip remains sorted after hidden values are completed.
+
+Before solving grid tiles, the player can use the visible neighbors around a hidden strip entry to narrow possible values.
+
+### The Highest Visible Number Is A Strong Anchor
+
+The current low-difficulty generator always reveals the highest strip value.
+
+The player can use this visible high value to test large product candidates and to rule out addition candidates that are too small.
+
+### Usage Badges Help Avoid Overusing Entries
+
+Operand options show whether each strip entry has already been used for addition or multiplication.
+
+The player can check these usage badges to avoid reusing the same strip entry too many times for the same operator.
+
+---
+
+## Candidate Dialog Copy
+
+Recommended dialog title:
+
+- `Solving tips`
+
+Recommended CTA:
+
+- `Practice tips`
+
+Recommended sections and copy:
+
+### Use The Strip
+
+- `Hidden strip values must still fit between their visible neighbors. Use the sorted strip to narrow possible values.`
+- `The highest strip value is visible in low difficulty. Use it as an anchor for large products and impossible sums.`
+
+### Find Products
+
+- `Large results are usually product tiles. Start by checking which visible strip values divide those results exactly.`
+- `If a strip value is not a factor of a result, it cannot be part of that product tile.`
+
+### Find Sums
+
+- `Prime results are addition tiles in low difficulty. Because the strip never includes 1, a prime result cannot be made by multiplying two strip values.`
+
+### Check Usage
+
+- `Operand choices show addition and multiplication usage. Use those badges to avoid overusing the same strip entry.`
+
+---
+
 ## Future Difficulty Guidance
 
 Any future difficulty level should explicitly decide whether these tips still apply.

@@ -14,7 +14,7 @@
 
 This document defines the intended Solving tips surface before implementation. It records what problem 'Solving tips' should solve, how it differs from Rules helper and Tutorial, and what the first interactive practice CTA should teach.
 
-The complete static dialog tip list is intentionally not finalized in this document yet.
+The first low-difficulty dialog tips are documented in `docs/product/solving-tips-low-difficulty.md`.
 
 ---
 
@@ -108,11 +108,8 @@ Solving tips must not:
 
 ## Open Content Work
 
-The static dialog tip list still needs product refinement before implementation.
-
 Future documentation updates should decide:
 
-- which concise tips appear directly in the dialog
-- which tips are only taught in `Practice tips`
-- which tips are low-difficulty-specific
-- which tips belong to future difficulty levels only
+- whether the initial low-difficulty dialog copy needs to be shortened during UI implementation
+- which tips should be added for future difficulty levels
+- which tips belong only to future non-low generated modes
