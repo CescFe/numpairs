@@ -184,14 +184,3 @@ Rationale:
 - Android string resources keep localization and accessibility paths open.
 
 If future helper content becomes mode-specific, localized at larger scale, or shared by non-Android surfaces, this decision can be revisited.
-
----
-
-## Remaining Open Questions
-
-- Exact helper copy and tone should be finalized during implementation.
-- Should the helper action be hidden, disabled, or left unavailable when the success overlay is visible?
-- If another gameplay modal is already open, should opening the helper be blocked, or should the existing modal close first?
-- Should the helper include any simple visual formatting, such as icons for strip, board, `+`, and `x`, or remain text-only initially?
-- Should future modes be able to add mode-specific helper sections after the shared core rules?
-- What accessibility labels and heading semantics should be used inside the dialog?
