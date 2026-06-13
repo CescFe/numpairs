@@ -131,7 +131,7 @@ class TutorialOverlayHostTest {
     }
 
     @Test
-    fun hintActionOpensPracticeFullPuzzleOverlayAndReturnsToGame() {
+    fun hintActionOpensSolvingTipsDialogPracticeOverlayAndReturnsToGame() {
         val puzzleProvider = QueueFourPairsPuzzleProvider(initialPuzzle)
 
         composeTestRule.setContent {
@@ -149,12 +149,22 @@ class TutorialOverlayHostTest {
             .assertIsDisplayed()
             .assertContentDescriptionEquals(string(R.string.hint_action_content_description))
             .performClick()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SOLVING_TIPS_DIALOG)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SOLVING_TIPS_PRACTICE_BUTTON)
+            .assertIsDisplayed()
+            .performClick()
 
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SOLVING_TIPS_DIALOG)
+            .assertDoesNotExist()
         composeTestRule
             .onNodeWithTag(TutorialScreenTestTags.FULL_SCREEN_OVERLAY)
             .assertIsDisplayed()
-        assertStepIndicatorDisplayed(mode = TutorialMode.PRACTICE_FULL_PUZZLE)
-        completePracticeFullPuzzleTutorial()
+        assertStepIndicatorDisplayed(mode = TutorialMode.SOLVING_TIPS_PRACTICE)
+        completeSolvingTipsPracticeTutorial()
         assertTutorialSuccessOverlayDisplayed()
         assertEquals(1, puzzleProvider.requestCount)
 
@@ -172,7 +182,7 @@ class TutorialOverlayHostTest {
     }
 
     private fun completeLearnBasicsTutorial() {
-        enterTutorialStripValue(index = 1, value = "2")
+        enterTutorialStripValue()
         waitForLearnBasicsStep(stepIndex = 1)
         completeTutorialTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
         waitForLearnBasicsStep(stepIndex = 2)
@@ -192,55 +202,33 @@ class TutorialOverlayHostTest {
         )
     }
 
-    private fun completePracticeFullPuzzleTutorial() {
-        enterTutorialStripValue(index = 1, value = "2")
-        enterTutorialStripValue(index = 4, value = "5")
-        enterTutorialStripValue(index = 6, value = "7")
+    private fun completeSolvingTipsPracticeTutorial() {
         completeTutorialTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
+        waitForSecondSolvingTipsPracticeStep()
         completeTutorialTile(
-            tileIndex = 1,
-            leftStripEntryId = 0,
-            operator = Operator.MULTIPLICATION,
-            rightStripEntryId = 1
-        )
-        completeTutorialTile(tileIndex = 2, leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3)
-        completeTutorialTile(
-            tileIndex = 3,
+            tileIndex = 2,
             leftStripEntryId = 2,
             operator = Operator.MULTIPLICATION,
             rightStripEntryId = 3
         )
-        completeTutorialTile(tileIndex = 4, leftStripEntryId = 4, operator = Operator.ADDITION, rightStripEntryId = 5)
-        completeTutorialTile(
-            tileIndex = 5,
-            leftStripEntryId = 4,
-            operator = Operator.MULTIPLICATION,
-            rightStripEntryId = 5
-        )
-        completeTutorialTile(tileIndex = 6, leftStripEntryId = 6, operator = Operator.ADDITION, rightStripEntryId = 7)
-        completeTutorialTile(
-            tileIndex = 7,
-            leftStripEntryId = 6,
-            operator = Operator.MULTIPLICATION,
-            rightStripEntryId = 7
-        )
+        completeTutorialTile(tileIndex = 3, leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3)
     }
 
-    private fun enterTutorialStripValue(index: Int, value: String) {
-        overlayNodeWithTag(GameScreenTestTags.stripItem(index))
+    private fun enterTutorialStripValue() {
+        overlayNodeWithTag(GameScreenTestTags.stripItem(PRESERVED_STRIP_ITEM_INDEX))
             .performScrollTo()
             .performClick()
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
-            .performTextInput(value)
+            .performTextInput(PRESERVED_STRIP_ITEM_VALUE)
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM)
             .performClick()
-        overlayNodeWithTag(GameScreenTestTags.stripItem(index))
+        overlayNodeWithTag(GameScreenTestTags.stripItem(PRESERVED_STRIP_ITEM_INDEX))
             .assertContentDescriptionEquals(
                 string(
                     R.string.strip_item_player_entered_content_description,
-                    value
+                    PRESERVED_STRIP_ITEM_VALUE
                 )
             )
     }
@@ -315,6 +303,17 @@ class TutorialOverlayHostTest {
 
     private fun waitForLearnBasicsStep(stepIndex: Int) {
         val step = TutorialMvpContent.stepsFor(TutorialMode.LEARN_BASICS)[stepIndex]
+
+        composeTestRule.waitUntil(timeoutMillis = TUTORIAL_STEP_WAIT_TIMEOUT_MS) {
+            composeTestRule
+                .onAllNodes(hasText(string(step.playerFacingCopyResId)))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+    }
+
+    private fun waitForSecondSolvingTipsPracticeStep() {
+        val step = TutorialMvpContent.stepsFor(TutorialMode.SOLVING_TIPS_PRACTICE)[1]
 
         composeTestRule.waitUntil(timeoutMillis = TUTORIAL_STEP_WAIT_TIMEOUT_MS) {
             composeTestRule

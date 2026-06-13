@@ -19,7 +19,8 @@ import org.cescfe.numpairs.feature.game.presentation.StripItemVisualStyle
 object TutorialMvpContent {
     val scenarios: List<TutorialScenario> = listOf(
         twoPairPracticeScenario(),
-        finalEasyFourPairsScenario()
+        finalEasyFourPairsScenario(),
+        solvingTipsPracticeScenario()
     )
 
     val steps: List<TutorialStep> = listOf(
@@ -100,15 +101,58 @@ object TutorialMvpContent {
             ),
             requiredAction = TutorialRequiredAction.CompleteScenario,
             completionPredicate = TutorialStepCompletionPredicate.ScenarioSolved
+        ),
+        TutorialStep(
+            order = 6,
+            scenarioId = TutorialScenarioId.SOLVING_TIPS_PRACTICE,
+            playerFacingCopyResId = R.string.tutorial_solving_tips_step_one_copy,
+            highlightedTargets = emptyList(),
+            requiredAction = TutorialRequiredAction.CompleteTileExpression(
+                tileIndex = 0,
+                leftStripEntryId = 0,
+                operator = Operator.ADDITION,
+                rightStripEntryId = 1
+            ),
+            completionPredicate = TutorialStepCompletionPredicate.TileExpressionCompleted(
+                tileIndex = 0,
+                leftValue = 2,
+                operator = Operator.ADDITION,
+                rightValue = 3
+            )
+        ),
+        TutorialStep(
+            order = 7,
+            scenarioId = TutorialScenarioId.SOLVING_TIPS_PRACTICE,
+            playerFacingCopyResId = R.string.tutorial_solving_tips_step_two_copy,
+            highlightedTargets = emptyList(),
+            requiredAction = TutorialRequiredAction.CompleteTileExpressions(
+                expressions = listOf(
+                    TutorialRequiredAction.CompleteTileExpression(
+                        tileIndex = 2,
+                        leftStripEntryId = 2,
+                        operator = Operator.MULTIPLICATION,
+                        rightStripEntryId = 3
+                    ),
+                    TutorialRequiredAction.CompleteTileExpression(
+                        tileIndex = 3,
+                        leftStripEntryId = 2,
+                        operator = Operator.ADDITION,
+                        rightStripEntryId = 3
+                    )
+                )
+            ),
+            completionPredicate = TutorialStepCompletionPredicate.ScenarioSolved
         )
     )
 
     val learnBasicsSteps: List<TutorialStep> = steps.take(4)
-    val practiceFullPuzzleSteps: List<TutorialStep> = steps.drop(4)
+    val practiceFullPuzzleSteps: List<TutorialStep> = listOf(steps[4])
+    val solvingTipsPracticeSteps: List<TutorialStep> = steps.drop(5)
 
     fun stepsFor(mode: TutorialMode): List<TutorialStep> = when (mode) {
         TutorialMode.LEARN_BASICS -> learnBasicsSteps
         TutorialMode.PRACTICE_FULL_PUZZLE -> practiceFullPuzzleSteps
+        TutorialMode.SOLVING_TIPS_PRACTICE -> solvingTipsPracticeSteps
     }
 
     fun scenario(id: TutorialScenarioId): TutorialScenario = scenarios.first { scenario -> scenario.id == id }
@@ -116,7 +160,8 @@ object TutorialMvpContent {
 
 enum class TutorialMode {
     LEARN_BASICS,
-    PRACTICE_FULL_PUZZLE
+    PRACTICE_FULL_PUZZLE,
+    SOLVING_TIPS_PRACTICE
 }
 
 data class TutorialScenario(
@@ -147,7 +192,8 @@ data class TutorialScenario(
 
 enum class TutorialScenarioId {
     TWO_PAIR_PRACTICE,
-    FINAL_EASY_FOUR_PAIRS
+    FINAL_EASY_FOUR_PAIRS,
+    SOLVING_TIPS_PRACTICE
 }
 
 data class TutorialIntendedPair(val firstStripEntryId: Int, val secondStripEntryId: Int) {
@@ -178,9 +224,6 @@ data class TutorialStep(
         }
         require(playerFacingCopyResId != 0) {
             "Tutorial step copy string resource must be defined."
-        }
-        require(highlightedTargets.isNotEmpty()) {
-            "Tutorial step must define at least one highlighted target."
         }
     }
 
@@ -257,6 +300,17 @@ sealed interface TutorialRequiredAction {
             }
             require(operator != Operator.Hidden) {
                 "Tutorial tile expression action requires a concrete operator."
+            }
+        }
+    }
+
+    data class CompleteTileExpressions(val expressions: List<CompleteTileExpression>) : TutorialRequiredAction {
+        init {
+            require(expressions.isNotEmpty()) {
+                "Tutorial tile expression set action must include at least one expression."
+            }
+            require(expressions.map(CompleteTileExpression::tileIndex).toSet().size == expressions.size) {
+                "Tutorial tile expression set action must target distinct tiles."
             }
         }
     }
@@ -392,6 +446,38 @@ private fun finalEasyFourPairsScenario(): TutorialScenario {
     )
 }
 
+private fun solvingTipsPracticeScenario(): TutorialScenario {
+    val stripValues = listOf(2, 3, 4, 8)
+    val solvedPuzzle = solvedPuzzle(
+        stripValues = stripValues,
+        tileDefinitions = listOf(
+            TileDefinition(leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1),
+            TileDefinition(leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1),
+            TileDefinition(leftStripEntryId = 2, operator = Operator.MULTIPLICATION, rightStripEntryId = 3),
+            TileDefinition(leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3)
+        )
+    )
+
+    return TutorialScenario(
+        id = TutorialScenarioId.SOLVING_TIPS_PRACTICE,
+        stripValues = stripValues,
+        initialPuzzle = puzzle(
+            stripItems = stripValues.map(StripItem::Known),
+            tiles = listOf(
+                hiddenTile(result = 5),
+                solvedPuzzle.board.tiles[1],
+                hiddenTile(result = 32),
+                hiddenTile(result = 12)
+            )
+        ),
+        solvedPuzzle = solvedPuzzle,
+        intendedPairs = listOf(
+            TutorialIntendedPair(firstStripEntryId = 0, secondStripEntryId = 1),
+            TutorialIntendedPair(firstStripEntryId = 2, secondStripEntryId = 3)
+        )
+    )
+}
+
 private data class TileDefinition(val leftStripEntryId: Int, val operator: Operator, val rightStripEntryId: Int)
 
 private fun puzzle(stripItems: List<StripItem>, tiles: List<Tile>): Puzzle = Puzzle(
@@ -400,11 +486,13 @@ private fun puzzle(stripItems: List<StripItem>, tiles: List<Tile>): Puzzle = Puz
 )
 
 private fun hiddenTiles(results: List<Int>): List<Tile> = results.map { result ->
-    Tile(
-        expression = hiddenExpression(),
-        result = result
-    )
+    hiddenTile(result = result)
 }
+
+private fun hiddenTile(result: Int): Tile = Tile(
+    expression = hiddenExpression(),
+    result = result
+)
 
 private fun solvedPuzzle(stripValues: List<Int>, tileDefinitions: List<TileDefinition>): Puzzle = puzzle(
     stripItems = stripValues.map(StripItem::Known),

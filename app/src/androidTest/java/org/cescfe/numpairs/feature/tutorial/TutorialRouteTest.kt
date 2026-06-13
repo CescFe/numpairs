@@ -144,6 +144,30 @@ class TutorialRouteTest {
             .assertIsDisplayed()
     }
 
+    @Test
+    fun solvingTipsPracticeUsesUnguidedHighlightsAndCompletesWithSuccessOverlay() {
+        setSolvingTipsPracticeTutorialContent()
+
+        assertStepDisplayed(stepIndex = 0, mode = TutorialMode.SOLVING_TIPS_PRACTICE)
+        assertSolvingTipsPracticeScenarioDisplayed()
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(0))
+        assertUnmergedNodeNotHighlighted(testTag = GameScreenTestTags.tile(0))
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.tileRightOperand(0), useUnmergedTree = true)
+
+        completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
+        waitForStep(stepIndex = 1, mode = TutorialMode.SOLVING_TIPS_PRACTICE)
+        assertStepDisplayed(stepIndex = 1, mode = TutorialMode.SOLVING_TIPS_PRACTICE)
+
+        completeTile(tileIndex = 2, leftStripEntryId = 2, operator = Operator.MULTIPLICATION, rightStripEntryId = 3)
+        completeTile(tileIndex = 3, leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3)
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .assertIsDisplayed()
+    }
+
     private fun setContent() {
         composeTestRule.setContent {
             NumPairsTheme {
@@ -160,6 +184,18 @@ class TutorialRouteTest {
         composeTestRule.setContent {
             NumPairsTheme {
                 TutorialRoute(mode = TutorialMode.PRACTICE_FULL_PUZZLE)
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+    }
+
+    private fun setSolvingTipsPracticeTutorialContent() {
+        composeTestRule.setContent {
+            NumPairsTheme {
+                TutorialRoute(mode = TutorialMode.SOLVING_TIPS_PRACTICE)
             }
         }
 
@@ -257,10 +293,15 @@ class TutorialRouteTest {
             .assertIsDisplayed()
     }
 
-    private fun assertTileExpression(tileIndex: Int, operator: Operator) {
+    private fun assertTileExpression(
+        tileIndex: Int,
+        operator: Operator,
+        leftValue: String = "1",
+        rightValue: String = "2"
+    ) {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileLeftOperand(tileIndex), useUnmergedTree = true)
-            .assertContentDescriptionEquals(string(R.string.tile_left_operand_content_description, "1"))
+            .assertContentDescriptionEquals(string(R.string.tile_left_operand_content_description, leftValue))
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperator(tileIndex), useUnmergedTree = true)
             .assertContentDescriptionEquals(
@@ -271,7 +312,7 @@ class TutorialRouteTest {
             )
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileRightOperand(tileIndex), useUnmergedTree = true)
-            .assertContentDescriptionEquals(string(R.string.tile_right_operand_content_description, "2"))
+            .assertContentDescriptionEquals(string(R.string.tile_right_operand_content_description, rightValue))
     }
 
     private fun assertStepDisplayed(stepIndex: Int, mode: TutorialMode = TutorialMode.LEARN_BASICS) {
@@ -344,6 +385,20 @@ class TutorialRouteTest {
         assertTileResult(tileIndex = 7, result = 56)
     }
 
+    private fun assertSolvingTipsPracticeScenarioDisplayed() {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(0))
+            .performScrollTo()
+            .assertContentDescriptionEquals(string(R.string.strip_item_known_content_description, "2"))
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(3))
+            .assertContentDescriptionEquals(string(R.string.strip_item_known_content_description, "8"))
+        assertTileResult(tileIndex = 0, result = 5)
+        assertTileExpression(tileIndex = 1, leftValue = "2", operator = Operator.MULTIPLICATION, rightValue = "3")
+        assertTileResult(tileIndex = 2, result = 32)
+        assertTileResult(tileIndex = 3, result = 12)
+    }
+
     private fun assertTileResult(tileIndex: Int, result: Int) {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.BOARD)
@@ -366,8 +421,12 @@ class TutorialRouteTest {
     }
 
     private fun assertUnmergedNodeNotHighlighted(testTag: String) {
+        assertNodeNotHighlighted(testTag = testTag, useUnmergedTree = true)
+    }
+
+    private fun assertNodeNotHighlighted(testTag: String, useUnmergedTree: Boolean = false) {
         composeTestRule
-            .onNodeWithTag(testTag, useUnmergedTree = true)
+            .onNodeWithTag(testTag, useUnmergedTree = useUnmergedTree)
             .assert(
                 SemanticsMatcher.keyNotDefined(GameHighlightedKey)
             )
