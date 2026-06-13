@@ -232,10 +232,10 @@ private fun GameScreenTopBar(
             Text(text = title)
         },
         actions = {
+            actions()
             if (isRulesHelperEnabled) {
                 RulesHelperAction(onClick = onRulesHelperClick)
             }
-            actions()
         }
     )
 }

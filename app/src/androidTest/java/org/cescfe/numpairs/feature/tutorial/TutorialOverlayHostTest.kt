@@ -24,6 +24,7 @@ import org.cescfe.numpairs.feature.game.ui.GameScreenTestTags
 import org.cescfe.numpairs.feature.tutorial.ui.TutorialScreenTestTags
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -119,6 +120,61 @@ class TutorialOverlayHostTest {
             .assertIsDisplayed()
         assertPreservedStripItemPlayerEntered()
         assertEquals(1, puzzleProvider.requestCount)
+    }
+
+    @Test
+    fun hintActionOpensPracticeFullPuzzleOverlayAndReturnsToGame() {
+        val puzzleProvider = QueueFourPairsPuzzleProvider(initialPuzzle)
+
+        composeTestRule.setContent {
+            NumPairsTheme {
+                FourPairsRoute(puzzleProvider = puzzleProvider)
+            }
+        }
+
+        enterPreservedStripValue()
+        assertPreservedStripItemPlayerEntered()
+        assertHintActionIsLeftOfRulesHelpAction()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.HINT_ACTION)
+            .assertIsDisplayed()
+            .assertContentDescriptionEquals(string(R.string.hint_action_content_description))
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.FULL_SCREEN_OVERLAY)
+            .assertIsDisplayed()
+        assertStepIndicatorDisplayed(mode = TutorialMode.PRACTICE_FULL_PUZZLE)
+
+        pressBackUnconditionally()
+
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.FULL_SCREEN_OVERLAY)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+        assertPreservedStripItemPlayerEntered()
+        assertEquals(1, puzzleProvider.requestCount)
+    }
+
+    private fun assertHintActionIsLeftOfRulesHelpAction() {
+        val hintActionBounds = composeTestRule
+            .onNodeWithTag(GameScreenTestTags.HINT_ACTION)
+            .assertIsDisplayed()
+            .fetchSemanticsNode()
+            .boundsInRoot
+        val rulesHelperActionBounds = composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
+            .assertIsDisplayed()
+            .fetchSemanticsNode()
+            .boundsInRoot
+
+        assertTrue(
+            "Hint action should appear to the left of rules help action.",
+            hintActionBounds.right <= rulesHelperActionBounds.left
+        )
     }
 
     private fun enterPreservedStripValue() {

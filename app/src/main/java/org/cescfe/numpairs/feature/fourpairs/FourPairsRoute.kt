@@ -1,5 +1,7 @@
 package org.cescfe.numpairs.feature.fourpairs
 
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -7,11 +9,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.GameRoute
+import org.cescfe.numpairs.feature.game.ui.GameScreenTestTags
 import org.cescfe.numpairs.feature.tutorial.TutorialMode
 import org.cescfe.numpairs.feature.tutorial.TutorialOverlayHost
 
@@ -57,7 +62,27 @@ fun FourPairsRoute(
             onRulesHelperPlayTutorialRequested = {
                 requestedTutorialOverlayMode = TutorialMode.LEARN_BASICS
             },
+            topBarActions = {
+                HintAction(
+                    onClick = {
+                        requestedTutorialOverlayMode = TutorialMode.PRACTICE_FULL_PUZZLE
+                    }
+                )
+            },
             onNavigateBack = onNavigateBack
+        )
+    }
+}
+
+@Composable
+private fun HintAction(onClick: () -> Unit) {
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier.testTag(GameScreenTestTags.HINT_ACTION)
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_hint),
+            contentDescription = stringResource(R.string.hint_action_content_description)
         )
     }
 }
