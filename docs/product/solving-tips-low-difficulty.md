@@ -105,21 +105,21 @@ Recommended sections and copy:
 
 ### Use The Strip
 
-- `Hidden strip values must still fit between their visible neighbors. Use the sorted strip to narrow possible values.`
-- `The highest strip value is visible in low difficulty. Use it as an anchor for large products and impossible sums.`
+- `Hidden strip values must still fit between their visible neighbors.`
+- `The highest strip value is an anchor for large products and impossible sums.`
 
 ### Find Products
 
-- `Large results are usually product tiles. Start by checking which visible strip values divide those results exactly.`
-- `If a strip value is not a factor of a result, it cannot be part of that product tile.`
+- `Large results are usually product tiles.`
+- `Check its factors.`
 
 ### Find Sums
 
-- `Prime results are addition tiles in low difficulty. Because the strip never includes 1, a prime result cannot be made by multiplying two strip values.`
+- `In low difficulty, prime results are always addition tiles.`
 
-### Check Usage
+### Use UI Clues
 
-- `Operand choices show addition and multiplication usage. Use those badges to avoid overusing the same strip entry.`
+- `Operand choices show addition and multiplication usage.`
 
 ---
 
