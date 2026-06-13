@@ -121,6 +121,42 @@ class TutorialOverlayHostTest {
         assertEquals(1, puzzleProvider.requestCount)
     }
 
+    @Test
+    fun hintActionOpensPracticeFullPuzzleOverlayAndReturnsToGame() {
+        val puzzleProvider = QueueFourPairsPuzzleProvider(initialPuzzle)
+
+        composeTestRule.setContent {
+            NumPairsTheme {
+                FourPairsRoute(puzzleProvider = puzzleProvider)
+            }
+        }
+
+        enterPreservedStripValue()
+        assertPreservedStripItemPlayerEntered()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.HINT_ACTION)
+            .assertIsDisplayed()
+            .assertContentDescriptionEquals(string(R.string.hint_action_content_description))
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.FULL_SCREEN_OVERLAY)
+            .assertIsDisplayed()
+        assertStepIndicatorDisplayed(mode = TutorialMode.PRACTICE_FULL_PUZZLE)
+
+        pressBackUnconditionally()
+
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.FULL_SCREEN_OVERLAY)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+        assertPreservedStripItemPlayerEntered()
+        assertEquals(1, puzzleProvider.requestCount)
+    }
+
     private fun enterPreservedStripValue() {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.stripItem(PRESERVED_STRIP_ITEM_INDEX))
