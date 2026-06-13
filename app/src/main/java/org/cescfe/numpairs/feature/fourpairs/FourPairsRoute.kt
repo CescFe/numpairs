@@ -17,6 +17,7 @@ import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.GameRoute
 import org.cescfe.numpairs.feature.game.ui.GameScreenTestTags
+import org.cescfe.numpairs.feature.game.ui.SolvingTipsDialog
 import org.cescfe.numpairs.feature.tutorial.TutorialMode
 import org.cescfe.numpairs.feature.tutorial.TutorialOverlayHost
 
@@ -36,6 +37,9 @@ fun FourPairsRoute(
     }
     var requestedTutorialOverlayMode by rememberSaveable {
         mutableStateOf<TutorialMode?>(null)
+    }
+    var isSolvingTipsDialogVisible by rememberSaveable {
+        mutableStateOf(false)
     }
     val activeTutorialOverlayMode = tutorialOverlayMode ?: requestedTutorialOverlayMode
 
@@ -65,12 +69,22 @@ fun FourPairsRoute(
             topBarActions = {
                 HintAction(
                     onClick = {
-                        requestedTutorialOverlayMode = TutorialMode.PRACTICE_FULL_PUZZLE
+                        isSolvingTipsDialogVisible = true
                     }
                 )
             },
             onNavigateBack = onNavigateBack
         )
+        if (isSolvingTipsDialogVisible) {
+            SolvingTipsDialog(
+                onDismiss = {
+                    isSolvingTipsDialogVisible = false
+                },
+                onPracticeTipsRequested = {
+                    requestedTutorialOverlayMode = TutorialMode.SOLVING_TIPS_PRACTICE
+                }
+            )
+        }
     }
 }
 

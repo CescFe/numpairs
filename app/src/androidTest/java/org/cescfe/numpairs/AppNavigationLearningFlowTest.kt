@@ -45,7 +45,7 @@ class AppNavigationLearningFlowTest {
         openLearnBasicsFromRulesHelper()
         closeOverlayAndAssertCurrentFourPairsScreen()
 
-        openPracticeFullPuzzleFromHintAction()
+        openSolvingTipsPracticeFromHintAction()
         closeOverlayAndAssertCurrentFourPairsScreen()
         assertEquals(1, puzzleProvider.requestCount)
     }
@@ -89,13 +89,23 @@ class AppNavigationLearningFlowTest {
         assertTutorialOverlayMode(TutorialMode.LEARN_BASICS)
     }
 
-    private fun openPracticeFullPuzzleFromHintAction() {
+    private fun openSolvingTipsPracticeFromHintAction() {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.HINT_ACTION)
             .assertIsDisplayed()
             .performClick()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SOLVING_TIPS_DIALOG)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SOLVING_TIPS_PRACTICE_BUTTON)
+            .assertIsDisplayed()
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SOLVING_TIPS_DIALOG)
+            .assertDoesNotExist()
 
-        assertTutorialOverlayMode(TutorialMode.PRACTICE_FULL_PUZZLE)
+        assertTutorialOverlayMode(TutorialMode.SOLVING_TIPS_PRACTICE)
     }
 
     private fun assertTutorialOverlayMode(mode: TutorialMode) {

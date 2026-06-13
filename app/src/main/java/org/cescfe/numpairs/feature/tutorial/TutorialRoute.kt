@@ -139,7 +139,27 @@ private fun TutorialRequiredAction.toInteractionPolicy(): GameInteractionPolicy 
             index == tileIndex && operator == this.operator
         }
     )
+    is TutorialRequiredAction.CompleteTileExpressions -> GameInteractionPolicy(
+        canTapStripItem = { false },
+        canConfirmStripItemEntry = { _, _ -> false },
+        canTapTileLeftOperand = { index -> expressionFor(tileIndex = index) != null },
+        canTapTileRightOperand = { index -> expressionFor(tileIndex = index) != null },
+        canTapTileOperator = { index -> expressionFor(tileIndex = index) != null },
+        canTapTileReset = { false },
+        canConfirmTileOperand = { index, slot, stripEntryId ->
+            expressionFor(tileIndex = index)?.requiredStripEntryIdFor(slot = slot) == stripEntryId
+        },
+        canConfirmTileOperator = { index, operator ->
+            expressionFor(tileIndex = index)?.operator == operator
+        }
+    )
     TutorialRequiredAction.CompleteScenario -> GameInteractionPolicy.AllowAll
+}
+
+private fun TutorialRequiredAction.CompleteTileExpressions.expressionFor(
+    tileIndex: Int
+): TutorialRequiredAction.CompleteTileExpression? = expressions.firstOrNull { expression ->
+    expression.tileIndex == tileIndex
 }
 
 private fun TutorialRequiredAction.CompleteTileExpression.requiredStripEntryIdFor(slot: OperandSlot): Int =
