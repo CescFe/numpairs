@@ -37,6 +37,10 @@ In current low-difficulty puzzles, strip values do not include `1`.
 
 Because of that, a prime grid result cannot be produced by multiplying two strip values. A prime result should be treated as a strong signal that the tile is an addition tile.
 
+Recommended step copy:
+
+> In low difficulty, the strip never includes 1, so prime results are always sums. Complete the prime result as an addition tile.
+
 This tip should be documented and implemented as low-difficulty-specific. It should be revisited if a future difficulty allows `1`, changes the strip value range, or introduces different operations.
 
 ### 2. Narrow A Product By Checking Factors, Then Confirm The Matching Pair's Sum
@@ -44,6 +48,10 @@ This tip should be documented and implemented as low-difficulty-specific. It sho
 For a multiplication tile, both operands must be exact factors of the visible result.
 
 After identifying a plausible factor pair, the player should check whether the same two strip entries also explain a matching addition result elsewhere in the grid.
+
+Recommended step copy:
+
+> Product tiles can only use factors of their result. Find two strip values that multiply to the product, then use the same pair to complete its matching sum.
 
 This tip is strongly aligned with current low-difficulty puzzles because the value range is small and the multiplication cap keeps factor checks approachable.
 
