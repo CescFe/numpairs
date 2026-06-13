@@ -27,6 +27,10 @@ object GameScreenTestTags {
     const val RULES_HELPER_CLOSE_BUTTON = "rules_helper_close_button"
     const val RULES_HELPER_PLAY_TUTORIAL_BUTTON = "rules_helper_play_tutorial_button"
     const val RULES_HELPER_CONTENT = "rules_helper_content"
+    const val SOLVING_TIPS_DIALOG = "solving_tips_dialog"
+    const val SOLVING_TIPS_CLOSE_BUTTON = "solving_tips_close_button"
+    const val SOLVING_TIPS_PRACTICE_BUTTON = "solving_tips_practice_button"
+    const val SOLVING_TIPS_CONTENT = "solving_tips_content"
 
     fun stripItem(index: Int): String = "strip_item_$index"
 
