@@ -24,6 +24,7 @@ import org.cescfe.numpairs.feature.game.ui.GameScreenTestTags
 import org.cescfe.numpairs.feature.tutorial.ui.TutorialScreenTestTags
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -133,6 +134,7 @@ class TutorialOverlayHostTest {
 
         enterPreservedStripValue()
         assertPreservedStripItemPlayerEntered()
+        assertHintActionIsLeftOfRulesHelpAction()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.HINT_ACTION)
@@ -155,6 +157,24 @@ class TutorialOverlayHostTest {
             .assertIsDisplayed()
         assertPreservedStripItemPlayerEntered()
         assertEquals(1, puzzleProvider.requestCount)
+    }
+
+    private fun assertHintActionIsLeftOfRulesHelpAction() {
+        val hintActionBounds = composeTestRule
+            .onNodeWithTag(GameScreenTestTags.HINT_ACTION)
+            .assertIsDisplayed()
+            .fetchSemanticsNode()
+            .boundsInRoot
+        val rulesHelperActionBounds = composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
+            .assertIsDisplayed()
+            .fetchSemanticsNode()
+            .boundsInRoot
+
+        assertTrue(
+            "Hint action should appear to the left of rules help action.",
+            hintActionBounds.right <= rulesHelperActionBounds.left
+        )
     }
 
     private fun enterPreservedStripValue() {
