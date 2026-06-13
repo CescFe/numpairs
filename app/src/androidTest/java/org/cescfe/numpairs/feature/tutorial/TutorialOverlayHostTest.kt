@@ -7,6 +7,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -17,6 +20,7 @@ import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
+import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.feature.fourpairs.FourPairsPuzzleProvider
 import org.cescfe.numpairs.feature.fourpairs.FourPairsRoute
@@ -109,7 +113,11 @@ class TutorialOverlayHostTest {
             .onNodeWithTag(TutorialScreenTestTags.FULL_SCREEN_OVERLAY)
             .assertIsDisplayed()
         assertStepIndicatorDisplayed(mode = TutorialMode.LEARN_BASICS)
+        completeLearnBasicsTutorial()
+        assertTutorialSuccessOverlayDisplayed()
+        assertEquals(1, puzzleProvider.requestCount)
 
+        dismissTutorialSuccessOverlayAndAssertOverlayRemains()
         pressBackUnconditionally()
 
         composeTestRule
@@ -146,7 +154,11 @@ class TutorialOverlayHostTest {
             .onNodeWithTag(TutorialScreenTestTags.FULL_SCREEN_OVERLAY)
             .assertIsDisplayed()
         assertStepIndicatorDisplayed(mode = TutorialMode.PRACTICE_FULL_PUZZLE)
+        completePracticeFullPuzzleTutorial()
+        assertTutorialSuccessOverlayDisplayed()
+        assertEquals(1, puzzleProvider.requestCount)
 
+        dismissTutorialSuccessOverlayAndAssertOverlayRemains()
         pressBackUnconditionally()
 
         composeTestRule
@@ -158,6 +170,164 @@ class TutorialOverlayHostTest {
         assertPreservedStripItemPlayerEntered()
         assertEquals(1, puzzleProvider.requestCount)
     }
+
+    private fun completeLearnBasicsTutorial() {
+        enterTutorialStripValue(index = 1, value = "2")
+        waitForLearnBasicsStep(stepIndex = 1)
+        completeTutorialTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
+        waitForLearnBasicsStep(stepIndex = 2)
+        completeTutorialTile(
+            tileIndex = 1,
+            leftStripEntryId = 0,
+            operator = Operator.MULTIPLICATION,
+            rightStripEntryId = 1
+        )
+        waitForLearnBasicsStep(stepIndex = 3)
+        completeTutorialTile(tileIndex = 2, leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3)
+        completeTutorialTile(
+            tileIndex = 3,
+            leftStripEntryId = 2,
+            operator = Operator.MULTIPLICATION,
+            rightStripEntryId = 3
+        )
+    }
+
+    private fun completePracticeFullPuzzleTutorial() {
+        enterTutorialStripValue(index = 1, value = "2")
+        enterTutorialStripValue(index = 4, value = "5")
+        enterTutorialStripValue(index = 6, value = "7")
+        completeTutorialTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
+        completeTutorialTile(
+            tileIndex = 1,
+            leftStripEntryId = 0,
+            operator = Operator.MULTIPLICATION,
+            rightStripEntryId = 1
+        )
+        completeTutorialTile(tileIndex = 2, leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3)
+        completeTutorialTile(
+            tileIndex = 3,
+            leftStripEntryId = 2,
+            operator = Operator.MULTIPLICATION,
+            rightStripEntryId = 3
+        )
+        completeTutorialTile(tileIndex = 4, leftStripEntryId = 4, operator = Operator.ADDITION, rightStripEntryId = 5)
+        completeTutorialTile(
+            tileIndex = 5,
+            leftStripEntryId = 4,
+            operator = Operator.MULTIPLICATION,
+            rightStripEntryId = 5
+        )
+        completeTutorialTile(tileIndex = 6, leftStripEntryId = 6, operator = Operator.ADDITION, rightStripEntryId = 7)
+        completeTutorialTile(
+            tileIndex = 7,
+            leftStripEntryId = 6,
+            operator = Operator.MULTIPLICATION,
+            rightStripEntryId = 7
+        )
+    }
+
+    private fun enterTutorialStripValue(index: Int, value: String) {
+        overlayNodeWithTag(GameScreenTestTags.stripItem(index))
+            .performScrollTo()
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
+            .performTextInput(value)
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM)
+            .performClick()
+        overlayNodeWithTag(GameScreenTestTags.stripItem(index))
+            .assertContentDescriptionEquals(
+                string(
+                    R.string.strip_item_player_entered_content_description,
+                    value
+                )
+            )
+    }
+
+    private fun completeTutorialTile(
+        tileIndex: Int,
+        leftStripEntryId: Int,
+        operator: Operator,
+        rightStripEntryId: Int
+    ) {
+        chooseTutorialTileOperand(
+            tileIndex = tileIndex,
+            isLeftOperand = true,
+            stripEntryId = leftStripEntryId
+        )
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(leftStripEntryId), useUnmergedTree = true)
+            .performClick()
+        chooseTutorialTileOperand(
+            tileIndex = tileIndex,
+            isLeftOperand = false,
+            stripEntryId = rightStripEntryId
+        )
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(rightStripEntryId), useUnmergedTree = true)
+            .performClick()
+        openTutorialTileOperatorMenu(tileIndex = tileIndex)
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(operator), useUnmergedTree = true)
+            .performClick()
+    }
+
+    private fun chooseTutorialTileOperand(tileIndex: Int, isLeftOperand: Boolean, stripEntryId: Int) {
+        overlayNodeWithTag(GameScreenTestTags.tile(tileIndex), useUnmergedTree = true)
+            .performScrollTo()
+        overlayNodeWithTag(
+            if (isLeftOperand) {
+                GameScreenTestTags.tileLeftOperand(tileIndex)
+            } else {
+                GameScreenTestTags.tileRightOperand(tileIndex)
+            },
+            useUnmergedTree = true
+        ).performClick()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(stripEntryId), useUnmergedTree = true)
+            .assertIsEnabled()
+    }
+
+    private fun openTutorialTileOperatorMenu(tileIndex: Int) {
+        overlayNodeWithTag(GameScreenTestTags.tile(tileIndex), useUnmergedTree = true)
+            .performScrollTo()
+        overlayNodeWithTag(GameScreenTestTags.tileOperator(tileIndex), useUnmergedTree = true)
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR, useUnmergedTree = true)
+            .assertIsDisplayed()
+    }
+
+    private fun assertTutorialSuccessOverlayDisplayed() {
+        overlayNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .assertIsDisplayed()
+    }
+
+    private fun dismissTutorialSuccessOverlayAndAssertOverlayRemains() {
+        pressBackUnconditionally()
+        overlayNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.FULL_SCREEN_OVERLAY)
+            .assertIsDisplayed()
+    }
+
+    private fun waitForLearnBasicsStep(stepIndex: Int) {
+        val step = TutorialMvpContent.stepsFor(TutorialMode.LEARN_BASICS)[stepIndex]
+
+        composeTestRule.waitUntil(timeoutMillis = TUTORIAL_STEP_WAIT_TIMEOUT_MS) {
+            composeTestRule
+                .onAllNodes(hasText(string(step.playerFacingCopyResId)))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+    }
+
+    private fun overlayNodeWithTag(testTag: String, useUnmergedTree: Boolean = false) = composeTestRule.onNode(
+        hasTestTag(testTag) and hasAnyAncestor(hasTestTag(TutorialScreenTestTags.FULL_SCREEN_OVERLAY)),
+        useUnmergedTree = useUnmergedTree
+    )
 
     private fun assertHintActionIsLeftOfRulesHelpAction() {
         val hintActionBounds = composeTestRule
@@ -238,5 +408,6 @@ class TutorialOverlayHostTest {
     private companion object {
         const val PRESERVED_STRIP_ITEM_INDEX = 1
         const val PRESERVED_STRIP_ITEM_VALUE = "2"
+        const val TUTORIAL_STEP_WAIT_TIMEOUT_MS = 5_000L
     }
 }
