@@ -369,10 +369,7 @@ class TutorialRouteTest {
         composeTestRule
             .onNodeWithTag(testTag, useUnmergedTree = true)
             .assert(
-                SemanticsMatcher.expectValue(
-                    GameHighlightedKey,
-                    false
-                )
+                SemanticsMatcher.keyNotDefined(GameHighlightedKey)
             )
     }
 
