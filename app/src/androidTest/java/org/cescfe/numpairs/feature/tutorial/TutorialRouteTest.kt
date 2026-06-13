@@ -106,7 +106,7 @@ class TutorialRouteTest {
     }
 
     @Test
-    fun finishingTheTwoPairPracticePuzzleStaysOnTheLearnBasicsCompletionStep() {
+    fun finishingTheTwoPairPracticePuzzleShowsSuccessOverlayOnTheLearnBasicsCompletionStep() {
         setContent()
 
         completeGuidedTwoPairSteps()
@@ -115,6 +115,9 @@ class TutorialRouteTest {
 
         assertStepDisplayed(stepIndex = 3)
         assertTwoPairPracticeScenarioDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .assertIsDisplayed()
     }
 
     @Test

@@ -59,7 +59,7 @@ fun TutorialRoute(
         modifier = modifier,
         gameSessionKey = "$TUTORIAL_GAME_SESSION_KEY:$mode:${currentScenario.id}",
         puzzleResetKey = mode to currentScenario.id,
-        isSuccessOverlayEnabled = currentStep.scenarioId == TutorialScenarioId.FINAL_EASY_FOUR_PAIRS,
+        isSuccessOverlayEnabled = currentStepIndex == steps.lastIndex,
         interactionPolicy = currentStep.requiredAction.toInteractionPolicy(),
         highlightState = currentStep.toHighlightState(scenario = currentScenario),
         contentBeforePuzzle = {
