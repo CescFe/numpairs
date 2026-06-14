@@ -17,8 +17,8 @@ import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.feature.fourpairs.FourPairsPuzzleProvider
 import org.cescfe.numpairs.feature.game.ui.GameScreenTestTags
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
+import org.cescfe.numpairs.feature.tutorial.TutorialContent
 import org.cescfe.numpairs.feature.tutorial.TutorialMode
-import org.cescfe.numpairs.feature.tutorial.TutorialMvpContent
 import org.cescfe.numpairs.feature.tutorial.ui.TutorialScreenTestTags
 import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
@@ -109,7 +109,7 @@ class AppNavigationLearningFlowTest {
     }
 
     private fun assertTutorialOverlayMode(mode: TutorialMode) {
-        val steps = TutorialMvpContent.stepsFor(mode)
+        val steps = TutorialContent.stepsFor(mode)
 
         composeTestRule
             .onNodeWithTag(TutorialScreenTestTags.FULL_SCREEN_OVERLAY)

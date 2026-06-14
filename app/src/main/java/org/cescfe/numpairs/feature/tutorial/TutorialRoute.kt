@@ -39,11 +39,11 @@ fun TutorialRoute(
     mode: TutorialMode = TutorialMode.LEARN_BASICS,
     onNavigateBack: () -> Unit = {}
 ) {
-    val steps = TutorialMvpContent.stepsFor(mode)
+    val steps = TutorialContent.stepsFor(mode)
     var currentStepIndex by rememberSaveable(mode) { mutableIntStateOf(0) }
     var latestGameUiState by remember(mode) { mutableStateOf<GameUiState?>(null) }
     val currentStep = steps[currentStepIndex]
-    val currentScenario = TutorialMvpContent.scenario(currentStep.scenarioId)
+    val currentScenario = TutorialContent.scenario(currentStep.scenarioId)
 
     LaunchedEffect(currentStepIndex, latestGameUiState) {
         val uiState = latestGameUiState ?: return@LaunchedEffect

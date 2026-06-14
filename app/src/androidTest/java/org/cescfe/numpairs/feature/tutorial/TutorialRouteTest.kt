@@ -311,7 +311,7 @@ class TutorialRouteTest {
     }
 
     private fun assertStepDisplayed(stepIndex: Int, mode: TutorialMode = TutorialMode.LEARN_BASICS) {
-        val steps = TutorialMvpContent.stepsFor(mode)
+        val steps = TutorialContent.stepsFor(mode)
         val step = steps[stepIndex]
 
         composeTestRule
@@ -433,7 +433,7 @@ class TutorialRouteTest {
     }
 
     private fun waitForStep(stepIndex: Int, mode: TutorialMode = TutorialMode.LEARN_BASICS) {
-        val step = TutorialMvpContent.stepsFor(mode)[stepIndex]
+        val step = TutorialContent.stepsFor(mode)[stepIndex]
 
         composeTestRule.waitUntil(timeoutMillis = TUTORIAL_STEP_WAIT_TIMEOUT_MS) {
             composeTestRule
