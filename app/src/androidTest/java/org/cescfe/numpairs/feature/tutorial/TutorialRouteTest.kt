@@ -121,30 +121,6 @@ class TutorialRouteTest {
     }
 
     @Test
-    fun practiceFullPuzzleTutorialScenarioCanBeCompletedWithNormalGameplay() {
-        setPracticeFullPuzzleTutorialContent()
-
-        assertStepDisplayed(stepIndex = 0, mode = TutorialMode.PRACTICE_FULL_PUZZLE)
-        assertFinalEasyFourPairsScenarioDisplayed()
-
-        enterStripValue(index = 1, value = "2")
-        enterStripValue(index = 4, value = "5")
-        enterStripValue(index = 6, value = "7")
-        completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
-        completeTile(tileIndex = 1, leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1)
-        completeTile(tileIndex = 2, leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3)
-        completeTile(tileIndex = 3, leftStripEntryId = 2, operator = Operator.MULTIPLICATION, rightStripEntryId = 3)
-        completeTile(tileIndex = 4, leftStripEntryId = 4, operator = Operator.ADDITION, rightStripEntryId = 5)
-        completeTile(tileIndex = 5, leftStripEntryId = 4, operator = Operator.MULTIPLICATION, rightStripEntryId = 5)
-        completeTile(tileIndex = 6, leftStripEntryId = 6, operator = Operator.ADDITION, rightStripEntryId = 7)
-        completeTile(tileIndex = 7, leftStripEntryId = 6, operator = Operator.MULTIPLICATION, rightStripEntryId = 7)
-
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
-            .assertIsDisplayed()
-    }
-
-    @Test
     fun solvingTipsPracticeHighlightsExpectedActionsAndCompletesWithSuccessOverlay() {
         setSolvingTipsPracticeTutorialContent()
 
@@ -191,18 +167,6 @@ class TutorialRouteTest {
         composeTestRule.setContent {
             NumPairsTheme {
                 TutorialRoute()
-            }
-        }
-
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SCREEN)
-            .assertIsDisplayed()
-    }
-
-    private fun setPracticeFullPuzzleTutorialContent() {
-        composeTestRule.setContent {
-            NumPairsTheme {
-                TutorialRoute(mode = TutorialMode.PRACTICE_FULL_PUZZLE)
             }
         }
 
@@ -400,20 +364,6 @@ class TutorialRouteTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tile(4), useUnmergedTree = true)
             .assertDoesNotExist()
-    }
-
-    private fun assertFinalEasyFourPairsScenarioDisplayed() {
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.stripItem(7))
-            .performScrollTo()
-            .assertContentDescriptionEquals(
-                string(
-                    R.string.strip_item_known_content_description,
-                    "8"
-                )
-            )
-        assertTileResult(tileIndex = 6, result = 15)
-        assertTileResult(tileIndex = 7, result = 56)
     }
 
     private fun assertSolvingTipsPracticeScenarioDisplayed() {

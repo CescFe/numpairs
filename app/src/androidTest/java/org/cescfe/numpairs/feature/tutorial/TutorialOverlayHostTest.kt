@@ -60,13 +60,13 @@ class TutorialOverlayHostTest {
         assertEquals(1, puzzleProvider.requestCount)
 
         composeTestRule.runOnIdle {
-            tutorialOverlayMode = TutorialMode.PRACTICE_FULL_PUZZLE
+            tutorialOverlayMode = TutorialMode.SOLVING_TIPS_PRACTICE
         }
 
         composeTestRule
             .onNodeWithTag(TutorialScreenTestTags.FULL_SCREEN_OVERLAY)
             .assertIsDisplayed()
-        assertStepIndicatorDisplayed(mode = TutorialMode.PRACTICE_FULL_PUZZLE)
+        assertStepIndicatorDisplayed(mode = TutorialMode.SOLVING_TIPS_PRACTICE)
 
         pressBackUnconditionally()
 
