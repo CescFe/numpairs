@@ -19,7 +19,6 @@ import org.cescfe.numpairs.feature.game.presentation.StripItemVisualStyle
 object TutorialMvpContent {
     val scenarios: List<TutorialScenario> = listOf(
         twoPairPracticeScenario(),
-        finalEasyFourPairsScenario(),
         solvingTipsPracticeScenario()
     )
 
@@ -93,17 +92,6 @@ object TutorialMvpContent {
         ),
         TutorialStep(
             order = 5,
-            scenarioId = TutorialScenarioId.FINAL_EASY_FOUR_PAIRS,
-            playerFacingCopyResId = R.string.tutorial_step_five_copy,
-            highlightedTargets = listOf(
-                TutorialHighlightTarget.HiddenStripEntries,
-                TutorialHighlightTarget.HiddenTileExpressions
-            ),
-            requiredAction = TutorialRequiredAction.CompleteScenario,
-            completionPredicate = TutorialStepCompletionPredicate.ScenarioSolved
-        ),
-        TutorialStep(
-            order = 6,
             scenarioId = TutorialScenarioId.SOLVING_TIPS_PRACTICE,
             playerFacingCopyResId = R.string.tutorial_solving_tips_step_one_copy,
             highlightedTargets = listOf(
@@ -144,7 +132,7 @@ object TutorialMvpContent {
             )
         ),
         TutorialStep(
-            order = 7,
+            order = 6,
             scenarioId = TutorialScenarioId.SOLVING_TIPS_PRACTICE,
             playerFacingCopyResId = R.string.tutorial_solving_tips_step_two_copy,
             highlightedTargets = listOf(
@@ -173,12 +161,10 @@ object TutorialMvpContent {
     )
 
     val learnBasicsSteps: List<TutorialStep> = steps.take(4)
-    val practiceFullPuzzleSteps: List<TutorialStep> = listOf(steps[4])
-    val solvingTipsPracticeSteps: List<TutorialStep> = steps.drop(5)
+    val solvingTipsPracticeSteps: List<TutorialStep> = steps.drop(4)
 
     fun stepsFor(mode: TutorialMode): List<TutorialStep> = when (mode) {
         TutorialMode.LEARN_BASICS -> learnBasicsSteps
-        TutorialMode.PRACTICE_FULL_PUZZLE -> practiceFullPuzzleSteps
         TutorialMode.SOLVING_TIPS_PRACTICE -> solvingTipsPracticeSteps
     }
 
@@ -187,7 +173,6 @@ object TutorialMvpContent {
 
 enum class TutorialMode {
     LEARN_BASICS,
-    PRACTICE_FULL_PUZZLE,
     SOLVING_TIPS_PRACTICE
 }
 
@@ -219,7 +204,6 @@ data class TutorialScenario(
 
 enum class TutorialScenarioId {
     TWO_PAIR_PRACTICE,
-    FINAL_EASY_FOUR_PAIRS,
     SOLVING_TIPS_PRACTICE
 }
 
@@ -455,47 +439,6 @@ private fun twoPairPracticeScenario(): TutorialScenario {
         intendedPairs = listOf(
             TutorialIntendedPair(firstStripEntryId = 0, secondStripEntryId = 1),
             TutorialIntendedPair(firstStripEntryId = 2, secondStripEntryId = 3)
-        )
-    )
-}
-
-private fun finalEasyFourPairsScenario(): TutorialScenario {
-    val stripValues = listOf(1, 2, 3, 4, 5, 6, 7, 8)
-
-    return TutorialScenario(
-        id = TutorialScenarioId.FINAL_EASY_FOUR_PAIRS,
-        stripValues = stripValues,
-        initialPuzzle = puzzle(
-            stripItems = listOf(
-                StripItem.Known(1),
-                StripItem.Hidden,
-                StripItem.Known(3),
-                StripItem.Known(4),
-                StripItem.Hidden,
-                StripItem.Known(6),
-                StripItem.Hidden,
-                StripItem.Known(8)
-            ),
-            tiles = hiddenTiles(results = listOf(3, 2, 7, 12, 11, 30, 15, 56))
-        ),
-        solvedPuzzle = solvedPuzzle(
-            stripValues = stripValues,
-            tileDefinitions = listOf(
-                TileDefinition(leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1),
-                TileDefinition(leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1),
-                TileDefinition(leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3),
-                TileDefinition(leftStripEntryId = 2, operator = Operator.MULTIPLICATION, rightStripEntryId = 3),
-                TileDefinition(leftStripEntryId = 4, operator = Operator.ADDITION, rightStripEntryId = 5),
-                TileDefinition(leftStripEntryId = 4, operator = Operator.MULTIPLICATION, rightStripEntryId = 5),
-                TileDefinition(leftStripEntryId = 6, operator = Operator.ADDITION, rightStripEntryId = 7),
-                TileDefinition(leftStripEntryId = 6, operator = Operator.MULTIPLICATION, rightStripEntryId = 7)
-            )
-        ),
-        intendedPairs = listOf(
-            TutorialIntendedPair(firstStripEntryId = 0, secondStripEntryId = 1),
-            TutorialIntendedPair(firstStripEntryId = 2, secondStripEntryId = 3),
-            TutorialIntendedPair(firstStripEntryId = 4, secondStripEntryId = 5),
-            TutorialIntendedPair(firstStripEntryId = 6, secondStripEntryId = 7)
         )
     )
 }

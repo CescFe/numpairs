@@ -20,7 +20,6 @@ class TutorialMvpContentTest {
         assertEquals(
             listOf(
                 TutorialScenarioId.TWO_PAIR_PRACTICE,
-                TutorialScenarioId.FINAL_EASY_FOUR_PAIRS,
                 TutorialScenarioId.SOLVING_TIPS_PRACTICE
             ),
             TutorialMvpContent.scenarios.map(TutorialScenario::id)
@@ -82,103 +81,6 @@ class TutorialMvpContentTest {
                 rightValue = 4,
                 rightStripEntryId = 3,
                 result = 12
-            )
-        )
-    }
-
-    @Test
-    fun defines_the_final_easy_four_pairs_tutorial_scenario() {
-        val scenario = TutorialMvpContent.scenario(TutorialScenarioId.FINAL_EASY_FOUR_PAIRS)
-
-        assertEquals(listOf(1, 2, 3, 4, 5, 6, 7, 8), scenario.stripValues)
-        assertEquals(
-            listOf(
-                StripItem.Known(1),
-                StripItem.Hidden,
-                StripItem.Known(3),
-                StripItem.Known(4),
-                StripItem.Hidden,
-                StripItem.Known(6),
-                StripItem.Hidden,
-                StripItem.Known(8)
-            ),
-            scenario.initialPuzzle.strip.items
-        )
-        assertEquals(listOf(3, 2, 7, 12, 11, 30, 15, 56), scenario.initialPuzzle.board.tiles.map(Tile::result))
-        assertAllTilesHaveHiddenExpressions(scenario.initialPuzzle)
-        assertEquals(
-            listOf(
-                TutorialIntendedPair(firstStripEntryId = 0, secondStripEntryId = 1),
-                TutorialIntendedPair(firstStripEntryId = 2, secondStripEntryId = 3),
-                TutorialIntendedPair(firstStripEntryId = 4, secondStripEntryId = 5),
-                TutorialIntendedPair(firstStripEntryId = 6, secondStripEntryId = 7)
-            ),
-            scenario.intendedPairs
-        )
-        scenario.assertSolvedTiles(
-            ExpectedSolvedTile(
-                leftValue = 1,
-                leftStripEntryId = 0,
-                operator = Operator.ADDITION,
-                rightValue = 2,
-                rightStripEntryId = 1,
-                result = 3
-            ),
-            ExpectedSolvedTile(
-                leftValue = 1,
-                leftStripEntryId = 0,
-                operator = Operator.MULTIPLICATION,
-                rightValue = 2,
-                rightStripEntryId = 1,
-                result = 2
-            ),
-            ExpectedSolvedTile(
-                leftValue = 3,
-                leftStripEntryId = 2,
-                operator = Operator.ADDITION,
-                rightValue = 4,
-                rightStripEntryId = 3,
-                result = 7
-            ),
-            ExpectedSolvedTile(
-                leftValue = 3,
-                leftStripEntryId = 2,
-                operator = Operator.MULTIPLICATION,
-                rightValue = 4,
-                rightStripEntryId = 3,
-                result = 12
-            ),
-            ExpectedSolvedTile(
-                leftValue = 5,
-                leftStripEntryId = 4,
-                operator = Operator.ADDITION,
-                rightValue = 6,
-                rightStripEntryId = 5,
-                result = 11
-            ),
-            ExpectedSolvedTile(
-                leftValue = 5,
-                leftStripEntryId = 4,
-                operator = Operator.MULTIPLICATION,
-                rightValue = 6,
-                rightStripEntryId = 5,
-                result = 30
-            ),
-            ExpectedSolvedTile(
-                leftValue = 7,
-                leftStripEntryId = 6,
-                operator = Operator.ADDITION,
-                rightValue = 8,
-                rightStripEntryId = 7,
-                result = 15
-            ),
-            ExpectedSolvedTile(
-                leftValue = 7,
-                leftStripEntryId = 6,
-                operator = Operator.MULTIPLICATION,
-                rightValue = 8,
-                rightStripEntryId = 7,
-                result = 56
             )
         )
     }
@@ -259,14 +161,13 @@ class TutorialMvpContentTest {
     fun maps_steps_to_the_authored_tutorial_scenarios() {
         val steps = TutorialMvpContent.steps
 
-        assertEquals(listOf(1, 2, 3, 4, 5, 6, 7), steps.map(TutorialStep::order))
+        assertEquals(listOf(1, 2, 3, 4, 5, 6), steps.map(TutorialStep::order))
         assertEquals(
             listOf(
                 TutorialScenarioId.TWO_PAIR_PRACTICE,
                 TutorialScenarioId.TWO_PAIR_PRACTICE,
                 TutorialScenarioId.TWO_PAIR_PRACTICE,
                 TutorialScenarioId.TWO_PAIR_PRACTICE,
-                TutorialScenarioId.FINAL_EASY_FOUR_PAIRS,
                 TutorialScenarioId.SOLVING_TIPS_PRACTICE,
                 TutorialScenarioId.SOLVING_TIPS_PRACTICE
             ),
@@ -278,7 +179,6 @@ class TutorialMvpContentTest {
                 R.string.tutorial_step_two_copy,
                 R.string.tutorial_step_three_copy,
                 R.string.tutorial_step_four_copy,
-                R.string.tutorial_step_five_copy,
                 R.string.tutorial_solving_tips_step_one_copy,
                 R.string.tutorial_solving_tips_step_two_copy
             ),
@@ -291,7 +191,6 @@ class TutorialMvpContentTest {
         assertEquals(
             listOf(
                 TutorialMode.LEARN_BASICS,
-                TutorialMode.PRACTICE_FULL_PUZZLE,
                 TutorialMode.SOLVING_TIPS_PRACTICE
             ),
             TutorialMode.entries.toList()
@@ -301,19 +200,11 @@ class TutorialMvpContentTest {
             TutorialMvpContent.stepsFor(TutorialMode.LEARN_BASICS).map(TutorialStep::order)
         )
         assertEquals(
-            listOf(5),
-            TutorialMvpContent.stepsFor(TutorialMode.PRACTICE_FULL_PUZZLE).map(TutorialStep::order)
-        )
-        assertEquals(
             TutorialMvpContent.learnBasicsSteps,
             TutorialMvpContent.stepsFor(TutorialMode.LEARN_BASICS)
         )
         assertEquals(
-            TutorialMvpContent.practiceFullPuzzleSteps,
-            TutorialMvpContent.stepsFor(TutorialMode.PRACTICE_FULL_PUZZLE)
-        )
-        assertEquals(
-            listOf(6, 7),
+            listOf(5, 6),
             TutorialMvpContent.stepsFor(TutorialMode.SOLVING_TIPS_PRACTICE).map(TutorialStep::order)
         )
         assertEquals(
@@ -342,10 +233,6 @@ class TutorialMvpContentTest {
                     TutorialHighlightTarget.TileExpressionSlots(tileIndex = 3)
                 ),
                 listOf(
-                    TutorialHighlightTarget.HiddenStripEntries,
-                    TutorialHighlightTarget.HiddenTileExpressions
-                ),
-                listOf(
                     TutorialHighlightTarget.StripEntries(indexes = listOf(1)),
                     TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0)
                 ),
@@ -372,7 +259,6 @@ class TutorialMvpContentTest {
                     operator = Operator.MULTIPLICATION,
                     rightStripEntryId = 1
                 ),
-                TutorialRequiredAction.CompleteScenario,
                 TutorialRequiredAction.CompleteScenario,
                 TutorialRequiredAction.CompleteTileExpressionsInOrder(
                     expressions = listOf(
@@ -431,7 +317,6 @@ class TutorialMvpContentTest {
                     rightValue = 2
                 ),
                 TutorialStepCompletionPredicate.ScenarioSolved,
-                TutorialStepCompletionPredicate.ScenarioSolved,
                 TutorialStepCompletionPredicate.TileExpressionsCompleted(
                     expressions = listOf(
                         TutorialStepCompletionPredicate.TileExpressionCompleted(
@@ -458,7 +343,6 @@ class TutorialMvpContentTest {
     fun completion_predicates_match_the_expected_game_ui_state() {
         val steps = TutorialMvpContent.steps
         val twoPairScenario = TutorialMvpContent.scenario(TutorialScenarioId.TWO_PAIR_PRACTICE)
-        val finalScenario = TutorialMvpContent.scenario(TutorialScenarioId.FINAL_EASY_FOUR_PAIRS)
         val solvingTipsScenario = TutorialMvpContent.scenario(TutorialScenarioId.SOLVING_TIPS_PRACTICE)
 
         assertFalse(steps[0].isComplete(GameUiState.from(twoPairScenario.initialPuzzle)))
@@ -485,23 +369,20 @@ class TutorialMvpContentTest {
         assertFalse(steps[3].isComplete(GameUiState.from(twoPairScenario.initialPuzzle)))
         assertTrue(steps[3].isComplete(GameUiState.from(twoPairScenario.solvedPuzzle)))
 
-        assertFalse(steps[4].isComplete(GameUiState.from(finalScenario.initialPuzzle)))
-        assertTrue(steps[4].isComplete(GameUiState.from(finalScenario.solvedPuzzle)))
-
-        assertFalse(steps[5].isComplete(GameUiState.from(solvingTipsScenario.initialPuzzle)))
+        assertFalse(steps[4].isComplete(GameUiState.from(solvingTipsScenario.initialPuzzle)))
         assertFalse(
-            steps[5].isComplete(
+            steps[4].isComplete(
                 GameUiState.from(solvingTipsScenario.initialPuzzle.withSolvedScenarioTiles(solvingTipsScenario, 0))
             )
         )
         assertTrue(
-            steps[5].isComplete(
+            steps[4].isComplete(
                 GameUiState.from(solvingTipsScenario.initialPuzzle.withSolvedScenarioTiles(solvingTipsScenario, 0, 1))
             )
         )
 
-        assertFalse(steps[6].isComplete(GameUiState.from(solvingTipsScenario.initialPuzzle)))
-        assertTrue(steps[6].isComplete(GameUiState.from(solvingTipsScenario.solvedPuzzle)))
+        assertFalse(steps[5].isComplete(GameUiState.from(solvingTipsScenario.initialPuzzle)))
+        assertTrue(steps[5].isComplete(GameUiState.from(solvingTipsScenario.solvedPuzzle)))
     }
 }
 
