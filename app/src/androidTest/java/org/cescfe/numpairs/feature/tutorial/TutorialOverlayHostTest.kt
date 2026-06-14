@@ -213,7 +213,6 @@ class TutorialOverlayHostTest {
         )
         waitForSecondSolvingTipsPracticeStep()
         enterTutorialStripValue(index = 2, value = "4")
-        enterTutorialStripValue(index = 3, value = "8")
         completeTutorialTile(
             tileIndex = 2,
             leftStripEntryId = 2,

@@ -193,7 +193,7 @@ class TutorialMvpContentTest {
                 StripItem.Known(2),
                 StripItem.Hidden,
                 StripItem.Hidden,
-                StripItem.Hidden
+                StripItem.Known(8)
             ),
             scenario.initialPuzzle.strip.items
         )
@@ -350,8 +350,7 @@ class TutorialMvpContentTest {
                     TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0)
                 ),
                 listOf(
-                    TutorialHighlightTarget.StripEntries(indexes = listOf(2, 3)),
-                    TutorialHighlightTarget.Tiles(indexes = listOf(2, 3)),
+                    TutorialHighlightTarget.StripEntries(indexes = listOf(2)),
                     TutorialHighlightTarget.TileExpressionSlots(tileIndex = 2),
                     TutorialHighlightTarget.TileExpressionSlots(tileIndex = 3)
                 )

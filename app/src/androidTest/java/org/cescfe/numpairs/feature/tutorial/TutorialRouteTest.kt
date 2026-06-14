@@ -170,16 +170,15 @@ class TutorialRouteTest {
         assertStepDisplayed(stepIndex = 1, mode = TutorialMode.SOLVING_TIPS_PRACTICE)
         assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(0))
         assertHighlighted(testTag = GameScreenTestTags.stripItem(2))
-        assertHighlighted(testTag = GameScreenTestTags.stripItem(3))
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(3))
         assertUnmergedNodeNotHighlighted(testTag = GameScreenTestTags.tile(0))
-        assertHighlighted(testTag = GameScreenTestTags.tile(2), useUnmergedTree = true)
-        assertHighlighted(testTag = GameScreenTestTags.tile(3), useUnmergedTree = true)
+        assertUnmergedNodeNotHighlighted(testTag = GameScreenTestTags.tile(2))
+        assertUnmergedNodeNotHighlighted(testTag = GameScreenTestTags.tile(3))
         assertTileExpressionSlotsNotHighlighted(tileIndex = 0)
         assertTileExpressionSlotsHighlighted(tileIndex = 2)
         assertTileExpressionSlotsHighlighted(tileIndex = 3)
 
         enterStripValue(index = 2, value = "4")
-        enterStripValue(index = 3, value = "8")
         completeTile(tileIndex = 2, leftStripEntryId = 2, operator = Operator.MULTIPLICATION, rightStripEntryId = 3)
         completeTile(tileIndex = 3, leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3)
 
@@ -430,7 +429,7 @@ class TutorialRouteTest {
             .assertContentDescriptionEquals(string(R.string.strip_item_hidden_content_description))
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.stripItem(3))
-            .assertContentDescriptionEquals(string(R.string.strip_item_hidden_content_description))
+            .assertContentDescriptionEquals(string(R.string.strip_item_known_content_description, "8"))
         assertTileResult(tileIndex = 0, result = 5)
         assertTileResult(tileIndex = 1, result = 6)
         assertSecondSolvingTipsTileExpressionHidden()

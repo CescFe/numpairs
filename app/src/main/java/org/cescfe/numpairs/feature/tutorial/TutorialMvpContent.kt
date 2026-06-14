@@ -148,8 +148,7 @@ object TutorialMvpContent {
             scenarioId = TutorialScenarioId.SOLVING_TIPS_PRACTICE,
             playerFacingCopyResId = R.string.tutorial_solving_tips_step_two_copy,
             highlightedTargets = listOf(
-                TutorialHighlightTarget.StripEntries(indexes = listOf(2, 3)),
-                TutorialHighlightTarget.Tiles(indexes = listOf(2, 3)),
+                TutorialHighlightTarget.StripEntries(indexes = listOf(2)),
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 2),
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 3)
             ),
@@ -521,7 +520,7 @@ private fun solvingTipsPracticeScenario(): TutorialScenario {
                 StripItem.Known(2),
                 StripItem.Hidden,
                 StripItem.Hidden,
-                StripItem.Hidden
+                StripItem.Known(8)
             ),
             tiles = listOf(
                 hiddenTile(result = 5),
