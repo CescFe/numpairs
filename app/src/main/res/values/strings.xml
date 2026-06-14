@@ -8,7 +8,7 @@
     <string name="tutorial_step_three_copy">Each pair must form one sum and one product. Use the same pair to complete its product tile.</string>
     <string name="tutorial_step_four_copy">Finish this practice puzzle.</string>
     <string name="tutorial_step_five_copy">Now finish the full tutorial puzzle.</string>
-    <string name="tutorial_solving_tips_step_one_copy">In low difficulty, the strip never includes 1 and no number appears twice, so prime results are always sums. Complete the prime result as an addition tile.</string>
+    <string name="tutorial_solving_tips_step_one_copy">In low difficulty, no number appears twice and the strip never includes 1, so prime results are always sums. Complete the prime result as an addition tile.</string>
     <string name="tutorial_solving_tips_step_two_copy">Product tiles can only use factors of their result. Find two strip values that multiply to the product, then use the same pair to complete its matching sum.</string>
     <string name="tutorial_previous_step_button">Back</string>
     <string name="tutorial_next_step_button">Next</string>

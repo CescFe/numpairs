@@ -375,11 +375,21 @@ class TutorialMvpContentTest {
                 ),
                 TutorialRequiredAction.CompleteScenario,
                 TutorialRequiredAction.CompleteScenario,
-                TutorialRequiredAction.CompleteTileExpression(
-                    tileIndex = 0,
-                    leftStripEntryId = 0,
-                    operator = Operator.ADDITION,
-                    rightStripEntryId = 1
+                TutorialRequiredAction.CompleteTileExpressionsInOrder(
+                    expressions = listOf(
+                        TutorialRequiredAction.CompleteTileExpression(
+                            tileIndex = 0,
+                            leftStripEntryId = 0,
+                            operator = Operator.ADDITION,
+                            rightStripEntryId = 1
+                        ),
+                        TutorialRequiredAction.CompleteTileExpression(
+                            tileIndex = 1,
+                            leftStripEntryId = 0,
+                            operator = Operator.MULTIPLICATION,
+                            rightStripEntryId = 1
+                        )
+                    )
                 ),
                 TutorialRequiredAction.CompleteTileExpressions(
                     expressions = listOf(
@@ -423,11 +433,21 @@ class TutorialMvpContentTest {
                 ),
                 TutorialStepCompletionPredicate.ScenarioSolved,
                 TutorialStepCompletionPredicate.ScenarioSolved,
-                TutorialStepCompletionPredicate.TileExpressionCompleted(
-                    tileIndex = 0,
-                    leftValue = 2,
-                    operator = Operator.ADDITION,
-                    rightValue = 3
+                TutorialStepCompletionPredicate.TileExpressionsCompleted(
+                    expressions = listOf(
+                        TutorialStepCompletionPredicate.TileExpressionCompleted(
+                            tileIndex = 0,
+                            leftValue = 2,
+                            operator = Operator.ADDITION,
+                            rightValue = 3
+                        ),
+                        TutorialStepCompletionPredicate.TileExpressionCompleted(
+                            tileIndex = 1,
+                            leftValue = 2,
+                            operator = Operator.MULTIPLICATION,
+                            rightValue = 3
+                        )
+                    )
                 ),
                 TutorialStepCompletionPredicate.ScenarioSolved
             ),
@@ -470,9 +490,14 @@ class TutorialMvpContentTest {
         assertTrue(steps[4].isComplete(GameUiState.from(finalScenario.solvedPuzzle)))
 
         assertFalse(steps[5].isComplete(GameUiState.from(solvingTipsScenario.initialPuzzle)))
-        assertTrue(
+        assertFalse(
             steps[5].isComplete(
                 GameUiState.from(solvingTipsScenario.initialPuzzle.withSolvedScenarioTiles(solvingTipsScenario, 0))
+            )
+        )
+        assertTrue(
+            steps[5].isComplete(
+                GameUiState.from(solvingTipsScenario.initialPuzzle.withSolvedScenarioTiles(solvingTipsScenario, 0, 1))
             )
         )
 

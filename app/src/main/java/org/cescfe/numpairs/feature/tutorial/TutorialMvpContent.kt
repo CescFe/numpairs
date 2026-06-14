@@ -110,17 +110,37 @@ object TutorialMvpContent {
                 TutorialHighlightTarget.StripEntries(indexes = listOf(1)),
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0)
             ),
-            requiredAction = TutorialRequiredAction.CompleteTileExpression(
-                tileIndex = 0,
-                leftStripEntryId = 0,
-                operator = Operator.ADDITION,
-                rightStripEntryId = 1
+            requiredAction = TutorialRequiredAction.CompleteTileExpressionsInOrder(
+                expressions = listOf(
+                    TutorialRequiredAction.CompleteTileExpression(
+                        tileIndex = 0,
+                        leftStripEntryId = 0,
+                        operator = Operator.ADDITION,
+                        rightStripEntryId = 1
+                    ),
+                    TutorialRequiredAction.CompleteTileExpression(
+                        tileIndex = 1,
+                        leftStripEntryId = 0,
+                        operator = Operator.MULTIPLICATION,
+                        rightStripEntryId = 1
+                    )
+                )
             ),
-            completionPredicate = TutorialStepCompletionPredicate.TileExpressionCompleted(
-                tileIndex = 0,
-                leftValue = 2,
-                operator = Operator.ADDITION,
-                rightValue = 3
+            completionPredicate = TutorialStepCompletionPredicate.TileExpressionsCompleted(
+                expressions = listOf(
+                    TutorialStepCompletionPredicate.TileExpressionCompleted(
+                        tileIndex = 0,
+                        leftValue = 2,
+                        operator = Operator.ADDITION,
+                        rightValue = 3
+                    ),
+                    TutorialStepCompletionPredicate.TileExpressionCompleted(
+                        tileIndex = 1,
+                        leftValue = 2,
+                        operator = Operator.MULTIPLICATION,
+                        rightValue = 3
+                    )
+                )
             )
         ),
         TutorialStep(
@@ -323,6 +343,17 @@ sealed interface TutorialRequiredAction {
         }
     }
 
+    data class CompleteTileExpressionsInOrder(val expressions: List<CompleteTileExpression>) : TutorialRequiredAction {
+        init {
+            require(expressions.isNotEmpty()) {
+                "Tutorial ordered tile expression action must include at least one expression."
+            }
+            require(expressions.map(CompleteTileExpression::tileIndex).toSet().size == expressions.size) {
+                "Tutorial ordered tile expression action must target distinct tiles."
+            }
+        }
+    }
+
     data object CompleteScenario : TutorialRequiredAction
 }
 
@@ -374,6 +405,22 @@ sealed interface TutorialStepCompletionPredicate {
             return tile.leftOperandLabel == leftValue.toString() &&
                 tile.operatorLabel == operator.symbol &&
                 tile.rightOperandLabel == rightValue.toString()
+        }
+    }
+
+    data class TileExpressionsCompleted(val expressions: List<TileExpressionCompleted>) :
+        TutorialStepCompletionPredicate {
+        init {
+            require(expressions.isNotEmpty()) {
+                "Tutorial tile expression completion set must include at least one expression."
+            }
+            require(expressions.map(TileExpressionCompleted::tileIndex).toSet().size == expressions.size) {
+                "Tutorial tile expression completion set must target distinct tiles."
+            }
+        }
+
+        override fun isSatisfiedBy(uiState: GameUiState): Boolean = expressions.all { expression ->
+            expression.isSatisfiedBy(uiState)
         }
     }
 

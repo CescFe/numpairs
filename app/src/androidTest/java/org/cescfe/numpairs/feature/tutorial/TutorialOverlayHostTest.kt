@@ -205,6 +205,12 @@ class TutorialOverlayHostTest {
     private fun completeSolvingTipsPracticeTutorial() {
         enterTutorialStripValue(index = 1, value = "3")
         completeTutorialTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
+        completeTutorialTile(
+            tileIndex = 1,
+            leftStripEntryId = 0,
+            operator = Operator.MULTIPLICATION,
+            rightStripEntryId = 1
+        )
         waitForSecondSolvingTipsPracticeStep()
         enterTutorialStripValue(index = 2, value = "4")
         enterTutorialStripValue(index = 3, value = "8")

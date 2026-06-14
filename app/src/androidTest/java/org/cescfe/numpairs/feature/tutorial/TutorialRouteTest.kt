@@ -160,6 +160,12 @@ class TutorialRouteTest {
 
         enterStripValue(index = 1, value = "3")
         completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
+        assertStepDisplayed(stepIndex = 0, mode = TutorialMode.SOLVING_TIPS_PRACTICE)
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(1))
+        assertTileExpressionSlotsNotHighlighted(tileIndex = 0)
+        assertTileExpressionSlotsHighlighted(tileIndex = 1)
+
+        completeTile(tileIndex = 1, leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1)
         waitForStep(stepIndex = 1, mode = TutorialMode.SOLVING_TIPS_PRACTICE)
         assertStepDisplayed(stepIndex = 1, mode = TutorialMode.SOLVING_TIPS_PRACTICE)
         assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(0))
