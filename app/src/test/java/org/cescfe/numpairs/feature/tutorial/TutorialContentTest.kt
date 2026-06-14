@@ -14,7 +14,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class TutorialMvpContentTest {
+class TutorialContentTest {
     @Test
     fun defines_the_authored_tutorial_scenarios() {
         assertEquals(
@@ -22,13 +22,13 @@ class TutorialMvpContentTest {
                 TutorialScenarioId.TWO_PAIR_PRACTICE,
                 TutorialScenarioId.SOLVING_TIPS_PRACTICE
             ),
-            TutorialMvpContent.scenarios.map(TutorialScenario::id)
+            TutorialContent.scenarios.map(TutorialScenario::id)
         )
     }
 
     @Test
     fun defines_the_two_pair_practice_scenario() {
-        val scenario = TutorialMvpContent.scenario(TutorialScenarioId.TWO_PAIR_PRACTICE)
+        val scenario = TutorialContent.scenario(TutorialScenarioId.TWO_PAIR_PRACTICE)
 
         assertEquals(listOf(1, 2, 3, 4), scenario.stripValues)
         assertEquals(
@@ -87,7 +87,7 @@ class TutorialMvpContentTest {
 
     @Test
     fun defines_the_solving_tips_practice_scenario() {
-        val scenario = TutorialMvpContent.scenario(TutorialScenarioId.SOLVING_TIPS_PRACTICE)
+        val scenario = TutorialContent.scenario(TutorialScenarioId.SOLVING_TIPS_PRACTICE)
 
         assertEquals(listOf(2, 3, 4, 8), scenario.stripValues)
         assertEquals(
@@ -149,7 +149,7 @@ class TutorialMvpContentTest {
 
     @Test
     fun tutorial_scenarios_are_valid_under_the_domain_rules() {
-        TutorialMvpContent.scenarios.forEach { scenario ->
+        TutorialContent.scenarios.forEach { scenario ->
             assertEquals(PuzzleCompletionState.INCOMPLETE, scenario.initialPuzzle.completionState)
             assertEquals(PuzzleCompletionState.SOLVED, scenario.solvedPuzzle.completionState)
             assertEquals(scenario.stripValues.size, scenario.initialPuzzle.strip.entries.size)
@@ -159,7 +159,7 @@ class TutorialMvpContentTest {
 
     @Test
     fun maps_steps_to_the_authored_tutorial_scenarios() {
-        val steps = TutorialMvpContent.steps
+        val steps = TutorialContent.steps
 
         assertEquals(listOf(1, 2, 3, 4, 5, 6), steps.map(TutorialStep::order))
         assertEquals(
@@ -197,25 +197,25 @@ class TutorialMvpContentTest {
         )
         assertEquals(
             listOf(1, 2, 3, 4),
-            TutorialMvpContent.stepsFor(TutorialMode.LEARN_BASICS).map(TutorialStep::order)
+            TutorialContent.stepsFor(TutorialMode.LEARN_BASICS).map(TutorialStep::order)
         )
         assertEquals(
-            TutorialMvpContent.learnBasicsSteps,
-            TutorialMvpContent.stepsFor(TutorialMode.LEARN_BASICS)
+            TutorialContent.learnBasicsSteps,
+            TutorialContent.stepsFor(TutorialMode.LEARN_BASICS)
         )
         assertEquals(
             listOf(5, 6),
-            TutorialMvpContent.stepsFor(TutorialMode.SOLVING_TIPS_PRACTICE).map(TutorialStep::order)
+            TutorialContent.stepsFor(TutorialMode.SOLVING_TIPS_PRACTICE).map(TutorialStep::order)
         )
         assertEquals(
-            TutorialMvpContent.solvingTipsPracticeSteps,
-            TutorialMvpContent.stepsFor(TutorialMode.SOLVING_TIPS_PRACTICE)
+            TutorialContent.solvingTipsPracticeSteps,
+            TutorialContent.stepsFor(TutorialMode.SOLVING_TIPS_PRACTICE)
         )
     }
 
     @Test
     fun defines_step_highlights_and_required_actions_for_the_guided_ui() {
-        val steps = TutorialMvpContent.steps
+        val steps = TutorialContent.steps
 
         assertEquals(
             listOf(
@@ -299,7 +299,7 @@ class TutorialMvpContentTest {
 
     @Test
     fun defines_completion_predicates_for_auto_advancing_steps() {
-        val steps = TutorialMvpContent.steps
+        val steps = TutorialContent.steps
 
         assertEquals(
             listOf(
@@ -341,9 +341,9 @@ class TutorialMvpContentTest {
 
     @Test
     fun completion_predicates_match_the_expected_game_ui_state() {
-        val steps = TutorialMvpContent.steps
-        val twoPairScenario = TutorialMvpContent.scenario(TutorialScenarioId.TWO_PAIR_PRACTICE)
-        val solvingTipsScenario = TutorialMvpContent.scenario(TutorialScenarioId.SOLVING_TIPS_PRACTICE)
+        val steps = TutorialContent.steps
+        val twoPairScenario = TutorialContent.scenario(TutorialScenarioId.TWO_PAIR_PRACTICE)
+        val solvingTipsScenario = TutorialContent.scenario(TutorialScenarioId.SOLVING_TIPS_PRACTICE)
 
         assertFalse(steps[0].isComplete(GameUiState.from(twoPairScenario.initialPuzzle)))
         assertTrue(

@@ -310,7 +310,7 @@ class TutorialOverlayHostTest {
     }
 
     private fun waitForLearnBasicsStep(stepIndex: Int) {
-        val step = TutorialMvpContent.stepsFor(TutorialMode.LEARN_BASICS)[stepIndex]
+        val step = TutorialContent.stepsFor(TutorialMode.LEARN_BASICS)[stepIndex]
 
         composeTestRule.waitUntil(timeoutMillis = TUTORIAL_STEP_WAIT_TIMEOUT_MS) {
             composeTestRule
@@ -321,7 +321,7 @@ class TutorialOverlayHostTest {
     }
 
     private fun waitForSecondSolvingTipsPracticeStep() {
-        val step = TutorialMvpContent.stepsFor(TutorialMode.SOLVING_TIPS_PRACTICE)[1]
+        val step = TutorialContent.stepsFor(TutorialMode.SOLVING_TIPS_PRACTICE)[1]
 
         composeTestRule.waitUntil(timeoutMillis = TUTORIAL_STEP_WAIT_TIMEOUT_MS) {
             composeTestRule
@@ -380,7 +380,7 @@ class TutorialOverlayHostTest {
     }
 
     private fun assertStepIndicatorDisplayed(mode: TutorialMode) {
-        val steps = TutorialMvpContent.stepsFor(mode)
+        val steps = TutorialContent.stepsFor(mode)
 
         composeTestRule
             .onNodeWithTag(TutorialScreenTestTags.STEP_INDICATOR)
