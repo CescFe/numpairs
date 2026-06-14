@@ -182,7 +182,7 @@ class TutorialOverlayHostTest {
     }
 
     private fun completeLearnBasicsTutorial() {
-        enterTutorialStripValue()
+        enterTutorialStripValue(index = 1, value = "2")
         waitForLearnBasicsStep(stepIndex = 1)
         completeTutorialTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
         waitForLearnBasicsStep(stepIndex = 2)
@@ -203,8 +203,11 @@ class TutorialOverlayHostTest {
     }
 
     private fun completeSolvingTipsPracticeTutorial() {
+        enterTutorialStripValue(index = 1, value = "3")
         completeTutorialTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
         waitForSecondSolvingTipsPracticeStep()
+        enterTutorialStripValue(index = 2, value = "4")
+        enterTutorialStripValue(index = 3, value = "8")
         completeTutorialTile(
             tileIndex = 2,
             leftStripEntryId = 2,
@@ -214,21 +217,21 @@ class TutorialOverlayHostTest {
         completeTutorialTile(tileIndex = 3, leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3)
     }
 
-    private fun enterTutorialStripValue() {
-        overlayNodeWithTag(GameScreenTestTags.stripItem(PRESERVED_STRIP_ITEM_INDEX))
+    private fun enterTutorialStripValue(index: Int, value: String) {
+        overlayNodeWithTag(GameScreenTestTags.stripItem(index))
             .performScrollTo()
             .performClick()
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
-            .performTextInput(PRESERVED_STRIP_ITEM_VALUE)
+            .performTextInput(value)
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM)
             .performClick()
-        overlayNodeWithTag(GameScreenTestTags.stripItem(PRESERVED_STRIP_ITEM_INDEX))
+        overlayNodeWithTag(GameScreenTestTags.stripItem(index))
             .assertContentDescriptionEquals(
                 string(
                     R.string.strip_item_player_entered_content_description,
-                    PRESERVED_STRIP_ITEM_VALUE
+                    value
                 )
             )
     }

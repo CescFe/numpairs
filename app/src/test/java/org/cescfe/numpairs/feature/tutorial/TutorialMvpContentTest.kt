@@ -191,15 +191,15 @@ class TutorialMvpContentTest {
         assertEquals(
             listOf(
                 StripItem.Known(2),
-                StripItem.Known(3),
-                StripItem.Known(4),
-                StripItem.Known(8)
+                StripItem.Hidden,
+                StripItem.Hidden,
+                StripItem.Hidden
             ),
             scenario.initialPuzzle.strip.items
         )
         assertEquals(listOf(5, 6, 32, 12), scenario.initialPuzzle.board.tiles.map(Tile::result))
         assertTileHasHiddenExpression(scenario.initialPuzzle.board.tiles[0])
-        assertEquals(scenario.solvedPuzzle.board.tiles[1], scenario.initialPuzzle.board.tiles[1])
+        assertTileHasHiddenExpression(scenario.initialPuzzle.board.tiles[1])
         assertTileHasHiddenExpression(scenario.initialPuzzle.board.tiles[2])
         assertTileHasHiddenExpression(scenario.initialPuzzle.board.tiles[3])
         assertEquals(
@@ -345,8 +345,16 @@ class TutorialMvpContentTest {
                     TutorialHighlightTarget.HiddenStripEntries,
                     TutorialHighlightTarget.HiddenTileExpressions
                 ),
-                emptyList(),
-                emptyList()
+                listOf(
+                    TutorialHighlightTarget.StripEntries(indexes = listOf(1)),
+                    TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0)
+                ),
+                listOf(
+                    TutorialHighlightTarget.StripEntries(indexes = listOf(2, 3)),
+                    TutorialHighlightTarget.Tiles(indexes = listOf(2, 3)),
+                    TutorialHighlightTarget.TileExpressionSlots(tileIndex = 2),
+                    TutorialHighlightTarget.TileExpressionSlots(tileIndex = 3)
+                )
             ),
             steps.map(TutorialStep::highlightedTargets)
         )

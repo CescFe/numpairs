@@ -60,7 +60,7 @@ fun TutorialRoute(
         gameSessionKey = "$TUTORIAL_GAME_SESSION_KEY:$mode:${currentScenario.id}",
         puzzleResetKey = mode to currentScenario.id,
         isSuccessOverlayEnabled = currentStepIndex == steps.lastIndex,
-        interactionPolicy = currentStep.requiredAction.toInteractionPolicy(),
+        interactionPolicy = currentStep.toInteractionPolicy(scenario = currentScenario),
         highlightState = currentStep.toHighlightState(scenario = currentScenario),
         contentBeforePuzzle = {
             TutorialInstructionSurface(
@@ -112,7 +112,16 @@ private fun TutorialInstructionSurface(
     }
 }
 
-private fun TutorialRequiredAction.toInteractionPolicy(): GameInteractionPolicy = when (this) {
+private fun TutorialStep.toInteractionPolicy(scenario: TutorialScenario): GameInteractionPolicy =
+    requiredAction.toInteractionPolicy(
+        scenario = scenario,
+        highlightedStripEntryIds = highlightedStripEntryIds(scenario = scenario)
+    )
+
+private fun TutorialRequiredAction.toInteractionPolicy(
+    scenario: TutorialScenario,
+    highlightedStripEntryIds: Set<Int>
+): GameInteractionPolicy = when (this) {
     is TutorialRequiredAction.EnterStripValue -> GameInteractionPolicy(
         canTapStripItem = { index -> index == stripEntryIndex },
         canConfirmStripItemEntry = { index, value ->
@@ -125,9 +134,31 @@ private fun TutorialRequiredAction.toInteractionPolicy(): GameInteractionPolicy 
         canConfirmTileOperand = { _, _, _ -> false },
         canConfirmTileOperator = { _, _ -> false }
     )
-    is TutorialRequiredAction.CompleteTileExpression -> GameInteractionPolicy(
-        canTapStripItem = { false },
-        canConfirmStripItemEntry = { _, _ -> false },
+    is TutorialRequiredAction.CompleteTileExpression -> toInteractionPolicy(
+        scenario = scenario,
+        highlightedStripEntryIds = highlightedStripEntryIds
+    )
+    is TutorialRequiredAction.CompleteTileExpressions -> toInteractionPolicy(
+        scenario = scenario,
+        highlightedStripEntryIds = highlightedStripEntryIds
+    )
+    TutorialRequiredAction.CompleteScenario -> GameInteractionPolicy.AllowAll
+}
+
+private fun TutorialRequiredAction.CompleteTileExpression.toInteractionPolicy(
+    scenario: TutorialScenario,
+    highlightedStripEntryIds: Set<Int>
+): GameInteractionPolicy {
+    val editableStripEntryIds = editableRequiredStripEntryIds(
+        scenario = scenario,
+        highlightedStripEntryIds = highlightedStripEntryIds
+    )
+
+    return GameInteractionPolicy(
+        canTapStripItem = { index -> index in editableStripEntryIds },
+        canConfirmStripItemEntry = { index, value ->
+            index in editableStripEntryIds && scenario.stripValues.getOrNull(index) == value
+        },
         canTapTileLeftOperand = { index -> index == tileIndex },
         canTapTileRightOperand = { index -> index == tileIndex },
         canTapTileOperator = { index -> index == tileIndex },
@@ -139,9 +170,24 @@ private fun TutorialRequiredAction.toInteractionPolicy(): GameInteractionPolicy 
             index == tileIndex && operator == this.operator
         }
     )
-    is TutorialRequiredAction.CompleteTileExpressions -> GameInteractionPolicy(
-        canTapStripItem = { false },
-        canConfirmStripItemEntry = { _, _ -> false },
+}
+
+private fun TutorialRequiredAction.CompleteTileExpressions.toInteractionPolicy(
+    scenario: TutorialScenario,
+    highlightedStripEntryIds: Set<Int>
+): GameInteractionPolicy {
+    val editableStripEntryIds = expressions.flatMap { expression ->
+        expression.editableRequiredStripEntryIds(
+            scenario = scenario,
+            highlightedStripEntryIds = highlightedStripEntryIds
+        )
+    }.toSet()
+
+    return GameInteractionPolicy(
+        canTapStripItem = { index -> index in editableStripEntryIds },
+        canConfirmStripItemEntry = { index, value ->
+            index in editableStripEntryIds && scenario.stripValues.getOrNull(index) == value
+        },
         canTapTileLeftOperand = { index -> expressionFor(tileIndex = index) != null },
         canTapTileRightOperand = { index -> expressionFor(tileIndex = index) != null },
         canTapTileOperator = { index -> expressionFor(tileIndex = index) != null },
@@ -153,7 +199,6 @@ private fun TutorialRequiredAction.toInteractionPolicy(): GameInteractionPolicy 
             expressionFor(tileIndex = index)?.operator == operator
         }
     )
-    TutorialRequiredAction.CompleteScenario -> GameInteractionPolicy.AllowAll
 }
 
 private fun TutorialRequiredAction.CompleteTileExpressions.expressionFor(
@@ -167,6 +212,37 @@ private fun TutorialRequiredAction.CompleteTileExpression.requiredStripEntryIdFo
         OperandSlot.LEFT -> leftStripEntryId
         OperandSlot.RIGHT -> rightStripEntryId
     }
+
+private fun TutorialRequiredAction.CompleteTileExpression.editableRequiredStripEntryIds(
+    scenario: TutorialScenario,
+    highlightedStripEntryIds: Set<Int>
+): Set<Int> = setOf(leftStripEntryId, rightStripEntryId).filterTo(mutableSetOf()) { stripEntryId ->
+    stripEntryId in highlightedStripEntryIds &&
+        scenario.initialPuzzle.strip.items.getOrNull(stripEntryId)?.isEditable == true
+}
+
+private val StripItem.isEditable: Boolean
+    get() = this == StripItem.Hidden || this is StripItem.PlayerEntered
+
+private fun TutorialStep.highlightedStripEntryIds(scenario: TutorialScenario): Set<Int> = buildSet {
+    highlightedTargets.forEach { target ->
+        when (target) {
+            TutorialHighlightTarget.HiddenStripEntries -> {
+                scenario.initialPuzzle.strip.items.forEachIndexed { index, item ->
+                    if (item == StripItem.Hidden) {
+                        add(index)
+                    }
+                }
+            }
+            is TutorialHighlightTarget.StripEntries -> addAll(target.indexes)
+            TutorialHighlightTarget.GridArea,
+            TutorialHighlightTarget.HiddenTileExpressions,
+            TutorialHighlightTarget.StripArea,
+            is TutorialHighlightTarget.TileExpressionSlots,
+            is TutorialHighlightTarget.Tiles -> Unit
+        }
+    }
+}
 
 private fun TutorialStep.toHighlightState(scenario: TutorialScenario): GameHighlightState {
     val stripEntryIndexes = mutableSetOf<Int>()

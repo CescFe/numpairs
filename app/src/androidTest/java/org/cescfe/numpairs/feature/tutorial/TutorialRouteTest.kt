@@ -150,14 +150,15 @@ class TutorialRouteTest {
 
         assertStepDisplayed(stepIndex = 0, mode = TutorialMode.SOLVING_TIPS_PRACTICE)
         assertSolvingTipsPracticeScenarioDisplayed()
-        assertHighlighted(testTag = GameScreenTestTags.stripItem(0))
         assertHighlighted(testTag = GameScreenTestTags.stripItem(1))
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(0))
         assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(2))
-        assertHighlighted(testTag = GameScreenTestTags.tile(0), useUnmergedTree = true)
+        assertUnmergedNodeNotHighlighted(testTag = GameScreenTestTags.tile(0))
         assertUnmergedNodeNotHighlighted(testTag = GameScreenTestTags.tile(1))
         assertTileExpressionSlotsHighlighted(tileIndex = 0)
         assertTileExpressionSlotsNotHighlighted(tileIndex = 1)
 
+        enterStripValue(index = 1, value = "3")
         completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
         waitForStep(stepIndex = 1, mode = TutorialMode.SOLVING_TIPS_PRACTICE)
         assertStepDisplayed(stepIndex = 1, mode = TutorialMode.SOLVING_TIPS_PRACTICE)
@@ -171,6 +172,8 @@ class TutorialRouteTest {
         assertTileExpressionSlotsHighlighted(tileIndex = 2)
         assertTileExpressionSlotsHighlighted(tileIndex = 3)
 
+        enterStripValue(index = 2, value = "4")
+        enterStripValue(index = 3, value = "8")
         completeTile(tileIndex = 2, leftStripEntryId = 2, operator = Operator.MULTIPLICATION, rightStripEntryId = 3)
         completeTile(tileIndex = 3, leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3)
 
@@ -326,6 +329,18 @@ class TutorialRouteTest {
             .assertContentDescriptionEquals(string(R.string.tile_right_operand_content_description, rightValue))
     }
 
+    private fun assertTileExpressionHidden(tileIndex: Int) {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(tileIndex), useUnmergedTree = true)
+            .assertContentDescriptionEquals(string(R.string.tile_left_operand_hidden_content_description))
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(tileIndex), useUnmergedTree = true)
+            .assertContentDescriptionEquals(string(R.string.tile_operator_hidden_content_description))
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileRightOperand(tileIndex), useUnmergedTree = true)
+            .assertContentDescriptionEquals(string(R.string.tile_right_operand_hidden_content_description))
+    }
+
     private fun assertStepDisplayed(stepIndex: Int, mode: TutorialMode = TutorialMode.LEARN_BASICS) {
         val steps = TutorialMvpContent.stepsFor(mode)
         val step = steps[stepIndex]
@@ -402,10 +417,17 @@ class TutorialRouteTest {
             .performScrollTo()
             .assertContentDescriptionEquals(string(R.string.strip_item_known_content_description, "2"))
         composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(1))
+            .assertContentDescriptionEquals(string(R.string.strip_item_hidden_content_description))
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(2))
+            .assertContentDescriptionEquals(string(R.string.strip_item_hidden_content_description))
+        composeTestRule
             .onNodeWithTag(GameScreenTestTags.stripItem(3))
-            .assertContentDescriptionEquals(string(R.string.strip_item_known_content_description, "8"))
+            .assertContentDescriptionEquals(string(R.string.strip_item_hidden_content_description))
         assertTileResult(tileIndex = 0, result = 5)
-        assertTileExpression(tileIndex = 1, leftValue = "2", operator = Operator.MULTIPLICATION, rightValue = "3")
+        assertTileResult(tileIndex = 1, result = 6)
+        assertTileExpressionHidden(tileIndex = 1)
         assertTileResult(tileIndex = 2, result = 32)
         assertTileResult(tileIndex = 3, result = 12)
     }
