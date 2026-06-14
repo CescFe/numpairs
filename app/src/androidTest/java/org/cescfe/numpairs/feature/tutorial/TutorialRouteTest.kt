@@ -329,15 +329,15 @@ class TutorialRouteTest {
             .assertContentDescriptionEquals(string(R.string.tile_right_operand_content_description, rightValue))
     }
 
-    private fun assertTileExpressionHidden(tileIndex: Int) {
+    private fun assertSecondSolvingTipsTileExpressionHidden() {
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(tileIndex), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(1), useUnmergedTree = true)
             .assertContentDescriptionEquals(string(R.string.tile_left_operand_hidden_content_description))
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperator(tileIndex), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tileOperator(1), useUnmergedTree = true)
             .assertContentDescriptionEquals(string(R.string.tile_operator_hidden_content_description))
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileRightOperand(tileIndex), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tileRightOperand(1), useUnmergedTree = true)
             .assertContentDescriptionEquals(string(R.string.tile_right_operand_hidden_content_description))
     }
 
@@ -427,7 +427,7 @@ class TutorialRouteTest {
             .assertContentDescriptionEquals(string(R.string.strip_item_hidden_content_description))
         assertTileResult(tileIndex = 0, result = 5)
         assertTileResult(tileIndex = 1, result = 6)
-        assertTileExpressionHidden(tileIndex = 1)
+        assertSecondSolvingTipsTileExpressionHidden()
         assertTileResult(tileIndex = 2, result = 32)
         assertTileResult(tileIndex = 3, result = 12)
     }
