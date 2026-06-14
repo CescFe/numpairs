@@ -145,20 +145,31 @@ class TutorialRouteTest {
     }
 
     @Test
-    fun solvingTipsPracticeUsesUnguidedHighlightsAndCompletesWithSuccessOverlay() {
+    fun solvingTipsPracticeHighlightsExpectedActionsAndCompletesWithSuccessOverlay() {
         setSolvingTipsPracticeTutorialContent()
 
         assertStepDisplayed(stepIndex = 0, mode = TutorialMode.SOLVING_TIPS_PRACTICE)
         assertSolvingTipsPracticeScenarioDisplayed()
-        assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(0))
-        assertUnmergedNodeNotHighlighted(testTag = GameScreenTestTags.tile(0))
-        assertNodeNotHighlighted(testTag = GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
-        assertNodeNotHighlighted(testTag = GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
-        assertNodeNotHighlighted(testTag = GameScreenTestTags.tileRightOperand(0), useUnmergedTree = true)
+        assertHighlighted(testTag = GameScreenTestTags.stripItem(0))
+        assertHighlighted(testTag = GameScreenTestTags.stripItem(1))
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(2))
+        assertHighlighted(testTag = GameScreenTestTags.tile(0), useUnmergedTree = true)
+        assertUnmergedNodeNotHighlighted(testTag = GameScreenTestTags.tile(1))
+        assertTileExpressionSlotsHighlighted(tileIndex = 0)
+        assertTileExpressionSlotsNotHighlighted(tileIndex = 1)
 
         completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
         waitForStep(stepIndex = 1, mode = TutorialMode.SOLVING_TIPS_PRACTICE)
         assertStepDisplayed(stepIndex = 1, mode = TutorialMode.SOLVING_TIPS_PRACTICE)
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(0))
+        assertHighlighted(testTag = GameScreenTestTags.stripItem(2))
+        assertHighlighted(testTag = GameScreenTestTags.stripItem(3))
+        assertUnmergedNodeNotHighlighted(testTag = GameScreenTestTags.tile(0))
+        assertHighlighted(testTag = GameScreenTestTags.tile(2), useUnmergedTree = true)
+        assertHighlighted(testTag = GameScreenTestTags.tile(3), useUnmergedTree = true)
+        assertTileExpressionSlotsNotHighlighted(tileIndex = 0)
+        assertTileExpressionSlotsHighlighted(tileIndex = 2)
+        assertTileExpressionSlotsHighlighted(tileIndex = 3)
 
         completeTile(tileIndex = 2, leftStripEntryId = 2, operator = Operator.MULTIPLICATION, rightStripEntryId = 3)
         completeTile(tileIndex = 3, leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3)
@@ -422,6 +433,18 @@ class TutorialRouteTest {
 
     private fun assertUnmergedNodeNotHighlighted(testTag: String) {
         assertNodeNotHighlighted(testTag = testTag, useUnmergedTree = true)
+    }
+
+    private fun assertTileExpressionSlotsHighlighted(tileIndex: Int) {
+        assertHighlighted(testTag = GameScreenTestTags.tileLeftOperand(tileIndex), useUnmergedTree = true)
+        assertHighlighted(testTag = GameScreenTestTags.tileOperator(tileIndex), useUnmergedTree = true)
+        assertHighlighted(testTag = GameScreenTestTags.tileRightOperand(tileIndex), useUnmergedTree = true)
+    }
+
+    private fun assertTileExpressionSlotsNotHighlighted(tileIndex: Int) {
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.tileLeftOperand(tileIndex), useUnmergedTree = true)
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.tileOperator(tileIndex), useUnmergedTree = true)
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.tileRightOperand(tileIndex), useUnmergedTree = true)
     }
 
     private fun assertNodeNotHighlighted(testTag: String, useUnmergedTree: Boolean = false) {

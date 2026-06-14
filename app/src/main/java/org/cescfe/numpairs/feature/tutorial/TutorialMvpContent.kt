@@ -106,7 +106,11 @@ object TutorialMvpContent {
             order = 6,
             scenarioId = TutorialScenarioId.SOLVING_TIPS_PRACTICE,
             playerFacingCopyResId = R.string.tutorial_solving_tips_step_one_copy,
-            highlightedTargets = emptyList(),
+            highlightedTargets = listOf(
+                TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1)),
+                TutorialHighlightTarget.Tiles(indexes = listOf(0)),
+                TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0)
+            ),
             requiredAction = TutorialRequiredAction.CompleteTileExpression(
                 tileIndex = 0,
                 leftStripEntryId = 0,
@@ -124,7 +128,12 @@ object TutorialMvpContent {
             order = 7,
             scenarioId = TutorialScenarioId.SOLVING_TIPS_PRACTICE,
             playerFacingCopyResId = R.string.tutorial_solving_tips_step_two_copy,
-            highlightedTargets = emptyList(),
+            highlightedTargets = listOf(
+                TutorialHighlightTarget.StripEntries(indexes = listOf(2, 3)),
+                TutorialHighlightTarget.Tiles(indexes = listOf(2, 3)),
+                TutorialHighlightTarget.TileExpressionSlots(tileIndex = 2),
+                TutorialHighlightTarget.TileExpressionSlots(tileIndex = 3)
+            ),
             requiredAction = TutorialRequiredAction.CompleteTileExpressions(
                 expressions = listOf(
                     TutorialRequiredAction.CompleteTileExpression(
