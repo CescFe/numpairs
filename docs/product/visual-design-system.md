@@ -18,34 +18,54 @@ This document extends that identity into the app UI:
 
 - from logo to interface language
 - from isolated component styling to shared design decisions
-- from default Material starter colors to NumPairs-specific semantic roles
+- from default Material starter colors to a fixed NumPairs premium palette
 - from local spacing and shape choices to reusable component guidance
 
-The v1 identity principle still applies: NumPairs should be shape-first, not color-first. Color should support hierarchy and state, but the product should remain recognizable through symbols, arithmetic structure, component shapes, and clear layout.
+The v1 identity principle still applies: NumPairs should be recognizable through symbols, arithmetic structure, component shapes, and clear layout.
+
+v4 adds a stronger product UI direction on top of that foundation. The logo should still work in monochrome and adaptive contexts, but the app UI should now use a deliberate NumPairs palette instead of relying on Android dynamic color.
 
 ---
 
-## Product Tone
+## Product Identity
 
 NumPairs should feel:
 
-- clear
-- focused
-- precise
+- elegant
+- minimalist
+- intelligent
 - calm
 - modern
-- approachable
-- lightly game-like without becoming noisy
+- premium
 
-The product should avoid feeling like:
+NumPairs should not feel:
 
-- a raw Material template
-- a dense spreadsheet
-- a casino-style number game
-- a children's math worksheet
-- a heavily illustrated puzzle app that distracts from deduction
+- childish
+- educational
+- arcade-like
+- overly playful
+- technology-centric
+- like a raw Material template
 
 The visual system should make the arithmetic puzzle easier to parse. Decoration is secondary to comprehension.
+
+---
+
+## Core Visual Principle
+
+The board is the protagonist.
+
+Every screen and component should support the puzzle experience without competing for attention.
+
+Priority hierarchy:
+
+1. Puzzle board
+2. Number strip
+3. Completion feedback
+4. Navigation and actions
+5. Decorative elements
+
+Numbers and expressions should remain the primary visual focus. Color, surfaces, spacing, typography, and motion should reinforce puzzle solving rather than distract from it.
 
 ---
 
@@ -55,17 +75,31 @@ The visual system should make the arithmetic puzzle easier to parse. Decoration 
 
 Numbers, operators, unknown slots, and target results are the core content. Typography, spacing, and state treatments should make them easier to scan before adding visual personality.
 
+### Board-First Hierarchy
+
+The board should receive the strongest visual clarity. The strip, controls, helper surfaces, and completion states should support the board without creating visual noise.
+
 ### State Clarity
 
-Players should quickly understand what is known, hidden, editable, selected, incorrect, matched, completed, or unavailable. Color may help, but shape, border, typography, labels, icons, and semantics should carry state too.
+Players should quickly understand what is known, hidden, editable, selected, valid, invalid, completed, or unavailable. Color may help, but shape, border, typography, labels, icons, and semantics should carry state too.
+
+### Premium Minimalism
+
+The app should rely on spacing before decoration, typography before color, and hierarchy before effects. Avoid unnecessary gradients, excessive color, heavy shadows, and decorative elements that do not improve puzzle comprehension.
 
 ### Material 3 Foundation
 
-NumPairs should continue using Material 3 for platform fit, accessibility defaults, and Android conventions. The design system should define NumPairs-specific roles on top of Material 3 rather than replacing it wholesale.
+NumPairs should continue using Material 3 for platform fit, accessibility defaults, and Android conventions. The design system should define NumPairs-specific visual decisions on top of Material 3 rather than replacing it wholesale.
 
-### Dynamic Color With Guardrails
+### Fixed Palette Over Dynamic Color
 
-Android dynamic color can remain supported, but the app should not depend on dynamic color to feel designed. A non-dynamic fallback palette should be intentional and NumPairs-specific.
+Dynamic color was useful during earlier prototype and polish phases, but it is no longer the v4 product direction.
+
+v4 should implement a fixed NumPairs premium palette so the app has a stable visual identity across devices, screenshots, and Android versions.
+
+### Light Theme First
+
+The primary v4 target is a polished light theme. Dark theme may be prepared or supported where cheap, but full dark theme polish is not required for this milestone.
 
 ### Compact Mobile-First Density
 
@@ -86,43 +120,67 @@ When a visual rule applies across screens or states, it should become a shared d
 Recommended direction:
 
 - keep Material 3 as the base
-- keep light and dark theme support
-- keep dynamic color support where it remains accessible
-- define a deliberate non-dynamic fallback color scheme
-- avoid using the default starter purple palette as the long-term fallback identity
+- implement a fixed NumPairs light color scheme
+- remove dynamic color as the default visual direction
+- replace the starter purple fallback palette with the NumPairs premium palette
+- optionally keep dark theme structurally available without treating full dark theme polish as v4 scope
 - expose NumPairs-specific visual defaults only where Material roles are too generic
 
-### Semantic Color Roles
+### Color Strategy
+
+The NumPairs UI should use a restrained premium color strategy:
+
+- warm light neutral background
+- pure or near-pure white surfaces
+- near-black primary text
+- medium gray secondary text
+- one jade-green accent color
+- soft red for error and invalid states
+- neutral gray for hidden and placeholder states
+
+The app should avoid introducing multiple primary colors. The jade accent should carry brand personality, primary actions, interactive highlights, selected states, positive states, and success feedback.
+
+### Core Color Roles
 
 The design system should describe colors by role before implementation assigns concrete values.
 
 Recommended roles:
 
-- `appBackground`: default app background
-- `surfaceBase`: standard screen and card surface
-- `surfaceRaised`: dialogs, sheets, and elevated surfaces
-- `surfaceSubtle`: strip container and quiet grouped areas
-- `primaryAction`: primary player action, such as starting generated `4 Pairs`
-- `secondaryAction`: secondary player action, such as Tutorial entry
-- `chipKnown`: known starting strip entries
-- `chipHidden`: hidden strip entries that invite player input
-- `chipPlayerEntered`: strip entries entered by the player
-- `tileNormal`: normal puzzle tile surface
-- `tileActive`: highlighted tile or active slot treatment
-- `tileIncorrect`: fully known expression that does not match the target result
-- `tileMismatchedPairing`: fully known expression that is arithmetically valid but uses the wrong pairing relationship, if exposed by the UI
-- `completionSuccess`: solved puzzle feedback
-- `completionInvalid`: completed puzzle that still violates puzzle constraints
+- `appBackground`: warm light neutral screen background
+- `surfaceBase`: pure or near-pure white surface for tiles, cards, dialogs, overlays, and sheets
+- `surfaceRaised`: white elevated surface with subtle tonal or shadow treatment
+- `surfaceSubtle`: quiet grouped surface, such as the strip container
+- `textPrimary`: near-black primary text
+- `textSecondary`: medium gray supporting text
+- `accent`: jade green brand and interaction accent
+- `accentSoft`: lighter jade treatment for selection, active focus, and subtle highlights
+- `error`: soft red for invalid tiles and error feedback
+- `errorSoft`: subtle red container or background treatment
+- `hidden`: neutral gray for unknown values and placeholder states
+- `borderSubtle`: low-contrast border for quiet component separation
 
-These roles can map to Material `ColorScheme` values, custom defaults, or a small wrapper around Material roles. The implementation should choose the least complex approach that keeps the UI consistent.
+### Gameplay State Roles
+
+Gameplay states should map consistently to the core color strategy:
+
+- Known strip entries: stable white or neutral surface with subtle border
+- Hidden strip entries: neutral gray treatment that clearly communicates unknown value
+- Player-entered strip entries: player-owned state with accent relationship, without overpowering the board
+- Selected or focused elements: accent or `accentSoft`
+- Valid or completed states: jade green
+- Invalid or incorrect states: soft red
+- Completion success: jade green
+- Completion invalid: soft red with actionable copy
 
 ### Color Usage Rules
 
+- Use one accent color only.
+- Use color sparingly.
 - Do not use color as the only state cue.
 - Keep result numbers high contrast in every tile state.
 - Keep error and invalid states noticeable but not visually overwhelming.
 - Keep hidden and player-entered strip states distinct at a glance.
-- Reserve strong accent color for interactive focus, active selection, or primary action.
+- Reserve the strongest accent treatment for primary actions, selected elements, focus, and positive feedback.
 - Avoid making every surface colorful; the board needs room for state colors to matter.
 
 ---
@@ -131,13 +189,55 @@ These roles can map to Material `ColorScheme` values, custom defaults, or a smal
 
 Typography should make arithmetic content clear before it creates personality.
 
+### UI Typography
+
+Use Inter for general UI typography where practical.
+
+Inter should be used for:
+
+- menus
+- buttons
+- titles
+- navigation
+- dialogs
+- helper text
+- tutorial text
+- supporting copy
+
+Intended characteristics:
+
+- modern
+- clean
+- highly legible
+- professional
+
+### Puzzle Typography
+
+Use JetBrains Mono for puzzle content where practical.
+
+JetBrains Mono should be used for:
+
+- tile expressions
+- tile results
+- strip numbers
+- puzzle-specific numeric labels
+
+Intended characteristics:
+
+- precise
+- distinctive numeric glyphs
+- strong mathematical feel
+- clear separation between UI content and gameplay content
+
+### Typography Roles
+
 Recommended roles:
 
-- App title: Material title style with stable weight and no oversized hero treatment
-- Screen title: compact top bar title
+- App title: refined title style with stable weight and no oversized hero treatment
+- Screen title: compact top bar or header title
 - Menu action label: readable label text with clear hierarchy between primary and secondary actions
-- Strip chip label: short numeric label optimized for one to three digits and `?`
-- Tile expression: clear operand and operator text with enough size to tap and scan
+- Strip chip label: monospaced numeric label optimized for one to three digits and `?`
+- Tile expression: monospaced operand and operator text with enough size to tap and scan
 - Tile result: strongest numeric emphasis in the tile
 - Dialog title: concise heading
 - Dialog body: comfortable reading size for helper and tutorial copy
@@ -145,7 +245,9 @@ Recommended roles:
 
 Implementation notes:
 
-- Prefer Material typography roles before adding custom text styles.
+- Prefer Material typography roles as the structural baseline.
+- Apply Inter and JetBrains Mono through the theme or shared text styles rather than local one-offs.
+- Provide sensible fallbacks if custom font integration is deferred.
 - Avoid viewport-scaled typography.
 - Preserve readable line heights.
 - Test one, two, and three-digit values.
@@ -155,18 +257,23 @@ Implementation notes:
 
 ## Shape And Surface Direction
 
-The visual system should feel geometric and approachable, consistent with the logo direction.
+The visual system should feel clean, structured, spacious, and easy to scan.
 
 Recommended shape guidance:
 
+- Primary buttons: large corner radius, comfortable touch target
+- Secondary buttons: same shape family as primary buttons, lower visual weight
+- Icon buttons: simple circular or rounded container with minimal visual weight
 - Puzzle tiles: rounded rectangles, visually stable, not overly pill-shaped
 - Strip chips: compact rounded chips with clear state borders
-- Dialogs and sheets: Material 3 shapes unless a NumPairs-specific reason emerges
-- Menu actions: consistent button shape and spacing
+- Dialogs and sheets: clean white surfaces with restrained shape treatment
+- Menu cards or actions: consistent radius and spacing
 - Highlighted slots: small, precise shape treatment around the active arithmetic element
 
 Surface guidance:
 
+- Use warm neutral backgrounds to reduce visual fatigue and give the app a more premium feel than pure white.
+- Use pure or near-pure white surfaces for tiles, cards, dialogs, and overlays.
 - Avoid nested card-heavy layouts.
 - Use grouped surfaces where they clarify the puzzle structure, especially the strip.
 - Keep tiles visually distinct from the page background.
@@ -180,6 +287,7 @@ NumPairs should use a restrained spacing system that keeps puzzle content scanna
 
 Recommended direction:
 
+- Use spacing before decoration.
 - Use a 4dp-based spacing rhythm.
 - Keep screen horizontal padding comfortable on phones.
 - Keep the strip and board close enough to feel related.
@@ -196,25 +304,54 @@ Existing layout rationale remains documented in `docs/product/ux-decisions.md`.
 
 ### App Shell And Menu
 
-The menu is the first usable app screen after splash. It should look like a deliberate product entry point.
+The menu is the first usable app screen after splash. It should look like a deliberate product entry point, not a prototype placeholder.
 
 Expectations:
 
 - show `NumPairs` clearly
 - make generated `4 Pairs` the primary replayable action
 - present Tutorial as a guided learning option
+- make Tutorial and `4 Pairs` entries feel like proper product cards or actions
 - avoid a marketing landing-page layout
 - keep actions large enough for touch
 - keep copy concise
 
+### Buttons
+
+Primary button:
+
+- accent color background
+- white text
+- large corner radius
+- comfortable touch target
+- used for the main action on the screen
+
+Secondary button:
+
+- neutral surface
+- border-only or low-emphasis treatment
+- less visual weight than the primary button
+- used for alternative actions
+
+Icon button:
+
+- simple circular or rounded container
+- minimal visual weight
+- used for navigation, help, settings, and compact actions
+
 ### Gameplay Top Bar
+
+The top bar should reduce the generic Android look and keep focus on gameplay.
 
 Expectations:
 
-- keep back navigation predictable
-- keep the mode title readable
-- keep helper and tutorial actions visually consistent
-- avoid overloading the top bar with too many icons
+- minimal visual weight
+- compact header treatment where practical
+- context-focused title
+- predictable back navigation
+- visually consistent helper and tutorial actions
+- no overloading with too many icons
+- more screen space for gameplay
 
 ### Number Strip
 
@@ -223,9 +360,9 @@ The strip should communicate the player's available numbers at a glance.
 State expectations:
 
 - Known: stable starting value, lower emphasis than editable states
-- Hidden: unresolved entry, clearly invites input
+- Hidden: unresolved entry using neutral gray and clear placeholder treatment
 - Player-entered: player-owned value, distinct from known values
-- Highlighted: visible during guided/tutorial focus without depending only on color
+- Selected or highlighted: visible accent treatment without depending only on color
 - Disabled or unavailable, if introduced later: visually subdued and semantically clear
 
 ### Puzzle Tiles
@@ -236,7 +373,8 @@ State expectations:
 
 - Normal: clear target result and editable expression slots
 - Active slot: focused element is identifiable without disrupting layout
-- Incorrect: expression area is marked while target result remains legible
+- Valid or correct, if surfaced: jade green, restrained
+- Incorrect or invalid: soft red, attached to the expression or problem state
 - Mismatched pairing: distinct from simple arithmetic error if this state is surfaced
 - Highlighted/tutorial focus: visible but not confused with incorrect state
 - Completed/correct: avoid adding noisy success styling per tile unless needed
@@ -272,8 +410,8 @@ Feedback should be obvious and recoverable.
 
 Expectations:
 
-- success state feels rewarding but restrained
-- invalid completion remains actionable
+- success state uses jade green and feels rewarding but restrained
+- invalid completion uses soft red and remains actionable
 - incorrect tile state remains local and editable
 - feedback surfaces should not obscure next steps
 - color, iconography, and text should work together
@@ -294,6 +432,7 @@ Recommended uses:
 Avoid:
 
 - long decorative animation
+- advanced animations for v4
 - motion that delays interaction
 - high-energy transitions that fight puzzle concentration
 - motion that is required to understand state
@@ -314,6 +453,19 @@ Requirements:
 - dialogs and sheets should support predictable back and dismissal behavior
 - UI should remain usable with increased font scale
 - icons without visible text should have clear content descriptions
+- aesthetic refinements must not reduce puzzle clarity
+
+---
+
+## Visual Consistency Rules
+
+- Use one accent color only.
+- Use color sparingly.
+- Rely on spacing before decoration.
+- Rely on typography before color.
+- Rely on hierarchy before effects.
+- Preserve clarity over aesthetics.
+- Every visual element should reinforce puzzle solving, not distract from it.
 
 ---
 
@@ -322,11 +474,13 @@ Requirements:
 Preferred implementation approach:
 
 - keep changes incremental
-- start with theme and shared component defaults
+- start with theme, palette, typography, and shared component defaults
+- remove dynamic color from the default theme path for v4
 - refactor duplicated visual constants only when there is a real shared role
 - use existing component APIs where possible
 - add component previews for important state combinations
-- verify UI manually in representative light/dark and dynamic-color states
+- verify UI manually in representative light theme and narrow-screen states
+- prepare dark theme only where it is cheap and does not distract from the v4 light theme polish goal
 
 Likely implementation areas:
 
@@ -360,22 +514,43 @@ Decision: carry forward the v1 logo direction as the identity anchor.
 Rationale:
 
 - NumPairs' core identity is the unresolved arithmetic expression
-- shape and symbols survive dynamic color, dark mode, and small sizes
-- a shape-first system fits a puzzle game better than a palette-first identity at this stage
+- shape and symbols survive dark mode, small sizes, and launcher contexts
+- a shape-first identity still fits a premium puzzle game better than a purely palette-driven brand
 
-### Define A Non-Dynamic Fallback Palette
+### Use A Fixed Premium Palette
 
-Decision: v4 should replace starter fallback colors with intentional NumPairs fallback colors.
+Decision: v4 should implement a fixed NumPairs palette instead of relying on Android dynamic color.
 
 Rationale:
 
-- dynamic color is not available on all devices
-- screenshots, documentation, and older Android versions need a designed default
-- the current fallback palette can read as an uncustomized Material template
+- the app needs a stable, recognizable visual identity
+- a single jade accent creates stronger product consistency than device-derived colors
+- screenshots, documentation, and older Android versions need the same designed baseline
+- the previous starter purple fallback reads as an uncustomized Material template
+
+### Make The Board The Protagonist
+
+Decision: visual hierarchy should prioritize the puzzle board above navigation chrome, decorative elements, and secondary actions.
+
+Rationale:
+
+- the board is the core product experience
+- puzzle readability matters more than visual decoration
+- supporting UI should reduce cognitive load, not compete for attention
+
+### Use Inter For UI And JetBrains Mono For Puzzle Content
+
+Decision: v4 should separate general UI typography from puzzle typography.
+
+Rationale:
+
+- Inter supports a clean, modern, premium product UI
+- JetBrains Mono gives puzzle numbers and expressions a precise mathematical feel
+- separating UI and puzzle text strengthens hierarchy and scanability
 
 ### Treat Gameplay State As A Design-System Concern
 
-Decision: known, hidden, player-entered, active, incorrect, mismatched, success, and invalid states should be documented visual roles.
+Decision: known, hidden, player-entered, selected, valid, invalid, completed, and unavailable states should be documented visual roles.
 
 Rationale:
 
@@ -397,9 +572,11 @@ Rationale:
 
 ## Open Decisions
 
-- Final non-dynamic light and dark fallback palette
-- Whether to introduce a small NumPairs-specific theme wrapper beyond Material `ColorScheme`
+- Exact jade green, warm neutral, text, gray, and soft red values
+- Whether dark theme should remain structurally supported during v4 or be deferred after the light theme is polished
+- Exact Inter and JetBrains Mono integration approach and fallback behavior
 - Exact typography tuning for tile expressions and results
+- Whether to introduce a small NumPairs-specific theme wrapper beyond Material `ColorScheme`
 - Whether to keep all current tile and chip corner radii or normalize them further
 - Whether screenshot or golden testing is worth adding during v4
 - Whether launcher or splash assets need visual adjustments after UI refinement
