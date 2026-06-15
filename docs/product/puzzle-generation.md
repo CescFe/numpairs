@@ -6,7 +6,6 @@
 - Applies to: generated `4 Pairs` mode
 - Related references:
   - `docs/product/prd/prd-v2.md`
-  - `docs/product/prd/prd-v3.md`
   - `docs/game-rules.md`
   - `docs/ubiquitous-language.md`
 
@@ -114,6 +113,6 @@ Guaranteed unique solutions are not required for v2. The solver may validate int
 
 `docs/game-rules.md` remains the source of truth for core NumPairs rules shared by handcrafted and generated puzzles.
 
-`docs/product/prd/prd-v2.md` remains the historical product reference for the v2 generation milestone. `docs/product/prd/prd-v3.md` is the current product reference.
+`docs/product/prd/prd-v2.md` remains the historical product reference for the v2 generation milestone.
 
 This document is the v2 reference for generated puzzle construction, low-difficulty assumptions, and the solved-to-initial puzzle transformation.

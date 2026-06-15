@@ -13,7 +13,7 @@ It complements the game rules described in [game-rules.md](./game-rules.md) and 
 
 This is the interaction baseline shared by Tutorial and generated `4 Pairs` gameplay.
 
-It intentionally focuses on in-puzzle behavior. Splash, menu, and replay routing are defined at the product level in `docs/product/prd/prd-v3.md`.
+It intentionally focuses on in-puzzle behavior. Splash, menu, and replay routing are defined at the product level in `docs/product/prd/prd-v4.md`.
 
 ---
 

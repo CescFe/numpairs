@@ -1,26 +1,6 @@
 # PRD - NumPairs (v3)
 
-## Document Status
-
-- Status: canonical PRD for the `v3 - Guided Play & Rules Onboarding` milestone
-- Supersedes: `docs/product/prd/prd-v2.md`
-- Current implementation baseline: `v2 - Puzzle Generation & Replay Loop`
-- Related references:
-  - `README.md`
-  - `docs/product/roadmap.md`
-  - `docs/product/rules-helper.md`
-  - `docs/product/tutorial.md`
-  - `docs/product/puzzle-generation.md`
-  - `docs/ui-behavior.md`
-  - `docs/product/ux-decisions.md`
-  - `docs/game-rules.md`
-  - `docs/ubiquitous-language.md`
-
-This document defines the product baseline that v3 is intended to establish.
-
-`prd-v0.md`, `prd-v1.md`, and `prd-v2.md` remain in the repository as historical milestone snapshots. `prd-v3.md` is the canonical reference for the current NumPairs product direction, scope, and documentation alignment.
-
----
+> Historical note: this document captures the original guided play % rules onboarding scope. It remains as a historical snapshot and was later superseded.
 
 ## Product Summary
 
@@ -209,6 +189,8 @@ That baseline does not yet include:
 ---
 
 ## Documentation Alignment Notes
+
+These notes reflect the intended documentation alignment for the v3 milestone at the time it was active.
 
 - `README.md` should identify `prd-v3.md` as the canonical product reference while treating v2 as the implemented baseline
 - `docs/product/roadmap.md` should treat `v2 - Puzzle Generation & Replay Loop` as the completed baseline and `v3 - Guided Play & Rules Onboarding` as the active milestone
