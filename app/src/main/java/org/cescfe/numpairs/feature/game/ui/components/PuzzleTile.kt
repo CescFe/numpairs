@@ -119,7 +119,7 @@ fun PuzzleTile(
                         fontSize = MaterialTheme.typography.bodyLarge.fontSize * 2,
                         lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 2
                     ),
-                    color = statePalette?.contentColor ?: MaterialTheme.colorScheme.primary,
+                    color = statePalette?.contentColor ?: MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Center
                 )

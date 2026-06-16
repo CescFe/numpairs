@@ -55,7 +55,7 @@ Turn the current functional NumPairs experience into a polished, coherent, and r
 - Define NumPairs visual principles for app UI
 - Extend the v1 shape-first identity direction into gameplay and app surfaces
 - Establish semantic visual roles for colors, typography, shape, spacing, elevation, and motion
-- Define an intentional non-dynamic fallback palette while preserving Android dynamic color support
+- Define one fixed premium NumPairs theme independent from Android dynamic color and system light/dark theme
 - Refine the menu as an intentional product entry point
 - Refine the puzzle screen visual hierarchy while preserving documented interaction behavior
 - Refine strip chips, puzzle tiles, selectors, top bars, dialogs, tutorial surfaces, and completion feedback
