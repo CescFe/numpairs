@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.feature.game.presentation.TileUiState
 import org.cescfe.numpairs.feature.game.ui.gameHighlightSemantics
+import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
 
 @Composable
 internal fun TileResetAction(modifier: Modifier = Modifier, onClick: () -> Unit) {
@@ -191,8 +192,7 @@ private fun Modifier.highlightBorder(isHighlighted: Boolean): Modifier = if (isH
     this
 }
 
-@Composable
 private fun expressionTextStyle(text: String, isOperand: Boolean) = when {
-    isOperand && text.length >= LARGE_OPERAND_CHARACTER_COUNT -> MaterialTheme.typography.titleSmall
-    else -> MaterialTheme.typography.titleMedium
+    isOperand && text.length >= LARGE_OPERAND_CHARACTER_COUNT -> NumPairsTextStyles.TileExpressionCompact
+    else -> NumPairsTextStyles.TileExpression
 }

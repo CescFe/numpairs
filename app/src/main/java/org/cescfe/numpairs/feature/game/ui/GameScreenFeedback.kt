@@ -27,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
@@ -95,16 +94,14 @@ internal fun SuccessOverlay(onDismiss: () -> Unit, completionActions: GameComple
                     ) {
                         Text(
                             text = "OK",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
+                            style = MaterialTheme.typography.titleMedium
                         )
                     }
                 }
                 Text(
                     text = stringResource(R.string.success_overlay_message),
                     modifier = Modifier.testTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.SemiBold
+                    style = MaterialTheme.typography.headlineSmall
                 )
                 Text(
                     text = stringResource(R.string.success_overlay_supporting_text),
@@ -161,8 +158,7 @@ internal fun PuzzleOutcomeBanner(puzzleOutcome: PuzzleOutcomeUiState.Invalid, mo
             Text(
                 text = stringResource(R.string.puzzle_outcome_invalid_title),
                 modifier = Modifier.testTag(GameScreenTestTags.PUZZLE_OUTCOME_TITLE),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                style = MaterialTheme.typography.titleMedium
             )
             Text(
                 text = puzzleOutcome.message(),

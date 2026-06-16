@@ -22,7 +22,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -32,6 +31,7 @@ import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.TileUiState
 import org.cescfe.numpairs.feature.game.presentation.TileVisualState
 import org.cescfe.numpairs.feature.game.ui.gameHighlightSemantics
+import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
@@ -115,12 +115,8 @@ fun PuzzleTile(
                 Text(
                     text = tile.resultLabel,
                     modifier = Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontSize = MaterialTheme.typography.bodyLarge.fontSize * 2,
-                        lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 2
-                    ),
+                    style = NumPairsTextStyles.TileResult,
                     color = statePalette?.contentColor ?: MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Center
                 )
             }
