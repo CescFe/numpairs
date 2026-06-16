@@ -53,7 +53,7 @@ import org.cescfe.numpairs.feature.game.presentation.StripItemEntryDialogUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperandOptionUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperandSelectionDialogUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState
-import org.cescfe.numpairs.ui.theme.TextStyles
+import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -151,7 +151,7 @@ private fun OperandSelectionOption(operand: TileOperandOptionUiState, onConfirm:
                     Text(
                         text = operandSelectionLabel,
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
-                        style = TextStyles.OperandOption
+                        style = NumPairsTextStyles.OperandOption
                     )
                 }
             }
@@ -222,7 +222,7 @@ private fun OperandUsageHintBadge(
                 horizontal = TILE_OPERAND_HINT_HORIZONTAL_PADDING,
                 vertical = TILE_OPERAND_HINT_VERTICAL_PADDING
             ),
-            style = TextStyles.PuzzleLabel
+            style = NumPairsTextStyles.PuzzleLabel
         )
     }
 }
@@ -346,7 +346,7 @@ internal fun StripItemEntryDialog(
                 },
                 isError = isInputInvalid,
                 singleLine = true,
-                textStyle = TextStyles.NumericInput,
+                textStyle = NumPairsTextStyles.NumericInput,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
         },
@@ -434,9 +434,9 @@ internal fun TileOperatorSelectionMenu(
                             vertical = TILE_OPERATOR_MENU_OPTION_VERTICAL_PADDING
                         ),
                         style = if (isSelected) {
-                            TextStyles.OperatorOptionSelected
+                            NumPairsTextStyles.OperatorOptionSelected
                         } else {
-                            TextStyles.OperatorOption
+                            NumPairsTextStyles.OperatorOption
                         }
                     )
                 }

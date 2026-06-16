@@ -31,7 +31,7 @@ import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.TileUiState
 import org.cescfe.numpairs.feature.game.presentation.TileVisualState
 import org.cescfe.numpairs.feature.game.ui.gameHighlightSemantics
-import org.cescfe.numpairs.ui.theme.TextStyles
+import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
@@ -115,7 +115,7 @@ fun PuzzleTile(
                 Text(
                     text = tile.resultLabel,
                     modifier = Modifier.fillMaxWidth(),
-                    style = TextStyles.TileResult,
+                    style = NumPairsTextStyles.TileResult,
                     color = statePalette?.contentColor ?: MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center
                 )

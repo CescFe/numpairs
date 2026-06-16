@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 
-object ComponentDefaults {
+object NumPairsComponents {
     val SmallRadius = 10.dp
     val MediumRadius = 14.dp
     val LargeRadius = 20.dp

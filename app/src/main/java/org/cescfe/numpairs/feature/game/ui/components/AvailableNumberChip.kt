@@ -18,7 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.feature.game.ui.gameHighlightSemantics
-import org.cescfe.numpairs.ui.theme.TextStyles
+import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 enum class AvailableNumberChipStyle {
@@ -87,7 +87,7 @@ private fun AvailableNumberChipLabel(label: String) {
     ) {
         Text(
             text = label,
-            style = TextStyles.StripValue,
+            style = NumPairsTextStyles.StripValue,
             textAlign = TextAlign.Center
         )
     }
