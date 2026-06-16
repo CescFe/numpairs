@@ -24,8 +24,6 @@ val NumPairsOnSand = Color(0xFF33270E)
 
 val NumPairsFocus = Color(0xFFAFC7E8)
 val NumPairsOnFocus = Color(0xFF162538)
-val NumPairsFocusSoft = Color(0xFF3A4656)
-val NumPairsOnFocusSoft = Color(0xFFE5EFFB)
 
 val NumPairsError = Color(0xFFE58A7A)
 val NumPairsErrorSoft = Color(0xFF5A3733)
