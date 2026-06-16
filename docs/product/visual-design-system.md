@@ -23,7 +23,7 @@ This document extends that identity into the app UI:
 
 The v1 identity principle still applies: NumPairs should be recognizable through symbols, arithmetic structure, component shapes, and clear layout.
 
-v4 adds a stronger product UI direction on top of that foundation. The logo should still work in monochrome and adaptive contexts, but the app UI should now use a deliberate NumPairs palette instead of relying on Android dynamic color.
+v4 adds a stronger product UI direction on top of that foundation. The logo should still work in monochrome and adaptive contexts, but the app UI should now use one deliberate NumPairs theme instead of relying on Android dynamic color or system light/dark switching.
 
 ---
 
@@ -97,9 +97,11 @@ Dynamic color was useful during earlier prototype and polish phases, but it is n
 
 v4 should implement a fixed NumPairs premium palette so the app has a stable visual identity across devices, screenshots, and Android versions.
 
-### Light Theme First
+### Single Default Theme
 
-The primary v4 target is a polished light theme. Dark theme may be prepared or supported where cheap, but full dark theme polish is not required for this milestone.
+The v4 target is one fixed default theme with a premium dark-leaning presentation. It should remain stable regardless of the device system theme.
+
+v4 should not implement separate light and dark app themes. If later product work needs alternate themes, that should become a deliberate future milestone.
 
 ### Compact Mobile-First Density
 
@@ -120,20 +122,20 @@ When a visual rule applies across screens or states, it should become a shared d
 Recommended direction:
 
 - keep Material 3 as the base
-- implement a fixed NumPairs light color scheme
-- remove dynamic color as the default visual direction
+- implement one fixed NumPairs color scheme
+- ignore system light/dark theme for app presentation
+- remove dynamic color from the default visual direction
 - replace the starter purple fallback palette with the NumPairs premium palette
-- optionally keep dark theme structurally available without treating full dark theme polish as v4 scope
 - expose NumPairs-specific visual defaults only where Material roles are too generic
 
 ### Color Strategy
 
-The NumPairs UI should use a restrained premium color strategy:
+The NumPairs UI should use a restrained premium dark-leaning color strategy:
 
-- warm light neutral background
-- pure or near-pure white surfaces
-- near-black primary text
-- medium gray secondary text
+- deep warm neutral background
+- dark raised surfaces
+- warm off-white primary text
+- muted warm gray secondary text
 - one jade-green accent color
 - soft red for error and invalid states
 - neutral gray for hidden and placeholder states
@@ -146,12 +148,12 @@ The design system should describe colors by role before implementation assigns c
 
 Recommended roles:
 
-- `appBackground`: warm light neutral screen background
-- `surfaceBase`: pure or near-pure white surface for tiles, cards, dialogs, overlays, and sheets
-- `surfaceRaised`: white elevated surface with subtle tonal or shadow treatment
+- `appBackground`: deep warm neutral screen background
+- `surfaceBase`: dark surface for tiles, cards, dialogs, overlays, and sheets
+- `surfaceRaised`: slightly lighter dark elevated surface with subtle tonal or shadow treatment
 - `surfaceSubtle`: quiet grouped surface, such as the strip container
-- `textPrimary`: near-black primary text
-- `textSecondary`: medium gray supporting text
+- `textPrimary`: warm off-white primary text
+- `textSecondary`: muted warm gray supporting text
 - `accent`: jade green brand and interaction accent
 - `accentSoft`: lighter jade treatment for selection, active focus, and subtle highlights
 - `error`: soft red for invalid tiles and error feedback
@@ -163,7 +165,7 @@ Recommended roles:
 
 Gameplay states should map consistently to the core color strategy:
 
-- Known strip entries: stable white or neutral surface with subtle border
+- Known strip entries: stable dark or neutral surface with subtle border
 - Hidden strip entries: neutral gray treatment that clearly communicates unknown value
 - Player-entered strip entries: player-owned state with accent relationship, without overpowering the board
 - Selected or focused elements: accent or `accentSoft`
@@ -266,14 +268,14 @@ Recommended shape guidance:
 - Icon buttons: simple circular or rounded container with minimal visual weight
 - Puzzle tiles: rounded rectangles, visually stable, not overly pill-shaped
 - Strip chips: compact rounded chips with clear state borders
-- Dialogs and sheets: clean white surfaces with restrained shape treatment
+- Dialogs and sheets: clean dark raised surfaces with restrained shape treatment
 - Menu cards or actions: consistent radius and spacing
 - Highlighted slots: small, precise shape treatment around the active arithmetic element
 
 Surface guidance:
 
-- Use warm neutral backgrounds to reduce visual fatigue and give the app a more premium feel than pure white.
-- Use pure or near-pure white surfaces for tiles, cards, dialogs, and overlays.
+- Use deep warm neutral backgrounds to reduce visual fatigue and give the app a premium, calm feel.
+- Use dark raised surfaces for tiles, cards, dialogs, and overlays.
 - Avoid nested card-heavy layouts.
 - Use grouped surfaces where they clarify the puzzle structure, especially the strip.
 - Keep tiles visually distinct from the page background.
@@ -479,8 +481,8 @@ Preferred implementation approach:
 - refactor duplicated visual constants only when there is a real shared role
 - use existing component APIs where possible
 - add component previews for important state combinations
-- verify UI manually in representative light theme and narrow-screen states
-- prepare dark theme only where it is cheap and does not distract from the v4 light theme polish goal
+- verify UI manually in the single default theme and narrow-screen states
+- do not add alternate theme variants in v4
 
 Likely implementation areas:
 
@@ -517,15 +519,15 @@ Rationale:
 - shape and symbols survive dark mode, small sizes, and launcher contexts
 - a shape-first identity still fits a premium puzzle game better than a purely palette-driven brand
 
-### Use A Fixed Premium Palette
+### Use A Single Fixed Premium Theme
 
-Decision: v4 should implement a fixed NumPairs palette instead of relying on Android dynamic color.
+Decision: v4 should implement one fixed NumPairs theme instead of relying on Android dynamic color or system light/dark theme switching.
 
 Rationale:
 
 - the app needs a stable, recognizable visual identity
 - a single jade accent creates stronger product consistency than device-derived colors
-- screenshots, documentation, and older Android versions need the same designed baseline
+- screenshots, documentation, and all Android versions need the same designed baseline
 - the previous starter purple fallback reads as an uncustomized Material template
 
 ### Make The Board The Protagonist
@@ -573,7 +575,6 @@ Rationale:
 ## Open Decisions
 
 - Exact jade green, warm neutral, text, gray, and soft red values
-- Whether dark theme should remain structurally supported during v4 or be deferred after the light theme is polished
 - Exact Inter and JetBrains Mono integration approach and fallback behavior
 - Exact typography tuning for tile expressions and results
 - Whether to introduce a small NumPairs-specific theme wrapper beyond Material `ColorScheme`

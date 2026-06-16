@@ -67,7 +67,7 @@ v4 should make the app:
 - First-time players who need the UI hierarchy to make the puzzle approachable
 - Casual puzzle players who expect a clean, readable mobile game experience
 - Returning players who should be able to scan game state quickly
-- Mobile-first players using light mode, dark mode, and dynamic color environments
+- Mobile-first players who should see one stable, premium NumPairs presentation regardless of device theme settings
 - Contributors who need stable visual guidelines before adding future gameplay features
 
 ---
@@ -89,7 +89,7 @@ That baseline currently includes:
 - direct strip editing and tile editing through contextual UI
 - local incorrect-tile feedback and whole-puzzle completion feedback
 - responsive Compose UI foundations
-- Material 3 theming with light/dark and dynamic color support
+- Material 3 theming with legacy light/dark and dynamic color support from the current implementation
 - first-pass visual identity documentation for the NumPairs logo and launcher direction
 - documented interaction behavior and layout decisions
 
@@ -97,10 +97,10 @@ That baseline does not yet include:
 
 - a NumPairs-specific visual design system for app UI
 - documented app-level color roles beyond the initial identity direction
-- a finalized non-dynamic fallback palette
+- one finalized fixed premium app theme
 - shared spacing, shape, typography, elevation, and motion decisions
 - a documented component-state model for chips, tiles, selectors, dialogs, banners, and completion surfaces
-- a visual QA baseline for representative light/dark and dynamic-color states
+- a visual QA baseline for the fixed default app theme
 - broader content expansion such as additional difficulty levels or modes
 
 ---
@@ -127,7 +127,7 @@ That baseline does not yet include:
 - Strip entries should clearly communicate hidden, known, and player-entered states
 - Board tiles should clearly communicate hidden slots, filled slots, target results, incorrect expressions, and other validation states
 - Dialogs, sheets, popovers, banners, and overlays should share a coherent visual language
-- The UI should remain readable in light theme, dark theme, dynamic color, and non-dynamic fallback color
+- The UI should remain readable in the single fixed default app theme
 - Accessibility should remain part of visual quality: contrast, touch targets, text scaling, and non-color state cues matter
 - Existing rules, puzzle generation, tutorial behavior, and replay behavior should remain stable
 
@@ -139,7 +139,7 @@ That baseline does not yet include:
 
 - Define the NumPairs app UI design principles in `docs/product/visual-design-system.md`
 - Establish how the v1 logo and shape-first identity direction extend into app UI
-- Define the intended relationship between Material 3, Android dynamic color, and NumPairs-specific component roles
+- Define the intended relationship between Material 3 and NumPairs-specific component roles
 - Document color roles for:
   - app background and surfaces
   - primary player actions
@@ -167,8 +167,8 @@ That baseline does not yet include:
 - Refine the puzzle screen visual hierarchy while preserving the documented interaction model
 - Refine strip, board, tile, selector, top bar, dialog, banner, and overlay presentation
 - Improve consistency between Tutorial, generated gameplay, rules help, and completion feedback
-- Replace starter-template fallback colors with a NumPairs-appropriate non-dynamic color direction
-- Keep Android dynamic color support unless implementation findings show a clear product or accessibility problem
+- Replace starter-template and dynamic colors with one fixed NumPairs premium theme
+- Keep app presentation independent from Android dynamic color and system light/dark theme
 - Keep the current responsive layout strategy unless specific spacing or readability issues are found during refinement
 
 ### Technical Implementation
@@ -183,8 +183,7 @@ That baseline does not yet include:
 
 - Preserve existing unit and UI behavior tests
 - Add or update UI tests only where visual refactoring risks changing behavior or semantics
-- Verify representative screens in light mode and dark mode
-- Verify dynamic color and non-dynamic fallback color behavior
+- Verify the fixed default theme behavior
 - Verify small-screen readability for the menu, strip, board, selectors, and dialogs
 - Verify accessibility basics:
   - minimum touch targets
@@ -232,7 +231,7 @@ That baseline does not yet include:
 - The app has a NumPairs-specific visual direction beyond default Material starter styling
 - The menu, tutorial surfaces, generated gameplay, rules help, selectors, dialogs, and feedback states feel like one product
 - Chips and tiles communicate their states clearly without relying on color alone
-- Light mode, dark mode, dynamic color, and non-dynamic fallback color remain readable
+- The single fixed default theme remains readable
 - Core gameplay behavior remains unchanged unless a change is explicitly documented
 - Existing v3 functionality remains stable after UI refinement
 - The codebase has clearer shared visual defaults for future features to reuse
