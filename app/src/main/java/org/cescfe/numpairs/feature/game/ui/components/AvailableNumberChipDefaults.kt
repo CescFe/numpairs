@@ -27,11 +27,11 @@ internal fun chipColorsFor(style: AvailableNumberChipStyle): AvailableNumberChip
         )
 
         AvailableNumberChipStyle.HIDDEN -> AvailableNumberChipColors(
-            containerColor = colorScheme.surfaceContainerHigh,
+            containerColor = colorScheme.surfaceVariant,
             contentColor = colorScheme.onSurfaceVariant,
             border = BorderStroke(
                 width = MODIFIABLE_CHIP_BORDER_WIDTH,
-                color = colorScheme.outline
+                color = colorScheme.onSurfaceVariant
             )
         )
 
