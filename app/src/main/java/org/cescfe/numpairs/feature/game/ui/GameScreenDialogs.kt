@@ -151,7 +151,7 @@ private fun OperandSelectionOption(operand: TileOperandOptionUiState, onConfirm:
                     Text(
                         text = operandSelectionLabel,
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
-                        style = NumPairsTextStyles.StripValue
+                        style = NumPairsTextStyles.OperandOption
                     )
                 }
             }
@@ -346,7 +346,7 @@ internal fun StripItemEntryDialog(
                 },
                 isError = isInputInvalid,
                 singleLine = true,
-                textStyle = NumPairsTextStyles.StripValue,
+                textStyle = NumPairsTextStyles.NumericInput,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
         },
@@ -433,7 +433,11 @@ internal fun TileOperatorSelectionMenu(
                             horizontal = TILE_OPERATOR_MENU_OPTION_HORIZONTAL_PADDING,
                             vertical = TILE_OPERATOR_MENU_OPTION_VERTICAL_PADDING
                         ),
-                        style = NumPairsTextStyles.TileExpression
+                        style = if (isSelected) {
+                            NumPairsTextStyles.OperatorOptionSelected
+                        } else {
+                            NumPairsTextStyles.OperatorOption
+                        }
                     )
                 }
             }

@@ -57,7 +57,7 @@ val Typography = Typography(
         fontFamily = Inter,
         fontWeight = FontWeight.SemiBold,
         fontSize = 24.sp,
-        lineHeight = 30.sp
+        lineHeight = 32.sp
     ),
     titleLarge = TextStyle(
         fontFamily = Inter,
@@ -73,9 +73,9 @@ val Typography = Typography(
     ),
     titleSmall = TextStyle(
         fontFamily = Inter,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 16.sp,
-        lineHeight = 22.sp
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp,
+        lineHeight = 20.sp
     ),
     bodyLarge = TextStyle(
         fontFamily = Inter,
