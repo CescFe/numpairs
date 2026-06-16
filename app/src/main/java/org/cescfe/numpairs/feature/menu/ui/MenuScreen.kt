@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
@@ -21,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
@@ -60,7 +62,10 @@ fun MenuScreen(
                         onClick = onFourPairsSelected,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .testTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+                            .height(NumPairsComponents.ButtonHeight)
+                            .testTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON),
+                        shape = NumPairsComponents.MediumShape,
+                        colors = NumPairsComponents.primaryButtonColors(),
                     ) {
                         Text(
                             text = stringResource(R.string.menu_four_pairs_button)
@@ -70,7 +75,11 @@ fun MenuScreen(
                         onClick = onTutorialSelected,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .testTag(MenuScreenTestTags.TUTORIAL_BUTTON)
+                            .height(NumPairsComponents.ButtonHeight)
+                            .testTag(MenuScreenTestTags.TUTORIAL_BUTTON),
+                        shape = NumPairsComponents.MediumShape,
+                        colors = NumPairsComponents.secondaryButtonColors(),
+                        border = NumPairsComponents.secondaryButtonBorder(),
                     ) {
                         Text(
                             text = stringResource(R.string.menu_tutorial_button)
@@ -88,8 +97,9 @@ private fun MenuScreenTopBar() {
     TopAppBar(
         title = {
             Text(text = stringResource(R.string.app_name))
-        }
-    )
+        },
+        colors = NumPairsComponents.topAppBarColors(),
+        )
 }
 
 @Preview(showBackground = true)
