@@ -15,10 +15,10 @@ private val NumPairsColorScheme = darkColorScheme(
     secondaryContainer = NumPairsSurfaceSubtle,
     onSecondaryContainer = NumPairsOnSurface,
 
-    tertiary = NumPairsGreenSoft,
-    onTertiary = NumPairsOnGreenSoft,
-    tertiaryContainer = NumPairsSurfaceSubtle,
-    onTertiaryContainer = NumPairsOnSurface,
+    tertiary = NumPairsFocus,
+    onTertiary = NumPairsOnFocus,
+    tertiaryContainer = NumPairsFocusSoft,
+    onTertiaryContainer = NumPairsOnFocusSoft,
 
     background = NumPairsBackground,
     onBackground = NumPairsOnSurface,
