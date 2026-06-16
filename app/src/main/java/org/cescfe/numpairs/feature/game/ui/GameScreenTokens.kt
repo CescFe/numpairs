@@ -1,7 +1,6 @@
 package org.cescfe.numpairs.feature.game.ui
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 internal const val BOARD_MAX_VISUAL_COLUMN_COUNT = 4
@@ -29,7 +28,6 @@ internal val TILE_OPERAND_HINT_EDGE_INSET = 8.dp
 internal val TILE_OPERAND_HINT_CORNER_RADIUS = 999.dp
 internal val TILE_OPERAND_HINT_HORIZONTAL_PADDING = 6.dp
 internal val TILE_OPERAND_HINT_VERTICAL_PADDING = 2.dp
-internal val TILE_OPERAND_HINT_TEXT_WEIGHT = FontWeight.Medium
 internal val PUZZLE_OUTCOME_CORNER_RADIUS = 24.dp
 internal val PUZZLE_OUTCOME_HORIZONTAL_PADDING = 16.dp
 internal val PUZZLE_OUTCOME_VERTICAL_PADDING = 14.dp

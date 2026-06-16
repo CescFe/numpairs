@@ -43,7 +43,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -54,6 +53,7 @@ import org.cescfe.numpairs.feature.game.presentation.StripItemEntryDialogUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperandOptionUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperandSelectionDialogUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState
+import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -151,8 +151,7 @@ private fun OperandSelectionOption(operand: TileOperandOptionUiState, onConfirm:
                     Text(
                         text = operandSelectionLabel,
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
+                        style = NumPairsTextStyles.StripValue
                     )
                 }
             }
@@ -223,8 +222,7 @@ private fun OperandUsageHintBadge(
                 horizontal = TILE_OPERAND_HINT_HORIZONTAL_PADDING,
                 vertical = TILE_OPERAND_HINT_VERTICAL_PADDING
             ),
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = TILE_OPERAND_HINT_TEXT_WEIGHT
+            style = NumPairsTextStyles.PuzzleLabel
         )
     }
 }
@@ -348,6 +346,7 @@ internal fun StripItemEntryDialog(
                 },
                 isError = isInputInvalid,
                 singleLine = true,
+                textStyle = NumPairsTextStyles.StripValue,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
         },
@@ -434,11 +433,7 @@ internal fun TileOperatorSelectionMenu(
                             horizontal = TILE_OPERATOR_MENU_OPTION_HORIZONTAL_PADDING,
                             vertical = TILE_OPERATOR_MENU_OPTION_VERTICAL_PADDING
                         ),
-                        fontWeight = if (isSelected) {
-                            FontWeight.SemiBold
-                        } else {
-                            FontWeight.Normal
-                        }
+                        style = NumPairsTextStyles.TileExpression
                     )
                 }
             }
