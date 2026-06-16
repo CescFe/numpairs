@@ -2,26 +2,28 @@ package org.cescfe.numpairs.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val NumPairsBackground = Color(0xFFF6F1E8)
-val NumPairsSurface = Color(0xFFFFFCF5)
-val NumPairsSurfaceRaised = Color(0xFFFFFFFF)
-val NumPairsSurfaceSubtle = Color(0xFFEDE5D8)
+val NumPairsBackground = Color(0xFF2F332A)
+val NumPairsSurface = Color(0xFF3A3F34)
+val NumPairsSurfaceRaised = Color(0xFF454B3E)
+val NumPairsSurfaceSubtle = Color(0xFF363B31)
 
-val NumPairsOnSurface = Color(0xFF2B261F)
-val NumPairsOnSurfaceVariant = Color(0xFF6F665B)
+val NumPairsOnSurface = Color(0xFFF2EDE2)
+val NumPairsOnSurfaceVariant = Color(0xFFC8C1B4)
 
-val NumPairsOutline = Color(0xFFD8CCBC)
-val NumPairsOutlineVariant = Color(0xFFE8DDCF)
+val NumPairsOutline = Color(0xFF5B6253)
+val NumPairsOutlineVariant = Color(0xFF4A5145)
 
-val NumPairsGreen = Color(0xFF7FA86B)
-val NumPairsOnGreen = Color(0xFFFFFFFF)
+val NumPairsGreen = Color(0xFF9CBD7B)
+val NumPairsOnGreen = Color(0xFF25301D)
 
-val NumPairsGreenSoft = Color(0xFFE2EBD8)
-val NumPairsOnGreenSoft = Color(0xFF314328)
+val NumPairsGreenSoft = Color(0xFF46583A)
+val NumPairsOnGreenSoft = Color(0xFFE3F0D4)
 
-val NumPairsSand = Color(0xFFE8C982)
-val NumPairsOnSand = Color(0xFF3A2B10)
+val NumPairsSand = Color(0xFFD7B56D)
+val NumPairsOnSand = Color(0xFF33270E)
 
-val NumPairsError = Color(0xFFC96F5F)
-val NumPairsErrorSoft = Color(0xFFF7DDD8)
-val NumPairsOnErrorSoft = Color(0xFF5A211A)
+val NumPairsError = Color(0xFFE58A7A)
+val NumPairsErrorSoft = Color(0xFF5A3733)
+val NumPairsOnErrorSoft = Color(0xFFFFDAD4)
+
+val NumPairsScrim = Color(0xCC000000)

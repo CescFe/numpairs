@@ -1,11 +1,10 @@
 package org.cescfe.numpairs.ui.theme
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 
-private val NumPairsColorScheme = lightColorScheme(
+private val NumPairsColorScheme = darkColorScheme(
     primary = NumPairsGreen,
     onPrimary = NumPairsOnGreen,
     primaryContainer = NumPairsGreenSoft,
@@ -38,9 +37,11 @@ private val NumPairsColorScheme = lightColorScheme(
     outlineVariant = NumPairsOutlineVariant,
 
     error = NumPairsError,
-    onError = Color.White,
+    onError = NumPairsBackground,
     errorContainer = NumPairsErrorSoft,
     onErrorContainer = NumPairsOnErrorSoft,
+
+    scrim = NumPairsScrim
 )
 
 @Composable
