@@ -67,7 +67,7 @@ fun MenuScreen(
                             .height(NumPairsComponents.ButtonHeight)
                             .testTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON),
                         shape = NumPairsComponents.MediumShape,
-                        colors = NumPairsComponents.primaryButtonColors(),
+                        colors = NumPairsComponents.primaryButtonColors()
                     ) {
                         MenuButtonText(text = stringResource(R.string.menu_four_pairs_button))
                     }
@@ -79,7 +79,7 @@ fun MenuScreen(
                             .testTag(MenuScreenTestTags.TUTORIAL_BUTTON),
                         shape = NumPairsComponents.MediumShape,
                         colors = NumPairsComponents.secondaryButtonColors(),
-                        border = NumPairsComponents.secondaryButtonBorder(),
+                        border = NumPairsComponents.secondaryButtonBorder()
                     ) {
                         MenuButtonText(text = stringResource(R.string.menu_tutorial_button))
                     }
