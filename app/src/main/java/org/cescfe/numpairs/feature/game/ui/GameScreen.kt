@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -26,7 +27,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
 import org.cescfe.numpairs.domain.puzzle.OperandSlot
@@ -39,6 +39,7 @@ import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperandOptionUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperandSelectionDialogUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState
+import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
@@ -77,6 +78,8 @@ fun GameScreen(
     ) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
+            containerColor = MaterialTheme.colorScheme.background,
+            contentColor = MaterialTheme.colorScheme.onBackground,
             topBar = {
                 GameScreenTopBar(
                     title = title,
@@ -94,8 +97,11 @@ fun GameScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(innerPadding)
-                    .padding(horizontal = 16.dp, vertical = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
+                    .padding(
+                        horizontal = GAME_SCREEN_HORIZONTAL_PADDING,
+                        vertical = GAME_SCREEN_VERTICAL_PADDING
+                    ),
+                verticalArrangement = Arrangement.spacedBy(GAME_SCREEN_SECTION_SPACING)
             ) {
                 contentBeforePuzzle()
                 StripSection(
@@ -217,6 +223,8 @@ private fun GameScreenTopBar(
     val backButtonContentDescription = stringResource(R.string.back_button_content_description)
 
     TopAppBar(
+        colors = NumPairsComponents.topAppBarColors(),
+        expandedHeight = GAME_TOP_BAR_HEIGHT,
         navigationIcon = {
             IconButton(
                 onClick = onNavigateBack,
