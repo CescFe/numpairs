@@ -1,6 +1,5 @@
 package org.cescfe.numpairs.feature.game.ui
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 internal const val BOARD_MAX_VISUAL_COLUMN_COUNT = 4
@@ -41,5 +40,3 @@ internal val SUCCESS_OVERLAY_HORIZONTAL_PADDING = 24.dp
 internal val SUCCESS_OVERLAY_VERTICAL_PADDING = 22.dp
 internal val SUCCESS_OVERLAY_CARD_CORNER_RADIUS = 28.dp
 internal val SUCCESS_OVERLAY_BADGE_SIZE = 44.dp
-internal val SUCCESS_OVERLAY_SUCCESS_GREEN = Color(0xFF2E7D32)
-internal val SUCCESS_OVERLAY_SUCCESS_GREEN_SOFT = Color(0xFFE6F4EA)

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
@@ -41,12 +43,15 @@ internal fun RulesHelperDialog(
     modifier: Modifier = Modifier,
     onPlayTutorialRequested: (() -> Unit)? = null
 ) {
-    val containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+    val containerColor = NumPairsComponents.raisedSurfaceColor()
 
     AlertDialog(
         modifier = modifier.testTag(GameScreenTestTags.RULES_HELPER_DIALOG),
         onDismissRequest = onDismiss,
+        shape = NumPairsComponents.LargeShape,
         containerColor = containerColor,
+        titleContentColor = MaterialTheme.colorScheme.onSurface,
+        textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         title = {
             RulesHelperTitle(onDismiss = onDismiss)
         },
@@ -60,7 +65,10 @@ internal fun RulesHelperDialog(
                         onDismiss()
                         onPlayTutorial()
                     },
-                    modifier = Modifier.testTag(GameScreenTestTags.RULES_HELPER_PLAY_TUTORIAL_BUTTON)
+                    modifier = Modifier.testTag(GameScreenTestTags.RULES_HELPER_PLAY_TUTORIAL_BUTTON),
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
                 ) {
                     Text(text = stringResource(R.string.rules_helper_play_tutorial_button))
                 }
@@ -82,11 +90,12 @@ private fun RulesHelperTitle(onDismiss: () -> Unit) {
     ) {
         Text(
             text = stringResource(R.string.rules_helper_title),
-            style = MaterialTheme.typography.headlineSmall
+            style = MaterialTheme.typography.titleMedium
         )
         IconButton(
             onClick = onDismiss,
-            modifier = Modifier.testTag(GameScreenTestTags.RULES_HELPER_CLOSE_BUTTON)
+            modifier = Modifier.testTag(GameScreenTestTags.RULES_HELPER_CLOSE_BUTTON),
+            colors = NumPairsComponents.iconButtonColors()
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_close),
