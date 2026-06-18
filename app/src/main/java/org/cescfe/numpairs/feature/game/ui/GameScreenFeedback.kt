@@ -1,7 +1,6 @@
 package org.cescfe.numpairs.feature.game.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -32,6 +31,7 @@ import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
 import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
+import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
 @Composable
 internal fun SuccessOverlay(onDismiss: () -> Unit, completionActions: GameCompletionActions? = null) {
@@ -67,9 +67,9 @@ internal fun SuccessOverlay(onDismiss: () -> Unit, completionActions: GameComple
                 .padding(horizontal = 32.dp)
                 .widthIn(max = SUCCESS_OVERLAY_CARD_MAX_WIDTH),
             shape = RoundedCornerShape(SUCCESS_OVERLAY_CARD_CORNER_RADIUS),
-            color = SUCCESS_OVERLAY_SUCCESS_GREEN_SOFT,
-            contentColor = SUCCESS_OVERLAY_SUCCESS_GREEN,
-            border = BorderStroke(width = 1.dp, color = SUCCESS_OVERLAY_SUCCESS_GREEN)
+            color = NumPairsComponents.successContainerColor(),
+            contentColor = NumPairsComponents.successContentColor(),
+            border = NumPairsComponents.focusBorder()
         ) {
             Column(
                 modifier = Modifier
@@ -83,8 +83,8 @@ internal fun SuccessOverlay(onDismiss: () -> Unit, completionActions: GameComple
             ) {
                 Surface(
                     shape = CircleShape,
-                    color = SUCCESS_OVERLAY_SUCCESS_GREEN.copy(alpha = 0.12f),
-                    contentColor = SUCCESS_OVERLAY_SUCCESS_GREEN
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
+                    contentColor = MaterialTheme.colorScheme.primary
                 ) {
                     Box(
                         modifier = Modifier
@@ -116,7 +116,9 @@ internal fun SuccessOverlay(onDismiss: () -> Unit, completionActions: GameComple
                             onClick = actions.onNewPuzzleRequested,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .testTag(GameScreenTestTags.SUCCESS_OVERLAY_NEW_PUZZLE)
+                                .testTag(GameScreenTestTags.SUCCESS_OVERLAY_NEW_PUZZLE),
+                            shape = NumPairsComponents.MediumShape,
+                            colors = NumPairsComponents.primaryButtonColors()
                         ) {
                             Text(text = stringResource(R.string.success_overlay_new_puzzle_button))
                         }
@@ -124,7 +126,10 @@ internal fun SuccessOverlay(onDismiss: () -> Unit, completionActions: GameComple
                             onClick = actions.onReturnToMenuRequested,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .testTag(GameScreenTestTags.SUCCESS_OVERLAY_RETURN_TO_MENU)
+                                .testTag(GameScreenTestTags.SUCCESS_OVERLAY_RETURN_TO_MENU),
+                            shape = NumPairsComponents.MediumShape,
+                            colors = NumPairsComponents.secondaryButtonColors(),
+                            border = NumPairsComponents.secondaryButtonBorder()
                         ) {
                             Text(text = stringResource(R.string.success_overlay_return_to_menu_button))
                         }
@@ -137,14 +142,12 @@ internal fun SuccessOverlay(onDismiss: () -> Unit, completionActions: GameComple
 
 @Composable
 internal fun PuzzleOutcomeBanner(puzzleOutcome: PuzzleOutcomeUiState.Invalid, modifier: Modifier = Modifier) {
-    val colorScheme = MaterialTheme.colorScheme
-
     Surface(
         modifier = modifier.testTag(GameScreenTestTags.PUZZLE_OUTCOME),
         shape = RoundedCornerShape(PUZZLE_OUTCOME_CORNER_RADIUS),
-        color = colorScheme.errorContainer,
-        contentColor = colorScheme.onErrorContainer,
-        border = BorderStroke(width = 1.dp, color = colorScheme.error)
+        color = NumPairsComponents.errorContainerColor(),
+        contentColor = NumPairsComponents.errorContentColor(),
+        border = NumPairsComponents.errorBorder()
     ) {
         Column(
             modifier = Modifier

@@ -32,6 +32,7 @@ import org.cescfe.numpairs.feature.game.GameTileExpressionSlotHighlight
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.StripItemVisualStyle
 import org.cescfe.numpairs.feature.tutorial.ui.TutorialScreenTestTags
+import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
 @Composable
 fun TutorialRoute(
@@ -93,9 +94,10 @@ private fun TutorialInstructionSurface(
 ) {
     Surface(
         modifier = modifier.testTag(TutorialScreenTestTags.INSTRUCTION_SURFACE),
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+        shape = NumPairsComponents.LargeShape,
+        color = NumPairsComponents.raisedSurfaceColor(),
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        border = NumPairsComponents.subtleBorder()
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -108,12 +110,14 @@ private fun TutorialInstructionSurface(
                     totalSteps
                 ),
                 modifier = Modifier.testTag(TutorialScreenTestTags.STEP_INDICATOR),
-                style = MaterialTheme.typography.labelLarge
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = stringResource(currentStep.playerFacingCopyResId),
                 modifier = Modifier.testTag(TutorialScreenTestTags.STEP_COPY),
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }
