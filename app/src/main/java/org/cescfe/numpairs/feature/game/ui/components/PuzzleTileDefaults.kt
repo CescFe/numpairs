@@ -6,8 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.feature.game.presentation.TileVisualState
+import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
-internal val TILE_CORNER_RADIUS = 20.dp
 internal val TILE_HORIZONTAL_PADDING = 10.dp
 internal val TILE_VERTICAL_PADDING = 16.dp
 internal val TILE_EXPRESSION_ITEM_SPACING = 2.dp
@@ -27,23 +27,36 @@ internal val HIGHLIGHTED_TILE_EXPRESSION_SLOT_BORDER_WIDTH = 2.dp
 internal val HIGHLIGHTED_TILE_EXPRESSION_SLOT_CORNER_RADIUS = 8.dp
 
 @Composable
-internal fun tileStatePalette(visualState: TileVisualState): TileStatePalette? {
+internal fun tileStatePalette(visualState: TileVisualState): TileStatePalette {
     val colorScheme = MaterialTheme.colorScheme
 
     return when (visualState) {
-        TileVisualState.NORMAL -> null
+        TileVisualState.NORMAL -> TileStatePalette(
+            containerColor = NumPairsComponents.raisedSurfaceColor(),
+            expressionContentColor = colorScheme.onSurfaceVariant,
+            resultContentColor = colorScheme.onSurface,
+            border = NumPairsComponents.subtleBorder()
+        )
+
         TileVisualState.INCORRECT -> TileStatePalette(
             containerColor = colorScheme.errorContainer,
-            contentColor = colorScheme.onErrorContainer,
-            border = BorderStroke(2.dp, colorScheme.error)
+            expressionContentColor = colorScheme.onErrorContainer,
+            resultContentColor = colorScheme.onSurface,
+            border = NumPairsComponents.errorBorder()
         )
 
         TileVisualState.MISMATCHED_PAIRING -> TileStatePalette(
-            containerColor = colorScheme.tertiaryContainer,
-            contentColor = colorScheme.onTertiaryContainer,
-            border = BorderStroke(2.dp, colorScheme.tertiary)
+            containerColor = NumPairsComponents.raisedSurfaceColor(),
+            expressionContentColor = colorScheme.onSurfaceVariant,
+            resultContentColor = colorScheme.onSurface,
+            border = BorderStroke(2.dp, colorScheme.error)
         )
     }
 }
 
-internal data class TileStatePalette(val containerColor: Color, val contentColor: Color, val border: BorderStroke)
+internal data class TileStatePalette(
+    val containerColor: Color,
+    val expressionContentColor: Color,
+    val resultContentColor: Color,
+    val border: BorderStroke
+)

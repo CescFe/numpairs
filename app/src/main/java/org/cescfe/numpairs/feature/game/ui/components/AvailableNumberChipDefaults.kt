@@ -5,10 +5,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
 internal val CHIP_MIN_HEIGHT = 48.dp
-internal val CHIP_CORNER_RADIUS = 14.dp
-internal val KNOWN_CHIP_BORDER_WIDTH = 1.dp
 internal val MODIFIABLE_CHIP_BORDER_WIDTH = 1.5.dp
 internal val HIGHLIGHTED_CHIP_BORDER_WIDTH = 3.dp
 
@@ -20,15 +19,12 @@ internal fun chipColorsFor(style: AvailableNumberChipStyle): AvailableNumberChip
         AvailableNumberChipStyle.KNOWN -> AvailableNumberChipColors(
             containerColor = colorScheme.surface,
             contentColor = colorScheme.onSurface,
-            border = BorderStroke(
-                width = KNOWN_CHIP_BORDER_WIDTH,
-                color = colorScheme.outline
-            )
+            border = NumPairsComponents.subtleBorder()
         )
 
         AvailableNumberChipStyle.HIDDEN -> AvailableNumberChipColors(
-            containerColor = colorScheme.surfaceVariant,
-            contentColor = colorScheme.onSurfaceVariant,
+            containerColor = NumPairsComponents.hiddenContainerColor(),
+            contentColor = NumPairsComponents.hiddenContentColor(),
             border = BorderStroke(
                 width = MODIFIABLE_CHIP_BORDER_WIDTH,
                 color = colorScheme.onSurfaceVariant
@@ -49,5 +45,5 @@ internal fun chipColorsFor(style: AvailableNumberChipStyle): AvailableNumberChip
 internal data class AvailableNumberChipColors(
     val containerColor: Color,
     val contentColor: Color,
-    val border: BorderStroke?
+    val border: BorderStroke
 )

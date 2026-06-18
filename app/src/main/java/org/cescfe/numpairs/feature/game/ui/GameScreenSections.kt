@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,7 +17,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.feature.game.GameHighlightState
@@ -32,6 +29,7 @@ import org.cescfe.numpairs.feature.game.presentation.TileUiState
 import org.cescfe.numpairs.feature.game.ui.components.AvailableNumberChip
 import org.cescfe.numpairs.feature.game.ui.components.AvailableNumberChipStyle
 import org.cescfe.numpairs.feature.game.ui.components.PuzzleTile
+import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
 @Composable
 internal fun BoardSection(
@@ -160,8 +158,9 @@ internal fun StripSection(
             .semantics {
                 contentDescription = stripContentDescription
             },
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        shape = RoundedCornerShape(24.dp)
+        color = NumPairsComponents.subtleSurfaceColor(),
+        shape = NumPairsComponents.LargeShape,
+        border = NumPairsComponents.subtleBorder()
     ) {
         BoxWithConstraints(
             modifier = Modifier

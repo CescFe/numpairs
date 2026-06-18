@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.feature.game.presentation.TileUiState
 import org.cescfe.numpairs.feature.game.ui.gameHighlightSemantics
+import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
 
 @Composable
@@ -45,9 +46,9 @@ internal fun TileResetAction(modifier: Modifier = Modifier, onClick: () -> Unit)
         onClick = onClick,
         modifier = modifier,
         shape = RoundedCornerShape(999.dp),
-        color = MaterialTheme.colorScheme.surface,
+        color = NumPairsComponents.subtleSurfaceColor(),
         contentColor = MaterialTheme.colorScheme.primary,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        border = NumPairsComponents.subtleBorder()
     ) {
         Box(
             modifier = Modifier

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -18,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -31,6 +29,7 @@ import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.TileUiState
 import org.cescfe.numpairs.feature.game.presentation.TileVisualState
 import org.cescfe.numpairs.feature.game.ui.gameHighlightSemantics
+import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
@@ -56,11 +55,10 @@ fun PuzzleTile(
     onResetClick: (() -> Unit)? = null
 ) {
     val statePalette = tileStatePalette(tile.visualState)
-    val expressionColor = statePalette?.contentColor ?: Color.Unspecified
-    val tileBorder = statePalette?.border ?: if (isHighlighted) {
+    val tileBorder = if (isHighlighted) {
         BorderStroke(width = HIGHLIGHTED_TILE_BORDER_WIDTH, color = MaterialTheme.colorScheme.tertiary)
     } else {
-        null
+        statePalette.border
     }
     val tileStateDescription = when (tile.visualState) {
         TileVisualState.INCORRECT -> stringResource(R.string.tile_state_incorrect)
@@ -79,12 +77,11 @@ fun PuzzleTile(
     ) {
         Card(
             modifier = Modifier,
-            shape = RoundedCornerShape(TILE_CORNER_RADIUS),
-            colors = if (statePalette == null) {
-                CardDefaults.cardColors()
-            } else {
-                CardDefaults.cardColors(containerColor = statePalette.containerColor)
-            },
+            shape = NumPairsComponents.LargeShape,
+            colors = CardDefaults.cardColors(
+                containerColor = statePalette.containerColor,
+                contentColor = statePalette.resultContentColor
+            ),
             border = tileBorder
         ) {
             Column(
@@ -109,14 +106,14 @@ fun PuzzleTile(
                     isRightOperandHighlighted = isRightOperandHighlighted,
                     rightOperandContentDescription = rightOperandContentDescription,
                     onRightOperandClick = onRightOperandClick,
-                    textColor = expressionColor,
+                    textColor = statePalette.expressionContentColor,
                     modifier = Modifier.fillMaxWidth()
                 )
                 Text(
                     text = tile.resultLabel,
                     modifier = Modifier.fillMaxWidth(),
                     style = NumPairsTextStyles.TileResult,
-                    color = statePalette?.contentColor ?: MaterialTheme.colorScheme.onSurface,
+                    color = statePalette.resultContentColor,
                     textAlign = TextAlign.Center
                 )
             }
