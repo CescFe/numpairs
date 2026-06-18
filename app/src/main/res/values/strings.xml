@@ -79,5 +79,4 @@
     <string name="puzzle_outcome_invalid_usage_message">Each strip entry must be used exactly once in addition and once in multiplication.</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
-    <string name="menu_subtitle">A calm logic puzzle\nabout numbers and pairs</string>
 </resources>
