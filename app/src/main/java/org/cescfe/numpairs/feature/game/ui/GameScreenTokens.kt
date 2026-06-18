@@ -4,6 +4,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 internal const val BOARD_MAX_VISUAL_COLUMN_COUNT = 4
+internal val GAME_SCREEN_HORIZONTAL_PADDING = 16.dp
+internal val GAME_SCREEN_VERTICAL_PADDING = 16.dp
+internal val GAME_SCREEN_SECTION_SPACING = 18.dp
+internal val GAME_TOP_BAR_HEIGHT = 56.dp
 internal val BOARD_TILE_MIN_WIDTH = 112.dp
 internal val BOARD_TILE_MAX_WIDTH = 144.dp
 internal val BOARD_TILE_SPACING = 12.dp

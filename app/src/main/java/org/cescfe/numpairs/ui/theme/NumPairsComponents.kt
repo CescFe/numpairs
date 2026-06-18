@@ -106,8 +106,8 @@ object NumPairsComponents {
     @Composable
     fun topAppBarColors(): TopAppBarColors = TopAppBarDefaults.topAppBarColors(
         containerColor = MaterialTheme.colorScheme.background,
-        titleContentColor = MaterialTheme.colorScheme.onBackground,
-        navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-        actionIconContentColor = MaterialTheme.colorScheme.onBackground
+        titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
