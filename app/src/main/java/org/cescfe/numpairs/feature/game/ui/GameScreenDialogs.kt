@@ -19,12 +19,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -53,6 +54,7 @@ import org.cescfe.numpairs.feature.game.presentation.StripItemEntryDialogUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperandOptionUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperandSelectionDialogUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState
+import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,7 +72,10 @@ internal fun TileOperandSelectionSheet(
             .semantics {
                 contentDescription = operandSheetContentDescription
             },
-        onDismissRequest = onDismiss
+        onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(topStart = NumPairsComponents.LargeRadius, topEnd = NumPairsComponents.LargeRadius),
+        containerColor = NumPairsComponents.raisedSurfaceColor(),
+        contentColor = MaterialTheme.colorScheme.onSurface
     ) {
         Text(
             text = operandSheetContentDescription,
@@ -111,10 +116,7 @@ internal fun TileOperandSelectionSheet(
 @Composable
 private fun OperandSelectionOption(operand: TileOperandOptionUiState, onConfirm: (Int) -> Unit) {
     val operandSelectionLabel = operand.value.toString()
-    val optionColors = operandOptionColors(
-        enabled = operand.isSelectable,
-        colorScheme = MaterialTheme.colorScheme
-    )
+    val optionColors = operandOptionColors(enabled = operand.isSelectable)
 
     Box(
         modifier = Modifier
@@ -136,13 +138,10 @@ private fun OperandSelectionOption(operand: TileOperandOptionUiState, onConfirm:
                     .semantics {
                         contentDescription = operandSelectionLabel
                     },
-                shape = RoundedCornerShape(TILE_OPERAND_SHEET_OPTION_CORNER_RADIUS),
+                shape = NumPairsComponents.LargeShape,
                 color = optionColors.container,
                 contentColor = optionColors.content,
-                border = BorderStroke(
-                    width = 1.dp,
-                    color = optionColors.border
-                )
+                border = optionColors.border
             ) {
                 Box(
                     modifier = Modifier.fillMaxWidth(),
@@ -189,7 +188,6 @@ private fun OperandUsageHintBadge(
     stripEntryId: Int,
     enabled: Boolean = true
 ) {
-    val colorScheme = MaterialTheme.colorScheme
     val hintContentDescription = when (operator) {
         Operator.Addition -> stringResource(R.string.tile_operand_usage_addition_hint)
         Operator.Multiplication -> stringResource(R.string.tile_operand_usage_multiplication_hint)
@@ -198,10 +196,9 @@ private fun OperandUsageHintBadge(
     val hintStateDescription = stringResource(usageState.stateDescriptionResId)
     val resolvedColors = baseHintBadgeColors(
         usageState = usageState,
-        operator = operator,
-        colorScheme = colorScheme
+        operator = operator
     ).let { colors ->
-        if (enabled) colors else colors.disabled(colorScheme)
+        if (enabled) colors else colors.disabled()
     }
 
     Surface(
@@ -214,7 +211,7 @@ private fun OperandUsageHintBadge(
         shape = RoundedCornerShape(TILE_OPERAND_HINT_CORNER_RADIUS),
         color = resolvedColors.container,
         contentColor = resolvedColors.content,
-        border = BorderStroke(width = 1.dp, color = resolvedColors.border)
+        border = resolvedColors.border
     ) {
         Text(
             text = operator.symbol,
@@ -227,50 +224,50 @@ private fun OperandUsageHintBadge(
     }
 }
 
-private data class HintBadgeColors(val container: Color, val content: Color, val border: Color)
+private data class HintBadgeColors(val container: Color, val content: Color, val border: BorderStroke)
 
-private fun baseHintBadgeColors(
-    usageState: OperandUsageHintState,
-    operator: Operator,
-    colorScheme: ColorScheme
-): HintBadgeColors = when (usageState) {
-    OperandUsageHintState.AVAILABLE -> HintBadgeColors(
-        container = colorScheme.surfaceContainerHighest,
-        content = colorScheme.onSurfaceVariant,
-        border = colorScheme.outline
-    )
-
-    OperandUsageHintState.USED -> when (operator) {
-        Operator.Addition,
-        Operator.Multiplication -> HintBadgeColors(
-            container = colorScheme.primaryContainer,
-            content = colorScheme.onPrimaryContainer,
-            border = colorScheme.primary
+@Composable
+private fun baseHintBadgeColors(usageState: OperandUsageHintState, operator: Operator): HintBadgeColors =
+    when (usageState) {
+        OperandUsageHintState.AVAILABLE -> HintBadgeColors(
+            container = NumPairsComponents.subtleSurfaceColor(),
+            content = MaterialTheme.colorScheme.onSurfaceVariant,
+            border = NumPairsComponents.subtleBorder()
         )
 
-        Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
-    }
-}
+        OperandUsageHintState.USED -> when (operator) {
+            Operator.Addition,
+            Operator.Multiplication -> HintBadgeColors(
+                container = NumPairsComponents.successContainerColor(),
+                content = NumPairsComponents.successContentColor(),
+                border = NumPairsComponents.focusBorder()
+            )
 
-private fun HintBadgeColors.disabled(colorScheme: ColorScheme): HintBadgeColors = HintBadgeColors(
-    container = lerp(container, colorScheme.surfaceContainerHigh, 0.35f),
-    content = lerp(content, colorScheme.onSurface, 0.20f),
-    border = lerp(border, colorScheme.outline, 0.35f)
+            Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
+        }
+    }
+
+@Composable
+private fun HintBadgeColors.disabled(): HintBadgeColors = HintBadgeColors(
+    container = lerp(container, NumPairsComponents.raisedSurfaceColor(), 0.35f),
+    content = lerp(content, MaterialTheme.colorScheme.onSurfaceVariant, 0.25f),
+    border = NumPairsComponents.subtleBorder()
 )
 
-private data class OperandOptionColors(val container: Color, val content: Color, val border: Color)
+private data class OperandOptionColors(val container: Color, val content: Color, val border: BorderStroke)
 
-private fun operandOptionColors(enabled: Boolean, colorScheme: ColorScheme): OperandOptionColors = if (enabled) {
+@Composable
+private fun operandOptionColors(enabled: Boolean): OperandOptionColors = if (enabled) {
     OperandOptionColors(
-        container = colorScheme.surface,
-        content = colorScheme.onSurface,
-        border = colorScheme.outline
+        container = NumPairsComponents.raisedSurfaceColor(),
+        content = MaterialTheme.colorScheme.onSurface,
+        border = NumPairsComponents.defaultBorder()
     )
 } else {
     OperandOptionColors(
-        container = colorScheme.surfaceContainerHigh,
-        content = colorScheme.onSurfaceVariant,
-        border = colorScheme.outline
+        container = NumPairsComponents.subtleSurfaceColor(),
+        content = MaterialTheme.colorScheme.onSurfaceVariant,
+        border = NumPairsComponents.subtleBorder()
     )
 }
 
@@ -325,8 +322,15 @@ internal fun StripItemEntryDialog(
     AlertDialog(
         modifier = Modifier.testTag(GameScreenTestTags.STRIP_ENTRY_DIALOG),
         onDismissRequest = onDismiss,
+        shape = NumPairsComponents.LargeShape,
+        containerColor = NumPairsComponents.raisedSurfaceColor(),
+        titleContentColor = MaterialTheme.colorScheme.onSurface,
+        textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         title = {
-            Text(text = stringResource(R.string.strip_entry_dialog_title))
+            Text(
+                text = stringResource(R.string.strip_entry_dialog_title),
+                style = MaterialTheme.typography.titleMedium
+            )
         },
         text = {
             OutlinedTextField(
@@ -347,6 +351,17 @@ internal fun StripItemEntryDialog(
                 isError = isInputInvalid,
                 singleLine = true,
                 textStyle = NumPairsTextStyles.NumericInput,
+                shape = NumPairsComponents.MediumShape,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    cursorColor = MaterialTheme.colorScheme.primary,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    errorContainerColor = MaterialTheme.colorScheme.surface
+                ),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
         },
@@ -354,7 +369,9 @@ internal fun StripItemEntryDialog(
             Button(
                 onClick = { onConfirm(confirmedValue ?: return@Button) },
                 enabled = confirmedValue != null,
-                modifier = Modifier.testTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM)
+                modifier = Modifier.testTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM),
+                shape = NumPairsComponents.MediumShape,
+                colors = NumPairsComponents.primaryButtonColors()
             ) {
                 Text(text = stringResource(R.string.confirm))
             }
@@ -362,7 +379,10 @@ internal fun StripItemEntryDialog(
         dismissButton = {
             TextButton(
                 onClick = onDismiss,
-                modifier = Modifier.testTag(GameScreenTestTags.STRIP_ENTRY_CANCEL)
+                modifier = Modifier.testTag(GameScreenTestTags.STRIP_ENTRY_CANCEL),
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             ) {
                 Text(text = stringResource(R.string.cancel))
             }
@@ -386,7 +406,12 @@ internal fun TileOperatorSelectionMenu(
             .semantics {
                 contentDescription = operatorMenuContentDescription
             },
-        offset = DpOffset(x = 0.dp, y = 4.dp)
+        offset = DpOffset(x = 0.dp, y = 4.dp),
+        shape = NumPairsComponents.LargeShape,
+        containerColor = NumPairsComponents.raisedSurfaceColor(),
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
+        border = NumPairsComponents.subtleBorder()
     ) {
         Row(
             modifier = Modifier
@@ -409,23 +434,20 @@ internal fun TileOperatorSelectionMenu(
                         },
                     shape = RoundedCornerShape(TILE_OPERATOR_MENU_CORNER_RADIUS),
                     color = if (isSelected) {
-                        MaterialTheme.colorScheme.primaryContainer
+                        NumPairsComponents.successContainerColor()
                     } else {
-                        MaterialTheme.colorScheme.surface
+                        NumPairsComponents.subtleSurfaceColor()
                     },
                     contentColor = if (isSelected) {
-                        MaterialTheme.colorScheme.onPrimaryContainer
+                        NumPairsComponents.successContentColor()
                     } else {
-                        MaterialTheme.colorScheme.onSurface
+                        MaterialTheme.colorScheme.onSurfaceVariant
                     },
-                    border = BorderStroke(
-                        width = 1.dp,
-                        color = if (isSelected) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.outlineVariant
-                        }
-                    )
+                    border = if (isSelected) {
+                        NumPairsComponents.focusBorder()
+                    } else {
+                        NumPairsComponents.subtleBorder()
+                    }
                 ) {
                     Text(
                         text = operator.symbol,
