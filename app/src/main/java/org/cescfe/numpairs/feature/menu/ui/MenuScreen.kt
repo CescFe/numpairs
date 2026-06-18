@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
@@ -68,9 +69,7 @@ fun MenuScreen(
                         shape = NumPairsComponents.MediumShape,
                         colors = NumPairsComponents.primaryButtonColors(),
                     ) {
-                        Text(
-                            text = stringResource(R.string.menu_four_pairs_button)
-                        )
+                        MenuButtonText(text = stringResource(R.string.menu_four_pairs_button))
                     }
                     Button(
                         onClick = onTutorialSelected,
@@ -82,9 +81,7 @@ fun MenuScreen(
                         colors = NumPairsComponents.secondaryButtonColors(),
                         border = NumPairsComponents.secondaryButtonBorder(),
                     ) {
-                        Text(
-                            text = stringResource(R.string.menu_tutorial_button)
-                        )
+                        MenuButtonText(text = stringResource(R.string.menu_tutorial_button))
                     }
                 }
             }
@@ -105,6 +102,17 @@ private fun MenuScreenTopBar() {
     )
 }
 
+@Composable
+private fun MenuButtonText(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelLarge.copy(
+            fontSize = MENU_BUTTON_TEXT_SIZE,
+            lineHeight = MENU_BUTTON_TEXT_LINE_HEIGHT
+        )
+    )
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun MenuScreenPreview() {
@@ -114,3 +122,5 @@ private fun MenuScreenPreview() {
 }
 
 private val MENU_CONTENT_MAX_WIDTH = 360.dp
+private val MENU_BUTTON_TEXT_SIZE = 22.sp
+private val MENU_BUTTON_TEXT_LINE_HEIGHT = 36.sp
