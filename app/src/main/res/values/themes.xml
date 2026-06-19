@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.NumPairs" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.NumPairs" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/num_pairs_splash_background</item>
+        <item name="android:colorAccent">@color/num_pairs_accent</item>
+        <item name="android:navigationBarColor">@color/num_pairs_splash_background</item>
+        <item name="android:statusBarColor">@color/num_pairs_splash_background</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
 
     <style name="Theme.NumPairs.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_numpairs_splash</item>
         <item name="windowSplashScreenBackground">@color/num_pairs_splash_background</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/num_pairs_splash_background</item>
         <item name="postSplashScreenTheme">@style/Theme.NumPairs</item>
     </style>
 </resources>
