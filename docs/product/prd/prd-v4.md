@@ -4,7 +4,8 @@
 
 - Status: canonical PRD for the `v4 - Visual Design System & UI Refinement` milestone
 - Supersedes: `docs/product/prd/prd-v3.md`
-- Current implementation baseline: `v3 - Guided Play & Rules Onboarding`
+- Feature baseline inherited from: `v3 - Guided Play & Rules Onboarding`
+- Current visual implementation direction: one fixed NumPairs premium theme, independent from Android dynamic color and system light/dark theme
 - Related references:
   - `README.md`
   - `docs/product/roadmap.md`
@@ -21,6 +22,8 @@
 This document defines the product baseline that v4 is intended to establish.
 
 `prd-v0.md`, `prd-v1.md`, `prd-v2.md`, and `prd-v3.md` remain in the repository as historical milestone snapshots. `prd-v4.md` is the canonical reference for the current NumPairs product direction, scope, and documentation alignment.
+
+Implementation alignment note: the v4 app theme is now implemented through `NumPairsTheme` as one fixed dark-leaning NumPairs color scheme. The app should not branch its primary UI presentation through Android dynamic color or system light/dark theme switching.
 
 ---
 
@@ -93,7 +96,9 @@ That baseline currently includes:
 - first-pass visual identity documentation for the NumPairs logo and launcher direction
 - documented interaction behavior and layout decisions
 
-That baseline does not yet include:
+During v4 implementation, the visual-theme gap above is resolved by the fixed NumPairs theme. The startup window, splash colors, Compose `MaterialTheme`, and shared component defaults should remain aligned to the single-theme direction.
+
+At the start of v4, that baseline did not yet include:
 
 - a NumPairs-specific visual design system for app UI
 - documented app-level color roles beyond the initial identity direction
@@ -243,7 +248,7 @@ That baseline does not yet include:
 
 - `README.md` should identify `prd-v4.md` as the canonical product reference while treating v3 as the implemented baseline
 - `docs/product/roadmap.md` should treat `v3 - Guided Play & Rules Onboarding` as the completed baseline and `v4 - Visual Design System & UI Refinement` as the active milestone
-- `docs/product/visual-design-system.md` should define v4 visual principles, design decisions, reusable component roles, accessibility expectations, and open design questions
+- `docs/product/visual-design-system.md` should define v4 visual principles, final theme decisions, reusable component roles, accessibility expectations, QA notes, and any remaining open design questions
 - `docs/product/visual-direction.md` should remain the source of truth for the v1 logo, launcher icon, and shape-first identity rationale
 - `docs/product/ux-decisions.md` should remain the place for layout rationale that applies to the puzzle screen
 - `docs/ui-behavior.md` should remain the source of truth for in-puzzle interaction behavior and should only change if v4 visual refinement changes user-facing behavior
