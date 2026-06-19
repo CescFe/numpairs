@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="num_pairs_splash_background">#FF2F332A</color>
-    <color name="num_pairs_splash_logo">#FFF2EDE2</color>
+    <color name="num_pairs_splash_logo">#FF9CBD7B</color>
     <color name="num_pairs_accent">#FF9CBD7B</color>
 </resources>
