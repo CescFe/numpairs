@@ -60,14 +60,12 @@ fun MenuScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Button(
+                    NumPairsComponents.PrimaryCtaButton(
                         onClick = onFourPairsSelected,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(NumPairsComponents.ButtonHeight)
-                            .testTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON),
-                        shape = NumPairsComponents.MediumShape,
-                        colors = NumPairsComponents.primaryButtonColors()
+                            .testTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
                     ) {
                         MenuButtonText(text = stringResource(R.string.menu_four_pairs_button))
                     }
