@@ -136,11 +136,12 @@ The NumPairs UI should use a restrained premium dark-leaning color strategy:
 - dark raised surfaces
 - warm off-white primary text
 - muted warm gray secondary text
-- one jade-green accent color
+- one jade-green brand and action accent color
+- limited supporting state colors for player-owned focus and tutorial emphasis
 - soft red for error and invalid states
 - neutral gray for hidden and placeholder states
 
-The app should avoid introducing multiple primary colors. The jade accent should carry brand personality, primary actions, interactive highlights, selected states, positive states, and success feedback.
+The app should avoid introducing multiple primary colors. The jade accent should carry brand personality, primary actions, selected states, positive states, and success feedback. Supporting state colors should stay narrow and functional rather than becoming alternate brand accents.
 
 ### Core Color Roles
 
@@ -156,10 +157,54 @@ Recommended roles:
 - `textSecondary`: muted warm gray supporting text
 - `accent`: jade green brand and interaction accent
 - `accentSoft`: lighter jade treatment for selection, active focus, and subtle highlights
+- `focus`: cool focus treatment for player-owned or currently edited values
+- `tutorialHighlight`: warm instructional highlight for guided tutorial focus
 - `error`: soft red for invalid tiles and error feedback
 - `errorSoft`: subtle red container or background treatment
 - `hidden`: neutral gray for unknown values and placeholder states
 - `borderSubtle`: low-contrast border for quiet component separation
+
+### Final Implemented Palette
+
+Implementation source:
+
+- `app/src/main/java/org/cescfe/numpairs/ui/theme/Color.kt`
+- `app/src/main/java/org/cescfe/numpairs/ui/theme/Theme.kt`
+- `app/src/main/res/values/colors.xml`
+
+Final v4 values:
+
+- App background: `#2F332A`
+- Surface base: `#3A3F34`
+- Surface raised: `#454B3E`
+- Surface subtle: `#363B31`
+- Text primary: `#F2EDE2`
+- Text secondary: `#C8C1B4`
+- Border: `#5B6253`
+- Border subtle: `#4A5145`
+- Jade accent: `#9CBD7B`
+- Jade accent content: `#25301D`
+- Jade soft container: `#46583A`
+- Jade soft content: `#E3F0D4`
+- Player-owned focus: `#AFC7E8`
+- Player-owned focus content: `#162538`
+- Tutorial highlight: `#D7B56D`
+- Tutorial highlight content: `#33270E`
+- Error: `#E58A7A`
+- Error soft container: `#5A3733`
+- Error soft content: `#FFDAD4`
+- Scrim: `#CC000000`
+
+Material role mapping:
+
+- `primary` uses jade accent.
+- `primaryContainer` uses jade soft and is reused for success containers.
+- `secondary` uses player-owned focus while `secondaryContainer` stays neutral/subtle.
+- `tertiary` uses tutorial highlight for guided focus borders.
+- `error` and `errorContainer` use the soft red family.
+- `background`, `surface`, `surfaceVariant`, and `surfaceContainer*` use the warm neutral surface family.
+
+The native splash and window background use the same app background, and launcher/splash accent resources use the jade accent.
 
 ### Gameplay State Roles
 
@@ -176,7 +221,8 @@ Gameplay states should map consistently to the core color strategy:
 
 ### Color Usage Rules
 
-- Use one accent color only.
+- Use jade as the single brand and action accent.
+- Keep focus blue, tutorial highlight, and error red limited to their state roles.
 - Use color sparingly.
 - Do not use color as the only state cue.
 - Keep result numbers high contrast in every tile state.
@@ -254,6 +300,51 @@ Implementation notes:
 - Preserve readable line heights.
 - Test one, two, and three-digit values.
 - Test Android font scaling for puzzle-critical text.
+
+### Final Implemented Typography
+
+Implementation source:
+
+- `app/src/main/java/org/cescfe/numpairs/ui/theme/Type.kt`
+- `app/src/main/java/org/cescfe/numpairs/ui/theme/NumPairsTextStyles.kt`
+- `app/src/main/res/font/`
+
+Final font families:
+
+- General UI: Inter, bundled as regular, medium, semibold, and bold weights.
+- Puzzle typography: JetBrains Mono, bundled as regular, medium, semibold, and bold weights.
+
+Material typography baseline:
+
+- `displayLarge`: Inter bold, `40sp` / `48sp`
+- `displayMedium`: Inter bold, `36sp` / `44sp`
+- `displaySmall`: Inter bold, `32sp` / `40sp`
+- `headlineLarge`: Inter semibold, `32sp` / `40sp`
+- `headlineMedium`: Inter semibold, `28sp` / `34sp`
+- `headlineSmall`: Inter semibold, `24sp` / `32sp`
+- `titleLarge`: Inter semibold, `22sp` / `28sp`
+- `titleMedium`: Inter semibold, `18sp` / `24sp`
+- `titleSmall`: Inter medium, `14sp` / `20sp`
+- `bodyLarge`: Inter regular, `16sp` / `24sp`
+- `bodyMedium`: Inter regular, `14sp` / `20sp`
+- `bodySmall`: Inter regular, `12sp` / `16sp`
+- `labelLarge`: Inter semibold, `15sp` / `20sp`
+- `labelMedium`: Inter medium, `13sp` / `18sp`
+- `labelSmall`: Inter medium, `11sp` / `16sp`
+
+Puzzle text styles:
+
+- Tile expression: JetBrains Mono semibold, `18sp` / `24sp`
+- Compact tile expression: JetBrains Mono medium, `14sp` / `20sp`, used for operands with three or more characters
+- Tile result: JetBrains Mono semibold, `32sp` / `48sp`
+- Strip value: JetBrains Mono medium, `14sp` / `20sp`
+- Operand option: JetBrains Mono semibold, `18sp` / `24sp`
+- Numeric input: JetBrains Mono regular, `16sp` / `24sp`
+- Operator option: JetBrains Mono regular, `16sp` / `24sp`
+- Selected operator option: JetBrains Mono semibold, `16sp` / `24sp`
+- Puzzle micro-label: JetBrains Mono medium, `11sp` / `16sp`
+
+Puzzle-critical text uses `sp` units, not viewport-scaled values. Tile operands switch to the compact expression style for three-digit values to preserve legibility inside bounded tile widths.
 
 ---
 
@@ -461,7 +552,8 @@ Requirements:
 
 ## Visual Consistency Rules
 
-- Use one accent color only.
+- Use jade as the single brand and action accent.
+- Keep supporting state colors limited to focus, tutorial highlight, and error roles.
 - Use color sparingly.
 - Rely on spacing before decoration.
 - Rely on typography before color.
@@ -493,6 +585,48 @@ Likely implementation areas:
 - `app/src/main/java/org/cescfe/numpairs/feature/tutorial/`
 
 The design system should not require a parallel UI framework. It should make the existing Compose implementation more coherent.
+
+---
+
+## v4 Visual QA Record
+
+This QA record captures the documentation and static implementation review for the v4 visual baseline. It intentionally does not represent an emulator or physical-device run.
+
+Review scope:
+
+- Date: 2026-06-19
+- Method: static review of Compose implementation, theme tokens, component defaults, previews, and existing UI test fixtures
+- Device/emulator execution: not performed
+- Reason device/emulator execution was not performed: this pass is constrained to avoid running anything against an emulator or physical device
+
+Main flows checked by implementation review:
+
+- Menu: `MenuScreen` uses the fixed `NumPairsTheme`, one primary generated `4 Pairs` CTA, one lower-emphasis Tutorial action, centered bounded content, and the jade app title.
+- Tutorial: `TutorialRoute` and `TutorialOverlayHost` reuse the same themed game surface and instructional overlay path instead of introducing a separate visual language.
+- Generated `4 Pairs`: `FourPairsRoute` uses the shared `GameScreen`, fixed theme, completion actions, Rules Helper entry point, and Solving Tips entry point.
+- Rules Helper: `RulesHelperDialog` uses the raised surface, shared shape, Inter content hierarchy, themed close action, scroll fades, and a low-noise Tutorial action.
+- Solving Tips: `SolvingTipsDialog` mirrors the Rules Helper surface, content hierarchy, close action, scroll fades, and practice action.
+- Selectors: operand selection, operator selection, and strip entry dialog use shared raised/subtle surfaces, rounded shapes, monospaced numeric text, state borders, and semantic descriptions.
+- Invalid feedback: incorrect tiles use error container, error border, error expression color, preserved result contrast, and state descriptions; invalid whole-puzzle feedback uses the error banner.
+- Success overlay: solved completion uses jade success container, scrim, concise confirmation copy, and themed replay/menu actions.
+
+Narrow-screen readability review:
+
+- Menu content is bounded to `360dp`, fills narrower widths, and keeps actions at the shared `52dp` height.
+- Game content scrolls vertically, uses `16dp` horizontal screen padding, and keeps the strip above the board.
+- Board tiles reflow by available width and stay within `112dp` to `144dp`, with `12dp` gaps and centered rows.
+- Tile expression slots keep stable widths and minimum heights; operator slots stay fixed at `28dp`.
+- The number strip remains a compact single row of eight chips with `48dp` minimum chip height and `4dp` gaps.
+- Dialog and helper content uses constrained scroll regions (`420dp` helper content max height, `320dp` operand sheet max height).
+- The tightest narrow-screen area remains the single-row number strip with three-digit labels; keep it on the visual QA watch list for any future device pass.
+
+Increased font-scale review for puzzle-critical text:
+
+- Puzzle-critical text uses `sp` values and shared JetBrains Mono styles rather than viewport-scaled typography.
+- Three-character tile operands switch to the compact tile expression style.
+- Tile result typography remains the strongest numeric emphasis at `32sp` / `48sp`.
+- Strip chips keep a `48dp` minimum touch height, and tile expression slots keep a `40dp` minimum height.
+- Existing UI test fixtures include large operand coverage for three-digit tile operands and stable tap target bounds, but this pass did not execute those tests on a device.
 
 ---
 
@@ -574,9 +708,6 @@ Rationale:
 
 ## Open Decisions
 
-- Exact jade green, warm neutral, text, gray, and soft red values
-- Exact Inter and JetBrains Mono integration approach and fallback behavior
-- Exact typography tuning for tile expressions and results
 - Whether to introduce a small NumPairs-specific theme wrapper beyond Material `ColorScheme`
 - Whether to keep all current tile and chip corner radii or normalize them further
 - Whether screenshot or golden testing is worth adding during v4
