@@ -28,7 +28,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 
 object NumPairsComponents {
-    val SmallRadius = 10.dp
     val MediumRadius = 14.dp
     val LargeRadius = 20.dp
 
@@ -37,7 +36,6 @@ object NumPairsComponents {
     val FocusBorderWidth = 3.dp
 
     val ButtonHeight = 52.dp
-    val IconButtonSize = 44.dp
 
     val MediumShape: Shape
         get() = RoundedCornerShape(MediumRadius)
