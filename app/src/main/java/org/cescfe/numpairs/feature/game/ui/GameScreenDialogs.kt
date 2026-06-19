@@ -18,7 +18,6 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -366,12 +365,10 @@ internal fun StripItemEntryDialog(
             )
         },
         confirmButton = {
-            Button(
-                onClick = { onConfirm(confirmedValue ?: return@Button) },
+            NumPairsComponents.PrimaryCtaButton(
+                onClick = { confirmedValue?.let(onConfirm) },
                 enabled = confirmedValue != null,
-                modifier = Modifier.testTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM),
-                shape = NumPairsComponents.MediumShape,
-                colors = NumPairsComponents.primaryButtonColors()
+                modifier = Modifier.testTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM)
             ) {
                 Text(text = stringResource(R.string.confirm))
             }

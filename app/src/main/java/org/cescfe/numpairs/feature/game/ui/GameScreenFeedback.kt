@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -112,13 +111,11 @@ internal fun SuccessOverlay(onDismiss: () -> Unit, completionActions: GameComple
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Button(
+                        NumPairsComponents.PrimaryCtaButton(
                             onClick = actions.onNewPuzzleRequested,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .testTag(GameScreenTestTags.SUCCESS_OVERLAY_NEW_PUZZLE),
-                            shape = NumPairsComponents.MediumShape,
-                            colors = NumPairsComponents.primaryButtonColors()
+                                .testTag(GameScreenTestTags.SUCCESS_OVERLAY_NEW_PUZZLE)
                         ) {
                             Text(text = stringResource(R.string.success_overlay_new_puzzle_button))
                         }
