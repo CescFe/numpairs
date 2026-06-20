@@ -2,10 +2,12 @@ package org.cescfe.numpairs.feature.game.ui
 
 import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
 import org.cescfe.numpairs.domain.puzzle.OperandSlot
+import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.StripEntryRange
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
+import org.cescfe.numpairs.feature.game.presentation.RuleConflictUiState
 import org.cescfe.numpairs.feature.game.presentation.StripItemEntryDialogMode
 import org.cescfe.numpairs.feature.game.presentation.StripItemEntryDialogUiState
 import org.cescfe.numpairs.feature.game.presentation.StripItemUiState
@@ -136,6 +138,54 @@ internal fun repeatedOperandSelectorUiState(): GameUiState = GameUiState.from(in
         )
     )
 )
+
+internal fun operandSelectorUsageHintVisualStateUiState(operatorContext: Operator = Operator.ADDITION): GameUiState =
+    GameUiState.from(initialPuzzle).copy(
+        tileOperandSelectionDialog = TileOperandSelectionDialogUiState(
+            tileIndex = 1,
+            slot = OperandSlot.LEFT,
+            availableOperands = listOf(
+                TileOperandOptionUiState(
+                    stripEntryId = 0,
+                    value = 2,
+                    additionUsed = false,
+                    multiplicationUsed = false,
+                    isSelectable = true
+                ),
+                TileOperandOptionUiState(
+                    stripEntryId = 1,
+                    value = 3,
+                    additionUsed = true,
+                    multiplicationUsed = false,
+                    isSelectable = true
+                ),
+                TileOperandOptionUiState(
+                    stripEntryId = 2,
+                    value = 5,
+                    additionUsed = true,
+                    multiplicationUsed = true,
+                    isSelectable = true
+                ),
+                TileOperandOptionUiState(
+                    stripEntryId = 3,
+                    value = 7,
+                    additionUsed = false,
+                    multiplicationUsed = false,
+                    isSelectable = true,
+                    additionRuleConflicts = setOf(RuleConflictUiState.DUPLICATE_OPERATOR_USAGE)
+                ),
+                TileOperandOptionUiState(
+                    stripEntryId = 4,
+                    value = 11,
+                    additionUsed = false,
+                    multiplicationUsed = false,
+                    isSelectable = true,
+                    multiplicationRuleConflicts = setOf(RuleConflictUiState.MISMATCHED_PAIRING)
+                )
+            ),
+            operatorContext = operatorContext
+        )
+    )
 
 internal fun stripEntryDialogUiState(validRange: StripEntryRange, initialValue: String = ""): GameUiState =
     GameUiState.from(initialPuzzle).copy(

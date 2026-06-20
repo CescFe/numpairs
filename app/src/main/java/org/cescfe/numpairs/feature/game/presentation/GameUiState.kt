@@ -100,7 +100,8 @@ data class TileOperatorSelectionDialogUiState(
 data class TileOperandSelectionDialogUiState(
     val tileIndex: Int,
     val slot: OperandSlot,
-    val availableOperands: List<TileOperandOptionUiState>
+    val availableOperands: List<TileOperandOptionUiState>,
+    val operatorContext: Operator = Operator.Hidden
 )
 
 data class TileOperandOptionUiState(

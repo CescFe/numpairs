@@ -108,6 +108,8 @@ internal object GameUiStateFactory {
             return null
         }
 
+        val targetTile = puzzle.board.tiles[target.tileIndex]
+
         return TileOperandSelectionDialogUiState(
             tileIndex = target.tileIndex,
             slot = target.slot,
@@ -130,7 +132,8 @@ internal object GameUiStateFactory {
                         operator = Operator.MULTIPLICATION
                     ).map { conflict -> conflict.toUiState() }.toSet()
                 )
-            }
+            },
+            operatorContext = targetTile.expression.operator
         )
     }
 }
