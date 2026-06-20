@@ -11,6 +11,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -287,17 +289,11 @@ class GameScreenRobot(
         operator: Operator,
         @StringRes stateDescriptionResId: Int
     ): GameScreenRobot = apply {
-        interactions
-            .onNodeWithTag(
-                GameScreenTestTags.tileOperandUsageHint(entryId = entryId, operator = operator),
-                useUnmergedTree = true
-            )
-            .assert(
-                SemanticsMatcher.expectValue(
-                    SemanticsProperties.StateDescription,
-                    string(stateDescriptionResId)
-                )
-            )
+        assertUsageIndicator(
+            testTag = GameScreenTestTags.tileOperandUsageHint(entryId = entryId, operator = operator),
+            operator = operator,
+            stateDescriptionResId = stateDescriptionResId
+        )
     }
 
     fun assertStripUsageIndicatorState(
@@ -305,17 +301,11 @@ class GameScreenRobot(
         operator: Operator,
         @StringRes stateDescriptionResId: Int
     ): GameScreenRobot = apply {
-        interactions
-            .onNodeWithTag(
-                GameScreenTestTags.stripUsageIndicator(index = index, operator = operator),
-                useUnmergedTree = true
-            )
-            .assert(
-                SemanticsMatcher.expectValue(
-                    SemanticsProperties.StateDescription,
-                    string(stateDescriptionResId)
-                )
-            )
+        assertUsageIndicator(
+            testTag = GameScreenTestTags.stripUsageIndicator(index = index, operator = operator),
+            operator = operator,
+            stateDescriptionResId = stateDescriptionResId
+        )
     }
 
     fun assertStripUsageIndicatorHidden(index: Int, operator: Operator): GameScreenRobot = apply {
@@ -467,6 +457,28 @@ class GameScreenRobot(
             )
     }
 
+    private fun assertUsageIndicator(testTag: String, operator: Operator, @StringRes stateDescriptionResId: Int) {
+        assertContentDescription(
+            testTag = testTag,
+            contentDescription = usageIndicatorContentDescription(operator),
+            useUnmergedTree = true
+        )
+        interactions
+            .onNodeWithTag(testTag, useUnmergedTree = true)
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.StateDescription,
+                    string(stateDescriptionResId)
+                )
+            )
+        interactions
+            .onNode(
+                hasTestTag(testTag).and(hasAnyDescendant(hasText(operator.symbol))),
+                useUnmergedTree = true
+            )
+            .assertIsDisplayed()
+    }
+
     private fun assertHighlighted(testTag: String, useUnmergedTree: Boolean = false) {
         interactions
             .onNodeWithTag(testTag, useUnmergedTree = useUnmergedTree)
@@ -485,6 +497,14 @@ class GameScreenRobot(
                 SemanticsMatcher.keyNotDefined(GameHighlightedKey)
             )
     }
+
+    private fun usageIndicatorContentDescription(operator: Operator): String = string(
+        when (operator) {
+            Operator.Addition -> R.string.tile_operand_usage_addition_hint
+            Operator.Multiplication -> R.string.tile_operand_usage_multiplication_hint
+            Operator.Hidden -> error("Hidden operator does not expose operand usage indicators.")
+        }
+    )
 
     private fun string(@StringRes stringResId: Int, vararg formatArgs: Any): String = if (formatArgs.isEmpty()) {
         activity.getString(stringResId)

@@ -188,20 +188,13 @@ private fun OperandSelectionOption(operand: TileOperandOptionUiState, onConfirm:
 private fun OperandUsageHintBadge(
     modifier: Modifier = Modifier,
     operator: Operator,
-    usageState: OperandUsageHintState,
+    usageState: OperandUsageIndicatorState,
     stripEntryId: Int,
     enabled: Boolean = true
 ) {
-    val hintContentDescription = when (operator) {
-        Operator.Addition -> stringResource(R.string.tile_operand_usage_addition_hint)
-        Operator.Multiplication -> stringResource(R.string.tile_operand_usage_multiplication_hint)
-        Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
-    }
+    val hintContentDescription = stringResource(operator.usageIndicatorContentDescriptionResId)
     val hintStateDescription = stringResource(usageState.stateDescriptionResId)
-    val resolvedColors = baseHintBadgeColors(
-        usageState = usageState,
-        operator = operator
-    ).let { colors ->
+    val resolvedColors = operandUsageIndicatorColors(usageState).let { colors ->
         if (enabled) colors else colors.disabled()
     }
 
@@ -218,7 +211,7 @@ private fun OperandUsageHintBadge(
         border = resolvedColors.border
     ) {
         Text(
-            text = operator.symbol,
+            text = operator.usageIndicatorSymbol,
             modifier = Modifier.padding(
                 horizontal = TILE_OPERAND_HINT_HORIZONTAL_PADDING,
                 vertical = TILE_OPERAND_HINT_VERTICAL_PADDING
@@ -228,31 +221,8 @@ private fun OperandUsageHintBadge(
     }
 }
 
-private data class HintBadgeColors(val container: Color, val content: Color, val border: BorderStroke)
-
 @Composable
-private fun baseHintBadgeColors(usageState: OperandUsageHintState, operator: Operator): HintBadgeColors =
-    when (usageState) {
-        OperandUsageHintState.AVAILABLE -> HintBadgeColors(
-            container = NumPairsComponents.subtleSurfaceColor(),
-            content = MaterialTheme.colorScheme.onSurfaceVariant,
-            border = NumPairsComponents.subtleBorder()
-        )
-
-        OperandUsageHintState.USED -> when (operator) {
-            Operator.Addition,
-            Operator.Multiplication -> HintBadgeColors(
-                container = NumPairsComponents.successContainerColor(),
-                content = NumPairsComponents.successContentColor(),
-                border = NumPairsComponents.focusBorder()
-            )
-
-            Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
-        }
-    }
-
-@Composable
-private fun HintBadgeColors.disabled(): HintBadgeColors = HintBadgeColors(
+private fun OperandUsageIndicatorColors.disabled(): OperandUsageIndicatorColors = OperandUsageIndicatorColors(
     container = lerp(container, NumPairsComponents.raisedSurfaceColor(), 0.35f),
     content = lerp(content, MaterialTheme.colorScheme.onSurfaceVariant, 0.25f),
     border = NumPairsComponents.subtleBorder()
@@ -275,23 +245,18 @@ private fun operandOptionColors(enabled: Boolean): OperandOptionColors = if (ena
     )
 }
 
-private fun TileOperandOptionUiState.usageStateFor(operator: Operator): OperandUsageHintState = when (operator) {
+private fun TileOperandOptionUiState.usageStateFor(operator: Operator): OperandUsageIndicatorState = when (operator) {
     Operator.Addition -> when {
-        additionUsed -> OperandUsageHintState.USED
-        else -> OperandUsageHintState.AVAILABLE
+        additionUsed -> OperandUsageIndicatorState.USED
+        else -> OperandUsageIndicatorState.AVAILABLE
     }
 
     Operator.Multiplication -> when {
-        multiplicationUsed -> OperandUsageHintState.USED
-        else -> OperandUsageHintState.AVAILABLE
+        multiplicationUsed -> OperandUsageIndicatorState.USED
+        else -> OperandUsageIndicatorState.AVAILABLE
     }
 
     Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
-}
-
-private enum class OperandUsageHintState(val stateDescriptionResId: Int) {
-    AVAILABLE(R.string.tile_operand_usage_state_available),
-    USED(R.string.tile_operand_usage_state_used)
 }
 
 @Composable
