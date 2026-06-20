@@ -51,27 +51,3 @@ internal data class AvailableNumberChipColors(
     val contentColor: Color,
     val border: BorderStroke
 )
-
-@Composable
-internal fun chipUsageIndicatorColors(used: Boolean): AvailableNumberChipUsageIndicatorColors = if (used) {
-    AvailableNumberChipUsageIndicatorColors(
-        containerColor = MaterialTheme.colorScheme.secondary,
-        contentColor = MaterialTheme.colorScheme.onSecondary,
-        border = BorderStroke(
-            width = NumPairsComponents.ThinBorderWidth,
-            color = MaterialTheme.colorScheme.secondary
-        )
-    )
-} else {
-    AvailableNumberChipUsageIndicatorColors(
-        containerColor = NumPairsComponents.subtleSurfaceColor(),
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        border = NumPairsComponents.subtleBorder()
-    )
-}
-
-internal data class AvailableNumberChipUsageIndicatorColors(
-    val containerColor: Color,
-    val contentColor: Color,
-    val border: BorderStroke
-)

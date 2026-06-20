@@ -25,8 +25,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.cescfe.numpairs.R
+import org.cescfe.numpairs.domain.puzzle.Operator
+import org.cescfe.numpairs.feature.game.ui.OperandUsageIndicatorState
 import org.cescfe.numpairs.feature.game.ui.gameHighlightSemantics
+import org.cescfe.numpairs.feature.game.ui.operandUsageIndicatorColors
+import org.cescfe.numpairs.feature.game.ui.usageIndicatorContentDescriptionResId
+import org.cescfe.numpairs.feature.game.ui.usageIndicatorSymbol
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
@@ -58,7 +62,7 @@ fun AvailableNumberChip(
     }
     val clickAction = onClick
     val chipModifier = modifier
-        .semantics(mergeDescendants = true) {
+        .semantics {
             contentDescription?.let { this.contentDescription = it }
             clickAction?.let { action ->
                 semanticOnClick(action = {
@@ -86,12 +90,12 @@ fun AvailableNumberChip(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 StripUsageIndicator(
-                    label = "+",
+                    operator = Operator.ADDITION,
                     used = additionUsed,
                     testTag = additionUsageIndicatorTestTag
                 )
                 StripUsageIndicator(
-                    label = "×",
+                    operator = Operator.MULTIPLICATION,
                     used = multiplicationUsed,
                     testTag = multiplicationUsageIndicatorTestTag
                 )
@@ -161,28 +165,29 @@ private fun AvailableNumberChipLabel(label: String) {
 }
 
 @Composable
-private fun StripUsageIndicator(label: String, used: Boolean, testTag: String?) {
-    val colors = chipUsageIndicatorColors(used = used)
-    val usageStateDescription = stringResource(
-        if (used) {
-            R.string.tile_operand_usage_state_used
-        } else {
-            R.string.tile_operand_usage_state_available
-        }
-    )
+private fun StripUsageIndicator(operator: Operator, used: Boolean, testTag: String?) {
+    val usageState = if (used) {
+        OperandUsageIndicatorState.USED
+    } else {
+        OperandUsageIndicatorState.AVAILABLE
+    }
+    val colors = operandUsageIndicatorColors(usageState)
+    val usageContentDescription = stringResource(operator.usageIndicatorContentDescriptionResId)
+    val usageStateDescription = stringResource(usageState.stateDescriptionResId)
     val tagModifier = testTag?.let { tag -> Modifier.testTag(tag) } ?: Modifier
 
     Surface(
         modifier = tagModifier.semantics {
+            contentDescription = usageContentDescription
             stateDescription = usageStateDescription
         },
         shape = RoundedCornerShape(999.dp),
-        color = colors.containerColor,
-        contentColor = colors.contentColor,
+        color = colors.container,
+        contentColor = colors.content,
         border = colors.border
     ) {
         Text(
-            text = label,
+            text = operator.usageIndicatorSymbol,
             modifier = Modifier.padding(
                 horizontal = CHIP_USAGE_INDICATOR_HORIZONTAL_PADDING,
                 vertical = CHIP_USAGE_INDICATOR_VERTICAL_PADDING
