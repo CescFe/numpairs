@@ -242,6 +242,15 @@ class GameUiStateFromTest {
             )
 
         val uiState = GameUiState.from(puzzle)
+        val selectorUiState = GameUiState.from(
+            puzzle = puzzle,
+            presentationState = GamePresentationState().showTileOperandSelection(
+                tileIndex = 2,
+                slot = OperandSlot.LEFT
+            )
+        )
+        val optionForThree = selectorUiState.tileOperandSelectionDialog!!.availableOperands
+            .first { operand -> operand.stripEntryId == 2 }
 
         assertEquals(
             setOf(RuleConflictUiState.DUPLICATE_OPERATOR_USAGE),
@@ -250,6 +259,10 @@ class GameUiStateFromTest {
         assertEquals(
             setOf(RuleConflictUiState.DUPLICATE_OPERATOR_USAGE),
             uiState.tiles[1].liveRuleConflicts
+        )
+        assertEquals(
+            setOf(RuleConflictUiState.DUPLICATE_OPERATOR_USAGE),
+            optionForThree.multiplicationRuleConflicts
         )
         assertNull(uiState.puzzleOutcome)
     }
@@ -286,7 +299,7 @@ class GameUiStateFromTest {
     }
 
     @Test
-    fun maps_predictive_mixed_rule_conflicts_to_operand_options_without_changing_selectability() {
+    fun maps_reactive_rule_conflicts_to_operand_options_without_changing_selectability() {
         val puzzle = liveRulePresentationPuzzle()
             .withTile(
                 index = 0,
@@ -321,10 +334,7 @@ class GameUiStateFromTest {
 
         assertTrue(optionForThree.isSelectable)
         assertEquals(
-            setOf(
-                RuleConflictUiState.DUPLICATE_OPERATOR_USAGE,
-                RuleConflictUiState.MISMATCHED_PAIRING
-            ),
+            setOf(RuleConflictUiState.MISMATCHED_PAIRING),
             optionForThree.multiplicationRuleConflicts
         )
     }
@@ -392,8 +402,7 @@ class GameUiStateFromTest {
                         value = 6,
                         additionUsed = true,
                         multiplicationUsed = false,
-                        isSelectable = true,
-                        additionRuleConflicts = setOf(RuleConflictUiState.DUPLICATE_OPERATOR_USAGE)
+                        isSelectable = true
                     ),
                     TileOperandOptionUiState(
                         stripEntryId = 1,

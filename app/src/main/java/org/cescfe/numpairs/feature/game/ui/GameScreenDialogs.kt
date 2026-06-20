@@ -111,7 +111,6 @@ internal fun TileOperandSelectionSheet(
             ) { operand ->
                 OperandSelectionOption(
                     operand = operand,
-                    operatorContext = dialogUiState.operatorContext,
                     onConfirm = onConfirm
                 )
             }
@@ -120,11 +119,7 @@ internal fun TileOperandSelectionSheet(
 }
 
 @Composable
-private fun OperandSelectionOption(
-    operand: TileOperandOptionUiState,
-    operatorContext: Operator,
-    onConfirm: (Int) -> Unit
-) {
+private fun OperandSelectionOption(operand: TileOperandOptionUiState, onConfirm: (Int) -> Unit) {
     val operandSelectionLabel = operand.value.toString()
     val optionColors = operandOptionColors(enabled = operand.isSelectable)
 
@@ -166,10 +161,7 @@ private fun OperandSelectionOption(
             }
             OperandUsageHintBadge(
                 operator = Operator.ADDITION,
-                visualState = operand.usageHintVisualStateFor(
-                    operator = Operator.ADDITION,
-                    operatorContext = operatorContext
-                ),
+                visualState = operand.usageHintVisualStateFor(Operator.ADDITION),
                 stripEntryId = operand.stripEntryId,
                 enabled = operand.isSelectable,
                 modifier = Modifier
@@ -180,10 +172,7 @@ private fun OperandSelectionOption(
             )
             OperandUsageHintBadge(
                 operator = Operator.MULTIPLICATION,
-                visualState = operand.usageHintVisualStateFor(
-                    operator = Operator.MULTIPLICATION,
-                    operatorContext = operatorContext
-                ),
+                visualState = operand.usageHintVisualStateFor(Operator.MULTIPLICATION),
                 stripEntryId = operand.stripEntryId,
                 enabled = operand.isSelectable,
                 modifier = Modifier
@@ -286,28 +275,25 @@ private fun operandOptionColors(enabled: Boolean): OperandOptionColors = if (ena
     )
 }
 
-private fun TileOperandOptionUiState.usageHintVisualStateFor(
-    operator: Operator,
-    operatorContext: Operator
-): OperandSelectorUsageHintVisualState = when {
-    operatorContext == operator &&
+private fun TileOperandOptionUiState.usageHintVisualStateFor(operator: Operator): OperandSelectorUsageHintVisualState =
+    when {
         ruleConflictsFor(operator).isNotEmpty() -> OperandSelectorUsageHintVisualState.RULE_CONFLICT
-    else -> when (operator) {
-        Operator.Addition -> when {
-            !additionUsed -> OperandSelectorUsageHintVisualState.AVAILABLE
-            multiplicationUsed -> OperandSelectorUsageHintVisualState.USED_EXHAUSTED
-            else -> OperandSelectorUsageHintVisualState.USED_WITH_PAIRING_AVAILABLE
-        }
+        else -> when (operator) {
+            Operator.Addition -> when {
+                !additionUsed -> OperandSelectorUsageHintVisualState.AVAILABLE
+                multiplicationUsed -> OperandSelectorUsageHintVisualState.USED_EXHAUSTED
+                else -> OperandSelectorUsageHintVisualState.USED_WITH_PAIRING_AVAILABLE
+            }
 
-        Operator.Multiplication -> when {
-            !multiplicationUsed -> OperandSelectorUsageHintVisualState.AVAILABLE
-            additionUsed -> OperandSelectorUsageHintVisualState.USED_EXHAUSTED
-            else -> OperandSelectorUsageHintVisualState.USED_WITH_PAIRING_AVAILABLE
-        }
+            Operator.Multiplication -> when {
+                !multiplicationUsed -> OperandSelectorUsageHintVisualState.AVAILABLE
+                additionUsed -> OperandSelectorUsageHintVisualState.USED_EXHAUSTED
+                else -> OperandSelectorUsageHintVisualState.USED_WITH_PAIRING_AVAILABLE
+            }
 
-        Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
+            Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
+        }
     }
-}
 
 private fun TileOperandOptionUiState.ruleConflictsFor(operator: Operator) = when (operator) {
     Operator.Addition -> additionRuleConflicts

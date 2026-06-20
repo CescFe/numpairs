@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.feature.game.presentation
 
+import org.cescfe.numpairs.domain.puzzle.Expression
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
@@ -8,7 +9,6 @@ import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.domain.puzzle.Tile
 import org.cescfe.numpairs.domain.puzzle.TileResolutionState
 import org.cescfe.numpairs.domain.puzzle.liveRuleConflictsByTile
-import org.cescfe.numpairs.domain.puzzle.liveRuleConflictsForCandidate
 import org.cescfe.numpairs.domain.puzzle.mismatchedSumProductPairingTileIndexes
 import org.cescfe.numpairs.domain.puzzle.operandSelectionChoicesFor
 import org.cescfe.numpairs.domain.puzzle.stripEntryUsageByOperator
@@ -26,6 +26,7 @@ internal object GameUiStateFactory {
         val liveRuleConflictsByTile = puzzle.liveRuleConflictsByTile.mapValues { (_, conflicts) ->
             conflicts.map { conflict -> conflict.toUiState() }.toSet()
         }
+        val liveRuleConflictsByUsage = puzzle.liveRuleConflictsByUsage(liveRuleConflictsByTile)
 
         return GameUiState(
             stripItems = puzzle.strip.entries.map { stripEntry ->
@@ -58,7 +59,8 @@ internal object GameUiStateFactory {
             ),
             tileOperandSelectionDialog = createTileOperandSelectionDialog(
                 puzzle = puzzle,
-                modal = presentationState.modal
+                modal = presentationState.modal,
+                liveRuleConflictsByUsage = liveRuleConflictsByUsage
             )
         )
     }
@@ -100,15 +102,14 @@ internal object GameUiStateFactory {
 
     private fun createTileOperandSelectionDialog(
         puzzle: Puzzle,
-        modal: GameModalState?
+        modal: GameModalState?,
+        liveRuleConflictsByUsage: Map<Pair<Int, Operator>, Set<RuleConflictUiState>>
     ): TileOperandSelectionDialogUiState? {
         val target = (modal as? GameModalState.TileOperandSelection)?.target ?: return null
 
         if (target.tileIndex !in puzzle.board.tiles.indices) {
             return null
         }
-
-        val targetTile = puzzle.board.tiles[target.tileIndex]
 
         return TileOperandSelectionDialogUiState(
             tileIndex = target.tileIndex,
@@ -119,21 +120,13 @@ internal object GameUiStateFactory {
             ).map { choice ->
                 TileOperandOptionUiState(
                     choice = choice,
-                    additionRuleConflicts = puzzle.liveRuleConflictsForCandidate(
-                        tileIndex = target.tileIndex,
-                        slot = target.slot,
-                        stripEntryId = choice.stripEntryId,
-                        operator = Operator.ADDITION
-                    ).map { conflict -> conflict.toUiState() }.toSet(),
-                    multiplicationRuleConflicts = puzzle.liveRuleConflictsForCandidate(
-                        tileIndex = target.tileIndex,
-                        slot = target.slot,
-                        stripEntryId = choice.stripEntryId,
-                        operator = Operator.MULTIPLICATION
-                    ).map { conflict -> conflict.toUiState() }.toSet()
+                    additionRuleConflicts = liveRuleConflictsByUsage[choice.stripEntryId to Operator.ADDITION]
+                        .orEmpty(),
+                    multiplicationRuleConflicts = liveRuleConflictsByUsage[
+                        choice.stripEntryId to Operator.MULTIPLICATION
+                    ].orEmpty()
                 )
-            },
-            operatorContext = targetTile.expression.operator
+            }
         )
     }
 }
@@ -149,4 +142,37 @@ private fun PuzzleCompletionState.mismatchedPairingTileIndexes(puzzle: Puzzle): 
         puzzle.mismatchedSumProductPairingTileIndexes.toSet()
     } else {
         emptySet()
+    }
+
+private fun Puzzle.liveRuleConflictsByUsage(
+    liveRuleConflictsByTile: Map<Int, Set<RuleConflictUiState>>
+): Map<Pair<Int, Operator>, Set<RuleConflictUiState>> = liveRuleConflictsByTile
+    .flatMap { (tileIndex, conflicts) ->
+        val tile = board.tiles.getOrNull(tileIndex) ?: return@flatMap emptyList()
+        val operator = tile.expression.operator
+
+        if (operator == Operator.Hidden) {
+            emptyList()
+        } else {
+            tile.expression.stripEntryIds.map { stripEntryId ->
+                stripEntryId to operator to conflicts
+            }
+        }
+    }
+    .groupBy(
+        keySelector = { (stripEntryIdAndOperator, _) -> stripEntryIdAndOperator },
+        valueTransform = { (_, conflicts) -> conflicts }
+    )
+    .mapValues { (_, conflictSets) -> conflictSets.flatten().toSet() }
+
+private val Expression.stripEntryIds: List<Int>
+    get() = listOfNotNull(
+        leftOperand.stripEntryId,
+        rightOperand.stripEntryId
+    )
+
+private val Expression.Operand.stripEntryId: Int?
+    get() = when (this) {
+        Expression.Operand.Hidden -> null
+        is Expression.Operand.Known -> stripEntryId
     }

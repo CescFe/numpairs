@@ -145,8 +145,8 @@ class GameScreenOperandSelectorTest : GameScreenTestHost() {
     }
 
     @Test
-    fun operandSelectorUsageHintBadgesExposePredictiveVisualStates() {
-        showUiStateFixture(operandSelectorUsageHintVisualStateUiState(operatorContext = Operator.ADDITION))
+    fun operandSelectorUsageHintBadgesExposeReactiveVisualStates() {
+        showUiStateFixture(operandSelectorUsageHintVisualStateUiState())
 
         screen
             .assertOperandUsageHintState(
@@ -190,13 +190,6 @@ class GameScreenOperandSelectorTest : GameScreenTestHost() {
                 visualState = OperandSelectorUsageHintVisualStateValues.RULE_CONFLICT
             )
             .assertOperandOptionEnabled(entryId = 3)
-    }
-
-    @Test
-    fun operandSelectorUsageHintBadgesExposeMultiplicationConflictWhenMultiplicationIsTheOperatorContext() {
-        showUiStateFixture(operandSelectorUsageHintVisualStateUiState(operatorContext = Operator.MULTIPLICATION))
-
-        screen
             .assertOperandUsageHintState(
                 entryId = 4,
                 operator = Operator.MULTIPLICATION,
@@ -208,33 +201,6 @@ class GameScreenOperandSelectorTest : GameScreenTestHost() {
                 visualState = OperandSelectorUsageHintVisualStateValues.RULE_CONFLICT
             )
             .assertOperandOptionEnabled(entryId = 4)
-    }
-
-    @Test
-    fun operandSelectorUsageHintBadgesDoNotRenderPredictiveConflictWithoutOperatorContext() {
-        showUiStateFixture(operandSelectorUsageHintVisualStateUiState(operatorContext = Operator.Hidden))
-
-        screen
-            .assertOperandUsageHintState(
-                entryId = 3,
-                operator = Operator.ADDITION,
-                stateDescriptionResId = R.string.tile_operand_usage_state_available
-            )
-            .assertOperandUsageHintVisualState(
-                entryId = 3,
-                operator = Operator.ADDITION,
-                visualState = OperandSelectorUsageHintVisualStateValues.AVAILABLE
-            )
-            .assertOperandUsageHintState(
-                entryId = 4,
-                operator = Operator.MULTIPLICATION,
-                stateDescriptionResId = R.string.tile_operand_usage_state_available
-            )
-            .assertOperandUsageHintVisualState(
-                entryId = 4,
-                operator = Operator.MULTIPLICATION,
-                visualState = OperandSelectorUsageHintVisualStateValues.AVAILABLE
-            )
     }
 
     private fun fillTileLeftOperandWithEntryTwo(tileIndex: Int, operator: Operator? = null) {
