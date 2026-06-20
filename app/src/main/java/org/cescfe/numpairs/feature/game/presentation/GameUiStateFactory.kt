@@ -7,6 +7,8 @@ import org.cescfe.numpairs.domain.puzzle.StripEntryUsageByOperator
 import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.domain.puzzle.Tile
 import org.cescfe.numpairs.domain.puzzle.TileResolutionState
+import org.cescfe.numpairs.domain.puzzle.liveRuleConflictsByTile
+import org.cescfe.numpairs.domain.puzzle.liveRuleConflictsForCandidate
 import org.cescfe.numpairs.domain.puzzle.mismatchedSumProductPairingTileIndexes
 import org.cescfe.numpairs.domain.puzzle.operandSelectionChoicesFor
 import org.cescfe.numpairs.domain.puzzle.stripEntryUsageByOperator
@@ -21,6 +23,9 @@ internal object GameUiStateFactory {
         val completionState = puzzle.completionState
         val mismatchedPairingTileIndexes = completionState.mismatchedPairingTileIndexes(puzzle = puzzle)
         val stripEntryUsageById = puzzle.stripEntryUsageByOperator()
+        val liveRuleConflictsByTile = puzzle.liveRuleConflictsByTile.mapValues { (_, conflicts) ->
+            conflicts.map { conflict -> conflict.toUiState() }.toSet()
+        }
 
         return GameUiState(
             stripItems = puzzle.strip.entries.map { stripEntry ->
@@ -35,7 +40,8 @@ internal object GameUiStateFactory {
                     visualState = tile.visualState(
                         tileIndex = tileIndex,
                         mismatchedPairingTileIndexes = mismatchedPairingTileIndexes
-                    )
+                    ),
+                    liveRuleConflicts = liveRuleConflictsByTile[tileIndex].orEmpty()
                 )
             },
             puzzleOutcome = completionState.outcomeUiState,
@@ -108,7 +114,23 @@ internal object GameUiStateFactory {
             availableOperands = puzzle.operandSelectionChoicesFor(
                 tileIndex = target.tileIndex,
                 slot = target.slot
-            ).map(::TileOperandOptionUiState)
+            ).map { choice ->
+                TileOperandOptionUiState(
+                    choice = choice,
+                    additionRuleConflicts = puzzle.liveRuleConflictsForCandidate(
+                        tileIndex = target.tileIndex,
+                        slot = target.slot,
+                        stripEntryId = choice.stripEntryId,
+                        operator = Operator.ADDITION
+                    ).map { conflict -> conflict.toUiState() }.toSet(),
+                    multiplicationRuleConflicts = puzzle.liveRuleConflictsForCandidate(
+                        tileIndex = target.tileIndex,
+                        slot = target.slot,
+                        stripEntryId = choice.stripEntryId,
+                        operator = Operator.MULTIPLICATION
+                    ).map { conflict -> conflict.toUiState() }.toSet()
+                )
+            }
         )
     }
 }

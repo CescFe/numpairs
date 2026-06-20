@@ -207,6 +207,129 @@ class GameUiStateFromTest {
     }
 
     @Test
+    fun maps_empty_live_rule_conflicts_for_tiles_and_operand_options_without_conflicts() {
+        val uiState = GameUiState.from(
+            puzzle = liveRulePresentationPuzzle(),
+            presentationState = GamePresentationState().showTileOperandSelection(
+                tileIndex = 0,
+                slot = OperandSlot.LEFT
+            )
+        )
+
+        assertTrue(uiState.tiles.all { tile -> tile.liveRuleConflicts.isEmpty() })
+        uiState.tileOperandSelectionDialog!!.availableOperands.forEach { operand ->
+            assertTrue(operand.additionRuleConflicts.isEmpty())
+            assertTrue(operand.multiplicationRuleConflicts.isEmpty())
+        }
+    }
+
+    @Test
+    fun maps_live_duplicate_operator_usage_conflicts_to_tiles() {
+        val puzzle = liveRulePresentationPuzzle()
+            .withTile(
+                index = 0,
+                tile = hiddenTile(result = 3)
+                    .withLeftOperand(value = 1, stripEntryId = 0)
+                    .withOperator(Operator.MULTIPLICATION)
+                    .withRightOperand(value = 3, stripEntryId = 2)
+            )
+            .withTile(
+                index = 1,
+                tile = hiddenTile(result = 6)
+                    .withLeftOperand(value = 2, stripEntryId = 1)
+                    .withOperator(Operator.MULTIPLICATION)
+                    .withRightOperand(value = 3, stripEntryId = 2)
+            )
+
+        val uiState = GameUiState.from(puzzle)
+
+        assertEquals(
+            setOf(RuleConflictUiState.DUPLICATE_OPERATOR_USAGE),
+            uiState.tiles[0].liveRuleConflicts
+        )
+        assertEquals(
+            setOf(RuleConflictUiState.DUPLICATE_OPERATOR_USAGE),
+            uiState.tiles[1].liveRuleConflicts
+        )
+        assertNull(uiState.puzzleOutcome)
+    }
+
+    @Test
+    fun maps_live_mismatched_pairing_conflicts_to_tiles_before_completion() {
+        val puzzle = liveRulePresentationPuzzle()
+            .withTile(
+                index = 0,
+                tile = hiddenTile(result = 3)
+                    .withLeftOperand(value = 1, stripEntryId = 0)
+                    .withOperator(Operator.ADDITION)
+                    .withRightOperand(value = 2, stripEntryId = 1)
+            )
+            .withTile(
+                index = 1,
+                tile = hiddenTile(result = 3)
+                    .withLeftOperand(value = 1, stripEntryId = 0)
+                    .withOperator(Operator.MULTIPLICATION)
+                    .withRightOperand(value = 3, stripEntryId = 2)
+            )
+
+        val uiState = GameUiState.from(puzzle)
+
+        assertEquals(
+            setOf(RuleConflictUiState.MISMATCHED_PAIRING),
+            uiState.tiles[0].liveRuleConflicts
+        )
+        assertEquals(
+            setOf(RuleConflictUiState.MISMATCHED_PAIRING),
+            uiState.tiles[1].liveRuleConflicts
+        )
+        assertNull(uiState.puzzleOutcome)
+    }
+
+    @Test
+    fun maps_predictive_mixed_rule_conflicts_to_operand_options_without_changing_selectability() {
+        val puzzle = liveRulePresentationPuzzle()
+            .withTile(
+                index = 0,
+                tile = hiddenTile(result = 3)
+                    .withLeftOperand(value = 1, stripEntryId = 0)
+                    .withOperator(Operator.ADDITION)
+                    .withRightOperand(value = 2, stripEntryId = 1)
+            )
+            .withTile(
+                index = 1,
+                tile = hiddenTile(result = 3)
+                    .withLeftOperand(value = 1, stripEntryId = 0)
+                    .withOperator(Operator.MULTIPLICATION)
+                    .withRightOperand(value = 3, stripEntryId = 2)
+            )
+            .withTile(
+                index = 2,
+                tile = hiddenTile(result = 6)
+                    .withLeftOperand(value = 2, stripEntryId = 1)
+                    .withOperator(Operator.MULTIPLICATION)
+            )
+
+        val uiState = GameUiState.from(
+            puzzle = puzzle,
+            presentationState = GamePresentationState().showTileOperandSelection(
+                tileIndex = 2,
+                slot = OperandSlot.RIGHT
+            )
+        )
+        val optionForThree = uiState.tileOperandSelectionDialog!!.availableOperands
+            .first { operand -> operand.stripEntryId == 2 }
+
+        assertTrue(optionForThree.isSelectable)
+        assertEquals(
+            setOf(
+                RuleConflictUiState.DUPLICATE_OPERATOR_USAGE,
+                RuleConflictUiState.MISMATCHED_PAIRING
+            ),
+            optionForThree.multiplicationRuleConflicts
+        )
+    }
+
+    @Test
     fun maps_a_solved_puzzle_to_a_success_outcome() {
         val uiState = GameUiState.from(
             puzzle = solvedPuzzleWithKnownStripAndAssignments()
@@ -269,7 +392,8 @@ class GameUiStateFromTest {
                         value = 6,
                         additionUsed = true,
                         multiplicationUsed = false,
-                        isSelectable = true
+                        isSelectable = true,
+                        additionRuleConflicts = setOf(RuleConflictUiState.DUPLICATE_OPERATOR_USAGE)
                     ),
                     TileOperandOptionUiState(
                         stripEntryId = 1,
@@ -328,3 +452,22 @@ private fun assertStripUsage(stripItem: StripItemUiState, additionUsed: Boolean,
     assertEquals(additionUsed, stripItem.additionUsed)
     assertEquals(multiplicationUsed, stripItem.multiplicationUsed)
 }
+
+private fun liveRulePresentationPuzzle(): Puzzle = Puzzle(
+    board = Board(
+        tiles = listOf(
+            hiddenTile(result = 3),
+            hiddenTile(result = 3),
+            hiddenTile(result = 6),
+            hiddenTile(result = 4)
+        )
+    ),
+    strip = Strip.fromItems(
+        items = listOf(
+            StripItem.Known(1),
+            StripItem.Known(2),
+            StripItem.Known(3),
+            StripItem.Known(4)
+        )
+    )
+)
