@@ -29,14 +29,19 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -307,6 +312,8 @@ internal fun StripItemEntryDialog(
     val valueInRange = parsedValue?.takeIf { value -> value in dialogUiState.validRange }
     val confirmedValue = valueInRange?.takeIf(canConfirm)
     val isInputInvalid = enteredValue.isNotEmpty() && parsedValue != null && valueInRange == null
+    val inputFocusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
     val validRangeText = dialogUiState.validRange.maximumValue?.let { maximumValue ->
         stringResource(
             R.string.strip_entry_valid_range_bounded,
@@ -317,6 +324,11 @@ internal fun StripItemEntryDialog(
         R.string.strip_entry_valid_range_unbounded,
         dialogUiState.validRange.minimumValue
     )
+
+    LaunchedEffect(dialogUiState.stripItemIndex, dialogUiState.mode) {
+        inputFocusRequester.requestFocus()
+        keyboardController?.show()
+    }
 
     AlertDialog(
         modifier = Modifier.testTag(GameScreenTestTags.STRIP_ENTRY_DIALOG),
@@ -337,7 +349,9 @@ internal fun StripItemEntryDialog(
                 onValueChange = { newValue ->
                     enteredValue = newValue.filter(Char::isDigit)
                 },
-                modifier = Modifier.testTag(GameScreenTestTags.STRIP_ENTRY_INPUT),
+                modifier = Modifier
+                    .focusRequester(inputFocusRequester)
+                    .testTag(GameScreenTestTags.STRIP_ENTRY_INPUT),
                 label = {
                     Text(text = stringResource(R.string.strip_entry_input_label))
                 },
