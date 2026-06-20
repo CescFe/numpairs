@@ -1,13 +1,16 @@
 package org.cescfe.numpairs.feature.game.presentation
 
 import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
+import org.cescfe.numpairs.domain.puzzle.Board
 import org.cescfe.numpairs.domain.puzzle.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.Operator
+import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.Strip
 import org.cescfe.numpairs.domain.puzzle.StripEntryRange
 import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.domain.puzzle.support.TileAssignment
+import org.cescfe.numpairs.domain.puzzle.support.assignedTile
 import org.cescfe.numpairs.domain.puzzle.support.defaultKnownStripValues
 import org.cescfe.numpairs.domain.puzzle.support.hiddenTile
 import org.cescfe.numpairs.domain.puzzle.support.knownPuzzleWithAssignments
@@ -49,6 +52,56 @@ class GameUiStateFromTest {
             ),
             GameUiState.from(puzzle).stripItems
         )
+    }
+
+    @Test
+    fun maps_strip_items_to_operator_usage_state() {
+        val puzzle = Puzzle(
+            strip = Strip.fromItems(items = defaultKnownStripValues().map(StripItem::Known)),
+            board = Board(
+                tiles = listOf(
+                    assignedTile(
+                        leftEntryId = 1,
+                        leftValue = 2,
+                        operator = Operator.ADDITION,
+                        rightEntryId = 4,
+                        rightValue = 5
+                    ),
+                    assignedTile(
+                        leftEntryId = 5,
+                        leftValue = 6,
+                        operator = Operator.MULTIPLICATION,
+                        rightEntryId = 2,
+                        rightValue = 3
+                    ),
+                    assignedTile(
+                        leftEntryId = 3,
+                        leftValue = 4,
+                        operator = Operator.ADDITION,
+                        rightEntryId = 6,
+                        rightValue = 7
+                    ),
+                    assignedTile(
+                        leftEntryId = 7,
+                        leftValue = 8,
+                        operator = Operator.MULTIPLICATION,
+                        rightEntryId = 3,
+                        rightValue = 4
+                    ),
+                    hiddenTile(result = 1),
+                    hiddenTile(result = 2),
+                    hiddenTile(result = 3),
+                    hiddenTile(result = 4)
+                )
+            )
+        )
+
+        val stripItems = GameUiState.from(puzzle).stripItems
+
+        assertStripUsage(stripItems[0], additionUsed = false, multiplicationUsed = false)
+        assertStripUsage(stripItems[1], additionUsed = true, multiplicationUsed = false)
+        assertStripUsage(stripItems[2], additionUsed = false, multiplicationUsed = true)
+        assertStripUsage(stripItems[3], additionUsed = true, multiplicationUsed = true)
     }
 
     @Test
@@ -269,4 +322,9 @@ class GameUiStateFromTest {
             assertNull(uiState.tileOperandSelectionDialog)
         }
     }
+}
+
+private fun assertStripUsage(stripItem: StripItemUiState, additionUsed: Boolean, multiplicationUsed: Boolean) {
+    assertEquals(additionUsed, stripItem.additionUsed)
+    assertEquals(multiplicationUsed, stripItem.multiplicationUsed)
 }

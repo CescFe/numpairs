@@ -3,10 +3,13 @@ package org.cescfe.numpairs.feature.game.presentation
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
+import org.cescfe.numpairs.domain.puzzle.StripEntryUsageByOperator
 import org.cescfe.numpairs.domain.puzzle.StripItem
+import org.cescfe.numpairs.domain.puzzle.Tile
 import org.cescfe.numpairs.domain.puzzle.TileResolutionState
 import org.cescfe.numpairs.domain.puzzle.mismatchedSumProductPairingTileIndexes
 import org.cescfe.numpairs.domain.puzzle.operandSelectionChoicesFor
+import org.cescfe.numpairs.domain.puzzle.stripEntryUsageByOperator
 
 internal object GameUiStateFactory {
     private val availableOperators = listOf(
@@ -17,9 +20,15 @@ internal object GameUiStateFactory {
     fun create(puzzle: Puzzle, presentationState: GamePresentationState): GameUiState {
         val completionState = puzzle.completionState
         val mismatchedPairingTileIndexes = completionState.mismatchedPairingTileIndexes(puzzle = puzzle)
+        val stripEntryUsageById = puzzle.stripEntryUsageByOperator()
 
         return GameUiState(
-            stripItems = puzzle.strip.items.map(::StripItemUiState),
+            stripItems = puzzle.strip.entries.map { stripEntry ->
+                StripItemUiState(
+                    stripItem = stripEntry.item,
+                    usageByOperator = stripEntryUsageById.getOrDefault(stripEntry.id, StripEntryUsageByOperator())
+                )
+            },
             tiles = puzzle.board.tiles.mapIndexed { tileIndex, tile ->
                 TileUiState(
                     tile = tile,
@@ -104,10 +113,7 @@ internal object GameUiStateFactory {
     }
 }
 
-private fun org.cescfe.numpairs.domain.puzzle.Tile.visualState(
-    tileIndex: Int,
-    mismatchedPairingTileIndexes: Set<Int>
-): TileVisualState = when {
+private fun Tile.visualState(tileIndex: Int, mismatchedPairingTileIndexes: Set<Int>): TileVisualState = when {
     resolutionState == TileResolutionState.INCORRECT -> TileVisualState.INCORRECT
     tileIndex in mismatchedPairingTileIndexes -> TileVisualState.MISMATCHED_PAIRING
     else -> TileVisualState.NORMAL

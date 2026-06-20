@@ -56,19 +56,12 @@ data class OperandSelectionChoice(
 }
 
 fun Puzzle.operandSelectionChoicesFor(tileIndex: Int, slot: OperandSlot): List<OperandSelectionChoice> {
-    val usageByEntryId = board.tiles
-        .flatMapIndexed { indexedTile, tile -> tile.assignedStripEntries(tileIndex = indexedTile) }
-        .filterNot { assignment -> assignment.tileIndex == tileIndex && assignment.slot == slot }
-        .groupBy { assignment -> assignment.stripEntryId }
-        .mapValues { (_, assignments) ->
-            StripEntryUsageByOperator(
-                additionUsageCount = assignments.count { assignment -> assignment.operator == Operator.ADDITION },
-                multiplicationUsageCount = assignments.count { assignment ->
-                    assignment.operator == Operator.MULTIPLICATION
-                },
-                provisionalUsageCount = assignments.count { assignment -> assignment.operator == Operator.Hidden }
-            )
-        }
+    val usageByEntryId = board.stripEntryUsageByOperator(
+        excludedAssignment = ExcludedAssignedStripEntry(
+            tileIndex = tileIndex,
+            slot = slot
+        )
+    )
     val oppositeSlotEntryId = board.tiles
         .getOrNull(tileIndex)
         ?.assignedStripEntryId(slot.opposite())
@@ -90,6 +83,29 @@ fun Puzzle.operandSelectionChoicesFor(tileIndex: Int, slot: OperandSlot): List<O
             )
         }
     }
+}
+
+fun Puzzle.stripEntryUsageByOperator(): Map<Int, StripEntryUsageByOperator> = board.stripEntryUsageByOperator()
+
+private fun Board.stripEntryUsageByOperator(
+    excludedAssignment: ExcludedAssignedStripEntry? = null
+): Map<Int, StripEntryUsageByOperator> = tiles
+    .flatMapIndexed { indexedTile, tile -> tile.assignedStripEntries(tileIndex = indexedTile) }
+    .filterNot { assignment -> excludedAssignment?.matches(assignment) == true }
+    .groupBy { assignment -> assignment.stripEntryId }
+    .mapValues { (_, assignments) ->
+        StripEntryUsageByOperator(
+            additionUsageCount = assignments.count { assignment -> assignment.operator == Operator.ADDITION },
+            multiplicationUsageCount = assignments.count { assignment ->
+                assignment.operator == Operator.MULTIPLICATION
+            },
+            provisionalUsageCount = assignments.count { assignment -> assignment.operator == Operator.Hidden }
+        )
+    }
+
+private data class ExcludedAssignedStripEntry(val tileIndex: Int, val slot: OperandSlot) {
+    fun matches(assignedStripEntry: AssignedStripEntry): Boolean =
+        assignedStripEntry.tileIndex == tileIndex && assignedStripEntry.slot == slot
 }
 
 private data class AssignedStripEntry(
