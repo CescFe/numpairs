@@ -63,6 +63,7 @@ fun PuzzleTile(
     val tileStateDescription = when (tile.visualState) {
         TileVisualState.INCORRECT -> stringResource(R.string.tile_state_incorrect)
         TileVisualState.MISMATCHED_PAIRING -> stringResource(R.string.tile_state_mismatched_pairing)
+        TileVisualState.LIVE_RULE_CONFLICT -> stringResource(R.string.tile_state_live_rule_conflict)
         TileVisualState.NORMAL -> null
     }
 

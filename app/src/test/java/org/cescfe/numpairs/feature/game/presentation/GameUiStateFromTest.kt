@@ -261,10 +261,12 @@ class GameUiStateFromTest {
             setOf(RuleConflictUiState.DUPLICATE_OPERATOR_USAGE),
             uiState.tiles[0].liveRuleConflicts
         )
+        assertEquals(TileVisualState.LIVE_RULE_CONFLICT, uiState.tiles[0].visualState)
         assertEquals(
             setOf(RuleConflictUiState.DUPLICATE_OPERATOR_USAGE),
             uiState.tiles[1].liveRuleConflicts
         )
+        assertEquals(TileVisualState.LIVE_RULE_CONFLICT, uiState.tiles[1].visualState)
         assertEquals(
             setOf(RuleConflictUiState.DUPLICATE_OPERATOR_USAGE),
             optionForThree.multiplicationRuleConflicts
@@ -298,10 +300,12 @@ class GameUiStateFromTest {
             setOf(RuleConflictUiState.MISMATCHED_PAIRING),
             uiState.tiles[0].liveRuleConflicts
         )
+        assertEquals(TileVisualState.LIVE_RULE_CONFLICT, uiState.tiles[0].visualState)
         assertEquals(
             setOf(RuleConflictUiState.MISMATCHED_PAIRING),
             uiState.tiles[1].liveRuleConflicts
         )
+        assertEquals(TileVisualState.LIVE_RULE_CONFLICT, uiState.tiles[1].visualState)
         assertNull(uiState.puzzleOutcome)
     }
 

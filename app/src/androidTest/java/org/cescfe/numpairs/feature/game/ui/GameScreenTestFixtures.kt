@@ -184,6 +184,42 @@ internal fun operandSelectorUsageHintVisualStateUiState(): GameUiState = GameUiS
     )
 )
 
+internal fun duplicateOperatorLocalConflictUiState(): GameUiState = GameUiState(
+    stripItems = completedStripItems(),
+    tiles = completedTiles().mapIndexed { index, tile ->
+        tile.copy(
+            visualState = if (index in listOf(0, 1)) {
+                TileVisualState.LIVE_RULE_CONFLICT
+            } else {
+                TileVisualState.NORMAL
+            },
+            liveRuleConflicts = if (index in listOf(0, 1)) {
+                setOf(RuleConflictUiState.DUPLICATE_OPERATOR_USAGE)
+            } else {
+                emptySet()
+            }
+        )
+    }
+)
+
+internal fun mismatchedPairingLocalConflictUiState(): GameUiState = GameUiState(
+    stripItems = completedStripItems(),
+    tiles = completedTiles().mapIndexed { index, tile ->
+        tile.copy(
+            visualState = if (index in listOf(0, 1)) {
+                TileVisualState.LIVE_RULE_CONFLICT
+            } else {
+                TileVisualState.NORMAL
+            },
+            liveRuleConflicts = if (index in listOf(0, 1)) {
+                setOf(RuleConflictUiState.MISMATCHED_PAIRING)
+            } else {
+                emptySet()
+            }
+        )
+    }
+)
+
 internal fun stripEntryDialogUiState(validRange: StripEntryRange, initialValue: String = ""): GameUiState =
     GameUiState.from(initialPuzzle).copy(
         stripItemEntryDialog = StripItemEntryDialogUiState(

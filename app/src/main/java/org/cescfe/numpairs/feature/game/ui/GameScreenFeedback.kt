@@ -25,11 +25,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
 import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
+import org.cescfe.numpairs.feature.game.presentation.RuleConflictUiState
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
 @Composable
@@ -138,6 +141,35 @@ internal fun SuccessOverlay(onDismiss: () -> Unit, completionActions: GameComple
 }
 
 @Composable
+internal fun LocalRuleConflictBanner(conflict: RuleConflictUiState, modifier: Modifier = Modifier) {
+    val message = conflict.localRuleConflictMessage()
+
+    Surface(
+        modifier = modifier
+            .testTag(GameScreenTestTags.LOCAL_RULE_CONFLICT)
+            .semantics {
+                contentDescription = message
+            },
+        shape = NumPairsComponents.MediumShape,
+        color = NumPairsComponents.errorContainerColor(),
+        contentColor = NumPairsComponents.errorContentColor(),
+        border = NumPairsComponents.errorBorder()
+    ) {
+        Text(
+            text = message,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = PUZZLE_OUTCOME_HORIZONTAL_PADDING,
+                    vertical = 10.dp
+                )
+                .testTag(GameScreenTestTags.LOCAL_RULE_CONFLICT_MESSAGE),
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
+
+@Composable
 internal fun PuzzleOutcomeBanner(puzzleOutcome: PuzzleOutcomeUiState.Invalid, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.testTag(GameScreenTestTags.PUZZLE_OUTCOME),
@@ -167,6 +199,14 @@ internal fun PuzzleOutcomeBanner(puzzleOutcome: PuzzleOutcomeUiState.Invalid, mo
             )
         }
     }
+}
+
+@Composable
+private fun RuleConflictUiState.localRuleConflictMessage(): String = when (this) {
+    RuleConflictUiState.DUPLICATE_OPERATOR_USAGE ->
+        stringResource(R.string.local_rule_conflict_duplicate_operator_usage_message)
+    RuleConflictUiState.MISMATCHED_PAIRING ->
+        stringResource(R.string.local_rule_conflict_mismatched_pairing_message)
 }
 
 @Composable

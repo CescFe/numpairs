@@ -165,7 +165,8 @@ enum class RuleConflictUiState {
 enum class TileVisualState {
     NORMAL,
     INCORRECT,
-    MISMATCHED_PAIRING
+    MISMATCHED_PAIRING,
+    LIVE_RULE_CONFLICT
 }
 
 private val Tile.defaultVisualState: TileVisualState
