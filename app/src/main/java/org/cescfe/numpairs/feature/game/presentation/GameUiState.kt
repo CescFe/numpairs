@@ -7,6 +7,7 @@ import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.StripEntryRange
+import org.cescfe.numpairs.domain.puzzle.StripEntryUsageByOperator
 import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.domain.puzzle.Tile
 import org.cescfe.numpairs.domain.puzzle.TileResolutionState
@@ -44,8 +45,17 @@ sealed interface PuzzleOutcomeUiState {
     }
 }
 
-data class StripItemUiState(val label: String, val isEntryEnabled: Boolean, val visualStyle: StripItemVisualStyle) {
-    constructor(stripItem: StripItem) : this(
+data class StripItemUiState(
+    val label: String,
+    val isEntryEnabled: Boolean,
+    val visualStyle: StripItemVisualStyle,
+    val additionUsed: Boolean = false,
+    val multiplicationUsed: Boolean = false
+) {
+    constructor(
+        stripItem: StripItem,
+        usageByOperator: StripEntryUsageByOperator = StripEntryUsageByOperator()
+    ) : this(
         label = when (stripItem) {
             StripItem.Hidden -> "?"
             is StripItem.Known -> stripItem.value.toString()
@@ -56,7 +66,9 @@ data class StripItemUiState(val label: String, val isEntryEnabled: Boolean, val 
             is StripItem.Known -> StripItemVisualStyle.KNOWN
             StripItem.Hidden -> StripItemVisualStyle.HIDDEN
             is StripItem.PlayerEntered -> StripItemVisualStyle.PLAYER_ENTERED
-        }
+        },
+        additionUsed = usageByOperator.additionUsed,
+        multiplicationUsed = usageByOperator.multiplicationUsed
     )
 }
 
