@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -105,6 +106,7 @@ private fun MenuButtonText(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelLarge.copy(
+            fontWeight = FontWeight.Bold,
             fontSize = MENU_BUTTON_TEXT_SIZE,
             lineHeight = MENU_BUTTON_TEXT_LINE_HEIGHT
         )
