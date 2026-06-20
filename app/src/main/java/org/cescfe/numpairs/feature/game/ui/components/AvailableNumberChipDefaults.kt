@@ -56,11 +56,11 @@ internal data class AvailableNumberChipColors(
 @Composable
 internal fun chipUsageIndicatorColors(used: Boolean): AvailableNumberChipUsageIndicatorColors = if (used) {
     AvailableNumberChipUsageIndicatorColors(
-        containerColor = MaterialTheme.colorScheme.primaryContainer,
-        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        containerColor = MaterialTheme.colorScheme.secondary,
+        contentColor = MaterialTheme.colorScheme.onSecondary,
         border = BorderStroke(
             width = NumPairsComponents.ThinBorderWidth,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.secondary
         )
     )
 } else {
