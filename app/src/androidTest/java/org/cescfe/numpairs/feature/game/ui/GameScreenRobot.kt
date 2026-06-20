@@ -300,6 +300,33 @@ class GameScreenRobot(
             )
     }
 
+    fun assertStripUsageIndicatorState(
+        index: Int,
+        operator: Operator,
+        @StringRes stateDescriptionResId: Int
+    ): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(
+                GameScreenTestTags.stripUsageIndicator(index = index, operator = operator),
+                useUnmergedTree = true
+            )
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.StateDescription,
+                    string(stateDescriptionResId)
+                )
+            )
+    }
+
+    fun assertStripUsageIndicatorHidden(index: Int, operator: Operator): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(
+                GameScreenTestTags.stripUsageIndicator(index = index, operator = operator),
+                useUnmergedTree = true
+            )
+            .assertDoesNotExist()
+    }
+
     fun assertResetHidden(tileIndex: Int): GameScreenRobot = apply {
         interactions
             .onNodeWithTag(GameScreenTestTags.tileReset(tileIndex), useUnmergedTree = true)

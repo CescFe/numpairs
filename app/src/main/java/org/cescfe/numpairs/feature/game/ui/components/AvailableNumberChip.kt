@@ -1,21 +1,30 @@
 package org.cescfe.numpairs.feature.game.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.cescfe.numpairs.R
 import org.cescfe.numpairs.feature.game.ui.gameHighlightSemantics
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
@@ -33,6 +42,10 @@ fun AvailableNumberChip(
     modifier: Modifier = Modifier,
     style: AvailableNumberChipStyle = AvailableNumberChipStyle.KNOWN,
     contentDescription: String? = null,
+    additionUsed: Boolean = false,
+    multiplicationUsed: Boolean = false,
+    additionUsageIndicatorTestTag: String? = null,
+    multiplicationUsageIndicatorTestTag: String? = null,
     isHighlighted: Boolean = false,
     onClick: (() -> Unit)? = null
 ) {
@@ -59,7 +72,14 @@ fun AvailableNumberChip(
             border = chipBorder,
             tonalElevation = 1.dp
         ) {
-            AvailableNumberChipLabel(label = label)
+            AvailableNumberChipContent(
+                label = label,
+                showUsageIndicators = style != AvailableNumberChipStyle.HIDDEN,
+                additionUsed = additionUsed,
+                multiplicationUsed = multiplicationUsed,
+                additionUsageIndicatorTestTag = additionUsageIndicatorTestTag,
+                multiplicationUsageIndicatorTestTag = multiplicationUsageIndicatorTestTag
+            )
         }
     } else {
         Surface(
@@ -71,6 +91,64 @@ fun AvailableNumberChip(
             border = chipBorder,
             tonalElevation = 1.dp
         ) {
+            AvailableNumberChipContent(
+                label = label,
+                showUsageIndicators = style != AvailableNumberChipStyle.HIDDEN,
+                additionUsed = additionUsed,
+                multiplicationUsed = multiplicationUsed,
+                additionUsageIndicatorTestTag = additionUsageIndicatorTestTag,
+                multiplicationUsageIndicatorTestTag = multiplicationUsageIndicatorTestTag
+            )
+        }
+    }
+}
+
+@Composable
+private fun AvailableNumberChipContent(
+    label: String,
+    showUsageIndicators: Boolean,
+    additionUsed: Boolean,
+    multiplicationUsed: Boolean,
+    additionUsageIndicatorTestTag: String?,
+    multiplicationUsageIndicatorTestTag: String?
+) {
+    if (showUsageIndicators) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultMinSize(minHeight = CHIP_MIN_HEIGHT)
+                .padding(
+                    horizontal = CHIP_CONTENT_HORIZONTAL_PADDING,
+                    vertical = CHIP_CONTENT_VERTICAL_PADDING
+                ),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(CHIP_USAGE_INDICATOR_SPACING),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                StripUsageIndicator(
+                    label = "+",
+                    used = additionUsed,
+                    testTag = additionUsageIndicatorTestTag
+                )
+                StripUsageIndicator(
+                    label = "×",
+                    used = multiplicationUsed,
+                    testTag = multiplicationUsageIndicatorTestTag
+                )
+            }
+            AvailableNumberChipLabel(label = label)
+        }
+    } else {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultMinSize(minHeight = CHIP_MIN_HEIGHT)
+                .padding(horizontal = 4.dp),
+            contentAlignment = Alignment.Center
+        ) {
             AvailableNumberChipLabel(label = label)
         }
     }
@@ -78,17 +156,47 @@ fun AvailableNumberChip(
 
 @Composable
 private fun AvailableNumberChipLabel(label: String) {
-    Box(
+    Text(
+        text = label,
         modifier = Modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = CHIP_MIN_HEIGHT)
-            .padding(horizontal = 4.dp),
-        contentAlignment = Alignment.Center
+            .padding(horizontal = 2.dp),
+        style = NumPairsTextStyles.StripValue,
+        textAlign = TextAlign.Center,
+        maxLines = 1,
+        overflow = TextOverflow.Clip
+    )
+}
+
+@Composable
+private fun StripUsageIndicator(label: String, used: Boolean, testTag: String?) {
+    val colors = chipUsageIndicatorColors(used = used)
+    val usageStateDescription = stringResource(
+        if (used) {
+            R.string.tile_operand_usage_state_used
+        } else {
+            R.string.tile_operand_usage_state_available
+        }
+    )
+    val tagModifier = testTag?.let { tag -> Modifier.testTag(tag) } ?: Modifier
+
+    Surface(
+        modifier = tagModifier.semantics {
+            stateDescription = usageStateDescription
+        },
+        shape = RoundedCornerShape(999.dp),
+        color = colors.containerColor,
+        contentColor = colors.contentColor,
+        border = colors.border
     ) {
         Text(
             text = label,
-            style = NumPairsTextStyles.StripValue,
-            textAlign = TextAlign.Center
+            modifier = Modifier.padding(
+                horizontal = CHIP_USAGE_INDICATOR_HORIZONTAL_PADDING,
+                vertical = CHIP_USAGE_INDICATOR_VERTICAL_PADDING
+            ),
+            style = NumPairsTextStyles.PuzzleLabel,
+            maxLines = 1
         )
     }
 }
@@ -114,5 +222,18 @@ private fun AvailableNumberChipHiddenPreview() {
 private fun AvailableNumberChipPlayerEnteredPreview() {
     NumPairsTheme {
         AvailableNumberChip(label = "4", style = AvailableNumberChipStyle.PLAYER_ENTERED)
+    }
+}
+
+@Preview(showBackground = true, widthDp = 48)
+@Composable
+private fun AvailableNumberChipUsedPreview() {
+    NumPairsTheme {
+        AvailableNumberChip(
+            label = "222",
+            style = AvailableNumberChipStyle.KNOWN,
+            additionUsed = true,
+            multiplicationUsed = false
+        )
     }
 }

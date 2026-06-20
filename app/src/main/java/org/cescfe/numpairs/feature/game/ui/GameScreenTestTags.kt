@@ -34,6 +34,12 @@ object GameScreenTestTags {
 
     fun stripItem(index: Int): String = "strip_item_$index"
 
+    fun stripUsageIndicator(index: Int, operator: Operator): String = when (operator) {
+        Operator.Addition -> "strip_usage_indicator_${index}_addition"
+        Operator.Multiplication -> "strip_usage_indicator_${index}_multiplication"
+        Operator.Hidden -> error("Hidden operator does not have a strip usage indicator.")
+    }
+
     fun tile(index: Int): String = "tile_$index"
 
     fun tileLeftOperand(index: Int): String = "tile_left_operand_$index"
