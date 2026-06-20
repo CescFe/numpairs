@@ -455,8 +455,19 @@ State expectations:
 - Known: stable starting value, lower emphasis than editable states
 - Hidden: unresolved entry using neutral gray and clear placeholder treatment
 - Player-entered: player-owned value, distinct from known values
+- Usage indicators: compact persistent `+` and `×` markers for visible strip entries
+- Unused: both operator-family markers read as available
+- Addition-used: `+` reads as used while `×` remains available
+- Multiplication-used: `×` reads as used while `+` remains available
+- Fully-used: both operator-family markers read as used
 - Selected or highlighted: visible accent treatment without depending only on color
 - Disabled or unavailable, if introduced later: visually subdued and semantically clear
+
+The strip usage treatment should be more compact than the operand selector badges. It should support persistent scanning without turning each chip into a dense mini-card. The numeric value remains the primary content of the chip.
+
+Used versus available marker states must not rely on color alone. Keep the `+` and `×` symbols visible and pair color with at least one additional cue such as fill, border, weight, opacity, or state description.
+
+Narrow-screen readability is a hard constraint for this feature. If persistent usage markers compete with three-digit values or destabilize the single-row strip, prefer a smaller two-segment treatment over larger badge-like elements.
 
 ### Puzzle Tiles
 
@@ -482,6 +493,8 @@ Expectations:
 - operator selection remains small and direct
 - strip entry dialog remains clear and focused
 - disabled options remain readable but clearly unavailable
+- operand selector usage badges remain contextual and more legible than strip usage markers
+- strip usage markers and operand selector badges use the same `+` / `×` semantics
 - current helper badges or micro-indicators stay low-noise
 
 ### Rules, Tutorial, And Helper Surfaces
