@@ -8,6 +8,10 @@ import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
 internal val CHIP_MIN_HEIGHT = 48.dp
+internal val CHIP_USAGE_INDICATOR_OVERLAY_LIFT = 5.dp
+internal val CHIP_USAGE_INDICATOR_SPACING = 1.dp
+internal val CHIP_USAGE_INDICATOR_HORIZONTAL_PADDING = 3.dp
+internal val CHIP_USAGE_INDICATOR_VERTICAL_PADDING = 0.dp
 internal val MODIFIABLE_CHIP_BORDER_WIDTH = 1.5.dp
 internal val HIGHLIGHTED_CHIP_BORDER_WIDTH = 3.dp
 
@@ -43,6 +47,30 @@ internal fun chipColorsFor(style: AvailableNumberChipStyle): AvailableNumberChip
 }
 
 internal data class AvailableNumberChipColors(
+    val containerColor: Color,
+    val contentColor: Color,
+    val border: BorderStroke
+)
+
+@Composable
+internal fun chipUsageIndicatorColors(used: Boolean): AvailableNumberChipUsageIndicatorColors = if (used) {
+    AvailableNumberChipUsageIndicatorColors(
+        containerColor = MaterialTheme.colorScheme.secondary,
+        contentColor = MaterialTheme.colorScheme.onSecondary,
+        border = BorderStroke(
+            width = NumPairsComponents.ThinBorderWidth,
+            color = MaterialTheme.colorScheme.secondary
+        )
+    )
+} else {
+    AvailableNumberChipUsageIndicatorColors(
+        containerColor = NumPairsComponents.subtleSurfaceColor(),
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        border = NumPairsComponents.subtleBorder()
+    )
+}
+
+internal data class AvailableNumberChipUsageIndicatorColors(
     val containerColor: Color,
     val contentColor: Color,
     val border: BorderStroke

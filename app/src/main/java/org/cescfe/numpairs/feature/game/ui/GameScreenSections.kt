@@ -187,6 +187,16 @@ internal fun StripSection(
                             .width(chipWidth)
                             .testTag(GameScreenTestTags.stripItem(index)),
                         contentDescription = stripItemContentDescription(stripItem),
+                        additionUsed = stripItem.additionUsed,
+                        multiplicationUsed = stripItem.multiplicationUsed,
+                        additionUsageIndicatorTestTag = GameScreenTestTags.stripUsageIndicator(
+                            index = index,
+                            operator = Operator.ADDITION
+                        ),
+                        multiplicationUsageIndicatorTestTag = GameScreenTestTags.stripUsageIndicator(
+                            index = index,
+                            operator = Operator.MULTIPLICATION
+                        ),
                         isHighlighted = highlightState.isStripEntryHighlighted(index),
                         style = when (stripItem.visualStyle) {
                             StripItemVisualStyle.KNOWN -> AvailableNumberChipStyle.KNOWN
