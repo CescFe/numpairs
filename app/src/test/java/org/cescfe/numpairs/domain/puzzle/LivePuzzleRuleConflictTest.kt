@@ -36,6 +36,35 @@ class LivePuzzleRuleConflictTest {
     }
 
     @Test
+    fun duplicate_same_operator_usage_marks_only_the_duplicated_strip_entry_operator_usage() {
+        val puzzle = liveRulePuzzle()
+            .withTile(
+                index = 0,
+                tile = hiddenTile(result = 4)
+                    .withLeftOperand(value = 1, stripEntryId = 0)
+                    .withOperator(Operator.ADDITION)
+                    .withRightOperand(value = 3, stripEntryId = 2)
+            )
+            .withTile(
+                index = 1,
+                tile = hiddenTile(result = 5)
+                    .withLeftOperand(value = 2, stripEntryId = 1)
+                    .withOperator(Operator.ADDITION)
+                    .withRightOperand(value = 3, stripEntryId = 2)
+            )
+
+        assertEquals(
+            mapOf(
+                LiveStripEntryOperatorUsage(
+                    stripEntryId = 2,
+                    operator = Operator.ADDITION
+                ) to setOf(LivePuzzleRuleConflict.DUPLICATE_OPERATOR_USAGE)
+            ),
+            puzzle.liveRuleConflictsByStripEntryOperator
+        )
+    }
+
+    @Test
     fun detects_mismatched_pairing_before_completion() {
         val puzzle = liveRulePuzzle()
             .withTile(
@@ -60,6 +89,39 @@ class LivePuzzleRuleConflictTest {
                 1 to setOf(LivePuzzleRuleConflict.MISMATCHED_PAIRING)
             ),
             puzzle.liveRuleConflictsByTile
+        )
+    }
+
+    @Test
+    fun mismatched_pairing_marks_only_the_entry_with_different_addition_and_multiplication_partners() {
+        val puzzle = liveRulePuzzle()
+            .withTile(
+                index = 0,
+                tile = hiddenTile(result = 3)
+                    .withLeftOperand(value = 1, stripEntryId = 0)
+                    .withOperator(Operator.ADDITION)
+                    .withRightOperand(value = 2, stripEntryId = 1)
+            )
+            .withTile(
+                index = 1,
+                tile = hiddenTile(result = 3)
+                    .withLeftOperand(value = 1, stripEntryId = 0)
+                    .withOperator(Operator.MULTIPLICATION)
+                    .withRightOperand(value = 3, stripEntryId = 2)
+            )
+
+        assertEquals(
+            mapOf(
+                LiveStripEntryOperatorUsage(
+                    stripEntryId = 0,
+                    operator = Operator.ADDITION
+                ) to setOf(LivePuzzleRuleConflict.MISMATCHED_PAIRING),
+                LiveStripEntryOperatorUsage(
+                    stripEntryId = 0,
+                    operator = Operator.MULTIPLICATION
+                ) to setOf(LivePuzzleRuleConflict.MISMATCHED_PAIRING)
+            ),
+            puzzle.liveRuleConflictsByStripEntryOperator
         )
     }
 
