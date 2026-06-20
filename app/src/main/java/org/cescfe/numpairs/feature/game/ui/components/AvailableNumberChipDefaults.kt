@@ -64,7 +64,7 @@ internal fun chipUsageIndicatorColors(used: Boolean): AvailableNumberChipUsageIn
     )
 } else {
     AvailableNumberChipUsageIndicatorColors(
-        containerColor = Color.Transparent,
+        containerColor = NumPairsComponents.subtleSurfaceColor(),
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         border = NumPairsComponents.subtleBorder()
     )
