@@ -113,10 +113,7 @@ internal object GameUiStateFactory {
     }
 }
 
-private fun Tile.visualState(
-    tileIndex: Int,
-    mismatchedPairingTileIndexes: Set<Int>
-): TileVisualState = when {
+private fun Tile.visualState(tileIndex: Int, mismatchedPairingTileIndexes: Set<Int>): TileVisualState = when {
     resolutionState == TileResolutionState.INCORRECT -> TileVisualState.INCORRECT
     tileIndex in mismatchedPairingTileIndexes -> TileVisualState.MISMATCHED_PAIRING
     else -> TileVisualState.NORMAL
