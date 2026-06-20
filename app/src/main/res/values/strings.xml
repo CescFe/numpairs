@@ -40,6 +40,7 @@
     <string name="tile_operator_option_multiplication">Multiplication (×)</string>
     <string name="tile_state_incorrect">Incorrect tile</string>
     <string name="tile_state_mismatched_pairing">Mismatched pairing tile</string>
+    <string name="tile_state_live_rule_conflict">Rule conflict tile</string>
     <string name="tile_reset_content_description">Reset tile</string>
     <string name="success_overlay_message">Puzzle Completed!</string>
     <string name="success_overlay_supporting_text">All pairs matched.</string>
@@ -78,6 +79,8 @@
     <string name="puzzle_outcome_missing_identities_message">Some completed tiles are missing their strip-entry identities.</string>
     <string name="puzzle_outcome_mismatched_pairings_message">Addition and multiplication tiles do not use the same strip-entry pairs.</string>
     <string name="puzzle_outcome_invalid_usage_message">Each strip entry must be used exactly once in addition and once in multiplication.</string>
+    <string name="local_rule_conflict_duplicate_operator_usage_message">An operand can only be paired once with a given operator.</string>
+    <string name="local_rule_conflict_mismatched_pairing_message">An operand must have the same partner in both addition and multiplication.</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
 </resources>

@@ -39,13 +39,17 @@ internal object GameUiStateFactory {
                 )
             },
             tiles = puzzle.board.tiles.mapIndexed { tileIndex, tile ->
+                val liveRuleConflicts = liveRuleConflictsByTile[tileIndex].orEmpty()
+
                 TileUiState(
                     tile = tile,
                     visualState = tile.visualState(
                         tileIndex = tileIndex,
-                        mismatchedPairingTileIndexes = mismatchedPairingTileIndexes
+                        mismatchedPairingTileIndexes = mismatchedPairingTileIndexes,
+                        hasLiveRuleConflicts = liveRuleConflicts.isNotEmpty(),
+                        completionState = completionState
                     ),
-                    liveRuleConflicts = liveRuleConflictsByTile[tileIndex].orEmpty()
+                    liveRuleConflicts = liveRuleConflicts
                 )
             },
             puzzleOutcome = completionState.outcomeUiState,
@@ -141,7 +145,13 @@ internal object GameUiStateFactory {
     }
 }
 
-private fun Tile.visualState(tileIndex: Int, mismatchedPairingTileIndexes: Set<Int>): TileVisualState = when {
+private fun Tile.visualState(
+    tileIndex: Int,
+    mismatchedPairingTileIndexes: Set<Int>,
+    hasLiveRuleConflicts: Boolean,
+    completionState: PuzzleCompletionState
+): TileVisualState = when {
+    completionState == PuzzleCompletionState.INCOMPLETE && hasLiveRuleConflicts -> TileVisualState.LIVE_RULE_CONFLICT
     resolutionState == TileResolutionState.INCORRECT -> TileVisualState.INCORRECT
     tileIndex in mismatchedPairingTileIndexes -> TileVisualState.MISMATCHED_PAIRING
     else -> TileVisualState.NORMAL

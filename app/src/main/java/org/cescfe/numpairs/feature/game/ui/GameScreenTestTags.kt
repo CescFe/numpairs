@@ -12,6 +12,8 @@ object GameScreenTestTags {
     const val PUZZLE_OUTCOME = "puzzle_outcome"
     const val PUZZLE_OUTCOME_TITLE = "puzzle_outcome_title"
     const val PUZZLE_OUTCOME_MESSAGE = "puzzle_outcome_message"
+    const val LOCAL_RULE_CONFLICT = "local_rule_conflict"
+    const val LOCAL_RULE_CONFLICT_MESSAGE = "local_rule_conflict_message"
     const val BOARD = "game_board"
     const val STRIP = "game_strip"
     const val STRIP_ENTRY_DIALOG = "strip_entry_dialog"

@@ -51,6 +51,13 @@ internal fun tileStatePalette(visualState: TileVisualState): TileStatePalette {
             resultContentColor = colorScheme.onSurface,
             border = BorderStroke(2.dp, colorScheme.error)
         )
+
+        TileVisualState.LIVE_RULE_CONFLICT -> TileStatePalette(
+            containerColor = colorScheme.errorContainer,
+            expressionContentColor = colorScheme.onErrorContainer,
+            resultContentColor = colorScheme.onErrorContainer,
+            border = NumPairsComponents.errorBorder()
+        )
     }
 }
 

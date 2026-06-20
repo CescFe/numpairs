@@ -383,6 +383,14 @@ class GameScreenRobot(
         assertNotHighlighted(testTag = GameScreenTestTags.stripItem(index))
     }
 
+    fun assertStripItemHasNoStateDescription(index: Int): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.stripItem(index))
+            .assert(
+                SemanticsMatcher.keyNotDefined(SemanticsProperties.StateDescription)
+            )
+    }
+
     fun assertTileHighlighted(index: Int): GameScreenRobot = apply {
         assertHighlighted(testTag = GameScreenTestTags.tile(index))
     }
@@ -449,6 +457,28 @@ class GameScreenRobot(
         interactions
             .onNodeWithTag(GameScreenTestTags.PUZZLE_OUTCOME_MESSAGE, useUnmergedTree = true)
             .assert(hasText(string(stringResId)))
+    }
+
+    fun assertPuzzleOutcomeHidden(): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.PUZZLE_OUTCOME)
+            .assertDoesNotExist()
+    }
+
+    fun assertLocalRuleConflictMessageDisplayed(@StringRes stringResId: Int): GameScreenRobot = apply {
+        assertContentDescription(
+            testTag = GameScreenTestTags.LOCAL_RULE_CONFLICT,
+            contentDescription = string(stringResId)
+        )
+        interactions
+            .onNodeWithTag(GameScreenTestTags.LOCAL_RULE_CONFLICT_MESSAGE, useUnmergedTree = true)
+            .assert(hasText(string(stringResId)))
+    }
+
+    fun assertLocalRuleConflictHidden(): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.LOCAL_RULE_CONFLICT)
+            .assertDoesNotExist()
     }
 
     fun assertSuccessOverlayVisible(): GameScreenRobot = apply {

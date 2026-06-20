@@ -36,9 +36,11 @@ import org.cescfe.numpairs.feature.game.GameHighlightState
 import org.cescfe.numpairs.feature.game.GameInteractionPolicy
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
+import org.cescfe.numpairs.feature.game.presentation.RuleConflictUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperandOptionUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperandSelectionDialogUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState
+import org.cescfe.numpairs.feature.game.presentation.TileUiState
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
@@ -70,6 +72,7 @@ fun GameScreen(
     contentBeforePuzzle: @Composable ColumnScope.() -> Unit = {}
 ) {
     var isRulesHelperVisible by rememberSaveable { mutableStateOf(false) }
+    val localRuleConflict = uiState.localRuleConflict()
 
     Box(
         modifier = modifier
@@ -111,6 +114,12 @@ fun GameScreen(
                     highlightState = highlightState,
                     modifier = Modifier.fillMaxWidth()
                 )
+                localRuleConflict?.let { conflict ->
+                    LocalRuleConflictBanner(
+                        conflict = conflict,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
                 (uiState.puzzleOutcome as? PuzzleOutcomeUiState.Invalid)?.let { puzzleOutcome ->
                     PuzzleOutcomeBanner(
                         puzzleOutcome = puzzleOutcome,
@@ -171,6 +180,20 @@ fun GameScreen(
             },
             onPlayTutorialRequested = onRulesHelperPlayTutorialRequested
         )
+    }
+}
+
+private fun GameUiState.localRuleConflict(): RuleConflictUiState? {
+    if (puzzleOutcome != null) {
+        return null
+    }
+
+    val conflicts = tiles.flatMap(TileUiState::liveRuleConflicts).toSet()
+
+    return when {
+        RuleConflictUiState.DUPLICATE_OPERATOR_USAGE in conflicts -> RuleConflictUiState.DUPLICATE_OPERATOR_USAGE
+        RuleConflictUiState.MISMATCHED_PAIRING in conflicts -> RuleConflictUiState.MISMATCHED_PAIRING
+        else -> null
     }
 }
 
