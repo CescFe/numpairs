@@ -1,6 +1,7 @@
 package org.cescfe.numpairs.feature.game.presentation
 
 import org.cescfe.numpairs.domain.puzzle.Expression
+import org.cescfe.numpairs.domain.puzzle.LivePuzzleRuleConflict
 import org.cescfe.numpairs.domain.puzzle.OperandSelectionChoice
 import org.cescfe.numpairs.domain.puzzle.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.Operator
@@ -107,14 +108,22 @@ data class TileOperandOptionUiState(
     val value: Int,
     val additionUsed: Boolean,
     val multiplicationUsed: Boolean,
-    val isSelectable: Boolean
+    val isSelectable: Boolean,
+    val additionRuleConflicts: Set<RuleConflictUiState> = emptySet(),
+    val multiplicationRuleConflicts: Set<RuleConflictUiState> = emptySet()
 ) {
-    constructor(choice: OperandSelectionChoice) : this(
+    constructor(
+        choice: OperandSelectionChoice,
+        additionRuleConflicts: Set<RuleConflictUiState> = emptySet(),
+        multiplicationRuleConflicts: Set<RuleConflictUiState> = emptySet()
+    ) : this(
         stripEntryId = choice.stripEntryId,
         value = choice.value,
         additionUsed = choice.usageByOperator.additionUsed,
         multiplicationUsed = choice.usageByOperator.multiplicationUsed,
-        isSelectable = choice.canBeSelected
+        isSelectable = choice.canBeSelected,
+        additionRuleConflicts = additionRuleConflicts,
+        multiplicationRuleConflicts = multiplicationRuleConflicts
     )
 }
 
@@ -124,7 +133,8 @@ data class TileUiState(
     val rightOperandLabel: String,
     val resultLabel: String,
     val visualState: TileVisualState = TileVisualState.NORMAL,
-    val canReset: Boolean = false
+    val canReset: Boolean = false,
+    val liveRuleConflicts: Set<RuleConflictUiState> = emptySet()
 ) {
     val isInvalid: Boolean
         get() = visualState == TileVisualState.INCORRECT
@@ -132,14 +142,24 @@ data class TileUiState(
     val isPairingMismatchHighlighted: Boolean
         get() = visualState == TileVisualState.MISMATCHED_PAIRING
 
-    constructor(tile: Tile, visualState: TileVisualState = tile.defaultVisualState) : this(
+    constructor(
+        tile: Tile,
+        visualState: TileVisualState = tile.defaultVisualState,
+        liveRuleConflicts: Set<RuleConflictUiState> = emptySet()
+    ) : this(
         leftOperandLabel = tile.expression.leftOperand.label,
         operatorLabel = tile.expression.operator.symbol,
         rightOperandLabel = tile.expression.rightOperand.label,
         resultLabel = tile.result.toString(),
         visualState = visualState,
-        canReset = tile.canReset
+        canReset = tile.canReset,
+        liveRuleConflicts = liveRuleConflicts
     )
+}
+
+enum class RuleConflictUiState {
+    DUPLICATE_OPERATOR_USAGE,
+    MISMATCHED_PAIRING
 }
 
 enum class TileVisualState {
@@ -172,3 +192,8 @@ internal val PuzzleCompletionState.outcomeUiState: PuzzleOutcomeUiState?
             completionState = this
         )
     }
+
+internal fun LivePuzzleRuleConflict.toUiState(): RuleConflictUiState = when (this) {
+    LivePuzzleRuleConflict.DUPLICATE_OPERATOR_USAGE -> RuleConflictUiState.DUPLICATE_OPERATOR_USAGE
+    LivePuzzleRuleConflict.MISMATCHED_PAIRING -> RuleConflictUiState.MISMATCHED_PAIRING
+}
