@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.feature.game.presentation
 
+import org.cescfe.numpairs.domain.puzzle.LiveStripEntryOperatorUsage
 import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
@@ -7,8 +8,8 @@ import org.cescfe.numpairs.domain.puzzle.StripEntryUsageByOperator
 import org.cescfe.numpairs.domain.puzzle.StripItem
 import org.cescfe.numpairs.domain.puzzle.Tile
 import org.cescfe.numpairs.domain.puzzle.TileResolutionState
+import org.cescfe.numpairs.domain.puzzle.liveRuleConflictsByStripEntryOperator
 import org.cescfe.numpairs.domain.puzzle.liveRuleConflictsByTile
-import org.cescfe.numpairs.domain.puzzle.liveRuleConflictsForCandidate
 import org.cescfe.numpairs.domain.puzzle.mismatchedSumProductPairingTileIndexes
 import org.cescfe.numpairs.domain.puzzle.operandSelectionChoicesFor
 import org.cescfe.numpairs.domain.puzzle.stripEntryUsageByOperator
@@ -24,6 +25,9 @@ internal object GameUiStateFactory {
         val mismatchedPairingTileIndexes = completionState.mismatchedPairingTileIndexes(puzzle = puzzle)
         val stripEntryUsageById = puzzle.stripEntryUsageByOperator()
         val liveRuleConflictsByTile = puzzle.liveRuleConflictsByTile.mapValues { (_, conflicts) ->
+            conflicts.map { conflict -> conflict.toUiState() }.toSet()
+        }
+        val liveRuleConflictsByUsage = puzzle.liveRuleConflictsByStripEntryOperator.mapValues { (_, conflicts) ->
             conflicts.map { conflict -> conflict.toUiState() }.toSet()
         }
 
@@ -58,7 +62,8 @@ internal object GameUiStateFactory {
             ),
             tileOperandSelectionDialog = createTileOperandSelectionDialog(
                 puzzle = puzzle,
-                modal = presentationState.modal
+                modal = presentationState.modal,
+                liveRuleConflictsByUsage = liveRuleConflictsByUsage
             )
         )
     }
@@ -100,7 +105,8 @@ internal object GameUiStateFactory {
 
     private fun createTileOperandSelectionDialog(
         puzzle: Puzzle,
-        modal: GameModalState?
+        modal: GameModalState?,
+        liveRuleConflictsByUsage: Map<LiveStripEntryOperatorUsage, Set<RuleConflictUiState>>
     ): TileOperandSelectionDialogUiState? {
         val target = (modal as? GameModalState.TileOperandSelection)?.target ?: return null
 
@@ -117,18 +123,18 @@ internal object GameUiStateFactory {
             ).map { choice ->
                 TileOperandOptionUiState(
                     choice = choice,
-                    additionRuleConflicts = puzzle.liveRuleConflictsForCandidate(
-                        tileIndex = target.tileIndex,
-                        slot = target.slot,
-                        stripEntryId = choice.stripEntryId,
-                        operator = Operator.ADDITION
-                    ).map { conflict -> conflict.toUiState() }.toSet(),
-                    multiplicationRuleConflicts = puzzle.liveRuleConflictsForCandidate(
-                        tileIndex = target.tileIndex,
-                        slot = target.slot,
-                        stripEntryId = choice.stripEntryId,
-                        operator = Operator.MULTIPLICATION
-                    ).map { conflict -> conflict.toUiState() }.toSet()
+                    additionRuleConflicts = liveRuleConflictsByUsage[
+                        LiveStripEntryOperatorUsage(
+                            stripEntryId = choice.stripEntryId,
+                            operator = Operator.ADDITION
+                        )
+                    ].orEmpty(),
+                    multiplicationRuleConflicts = liveRuleConflictsByUsage[
+                        LiveStripEntryOperatorUsage(
+                            stripEntryId = choice.stripEntryId,
+                            operator = Operator.MULTIPLICATION
+                        )
+                    ].orEmpty()
                 )
             }
         )

@@ -296,6 +296,21 @@ class GameScreenRobot(
         )
     }
 
+    fun assertOperandUsageHintVisualState(entryId: Int, operator: Operator, visualState: String): GameScreenRobot =
+        apply {
+            interactions
+                .onNodeWithTag(
+                    GameScreenTestTags.tileOperandUsageHint(entryId = entryId, operator = operator),
+                    useUnmergedTree = true
+                )
+                .assert(
+                    SemanticsMatcher.expectValue(
+                        OperandSelectorUsageHintVisualStateKey,
+                        visualState
+                    )
+                )
+        }
+
     fun assertStripUsageIndicatorState(
         index: Int,
         operator: Operator,
@@ -307,6 +322,18 @@ class GameScreenRobot(
             stateDescriptionResId = stateDescriptionResId
         )
     }
+
+    fun assertStripUsageIndicatorDoesNotExposeSelectorVisualState(index: Int, operator: Operator): GameScreenRobot =
+        apply {
+            interactions
+                .onNodeWithTag(
+                    GameScreenTestTags.stripUsageIndicator(index = index, operator = operator),
+                    useUnmergedTree = true
+                )
+                .assert(
+                    SemanticsMatcher.keyNotDefined(OperandSelectorUsageHintVisualStateKey)
+                )
+        }
 
     fun assertStripUsageIndicatorHidden(index: Int, operator: Operator): GameScreenRobot = apply {
         interactions

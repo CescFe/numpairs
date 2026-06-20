@@ -60,6 +60,14 @@ class GameScreenStripUsageIndicatorTest : GameScreenTestHost() {
                 operator = Operator.MULTIPLICATION,
                 stateDescriptionResId = R.string.tile_operand_usage_state_used
             )
+            .assertStripUsageIndicatorDoesNotExposeSelectorVisualState(
+                index = 3,
+                operator = Operator.ADDITION
+            )
+            .assertStripUsageIndicatorDoesNotExposeSelectorVisualState(
+                index = 3,
+                operator = Operator.MULTIPLICATION
+            )
             .assertStripUsageIndicatorHidden(index = 4, operator = Operator.ADDITION)
             .assertStripUsageIndicatorHidden(index = 4, operator = Operator.MULTIPLICATION)
     }

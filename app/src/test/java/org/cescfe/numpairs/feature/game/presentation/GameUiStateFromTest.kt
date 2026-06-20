@@ -242,6 +242,20 @@ class GameUiStateFromTest {
             )
 
         val uiState = GameUiState.from(puzzle)
+        val selectorUiState = GameUiState.from(
+            puzzle = puzzle,
+            presentationState = GamePresentationState().showTileOperandSelection(
+                tileIndex = 2,
+                slot = OperandSlot.LEFT
+            )
+        )
+        val selectorDialog = selectorUiState.tileOperandSelectionDialog!!
+        val optionForThree = selectorDialog.availableOperands
+            .first { operand -> operand.stripEntryId == 2 }
+        val optionForOne = selectorDialog.availableOperands
+            .first { operand -> operand.stripEntryId == 0 }
+        val optionForTwo = selectorDialog.availableOperands
+            .first { operand -> operand.stripEntryId == 1 }
 
         assertEquals(
             setOf(RuleConflictUiState.DUPLICATE_OPERATOR_USAGE),
@@ -251,6 +265,12 @@ class GameUiStateFromTest {
             setOf(RuleConflictUiState.DUPLICATE_OPERATOR_USAGE),
             uiState.tiles[1].liveRuleConflicts
         )
+        assertEquals(
+            setOf(RuleConflictUiState.DUPLICATE_OPERATOR_USAGE),
+            optionForThree.multiplicationRuleConflicts
+        )
+        assertTrue(optionForOne.multiplicationRuleConflicts.isEmpty())
+        assertTrue(optionForTwo.multiplicationRuleConflicts.isEmpty())
         assertNull(uiState.puzzleOutcome)
     }
 
@@ -286,7 +306,7 @@ class GameUiStateFromTest {
     }
 
     @Test
-    fun maps_predictive_mixed_rule_conflicts_to_operand_options_without_changing_selectability() {
+    fun maps_reactive_mismatched_pairing_conflicts_to_operand_options() {
         val puzzle = liveRulePresentationPuzzle()
             .withTile(
                 index = 0,
@@ -316,17 +336,21 @@ class GameUiStateFromTest {
                 slot = OperandSlot.RIGHT
             )
         )
-        val optionForThree = uiState.tileOperandSelectionDialog!!.availableOperands
+        val selectorDialog = uiState.tileOperandSelectionDialog!!
+        val optionForOne = selectorDialog.availableOperands
+            .first { operand -> operand.stripEntryId == 0 }
+        val optionForThree = selectorDialog.availableOperands
             .first { operand -> operand.stripEntryId == 2 }
 
-        assertTrue(optionForThree.isSelectable)
         assertEquals(
-            setOf(
-                RuleConflictUiState.DUPLICATE_OPERATOR_USAGE,
-                RuleConflictUiState.MISMATCHED_PAIRING
-            ),
-            optionForThree.multiplicationRuleConflicts
+            setOf(RuleConflictUiState.MISMATCHED_PAIRING),
+            optionForOne.additionRuleConflicts
         )
+        assertEquals(
+            setOf(RuleConflictUiState.MISMATCHED_PAIRING),
+            optionForOne.multiplicationRuleConflicts
+        )
+        assertTrue(optionForThree.multiplicationRuleConflicts.isEmpty())
     }
 
     @Test
@@ -392,8 +416,7 @@ class GameUiStateFromTest {
                         value = 6,
                         additionUsed = true,
                         multiplicationUsed = false,
-                        isSelectable = true,
-                        additionRuleConflicts = setOf(RuleConflictUiState.DUPLICATE_OPERATOR_USAGE)
+                        isSelectable = true
                     ),
                     TileOperandOptionUiState(
                         stripEntryId = 1,

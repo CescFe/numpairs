@@ -5,8 +5,22 @@ enum class LivePuzzleRuleConflict {
     MISMATCHED_PAIRING
 }
 
+data class LiveStripEntryOperatorUsage(val stripEntryId: Int, val operator: Operator) {
+    init {
+        require(stripEntryId >= 0) {
+            "Strip entry id must be non-negative."
+        }
+        require(operator != Operator.Hidden) {
+            "Hidden operators cannot expose live usage conflicts."
+        }
+    }
+}
+
 val Puzzle.liveRuleConflictsByTile: Map<Int, Set<LivePuzzleRuleConflict>>
     get() = board.liveRuleConflictsByTile()
+
+val Puzzle.liveRuleConflictsByStripEntryOperator: Map<LiveStripEntryOperatorUsage, Set<LivePuzzleRuleConflict>>
+    get() = board.liveRuleConflictsByStripEntryOperator()
 
 fun Puzzle.liveRuleConflictsForCandidate(
     tileIndex: Int,
@@ -62,6 +76,35 @@ private fun Board.liveRuleConflictsByTile(
     return conflicts
 }
 
+private fun Board.liveRuleConflictsByStripEntryOperator():
+    Map<LiveStripEntryOperatorUsage, Set<LivePuzzleRuleConflict>> {
+    val assignments = operandAssignments(candidate = null)
+    val pairAssignments = pairAssignments(candidate = null)
+    val conflicts = mutableMapOf<LiveStripEntryOperatorUsage, MutableSet<LivePuzzleRuleConflict>>()
+
+    assignments
+        .groupBy { assignment -> assignment.stripEntryId to assignment.operator }
+        .values
+        .filter { sameEntryOperatorAssignments -> sameEntryOperatorAssignments.size > 1 }
+        .forEach { sameEntryOperatorAssignments ->
+            val duplicatedUsage = sameEntryOperatorAssignments.first().usage
+
+            conflicts.add(
+                usage = duplicatedUsage,
+                conflict = LivePuzzleRuleConflict.DUPLICATE_OPERATOR_USAGE
+            )
+        }
+
+    pairAssignments.mismatchedPairingUsages().forEach { usage ->
+        conflicts.add(
+            usage = usage,
+            conflict = LivePuzzleRuleConflict.MISMATCHED_PAIRING
+        )
+    }
+
+    return conflicts
+}
+
 private data class CandidateTileOperandAssignment(
     val tileIndex: Int,
     val slot: OperandSlot,
@@ -87,6 +130,13 @@ private data class PartnerOnTile(val partnerStripEntryId: Int, val tileIndex: In
 
 private fun MutableMap<Int, MutableSet<LivePuzzleRuleConflict>>.add(tileIndex: Int, conflict: LivePuzzleRuleConflict) {
     getOrPut(tileIndex) { mutableSetOf() }.add(conflict)
+}
+
+private fun MutableMap<LiveStripEntryOperatorUsage, MutableSet<LivePuzzleRuleConflict>>.add(
+    usage: LiveStripEntryOperatorUsage,
+    conflict: LivePuzzleRuleConflict
+) {
+    getOrPut(usage) { mutableSetOf() }.add(conflict)
 }
 
 private fun Board.operandAssignments(candidate: CandidateTileOperandAssignment?): List<LiveOperandAssignment> =
@@ -213,6 +263,54 @@ private fun List<LivePairAssignment>.mismatchedPairingTileIndexes(): Set<Int> {
         .toSet()
 }
 
+private fun List<LivePairAssignment>.mismatchedPairingUsages(): Set<LiveStripEntryOperatorUsage> {
+    val partnersByEntryIdAndOperator = mutableMapOf<Pair<Int, Operator>, MutableSet<PartnerOnTile>>()
+
+    forEach { assignment ->
+        partnersByEntryIdAndOperator.addPartner(
+            stripEntryId = assignment.leftStripEntryId,
+            operator = assignment.operator,
+            partner = PartnerOnTile(
+                partnerStripEntryId = assignment.rightStripEntryId,
+                tileIndex = assignment.tileIndex
+            )
+        )
+        partnersByEntryIdAndOperator.addPartner(
+            stripEntryId = assignment.rightStripEntryId,
+            operator = assignment.operator,
+            partner = PartnerOnTile(
+                partnerStripEntryId = assignment.leftStripEntryId,
+                tileIndex = assignment.tileIndex
+            )
+        )
+    }
+
+    return partnersByEntryIdAndOperator.keys
+        .map(Pair<Int, Operator>::first)
+        .toSet()
+        .flatMap { stripEntryId ->
+            val additionPartners = partnersByEntryIdAndOperator.getValueOrEmpty(stripEntryId, Operator.ADDITION)
+            val multiplicationPartners = partnersByEntryIdAndOperator.getValueOrEmpty(
+                stripEntryId = stripEntryId,
+                operator = Operator.MULTIPLICATION
+            )
+
+            if (
+                additionPartners.isNotEmpty() &&
+                multiplicationPartners.isNotEmpty() &&
+                additionPartners.partnerIds != multiplicationPartners.partnerIds
+            ) {
+                listOf(
+                    LiveStripEntryOperatorUsage(stripEntryId = stripEntryId, operator = Operator.ADDITION),
+                    LiveStripEntryOperatorUsage(stripEntryId = stripEntryId, operator = Operator.MULTIPLICATION)
+                )
+            } else {
+                emptyList()
+            }
+        }
+        .toSet()
+}
+
 private fun MutableMap<Pair<Int, Operator>, MutableSet<PartnerOnTile>>.addPartner(
     stripEntryId: Int,
     operator: Operator,
@@ -241,6 +339,9 @@ private fun CandidateTileOperandAssignment.asOperandAssignment(): LiveOperandAss
     stripEntryId = stripEntryId,
     operator = operator
 )
+
+private val LiveOperandAssignment.usage: LiveStripEntryOperatorUsage
+    get() = LiveStripEntryOperatorUsage(stripEntryId = stripEntryId, operator = operator)
 
 private val Puzzle.visibleStripEntryIds: Set<Int>
     get() = strip.entries.mapNotNull { entry ->

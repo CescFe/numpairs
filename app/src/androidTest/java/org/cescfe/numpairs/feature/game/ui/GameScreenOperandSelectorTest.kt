@@ -144,6 +144,65 @@ class GameScreenOperandSelectorTest : GameScreenTestHost() {
             )
     }
 
+    @Test
+    fun operandSelectorUsageHintBadgesExposeReactiveVisualStates() {
+        showUiStateFixture(operandSelectorUsageHintVisualStateUiState())
+
+        screen
+            .assertOperandUsageHintState(
+                entryId = 0,
+                operator = Operator.ADDITION,
+                stateDescriptionResId = R.string.tile_operand_usage_state_available
+            )
+            .assertOperandUsageHintVisualState(
+                entryId = 0,
+                operator = Operator.ADDITION,
+                visualState = OperandSelectorUsageHintVisualStateValues.AVAILABLE
+            )
+            .assertOperandUsageHintState(
+                entryId = 1,
+                operator = Operator.ADDITION,
+                stateDescriptionResId = R.string.tile_operand_usage_state_used
+            )
+            .assertOperandUsageHintVisualState(
+                entryId = 1,
+                operator = Operator.ADDITION,
+                visualState = OperandSelectorUsageHintVisualStateValues.USED_WITH_PAIRING_AVAILABLE
+            )
+            .assertOperandUsageHintState(
+                entryId = 2,
+                operator = Operator.ADDITION,
+                stateDescriptionResId = R.string.tile_operand_usage_state_used
+            )
+            .assertOperandUsageHintVisualState(
+                entryId = 2,
+                operator = Operator.ADDITION,
+                visualState = OperandSelectorUsageHintVisualStateValues.USED_EXHAUSTED
+            )
+            .assertOperandUsageHintState(
+                entryId = 3,
+                operator = Operator.ADDITION,
+                stateDescriptionResId = R.string.tile_operand_usage_state_rule_conflict
+            )
+            .assertOperandUsageHintVisualState(
+                entryId = 3,
+                operator = Operator.ADDITION,
+                visualState = OperandSelectorUsageHintVisualStateValues.RULE_CONFLICT
+            )
+            .assertOperandOptionEnabled(entryId = 3)
+            .assertOperandUsageHintState(
+                entryId = 4,
+                operator = Operator.MULTIPLICATION,
+                stateDescriptionResId = R.string.tile_operand_usage_state_rule_conflict
+            )
+            .assertOperandUsageHintVisualState(
+                entryId = 4,
+                operator = Operator.MULTIPLICATION,
+                visualState = OperandSelectorUsageHintVisualStateValues.RULE_CONFLICT
+            )
+            .assertOperandOptionEnabled(entryId = 4)
+    }
+
     private fun fillTileLeftOperandWithEntryTwo(tileIndex: Int, operator: Operator? = null) {
         screen
             .scrollToBoard()

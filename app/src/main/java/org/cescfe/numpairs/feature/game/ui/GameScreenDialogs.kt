@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.feature.game.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -193,7 +194,7 @@ private fun OperandUsageHintBadge(
     enabled: Boolean = true
 ) {
     val hintContentDescription = stringResource(operator.usageIndicatorContentDescriptionResId)
-    val hintStateDescription = stringResource(visualState.semanticState.stateDescriptionResId)
+    val hintStateDescription = stringResource(visualState.stateDescriptionResId)
     val resolvedColors = operandSelectorUsageHintColors(visualState).let { colors ->
         if (enabled || visualState != OperandSelectorUsageHintVisualState.AVAILABLE) {
             colors
@@ -208,6 +209,7 @@ private fun OperandUsageHintBadge(
             .semantics {
                 contentDescription = hintContentDescription
                 stateDescription = hintStateDescription
+                operandSelectorUsageHintVisualState = visualState.semanticsValue
             },
         shape = RoundedCornerShape(TILE_OPERAND_HINT_CORNER_RADIUS),
         color = resolvedColors.container,
@@ -241,6 +243,12 @@ private fun operandSelectorUsageHintColors(
     OperandSelectorUsageHintVisualState.USED_EXHAUSTED -> operandUsageIndicatorColors(
         OperandUsageIndicatorState.USED
     )
+
+    OperandSelectorUsageHintVisualState.RULE_CONFLICT -> OperandUsageIndicatorColors(
+        container = NumPairsComponents.errorContainerColor(),
+        content = NumPairsComponents.errorContentColor(),
+        border = NumPairsComponents.errorBorder()
+    )
 }
 
 @Composable
@@ -268,26 +276,51 @@ private fun operandOptionColors(enabled: Boolean): OperandOptionColors = if (ena
 }
 
 private fun TileOperandOptionUiState.usageHintVisualStateFor(operator: Operator): OperandSelectorUsageHintVisualState =
-    when (operator) {
-        Operator.Addition -> when {
-            !additionUsed -> OperandSelectorUsageHintVisualState.AVAILABLE
-            multiplicationUsed -> OperandSelectorUsageHintVisualState.USED_EXHAUSTED
-            else -> OperandSelectorUsageHintVisualState.USED_WITH_PAIRING_AVAILABLE
-        }
+    when {
+        ruleConflictsFor(operator).isNotEmpty() -> OperandSelectorUsageHintVisualState.RULE_CONFLICT
+        else -> when (operator) {
+            Operator.Addition -> when {
+                !additionUsed -> OperandSelectorUsageHintVisualState.AVAILABLE
+                multiplicationUsed -> OperandSelectorUsageHintVisualState.USED_EXHAUSTED
+                else -> OperandSelectorUsageHintVisualState.USED_WITH_PAIRING_AVAILABLE
+            }
 
-        Operator.Multiplication -> when {
-            !multiplicationUsed -> OperandSelectorUsageHintVisualState.AVAILABLE
-            additionUsed -> OperandSelectorUsageHintVisualState.USED_EXHAUSTED
-            else -> OperandSelectorUsageHintVisualState.USED_WITH_PAIRING_AVAILABLE
-        }
+            Operator.Multiplication -> when {
+                !multiplicationUsed -> OperandSelectorUsageHintVisualState.AVAILABLE
+                additionUsed -> OperandSelectorUsageHintVisualState.USED_EXHAUSTED
+                else -> OperandSelectorUsageHintVisualState.USED_WITH_PAIRING_AVAILABLE
+            }
 
-        Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
+            Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
+        }
     }
 
-private enum class OperandSelectorUsageHintVisualState(val semanticState: OperandUsageIndicatorState) {
-    AVAILABLE(OperandUsageIndicatorState.AVAILABLE),
-    USED_WITH_PAIRING_AVAILABLE(OperandUsageIndicatorState.USED),
-    USED_EXHAUSTED(OperandUsageIndicatorState.USED)
+private fun TileOperandOptionUiState.ruleConflictsFor(operator: Operator) = when (operator) {
+    Operator.Addition -> additionRuleConflicts
+    Operator.Multiplication -> multiplicationRuleConflicts
+    Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
+}
+
+private enum class OperandSelectorUsageHintVisualState(
+    @get:StringRes val stateDescriptionResId: Int,
+    val semanticsValue: String
+) {
+    AVAILABLE(
+        R.string.tile_operand_usage_state_available,
+        OperandSelectorUsageHintVisualStateValues.AVAILABLE
+    ),
+    USED_WITH_PAIRING_AVAILABLE(
+        R.string.tile_operand_usage_state_used,
+        OperandSelectorUsageHintVisualStateValues.USED_WITH_PAIRING_AVAILABLE
+    ),
+    USED_EXHAUSTED(
+        R.string.tile_operand_usage_state_used,
+        OperandSelectorUsageHintVisualStateValues.USED_EXHAUSTED
+    ),
+    RULE_CONFLICT(
+        R.string.tile_operand_usage_state_rule_conflict,
+        OperandSelectorUsageHintVisualStateValues.RULE_CONFLICT
+    )
 }
 
 @Composable

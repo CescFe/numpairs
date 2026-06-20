@@ -34,6 +34,7 @@
     <string name="tile_operand_usage_multiplication_hint">Multiplication usage hint</string>
     <string name="tile_operand_usage_state_available">Available</string>
     <string name="tile_operand_usage_state_used">Used</string>
+    <string name="tile_operand_usage_state_rule_conflict">Rule conflict</string>
     <string name="tile_operator_dialog_title">Choose operator</string>
     <string name="tile_operator_option_addition">Addition (+)</string>
     <string name="tile_operator_option_multiplication">Multiplication (×)</string>
