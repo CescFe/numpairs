@@ -3,10 +3,10 @@ package org.cescfe.numpairs.feature.game.ui.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick as semanticOnClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
@@ -55,76 +56,32 @@ fun AvailableNumberChip(
     } else {
         chipColors.border
     }
-    val chipModifier = if (contentDescription == null) {
-        modifier
-    } else {
-        modifier.semantics(mergeDescendants = true) {
-            this.contentDescription = contentDescription
+    val clickAction = onClick
+    val chipModifier = modifier
+        .semantics(mergeDescendants = true) {
+            contentDescription?.let { this.contentDescription = it }
+            clickAction?.let { action ->
+                semanticOnClick(action = {
+                    action()
+                    true
+                })
+            }
         }
-    }.gameHighlightSemantics(isHighlighted)
+        .gameHighlightSemantics(isHighlighted)
 
-    if (onClick == null) {
-        Surface(
-            modifier = chipModifier,
-            shape = NumPairsComponents.MediumShape,
-            color = chipColors.containerColor,
-            contentColor = chipColors.contentColor,
-            border = chipBorder,
-            tonalElevation = 1.dp
-        ) {
-            AvailableNumberChipContent(
-                label = label,
-                showUsageIndicators = style != AvailableNumberChipStyle.HIDDEN,
-                additionUsed = additionUsed,
-                multiplicationUsed = multiplicationUsed,
-                additionUsageIndicatorTestTag = additionUsageIndicatorTestTag,
-                multiplicationUsageIndicatorTestTag = multiplicationUsageIndicatorTestTag
-            )
-        }
-    } else {
-        Surface(
-            modifier = chipModifier,
-            onClick = onClick,
-            shape = NumPairsComponents.MediumShape,
-            color = chipColors.containerColor,
-            contentColor = chipColors.contentColor,
-            border = chipBorder,
-            tonalElevation = 1.dp
-        ) {
-            AvailableNumberChipContent(
-                label = label,
-                showUsageIndicators = style != AvailableNumberChipStyle.HIDDEN,
-                additionUsed = additionUsed,
-                multiplicationUsed = multiplicationUsed,
-                additionUsageIndicatorTestTag = additionUsageIndicatorTestTag,
-                multiplicationUsageIndicatorTestTag = multiplicationUsageIndicatorTestTag
-            )
-        }
-    }
-}
-
-@Composable
-private fun AvailableNumberChipContent(
-    label: String,
-    showUsageIndicators: Boolean,
-    additionUsed: Boolean,
-    multiplicationUsed: Boolean,
-    additionUsageIndicatorTestTag: String?,
-    multiplicationUsageIndicatorTestTag: String?
-) {
-    if (showUsageIndicators) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = CHIP_MIN_HEIGHT)
-                .padding(
-                    horizontal = CHIP_CONTENT_HORIZONTAL_PADDING,
-                    vertical = CHIP_CONTENT_VERTICAL_PADDING
-                ),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
+    Box(
+        modifier = chipModifier,
+        contentAlignment = Alignment.TopCenter
+    ) {
+        AvailableNumberChipSurface(
+            label = label,
+            chipColors = chipColors,
+            chipBorder = chipBorder,
+            onClick = onClick
+        )
+        if (style != AvailableNumberChipStyle.HIDDEN) {
             Row(
+                modifier = Modifier.offset(y = -CHIP_USAGE_INDICATOR_OVERLAY_LIFT),
                 horizontalArrangement = Arrangement.spacedBy(CHIP_USAGE_INDICATOR_SPACING),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -139,18 +96,53 @@ private fun AvailableNumberChipContent(
                     testTag = multiplicationUsageIndicatorTestTag
                 )
             }
-            AvailableNumberChipLabel(label = label)
+        }
+    }
+}
+
+@Composable
+private fun AvailableNumberChipSurface(
+    label: String,
+    chipColors: AvailableNumberChipColors,
+    chipBorder: BorderStroke,
+    onClick: (() -> Unit)?
+) {
+    if (onClick == null) {
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = NumPairsComponents.MediumShape,
+            color = chipColors.containerColor,
+            contentColor = chipColors.contentColor,
+            border = chipBorder,
+            tonalElevation = 1.dp
+        ) {
+            AvailableNumberChipContent(label = label)
         }
     } else {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = CHIP_MIN_HEIGHT)
-                .padding(horizontal = 4.dp),
-            contentAlignment = Alignment.Center
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onClick,
+            shape = NumPairsComponents.MediumShape,
+            color = chipColors.containerColor,
+            contentColor = chipColors.contentColor,
+            border = chipBorder,
+            tonalElevation = 1.dp
         ) {
-            AvailableNumberChipLabel(label = label)
+            AvailableNumberChipContent(label = label)
         }
+    }
+}
+
+@Composable
+private fun AvailableNumberChipContent(label: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = CHIP_MIN_HEIGHT)
+            .padding(horizontal = 4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        AvailableNumberChipLabel(label = label)
     }
 }
 

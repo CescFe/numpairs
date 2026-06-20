@@ -8,8 +8,7 @@ import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
 internal val CHIP_MIN_HEIGHT = 48.dp
-internal val CHIP_CONTENT_HORIZONTAL_PADDING = 2.dp
-internal val CHIP_CONTENT_VERTICAL_PADDING = 3.dp
+internal val CHIP_USAGE_INDICATOR_OVERLAY_LIFT = 5.dp
 internal val CHIP_USAGE_INDICATOR_SPACING = 1.dp
 internal val CHIP_USAGE_INDICATOR_HORIZONTAL_PADDING = 3.dp
 internal val CHIP_USAGE_INDICATOR_VERTICAL_PADDING = 0.dp
