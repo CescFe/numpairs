@@ -27,6 +27,7 @@ It intentionally focuses on in-puzzle behavior. Splash, menu, and replay routing
 - **Contextual selector**: a small anchored popover or bubble used to choose a value for a grid slot
 - **Entry dialog**: the dialog used to enter or edit a number in the strip
 - **Rules helper**: an informational dialog opened from the game top app bar to explain core game rules
+- **Usage indicator**: a compact `+` or `×` marker that shows whether a visible strip entry is already used by that operator family
 
 In this document, strip items are rendered as chips.
 
@@ -86,6 +87,40 @@ Each strip item has an origin state.
   - Displayed as a number entered by the player
   - Uses a filled or tonal style to distinguish it from known strip items
   - Is editable
+
+### Usage Indicator States
+
+Visible strip entries should expose persistent operator-family usage indicators in the strip so players can scan number availability without opening the operand selector.
+
+Usage indicators are computed per strip entry, not per numeric value. If the same number appears more than once, each repeated value keeps its own independent usage state.
+
+Hidden strip items do not show operator-family usage indicators because they do not yet expose a selectable number.
+
+For each visible strip entry, the combined usage state is:
+
+- **Unused**
+  - Neither `+` nor `×` has been used for this strip entry
+  - Both operator-family markers should read as available
+
+- **Addition-used**
+  - The strip entry is already used in an addition expression
+  - The `+` marker should read as used
+  - The `×` marker should read as available
+
+- **Multiplication-used**
+  - The strip entry is already used in a multiplication expression
+  - The `×` marker should read as used
+  - The `+` marker should read as available
+
+- **Fully-used**
+  - The strip entry is already used once in addition and once in multiplication
+  - Both `+` and `×` markers should read as used
+
+Operator-family usage indicators are informational. Assignment availability is still governed by the puzzle rules, including cases where a strip entry is temporarily assigned to a tile whose operator is still hidden.
+
+The indicators must not rely on color alone. The symbols, border or fill treatment, opacity, and accessibility state descriptions should all help communicate used versus available states.
+
+The strip remains a narrow-screen constraint. Usage indicators must stay compact enough that visible strip values, including three-digit values, remain readable and the single-row strip layout remains stable.
 
 ---
 
@@ -180,12 +215,14 @@ The contextual selector is the primary interaction used to edit the grid.
 - Selecting a value immediately fills or replaces the operand slot and closes the sheet
 - Closing the selector without choosing a value leaves the slot unchanged
 - The selector does not specially highlight the currently assigned operand when reopened
-- Each visible strip entry shows subtle `+` and `×` usage indicators derived from the current board state
+- Each visible strip entry in the operand selector shows contextual `+` and `×` usage badges derived from the current board state
+- Operand selector usage badges should remain richer and more legible than the persistent strip indicators because the player is actively choosing an operand in this context
+- The persistent strip indicators and operand selector badges must use the same semantic meaning for `+`, `×`, used, and available
 - A strip entry becomes unavailable once it is already assigned twice anywhere on the board, even if one or both assignments still belong to tiles whose operator is hidden
 - Reopening a slot keeps that slot's current strip entry selectable for reassignment there, even if the entry is otherwise exhausted
 - The `+` and `×` indicators remain informational; disabled options are driven by strip-entry availability rather than by the badges alone
 
-Operand selection logic should treat strip entries as unique entities rather than grouping options only by numeric value. Any future operator-usage indicators must therefore be computed per strip entry.
+Operand selection logic should treat strip entries as unique entities rather than grouping options only by numeric value. Operator-usage indicators in both the strip and operand selector must therefore be computed per strip entry.
 
 ### Operator Slot Mode
 
@@ -224,11 +261,12 @@ The entry dialog is used only for strip items, not for grid slot assignment.
 
 ## Visual Guidance
 
-The strip should communicate three things at a glance:
+The strip should communicate four things at a glance:
 
 1. Which strip items were known from the beginning
 2. Which strip items were entered by the player
 3. Which strip items are still hidden
+4. Which visible strip entries have already been used for `+`, `×`, both, or neither
 
 The grid should communicate two things at a glance:
 
@@ -244,10 +282,11 @@ Recommended visual direction for the first implementation:
 - `Known strip item`: outlined chip
 - `Player-entered strip item`: filled or tonal chip
 - `Hidden strip item`: `?`
+- Visible strip item usage: compact persistent `+` / `×` indicators
 - Hidden grid slot: `?`
 - Filled grid slot: chosen number or operator
 - Active grid slot: temporary highlight while its contextual selector is open
-- Operand selector option: number-first card with compact `+` / `×` micro-indicators
+- Operand selector option: number-first card with contextual `+` / `×` badges
 - Incorrect tile: subtle error-tinted container
 - Incorrect tile: error border
 - Incorrect tile: expression row in error color
