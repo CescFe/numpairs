@@ -160,7 +160,7 @@ private fun OperandSelectionOption(operand: TileOperandOptionUiState, onConfirm:
             }
             OperandUsageHintBadge(
                 operator = Operator.ADDITION,
-                usageState = operand.usageStateFor(Operator.ADDITION),
+                visualState = operand.usageHintVisualStateFor(Operator.ADDITION),
                 stripEntryId = operand.stripEntryId,
                 enabled = operand.isSelectable,
                 modifier = Modifier
@@ -171,7 +171,7 @@ private fun OperandSelectionOption(operand: TileOperandOptionUiState, onConfirm:
             )
             OperandUsageHintBadge(
                 operator = Operator.MULTIPLICATION,
-                usageState = operand.usageStateFor(Operator.MULTIPLICATION),
+                visualState = operand.usageHintVisualStateFor(Operator.MULTIPLICATION),
                 stripEntryId = operand.stripEntryId,
                 enabled = operand.isSelectable,
                 modifier = Modifier
@@ -188,14 +188,18 @@ private fun OperandSelectionOption(operand: TileOperandOptionUiState, onConfirm:
 private fun OperandUsageHintBadge(
     modifier: Modifier = Modifier,
     operator: Operator,
-    usageState: OperandUsageIndicatorState,
+    visualState: OperandSelectorUsageHintVisualState,
     stripEntryId: Int,
     enabled: Boolean = true
 ) {
     val hintContentDescription = stringResource(operator.usageIndicatorContentDescriptionResId)
-    val hintStateDescription = stringResource(usageState.stateDescriptionResId)
-    val resolvedColors = operandUsageIndicatorColors(usageState).let { colors ->
-        if (enabled) colors else colors.disabled()
+    val hintStateDescription = stringResource(visualState.semanticState.stateDescriptionResId)
+    val resolvedColors = operandSelectorUsageHintColors(visualState).let { colors ->
+        if (enabled || visualState != OperandSelectorUsageHintVisualState.AVAILABLE) {
+            colors
+        } else {
+            colors.disabled()
+        }
     }
 
     Surface(
@@ -222,6 +226,24 @@ private fun OperandUsageHintBadge(
 }
 
 @Composable
+private fun operandSelectorUsageHintColors(
+    visualState: OperandSelectorUsageHintVisualState
+): OperandUsageIndicatorColors = when (visualState) {
+    OperandSelectorUsageHintVisualState.AVAILABLE -> operandUsageIndicatorColors(
+        OperandUsageIndicatorState.AVAILABLE
+    )
+    OperandSelectorUsageHintVisualState.USED_WITH_PAIRING_AVAILABLE -> OperandUsageIndicatorColors(
+        container = NumPairsComponents.successContainerColor(),
+        content = NumPairsComponents.successContentColor(),
+        border = NumPairsComponents.focusBorder()
+    )
+
+    OperandSelectorUsageHintVisualState.USED_EXHAUSTED -> operandUsageIndicatorColors(
+        OperandUsageIndicatorState.USED
+    )
+}
+
+@Composable
 private fun OperandUsageIndicatorColors.disabled(): OperandUsageIndicatorColors = OperandUsageIndicatorColors(
     container = lerp(container, NumPairsComponents.raisedSurfaceColor(), 0.35f),
     content = lerp(content, MaterialTheme.colorScheme.onSurfaceVariant, 0.25f),
@@ -245,18 +267,27 @@ private fun operandOptionColors(enabled: Boolean): OperandOptionColors = if (ena
     )
 }
 
-private fun TileOperandOptionUiState.usageStateFor(operator: Operator): OperandUsageIndicatorState = when (operator) {
-    Operator.Addition -> when {
-        additionUsed -> OperandUsageIndicatorState.USED
-        else -> OperandUsageIndicatorState.AVAILABLE
+private fun TileOperandOptionUiState.usageHintVisualStateFor(operator: Operator): OperandSelectorUsageHintVisualState =
+    when (operator) {
+        Operator.Addition -> when {
+            !additionUsed -> OperandSelectorUsageHintVisualState.AVAILABLE
+            multiplicationUsed -> OperandSelectorUsageHintVisualState.USED_EXHAUSTED
+            else -> OperandSelectorUsageHintVisualState.USED_WITH_PAIRING_AVAILABLE
+        }
+
+        Operator.Multiplication -> when {
+            !multiplicationUsed -> OperandSelectorUsageHintVisualState.AVAILABLE
+            additionUsed -> OperandSelectorUsageHintVisualState.USED_EXHAUSTED
+            else -> OperandSelectorUsageHintVisualState.USED_WITH_PAIRING_AVAILABLE
+        }
+
+        Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
     }
 
-    Operator.Multiplication -> when {
-        multiplicationUsed -> OperandUsageIndicatorState.USED
-        else -> OperandUsageIndicatorState.AVAILABLE
-    }
-
-    Operator.Hidden -> error("Hidden operator does not expose operand usage hints.")
+private enum class OperandSelectorUsageHintVisualState(val semanticState: OperandUsageIndicatorState) {
+    AVAILABLE(OperandUsageIndicatorState.AVAILABLE),
+    USED_WITH_PAIRING_AVAILABLE(OperandUsageIndicatorState.USED),
+    USED_EXHAUSTED(OperandUsageIndicatorState.USED)
 }
 
 @Composable
