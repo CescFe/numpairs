@@ -213,6 +213,7 @@ Gameplay states should map consistently to the core color strategy:
 - Known strip entries: stable dark or neutral surface with subtle border
 - Hidden strip entries: neutral gray treatment that clearly communicates unknown value
 - Player-entered strip entries: player-owned state with accent relationship, without overpowering the board
+- Strip usage indicators: compact neutral `+` and `×` markers; available uses subtle surface treatment, used uses player-owned focus blue, and rule conflicts are not shown in the strip
 - Selected or focused elements: accent or `accentSoft`
 - Valid or completed states: jade green
 - Invalid or incorrect states: soft red
@@ -467,7 +468,21 @@ The strip usage treatment should be more compact than the operand selector badge
 
 Used versus available marker states must not rely on color alone. Keep the `+` and `×` symbols visible and pair color with at least one additional cue such as fill, border, weight, opacity, or state description.
 
+Final compact treatment:
+
+- Render the indicators as two small pill markers over the chip's top edge.
+- Keep hidden strip chips indicator-free.
+- Use the same `+` and `×` semantics as the operand selector badges.
+- Use subtle surface, muted content, and subtle border for available markers.
+- Use player-owned focus blue fill, matching border, and contrasting content for used markers.
+- Do not use jade for strip usage because jade implies success or correctness.
+- Do not use red for strip usage because conflicts belong to selector badges, local tile feedback, contextual messages, and final invalid feedback.
+- Keep an opaque or subtle marker surface so the chip surface behind the marker does not visually bleed through.
+- Preserve accessibility content descriptions for the operator and state descriptions for available versus used.
+
 Narrow-screen readability is a hard constraint for this feature. If persistent usage markers compete with three-digit values or destabilize the single-row strip, prefer a smaller two-segment treatment over larger badge-like elements.
+
+The implemented strip indicator treatment was checked by static Compose/layout review on 2026-06-21. The indicators overlay the chip edge instead of taking space from the centered label; strip labels remain single-line; chip tap behavior remains unchanged; and the indicator text uses the puzzle micro-label style so it scales with Android font settings without becoming the dominant chip content. This pass intentionally did not run on an emulator or physical device.
 
 ### Puzzle Tiles
 
@@ -607,7 +622,7 @@ This QA record captures the documentation and static implementation review for t
 
 Review scope:
 
-- Date: 2026-06-19
+- Date: 2026-06-19; strip usage indicator follow-up on 2026-06-21
 - Method: static review of Compose implementation, theme tokens, component defaults, previews, and existing UI test fixtures
 - Device/emulator execution: not performed
 - Reason device/emulator execution was not performed: this pass is constrained to avoid running anything against an emulator or physical device
@@ -630,6 +645,8 @@ Narrow-screen readability review:
 - Board tiles reflow by available width and stay within `112dp` to `144dp`, with `12dp` gaps and centered rows.
 - Tile expression slots keep stable widths and minimum heights; operator slots stay fixed at `28dp`.
 - The number strip remains a compact single row of eight chips with `48dp` minimum chip height and `4dp` gaps.
+- Strip usage indicators render as compact `+` / `×` overlays above visible strip chips, so they do not reduce the centered label's available row space.
+- Three-digit strip labels and usage indicators were checked by static layout review against the current equal-width strip row, `4dp` chip gaps, and stable chip min-height.
 - Dialog and helper content uses constrained scroll regions (`420dp` helper content max height, `320dp` operand sheet max height).
 - The tightest narrow-screen area remains the single-row number strip with three-digit labels; keep it on the visual QA watch list for any future device pass.
 
@@ -638,7 +655,10 @@ Increased font-scale review for puzzle-critical text:
 - Puzzle-critical text uses `sp` values and shared JetBrains Mono styles rather than viewport-scaled typography.
 - Three-character tile operands switch to the compact tile expression style.
 - Tile result typography remains the strongest numeric emphasis at `32sp` / `48sp`.
-- Strip chips keep a `48dp` minimum touch height, and tile expression slots keep a `40dp` minimum height.
+- Strip labels use JetBrains Mono `14sp` / `20sp`; strip usage indicators use the puzzle micro-label style at `11sp` / `16sp`.
+- Strip chips keep a `48dp` minimum touch height, and the indicator overlay does not change chip height or tap behavior.
+- Three-digit strip labels and compact indicators were checked by static implementation review for increased font-scale risk; any future increase in marker size should receive a device visual pass.
+- Tile expression slots keep a `40dp` minimum height.
 - Existing UI test fixtures include large operand coverage for three-digit tile operands and stable tap target bounds, but this pass did not execute those tests on a device.
 
 ---
