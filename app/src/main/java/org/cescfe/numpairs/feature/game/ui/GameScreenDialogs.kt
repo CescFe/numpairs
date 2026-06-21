@@ -234,11 +234,7 @@ private fun operandSelectorUsageHintColors(
     OperandSelectorUsageHintVisualState.AVAILABLE -> operandUsageIndicatorColors(
         OperandUsageIndicatorState.AVAILABLE
     )
-    OperandSelectorUsageHintVisualState.USED_WITH_PAIRING_AVAILABLE -> OperandUsageIndicatorColors(
-        container = NumPairsComponents.successContainerColor(),
-        content = NumPairsComponents.successContentColor(),
-        border = NumPairsComponents.focusBorder()
-    )
+    OperandSelectorUsageHintVisualState.USED_WITH_PAIRING_AVAILABLE -> operandSelectorPartialUsageHintColors()
 
     OperandSelectorUsageHintVisualState.USED_EXHAUSTED -> operandUsageIndicatorColors(
         OperandUsageIndicatorState.USED
@@ -250,6 +246,16 @@ private fun operandSelectorUsageHintColors(
         border = NumPairsComponents.errorBorder()
     )
 }
+
+@Composable
+private fun operandSelectorPartialUsageHintColors(): OperandUsageIndicatorColors = OperandUsageIndicatorColors(
+    container = NumPairsComponents.subtleSurfaceColor(),
+    content = MaterialTheme.colorScheme.secondary,
+    border = BorderStroke(
+        width = NumPairsComponents.FocusBorderWidth,
+        color = MaterialTheme.colorScheme.secondary
+    )
+)
 
 @Composable
 private fun OperandUsageIndicatorColors.disabled(): OperandUsageIndicatorColors = OperandUsageIndicatorColors(
