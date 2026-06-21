@@ -14,6 +14,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyPuzzleGenerator
 import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyRules
 import org.cescfe.numpairs.domain.puzzle.Board
@@ -153,9 +154,14 @@ class FourPairsCompletionActionsTest {
     }
 
     private fun setContent(puzzleProvider: FourPairsPuzzleProvider) {
+        val actionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository()
+
         composeTestRule.setContent {
             NumPairsTheme {
-                AppNavigation(fourPairsPuzzleProvider = puzzleProvider)
+                AppNavigation(
+                    topAppBarActionDiscoveryRepository = actionDiscoveryRepository,
+                    fourPairsPuzzleProvider = puzzleProvider
+                )
             }
         }
     }

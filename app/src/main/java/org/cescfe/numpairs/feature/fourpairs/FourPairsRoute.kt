@@ -11,7 +11,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -29,18 +28,14 @@ import org.cescfe.numpairs.feature.tutorial.TutorialOverlayHost
 
 @Composable
 fun FourPairsRoute(
+    topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     modifier: Modifier = Modifier,
     puzzleProvider: FourPairsPuzzleProvider = DefaultFourPairsPuzzleProvider,
-    topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository? = null,
     tutorialOverlayMode: TutorialMode? = null,
     onTutorialOverlayClosed: () -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
-    val context = LocalContext.current.applicationContext
-    val actionDiscoveryRepository = remember(context, topAppBarActionDiscoveryRepository) {
-        topAppBarActionDiscoveryRepository ?: TopAppBarActionDiscoveryRepository.create(context)
-    }
-    val actionDiscoveryState by actionDiscoveryRepository.discoveryState.collectAsState(
+    val actionDiscoveryState by topAppBarActionDiscoveryRepository.discoveryState.collectAsState(
         initial = TopAppBarActionDiscoveryState()
     )
     val coroutineScope = rememberCoroutineScope()
@@ -81,7 +76,7 @@ fun FourPairsRoute(
             onRulesHelperActionTapped = {
                 if (!actionDiscoveryState.hasSeenHelpAction) {
                     coroutineScope.launch {
-                        actionDiscoveryRepository.markHelpActionSeen()
+                        topAppBarActionDiscoveryRepository.markHelpActionSeen()
                     }
                 }
             },
@@ -93,7 +88,7 @@ fun FourPairsRoute(
                     onClick = {
                         if (!actionDiscoveryState.hasSeenHintAction) {
                             coroutineScope.launch {
-                                actionDiscoveryRepository.markHintActionSeen()
+                                topAppBarActionDiscoveryRepository.markHintActionSeen()
                             }
                         }
                         isSolvingTipsDialogVisible = true
