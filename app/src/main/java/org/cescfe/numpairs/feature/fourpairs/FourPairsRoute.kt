@@ -3,16 +3,21 @@ package org.cescfe.numpairs.feature.fourpairs
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import kotlinx.coroutines.launch
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryRepository
+import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryState
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.GameRoute
@@ -23,12 +28,17 @@ import org.cescfe.numpairs.feature.tutorial.TutorialOverlayHost
 
 @Composable
 fun FourPairsRoute(
+    topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     modifier: Modifier = Modifier,
     puzzleProvider: FourPairsPuzzleProvider = DefaultFourPairsPuzzleProvider,
     tutorialOverlayMode: TutorialMode? = null,
     onTutorialOverlayClosed: () -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
+    val actionDiscoveryState by topAppBarActionDiscoveryRepository.discoveryState.collectAsState(
+        initial = TopAppBarActionDiscoveryState()
+    )
+    val coroutineScope = rememberCoroutineScope()
     val gameSessionFactory = remember(puzzleProvider) {
         FourPairsGameSessionFactory(puzzleProvider = puzzleProvider)
     }
@@ -63,12 +73,24 @@ fun FourPairsRoute(
                 onReturnToMenuRequested = onNavigateBack
             ),
             isRulesHelperEnabled = true,
+            onRulesHelperActionTapped = {
+                if (!actionDiscoveryState.hasSeenHelpAction) {
+                    coroutineScope.launch {
+                        topAppBarActionDiscoveryRepository.markHelpActionSeen()
+                    }
+                }
+            },
             onRulesHelperPlayTutorialRequested = {
                 requestedTutorialOverlayMode = TutorialMode.LEARN_BASICS
             },
             topBarActions = {
                 HintAction(
                     onClick = {
+                        if (!actionDiscoveryState.hasSeenHintAction) {
+                            coroutineScope.launch {
+                                topAppBarActionDiscoveryRepository.markHintActionSeen()
+                            }
+                        }
                         isSolvingTipsDialogVisible = true
                     }
                 )

@@ -64,6 +64,7 @@ fun GameScreen(
     onSuccessOverlayDismissed: () -> Unit = {},
     completionActions: GameCompletionActions? = null,
     isRulesHelperEnabled: Boolean = false,
+    onRulesHelperActionTapped: () -> Unit = {},
     onRulesHelperPlayTutorialRequested: (() -> Unit)? = null,
     isSuccessOverlayEnabled: Boolean = true,
     interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
@@ -88,6 +89,7 @@ fun GameScreen(
                     title = title,
                     onNavigateBack = onNavigateBack,
                     onRulesHelperClick = {
+                        onRulesHelperActionTapped()
                         isRulesHelperVisible = true
                     },
                     isRulesHelperEnabled = isRulesHelperEnabled,

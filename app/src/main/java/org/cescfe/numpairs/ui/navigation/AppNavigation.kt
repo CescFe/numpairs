@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.feature.fourpairs.DefaultFourPairsPuzzleProvider
 import org.cescfe.numpairs.feature.fourpairs.FourPairsPuzzleProvider
 import org.cescfe.numpairs.feature.fourpairs.FourPairsRoute
@@ -21,6 +22,7 @@ sealed interface AppDestination {
 
 @Composable
 fun AppNavigation(
+    topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     modifier: Modifier = Modifier,
     startDestination: AppDestination = AppDestination.Menu,
     fourPairsPuzzleProvider: FourPairsPuzzleProvider = DefaultFourPairsPuzzleProvider
@@ -53,6 +55,7 @@ fun AppNavigation(
         AppDestination.FourPairs -> FourPairsRoute(
             modifier = modifier,
             puzzleProvider = fourPairsPuzzleProvider,
+            topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
             onNavigateBack = navigateToMenu
         )
     }

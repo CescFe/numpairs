@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.feature.fourpairs.FourPairsPuzzleProvider
@@ -51,9 +52,14 @@ class AppNavigationLearningFlowTest {
     }
 
     private fun setContent(puzzleProvider: FourPairsPuzzleProvider) {
+        val actionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository()
+
         composeTestRule.setContent {
             NumPairsTheme {
-                AppNavigation(fourPairsPuzzleProvider = puzzleProvider)
+                AppNavigation(
+                    topAppBarActionDiscoveryRepository = actionDiscoveryRepository,
+                    fourPairsPuzzleProvider = puzzleProvider
+                )
             }
         }
 
