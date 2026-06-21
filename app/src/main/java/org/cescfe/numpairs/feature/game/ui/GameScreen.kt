@@ -64,6 +64,7 @@ fun GameScreen(
     onSuccessOverlayDismissed: () -> Unit = {},
     completionActions: GameCompletionActions? = null,
     isRulesHelperEnabled: Boolean = false,
+    isRulesHelperActionDiscoveryDotVisible: Boolean = false,
     onRulesHelperActionTapped: () -> Unit = {},
     onRulesHelperPlayTutorialRequested: (() -> Unit)? = null,
     isSuccessOverlayEnabled: Boolean = true,
@@ -93,6 +94,7 @@ fun GameScreen(
                         isRulesHelperVisible = true
                     },
                     isRulesHelperEnabled = isRulesHelperEnabled,
+                    isRulesHelperActionDiscoveryDotVisible = isRulesHelperActionDiscoveryDotVisible,
                     actions = topBarActions
                 )
             }
@@ -243,6 +245,7 @@ private fun GameScreenTopBar(
     onNavigateBack: () -> Unit,
     onRulesHelperClick: () -> Unit,
     isRulesHelperEnabled: Boolean,
+    isRulesHelperActionDiscoveryDotVisible: Boolean,
     actions: @Composable RowScope.() -> Unit
 ) {
     val backButtonContentDescription = stringResource(R.string.back_button_content_description)
@@ -267,23 +270,13 @@ private fun GameScreenTopBar(
         actions = {
             actions()
             if (isRulesHelperEnabled) {
-                RulesHelperAction(onClick = onRulesHelperClick)
+                RulesHelperAction(
+                    onClick = onRulesHelperClick,
+                    isDiscoveryDotVisible = isRulesHelperActionDiscoveryDotVisible
+                )
             }
         }
     )
-}
-
-@Composable
-private fun RulesHelperAction(onClick: () -> Unit) {
-    IconButton(
-        onClick = onClick,
-        modifier = Modifier.testTag(GameScreenTestTags.RULES_HELPER_ACTION)
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_help),
-            contentDescription = stringResource(R.string.rules_helper_action_content_description)
-        )
-    }
 }
 
 @Preview(showBackground = true)

@@ -38,6 +38,12 @@ class FourPairsActionDiscoveryTest {
             assertFalse(actionDiscoveryRepository.state.value.hasSeenHelpAction)
             assertFalse(actionDiscoveryRepository.state.value.hasSeenHintAction)
         }
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION_DISCOVERY_DOT)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.HINT_ACTION_DISCOVERY_DOT)
+            .assertIsDisplayed()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
@@ -51,6 +57,12 @@ class FourPairsActionDiscoveryTest {
             assertTrue(actionDiscoveryRepository.state.value.hasSeenHelpAction)
             assertFalse(actionDiscoveryRepository.state.value.hasSeenHintAction)
         }
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION_DISCOVERY_DOT)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.HINT_ACTION_DISCOVERY_DOT)
+            .assertIsDisplayed()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.RULES_HELPER_CLOSE_BUTTON)
@@ -69,5 +81,11 @@ class FourPairsActionDiscoveryTest {
             assertTrue(actionDiscoveryRepository.state.value.hasSeenHelpAction)
             assertTrue(actionDiscoveryRepository.state.value.hasSeenHintAction)
         }
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION_DISCOVERY_DOT)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.HINT_ACTION_DISCOVERY_DOT)
+            .assertDoesNotExist()
     }
 }
