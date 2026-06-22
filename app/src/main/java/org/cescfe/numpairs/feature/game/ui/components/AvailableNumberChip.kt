@@ -73,11 +73,10 @@ fun AvailableNumberChip(
     } else {
         chipColors.border
     }
-    val clickAction = onClick
     val chipModifier = modifier
         .semantics {
             contentDescription?.let { this.contentDescription = it }
-            clickAction?.let { action ->
+            onClick?.let { action ->
                 semanticOnClick(action = {
                     action()
                     true
