@@ -56,6 +56,10 @@ internal object GameUiStateFactory {
             isSuccessOverlayVisible = presentationState.isSuccessOverlayVisible(
                 isPuzzleSolved = puzzle.isSolved
             ),
+            stripItemEntryInput = createStripItemEntryInput(
+                puzzle = puzzle,
+                input = presentationState.stripItemEntryInput
+            ),
             stripItemEntryDialog = createStripItemEntryDialog(
                 puzzle = puzzle,
                 modal = presentationState.modal
@@ -69,6 +73,25 @@ internal object GameUiStateFactory {
                 modal = presentationState.modal,
                 liveRuleConflictsByUsage = liveRuleConflictsByUsage
             )
+        )
+    }
+
+    private fun createStripItemEntryInput(
+        puzzle: Puzzle,
+        input: StripItemEntryInputState?
+    ): StripItemEntryInputUiState? {
+        input ?: return null
+        val stripItem = puzzle.strip.items.getOrNull(input.stripItemIndex) ?: return null
+
+        if (stripItem !is StripItem.Hidden && stripItem !is StripItem.PlayerEntered) {
+            return null
+        }
+
+        return StripItemEntryInputUiState(
+            stripItemIndex = input.stripItemIndex,
+            draftText = input.draftText,
+            validRange = puzzle.strip.validEntryRangeFor(input.stripItemIndex),
+            isInvalid = input.isInvalid
         )
     }
 

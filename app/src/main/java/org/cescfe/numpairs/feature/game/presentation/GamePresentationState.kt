@@ -4,18 +4,52 @@ import org.cescfe.numpairs.domain.puzzle.OperandSlot
 
 data class GamePresentationState(
     val modal: GameModalState? = null,
+    val stripItemEntryInput: StripItemEntryInputState? = null,
     private val isSuccessOverlayDismissed: Boolean = false
 ) {
-    fun showStripItemEntry(index: Int): GamePresentationState =
-        copy(modal = GameModalState.StripItemEntry(index = index))
+    fun showStripItemEntry(index: Int): GamePresentationState = copy(
+        modal = GameModalState.StripItemEntry(index = index),
+        stripItemEntryInput = null
+    )
 
     fun dismissStripItemEntry(): GamePresentationState = when (modal) {
         is GameModalState.StripItemEntry -> copy(modal = null)
         else -> this
     }
 
-    fun showTileOperatorSelection(tileIndex: Int): GamePresentationState =
-        copy(modal = GameModalState.TileOperatorSelection(tileIndex = tileIndex))
+    fun showStripItemEntryInput(index: Int, draftText: String, isInvalid: Boolean = false): GamePresentationState =
+        copy(
+            modal = null,
+            stripItemEntryInput = StripItemEntryInputState(
+                stripItemIndex = index,
+                draftText = draftText,
+                isInvalid = isInvalid
+            )
+        )
+
+    fun updateStripItemEntryInputDraft(draftText: String): GamePresentationState = stripItemEntryInput?.let { input ->
+        copy(
+            stripItemEntryInput = input.copy(
+                draftText = draftText,
+                isInvalid = false
+            )
+        )
+    } ?: this
+
+    fun markStripItemEntryInputInvalid(): GamePresentationState = stripItemEntryInput?.let { input ->
+        copy(stripItemEntryInput = input.copy(isInvalid = true))
+    } ?: this
+
+    fun dismissStripItemEntryInput(): GamePresentationState = if (stripItemEntryInput == null) {
+        this
+    } else {
+        copy(stripItemEntryInput = null)
+    }
+
+    fun showTileOperatorSelection(tileIndex: Int): GamePresentationState = copy(
+        modal = GameModalState.TileOperatorSelection(tileIndex = tileIndex),
+        stripItemEntryInput = null
+    )
 
     fun dismissTileOperatorSelection(): GamePresentationState = when (modal) {
         is GameModalState.TileOperatorSelection -> copy(modal = null)
@@ -28,7 +62,8 @@ data class GamePresentationState(
                 tileIndex = tileIndex,
                 slot = slot
             )
-        )
+        ),
+        stripItemEntryInput = null
     )
 
     fun dismissTileOperandSelection(): GamePresentationState = when (modal) {
@@ -58,6 +93,8 @@ data class GamePresentationState(
 
     fun isSuccessOverlayVisible(isPuzzleSolved: Boolean): Boolean = isPuzzleSolved && !isSuccessOverlayDismissed
 }
+
+data class StripItemEntryInputState(val stripItemIndex: Int, val draftText: String, val isInvalid: Boolean = false)
 
 sealed interface GameModalState {
     data class StripItemEntry(val index: Int) : GameModalState

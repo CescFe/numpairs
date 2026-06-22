@@ -120,6 +120,7 @@ class GameUiStateFromTest {
             ),
             uiState.stripItemEntryDialog
         )
+        assertNull(uiState.stripItemEntryInput)
     }
 
     @Test
@@ -153,6 +154,43 @@ class GameUiStateFromTest {
             ),
             uiState.stripItemEntryDialog
         )
+        assertNull(uiState.stripItemEntryInput)
+    }
+
+    @Test
+    fun builds_strip_item_entry_input_state_for_editable_entries() {
+        val uiState = GameUiState.from(
+            puzzle = initialPuzzle,
+            presentationState = GamePresentationState().showStripItemEntryInput(
+                index = 1,
+                draftText = "9",
+                isInvalid = true
+            )
+        )
+
+        assertEquals(
+            StripItemEntryInputUiState(
+                stripItemIndex = 1,
+                draftText = "9",
+                validRange = StripEntryRange(minimumValue = 1, maximumValue = 6),
+                isInvalid = true
+            ),
+            uiState.stripItemEntryInput
+        )
+        assertNull(uiState.stripItemEntryDialog)
+    }
+
+    @Test
+    fun does_not_build_strip_item_entry_input_state_for_known_entries() {
+        val uiState = GameUiState.from(
+            puzzle = initialPuzzle,
+            presentationState = GamePresentationState().showStripItemEntryInput(
+                index = 2,
+                draftText = "6"
+            )
+        )
+
+        assertNull(uiState.stripItemEntryInput)
     }
 
     @Test
