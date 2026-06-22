@@ -62,7 +62,7 @@ fun GameRoute(
         onNavigateBack = onNavigateBack,
         onStripItemTapped = { index ->
             if (interactionPolicy.canTapStripItem(index)) {
-                gameViewModel.onStripItemTapped(index)
+                gameViewModel.onStripItemDialogTapped(index)
             }
         },
         onStripItemEntryDismissed = gameViewModel::onStripItemEntryDismissed,
