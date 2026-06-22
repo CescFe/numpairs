@@ -1,7 +1,5 @@
 package org.cescfe.numpairs.feature.fourpairs
 
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -11,8 +9,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 import org.cescfe.numpairs.R
@@ -21,7 +17,7 @@ import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryState
 import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.GameRoute
-import org.cescfe.numpairs.feature.game.ui.GameScreenTestTags
+import org.cescfe.numpairs.feature.game.ui.HintAction
 import org.cescfe.numpairs.feature.game.ui.SolvingTipsDialog
 import org.cescfe.numpairs.feature.tutorial.TutorialMode
 import org.cescfe.numpairs.feature.tutorial.TutorialOverlayHost
@@ -35,9 +31,8 @@ fun FourPairsRoute(
     onTutorialOverlayClosed: () -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
-    val actionDiscoveryState by topAppBarActionDiscoveryRepository.discoveryState.collectAsState(
-        initial = TopAppBarActionDiscoveryState()
-    )
+    val actionDiscoveryState: TopAppBarActionDiscoveryState? by topAppBarActionDiscoveryRepository.discoveryState
+        .collectAsState(initial = null)
     val coroutineScope = rememberCoroutineScope()
     val gameSessionFactory = remember(puzzleProvider) {
         FourPairsGameSessionFactory(puzzleProvider = puzzleProvider)
@@ -73,8 +68,9 @@ fun FourPairsRoute(
                 onReturnToMenuRequested = onNavigateBack
             ),
             isRulesHelperEnabled = true,
+            isRulesHelperActionDiscoveryDotVisible = actionDiscoveryState?.hasSeenHelpAction == false,
             onRulesHelperActionTapped = {
-                if (!actionDiscoveryState.hasSeenHelpAction) {
+                if (actionDiscoveryState?.hasSeenHelpAction != true) {
                     coroutineScope.launch {
                         topAppBarActionDiscoveryRepository.markHelpActionSeen()
                     }
@@ -85,8 +81,9 @@ fun FourPairsRoute(
             },
             topBarActions = {
                 HintAction(
+                    isDiscoveryDotVisible = actionDiscoveryState?.hasSeenHintAction == false,
                     onClick = {
-                        if (!actionDiscoveryState.hasSeenHintAction) {
+                        if (actionDiscoveryState?.hasSeenHintAction != true) {
                             coroutineScope.launch {
                                 topAppBarActionDiscoveryRepository.markHintActionSeen()
                             }
@@ -107,19 +104,6 @@ fun FourPairsRoute(
                 }
             )
         }
-    }
-}
-
-@Composable
-private fun HintAction(onClick: () -> Unit) {
-    IconButton(
-        onClick = onClick,
-        modifier = Modifier.testTag(GameScreenTestTags.HINT_ACTION)
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_hint),
-            contentDescription = stringResource(R.string.hint_action_content_description)
-        )
     }
 }
 
