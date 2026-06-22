@@ -17,11 +17,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
@@ -121,6 +125,7 @@ fun AvailableNumberInputChip(
     value: String,
     onValueChange: (String) -> Unit,
     onDone: () -> Unit,
+    onFocusLost: () -> Unit,
     modifier: Modifier = Modifier,
     style: AvailableNumberChipStyle = AvailableNumberChipStyle.HIDDEN,
     contentDescription: String? = null,
@@ -141,6 +146,7 @@ fun AvailableNumberInputChip(
     }
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
+    var hasHeldFocus by remember { mutableStateOf(false) }
     val chipModifier = modifier
         .semantics {
             contentDescription?.let { this.contentDescription = it }
@@ -174,6 +180,13 @@ fun AvailableNumberInputChip(
                     .fillMaxWidth()
                     .defaultMinSize(minHeight = CHIP_MIN_HEIGHT)
                     .focusRequester(focusRequester)
+                    .onFocusChanged { focusState ->
+                        if (focusState.isFocused) {
+                            hasHeldFocus = true
+                        } else if (hasHeldFocus) {
+                            onFocusLost()
+                        }
+                    }
                     .then(inputTagModifier)
                     .semantics {
                         if (isInvalid) {
@@ -370,6 +383,7 @@ private fun AvailableNumberInputChipPreview() {
             value = "4",
             onValueChange = {},
             onDone = {},
+            onFocusLost = {},
             style = AvailableNumberChipStyle.PLAYER_ENTERED,
             isInvalid = true
         )

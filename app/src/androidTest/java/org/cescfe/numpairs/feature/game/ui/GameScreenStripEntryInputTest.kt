@@ -39,10 +39,49 @@ class GameScreenStripEntryInputTest : GameScreenTestHost() {
         screen
             .tapStripItem(1)
             .enterStripValue("9")
+            .assertStripEntryInputInvalid()
+            .assertStripEntryInvalidRange(minimum = 1, maximum = 6)
             .submitStripEntryInput()
             .assertStripEntryInputValue("9")
             .assertStripEntryInputInvalid()
             .assertStripEntryInvalidRange(minimum = 1, maximum = 6)
+            .assertStripItemDescription(
+                1,
+                R.string.strip_item_hidden_content_description
+            )
+    }
+
+    @Test
+    fun losingFocusWithAValidValueCommitsAndExitsInlineEditing() {
+        screen
+            .tapStripItem(1)
+            .enterStripValue("2")
+            .tapTileLeftOperand(0)
+            .assertStripEntryInputHidden()
+            .assertStripItemDescription(
+                1,
+                R.string.strip_item_player_entered_content_description,
+                "2"
+            )
+    }
+
+    @Test
+    fun losingFocusWithAnInvalidValueKeepsInlineEditingActiveAndShowsFeedback() {
+        screen
+            .tapStripItem(1)
+            .enterStripValue("9")
+            .tapTileLeftOperand(0)
+            .assertStripEntryInputDisplayed()
+            .assertStripEntryInputInvalid()
+            .assertStripEntryInvalidRange(minimum = 1, maximum = 6)
+    }
+
+    @Test
+    fun losingFocusWithAnEmptyDraftCancelsInlineEditingWithoutChangingTheStripItem() {
+        screen
+            .tapStripItem(1)
+            .tapTileLeftOperand(0)
+            .assertStripEntryInputHidden()
             .assertStripItemDescription(
                 1,
                 R.string.strip_item_hidden_content_description

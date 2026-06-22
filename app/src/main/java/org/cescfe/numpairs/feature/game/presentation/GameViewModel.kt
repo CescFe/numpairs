@@ -33,6 +33,10 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
             return
         }
 
+        if (!resolveActiveStripItemEntryInput()) {
+            return
+        }
+
         if (!canEditStripItem(index = index)) {
             return
         }
@@ -51,18 +55,6 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
         }
     }
 
-    fun onStripItemDialogTapped(index: Int) {
-        if (!canInteractWithPuzzle()) {
-            return
-        }
-
-        if (!canEditStripItem(index = index)) {
-            return
-        }
-
-        commit { showStripItemEntry(index = index) }
-    }
-
     fun onStripItemEntryDismissed() {
         commit {
             dismissStripItemEntry()
@@ -71,10 +63,23 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
     }
 
     fun onStripItemEntryInputChanged(draftText: String) {
-        commit { updateStripItemEntryInputDraft(draftText = draftText) }
+        val input = presentationState.stripItemEntryInput ?: return
+
+        commit {
+            updateStripItemEntryInputDraft(
+                draftText = draftText,
+                isInvalid = draftText.isInvalidStripItemEntryInput(
+                    stripItemIndex = input.stripItemIndex
+                )
+            )
+        }
     }
 
     fun onStripItemEntryInputConfirmed() {
+        confirmStripItemEntryInput()
+    }
+
+    fun onStripItemEntryInputFocusLost() {
         confirmStripItemEntryInput()
     }
 
@@ -84,6 +89,10 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
 
     fun onTileOperatorTapped(index: Int) {
         if (!canInteractWithPuzzle()) {
+            return
+        }
+
+        if (!resolveActiveStripItemEntryInput()) {
             return
         }
 
@@ -153,19 +162,22 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
         }
     }
 
-    private fun confirmStripItemEntryInput(draftText: String? = null) {
-        val input = presentationState.stripItemEntryInput ?: return
-        val currentStripItem = puzzle.strip.items.getOrNull(input.stripItemIndex) ?: return
+    private fun confirmStripItemEntryInput(draftText: String? = null): Boolean =
+        resolveActiveStripItemEntryInput(draftText = draftText)
+
+    private fun resolveActiveStripItemEntryInput(draftText: String? = null): Boolean {
+        val input = presentationState.stripItemEntryInput ?: return true
+        val currentStripItem = puzzle.strip.items.getOrNull(input.stripItemIndex) ?: return true
 
         if (currentStripItem !is StripItem.Hidden && currentStripItem !is StripItem.PlayerEntered) {
             commit { dismissStripItemEntryInput() }
-            return
+            return true
         }
 
         val resolvedDraftText = draftText ?: input.draftText
         if (resolvedDraftText.isBlank()) {
             commit { dismissStripItemEntryInput() }
-            return
+            return true
         }
 
         val value = resolvedDraftText.toIntOrNull()
@@ -177,7 +189,7 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
                     isInvalid = true
                 )
             }
-            return
+            return false
         }
 
         commit(
@@ -190,6 +202,8 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
         ) {
             dismissStripItemEntryInput()
         }
+
+        return true
     }
 
     fun onTileOperandSelectionConfirmed(stripEntryId: Int) {
@@ -221,6 +235,10 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
             return
         }
 
+        if (!resolveActiveStripItemEntryInput()) {
+            return
+        }
+
         val updatedPuzzle = puzzle.withResetTile(tileIndex = index) ?: return
 
         commit(updatedPuzzle = updatedPuzzle) {
@@ -237,6 +255,10 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
 
     private fun onTileOperandTapped(index: Int, slot: OperandSlot) {
         if (!canInteractWithPuzzle()) {
+            return
+        }
+
+        if (!resolveActiveStripItemEntryInput()) {
             return
         }
 
@@ -273,6 +295,16 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
         val stripItem = puzzle.strip.items.getOrNull(index)
 
         return stripItem == StripItem.Hidden || stripItem is StripItem.PlayerEntered
+    }
+
+    private fun String.isInvalidStripItemEntryInput(stripItemIndex: Int): Boolean {
+        if (isBlank()) {
+            return false
+        }
+
+        val value = toIntOrNull() ?: return true
+
+        return value !in puzzle.strip.validEntryRangeFor(stripItemIndex)
     }
 
     private fun hasTile(index: Int): Boolean = puzzle.board.tiles.getOrNull(index) != null

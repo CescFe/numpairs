@@ -27,14 +27,15 @@ data class GamePresentationState(
             )
         )
 
-    fun updateStripItemEntryInputDraft(draftText: String): GamePresentationState = stripItemEntryInput?.let { input ->
-        copy(
-            stripItemEntryInput = input.copy(
-                draftText = draftText,
-                isInvalid = false
+    fun updateStripItemEntryInputDraft(draftText: String, isInvalid: Boolean = false): GamePresentationState =
+        stripItemEntryInput?.let { input ->
+            copy(
+                stripItemEntryInput = input.copy(
+                    draftText = draftText,
+                    isInvalid = isInvalid
+                )
             )
-        )
-    } ?: this
+        } ?: this
 
     fun markStripItemEntryInputInvalid(): GamePresentationState = stripItemEntryInput?.let { input ->
         copy(stripItemEntryInput = input.copy(isInvalid = true))

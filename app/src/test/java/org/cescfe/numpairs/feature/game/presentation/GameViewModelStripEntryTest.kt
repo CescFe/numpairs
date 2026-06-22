@@ -68,6 +68,27 @@ class GameViewModelStripEntryTest {
     }
 
     @Test
+    fun changing_the_inline_entry_draft_to_an_out_of_range_value_marks_the_input_invalid_immediately() {
+        val viewModel = GameViewModel()
+
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryInputChanged(draftText = "9")
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals("?", uiState.stripItems[1].label)
+        assertEquals(
+            StripItemEntryInputUiState(
+                stripItemIndex = 1,
+                draftText = "9",
+                validRange = StripEntryRange(minimumValue = 1, maximumValue = 6),
+                isInvalid = true
+            ),
+            uiState.stripItemEntryInput
+        )
+    }
+
+    @Test
     fun confirming_a_valid_inline_entry_completes_the_hidden_strip_item_and_exits_editing() {
         val viewModel = GameViewModel()
 
@@ -117,6 +138,55 @@ class GameViewModelStripEntryTest {
             ),
             uiState.stripItemEntryInput
         )
+    }
+
+    @Test
+    fun losing_focus_with_a_valid_inline_entry_completes_the_hidden_strip_item_and_exits_editing() {
+        val viewModel = GameViewModel()
+
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryInputChanged(draftText = "2")
+        viewModel.onStripItemEntryInputFocusLost()
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals("2", uiState.stripItems[1].label)
+        assertNull(uiState.stripItemEntryInput)
+    }
+
+    @Test
+    fun losing_focus_with_an_invalid_inline_entry_keeps_the_input_active_and_preserves_the_item() {
+        val viewModel = GameViewModel()
+
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryInputChanged(draftText = "9")
+        viewModel.onStripItemEntryInputFocusLost()
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals("?", uiState.stripItems[1].label)
+        assertEquals(
+            StripItemEntryInputUiState(
+                stripItemIndex = 1,
+                draftText = "9",
+                validRange = StripEntryRange(minimumValue = 1, maximumValue = 6),
+                isInvalid = true
+            ),
+            uiState.stripItemEntryInput
+        )
+    }
+
+    @Test
+    fun losing_focus_with_an_empty_inline_entry_draft_exits_editing_without_changing_the_item() {
+        val viewModel = GameViewModel()
+
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryInputFocusLost()
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals("?", uiState.stripItems[1].label)
+        assertNull(uiState.stripItemEntryInput)
     }
 
     @Test

@@ -134,6 +134,12 @@ class GameScreenRobot(
             .assertIsDisplayed()
     }
 
+    fun assertStripEntryInputHidden(): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
+            .assertDoesNotExist()
+    }
+
     fun assertStripEntryInputFocused(): GameScreenRobot = apply {
         interactions
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)

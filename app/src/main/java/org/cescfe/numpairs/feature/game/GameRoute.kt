@@ -55,29 +55,39 @@ fun GameRoute(
         currentOnGameUiStateChanged(uiState)
     }
 
+    fun resolveActiveStripItemEntryInputIfAllowed(): Boolean {
+        val input = uiState.stripItemEntryInput ?: return true
+        val value = input.draftText.toIntOrNull()
+        val isInvalid = input.draftText.isNotBlank() &&
+            (value == null || value !in input.validRange)
+        val canResolve = input.draftText.isBlank() ||
+            isInvalid ||
+            value?.let { resolvedValue ->
+                interactionPolicy.canConfirmStripItemEntry(input.stripItemIndex, resolvedValue)
+            } == true
+
+        if (!canResolve) {
+            return false
+        }
+
+        gameViewModel.onStripItemEntryInputFocusLost()
+
+        return input.draftText.isBlank() || !isInvalid
+    }
+
     GameScreen(
         title = title,
         uiState = uiState,
         modifier = modifier,
         onNavigateBack = onNavigateBack,
         onStripItemTapped = { index ->
-            if (interactionPolicy.canTapStripItem(index)) {
+            if (interactionPolicy.canTapStripItem(index) && resolveActiveStripItemEntryInputIfAllowed()) {
                 gameViewModel.onStripItemTapped(index)
             }
         },
         onStripItemEntryInputChanged = gameViewModel::onStripItemEntryInputChanged,
-        onStripItemEntryInputConfirmed = onStripItemEntryInputConfirmed@{
-            val input = uiState.stripItemEntryInput ?: return@onStripItemEntryInputConfirmed
-            val value = input.draftText.toIntOrNull()
-            val canConfirmInput = input.draftText.isBlank() ||
-                value == null ||
-                value !in input.validRange ||
-                interactionPolicy.canConfirmStripItemEntry(input.stripItemIndex, value)
-
-            if (canConfirmInput) {
-                gameViewModel.onStripItemEntryInputConfirmed()
-            }
-        },
+        onStripItemEntryInputConfirmed = { resolveActiveStripItemEntryInputIfAllowed() },
+        onStripItemEntryInputFocusLost = { resolveActiveStripItemEntryInputIfAllowed() },
         onStripItemEntryDismissed = gameViewModel::onStripItemEntryDismissed,
         onStripItemEntryConfirmed = onStripItemEntryConfirmed@{ value ->
             val stripItemIndex = uiState.stripItemEntryDialog?.stripItemIndex ?: return@onStripItemEntryConfirmed
@@ -87,12 +97,12 @@ fun GameRoute(
             }
         },
         onTileLeftOperandTapped = { index ->
-            if (interactionPolicy.canTapTileLeftOperand(index)) {
+            if (interactionPolicy.canTapTileLeftOperand(index) && resolveActiveStripItemEntryInputIfAllowed()) {
                 gameViewModel.onTileLeftOperandTapped(index)
             }
         },
         onTileRightOperandTapped = { index ->
-            if (interactionPolicy.canTapTileRightOperand(index)) {
+            if (interactionPolicy.canTapTileRightOperand(index) && resolveActiveStripItemEntryInputIfAllowed()) {
                 gameViewModel.onTileRightOperandTapped(index)
             }
         },
@@ -105,12 +115,12 @@ fun GameRoute(
             }
         },
         onTileOperatorTapped = { index ->
-            if (interactionPolicy.canTapTileOperator(index)) {
+            if (interactionPolicy.canTapTileOperator(index) && resolveActiveStripItemEntryInputIfAllowed()) {
                 gameViewModel.onTileOperatorTapped(index)
             }
         },
         onTileResetTapped = { index ->
-            if (interactionPolicy.canTapTileReset(index)) {
+            if (interactionPolicy.canTapTileReset(index) && resolveActiveStripItemEntryInputIfAllowed()) {
                 gameViewModel.onTileResetTapped(index)
             }
         },
