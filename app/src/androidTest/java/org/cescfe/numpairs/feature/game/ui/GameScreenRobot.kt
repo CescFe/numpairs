@@ -151,6 +151,14 @@ class GameScreenRobot(
             )
     }
 
+    fun assertStripEntryValidRange(minimum: Int, maximum: Int? = null): GameScreenRobot = apply {
+        assertStripEntryFeedback(stripEntryValidRangeText(minimum = minimum, maximum = maximum))
+    }
+
+    fun assertStripEntryInvalidRange(minimum: Int, maximum: Int? = null): GameScreenRobot = apply {
+        assertStripEntryFeedback(stripEntryInvalidRangeText(minimum = minimum, maximum = maximum))
+    }
+
     fun assertStripEntryInputInvalid(): GameScreenRobot = apply {
         interactions
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
@@ -515,6 +523,21 @@ class GameScreenRobot(
             )
     }
 
+    private fun assertStripEntryFeedback(message: String) {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_RANGE)
+            .assertIsDisplayed()
+            .assert(hasText(message))
+        interactions
+            .onNodeWithTag(GameScreenTestTags.STRIP)
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.StateDescription,
+                    message
+                )
+            )
+    }
+
     private fun assertUsageIndicator(testTag: String, operator: Operator, @StringRes stateDescriptionResId: Int) {
         assertContentDescription(
             testTag = testTag,
@@ -563,6 +586,14 @@ class GameScreenRobot(
             Operator.Hidden -> error("Hidden operator does not expose operand usage indicators.")
         }
     )
+
+    private fun stripEntryValidRangeText(minimum: Int, maximum: Int?): String = maximum?.let { maximumValue ->
+        string(R.string.strip_entry_valid_range_bounded, minimum, maximumValue)
+    } ?: string(R.string.strip_entry_valid_range_unbounded, minimum)
+
+    private fun stripEntryInvalidRangeText(minimum: Int, maximum: Int?): String = maximum?.let { maximumValue ->
+        string(R.string.strip_entry_invalid_range_bounded, minimum, maximumValue)
+    } ?: string(R.string.strip_entry_invalid_range_unbounded, minimum)
 
     private fun string(@StringRes stringResId: Int, vararg formatArgs: Any): String = if (formatArgs.isEmpty()) {
         activity.getString(stringResId)

@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.onClick as semanticOnClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -72,11 +73,10 @@ fun AvailableNumberChip(
     } else {
         chipColors.border
     }
-    val clickAction = onClick
     val chipModifier = modifier
         .semantics {
             contentDescription?.let { this.contentDescription = it }
-            clickAction?.let { action ->
+            onClick?.let { action ->
                 semanticOnClick(action = {
                     action()
                     true
@@ -125,6 +125,7 @@ fun AvailableNumberInputChip(
     style: AvailableNumberChipStyle = AvailableNumberChipStyle.HIDDEN,
     contentDescription: String? = null,
     isInvalid: Boolean = false,
+    errorMessage: String? = null,
     additionUsed: Boolean = false,
     multiplicationUsed: Boolean = false,
     inputTestTag: String? = null,
@@ -177,6 +178,7 @@ fun AvailableNumberInputChip(
                     .semantics {
                         if (isInvalid) {
                             stripEntryInputInvalid = true
+                            errorMessage?.let { message -> error(message) }
                         }
                     },
                 textStyle = NumPairsTextStyles.StripValue.copy(

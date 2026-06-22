@@ -61,6 +61,9 @@ class FourPairsCompletionActionsTest {
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_DIALOG)
             .assertDoesNotExist()
         composeTestRule
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
+            .assertDoesNotExist()
+        composeTestRule
             .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR, useUnmergedTree = true)
             .assertDoesNotExist()
         composeTestRule
