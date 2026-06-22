@@ -31,9 +31,8 @@ fun FourPairsRoute(
     onTutorialOverlayClosed: () -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
-    val actionDiscoveryState by topAppBarActionDiscoveryRepository.discoveryState.collectAsState(
-        initial = TopAppBarActionDiscoveryState()
-    )
+    val actionDiscoveryState: TopAppBarActionDiscoveryState? by topAppBarActionDiscoveryRepository.discoveryState
+        .collectAsState(initial = null)
     val coroutineScope = rememberCoroutineScope()
     val gameSessionFactory = remember(puzzleProvider) {
         FourPairsGameSessionFactory(puzzleProvider = puzzleProvider)
@@ -69,9 +68,9 @@ fun FourPairsRoute(
                 onReturnToMenuRequested = onNavigateBack
             ),
             isRulesHelperEnabled = true,
-            isRulesHelperActionDiscoveryDotVisible = !actionDiscoveryState.hasSeenHelpAction,
+            isRulesHelperActionDiscoveryDotVisible = actionDiscoveryState?.hasSeenHelpAction == false,
             onRulesHelperActionTapped = {
-                if (!actionDiscoveryState.hasSeenHelpAction) {
+                if (actionDiscoveryState?.hasSeenHelpAction != true) {
                     coroutineScope.launch {
                         topAppBarActionDiscoveryRepository.markHelpActionSeen()
                     }
@@ -82,9 +81,9 @@ fun FourPairsRoute(
             },
             topBarActions = {
                 HintAction(
-                    isDiscoveryDotVisible = !actionDiscoveryState.hasSeenHintAction,
+                    isDiscoveryDotVisible = actionDiscoveryState?.hasSeenHintAction == false,
                     onClick = {
-                        if (!actionDiscoveryState.hasSeenHintAction) {
+                        if (actionDiscoveryState?.hasSeenHintAction != true) {
                             coroutineScope.launch {
                                 topAppBarActionDiscoveryRepository.markHintActionSeen()
                             }
