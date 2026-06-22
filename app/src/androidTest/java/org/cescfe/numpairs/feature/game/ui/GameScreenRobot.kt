@@ -9,6 +9,7 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasAnyDescendant
@@ -17,8 +18,10 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.text.AnnotatedString
 import androidx.test.espresso.Espresso.pressBack as espressoPressBack
 import org.cescfe.numpairs.R
@@ -109,47 +112,32 @@ class GameScreenRobot(
             .performTextInput(value)
     }
 
-    fun confirmStripEntry(): GameScreenRobot = apply {
+    fun replaceStripValue(value: String): GameScreenRobot = apply {
         interactions
-            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM)
-            .performClick()
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
+            .performTextReplacement(value)
     }
 
-    fun cancelStripEntry(): GameScreenRobot = apply {
+    fun submitStripEntryInput(): GameScreenRobot = apply {
         interactions
-            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CANCEL)
-            .performClick()
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
+            .performImeAction()
     }
 
     fun pressBack(): GameScreenRobot = apply {
         espressoPressBack()
     }
 
-    fun assertStripEntryDialogDisplayed(): GameScreenRobot = apply {
+    fun assertStripEntryInputDisplayed(): GameScreenRobot = apply {
         interactions
-            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_DIALOG)
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
             .assertIsDisplayed()
     }
 
-    fun assertStripEntryValidRange(minimum: Int, maximum: Int? = null): GameScreenRobot = apply {
+    fun assertStripEntryInputFocused(): GameScreenRobot = apply {
         interactions
-            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_RANGE, useUnmergedTree = true)
-            .assert(
-                hasText(
-                    if (maximum == null) {
-                        string(
-                            R.string.strip_entry_valid_range_unbounded,
-                            minimum
-                        )
-                    } else {
-                        string(
-                            R.string.strip_entry_valid_range_bounded,
-                            minimum,
-                            maximum
-                        )
-                    }
-                )
-            )
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
+            .assertIsFocused()
     }
 
     fun assertStripEntryInputValue(value: String): GameScreenRobot = apply {
@@ -163,10 +151,23 @@ class GameScreenRobot(
             )
     }
 
-    fun assertStripEntryConfirmDisabled(): GameScreenRobot = apply {
+    fun assertStripEntryInputInvalid(): GameScreenRobot = apply {
         interactions
-            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM)
-            .assertIsNotEnabled()
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
+            .assert(
+                SemanticsMatcher.expectValue(
+                    StripEntryInputInvalidKey,
+                    true
+                )
+            )
+    }
+
+    fun assertStripEntryInputNotInvalid(): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
+            .assert(
+                SemanticsMatcher.keyNotDefined(StripEntryInputInvalidKey)
+            )
     }
 
     fun assertStripItemDescription(index: Int, @StringRes stringResId: Int, vararg formatArgs: Any): GameScreenRobot =

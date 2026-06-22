@@ -8,6 +8,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso.pressBackUnconditionally
@@ -158,8 +159,8 @@ class AppNavigationLearningFlowTest {
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
             .performTextInput(PRESERVED_STRIP_ITEM_VALUE)
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM)
-            .performClick()
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
+            .performImeAction()
     }
 
     private fun assertPreservedStripItemPlayerEntered() {

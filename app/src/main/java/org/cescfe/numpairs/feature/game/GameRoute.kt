@@ -62,7 +62,20 @@ fun GameRoute(
         onNavigateBack = onNavigateBack,
         onStripItemTapped = { index ->
             if (interactionPolicy.canTapStripItem(index)) {
-                gameViewModel.onStripItemDialogTapped(index)
+                gameViewModel.onStripItemTapped(index)
+            }
+        },
+        onStripItemEntryInputChanged = gameViewModel::onStripItemEntryInputChanged,
+        onStripItemEntryInputConfirmed = onStripItemEntryInputConfirmed@{
+            val input = uiState.stripItemEntryInput ?: return@onStripItemEntryInputConfirmed
+            val value = input.draftText.toIntOrNull()
+            val canConfirmInput = input.draftText.isBlank() ||
+                value == null ||
+                value !in input.validRange ||
+                interactionPolicy.canConfirmStripItemEntry(input.stripItemIndex, value)
+
+            if (canConfirmInput) {
+                gameViewModel.onStripItemEntryInputConfirmed()
             }
         },
         onStripItemEntryDismissed = gameViewModel::onStripItemEntryDismissed,
