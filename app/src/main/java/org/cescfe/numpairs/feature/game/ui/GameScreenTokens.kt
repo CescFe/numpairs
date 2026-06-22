@@ -11,6 +11,7 @@ internal val BOARD_TILE_MIN_WIDTH = 112.dp
 internal val BOARD_TILE_MAX_WIDTH = 144.dp
 internal val BOARD_TILE_SPACING = 12.dp
 internal val STRIP_CHIP_SPACING = 4.dp
+internal val STRIP_ENTRY_FEEDBACK_TOP_SPACING = 8.dp
 internal val STRIP_HORIZONTAL_PADDING = 8.dp
 internal val STRIP_VERTICAL_PADDING = 14.dp
 internal val TILE_OPERATOR_MENU_CORNER_RADIUS = 16.dp

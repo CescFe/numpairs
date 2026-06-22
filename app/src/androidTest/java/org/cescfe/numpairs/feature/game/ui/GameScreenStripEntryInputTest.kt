@@ -13,6 +13,7 @@ class GameScreenStripEntryInputTest : GameScreenTestHost() {
             .tapStripItem(1)
             .assertStripEntryInputDisplayed()
             .assertStripEntryInputFocused()
+            .assertStripEntryValidRange(minimum = 1, maximum = 6)
             .enterStripValue("2")
             .submitStripEntryInput()
             .assertStripItemDescription(
@@ -41,6 +42,7 @@ class GameScreenStripEntryInputTest : GameScreenTestHost() {
             .submitStripEntryInput()
             .assertStripEntryInputValue("9")
             .assertStripEntryInputInvalid()
+            .assertStripEntryInvalidRange(minimum = 1, maximum = 6)
             .assertStripItemDescription(
                 1,
                 R.string.strip_item_hidden_content_description
@@ -56,6 +58,7 @@ class GameScreenStripEntryInputTest : GameScreenTestHost() {
             .assertStripEntryInputInvalid()
             .replaceStripValue("2")
             .assertStripEntryInputNotInvalid()
+            .assertStripEntryValidRange(minimum = 1, maximum = 6)
     }
 
     @Test
