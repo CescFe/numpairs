@@ -51,6 +51,8 @@ fun GameScreen(
     modifier: Modifier = Modifier,
     onNavigateBack: () -> Unit = {},
     onStripItemTapped: (Int) -> Unit = {},
+    onStripItemEntryInputChanged: (String) -> Unit = {},
+    onStripItemEntryInputConfirmed: () -> Unit = {},
     onStripItemEntryDismissed: () -> Unit = {},
     onStripItemEntryConfirmed: (Int) -> Unit = {},
     onTileLeftOperandTapped: (Int) -> Unit = {},
@@ -113,7 +115,10 @@ fun GameScreen(
                 contentBeforePuzzle()
                 StripSection(
                     stripItems = uiState.stripItems,
+                    stripItemEntryInput = uiState.stripItemEntryInput,
                     onStripItemTapped = onStripItemTapped,
+                    onStripItemEntryInputChanged = onStripItemEntryInputChanged,
+                    onStripItemEntryInputConfirmed = onStripItemEntryInputConfirmed,
                     isStripItemEnabled = interactionPolicy.canTapStripItem,
                     highlightState = highlightState,
                     modifier = Modifier.fillMaxWidth()

@@ -51,7 +51,7 @@ class GameScreenTileStateTest : GameScreenTestHost() {
         screen
             .tapStripItem(1)
             .enterStripValue("1")
-            .confirmStripEntry()
+            .submitStripEntryInput()
             .scrollToBoard()
             .tapTileLeftOperand(0)
             .tapOperandOption(entryId = 1)

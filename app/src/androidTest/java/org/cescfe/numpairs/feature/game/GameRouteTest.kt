@@ -114,10 +114,10 @@ class GameRouteTest {
         ).tapStripItem(index = 0)
 
         composeTestRule.waitUntil {
-            observedUiState.get()?.stripItemEntryDialog?.stripItemIndex == 0
+            observedUiState.get()?.stripItemEntryInput?.stripItemIndex == 0
         }
 
-        assertEquals(0, observedUiState.get()?.stripItemEntryDialog?.stripItemIndex)
+        assertEquals(0, observedUiState.get()?.stripItemEntryInput?.stripItemIndex)
     }
 
     @Test
@@ -190,7 +190,7 @@ class GameRouteTest {
         screen
             .tapStripItem(index = 0)
             .enterStripValue("1")
-            .confirmStripEntry()
+            .submitStripEntryInput()
             .assertStripItemDescription(
                 index = 0,
                 stringResId = R.string.strip_item_player_entered_content_description,

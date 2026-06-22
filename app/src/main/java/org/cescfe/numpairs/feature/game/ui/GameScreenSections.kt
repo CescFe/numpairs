@@ -22,12 +22,14 @@ import org.cescfe.numpairs.domain.puzzle.Operator
 import org.cescfe.numpairs.feature.game.GameHighlightState
 import org.cescfe.numpairs.feature.game.GameInteractionPolicy
 import org.cescfe.numpairs.feature.game.GameTileExpressionSlot
+import org.cescfe.numpairs.feature.game.presentation.StripItemEntryInputUiState
 import org.cescfe.numpairs.feature.game.presentation.StripItemUiState
 import org.cescfe.numpairs.feature.game.presentation.StripItemVisualStyle
 import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState
 import org.cescfe.numpairs.feature.game.presentation.TileUiState
 import org.cescfe.numpairs.feature.game.ui.components.AvailableNumberChip
 import org.cescfe.numpairs.feature.game.ui.components.AvailableNumberChipStyle
+import org.cescfe.numpairs.feature.game.ui.components.AvailableNumberInputChip
 import org.cescfe.numpairs.feature.game.ui.components.PuzzleTile
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
@@ -146,7 +148,10 @@ internal fun BoardSection(
 internal fun StripSection(
     modifier: Modifier = Modifier,
     stripItems: List<StripItemUiState>,
+    stripItemEntryInput: StripItemEntryInputUiState? = null,
     onStripItemTapped: (Int) -> Unit,
+    onStripItemEntryInputChanged: (String) -> Unit = {},
+    onStripItemEntryInputConfirmed: () -> Unit = {},
     isStripItemEnabled: (Int) -> Boolean = { true },
     highlightState: GameHighlightState = GameHighlightState.None
 ) {
@@ -181,34 +186,59 @@ internal fun StripSection(
                 horizontalArrangement = Arrangement.spacedBy(STRIP_CHIP_SPACING)
             ) {
                 stripItems.forEachIndexed { index, stripItem ->
-                    AvailableNumberChip(
-                        label = stripItem.label,
-                        modifier = Modifier
-                            .width(chipWidth)
-                            .testTag(GameScreenTestTags.stripItem(index)),
-                        contentDescription = stripItemContentDescription(stripItem),
-                        additionUsed = stripItem.additionUsed,
-                        multiplicationUsed = stripItem.multiplicationUsed,
-                        additionUsageIndicatorTestTag = GameScreenTestTags.stripUsageIndicator(
-                            index = index,
-                            operator = Operator.ADDITION
-                        ),
-                        multiplicationUsageIndicatorTestTag = GameScreenTestTags.stripUsageIndicator(
-                            index = index,
-                            operator = Operator.MULTIPLICATION
-                        ),
-                        isHighlighted = highlightState.isStripEntryHighlighted(index),
-                        style = when (stripItem.visualStyle) {
-                            StripItemVisualStyle.KNOWN -> AvailableNumberChipStyle.KNOWN
-                            StripItemVisualStyle.HIDDEN -> AvailableNumberChipStyle.HIDDEN
-                            StripItemVisualStyle.PLAYER_ENTERED -> AvailableNumberChipStyle.PLAYER_ENTERED
-                        },
-                        onClick = if (stripItem.isEntryEnabled && isStripItemEnabled(index)) {
-                            { onStripItemTapped(index) }
-                        } else {
-                            null
-                        }
+                    val chipStyle = when (stripItem.visualStyle) {
+                        StripItemVisualStyle.KNOWN -> AvailableNumberChipStyle.KNOWN
+                        StripItemVisualStyle.HIDDEN -> AvailableNumberChipStyle.HIDDEN
+                        StripItemVisualStyle.PLAYER_ENTERED -> AvailableNumberChipStyle.PLAYER_ENTERED
+                    }
+                    val activeInput = stripItemEntryInput?.takeIf { input -> input.stripItemIndex == index }
+                    val chipModifier = Modifier
+                        .width(chipWidth)
+                        .testTag(GameScreenTestTags.stripItem(index))
+                    val additionUsageIndicatorTestTag = GameScreenTestTags.stripUsageIndicator(
+                        index = index,
+                        operator = Operator.ADDITION
                     )
+                    val multiplicationUsageIndicatorTestTag = GameScreenTestTags.stripUsageIndicator(
+                        index = index,
+                        operator = Operator.MULTIPLICATION
+                    )
+                    val isHighlighted = highlightState.isStripEntryHighlighted(index)
+
+                    if (activeInput != null) {
+                        AvailableNumberInputChip(
+                            value = activeInput.draftText,
+                            onValueChange = onStripItemEntryInputChanged,
+                            onDone = onStripItemEntryInputConfirmed,
+                            modifier = chipModifier,
+                            contentDescription = stripItemContentDescription(stripItem),
+                            additionUsed = stripItem.additionUsed,
+                            multiplicationUsed = stripItem.multiplicationUsed,
+                            inputTestTag = GameScreenTestTags.STRIP_ENTRY_INPUT,
+                            additionUsageIndicatorTestTag = additionUsageIndicatorTestTag,
+                            multiplicationUsageIndicatorTestTag = multiplicationUsageIndicatorTestTag,
+                            isHighlighted = isHighlighted,
+                            style = chipStyle,
+                            isInvalid = activeInput.isInvalid
+                        )
+                    } else {
+                        AvailableNumberChip(
+                            label = stripItem.label,
+                            modifier = chipModifier,
+                            contentDescription = stripItemContentDescription(stripItem),
+                            additionUsed = stripItem.additionUsed,
+                            multiplicationUsed = stripItem.multiplicationUsed,
+                            additionUsageIndicatorTestTag = additionUsageIndicatorTestTag,
+                            multiplicationUsageIndicatorTestTag = multiplicationUsageIndicatorTestTag,
+                            isHighlighted = isHighlighted,
+                            style = chipStyle,
+                            onClick = if (stripItem.isEntryEnabled && isStripItemEnabled(index)) {
+                                { onStripItemTapped(index) }
+                            } else {
+                                null
+                            }
+                        )
+                    }
                 }
             }
         }

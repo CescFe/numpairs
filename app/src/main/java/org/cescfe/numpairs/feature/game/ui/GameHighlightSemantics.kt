@@ -13,6 +13,9 @@ val OperandSelectorUsageHintVisualStateKey = SemanticsPropertyKey<String>(
 )
 var SemanticsPropertyReceiver.operandSelectorUsageHintVisualState by OperandSelectorUsageHintVisualStateKey
 
+val StripEntryInputInvalidKey = SemanticsPropertyKey<Boolean>("StripEntryInputInvalid")
+var SemanticsPropertyReceiver.stripEntryInputInvalid by StripEntryInputInvalidKey
+
 object OperandSelectorUsageHintVisualStateValues {
     const val AVAILABLE = "available"
     const val USED_WITH_PAIRING_AVAILABLE = "used_with_pairing_available"

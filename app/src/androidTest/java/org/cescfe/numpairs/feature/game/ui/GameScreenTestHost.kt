@@ -64,6 +64,8 @@ abstract class GameScreenTestHost {
                     title = stringResource(R.string.tutorial_screen_title),
                     uiState = uiState,
                     onStripItemTapped = currentViewModel::onStripItemTapped,
+                    onStripItemEntryInputChanged = currentViewModel::onStripItemEntryInputChanged,
+                    onStripItemEntryInputConfirmed = currentViewModel::onStripItemEntryInputConfirmed,
                     onStripItemEntryDismissed = currentViewModel::onStripItemEntryDismissed,
                     onStripItemEntryConfirmed = currentViewModel::onStripItemEntryConfirmed,
                     onTileLeftOperandTapped = currentViewModel::onTileLeftOperandTapped,
