@@ -10,34 +10,75 @@ import org.junit.Test
 
 class GameViewModelStripEntryTest {
     @Test
-    fun tapping_a_hidden_strip_item_opens_the_entry_dialog() {
+    fun tapping_a_hidden_strip_item_starts_inline_entry_with_an_empty_draft() {
         val viewModel = GameViewModel()
 
         viewModel.onStripItemTapped(index = 1)
 
         assertEquals(
-            StripItemEntryDialogUiState(
+            StripItemEntryInputUiState(
                 stripItemIndex = 1,
+                draftText = "",
                 validRange = StripEntryRange(minimumValue = 1, maximumValue = 6),
-                mode = StripItemEntryDialogMode.CREATE,
-                initialValue = ""
+                isInvalid = false
             ),
-            viewModel.uiState.value.stripItemEntryDialog
+            viewModel.uiState.value.stripItemEntryInput
+        )
+        assertNull(viewModel.uiState.value.stripItemEntryDialog)
+    }
+
+    @Test
+    fun tapping_a_player_entered_strip_item_starts_inline_entry_with_the_current_value_as_draft() {
+        val viewModel = GameViewModel()
+
+        viewModel.enterStripValue(index = 1, value = "2")
+        viewModel.onStripItemTapped(index = 1)
+
+        assertEquals(
+            StripItemEntryInputUiState(
+                stripItemIndex = 1,
+                draftText = "2",
+                validRange = StripEntryRange(minimumValue = 1, maximumValue = 6),
+                isInvalid = false
+            ),
+            viewModel.uiState.value.stripItemEntryInput
+        )
+        assertNull(viewModel.uiState.value.stripItemEntryDialog)
+    }
+
+    @Test
+    fun changing_the_inline_entry_draft_does_not_update_the_puzzle() {
+        val viewModel = GameViewModel()
+
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryInputChanged(draftText = "2")
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals("?", uiState.stripItems[1].label)
+        assertEquals(
+            StripItemEntryInputUiState(
+                stripItemIndex = 1,
+                draftText = "2",
+                validRange = StripEntryRange(minimumValue = 1, maximumValue = 6),
+                isInvalid = false
+            ),
+            uiState.stripItemEntryInput
         )
     }
 
     @Test
-    fun confirming_the_entry_dialog_completes_the_hidden_strip_item_and_closes_the_dialog() {
+    fun confirming_a_valid_inline_entry_completes_the_hidden_strip_item_and_exits_editing() {
         val viewModel = GameViewModel()
 
-        viewModel.onStripItemTapped(index = 1)
-        viewModel.onStripItemEntryConfirmed(value = 2)
+        viewModel.enterStripValue(index = 1, value = "2")
 
         val uiState = viewModel.uiState.value
 
         assertEquals("2", uiState.stripItems[1].label)
         assertEquals(true, uiState.stripItems[1].isEntryEnabled)
         assertEquals(StripItemVisualStyle.PLAYER_ENTERED, uiState.stripItems[1].visualStyle)
+        assertNull(uiState.stripItemEntryInput)
         assertNull(uiState.stripItemEntryDialog)
     }
 
@@ -45,129 +86,146 @@ class GameViewModelStripEntryTest {
     fun confirming_adjacent_hidden_strip_entries_surfaces_the_reordered_domain_result_in_ui_state() {
         val viewModel = GameViewModel()
 
-        viewModel.onStripItemTapped(index = 0)
-        viewModel.onStripItemEntryConfirmed(value = 5)
-        viewModel.onStripItemTapped(index = 1)
-        viewModel.onStripItemEntryConfirmed(value = 2)
+        viewModel.enterStripValue(index = 0, value = "5")
+        viewModel.enterStripValue(index = 1, value = "2")
 
         assertEquals(
             listOf("2", "5", "6", "?", "25", "?", "?", "222"),
             viewModel.uiState.value.stripItems.map { stripItem -> stripItem.label }
         )
+        assertNull(viewModel.uiState.value.stripItemEntryInput)
         assertNull(viewModel.uiState.value.stripItemEntryDialog)
     }
 
     @Test
-    fun confirming_an_out_of_range_value_keeps_the_hidden_strip_item_dialog_open_and_does_not_change_the_item() {
+    fun confirming_an_out_of_range_inline_entry_marks_the_input_invalid_and_preserves_hidden_item() {
         val viewModel = GameViewModel()
 
         viewModel.onStripItemTapped(index = 1)
-        viewModel.onStripItemEntryConfirmed(value = 9)
+        viewModel.onStripItemEntryInputChanged(draftText = "9")
+        viewModel.onStripItemEntryInputConfirmed()
 
         val uiState = viewModel.uiState.value
 
         assertEquals("?", uiState.stripItems[1].label)
         assertEquals(
-            StripItemEntryDialogUiState(
+            StripItemEntryInputUiState(
                 stripItemIndex = 1,
+                draftText = "9",
                 validRange = StripEntryRange(minimumValue = 1, maximumValue = 6),
-                mode = StripItemEntryDialogMode.CREATE,
-                initialValue = ""
+                isInvalid = true
             ),
-            uiState.stripItemEntryDialog
+            uiState.stripItemEntryInput
         )
     }
 
     @Test
-    fun tapping_a_player_entered_strip_item_opens_the_entry_dialog_in_edit_mode() {
+    fun updating_an_invalid_inline_entry_draft_clears_the_invalid_state_without_updating_the_puzzle() {
         val viewModel = GameViewModel()
 
         viewModel.onStripItemTapped(index = 1)
-        viewModel.onStripItemEntryConfirmed(value = 2)
-        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryInputChanged(draftText = "9")
+        viewModel.onStripItemEntryInputConfirmed()
+        viewModel.onStripItemEntryInputChanged(draftText = "3")
 
+        val uiState = viewModel.uiState.value
+
+        assertEquals("?", uiState.stripItems[1].label)
         assertEquals(
-            StripItemEntryDialogUiState(
+            StripItemEntryInputUiState(
                 stripItemIndex = 1,
+                draftText = "3",
                 validRange = StripEntryRange(minimumValue = 1, maximumValue = 6),
-                mode = StripItemEntryDialogMode.EDIT,
-                initialValue = "2"
+                isInvalid = false
             ),
-            viewModel.uiState.value.stripItemEntryDialog
+            uiState.stripItemEntryInput
         )
     }
 
     @Test
-    fun confirming_the_entry_dialog_updates_a_player_entered_strip_item_and_closes_the_dialog() {
+    fun confirming_a_valid_inline_entry_updates_a_player_entered_strip_item_and_exits_editing() {
         val viewModel = GameViewModel()
 
-        viewModel.onStripItemTapped(index = 1)
-        viewModel.onStripItemEntryConfirmed(value = 2)
-        viewModel.onStripItemTapped(index = 1)
-        viewModel.onStripItemEntryConfirmed(value = 3)
+        viewModel.enterStripValue(index = 1, value = "2")
+        viewModel.enterStripValue(index = 1, value = "3")
 
         val uiState = viewModel.uiState.value
 
         assertEquals("3", uiState.stripItems[1].label)
         assertEquals(true, uiState.stripItems[1].isEntryEnabled)
         assertEquals(StripItemVisualStyle.PLAYER_ENTERED, uiState.stripItems[1].visualStyle)
-        assertNull(uiState.stripItemEntryDialog)
+        assertNull(uiState.stripItemEntryInput)
     }
 
     @Test
-    fun cancelling_the_entry_dialog_leaves_hidden_and_player_entered_strip_items_unchanged() {
-        val hiddenItemViewModel = GameViewModel()
-
-        hiddenItemViewModel.onStripItemTapped(index = 1)
-        hiddenItemViewModel.onStripItemEntryDismissed()
-
-        var uiState = hiddenItemViewModel.uiState.value
-        assertEquals("?", uiState.stripItems[1].label)
-        assertEquals(true, uiState.stripItems[1].isEntryEnabled)
-        assertNull(uiState.stripItemEntryDialog)
-
-        val playerEnteredViewModel = GameViewModel()
-
-        playerEnteredViewModel.onStripItemTapped(index = 1)
-        playerEnteredViewModel.onStripItemEntryConfirmed(value = 2)
-        playerEnteredViewModel.onStripItemTapped(index = 1)
-        playerEnteredViewModel.onStripItemEntryDismissed()
-
-        uiState = playerEnteredViewModel.uiState.value
-        assertEquals("2", uiState.stripItems[1].label)
-        assertEquals(true, uiState.stripItems[1].isEntryEnabled)
-        assertNull(uiState.stripItemEntryDialog)
-    }
-
-    @Test
-    fun confirming_an_out_of_range_value_keeps_the_player_entered_item_dialog_open_and_preserves_the_item() {
+    fun confirming_an_out_of_range_inline_entry_marks_the_input_invalid_and_preserves_player_entered_item() {
         val viewModel = GameViewModel()
 
+        viewModel.enterStripValue(index = 1, value = "2")
         viewModel.onStripItemTapped(index = 1)
-        viewModel.onStripItemEntryConfirmed(value = 2)
-        viewModel.onStripItemTapped(index = 1)
-        viewModel.onStripItemEntryConfirmed(value = 9)
+        viewModel.onStripItemEntryInputChanged(draftText = "9")
+        viewModel.onStripItemEntryInputConfirmed()
 
         val uiState = viewModel.uiState.value
 
         assertEquals("2", uiState.stripItems[1].label)
         assertEquals(
-            StripItemEntryDialogUiState(
+            StripItemEntryInputUiState(
                 stripItemIndex = 1,
+                draftText = "9",
                 validRange = StripEntryRange(minimumValue = 1, maximumValue = 6),
-                mode = StripItemEntryDialogMode.EDIT,
-                initialValue = "2"
+                isInvalid = true
             ),
-            uiState.stripItemEntryDialog
+            uiState.stripItemEntryInput
         )
     }
 
     @Test
-    fun tapping_a_known_strip_item_does_not_open_the_entry_dialog() {
+    fun cancelling_inline_entry_leaves_hidden_and_player_entered_strip_items_unchanged() {
+        val hiddenItemViewModel = GameViewModel()
+
+        hiddenItemViewModel.onStripItemTapped(index = 1)
+        hiddenItemViewModel.onStripItemEntryInputChanged(draftText = "2")
+        hiddenItemViewModel.onStripItemEntryInputCancelled()
+
+        var uiState = hiddenItemViewModel.uiState.value
+        assertEquals("?", uiState.stripItems[1].label)
+        assertEquals(true, uiState.stripItems[1].isEntryEnabled)
+        assertNull(uiState.stripItemEntryInput)
+
+        val playerEnteredViewModel = GameViewModel()
+
+        playerEnteredViewModel.enterStripValue(index = 1, value = "2")
+        playerEnteredViewModel.onStripItemTapped(index = 1)
+        playerEnteredViewModel.onStripItemEntryInputChanged(draftText = "3")
+        playerEnteredViewModel.onStripItemEntryInputCancelled()
+
+        uiState = playerEnteredViewModel.uiState.value
+        assertEquals("2", uiState.stripItems[1].label)
+        assertEquals(true, uiState.stripItems[1].isEntryEnabled)
+        assertNull(uiState.stripItemEntryInput)
+    }
+
+    @Test
+    fun confirming_an_empty_inline_entry_draft_exits_editing_without_changing_the_item() {
+        val viewModel = GameViewModel()
+
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryInputConfirmed()
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals("?", uiState.stripItems[1].label)
+        assertNull(uiState.stripItemEntryInput)
+    }
+
+    @Test
+    fun tapping_a_known_strip_item_does_not_start_inline_entry() {
         val viewModel = GameViewModel()
 
         viewModel.onStripItemTapped(index = 2)
 
+        assertNull(viewModel.uiState.value.stripItemEntryInput)
         assertNull(viewModel.uiState.value.stripItemEntryDialog)
     }
 
@@ -193,13 +251,19 @@ class GameViewModelStripEntryTest {
         viewModel.onStripItemTapped(index = 0)
 
         assertEquals(
-            StripItemEntryDialogUiState(
+            StripItemEntryInputUiState(
                 stripItemIndex = 0,
+                draftText = "",
                 validRange = StripEntryRange(minimumValue = 1, maximumValue = 3),
-                mode = StripItemEntryDialogMode.CREATE,
-                initialValue = ""
+                isInvalid = false
             ),
-            viewModel.uiState.value.stripItemEntryDialog
+            viewModel.uiState.value.stripItemEntryInput
         )
+    }
+
+    private fun GameViewModel.enterStripValue(index: Int, value: String) {
+        onStripItemTapped(index = index)
+        onStripItemEntryInputChanged(draftText = value)
+        onStripItemEntryInputConfirmed()
     }
 }

@@ -37,11 +37,49 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
             return
         }
 
+        val draftText = when (val stripItem = puzzle.strip.items[index]) {
+            StripItem.Hidden -> ""
+            is StripItem.PlayerEntered -> stripItem.value.toString()
+            is StripItem.Known -> return
+        }
+
+        commit {
+            showStripItemEntryInput(
+                index = index,
+                draftText = draftText
+            )
+        }
+    }
+
+    fun onStripItemDialogTapped(index: Int) {
+        if (!canInteractWithPuzzle()) {
+            return
+        }
+
+        if (!canEditStripItem(index = index)) {
+            return
+        }
+
         commit { showStripItemEntry(index = index) }
     }
 
     fun onStripItemEntryDismissed() {
-        commit { dismissStripItemEntry() }
+        commit {
+            dismissStripItemEntry()
+                .dismissStripItemEntryInput()
+        }
+    }
+
+    fun onStripItemEntryInputChanged(draftText: String) {
+        commit { updateStripItemEntryInputDraft(draftText = draftText) }
+    }
+
+    fun onStripItemEntryInputConfirmed() {
+        confirmStripItemEntryInput()
+    }
+
+    fun onStripItemEntryInputCancelled() {
+        commit { dismissStripItemEntryInput() }
     }
 
     fun onTileOperatorTapped(index: Int) {
@@ -85,6 +123,12 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
     }
 
     fun onStripItemEntryConfirmed(value: Int) {
+        val input = presentationState.stripItemEntryInput
+        if (input != null) {
+            confirmStripItemEntryInput(draftText = value.toString())
+            return
+        }
+
         val index = (presentationState.modal as? GameModalState.StripItemEntry)?.index ?: return
         val currentStripItem = puzzle.strip.items.getOrNull(index) ?: return
 
@@ -106,6 +150,45 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
             )
         ) {
             dismissStripItemEntry()
+        }
+    }
+
+    private fun confirmStripItemEntryInput(draftText: String? = null) {
+        val input = presentationState.stripItemEntryInput ?: return
+        val currentStripItem = puzzle.strip.items.getOrNull(input.stripItemIndex) ?: return
+
+        if (currentStripItem !is StripItem.Hidden && currentStripItem !is StripItem.PlayerEntered) {
+            commit { dismissStripItemEntryInput() }
+            return
+        }
+
+        val resolvedDraftText = draftText ?: input.draftText
+        if (resolvedDraftText.isBlank()) {
+            commit { dismissStripItemEntryInput() }
+            return
+        }
+
+        val value = resolvedDraftText.toIntOrNull()
+        if (value == null || value !in puzzle.strip.validEntryRangeFor(input.stripItemIndex)) {
+            commit {
+                showStripItemEntryInput(
+                    index = input.stripItemIndex,
+                    draftText = resolvedDraftText,
+                    isInvalid = true
+                )
+            }
+            return
+        }
+
+        commit(
+            updatedPuzzle = puzzle.copy(
+                strip = puzzle.strip.withUpdatedEntry(
+                    index = input.stripItemIndex,
+                    value = value
+                )
+            )
+        ) {
+            dismissStripItemEntryInput()
         }
     }
 
