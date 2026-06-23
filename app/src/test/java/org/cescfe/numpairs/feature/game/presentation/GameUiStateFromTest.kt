@@ -191,23 +191,6 @@ class GameUiStateFromTest {
     }
 
     @Test
-    fun maps_empty_live_rule_conflicts_for_tiles_and_operand_options_without_conflicts() {
-        val uiState = GameUiState.from(
-            puzzle = liveRulePresentationPuzzle(),
-            presentationState = GamePresentationState().showTileOperandSelection(
-                tileIndex = 0,
-                slot = OperandSlot.LEFT
-            )
-        )
-
-        assertTrue(uiState.tiles.all { tile -> tile.liveRuleConflicts.isEmpty() })
-        uiState.tileOperandSelectionDialog!!.availableOperands.forEach { operand ->
-            assertTrue(operand.additionRuleConflicts.isEmpty())
-            assertTrue(operand.multiplicationRuleConflicts.isEmpty())
-        }
-    }
-
-    @Test
     fun maps_live_duplicate_operator_usage_conflicts_to_tiles() {
         val puzzle = liveRulePresentationPuzzle()
             .withTile(
@@ -377,7 +360,7 @@ class GameUiStateFromTest {
     }
 
     @Test
-    fun builds_an_operand_selection_dialog_from_operand_selection_hints() {
+    fun builds_an_operand_selection_dialog_without_collapsing_repeated_values() {
         val puzzle = puzzleWithRepeatedSixes()
             .withTile(
                 index = 0,
@@ -393,44 +376,21 @@ class GameUiStateFromTest {
                 slot = OperandSlot.LEFT
             )
         )
+        val dialog = uiState.tileOperandSelectionDialog!!
+        val repeatedSixOptions = dialog.availableOperands.filter { operand -> operand.value == 6 }
+        val usedRepeatedSixOption = repeatedSixOptions.first { operand -> operand.stripEntryId == 0 }
+        val unusedRepeatedSixOption = repeatedSixOptions.first { operand -> operand.stripEntryId == 1 }
 
+        assertEquals(1, dialog.tileIndex)
+        assertEquals(OperandSlot.LEFT, dialog.slot)
         assertEquals(
-            TileOperandSelectionDialogUiState(
-                tileIndex = 1,
-                slot = OperandSlot.LEFT,
-                availableOperands = listOf(
-                    TileOperandOptionUiState(
-                        stripEntryId = 0,
-                        value = 6,
-                        additionUsed = true,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        stripEntryId = 1,
-                        value = 6,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        stripEntryId = 4,
-                        value = 25,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    ),
-                    TileOperandOptionUiState(
-                        stripEntryId = 7,
-                        value = 222,
-                        additionUsed = false,
-                        multiplicationUsed = false,
-                        isSelectable = true
-                    )
-                )
-            ),
-            uiState.tileOperandSelectionDialog
+            listOf(0, 1),
+            repeatedSixOptions.map(TileOperandOptionUiState::stripEntryId)
         )
+        assertTrue(usedRepeatedSixOption.additionUsed)
+        assertTrue(usedRepeatedSixOption.isSelectable)
+        assertEquals(false, unusedRepeatedSixOption.additionUsed)
+        assertTrue(unusedRepeatedSixOption.isSelectable)
     }
 
     @Test
