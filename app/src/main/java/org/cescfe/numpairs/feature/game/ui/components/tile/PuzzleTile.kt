@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.feature.game.ui.components
+package org.cescfe.numpairs.feature.game.ui.components.tile
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
