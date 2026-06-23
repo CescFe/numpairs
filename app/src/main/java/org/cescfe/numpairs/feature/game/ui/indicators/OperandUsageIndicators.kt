@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.feature.game.ui
+package org.cescfe.numpairs.feature.game.ui.indicators
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke

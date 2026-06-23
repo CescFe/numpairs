@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.feature.game.ui
+package org.cescfe.numpairs.feature.game.ui.actions
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -16,6 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.ui.theme.NumPairsSand
 
 @Composable

@@ -12,7 +12,7 @@ import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryReposito
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryState
 import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
-import org.cescfe.numpairs.feature.game.ui.GameScreenTestTags
+import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

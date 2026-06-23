@@ -14,7 +14,7 @@ import org.cescfe.numpairs.MainActivity
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyRules
 import org.cescfe.numpairs.domain.puzzle.model.Operator
-import org.cescfe.numpairs.feature.game.ui.GameScreenTestTags
+import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.junit.Assert.assertEquals
 import org.junit.Rule

@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.feature.game.ui
+package org.cescfe.numpairs.feature.game.ui.screen
 
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 

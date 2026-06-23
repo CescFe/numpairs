@@ -18,8 +18,8 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.model.Operator
-import org.cescfe.numpairs.feature.game.ui.GameHighlightedKey
-import org.cescfe.numpairs.feature.game.ui.GameScreenTestTags
+import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
+import org.cescfe.numpairs.feature.game.ui.semantics.GameHighlightedKey
 import org.cescfe.numpairs.feature.tutorial.ui.TutorialScreenTestTags
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Rule

@@ -17,8 +17,8 @@ import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryState
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.GameRoute
-import org.cescfe.numpairs.feature.game.ui.HintAction
-import org.cescfe.numpairs.feature.game.ui.SolvingTipsDialog
+import org.cescfe.numpairs.feature.game.ui.actions.HintAction
+import org.cescfe.numpairs.feature.game.ui.help.SolvingTipsDialog
 import org.cescfe.numpairs.feature.tutorial.TutorialMode
 import org.cescfe.numpairs.feature.tutorial.TutorialOverlayHost
 

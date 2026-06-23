@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.feature.game.ui
+package org.cescfe.numpairs.feature.game.ui.semantics
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsPropertyKey

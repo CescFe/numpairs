@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.feature.game.ui
+package org.cescfe.numpairs.feature.game.ui.help
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -34,44 +34,43 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 @Composable
-internal fun RulesHelperDialog(
+internal fun SolvingTipsDialog(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
-    onPlayTutorialRequested: (() -> Unit)? = null
+    onPracticeTipsRequested: () -> Unit = {}
 ) {
     val containerColor = NumPairsComponents.raisedSurfaceColor()
 
     AlertDialog(
-        modifier = modifier.testTag(GameScreenTestTags.RULES_HELPER_DIALOG),
+        modifier = modifier.testTag(GameScreenTestTags.SOLVING_TIPS_DIALOG),
         onDismissRequest = onDismiss,
         shape = NumPairsComponents.LargeShape,
         containerColor = containerColor,
         titleContentColor = MaterialTheme.colorScheme.onSurface,
         textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         title = {
-            RulesHelperTitle(onDismiss = onDismiss)
+            SolvingTipsTitle(onDismiss = onDismiss)
         },
         text = {
-            RulesHelperContent(containerColor = containerColor)
+            SolvingTipsContent(containerColor = containerColor)
         },
         confirmButton = {
-            onPlayTutorialRequested?.let { onPlayTutorial ->
-                TextButton(
-                    onClick = {
-                        onDismiss()
-                        onPlayTutorial()
-                    },
-                    modifier = Modifier.testTag(GameScreenTestTags.RULES_HELPER_PLAY_TUTORIAL_BUTTON),
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Text(text = stringResource(R.string.rules_helper_play_tutorial_button))
-                }
+            TextButton(
+                onClick = {
+                    onDismiss()
+                    onPracticeTipsRequested()
+                },
+                modifier = Modifier.testTag(GameScreenTestTags.SOLVING_TIPS_PRACTICE_BUTTON),
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Text(text = stringResource(R.string.solving_tips_practice_button))
             }
         },
         properties = DialogProperties(
@@ -82,31 +81,31 @@ internal fun RulesHelperDialog(
 }
 
 @Composable
-private fun RulesHelperTitle(onDismiss: () -> Unit) {
+private fun SolvingTipsTitle(onDismiss: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = stringResource(R.string.rules_helper_title),
+            text = stringResource(R.string.solving_tips_title),
             style = MaterialTheme.typography.titleMedium
         )
         IconButton(
             onClick = onDismiss,
-            modifier = Modifier.testTag(GameScreenTestTags.RULES_HELPER_CLOSE_BUTTON),
+            modifier = Modifier.testTag(GameScreenTestTags.SOLVING_TIPS_CLOSE_BUTTON),
             colors = NumPairsComponents.iconButtonColors()
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_close),
-                contentDescription = stringResource(R.string.rules_helper_close_content_description)
+                contentDescription = stringResource(R.string.solving_tips_close_content_description)
             )
         }
     }
 }
 
 @Composable
-private fun RulesHelperContent(containerColor: Color) {
+private fun SolvingTipsContent(containerColor: Color) {
     val scrollState = rememberScrollState()
     val hasContentAbove by remember {
         derivedStateOf { scrollState.value > 0 }
@@ -117,59 +116,58 @@ private fun RulesHelperContent(containerColor: Color) {
 
     Box(
         modifier = Modifier
-            .heightIn(max = RULES_HELPER_CONTENT_MAX_HEIGHT)
-            .testTag(GameScreenTestTags.RULES_HELPER_CONTENT)
+            .heightIn(max = SOLVING_TIPS_CONTENT_MAX_HEIGHT)
+            .testTag(GameScreenTestTags.SOLVING_TIPS_CONTENT)
     ) {
         Column(
-            modifier = Modifier
-                .verticalScroll(scrollState),
+            modifier = Modifier.verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            RulesHelperSection(
-                title = stringResource(R.string.rules_helper_objective_title),
+            SolvingTipsSection(
+                title = stringResource(R.string.solving_tips_strip_title),
                 bullets = listOf(
-                    stringResource(R.string.rules_helper_objective_complete)
+                    stringResource(R.string.solving_tips_strip_hidden_range),
+                    stringResource(R.string.solving_tips_strip_highest_anchor)
                 )
             )
-            RulesHelperSection(
-                title = stringResource(R.string.rules_helper_elements_title),
+            SolvingTipsSection(
+                title = stringResource(R.string.solving_tips_products_title),
                 bullets = listOf(
-                    stringResource(R.string.rules_helper_elements_strip),
-                    stringResource(R.string.rules_helper_elements_grid)
+                    stringResource(R.string.solving_tips_products_large_results),
+                    stringResource(R.string.solving_tips_products_factors)
                 )
             )
-            RulesHelperSection(
-                title = stringResource(R.string.rules_helper_strip_title),
+            SolvingTipsSection(
+                title = stringResource(R.string.solving_tips_sums_title),
                 bullets = listOf(
-                    stringResource(R.string.rules_helper_strip_hidden)
+                    stringResource(R.string.solving_tips_sums_prime_results)
                 )
             )
-            RulesHelperSection(
-                title = stringResource(R.string.rules_helper_grid_title),
+            SolvingTipsSection(
+                title = stringResource(R.string.solving_tips_ui_clues_title),
                 bullets = listOf(
-                    stringResource(R.string.rules_helper_grid_expression),
-                    stringResource(R.string.rules_helper_grid_pair_usage)
+                    stringResource(R.string.solving_tips_ui_clues_operand_usage)
                 )
             )
         }
 
         if (hasContentAbove) {
-            RulesHelperScrollFade(
+            SolvingTipsScrollFade(
                 containerColor = containerColor,
-                edge = RulesHelperScrollEdge.Top
+                edge = SolvingTipsScrollEdge.Top
             )
         }
         if (hasContentBelow) {
-            RulesHelperScrollFade(
+            SolvingTipsScrollFade(
                 containerColor = containerColor,
-                edge = RulesHelperScrollEdge.Bottom
+                edge = SolvingTipsScrollEdge.Bottom
             )
         }
     }
 }
 
 @Composable
-private fun RulesHelperSection(title: String, bullets: List<String>) {
+private fun SolvingTipsSection(title: String, bullets: List<String>) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
             text = title,
@@ -177,13 +175,13 @@ private fun RulesHelperSection(title: String, bullets: List<String>) {
             color = MaterialTheme.colorScheme.onSurface
         )
         bullets.forEach { bullet ->
-            RulesHelperBullet(text = bullet)
+            SolvingTipsBullet(text = bullet)
         }
     }
 }
 
 @Composable
-private fun RulesHelperBullet(text: String) {
+private fun SolvingTipsBullet(text: String) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = BULLET,
@@ -202,38 +200,38 @@ private fun RulesHelperBullet(text: String) {
 }
 
 @Composable
-private fun BoxScope.RulesHelperScrollFade(containerColor: Color, edge: RulesHelperScrollEdge) {
+private fun BoxScope.SolvingTipsScrollFade(containerColor: Color, edge: SolvingTipsScrollEdge) {
     val colors = when (edge) {
-        RulesHelperScrollEdge.Top -> listOf(containerColor, Color.Transparent)
-        RulesHelperScrollEdge.Bottom -> listOf(Color.Transparent, containerColor)
+        SolvingTipsScrollEdge.Top -> listOf(containerColor, Color.Transparent)
+        SolvingTipsScrollEdge.Bottom -> listOf(Color.Transparent, containerColor)
     }
     val alignment = when (edge) {
-        RulesHelperScrollEdge.Top -> Alignment.TopCenter
-        RulesHelperScrollEdge.Bottom -> Alignment.BottomCenter
+        SolvingTipsScrollEdge.Top -> Alignment.TopCenter
+        SolvingTipsScrollEdge.Bottom -> Alignment.BottomCenter
     }
 
     Box(
         modifier = Modifier
             .align(alignment)
             .fillMaxWidth()
-            .height(RULES_HELPER_FADE_HEIGHT)
+            .height(SOLVING_TIPS_FADE_HEIGHT)
             .background(Brush.verticalGradient(colors = colors))
     )
 }
 
-private enum class RulesHelperScrollEdge {
+private enum class SolvingTipsScrollEdge {
     Top,
     Bottom
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun RulesHelperDialogPreview() {
+private fun SolvingTipsDialogPreview() {
     NumPairsTheme {
-        RulesHelperDialog(onDismiss = {})
+        SolvingTipsDialog(onDismiss = {})
     }
 }
 
-private val RULES_HELPER_CONTENT_MAX_HEIGHT = 420.dp
-private val RULES_HELPER_FADE_HEIGHT = 36.dp
+private val SOLVING_TIPS_CONTENT_MAX_HEIGHT = 420.dp
+private val SOLVING_TIPS_FADE_HEIGHT = 36.dp
 private const val BULLET = "\u2022"
