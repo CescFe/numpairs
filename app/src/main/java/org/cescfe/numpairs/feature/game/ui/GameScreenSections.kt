@@ -157,6 +157,7 @@ internal fun StripSection(
     onStripItemTapped: (Int) -> Unit,
     onStripItemEntryInputChanged: (String) -> Unit = {},
     onStripItemEntryInputConfirmed: () -> Unit = {},
+    onStripItemEntryInputFocusLost: () -> Unit = {},
     isStripItemEnabled: (Int) -> Boolean = { true },
     highlightState: GameHighlightState = GameHighlightState.None
 ) {
@@ -221,6 +222,7 @@ internal fun StripSection(
                                 value = activeInput.draftText,
                                 onValueChange = onStripItemEntryInputChanged,
                                 onDone = onStripItemEntryInputConfirmed,
+                                onFocusLost = onStripItemEntryInputFocusLost,
                                 modifier = chipModifier,
                                 contentDescription = stripItemContentDescription(stripItem),
                                 additionUsed = stripItem.additionUsed,

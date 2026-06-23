@@ -53,6 +53,7 @@ fun GameScreen(
     onStripItemTapped: (Int) -> Unit = {},
     onStripItemEntryInputChanged: (String) -> Unit = {},
     onStripItemEntryInputConfirmed: () -> Unit = {},
+    onStripItemEntryInputFocusLost: () -> Unit = {},
     onStripItemEntryDismissed: () -> Unit = {},
     onStripItemEntryConfirmed: (Int) -> Unit = {},
     onTileLeftOperandTapped: (Int) -> Unit = {},
@@ -119,6 +120,7 @@ fun GameScreen(
                     onStripItemTapped = onStripItemTapped,
                     onStripItemEntryInputChanged = onStripItemEntryInputChanged,
                     onStripItemEntryInputConfirmed = onStripItemEntryInputConfirmed,
+                    onStripItemEntryInputFocusLost = onStripItemEntryInputFocusLost,
                     isStripItemEnabled = interactionPolicy.canTapStripItem,
                     highlightState = highlightState,
                     modifier = Modifier.fillMaxWidth()
