@@ -1,12 +1,12 @@
 package org.cescfe.numpairs.feature.tutorial
 
-import org.cescfe.numpairs.domain.puzzle.Board
-import org.cescfe.numpairs.domain.puzzle.Expression
-import org.cescfe.numpairs.domain.puzzle.Operator
-import org.cescfe.numpairs.domain.puzzle.Puzzle
-import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
-import org.cescfe.numpairs.domain.puzzle.StripItem
-import org.cescfe.numpairs.domain.puzzle.Tile
+import org.cescfe.numpairs.domain.puzzle.model.Board
+import org.cescfe.numpairs.domain.puzzle.model.Expression
+import org.cescfe.numpairs.domain.puzzle.model.Operator
+import org.cescfe.numpairs.domain.puzzle.model.Puzzle
+import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
+import org.cescfe.numpairs.domain.puzzle.model.StripItem
+import org.cescfe.numpairs.domain.puzzle.model.Tile
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

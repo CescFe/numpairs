@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.domain.puzzle.Operator
+import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.feature.game.presentation.TileOperandOptionUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperandSelectionDialogUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState

@@ -1,5 +1,11 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.cescfe.numpairs.domain.puzzle.model.Board
+import org.cescfe.numpairs.domain.puzzle.model.Expression
+import org.cescfe.numpairs.domain.puzzle.model.Operator
+import org.cescfe.numpairs.domain.puzzle.model.Puzzle
+import org.cescfe.numpairs.domain.puzzle.model.Tile
+
 data class ResolvedOperandAssignment(val stripEntryId: Int, val value: Int) {
     init {
         require(stripEntryId >= 0) {

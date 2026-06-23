@@ -1,8 +1,8 @@
 package org.cescfe.numpairs.feature.tutorial
 
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.domain.puzzle.Operator
-import org.cescfe.numpairs.domain.puzzle.StripItem
+import org.cescfe.numpairs.domain.puzzle.model.Operator
+import org.cescfe.numpairs.domain.puzzle.model.StripItem
 
 internal object LearnBasicsTutorialContent {
     val scenario: TutorialScenario = twoPairPracticeScenario()

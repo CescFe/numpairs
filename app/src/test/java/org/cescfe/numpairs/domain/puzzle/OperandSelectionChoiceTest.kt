@@ -1,6 +1,8 @@
 package org.cescfe.numpairs.domain.puzzle
 
 import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
+import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
+import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.support.hiddenTile
 import org.cescfe.numpairs.domain.puzzle.support.puzzleWithRepeatedSixes
 import org.cescfe.numpairs.domain.puzzle.support.withTile

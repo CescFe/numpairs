@@ -1,17 +1,17 @@
 package org.cescfe.numpairs.feature.game.presentation
 
-import org.cescfe.numpairs.domain.puzzle.Expression
 import org.cescfe.numpairs.domain.puzzle.LivePuzzleRuleConflict
 import org.cescfe.numpairs.domain.puzzle.OperandSelectionChoice
-import org.cescfe.numpairs.domain.puzzle.OperandSlot
-import org.cescfe.numpairs.domain.puzzle.Operator
-import org.cescfe.numpairs.domain.puzzle.Puzzle
-import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
-import org.cescfe.numpairs.domain.puzzle.StripEntryRange
 import org.cescfe.numpairs.domain.puzzle.StripEntryUsageByOperator
-import org.cescfe.numpairs.domain.puzzle.StripItem
-import org.cescfe.numpairs.domain.puzzle.Tile
-import org.cescfe.numpairs.domain.puzzle.TileResolutionState
+import org.cescfe.numpairs.domain.puzzle.model.Expression
+import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
+import org.cescfe.numpairs.domain.puzzle.model.Operator
+import org.cescfe.numpairs.domain.puzzle.model.Puzzle
+import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
+import org.cescfe.numpairs.domain.puzzle.model.StripEntryRange
+import org.cescfe.numpairs.domain.puzzle.model.StripItem
+import org.cescfe.numpairs.domain.puzzle.model.Tile
+import org.cescfe.numpairs.domain.puzzle.model.TileResolutionState
 
 data class GameUiState(
     val stripItems: List<StripItemUiState>,

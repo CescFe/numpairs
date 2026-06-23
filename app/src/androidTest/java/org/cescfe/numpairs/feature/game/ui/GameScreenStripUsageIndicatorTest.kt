@@ -2,7 +2,7 @@ package org.cescfe.numpairs.feature.game.ui
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.domain.puzzle.Operator
+import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.StripItemUiState
 import org.cescfe.numpairs.feature.game.presentation.StripItemVisualStyle

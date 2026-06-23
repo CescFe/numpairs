@@ -1,7 +1,7 @@
 package org.cescfe.numpairs.feature.fourpairs
 
 import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyPuzzleGenerator
-import org.cescfe.numpairs.domain.puzzle.Puzzle
+import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
 class LowDifficultyFourPairsPuzzleProvider private constructor(
     private val generator: FourPairsLowDifficultyPuzzleGenerator

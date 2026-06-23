@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.domain.puzzle
+package org.cescfe.numpairs.domain.puzzle.model
 
 data class StripEntryRange(val minimumValue: Int, val maximumValue: Int? = null) {
     init {

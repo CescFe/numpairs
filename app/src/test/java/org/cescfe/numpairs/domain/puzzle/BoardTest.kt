@@ -1,5 +1,7 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.cescfe.numpairs.domain.puzzle.model.Board
+import org.cescfe.numpairs.domain.puzzle.model.Tile
 import org.cescfe.numpairs.domain.puzzle.support.additionTile
 import org.junit.Assert.assertEquals
 import org.junit.Test

@@ -1,7 +1,7 @@
 package org.cescfe.numpairs.feature.game.presentation
 
 import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
-import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
+import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -44,7 +44,7 @@ class GameViewModelCompletionAndResetTest {
         viewModel.onTileLeftOperandTapped(index = 0)
         viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
         viewModel.onTileOperatorTapped(index = 1)
-        viewModel.onTileOperatorSelectionConfirmed(operator = org.cescfe.numpairs.domain.puzzle.Operator.ADDITION)
+        viewModel.onTileOperatorSelectionConfirmed(operator = org.cescfe.numpairs.domain.puzzle.model.Operator.ADDITION)
 
         val stripLabelsBeforeReset = viewModel.uiState.value.stripItems.map { it.label }
         val otherTileBeforeReset = viewModel.uiState.value.tiles[1]
@@ -67,7 +67,9 @@ class GameViewModelCompletionAndResetTest {
         viewModel.onTileLeftOperandTapped(index = 0)
         viewModel.onTileOperandSelectionConfirmed(stripEntryId = 1)
         viewModel.onTileOperatorTapped(index = 0)
-        viewModel.onTileOperatorSelectionConfirmed(operator = org.cescfe.numpairs.domain.puzzle.Operator.MULTIPLICATION)
+        viewModel.onTileOperatorSelectionConfirmed(
+            operator = org.cescfe.numpairs.domain.puzzle.model.Operator.MULTIPLICATION
+        )
         viewModel.onTileRightOperandTapped(index = 0)
         viewModel.onTileOperandSelectionConfirmed(stripEntryId = 7)
 
@@ -158,7 +160,9 @@ class GameViewModelCompletionAndResetTest {
         assertFalse(viewModel.uiState.value.isSuccessOverlayVisible)
 
         viewModel.onTileOperatorTapped(index = 1)
-        viewModel.onTileOperatorSelectionConfirmed(operator = org.cescfe.numpairs.domain.puzzle.Operator.MULTIPLICATION)
+        viewModel.onTileOperatorSelectionConfirmed(
+            operator = org.cescfe.numpairs.domain.puzzle.model.Operator.MULTIPLICATION
+        )
 
         assertEquals(PuzzleOutcomeUiState.Solved, viewModel.uiState.value.puzzleOutcome)
         assertTrue(viewModel.uiState.value.isSuccessOverlayVisible)
@@ -174,7 +178,9 @@ class GameViewModelCompletionAndResetTest {
         assertTrue(viewModel.uiState.value.tiles.none { tile -> tile.isPairingMismatchHighlighted })
 
         viewModel.onTileOperatorTapped(index = 1)
-        viewModel.onTileOperatorSelectionConfirmed(operator = org.cescfe.numpairs.domain.puzzle.Operator.MULTIPLICATION)
+        viewModel.onTileOperatorSelectionConfirmed(
+            operator = org.cescfe.numpairs.domain.puzzle.model.Operator.MULTIPLICATION
+        )
 
         val uiState = viewModel.uiState.value
         val highlightedTileIndexes = uiState.tiles.mapIndexedNotNull { index, tile ->

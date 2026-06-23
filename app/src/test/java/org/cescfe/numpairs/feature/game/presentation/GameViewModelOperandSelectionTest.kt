@@ -1,7 +1,7 @@
 package org.cescfe.numpairs.feature.game.presentation
 
-import org.cescfe.numpairs.domain.puzzle.OperandSlot
-import org.cescfe.numpairs.domain.puzzle.Operator
+import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
+import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.support.puzzleWithRepeatedSixes
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

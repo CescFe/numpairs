@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.domain.puzzle
+package org.cescfe.numpairs.domain.puzzle.model
 
 @ConsistentCopyVisibility
 data class Strip private constructor(val entries: List<StripEntry>) {

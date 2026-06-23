@@ -41,7 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.cescfe.numpairs.domain.puzzle.Operator
+import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.feature.game.ui.OperandUsageIndicatorState
 import org.cescfe.numpairs.feature.game.ui.gameHighlightSemantics
 import org.cescfe.numpairs.feature.game.ui.operandUsageIndicatorColors

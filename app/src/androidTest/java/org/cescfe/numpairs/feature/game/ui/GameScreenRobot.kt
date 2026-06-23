@@ -25,7 +25,7 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.text.AnnotatedString
 import androidx.test.espresso.Espresso.pressBack as espressoPressBack
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.domain.puzzle.Operator
+import org.cescfe.numpairs.domain.puzzle.model.Operator
 
 class GameScreenRobot(
     private val activity: ComponentActivity,
