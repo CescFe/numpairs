@@ -353,18 +353,6 @@ class GameScreenRobot(
         )
     }
 
-    fun assertStripUsageIndicatorDoesNotExposeSelectorVisualState(index: Int, operator: Operator): GameScreenRobot =
-        apply {
-            interactions
-                .onNodeWithTag(
-                    GameScreenTestTags.stripUsageIndicator(index = index, operator = operator),
-                    useUnmergedTree = true
-                )
-                .assert(
-                    SemanticsMatcher.keyNotDefined(OperandSelectorUsageHintVisualStateKey)
-                )
-        }
-
     fun assertStripUsageIndicatorHidden(index: Int, operator: Operator): GameScreenRobot = apply {
         interactions
             .onNodeWithTag(
