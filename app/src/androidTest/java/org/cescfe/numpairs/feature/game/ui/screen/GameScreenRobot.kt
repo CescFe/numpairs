@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.feature.game.ui
+package org.cescfe.numpairs.feature.game.ui.screen
 
 import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes
@@ -26,7 +26,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.test.espresso.Espresso.pressBack as espressoPressBack
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.model.Operator
-import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.game.ui.semantics.GameHighlightedKey
 import org.cescfe.numpairs.feature.game.ui.semantics.OperandSelectorUsageHintVisualStateKey
 import org.cescfe.numpairs.feature.game.ui.semantics.StripEntryInputInvalidKey
