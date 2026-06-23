@@ -1,7 +1,7 @@
 package org.cescfe.numpairs.domain.fourpairs
 
 import kotlin.random.Random
-import org.cescfe.numpairs.domain.puzzle.ResolvedOperandAssignment
+import org.cescfe.numpairs.domain.puzzle.assignment.ResolvedOperandAssignment
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Expression
 import org.cescfe.numpairs.domain.puzzle.model.Operator
