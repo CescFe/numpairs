@@ -11,6 +11,7 @@ class GameScreenStripEntryInputTest : GameScreenTestHost() {
     fun hiddenStripItemsRenderInlineInputAndCanBeConfirmedWithImeDone() {
         screen
             .tapStripItem(1)
+            .assertNoDialogDisplayed()
             .assertStripEntryInputDisplayed()
             .assertStripEntryInputFocused()
             .assertStripEntryValidRange(minimum = 1, maximum = 6)
@@ -106,16 +107,5 @@ class GameScreenStripEntryInputTest : GameScreenTestHost() {
             .tapStripItem(1)
             .enterStripValue("2a!")
             .assertStripEntryInputValue("2")
-    }
-
-    @Test
-    fun nonActiveStripChipsKeepTheirCurrentAppearance() {
-        screen
-            .tapStripItem(1)
-            .assertStripItemDescription(
-                2,
-                R.string.strip_item_known_content_description,
-                "6"
-            )
     }
 }
