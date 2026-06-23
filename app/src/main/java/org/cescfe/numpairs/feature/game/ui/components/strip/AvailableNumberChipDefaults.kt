@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.feature.game.ui.components
+package org.cescfe.numpairs.feature.game.ui.components.strip
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.MaterialTheme
