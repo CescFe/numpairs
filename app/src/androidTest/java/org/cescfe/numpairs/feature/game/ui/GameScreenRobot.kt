@@ -134,6 +134,15 @@ class GameScreenRobot(
             .assertIsDisplayed()
     }
 
+    fun assertNoDialogDisplayed(): GameScreenRobot = apply {
+        interactions
+            .onAllNodes(
+                SemanticsMatcher.expectValue(SemanticsProperties.IsDialog, Unit),
+                useUnmergedTree = true
+            )
+            .assertCountEquals(0)
+    }
+
     fun assertStripEntryInputHidden(): GameScreenRobot = apply {
         interactions
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
@@ -158,11 +167,17 @@ class GameScreenRobot(
     }
 
     fun assertStripEntryValidRange(minimum: Int, maximum: Int? = null): GameScreenRobot = apply {
-        assertStripEntryFeedback(stripEntryValidRangeText(minimum = minimum, maximum = maximum))
+        assertStripEntryFeedback(
+            message = stripEntryValidRangeText(minimum = minimum, maximum = maximum),
+            isError = false
+        )
     }
 
     fun assertStripEntryInvalidRange(minimum: Int, maximum: Int? = null): GameScreenRobot = apply {
-        assertStripEntryFeedback(stripEntryInvalidRangeText(minimum = minimum, maximum = maximum))
+        assertStripEntryFeedback(
+            message = stripEntryInvalidRangeText(minimum = minimum, maximum = maximum),
+            isError = true
+        )
     }
 
     fun assertStripEntryInputInvalid(): GameScreenRobot = apply {
@@ -529,11 +544,24 @@ class GameScreenRobot(
             )
     }
 
-    private fun assertStripEntryFeedback(message: String) {
+    private fun assertStripEntryFeedback(message: String, isError: Boolean) {
         interactions
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_RANGE)
             .assertIsDisplayed()
             .assert(hasText(message))
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.ContentDescription,
+                    listOf(message)
+                )
+            )
+            .assert(
+                if (isError) {
+                    SemanticsMatcher.expectValue(SemanticsProperties.Error, message)
+                } else {
+                    SemanticsMatcher.keyNotDefined(SemanticsProperties.Error)
+                }
+            )
         interactions
             .onNodeWithTag(GameScreenTestTags.STRIP)
             .assert(
