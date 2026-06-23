@@ -1,14 +1,14 @@
 package org.cescfe.numpairs.feature.tutorial
 
 import org.cescfe.numpairs.domain.puzzle.assignment.ResolvedOperandAssignment
-import org.cescfe.numpairs.domain.puzzle.hiddenExpression
+import org.cescfe.numpairs.domain.puzzle.construction.hiddenExpression
+import org.cescfe.numpairs.domain.puzzle.construction.resolvedTile
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.Strip
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
-import org.cescfe.numpairs.domain.puzzle.resolvedTile
 
 internal data class TileDefinition(val leftStripEntryId: Int, val operator: Operator, val rightStripEntryId: Int)
 
