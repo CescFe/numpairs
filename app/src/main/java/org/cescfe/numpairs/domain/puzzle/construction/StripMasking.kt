@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.domain.puzzle
+package org.cescfe.numpairs.domain.puzzle.construction
 
 import org.cescfe.numpairs.domain.puzzle.model.Strip
 import org.cescfe.numpairs.domain.puzzle.model.StripItem

@@ -2,6 +2,9 @@ package org.cescfe.numpairs.domain.fourpairs
 
 import kotlin.random.Random
 import org.cescfe.numpairs.domain.puzzle.assignment.ResolvedOperandAssignment
+import org.cescfe.numpairs.domain.puzzle.construction.resolvedTile
+import org.cescfe.numpairs.domain.puzzle.construction.withHiddenExpression
+import org.cescfe.numpairs.domain.puzzle.construction.withKnownEntriesOnly
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Expression
 import org.cescfe.numpairs.domain.puzzle.model.Operator
@@ -10,9 +13,6 @@ import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.model.Strip
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
-import org.cescfe.numpairs.domain.puzzle.resolvedTile
-import org.cescfe.numpairs.domain.puzzle.withHiddenExpression
-import org.cescfe.numpairs.domain.puzzle.withKnownEntriesOnly
 
 class FourPairsLowDifficultyPuzzleGenerator(
     private val random: Random = Random.Default,
