@@ -7,6 +7,8 @@ import org.cescfe.numpairs.domain.puzzle.model.TileResolutionState
 import org.cescfe.numpairs.domain.puzzle.support.TileAssignment
 import org.cescfe.numpairs.domain.puzzle.support.defaultKnownStripValues
 import org.cescfe.numpairs.domain.puzzle.support.knownPuzzleWithAssignments
+import org.cescfe.numpairs.domain.puzzle.validation.hasMismatchedSumProductPairings
+import org.cescfe.numpairs.domain.puzzle.validation.mismatchedSumProductPairingTileIndexes
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
