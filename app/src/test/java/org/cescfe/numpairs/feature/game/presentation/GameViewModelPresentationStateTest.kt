@@ -8,7 +8,7 @@ import org.junit.Test
 
 class GameViewModelPresentationStateTest {
     @Test
-    fun opening_an_operator_selector_closes_the_strip_entry_dialog() {
+    fun opening_an_operator_selector_closes_an_empty_strip_entry_input() {
         val viewModel = GameViewModel()
 
         viewModel.onStripItemTapped(index = 1)
@@ -16,7 +16,7 @@ class GameViewModelPresentationStateTest {
 
         val uiState = viewModel.uiState.value
 
-        assertNull(uiState.stripItemEntryDialog)
+        assertNull(uiState.stripItemEntryInput)
         assertEquals(0, uiState.tileOperatorSelectionDialog?.tileIndex)
     }
 

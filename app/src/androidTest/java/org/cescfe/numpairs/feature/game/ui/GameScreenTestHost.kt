@@ -67,8 +67,6 @@ abstract class GameScreenTestHost {
                     onStripItemEntryInputChanged = currentViewModel::onStripItemEntryInputChanged,
                     onStripItemEntryInputConfirmed = currentViewModel::onStripItemEntryInputConfirmed,
                     onStripItemEntryInputFocusLost = currentViewModel::onStripItemEntryInputFocusLost,
-                    onStripItemEntryDismissed = currentViewModel::onStripItemEntryDismissed,
-                    onStripItemEntryConfirmed = currentViewModel::onStripItemEntryConfirmed,
                     onTileLeftOperandTapped = currentViewModel::onTileLeftOperandTapped,
                     onTileRightOperandTapped = currentViewModel::onTileRightOperandTapped,
                     onTileOperandSelectionDismissed = currentViewModel::onTileOperandSelectionDismissed,

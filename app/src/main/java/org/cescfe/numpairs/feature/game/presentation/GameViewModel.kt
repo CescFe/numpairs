@@ -55,13 +55,6 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
         }
     }
 
-    fun onStripItemEntryDismissed() {
-        commit {
-            dismissStripItemEntry()
-                .dismissStripItemEntryInput()
-        }
-    }
-
     fun onStripItemEntryInputChanged(draftText: String) {
         val input = presentationState.stripItemEntryInput ?: return
 
@@ -131,41 +124,9 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
         commit { dismissTileOperandSelection() }
     }
 
-    fun onStripItemEntryConfirmed(value: Int) {
-        val input = presentationState.stripItemEntryInput
-        if (input != null) {
-            confirmStripItemEntryInput(draftText = value.toString())
-            return
-        }
+    private fun confirmStripItemEntryInput(): Boolean = resolveActiveStripItemEntryInput()
 
-        val index = (presentationState.modal as? GameModalState.StripItemEntry)?.index ?: return
-        val currentStripItem = puzzle.strip.items.getOrNull(index) ?: return
-
-        if (currentStripItem !is StripItem.Hidden && currentStripItem !is StripItem.PlayerEntered) {
-            commit { dismissStripItemEntry() }
-            return
-        }
-
-        if (value !in puzzle.strip.validEntryRangeFor(index)) {
-            return
-        }
-
-        commit(
-            updatedPuzzle = puzzle.copy(
-                strip = puzzle.strip.withUpdatedEntry(
-                    index = index,
-                    value = value
-                )
-            )
-        ) {
-            dismissStripItemEntry()
-        }
-    }
-
-    private fun confirmStripItemEntryInput(draftText: String? = null): Boolean =
-        resolveActiveStripItemEntryInput(draftText = draftText)
-
-    private fun resolveActiveStripItemEntryInput(draftText: String? = null): Boolean {
+    private fun resolveActiveStripItemEntryInput(): Boolean {
         val input = presentationState.stripItemEntryInput ?: return true
         val currentStripItem = puzzle.strip.items.getOrNull(input.stripItemIndex) ?: return true
 
@@ -174,7 +135,7 @@ class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() 
             return true
         }
 
-        val resolvedDraftText = draftText ?: input.draftText
+        val resolvedDraftText = input.draftText
         if (resolvedDraftText.isBlank()) {
             commit { dismissStripItemEntryInput() }
             return true

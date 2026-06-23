@@ -35,8 +35,7 @@ class GameViewModelOperandSelectionTest {
     fun player_entered_strip_items_are_included_in_hidden_tile_operand_selection() {
         val viewModel = GameViewModel()
 
-        viewModel.onStripItemTapped(index = 1)
-        viewModel.onStripItemEntryConfirmed(value = 2)
+        viewModel.enterStripValue(index = 1, value = "2")
         viewModel.onTileLeftOperandTapped(index = 0)
 
         val dialog = requireNotNull(viewModel.uiState.value.tileOperandSelectionDialog)

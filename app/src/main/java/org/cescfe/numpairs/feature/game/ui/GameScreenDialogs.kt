@@ -17,45 +17,28 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.Operator
-import org.cescfe.numpairs.feature.game.presentation.StripItemEntryDialogUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperandOptionUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperandSelectionDialogUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState
@@ -326,113 +309,6 @@ private enum class OperandSelectorUsageHintVisualState(
     RULE_CONFLICT(
         R.string.tile_operand_usage_state_rule_conflict,
         OperandSelectorUsageHintVisualStateValues.RULE_CONFLICT
-    )
-}
-
-@Composable
-internal fun StripItemEntryDialog(
-    dialogUiState: StripItemEntryDialogUiState,
-    onDismiss: () -> Unit,
-    onConfirm: (Int) -> Unit,
-    canConfirm: (Int) -> Boolean = { true }
-) {
-    var enteredValue by rememberSaveable(
-        dialogUiState.stripItemIndex,
-        dialogUiState.mode,
-        dialogUiState.initialValue
-    ) {
-        mutableStateOf(dialogUiState.initialValue)
-    }
-    val parsedValue = enteredValue.toIntOrNull()
-    val valueInRange = parsedValue?.takeIf { value -> value in dialogUiState.validRange }
-    val confirmedValue = valueInRange?.takeIf(canConfirm)
-    val isInputInvalid = enteredValue.isNotEmpty() && parsedValue != null && valueInRange == null
-    val inputFocusRequester = remember { FocusRequester() }
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val validRangeText = dialogUiState.validRange.maximumValue?.let { maximumValue ->
-        stringResource(
-            R.string.strip_entry_valid_range_bounded,
-            dialogUiState.validRange.minimumValue,
-            maximumValue
-        )
-    } ?: stringResource(
-        R.string.strip_entry_valid_range_unbounded,
-        dialogUiState.validRange.minimumValue
-    )
-
-    LaunchedEffect(dialogUiState.stripItemIndex, dialogUiState.mode) {
-        inputFocusRequester.requestFocus()
-        keyboardController?.show()
-    }
-
-    AlertDialog(
-        modifier = Modifier.testTag(GameScreenTestTags.STRIP_ENTRY_DIALOG),
-        onDismissRequest = onDismiss,
-        shape = NumPairsComponents.LargeShape,
-        containerColor = NumPairsComponents.raisedSurfaceColor(),
-        titleContentColor = MaterialTheme.colorScheme.onSurface,
-        textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        title = {
-            Text(
-                text = stringResource(R.string.strip_entry_dialog_title),
-                style = MaterialTheme.typography.titleMedium
-            )
-        },
-        text = {
-            OutlinedTextField(
-                value = enteredValue,
-                onValueChange = { newValue ->
-                    enteredValue = newValue.filter(Char::isDigit)
-                },
-                modifier = Modifier
-                    .focusRequester(inputFocusRequester)
-                    .testTag(GameScreenTestTags.STRIP_ENTRY_INPUT),
-                label = {
-                    Text(text = stringResource(R.string.strip_entry_input_label))
-                },
-                supportingText = {
-                    Text(
-                        text = validRangeText,
-                        modifier = Modifier.testTag(GameScreenTestTags.STRIP_ENTRY_RANGE)
-                    )
-                },
-                isError = isInputInvalid,
-                singleLine = true,
-                textStyle = NumPairsTextStyles.NumericInput,
-                shape = NumPairsComponents.MediumShape,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    errorContainerColor = MaterialTheme.colorScheme.surface
-                ),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-        },
-        confirmButton = {
-            NumPairsComponents.PrimaryCtaButton(
-                onClick = { confirmedValue?.let(onConfirm) },
-                enabled = confirmedValue != null,
-                modifier = Modifier.testTag(GameScreenTestTags.STRIP_ENTRY_CONFIRM)
-            ) {
-                Text(text = stringResource(R.string.confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                modifier = Modifier.testTag(GameScreenTestTags.STRIP_ENTRY_CANCEL),
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            ) {
-                Text(text = stringResource(R.string.cancel))
-            }
-        }
     )
 }
 

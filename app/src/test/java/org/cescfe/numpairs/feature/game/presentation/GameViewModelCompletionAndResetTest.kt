@@ -15,7 +15,7 @@ class GameViewModelCompletionAndResetTest {
 
         assertNull(uiState.puzzleOutcome)
         assertFalse(uiState.isSuccessOverlayVisible)
-        assertNull(uiState.stripItemEntryDialog)
+        assertNull(uiState.stripItemEntryInput)
         assertNull(uiState.tileOperatorSelectionDialog)
         assertNull(uiState.tileOperandSelectionDialog)
         assertTrue(
@@ -63,8 +63,7 @@ class GameViewModelCompletionAndResetTest {
     fun resetting_an_incorrect_tile_clears_invalid_styling_and_restores_the_initial_expression() {
         val viewModel = GameViewModel()
 
-        viewModel.onStripItemTapped(index = 1)
-        viewModel.onStripItemEntryConfirmed(value = 1)
+        viewModel.enterStripValue(index = 1, value = "1")
         viewModel.onTileLeftOperandTapped(index = 0)
         viewModel.onTileOperandSelectionConfirmed(stripEntryId = 1)
         viewModel.onTileOperatorTapped(index = 0)
@@ -143,7 +142,7 @@ class GameViewModelCompletionAndResetTest {
 
         assertNull(uiState.puzzleOutcome)
         assertFalse(uiState.isSuccessOverlayVisible)
-        assertNull(uiState.stripItemEntryDialog)
+        assertNull(uiState.stripItemEntryInput)
         assertNull(uiState.tileOperatorSelectionDialog)
         assertNull(uiState.tileOperandSelectionDialog)
         assertEquals(TileUiState("?", "?", "?", "223"), uiState.tiles.first())

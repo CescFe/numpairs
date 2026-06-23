@@ -19,7 +19,6 @@ data class GameUiState(
     val puzzleOutcome: PuzzleOutcomeUiState? = null,
     val isSuccessOverlayVisible: Boolean = false,
     val stripItemEntryInput: StripItemEntryInputUiState? = null,
-    val stripItemEntryDialog: StripItemEntryDialogUiState? = null,
     val tileOperatorSelectionDialog: TileOperatorSelectionDialogUiState? = null,
     val tileOperandSelectionDialog: TileOperandSelectionDialogUiState? = null
 ) {
@@ -80,24 +79,12 @@ enum class StripItemVisualStyle {
     PLAYER_ENTERED
 }
 
-data class StripItemEntryDialogUiState(
-    val stripItemIndex: Int,
-    val validRange: StripEntryRange,
-    val mode: StripItemEntryDialogMode,
-    val initialValue: String
-)
-
 data class StripItemEntryInputUiState(
     val stripItemIndex: Int,
     val draftText: String,
     val validRange: StripEntryRange,
     val isInvalid: Boolean
 )
-
-enum class StripItemEntryDialogMode {
-    CREATE,
-    EDIT
-}
 
 data class TileOperatorSelectionDialogUiState(
     val tileIndex: Int,

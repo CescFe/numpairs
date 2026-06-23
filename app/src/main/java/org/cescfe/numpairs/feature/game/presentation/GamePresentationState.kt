@@ -7,16 +7,6 @@ data class GamePresentationState(
     val stripItemEntryInput: StripItemEntryInputState? = null,
     private val isSuccessOverlayDismissed: Boolean = false
 ) {
-    fun showStripItemEntry(index: Int): GamePresentationState = copy(
-        modal = GameModalState.StripItemEntry(index = index),
-        stripItemEntryInput = null
-    )
-
-    fun dismissStripItemEntry(): GamePresentationState = when (modal) {
-        is GameModalState.StripItemEntry -> copy(modal = null)
-        else -> this
-    }
-
     fun showStripItemEntryInput(index: Int, draftText: String, isInvalid: Boolean = false): GamePresentationState =
         copy(
             modal = null,
@@ -98,8 +88,6 @@ data class GamePresentationState(
 data class StripItemEntryInputState(val stripItemIndex: Int, val draftText: String, val isInvalid: Boolean = false)
 
 sealed interface GameModalState {
-    data class StripItemEntry(val index: Int) : GameModalState
-
     data class TileOperatorSelection(val tileIndex: Int) : GameModalState
 
     data class TileOperandSelection(val target: TileOperandSelectionTarget) : GameModalState

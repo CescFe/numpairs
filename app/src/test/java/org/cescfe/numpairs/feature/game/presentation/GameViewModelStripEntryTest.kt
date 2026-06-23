@@ -24,7 +24,6 @@ class GameViewModelStripEntryTest {
             ),
             viewModel.uiState.value.stripItemEntryInput
         )
-        assertNull(viewModel.uiState.value.stripItemEntryDialog)
     }
 
     @Test
@@ -43,7 +42,6 @@ class GameViewModelStripEntryTest {
             ),
             viewModel.uiState.value.stripItemEntryInput
         )
-        assertNull(viewModel.uiState.value.stripItemEntryDialog)
     }
 
     @Test
@@ -100,7 +98,6 @@ class GameViewModelStripEntryTest {
         assertEquals(true, uiState.stripItems[1].isEntryEnabled)
         assertEquals(StripItemVisualStyle.PLAYER_ENTERED, uiState.stripItems[1].visualStyle)
         assertNull(uiState.stripItemEntryInput)
-        assertNull(uiState.stripItemEntryDialog)
     }
 
     @Test
@@ -115,7 +112,6 @@ class GameViewModelStripEntryTest {
             viewModel.uiState.value.stripItems.map { stripItem -> stripItem.label }
         )
         assertNull(viewModel.uiState.value.stripItemEntryInput)
-        assertNull(viewModel.uiState.value.stripItemEntryDialog)
     }
 
     @Test
@@ -296,7 +292,6 @@ class GameViewModelStripEntryTest {
         viewModel.onStripItemTapped(index = 2)
 
         assertNull(viewModel.uiState.value.stripItemEntryInput)
-        assertNull(viewModel.uiState.value.stripItemEntryDialog)
     }
 
     @Test
@@ -329,11 +324,5 @@ class GameViewModelStripEntryTest {
             ),
             viewModel.uiState.value.stripItemEntryInput
         )
-    }
-
-    private fun GameViewModel.enterStripValue(index: Int, value: String) {
-        onStripItemTapped(index = index)
-        onStripItemEntryInputChanged(draftText = value)
-        onStripItemEntryInputConfirmed()
     }
 }

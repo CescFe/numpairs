@@ -11,22 +11,30 @@ class GamePresentationStateTest {
     @Test
     fun opening_a_modal_replaces_any_previously_open_modal() {
         val presentationState = GamePresentationState()
-            .showStripItemEntry(index = 1)
             .showTileOperatorSelection(tileIndex = 3)
+            .showTileOperandSelection(
+                tileIndex = 4,
+                slot = OperandSlot.RIGHT
+            )
 
         assertEquals(
-            GameModalState.TileOperatorSelection(tileIndex = 3),
+            GameModalState.TileOperandSelection(
+                target = TileOperandSelectionTarget(
+                    tileIndex = 4,
+                    slot = OperandSlot.RIGHT
+                )
+            ),
             presentationState.modal
         )
     }
 
     @Test
     fun dismissing_a_modal_only_affects_the_matching_modal_kind() {
-        val stripItemEntryState = GamePresentationState()
-            .showStripItemEntry(index = 1)
-            .dismissTileOperatorSelection()
-
         val operatorSelectionState = GamePresentationState()
+            .showTileOperatorSelection(tileIndex = 2)
+            .dismissTileOperandSelection()
+
+        val dismissedOperatorSelectionState = GamePresentationState()
             .showTileOperatorSelection(tileIndex = 2)
             .dismissTileOperatorSelection()
 
@@ -37,8 +45,8 @@ class GamePresentationStateTest {
             )
             .dismissTileOperandSelection()
 
-        assertEquals(GameModalState.StripItemEntry(index = 1), stripItemEntryState.modal)
-        assertNull(operatorSelectionState.modal)
+        assertEquals(GameModalState.TileOperatorSelection(tileIndex = 2), operatorSelectionState.modal)
+        assertNull(dismissedOperatorSelectionState.modal)
         assertNull(operandSelectionState.modal)
     }
 
@@ -70,9 +78,9 @@ class GamePresentationStateTest {
     }
 
     @Test
-    fun strip_item_entry_input_replaces_modal_state_and_can_be_dismissed() {
+    fun strip_item_entry_input_clears_modal_state_and_can_be_dismissed() {
         val presentationState = GamePresentationState()
-            .showStripItemEntry(index = 1)
+            .showTileOperatorSelection(tileIndex = 1)
             .showStripItemEntryInput(index = 2, draftText = "4")
             .dismissStripItemEntryInput()
 

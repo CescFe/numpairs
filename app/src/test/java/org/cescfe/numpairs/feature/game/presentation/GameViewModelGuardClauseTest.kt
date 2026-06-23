@@ -19,7 +19,7 @@ class GameViewModelGuardClauseTest {
 
     @Test
     fun confirming_without_an_active_modal_leaves_state_unchanged() {
-        assertStateUnchanged { onStripItemEntryConfirmed(value = 2) }
+        assertStateUnchanged { onStripItemEntryInputConfirmed() }
         assertStateUnchanged { onTileOperandSelectionConfirmed(stripEntryId = 2) }
         assertStateUnchanged { onTileOperatorSelectionConfirmed(operator = Operator.ADDITION) }
     }
