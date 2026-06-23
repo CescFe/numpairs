@@ -88,14 +88,6 @@ fun GameRoute(
         onStripItemEntryInputChanged = gameViewModel::onStripItemEntryInputChanged,
         onStripItemEntryInputConfirmed = { resolveActiveStripItemEntryInputIfAllowed() },
         onStripItemEntryInputFocusLost = { resolveActiveStripItemEntryInputIfAllowed() },
-        onStripItemEntryDismissed = gameViewModel::onStripItemEntryDismissed,
-        onStripItemEntryConfirmed = onStripItemEntryConfirmed@{ value ->
-            val stripItemIndex = uiState.stripItemEntryDialog?.stripItemIndex ?: return@onStripItemEntryConfirmed
-
-            if (interactionPolicy.canConfirmStripItemEntry(stripItemIndex, value)) {
-                gameViewModel.onStripItemEntryConfirmed(value)
-            }
-        },
         onTileLeftOperandTapped = { index ->
             if (interactionPolicy.canTapTileLeftOperand(index) && resolveActiveStripItemEntryInputIfAllowed()) {
                 gameViewModel.onTileLeftOperandTapped(index)

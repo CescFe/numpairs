@@ -58,9 +58,6 @@ class FourPairsCompletionActionsTest {
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
             .assertDoesNotExist()
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_DIALOG)
-            .assertDoesNotExist()
-        composeTestRule
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
             .assertDoesNotExist()
         composeTestRule

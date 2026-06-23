@@ -148,6 +148,12 @@ fun incompletePuzzleOneOperatorSelectionAwayFromSolvedCompletion(): Puzzle = Puz
     strip = Strip.fromItems(items = defaultKnownStripValues().map(StripItem::Known))
 )
 
+fun GameViewModel.enterStripValue(index: Int, value: String) {
+    onStripItemTapped(index = index)
+    onStripItemEntryInputChanged(draftText = value)
+    onStripItemEntryInputConfirmed()
+}
+
 private fun tileWithHiddenOperator(
     resultOperator: Operator,
     leftStripEntryId: Int = 0,

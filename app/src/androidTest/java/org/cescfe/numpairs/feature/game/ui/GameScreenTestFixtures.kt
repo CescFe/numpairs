@@ -3,12 +3,9 @@ package org.cescfe.numpairs.feature.game.ui
 import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
 import org.cescfe.numpairs.domain.puzzle.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
-import org.cescfe.numpairs.domain.puzzle.StripEntryRange
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
 import org.cescfe.numpairs.feature.game.presentation.RuleConflictUiState
-import org.cescfe.numpairs.feature.game.presentation.StripItemEntryDialogMode
-import org.cescfe.numpairs.feature.game.presentation.StripItemEntryDialogUiState
 import org.cescfe.numpairs.feature.game.presentation.StripItemUiState
 import org.cescfe.numpairs.feature.game.presentation.StripItemVisualStyle
 import org.cescfe.numpairs.feature.game.presentation.TileOperandOptionUiState
@@ -219,16 +216,6 @@ internal fun mismatchedPairingLocalConflictUiState(): GameUiState = GameUiState(
         )
     }
 )
-
-internal fun stripEntryDialogUiState(validRange: StripEntryRange, initialValue: String = ""): GameUiState =
-    GameUiState.from(initialPuzzle).copy(
-        stripItemEntryDialog = StripItemEntryDialogUiState(
-            stripItemIndex = 6,
-            validRange = validRange,
-            mode = StripItemEntryDialogMode.CREATE,
-            initialValue = initialValue
-        )
-    )
 
 private fun completedStripItems(): List<StripItemUiState> = List(8) { index ->
     StripItemUiState(

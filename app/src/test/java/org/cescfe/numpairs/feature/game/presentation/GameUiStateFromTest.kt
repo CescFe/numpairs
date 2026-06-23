@@ -105,59 +105,6 @@ class GameUiStateFromTest {
     }
 
     @Test
-    fun builds_create_mode_strip_item_dialog_for_hidden_entries() {
-        val uiState = GameUiState.from(
-            puzzle = initialPuzzle,
-            presentationState = GamePresentationState().showStripItemEntry(index = 1)
-        )
-
-        assertEquals(
-            StripItemEntryDialogUiState(
-                stripItemIndex = 1,
-                validRange = StripEntryRange(minimumValue = 1, maximumValue = 6),
-                mode = StripItemEntryDialogMode.CREATE,
-                initialValue = ""
-            ),
-            uiState.stripItemEntryDialog
-        )
-        assertNull(uiState.stripItemEntryInput)
-    }
-
-    @Test
-    fun builds_edit_mode_strip_item_dialog_for_player_entered_entries() {
-        val puzzle = initialPuzzle.copy(
-            strip = Strip.fromItems(
-                items = listOf(
-                    StripItem.Hidden,
-                    StripItem.PlayerEntered(2),
-                    StripItem.Known(6),
-                    StripItem.Hidden,
-                    StripItem.Known(25),
-                    StripItem.Hidden,
-                    StripItem.Hidden,
-                    StripItem.Known(222)
-                )
-            )
-        )
-
-        val uiState = GameUiState.from(
-            puzzle = puzzle,
-            presentationState = GamePresentationState().showStripItemEntry(index = 1)
-        )
-
-        assertEquals(
-            StripItemEntryDialogUiState(
-                stripItemIndex = 1,
-                validRange = StripEntryRange(minimumValue = 1, maximumValue = 6),
-                mode = StripItemEntryDialogMode.EDIT,
-                initialValue = "2"
-            ),
-            uiState.stripItemEntryDialog
-        )
-        assertNull(uiState.stripItemEntryInput)
-    }
-
-    @Test
     fun builds_strip_item_entry_input_state_for_editable_entries() {
         val uiState = GameUiState.from(
             puzzle = initialPuzzle,
@@ -177,7 +124,6 @@ class GameUiStateFromTest {
             ),
             uiState.stripItemEntryInput
         )
-        assertNull(uiState.stripItemEntryDialog)
     }
 
     @Test

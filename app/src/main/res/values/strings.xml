@@ -25,8 +25,6 @@
     <string name="tile_right_operand_content_description">Right operand, value %1$s</string>
     <string name="tile_operator_hidden_content_description">Hidden operator</string>
     <string name="tile_operator_content_description">Operator, %1$s</string>
-    <string name="strip_entry_dialog_title">Enter number</string>
-    <string name="strip_entry_input_label">Number</string>
     <string name="strip_entry_valid_range_bounded">Valid range: %1$d to %2$d</string>
     <string name="strip_entry_valid_range_unbounded">Valid range: %1$d or greater</string>
     <string name="strip_entry_invalid_range_bounded">Invalid number. Valid range: %1$d to %2$d</string>
@@ -83,6 +81,4 @@
     <string name="puzzle_outcome_invalid_usage_message">Each strip entry must be used exactly once in addition and once in multiplication.</string>
     <string name="local_rule_conflict_duplicate_operator_usage_message">An operand can only be paired once with a given operator.</string>
     <string name="local_rule_conflict_mismatched_pairing_message">An operand must have the same partner in both addition and multiplication.</string>
-    <string name="confirm">Confirm</string>
-    <string name="cancel">Cancel</string>
 </resources>

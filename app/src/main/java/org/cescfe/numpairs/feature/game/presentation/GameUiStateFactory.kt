@@ -60,10 +60,6 @@ internal object GameUiStateFactory {
                 puzzle = puzzle,
                 input = presentationState.stripItemEntryInput
             ),
-            stripItemEntryDialog = createStripItemEntryDialog(
-                puzzle = puzzle,
-                modal = presentationState.modal
-            ),
             tileOperatorSelectionDialog = createTileOperatorSelectionDialog(
                 puzzle = puzzle,
                 modal = presentationState.modal
@@ -93,27 +89,6 @@ internal object GameUiStateFactory {
             validRange = puzzle.strip.validEntryRangeFor(input.stripItemIndex),
             isInvalid = input.isInvalid
         )
-    }
-
-    private fun createStripItemEntryDialog(puzzle: Puzzle, modal: GameModalState?): StripItemEntryDialogUiState? {
-        val stripItemIndex = (modal as? GameModalState.StripItemEntry)?.index ?: return null
-        val stripItem = puzzle.strip.items.getOrNull(stripItemIndex) ?: return null
-
-        return when (stripItem) {
-            StripItem.Hidden -> StripItemEntryDialogUiState(
-                stripItemIndex = stripItemIndex,
-                validRange = puzzle.strip.validEntryRangeFor(stripItemIndex),
-                mode = StripItemEntryDialogMode.CREATE,
-                initialValue = ""
-            )
-            is StripItem.PlayerEntered -> StripItemEntryDialogUiState(
-                stripItemIndex = stripItemIndex,
-                validRange = puzzle.strip.validEntryRangeFor(stripItemIndex),
-                mode = StripItemEntryDialogMode.EDIT,
-                initialValue = stripItem.value.toString()
-            )
-            is StripItem.Known -> null
-        }
     }
 
     private fun createTileOperatorSelectionDialog(

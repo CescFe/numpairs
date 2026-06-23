@@ -93,8 +93,7 @@ class GameViewModelOperatorAndTileStateTest {
     fun completing_a_tile_with_an_incorrect_expression_marks_it_invalid_without_crashing() {
         val viewModel = GameViewModel()
 
-        viewModel.onStripItemTapped(index = 1)
-        viewModel.onStripItemEntryConfirmed(value = 1)
+        viewModel.enterStripValue(index = 1, value = "1")
         viewModel.onTileLeftOperandTapped(index = 0)
         viewModel.onTileOperandSelectionConfirmed(stripEntryId = 1)
         viewModel.onTileOperatorTapped(index = 0)
@@ -117,8 +116,7 @@ class GameViewModelOperatorAndTileStateTest {
     fun correcting_an_incorrect_tile_clears_its_invalid_ui_state() {
         val viewModel = GameViewModel()
 
-        viewModel.onStripItemTapped(index = 1)
-        viewModel.onStripItemEntryConfirmed(value = 1)
+        viewModel.enterStripValue(index = 1, value = "1")
         viewModel.onTileLeftOperandTapped(index = 0)
         viewModel.onTileOperandSelectionConfirmed(stripEntryId = 1)
         viewModel.onTileOperatorTapped(index = 0)

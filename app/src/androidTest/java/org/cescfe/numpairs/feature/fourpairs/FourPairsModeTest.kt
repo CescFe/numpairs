@@ -106,9 +106,6 @@ class FourPairsModeTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_DIALOG)
-            .assertDoesNotExist()
-        composeTestRule
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
             .assertIsDisplayed()
         composeTestRule

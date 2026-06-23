@@ -54,8 +54,6 @@ fun GameScreen(
     onStripItemEntryInputChanged: (String) -> Unit = {},
     onStripItemEntryInputConfirmed: () -> Unit = {},
     onStripItemEntryInputFocusLost: () -> Unit = {},
-    onStripItemEntryDismissed: () -> Unit = {},
-    onStripItemEntryConfirmed: (Int) -> Unit = {},
     onTileLeftOperandTapped: (Int) -> Unit = {},
     onTileRightOperandTapped: (Int) -> Unit = {},
     onTileOperandSelectionDismissed: () -> Unit = {},
@@ -167,16 +165,6 @@ fun GameScreen(
         }
     }
 
-    uiState.stripItemEntryDialog?.let { dialogUiState ->
-        StripItemEntryDialog(
-            dialogUiState = dialogUiState,
-            onDismiss = onStripItemEntryDismissed,
-            onConfirm = onStripItemEntryConfirmed,
-            canConfirm = { value ->
-                interactionPolicy.canConfirmStripItemEntry(dialogUiState.stripItemIndex, value)
-            }
-        )
-    }
     uiState.tileOperandSelectionDialog?.let { dialogUiState ->
         TileOperandSelectionSheet(
             dialogUiState = dialogUiState.restrictedBy(interactionPolicy = interactionPolicy),
