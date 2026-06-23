@@ -1,6 +1,6 @@
 package org.cescfe.numpairs.domain.puzzle
 
-import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
+import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.puzzle.assignment.OperandSelectionAvailability
 import org.cescfe.numpairs.domain.puzzle.assignment.OperandSelectionChoice
 import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryUsageByOperator
@@ -39,7 +39,7 @@ class OperandSelectionChoiceTest {
 
     @Test
     fun selection_choices_mark_multiplication_usage_for_the_matching_strip_entry_only() {
-        val puzzle = initialPuzzle
+        val puzzle = samplePuzzle
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)
@@ -59,7 +59,7 @@ class OperandSelectionChoiceTest {
 
     @Test
     fun selection_choices_mark_both_operator_families_when_the_same_strip_entry_is_reused() {
-        val puzzle = initialPuzzle
+        val puzzle = samplePuzzle
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)
@@ -85,7 +85,7 @@ class OperandSelectionChoiceTest {
 
     @Test
     fun selection_choices_exclude_the_current_editing_slot_assignment_from_usage() {
-        val puzzle = initialPuzzle
+        val puzzle = samplePuzzle
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)
@@ -105,7 +105,7 @@ class OperandSelectionChoiceTest {
 
     @Test
     fun selection_choices_count_assignments_when_the_operator_is_still_hidden() {
-        val puzzle = initialPuzzle
+        val puzzle = samplePuzzle
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)
@@ -229,7 +229,7 @@ class OperandSelectionChoiceTest {
 
     @Test
     fun selection_choices_mark_the_opposite_slot_strip_entry_as_blocked_for_the_current_tile() {
-        val puzzle = initialPuzzle
+        val puzzle = samplePuzzle
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 12)
@@ -246,7 +246,7 @@ class OperandSelectionChoiceTest {
 
     @Test
     fun selection_choices_keep_the_current_slot_assignment_available_when_the_opposite_slot_uses_another_entry() {
-        val puzzle = initialPuzzle
+        val puzzle = samplePuzzle
             .withTile(
                 index = 0,
                 tile = hiddenTile(result = 31)

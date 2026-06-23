@@ -1,6 +1,6 @@
 package org.cescfe.numpairs.feature.game.ui.screen
 
-import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
+import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
@@ -98,7 +98,7 @@ internal fun largeOperandBoardUiState(): GameUiState = GameUiState(
     )
 )
 
-internal fun repeatedOperandSelectorUiState(): GameUiState = GameUiState.from(initialPuzzle).copy(
+internal fun repeatedOperandSelectorUiState(): GameUiState = GameUiState.from(samplePuzzle).copy(
     tileOperandSelectionDialog = TileOperandSelectionDialogUiState(
         tileIndex = 1,
         slot = OperandSlot.LEFT,
@@ -135,7 +135,7 @@ internal fun repeatedOperandSelectorUiState(): GameUiState = GameUiState.from(in
     )
 )
 
-internal fun operandSelectorUsageHintVisualStateUiState(): GameUiState = GameUiState.from(initialPuzzle).copy(
+internal fun operandSelectorUsageHintVisualStateUiState(): GameUiState = GameUiState.from(samplePuzzle).copy(
     tileOperandSelectionDialog = TileOperandSelectionDialogUiState(
         tileIndex = 1,
         slot = OperandSlot.LEFT,

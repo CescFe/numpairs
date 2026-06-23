@@ -7,7 +7,7 @@ import org.cescfe.numpairs.domain.puzzle.model.Tile
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class InitialPuzzleTest {
+class SamplePuzzleTest {
     @Test
     fun initial_strip_matches_the_expected_seed_contract() {
         assertEquals(
@@ -21,7 +21,7 @@ class InitialPuzzleTest {
                 StripItem.Hidden,
                 StripItem.Known(222)
             ),
-            initialPuzzle.strip.items
+            samplePuzzle.strip.items
         )
     }
 
@@ -38,7 +38,7 @@ class InitialPuzzleTest {
                 hiddenExpressionTile(result = 35),
                 hiddenExpressionTile(result = 250)
             ),
-            initialPuzzle.board.tiles
+            samplePuzzle.board.tiles
         )
     }
 }

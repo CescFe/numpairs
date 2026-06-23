@@ -14,7 +14,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
-import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
+import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.fourpairs.FourPairsPuzzleProvider
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
@@ -36,7 +36,7 @@ class AppNavigationLearningFlowTest {
 
     @Test
     fun inGameLearningActionsOpenTutorialOverlaysAndReturnToCurrentFourPairsScreen() {
-        val puzzleProvider = QueueFourPairsPuzzleProvider(initialPuzzle)
+        val puzzleProvider = QueueFourPairsPuzzleProvider(samplePuzzle)
         setContent(puzzleProvider = puzzleProvider)
 
         navigateToFourPairs()

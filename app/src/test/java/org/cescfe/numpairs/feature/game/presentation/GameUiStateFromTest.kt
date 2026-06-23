@@ -1,6 +1,6 @@
 package org.cescfe.numpairs.feature.game.presentation
 
-import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
+import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.model.Operator
@@ -24,7 +24,7 @@ import org.junit.Test
 class GameUiStateFromTest {
     @Test
     fun maps_strip_items_to_labels_entry_enablement_and_visual_style() {
-        val puzzle = initialPuzzle.copy(
+        val puzzle = samplePuzzle.copy(
             strip = Strip.fromItems(
                 items = listOf(
                     StripItem.Hidden,
@@ -107,7 +107,7 @@ class GameUiStateFromTest {
     @Test
     fun builds_strip_item_entry_input_state_for_editable_entries() {
         val uiState = GameUiState.from(
-            puzzle = initialPuzzle,
+            puzzle = samplePuzzle,
             presentationState = GamePresentationState().showStripItemEntryInput(
                 index = 1,
                 draftText = "9",
@@ -129,7 +129,7 @@ class GameUiStateFromTest {
     @Test
     fun does_not_build_strip_item_entry_input_state_for_known_entries() {
         val uiState = GameUiState.from(
-            puzzle = initialPuzzle,
+            puzzle = samplePuzzle,
             presentationState = GamePresentationState().showStripItemEntryInput(
                 index = 2,
                 draftText = "6"
@@ -336,7 +336,7 @@ class GameUiStateFromTest {
 
     @Test
     fun builds_an_operator_dialog_with_the_current_operator_selection() {
-        val puzzle = initialPuzzle.withTile(
+        val puzzle = samplePuzzle.withTile(
             index = 0,
             tile = hiddenTile(result = 223).withOperator(Operator.MULTIPLICATION)
         )
@@ -396,7 +396,7 @@ class GameUiStateFromTest {
     @Test
     fun does_not_build_a_dialog_for_an_invalid_operator_selection_index() {
         val uiState = GameUiState.from(
-            puzzle = initialPuzzle,
+            puzzle = samplePuzzle,
             presentationState = GamePresentationState().showTileOperatorSelection(tileIndex = 999)
         )
 
@@ -407,7 +407,7 @@ class GameUiStateFromTest {
     fun does_not_build_a_dialog_for_invalid_operand_selection_indexes() {
         listOf(-1, 999).forEach { invalidTileIndex ->
             val uiState = GameUiState.from(
-                puzzle = initialPuzzle,
+                puzzle = samplePuzzle,
                 presentationState = GamePresentationState().showTileOperandSelection(
                     tileIndex = invalidTileIndex,
                     slot = OperandSlot.LEFT
