@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.feature.game.ui
+package org.cescfe.numpairs.feature.game.ui.screen
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
@@ -42,6 +42,13 @@ import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.feature.game.presentation.TileOperandOptionUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperandSelectionDialogUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState
+import org.cescfe.numpairs.feature.game.ui.indicators.OperandUsageIndicatorColors
+import org.cescfe.numpairs.feature.game.ui.indicators.OperandUsageIndicatorState
+import org.cescfe.numpairs.feature.game.ui.indicators.operandUsageIndicatorColors
+import org.cescfe.numpairs.feature.game.ui.indicators.usageIndicatorContentDescriptionResId
+import org.cescfe.numpairs.feature.game.ui.indicators.usageIndicatorSymbol
+import org.cescfe.numpairs.feature.game.ui.semantics.OperandSelectorUsageHintVisualStateValues
+import org.cescfe.numpairs.feature.game.ui.semantics.operandSelectorUsageHintVisualState
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
 

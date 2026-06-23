@@ -3,6 +3,7 @@ package org.cescfe.numpairs.feature.game.ui
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.model.Operator
+import org.cescfe.numpairs.feature.game.ui.semantics.OperandSelectorUsageHintVisualStateValues
 import org.junit.Test
 import org.junit.runner.RunWith
 

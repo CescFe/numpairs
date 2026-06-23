@@ -14,6 +14,7 @@ import org.cescfe.numpairs.feature.game.GameHighlightState
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.GameViewModel
 import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState
+import org.cescfe.numpairs.feature.game.ui.screen.GameScreen
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Before
 import org.junit.Rule

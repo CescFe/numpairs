@@ -18,7 +18,7 @@ import androidx.lifecycle.ViewModelProvider
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.GameViewModel
-import org.cescfe.numpairs.feature.game.ui.GameScreen
+import org.cescfe.numpairs.feature.game.ui.screen.GameScreen
 
 @Composable
 fun GameRoute(
