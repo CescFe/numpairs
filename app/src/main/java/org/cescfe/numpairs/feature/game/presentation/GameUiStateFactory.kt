@@ -1,16 +1,16 @@
 package org.cescfe.numpairs.feature.game.presentation
 
 import org.cescfe.numpairs.domain.puzzle.LiveStripEntryOperatorUsage
-import org.cescfe.numpairs.domain.puzzle.Operator
-import org.cescfe.numpairs.domain.puzzle.Puzzle
-import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.StripEntryUsageByOperator
-import org.cescfe.numpairs.domain.puzzle.StripItem
-import org.cescfe.numpairs.domain.puzzle.Tile
-import org.cescfe.numpairs.domain.puzzle.TileResolutionState
 import org.cescfe.numpairs.domain.puzzle.liveRuleConflictsByStripEntryOperator
 import org.cescfe.numpairs.domain.puzzle.liveRuleConflictsByTile
 import org.cescfe.numpairs.domain.puzzle.mismatchedSumProductPairingTileIndexes
+import org.cescfe.numpairs.domain.puzzle.model.Operator
+import org.cescfe.numpairs.domain.puzzle.model.Puzzle
+import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
+import org.cescfe.numpairs.domain.puzzle.model.StripItem
+import org.cescfe.numpairs.domain.puzzle.model.Tile
+import org.cescfe.numpairs.domain.puzzle.model.TileResolutionState
 import org.cescfe.numpairs.domain.puzzle.operandSelectionChoicesFor
 import org.cescfe.numpairs.domain.puzzle.stripEntryUsageByOperator
 

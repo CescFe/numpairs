@@ -6,7 +6,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.domain.puzzle.Operator
+import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
 internal enum class OperandUsageIndicatorState(@get:StringRes val stateDescriptionResId: Int) {

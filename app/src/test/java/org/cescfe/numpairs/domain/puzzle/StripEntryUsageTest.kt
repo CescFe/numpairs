@@ -1,5 +1,7 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.cescfe.numpairs.domain.puzzle.model.Operator
+import org.cescfe.numpairs.domain.puzzle.model.TileResolutionState
 import org.cescfe.numpairs.domain.puzzle.support.TileAssignment
 import org.cescfe.numpairs.domain.puzzle.support.knownPuzzleWithAssignments
 import org.junit.Assert.assertFalse

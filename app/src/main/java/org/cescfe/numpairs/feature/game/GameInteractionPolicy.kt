@@ -1,7 +1,7 @@
 package org.cescfe.numpairs.feature.game
 
-import org.cescfe.numpairs.domain.puzzle.OperandSlot
-import org.cescfe.numpairs.domain.puzzle.Operator
+import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
+import org.cescfe.numpairs.domain.puzzle.model.Operator
 
 data class GameInteractionPolicy(
     val canTapStripItem: (Int) -> Boolean = { true },

@@ -22,8 +22,8 @@ import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.domain.puzzle.Operator
-import org.cescfe.numpairs.domain.puzzle.StripEntryRange
+import org.cescfe.numpairs.domain.puzzle.model.Operator
+import org.cescfe.numpairs.domain.puzzle.model.StripEntryRange
 import org.cescfe.numpairs.feature.game.GameHighlightState
 import org.cescfe.numpairs.feature.game.GameInteractionPolicy
 import org.cescfe.numpairs.feature.game.GameTileExpressionSlot

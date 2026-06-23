@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.domain.puzzle
+package org.cescfe.numpairs.domain.puzzle.model
 
 data class Board(val tiles: List<Tile>) {
     val hasUnresolvedTiles: Boolean

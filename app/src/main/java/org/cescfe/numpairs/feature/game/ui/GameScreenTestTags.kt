@@ -1,6 +1,6 @@
 package org.cescfe.numpairs.feature.game.ui
 
-import org.cescfe.numpairs.domain.puzzle.Operator
+import org.cescfe.numpairs.domain.puzzle.model.Operator
 
 object GameScreenTestTags {
     const val SCREEN = "game_screen"

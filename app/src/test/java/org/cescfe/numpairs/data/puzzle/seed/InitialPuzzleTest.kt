@@ -1,9 +1,9 @@
 package org.cescfe.numpairs.data.puzzle.seed
 
-import org.cescfe.numpairs.domain.puzzle.Expression
-import org.cescfe.numpairs.domain.puzzle.Operator
-import org.cescfe.numpairs.domain.puzzle.StripItem
-import org.cescfe.numpairs.domain.puzzle.Tile
+import org.cescfe.numpairs.domain.puzzle.model.Expression
+import org.cescfe.numpairs.domain.puzzle.model.Operator
+import org.cescfe.numpairs.domain.puzzle.model.StripItem
+import org.cescfe.numpairs.domain.puzzle.model.Tile
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

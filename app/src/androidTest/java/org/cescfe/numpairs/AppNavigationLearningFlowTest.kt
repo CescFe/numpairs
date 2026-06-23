@@ -15,7 +15,7 @@ import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
-import org.cescfe.numpairs.domain.puzzle.Puzzle
+import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.fourpairs.FourPairsPuzzleProvider
 import org.cescfe.numpairs.feature.game.ui.GameScreenTestTags
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags

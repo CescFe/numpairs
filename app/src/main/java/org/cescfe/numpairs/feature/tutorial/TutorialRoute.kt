@@ -22,8 +22,8 @@ import androidx.compose.ui.unit.dp
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.domain.puzzle.OperandSlot
-import org.cescfe.numpairs.domain.puzzle.StripItem
+import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
+import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.feature.game.GameHighlightState
 import org.cescfe.numpairs.feature.game.GameInteractionPolicy
 import org.cescfe.numpairs.feature.game.GameRoute

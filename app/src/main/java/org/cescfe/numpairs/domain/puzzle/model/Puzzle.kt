@@ -1,4 +1,9 @@
-package org.cescfe.numpairs.domain.puzzle
+package org.cescfe.numpairs.domain.puzzle.model
+
+import org.cescfe.numpairs.domain.puzzle.hasIncorrectTiles
+import org.cescfe.numpairs.domain.puzzle.hasInvalidStripEntryUsage
+import org.cescfe.numpairs.domain.puzzle.hasMismatchedSumProductPairings
+import org.cescfe.numpairs.domain.puzzle.hasMissingResolvedTileAssignments
 
 data class Puzzle(val board: Board, val strip: Strip) {
     init {

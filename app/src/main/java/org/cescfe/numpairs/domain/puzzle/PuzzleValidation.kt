@@ -1,5 +1,10 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.cescfe.numpairs.domain.puzzle.model.Operator
+import org.cescfe.numpairs.domain.puzzle.model.Puzzle
+import org.cescfe.numpairs.domain.puzzle.model.StripEntry
+import org.cescfe.numpairs.domain.puzzle.model.TileResolutionState
+
 internal val Puzzle.hasIncorrectTiles: Boolean
     get() = board.tiles.any { tile -> tile.resolutionState == TileResolutionState.INCORRECT }
 

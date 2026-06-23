@@ -1,13 +1,13 @@
 package org.cescfe.numpairs.feature.tutorial
 
-import org.cescfe.numpairs.domain.puzzle.Board
-import org.cescfe.numpairs.domain.puzzle.Operator
-import org.cescfe.numpairs.domain.puzzle.Puzzle
 import org.cescfe.numpairs.domain.puzzle.ResolvedOperandAssignment
-import org.cescfe.numpairs.domain.puzzle.Strip
-import org.cescfe.numpairs.domain.puzzle.StripItem
-import org.cescfe.numpairs.domain.puzzle.Tile
 import org.cescfe.numpairs.domain.puzzle.hiddenExpression
+import org.cescfe.numpairs.domain.puzzle.model.Board
+import org.cescfe.numpairs.domain.puzzle.model.Operator
+import org.cescfe.numpairs.domain.puzzle.model.Puzzle
+import org.cescfe.numpairs.domain.puzzle.model.Strip
+import org.cescfe.numpairs.domain.puzzle.model.StripItem
+import org.cescfe.numpairs.domain.puzzle.model.Tile
 import org.cescfe.numpairs.domain.puzzle.resolvedTile
 
 internal data class TileDefinition(val leftStripEntryId: Int, val operator: Operator, val rightStripEntryId: Int)

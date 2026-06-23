@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.domain.puzzle
+package org.cescfe.numpairs.domain.puzzle.model
 
 data class StripEntry(val id: Int, val item: StripItem) {
     init {

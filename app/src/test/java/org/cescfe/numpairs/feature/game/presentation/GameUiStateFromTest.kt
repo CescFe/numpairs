@@ -1,14 +1,14 @@
 package org.cescfe.numpairs.feature.game.presentation
 
 import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
-import org.cescfe.numpairs.domain.puzzle.Board
-import org.cescfe.numpairs.domain.puzzle.OperandSlot
-import org.cescfe.numpairs.domain.puzzle.Operator
-import org.cescfe.numpairs.domain.puzzle.Puzzle
-import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
-import org.cescfe.numpairs.domain.puzzle.Strip
-import org.cescfe.numpairs.domain.puzzle.StripEntryRange
-import org.cescfe.numpairs.domain.puzzle.StripItem
+import org.cescfe.numpairs.domain.puzzle.model.Board
+import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
+import org.cescfe.numpairs.domain.puzzle.model.Operator
+import org.cescfe.numpairs.domain.puzzle.model.Puzzle
+import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
+import org.cescfe.numpairs.domain.puzzle.model.Strip
+import org.cescfe.numpairs.domain.puzzle.model.StripEntryRange
+import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.support.TileAssignment
 import org.cescfe.numpairs.domain.puzzle.support.assignedTile
 import org.cescfe.numpairs.domain.puzzle.support.defaultKnownStripValues

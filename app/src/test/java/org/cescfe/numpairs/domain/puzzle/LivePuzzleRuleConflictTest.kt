@@ -1,5 +1,12 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.cescfe.numpairs.domain.puzzle.model.Board
+import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
+import org.cescfe.numpairs.domain.puzzle.model.Operator
+import org.cescfe.numpairs.domain.puzzle.model.Puzzle
+import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
+import org.cescfe.numpairs.domain.puzzle.model.Strip
+import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.support.hiddenTile
 import org.cescfe.numpairs.domain.puzzle.support.withTile
 import org.junit.Assert.assertEquals

@@ -1,9 +1,9 @@
 package org.cescfe.numpairs.feature.game.presentation
 
 import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
-import org.cescfe.numpairs.domain.puzzle.Strip
-import org.cescfe.numpairs.domain.puzzle.StripEntryRange
-import org.cescfe.numpairs.domain.puzzle.StripItem
+import org.cescfe.numpairs.domain.puzzle.model.Strip
+import org.cescfe.numpairs.domain.puzzle.model.StripEntryRange
+import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test

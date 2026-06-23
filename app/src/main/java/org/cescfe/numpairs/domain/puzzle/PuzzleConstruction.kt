@@ -1,5 +1,9 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.cescfe.numpairs.domain.puzzle.model.Expression
+import org.cescfe.numpairs.domain.puzzle.model.Operator
+import org.cescfe.numpairs.domain.puzzle.model.Tile
+
 fun hiddenExpression(): Expression = Expression(
     leftOperand = Expression.Operand.Hidden,
     operator = Operator.Hidden,

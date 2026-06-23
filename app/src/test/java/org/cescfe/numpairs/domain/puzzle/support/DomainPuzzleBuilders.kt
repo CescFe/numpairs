@@ -1,12 +1,12 @@
 package org.cescfe.numpairs.domain.puzzle.support
 
-import org.cescfe.numpairs.domain.puzzle.Board
-import org.cescfe.numpairs.domain.puzzle.Expression
-import org.cescfe.numpairs.domain.puzzle.Operator
-import org.cescfe.numpairs.domain.puzzle.Puzzle
-import org.cescfe.numpairs.domain.puzzle.Strip
-import org.cescfe.numpairs.domain.puzzle.StripItem
-import org.cescfe.numpairs.domain.puzzle.Tile
+import org.cescfe.numpairs.domain.puzzle.model.Board
+import org.cescfe.numpairs.domain.puzzle.model.Expression
+import org.cescfe.numpairs.domain.puzzle.model.Operator
+import org.cescfe.numpairs.domain.puzzle.model.Puzzle
+import org.cescfe.numpairs.domain.puzzle.model.Strip
+import org.cescfe.numpairs.domain.puzzle.model.StripItem
+import org.cescfe.numpairs.domain.puzzle.model.Tile
 
 data class TileAssignment(val leftEntryId: Int, val operator: Operator, val rightEntryId: Int, val result: Int? = null)
 

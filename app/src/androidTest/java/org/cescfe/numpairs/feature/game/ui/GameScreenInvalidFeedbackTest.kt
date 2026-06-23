@@ -2,7 +2,7 @@ package org.cescfe.numpairs.feature.game.ui
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
+import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.junit.Test
 import org.junit.runner.RunWith
 

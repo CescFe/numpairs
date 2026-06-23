@@ -1,5 +1,8 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.cescfe.numpairs.domain.puzzle.model.Strip
+import org.cescfe.numpairs.domain.puzzle.model.StripItem
+
 fun Strip.withKnownEntriesOnly(knownEntryIds: Set<Int>): Strip = Strip.fromEntries(
     entries = entries.map { entry ->
         val visibleValue = requireNotNull(entry.item.maskableValue) {

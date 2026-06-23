@@ -1,6 +1,6 @@
 package org.cescfe.numpairs.feature.game.presentation
 
-import org.cescfe.numpairs.domain.puzzle.OperandSlot
+import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
 
 data class GamePresentationState(
     val modal: GameModalState? = null,

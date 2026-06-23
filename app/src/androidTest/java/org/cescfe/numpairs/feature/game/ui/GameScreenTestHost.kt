@@ -8,8 +8,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.domain.puzzle.Operator
-import org.cescfe.numpairs.domain.puzzle.PuzzleCompletionState
+import org.cescfe.numpairs.domain.puzzle.model.Operator
+import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.cescfe.numpairs.feature.game.GameHighlightState
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.GameViewModel

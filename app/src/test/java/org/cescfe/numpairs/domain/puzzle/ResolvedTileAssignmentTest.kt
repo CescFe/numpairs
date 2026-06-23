@@ -1,5 +1,7 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.cescfe.numpairs.domain.puzzle.model.Board
+import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.support.assignedTile
 import org.cescfe.numpairs.domain.puzzle.support.hiddenTile
 import org.cescfe.numpairs.domain.puzzle.support.puzzleWithRepeatedSixes

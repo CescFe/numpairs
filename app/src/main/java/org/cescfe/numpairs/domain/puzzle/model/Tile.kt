@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.domain.puzzle
+package org.cescfe.numpairs.domain.puzzle.model
 
 data class Tile(val expression: Expression, val result: Int) {
     val canReset: Boolean

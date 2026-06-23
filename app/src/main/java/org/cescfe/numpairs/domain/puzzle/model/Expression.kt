@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.domain.puzzle
+package org.cescfe.numpairs.domain.puzzle.model
 
 data class Expression(val leftOperand: Operand, val operator: Operator, val rightOperand: Operand) {
     constructor(leftOperand: Int, operator: Operator, rightOperand: Int) : this(

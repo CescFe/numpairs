@@ -17,9 +17,9 @@ import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyPuzzleGenerator
 import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyRules
-import org.cescfe.numpairs.domain.puzzle.Board
-import org.cescfe.numpairs.domain.puzzle.Operator
-import org.cescfe.numpairs.domain.puzzle.Puzzle
+import org.cescfe.numpairs.domain.puzzle.model.Board
+import org.cescfe.numpairs.domain.puzzle.model.Operator
+import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.game.ui.GameScreenTestTags
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.ui.navigation.AppNavigation
