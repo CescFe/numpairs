@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.feature.game.ui
+package org.cescfe.numpairs.feature.game.ui.help
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.getValue
@@ -15,7 +15,6 @@ import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.feature.game.ui.help.RulesHelperDialog
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
@@ -24,51 +23,57 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class RulesHelperDialogTest {
+class SolvingTipsDialogTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun displaysStaticRulesHelperContent() {
+    fun displaysStaticSolvingTipsContent() {
         composeTestRule.setContent {
             NumPairsTheme {
-                RulesHelperDialog(onDismiss = {})
+                SolvingTipsDialog(onDismiss = {})
             }
         }
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_DIALOG)
+            .onNodeWithTag(GameScreenTestTags.SOLVING_TIPS_DIALOG)
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithContentDescription(string(R.string.rules_helper_close_content_description))
+            .onNodeWithTag(GameScreenTestTags.SOLVING_TIPS_CONTENT)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithContentDescription(string(R.string.solving_tips_close_content_description))
             .assertIsDisplayed()
 
-        assertRulesHelperTextExists(R.string.rules_helper_title)
-        assertRulesHelperTextExists(R.string.rules_helper_objective_title)
-        assertRulesHelperTextExists(R.string.rules_helper_objective_complete)
-        assertRulesHelperTextExists(R.string.rules_helper_elements_title)
-        assertRulesHelperTextExists(R.string.rules_helper_elements_strip)
-        assertRulesHelperTextExists(R.string.rules_helper_elements_grid)
-        assertRulesHelperTextExists(R.string.rules_helper_strip_title)
-        assertRulesHelperTextExists(R.string.rules_helper_strip_hidden)
-        assertRulesHelperTextExists(R.string.rules_helper_grid_title)
-        assertRulesHelperTextExists(R.string.rules_helper_grid_expression)
-        assertRulesHelperTextExists(R.string.rules_helper_grid_pair_usage)
+        assertSolvingTipsTextExists(R.string.solving_tips_title)
+        assertSolvingTipsTextExists(R.string.solving_tips_strip_title)
+        assertSolvingTipsTextExists(R.string.solving_tips_strip_hidden_range)
+        assertSolvingTipsTextExists(R.string.solving_tips_strip_highest_anchor)
+        assertSolvingTipsTextExists(R.string.solving_tips_products_title)
+        assertSolvingTipsTextExists(R.string.solving_tips_products_large_results)
+        assertSolvingTipsTextExists(R.string.solving_tips_products_factors)
+        assertSolvingTipsTextExists(R.string.solving_tips_sums_title)
+        assertSolvingTipsTextExists(R.string.solving_tips_sums_prime_results)
+        assertSolvingTipsTextExists(R.string.solving_tips_ui_clues_title)
+        assertSolvingTipsTextExists(R.string.solving_tips_ui_clues_operand_usage)
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_PLAY_TUTORIAL_BUTTON)
-            .assertDoesNotExist()
+            .onNodeWithTag(GameScreenTestTags.SOLVING_TIPS_PRACTICE_BUTTON)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(string(R.string.solving_tips_practice_button))
+            .assertIsDisplayed()
     }
 
     @Test
-    fun closeIconDismissesRulesHelperDialog() {
+    fun closeIconDismissesSolvingTipsDialog() {
         var isDialogVisible by mutableStateOf(true)
         var dismissCount = 0
 
         composeTestRule.setContent {
             NumPairsTheme {
                 if (isDialogVisible) {
-                    RulesHelperDialog(
+                    SolvingTipsDialog(
                         onDismiss = {
                             dismissCount += 1
                             isDialogVisible = false
@@ -79,11 +84,11 @@ class RulesHelperDialogTest {
         }
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_CLOSE_BUTTON)
+            .onNodeWithTag(GameScreenTestTags.SOLVING_TIPS_CLOSE_BUTTON)
             .performClick()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_DIALOG)
+            .onNodeWithTag(GameScreenTestTags.SOLVING_TIPS_DIALOG)
             .assertDoesNotExist()
         composeTestRule.runOnIdle {
             assertEquals(1, dismissCount)
@@ -91,21 +96,21 @@ class RulesHelperDialogTest {
     }
 
     @Test
-    fun playTutorialActionDismissesRulesHelperDialogAndInvokesCallback() {
+    fun practiceTipsActionDismissesSolvingTipsDialogAndInvokesCallback() {
         var isDialogVisible by mutableStateOf(true)
         var dismissCount = 0
-        var playTutorialRequestCount = 0
+        var practiceTipsRequestCount = 0
 
         composeTestRule.setContent {
             NumPairsTheme {
                 if (isDialogVisible) {
-                    RulesHelperDialog(
+                    SolvingTipsDialog(
                         onDismiss = {
                             dismissCount += 1
                             isDialogVisible = false
                         },
-                        onPlayTutorialRequested = {
-                            playTutorialRequestCount += 1
+                        onPracticeTipsRequested = {
+                            practiceTipsRequestCount += 1
                         }
                     )
                 }
@@ -113,34 +118,28 @@ class RulesHelperDialogTest {
         }
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_PLAY_TUTORIAL_BUTTON)
+            .onNodeWithTag(GameScreenTestTags.SOLVING_TIPS_PRACTICE_BUTTON)
             .assertIsDisplayed()
-        composeTestRule
-            .onNodeWithText(string(R.string.rules_helper_play_tutorial_button))
-            .assertIsDisplayed()
-
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_PLAY_TUTORIAL_BUTTON)
             .performClick()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_DIALOG)
+            .onNodeWithTag(GameScreenTestTags.SOLVING_TIPS_DIALOG)
             .assertDoesNotExist()
         composeTestRule.runOnIdle {
             assertEquals(1, dismissCount)
-            assertEquals(1, playTutorialRequestCount)
+            assertEquals(1, practiceTipsRequestCount)
         }
     }
 
     @Test
-    fun systemBackDismissesRulesHelperDialog() {
+    fun systemBackDismissesSolvingTipsDialog() {
         var isDialogVisible by mutableStateOf(true)
         var dismissCount = 0
 
         composeTestRule.setContent {
             NumPairsTheme {
                 if (isDialogVisible) {
-                    RulesHelperDialog(
+                    SolvingTipsDialog(
                         onDismiss = {
                             dismissCount += 1
                             isDialogVisible = false
@@ -151,20 +150,20 @@ class RulesHelperDialogTest {
         }
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_DIALOG)
+            .onNodeWithTag(GameScreenTestTags.SOLVING_TIPS_DIALOG)
             .assertIsDisplayed()
 
         pressBackUnconditionally()
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_DIALOG)
+            .onNodeWithTag(GameScreenTestTags.SOLVING_TIPS_DIALOG)
             .assertDoesNotExist()
         composeTestRule.runOnIdle {
             assertEquals(1, dismissCount)
         }
     }
 
-    private fun assertRulesHelperTextExists(stringResId: Int) {
+    private fun assertSolvingTipsTextExists(stringResId: Int) {
         composeTestRule
             .onNodeWithText(string(stringResId))
             .assert(hasText(string(stringResId)))
