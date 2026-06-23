@@ -1,6 +1,6 @@
 package org.cescfe.numpairs.feature.game.presentation
 
-import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
+import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.junit.Assert.assertEquals
@@ -137,7 +137,7 @@ class GameViewModelCompletionAndResetTest {
         viewModel.onTileOperatorTapped(index = 0)
         assertEquals(0, viewModel.uiState.value.tileOperatorSelectionDialog?.tileIndex)
 
-        viewModel.reset(initialPuzzle = initialPuzzle)
+        viewModel.reset(initialPuzzle = samplePuzzle)
 
         val uiState = viewModel.uiState.value
 

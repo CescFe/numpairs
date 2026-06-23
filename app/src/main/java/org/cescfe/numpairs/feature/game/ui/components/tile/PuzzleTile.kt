@@ -24,7 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
+import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.TileUiState
 import org.cescfe.numpairs.feature.game.presentation.TileVisualState
@@ -140,7 +140,7 @@ fun PuzzleTile(
 private fun PuzzleTilePreview() {
     NumPairsTheme {
         PuzzleTile(
-            tile = GameUiState.from(initialPuzzle).tiles.first()
+            tile = GameUiState.from(samplePuzzle).tiles.first()
         )
     }
 }

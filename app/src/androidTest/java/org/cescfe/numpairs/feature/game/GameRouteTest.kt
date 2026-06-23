@@ -14,7 +14,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import java.util.concurrent.atomic.AtomicReference
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
+import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.puzzle.assignment.ResolvedOperandAssignment
 import org.cescfe.numpairs.domain.puzzle.construction.resolvedTile
 import org.cescfe.numpairs.domain.puzzle.model.Board
@@ -41,7 +41,7 @@ class GameRouteTest {
             NumPairsTheme {
                 GameRoute(
                     title = "Tutorial",
-                    initialPuzzle = initialPuzzle,
+                    initialPuzzle = samplePuzzle,
                     gameSessionKey = "top-bar-action",
                     topBarActions = {
                         IconButton(
@@ -63,7 +63,7 @@ class GameRouteTest {
     @Test
     fun displays_the_caller_title_and_initial_puzzle() {
         val routeTitle = "4 pairs"
-        val routePuzzle = initialPuzzle.withStripItem(
+        val routePuzzle = samplePuzzle.withStripItem(
             index = 0,
             item = StripItem.Known(4)
         )
@@ -97,7 +97,7 @@ class GameRouteTest {
             NumPairsTheme {
                 GameRoute(
                     title = "Tutorial",
-                    initialPuzzle = initialPuzzle,
+                    initialPuzzle = samplePuzzle,
                     gameSessionKey = "observed-ui-state",
                     onGameUiStateChanged = observedUiState::set
                 )
@@ -160,7 +160,7 @@ class GameRouteTest {
     @Test
     fun game_state_is_isolated_between_route_keys() {
         var gameMode by mutableStateOf(GameRouteMode.TUTORIAL)
-        val fourPairsPuzzle = initialPuzzle.withStripItem(
+        val fourPairsPuzzle = samplePuzzle.withStripItem(
             index = 0,
             item = StripItem.Known(4)
         )
@@ -170,7 +170,7 @@ class GameRouteTest {
                 when (gameMode) {
                     GameRouteMode.TUTORIAL -> GameRoute(
                         title = "Tutorial",
-                        initialPuzzle = initialPuzzle,
+                        initialPuzzle = samplePuzzle,
                         gameSessionKey = "tutorial"
                     )
                     GameRouteMode.FOUR_PAIRS -> GameRoute(

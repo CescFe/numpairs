@@ -28,7 +28,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
+import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.feature.game.GameCompletionActions
@@ -282,7 +282,7 @@ private fun GameScreenPreview() {
     NumPairsTheme {
         GameScreen(
             title = stringResource(R.string.tutorial_screen_title),
-            uiState = GameUiState.from(initialPuzzle)
+            uiState = GameUiState.from(samplePuzzle)
         )
     }
 }
@@ -293,7 +293,7 @@ private fun GameScreenWithTopBarActionPreview() {
     NumPairsTheme {
         GameScreen(
             title = stringResource(R.string.tutorial_screen_title),
-            uiState = GameUiState.from(initialPuzzle),
+            uiState = GameUiState.from(samplePuzzle),
             topBarActions = {
                 IconButton(onClick = {}) {
                     Text(text = "A")

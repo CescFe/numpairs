@@ -8,7 +8,7 @@ import org.cescfe.numpairs.domain.puzzle.model.Strip
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
 
-val initialPuzzle: Puzzle = Puzzle(
+val samplePuzzle: Puzzle = Puzzle(
     board = Board(
         tiles = listOf(
             hiddenExpressionTile(result = 223),

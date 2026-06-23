@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle as defaultInitialPuzzle
+import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle as defaultSamplePuzzle
 import org.cescfe.numpairs.domain.puzzle.assignment.operandSelectionChoicesFor
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
@@ -13,7 +13,7 @@ import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
 
-class GameViewModel(initialPuzzle: Puzzle = defaultInitialPuzzle) : ViewModel() {
+class GameViewModel(initialPuzzle: Puzzle = defaultSamplePuzzle) : ViewModel() {
     private var puzzle: Puzzle = initialPuzzle
     private var presentationState = GamePresentationState()
 
