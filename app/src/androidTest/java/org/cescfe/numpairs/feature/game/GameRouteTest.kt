@@ -15,7 +15,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import java.util.concurrent.atomic.AtomicReference
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
-import org.cescfe.numpairs.domain.puzzle.ResolvedOperandAssignment
+import org.cescfe.numpairs.domain.puzzle.assignment.ResolvedOperandAssignment
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle

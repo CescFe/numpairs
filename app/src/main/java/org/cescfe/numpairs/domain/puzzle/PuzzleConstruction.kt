@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.cescfe.numpairs.domain.puzzle.assignment.ResolvedOperandAssignment
 import org.cescfe.numpairs.domain.puzzle.model.Expression
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Tile

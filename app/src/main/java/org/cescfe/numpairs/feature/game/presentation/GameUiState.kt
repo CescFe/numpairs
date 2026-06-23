@@ -1,8 +1,8 @@
 package org.cescfe.numpairs.feature.game.presentation
 
 import org.cescfe.numpairs.domain.puzzle.LivePuzzleRuleConflict
-import org.cescfe.numpairs.domain.puzzle.OperandSelectionChoice
-import org.cescfe.numpairs.domain.puzzle.StripEntryUsageByOperator
+import org.cescfe.numpairs.domain.puzzle.assignment.OperandSelectionChoice
+import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryUsageByOperator
 import org.cescfe.numpairs.domain.puzzle.model.Expression
 import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.model.Operator

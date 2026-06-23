@@ -1,5 +1,7 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.cescfe.numpairs.domain.puzzle.assignment.IndexedResolvedTileAssignment
+import org.cescfe.numpairs.domain.puzzle.assignment.resolvedTileAssignments
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.StripEntry

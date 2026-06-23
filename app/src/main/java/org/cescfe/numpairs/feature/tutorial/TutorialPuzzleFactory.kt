@@ -1,6 +1,6 @@
 package org.cescfe.numpairs.feature.tutorial
 
-import org.cescfe.numpairs.domain.puzzle.ResolvedOperandAssignment
+import org.cescfe.numpairs.domain.puzzle.assignment.ResolvedOperandAssignment
 import org.cescfe.numpairs.domain.puzzle.hiddenExpression
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Operator

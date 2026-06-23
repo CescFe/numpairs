@@ -1,6 +1,10 @@
 package org.cescfe.numpairs.domain.puzzle
 
 import org.cescfe.numpairs.data.puzzle.seed.initialPuzzle
+import org.cescfe.numpairs.domain.puzzle.assignment.OperandSelectionAvailability
+import org.cescfe.numpairs.domain.puzzle.assignment.OperandSelectionChoice
+import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryUsageByOperator
+import org.cescfe.numpairs.domain.puzzle.assignment.operandSelectionChoicesFor
 import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.support.hiddenTile

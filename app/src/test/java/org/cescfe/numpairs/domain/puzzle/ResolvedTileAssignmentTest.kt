@@ -1,5 +1,10 @@
 package org.cescfe.numpairs.domain.puzzle
 
+import org.cescfe.numpairs.domain.puzzle.assignment.IndexedResolvedTileAssignment
+import org.cescfe.numpairs.domain.puzzle.assignment.ResolvedOperandAssignment
+import org.cescfe.numpairs.domain.puzzle.assignment.ResolvedTileAssignment
+import org.cescfe.numpairs.domain.puzzle.assignment.resolvedStripEntryAssignment
+import org.cescfe.numpairs.domain.puzzle.assignment.resolvedTileAssignments
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.support.assignedTile

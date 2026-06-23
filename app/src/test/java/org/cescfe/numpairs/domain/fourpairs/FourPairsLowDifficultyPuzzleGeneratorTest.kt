@@ -1,13 +1,13 @@
 package org.cescfe.numpairs.domain.fourpairs
 
-import org.cescfe.numpairs.domain.puzzle.IndexedResolvedTileAssignment
+import org.cescfe.numpairs.domain.puzzle.assignment.IndexedResolvedTileAssignment
+import org.cescfe.numpairs.domain.puzzle.assignment.resolvedTileAssignments
 import org.cescfe.numpairs.domain.puzzle.model.Expression
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
-import org.cescfe.numpairs.domain.puzzle.resolvedTileAssignments
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
