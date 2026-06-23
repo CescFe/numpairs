@@ -9,6 +9,8 @@ import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.support.TileAssignment
 import org.cescfe.numpairs.domain.puzzle.support.hiddenTile
 import org.cescfe.numpairs.domain.puzzle.support.knownPuzzleWithAssignments
+import org.cescfe.numpairs.domain.puzzle.validation.hasInvalidStripEntryUsage
+import org.cescfe.numpairs.domain.puzzle.validation.hasMismatchedSumProductPairings
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows

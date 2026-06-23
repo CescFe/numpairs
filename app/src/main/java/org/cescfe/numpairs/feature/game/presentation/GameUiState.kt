@@ -1,6 +1,5 @@
 package org.cescfe.numpairs.feature.game.presentation
 
-import org.cescfe.numpairs.domain.puzzle.LivePuzzleRuleConflict
 import org.cescfe.numpairs.domain.puzzle.assignment.OperandSelectionChoice
 import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryUsageByOperator
 import org.cescfe.numpairs.domain.puzzle.model.Expression
@@ -12,6 +11,7 @@ import org.cescfe.numpairs.domain.puzzle.model.StripEntryRange
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
 import org.cescfe.numpairs.domain.puzzle.model.TileResolutionState
+import org.cescfe.numpairs.domain.puzzle.validation.LivePuzzleRuleConflict
 
 data class GameUiState(
     val stripItems: List<StripItemUiState>,

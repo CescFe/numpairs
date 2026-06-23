@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.domain.puzzle
+package org.cescfe.numpairs.domain.puzzle.validation
 
 import org.cescfe.numpairs.domain.puzzle.assignment.IndexedResolvedTileAssignment
 import org.cescfe.numpairs.domain.puzzle.assignment.resolvedTileAssignments

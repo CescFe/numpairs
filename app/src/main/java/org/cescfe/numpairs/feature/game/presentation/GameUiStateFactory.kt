@@ -1,18 +1,18 @@
 package org.cescfe.numpairs.feature.game.presentation
 
-import org.cescfe.numpairs.domain.puzzle.LiveStripEntryOperatorUsage
 import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryUsageByOperator
 import org.cescfe.numpairs.domain.puzzle.assignment.operandSelectionChoicesFor
 import org.cescfe.numpairs.domain.puzzle.assignment.stripEntryUsageByOperator
-import org.cescfe.numpairs.domain.puzzle.liveRuleConflictsByStripEntryOperator
-import org.cescfe.numpairs.domain.puzzle.liveRuleConflictsByTile
-import org.cescfe.numpairs.domain.puzzle.mismatchedSumProductPairingTileIndexes
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
 import org.cescfe.numpairs.domain.puzzle.model.TileResolutionState
+import org.cescfe.numpairs.domain.puzzle.validation.LiveStripEntryOperatorUsage
+import org.cescfe.numpairs.domain.puzzle.validation.liveRuleConflictsByStripEntryOperator
+import org.cescfe.numpairs.domain.puzzle.validation.liveRuleConflictsByTile
+import org.cescfe.numpairs.domain.puzzle.validation.mismatchedSumProductPairingTileIndexes
 
 internal object GameUiStateFactory {
     private val availableOperators = listOf(
