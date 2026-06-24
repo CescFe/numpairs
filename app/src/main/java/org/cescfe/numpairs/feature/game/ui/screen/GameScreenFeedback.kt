@@ -95,7 +95,7 @@ internal fun SuccessOverlay(onDismiss: () -> Unit, completionActions: GameComple
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "OK",
+                            text = stringResource(R.string.success_overlay_badge_text),
                             style = MaterialTheme.typography.titleMedium
                         )
                     }

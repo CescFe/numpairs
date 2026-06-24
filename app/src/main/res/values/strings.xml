@@ -43,6 +43,7 @@
     <string name="tile_state_live_rule_conflict">Rule conflict tile</string>
     <string name="tile_reset_content_description">Reset tile</string>
     <string name="success_overlay_message">Puzzle Completed!</string>
+    <string name="success_overlay_badge_text">OK</string>
     <string name="success_overlay_supporting_text">All pairs matched.</string>
     <string name="success_overlay_new_puzzle_button">New puzzle</string>
     <string name="success_overlay_return_to_menu_button">Menu</string>
