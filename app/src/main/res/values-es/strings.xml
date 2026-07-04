@@ -1,0 +1,102 @@
+<resources>
+    <!-- App and navigation -->
+    <string name="app_name">NumPairs</string>
+    <string name="back_button_content_description">Atrás</string>
+
+    <!-- Menu screen -->
+    <string name="menu_tutorial_button">Tutorial</string>
+    <string name="menu_four_pairs_button">Jugar 4 pares</string>
+
+    <!-- Four pairs screen -->
+    <string name="four_pairs_screen_title">4 pares</string>
+
+    <!-- Tutorial screen -->
+    <string name="tutorial_screen_title">Tutorial</string>
+    <string name="tutorial_step_indicator">Paso %1$d de %2$d</string>
+    <string name="tutorial_step_one_copy">El objetivo principal es descubrir todos los elementos desconocidos. Adivina los valores ocultos para completar una lista ascendente de enteros positivos.</string>
+    <string name="tutorial_step_two_copy">Combina dos números de la serie para formar una expresión matemática que dé como resultado el valor visible de la casilla. Completa la casilla resaltada con dos operandos y un operador.</string>
+    <string name="tutorial_step_three_copy">Cada par debe formar una suma y un producto. Usa el mismo par para completar su casilla de producto.</string>
+    <string name="tutorial_step_four_copy">Termina este puzle de práctica.</string>
+    <string name="tutorial_solving_tips_step_one_copy">En dificultad baja, ningún número aparece dos veces y la serie nunca incluye el 1, así que los resultados primos siempre son sumas. Completa el resultado primo como una casilla de suma.</string>
+    <string name="tutorial_solving_tips_step_two_copy">Las casillas de producto solo pueden usar factores de su resultado. Encuentra dos valores de la serie que multipliquen hasta obtener el producto y luego usa el mismo par para completar su suma correspondiente.</string>
+    <string name="tutorial_previous_step_button">Atrás</string>
+    <string name="tutorial_next_step_button">Siguiente</string>
+
+    <!-- Game screen: board and strip -->
+    <string name="board_content_description">Tablero</string>
+    <string name="strip_content_description">Serie</string>
+    <string name="strip_item_hidden_content_description">Elemento oculto de la serie</string>
+    <string name="strip_item_known_content_description">Elemento conocido de la serie, valor %1$s</string>
+    <string name="strip_item_player_entered_content_description">Elemento de la serie introducido por el jugador, valor %1$s</string>
+    <string name="tile_left_operand_hidden_content_description">Operando izquierdo oculto</string>
+    <string name="tile_left_operand_content_description">Operando izquierdo, valor %1$s</string>
+    <string name="tile_right_operand_hidden_content_description">Operando derecho oculto</string>
+    <string name="tile_right_operand_content_description">Operando derecho, valor %1$s</string>
+    <string name="tile_operator_hidden_content_description">Operador oculto</string>
+    <string name="tile_operator_content_description">Operador, %1$s</string>
+    <string name="strip_entry_valid_range_bounded">Rango válido: de %1$d a %2$d</string>
+    <string name="strip_entry_valid_range_unbounded">Rango válido: %1$d o más</string>
+    <string name="strip_entry_invalid_range_bounded">Número no válido. Rango válido: de %1$d a %2$d</string>
+    <string name="strip_entry_invalid_range_unbounded">Número no válido. Rango válido: %1$d o más</string>
+
+    <!-- Game screen: tile selection dialogs -->
+    <string name="tile_operand_dialog_title">Elige operando</string>
+    <string name="tile_operand_usage_addition_hint">Pista de uso en suma</string>
+    <string name="tile_operand_usage_multiplication_hint">Pista de uso en multiplicación</string>
+    <string name="tile_operand_usage_state_available">Disponible</string>
+    <string name="tile_operand_usage_state_used">Usado</string>
+    <string name="tile_operand_usage_state_rule_conflict">Conflicto de regla</string>
+    <string name="tile_operator_dialog_title">Elige operador</string>
+    <string name="tile_operator_option_addition">Suma (+)</string>
+    <string name="tile_operator_option_multiplication">Multiplicación (×)</string>
+    <string name="tile_state_incorrect">Casilla incorrecta</string>
+    <string name="tile_state_mismatched_pairing">Casilla con par no coincidente</string>
+    <string name="tile_state_live_rule_conflict">Casilla con conflicto de regla</string>
+    <string name="tile_reset_content_description">Restablecer casilla</string>
+
+    <!-- Game screen: feedback and overlays -->
+    <string name="success_overlay_message">¡Puzle completado!</string>
+    <string name="success_overlay_badge_text">OK</string>
+    <string name="success_overlay_supporting_text">Todos los pares coinciden.</string>
+    <string name="success_overlay_new_puzzle_button">Nuevo puzle</string>
+    <string name="success_overlay_return_to_menu_button">Menú</string>
+    <string name="hint_action_content_description">Abrir pistas de práctica</string>
+    <string name="rules_helper_action_content_description">Ayuda de reglas</string>
+    <string name="rules_helper_title">Cómo jugar</string>
+    <string name="rules_helper_close_content_description">Cerrar ayuda de reglas</string>
+    <string name="rules_helper_play_tutorial_button">Jugar tutorial</string>
+    <string name="rules_helper_objective_title">Objetivo</string>
+    <string name="rules_helper_objective_complete">Adivina todos los elementos desconocidos.</string>
+    <string name="rules_helper_elements_title">Elementos de la pantalla</string>
+    <string name="rules_helper_elements_strip">Serie: números disponibles para resolver el puzle.</string>
+    <string name="rules_helper_elements_grid">Cuadrícula: casillas con un resultado visible y una expresión desconocida.</string>
+    <string name="rules_helper_strip_title">Completa la serie</string>
+    <string name="rules_helper_strip_hidden">Adivina los valores ocultos para completar una lista ascendente de enteros positivos.</string>
+    <string name="rules_helper_grid_title">Completa la cuadrícula</string>
+    <string name="rules_helper_grid_expression">Completa cada casilla con dos operandos y un operador.</string>
+    <string name="rules_helper_grid_pair_usage">Empareja números de la serie para que cada par cree una suma y un producto que coincidan con dos resultados de la cuadrícula.</string>
+
+    <!-- Game screen: solving tips -->
+    <string name="solving_tips_title">Consejos de resolución</string>
+    <string name="solving_tips_close_content_description">Cerrar consejos de resolución</string>
+    <string name="solving_tips_practice_button">Practicar consejos</string>
+    <string name="solving_tips_strip_title">Usa la serie</string>
+    <string name="solving_tips_strip_hidden_range">Los valores ocultos de la serie deben seguir encajando entre sus vecinos visibles.</string>
+    <string name="solving_tips_strip_highest_anchor">El valor más alto de la serie es una referencia para productos grandes y sumas imposibles.</string>
+    <string name="solving_tips_products_title">Encuentra productos</string>
+    <string name="solving_tips_products_large_results">Los resultados grandes suelen ser casillas de producto.</string>
+    <string name="solving_tips_products_factors">Comprueba sus factores.</string>
+    <string name="solving_tips_sums_title">Encuentra sumas</string>
+    <string name="solving_tips_sums_prime_results">En dificultad baja, los resultados primos siempre son casillas de suma.</string>
+    <string name="solving_tips_ui_clues_title">Usa las pistas visuales</string>
+    <string name="solving_tips_ui_clues_operand_usage">Las opciones de operandos muestran su uso en sumas y multiplicaciones.</string>
+
+    <!-- Game screen: validation messages -->
+    <string name="puzzle_outcome_invalid_title">Completado, pero no resuelto</string>
+    <string name="puzzle_outcome_invalid_tiles_message">Al menos una casilla completada es incorrecta.</string>
+    <string name="puzzle_outcome_missing_identities_message">A algunas casillas completadas les faltan las identidades de entrada de la serie.</string>
+    <string name="puzzle_outcome_mismatched_pairings_message">Las casillas de suma y multiplicación no usan los mismos pares de entradas de la serie.</string>
+    <string name="puzzle_outcome_invalid_usage_message">Cada entrada de la serie debe usarse exactamente una vez en suma y una vez en multiplicación.</string>
+    <string name="local_rule_conflict_duplicate_operator_usage_message">Un operando solo puede emparejarse una vez con un operador determinado.</string>
+    <string name="local_rule_conflict_mismatched_pairing_message">Un operando debe tener el mismo compañero tanto en la suma como en la multiplicación.</string>
+</resources>
