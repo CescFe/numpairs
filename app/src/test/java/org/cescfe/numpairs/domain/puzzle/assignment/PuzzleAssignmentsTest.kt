@@ -1,8 +1,5 @@
-package org.cescfe.numpairs.domain.puzzle
+package org.cescfe.numpairs.domain.puzzle.assignment
 
-import org.cescfe.numpairs.domain.puzzle.assignment.IndexedResolvedTileAssignment
-import org.cescfe.numpairs.domain.puzzle.assignment.ResolvedOperandAssignment
-import org.cescfe.numpairs.domain.puzzle.assignment.ResolvedTileAssignment
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.junit.Assert.assertThrows
 import org.junit.Test
