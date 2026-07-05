@@ -1,0 +1,102 @@
+<resources>
+    <!-- App and navigation -->
+    <string name="app_name">NumPairs</string>
+    <string name="back_button_content_description">Arrere</string>
+
+    <!-- Menu screen -->
+    <string name="menu_tutorial_button">Tutorial</string>
+    <string name="menu_four_pairs_button">Juga a 4 parelles</string>
+
+    <!-- Four pairs screen -->
+    <string name="four_pairs_screen_title">4 parelles</string>
+
+    <!-- Tutorial screen -->
+    <string name="tutorial_screen_title">Tutorial</string>
+    <string name="tutorial_step_indicator">Pas %1$d de %2$d</string>
+    <string name="tutorial_step_one_copy">L’objectiu principal és descobrir tots els elements desconeguts. Endevina els valors ocults per a completar una llista ascendent d’enters positius.</string>
+    <string name="tutorial_step_two_copy">Combina dos números de la sèrie per a formar una expressió matemàtica que done com a resultat el valor visible de la casella. Completa la casella ressaltada amb dos operands i un operador.</string>
+    <string name="tutorial_step_three_copy">Cada parella ha de formar una suma i un producte. Usa la mateixa parella per a completar la seua casella de producte.</string>
+    <string name="tutorial_step_four_copy">Acaba este puzle de pràctica.</string>
+    <string name="tutorial_solving_tips_step_one_copy">En dificultat baixa, cap número apareix dos vegades i la sèrie no inclou mai l’1, així que els resultats primers sempre són sumes. Completa el resultat primer com una casella de suma.</string>
+    <string name="tutorial_solving_tips_step_two_copy">Les caselles de producte només poden usar factors del seu resultat. Troba dos valors de la sèrie que multipliquen fins a obtindre el producte i després usa la mateixa parella per a completar la suma corresponent.</string>
+    <string name="tutorial_previous_step_button">Arrere</string>
+    <string name="tutorial_next_step_button">Següent</string>
+
+    <!-- Game screen: board and strip -->
+    <string name="board_content_description">Tauler</string>
+    <string name="strip_content_description">Sèrie</string>
+    <string name="strip_item_hidden_content_description">Element ocult de la sèrie</string>
+    <string name="strip_item_known_content_description">Element conegut de la sèrie, valor %1$s</string>
+    <string name="strip_item_player_entered_content_description">Element de la sèrie introduït pel jugador, valor %1$s</string>
+    <string name="tile_left_operand_hidden_content_description">Operand esquerre ocult</string>
+    <string name="tile_left_operand_content_description">Operand esquerre, valor %1$s</string>
+    <string name="tile_right_operand_hidden_content_description">Operand dret ocult</string>
+    <string name="tile_right_operand_content_description">Operand dret, valor %1$s</string>
+    <string name="tile_operator_hidden_content_description">Operador ocult</string>
+    <string name="tile_operator_content_description">Operador, %1$s</string>
+    <string name="strip_entry_valid_range_bounded">Rang vàlid: de %1$d a %2$d</string>
+    <string name="strip_entry_valid_range_unbounded">Rang vàlid: %1$d o més</string>
+    <string name="strip_entry_invalid_range_bounded">Número no vàlid. Rang vàlid: de %1$d a %2$d</string>
+    <string name="strip_entry_invalid_range_unbounded">Número no vàlid. Rang vàlid: %1$d o més</string>
+
+    <!-- Game screen: tile selection dialogs -->
+    <string name="tile_operand_dialog_title">Tria operand</string>
+    <string name="tile_operand_usage_addition_hint">Pista d’ús en suma</string>
+    <string name="tile_operand_usage_multiplication_hint">Pista d’ús en multiplicació</string>
+    <string name="tile_operand_usage_state_available">Disponible</string>
+    <string name="tile_operand_usage_state_used">Usat</string>
+    <string name="tile_operand_usage_state_rule_conflict">Conflicte de regla</string>
+    <string name="tile_operator_dialog_title">Tria operador</string>
+    <string name="tile_operator_option_addition">Suma (+)</string>
+    <string name="tile_operator_option_multiplication">Multiplicació (×)</string>
+    <string name="tile_state_incorrect">Casella incorrecta</string>
+    <string name="tile_state_mismatched_pairing">Casella amb parella no coincident</string>
+    <string name="tile_state_live_rule_conflict">Casella amb conflicte de regla</string>
+    <string name="tile_reset_content_description">Restablir casella</string>
+
+    <!-- Game screen: feedback and overlays -->
+    <string name="success_overlay_message">Puzle completat!</string>
+    <string name="success_overlay_badge_text">OK</string>
+    <string name="success_overlay_supporting_text">Totes les parelles coincidixen.</string>
+    <string name="success_overlay_new_puzzle_button">Nou puzle</string>
+    <string name="success_overlay_return_to_menu_button">Menú</string>
+    <string name="hint_action_content_description">Obrir pistes de pràctica</string>
+    <string name="rules_helper_action_content_description">Ajuda de regles</string>
+    <string name="rules_helper_title">Com es juga</string>
+    <string name="rules_helper_close_content_description">Tancar ajuda de regles</string>
+    <string name="rules_helper_play_tutorial_button">Jugar al tutorial</string>
+    <string name="rules_helper_objective_title">Objectiu</string>
+    <string name="rules_helper_objective_complete">Endevina tots els elements desconeguts.</string>
+    <string name="rules_helper_elements_title">Elements de la pantalla</string>
+    <string name="rules_helper_elements_strip">Sèrie: números disponibles per a resoldre el puzle.</string>
+    <string name="rules_helper_elements_grid">Graella: caselles amb un resultat visible i una expressió desconeguda.</string>
+    <string name="rules_helper_strip_title">Completa la sèrie</string>
+    <string name="rules_helper_strip_hidden">Endevina els valors ocults per a completar una llista ascendent d’enters positius.</string>
+    <string name="rules_helper_grid_title">Completa la graella</string>
+    <string name="rules_helper_grid_expression">Completa cada casella amb dos operands i un operador.</string>
+    <string name="rules_helper_grid_pair_usage">Emparella números de la sèrie perquè cada parella cree una suma i un producte que coincidisquen amb dos resultats de la graella.</string>
+
+    <!-- Game screen: solving tips -->
+    <string name="solving_tips_title">Consells de resolució</string>
+    <string name="solving_tips_close_content_description">Tancar consells de resolució</string>
+    <string name="solving_tips_practice_button">Practicar consells</string>
+    <string name="solving_tips_strip_title">Usa la sèrie</string>
+    <string name="solving_tips_strip_hidden_range">Els valors ocults de la sèrie han de continuar encaixant entre els seus veïns visibles.</string>
+    <string name="solving_tips_strip_highest_anchor">El valor més alt de la sèrie és una referència per a productes grans i sumes impossibles.</string>
+    <string name="solving_tips_products_title">Troba productes</string>
+    <string name="solving_tips_products_large_results">Els resultats grans solen ser caselles de producte.</string>
+    <string name="solving_tips_products_factors">Comprova’n els factors.</string>
+    <string name="solving_tips_sums_title">Troba sumes</string>
+    <string name="solving_tips_sums_prime_results">En dificultat baixa, els resultats primers sempre són caselles de suma.</string>
+    <string name="solving_tips_ui_clues_title">Usa les pistes visuals</string>
+    <string name="solving_tips_ui_clues_operand_usage">Les opcions d’operands mostren l’ús en sumes i multiplicacions.</string>
+
+    <!-- Game screen: validation messages -->
+    <string name="puzzle_outcome_invalid_title">Completat, però no resolt</string>
+    <string name="puzzle_outcome_invalid_tiles_message">Almenys una casella completada és incorrecta.</string>
+    <string name="puzzle_outcome_missing_identities_message">A algunes caselles completades els falten les identitats d’entrada de la sèrie.</string>
+    <string name="puzzle_outcome_mismatched_pairings_message">Les caselles de suma i multiplicació no usen les mateixes parelles d’entrades de la sèrie.</string>
+    <string name="puzzle_outcome_invalid_usage_message">Cada entrada de la sèrie ha d’usar-se exactament una vegada en suma i una vegada en multiplicació.</string>
+    <string name="local_rule_conflict_duplicate_operator_usage_message">Un operand només pot emparellar-se una vegada amb un operador determinat.</string>
+    <string name="local_rule_conflict_mismatched_pairing_message">Un operand ha de tindre el mateix company tant en la suma com en la multiplicació.</string>
+</resources>
