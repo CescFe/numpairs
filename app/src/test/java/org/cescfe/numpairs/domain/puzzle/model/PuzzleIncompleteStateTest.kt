@@ -1,12 +1,5 @@
-package org.cescfe.numpairs.domain.puzzle
+package org.cescfe.numpairs.domain.puzzle.model
 
-import org.cescfe.numpairs.domain.puzzle.model.Board
-import org.cescfe.numpairs.domain.puzzle.model.Expression
-import org.cescfe.numpairs.domain.puzzle.model.Operator
-import org.cescfe.numpairs.domain.puzzle.model.Puzzle
-import org.cescfe.numpairs.domain.puzzle.model.Strip
-import org.cescfe.numpairs.domain.puzzle.model.StripItem
-import org.cescfe.numpairs.domain.puzzle.model.Tile
 import org.cescfe.numpairs.domain.puzzle.support.additionTile
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
