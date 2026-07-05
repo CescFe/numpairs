@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.domain.puzzle
+package org.cescfe.numpairs.domain.puzzle.validation
 
 import org.cescfe.numpairs.domain.puzzle.assignment.OperandSelectionAvailability
 import org.cescfe.numpairs.domain.puzzle.assignment.operandSelectionChoicesFor
@@ -11,11 +11,6 @@ import org.cescfe.numpairs.domain.puzzle.model.Strip
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.support.hiddenTile
 import org.cescfe.numpairs.domain.puzzle.support.withTile
-import org.cescfe.numpairs.domain.puzzle.validation.LivePuzzleRuleConflict
-import org.cescfe.numpairs.domain.puzzle.validation.LiveStripEntryOperatorUsage
-import org.cescfe.numpairs.domain.puzzle.validation.liveRuleConflictsByStripEntryOperator
-import org.cescfe.numpairs.domain.puzzle.validation.liveRuleConflictsByTile
-import org.cescfe.numpairs.domain.puzzle.validation.liveRuleConflictsForCandidate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

@@ -1,11 +1,5 @@
-package org.cescfe.numpairs.domain.puzzle
+package org.cescfe.numpairs.domain.puzzle.model
 
-import org.cescfe.numpairs.domain.puzzle.model.Board
-import org.cescfe.numpairs.domain.puzzle.model.Operator
-import org.cescfe.numpairs.domain.puzzle.model.Puzzle
-import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
-import org.cescfe.numpairs.domain.puzzle.model.Strip
-import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.support.TileAssignment
 import org.cescfe.numpairs.domain.puzzle.support.assignedTile
 import org.cescfe.numpairs.domain.puzzle.support.defaultKnownStripValues

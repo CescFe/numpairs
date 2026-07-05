@@ -1,7 +1,5 @@
-package org.cescfe.numpairs.domain.puzzle
+package org.cescfe.numpairs.domain.puzzle.model
 
-import org.cescfe.numpairs.domain.puzzle.model.Operator
-import org.cescfe.numpairs.domain.puzzle.model.TileResolutionState
 import org.cescfe.numpairs.domain.puzzle.support.TileAssignment
 import org.cescfe.numpairs.domain.puzzle.support.knownPuzzleWithAssignments
 import org.cescfe.numpairs.domain.puzzle.validation.hasInvalidStripEntryUsage
