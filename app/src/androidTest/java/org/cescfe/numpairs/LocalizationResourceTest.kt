@@ -21,6 +21,15 @@ class LocalizationResourceTest {
     }
 
     @Test
+    fun catalanDeviceLanguageUsesValencianResources() {
+        val resources = resourcesFor(languageTag = "ca")
+
+        assertEquals("Juga a 4 parelles", resources.getString(R.string.menu_four_pairs_button))
+        assertEquals("Sèrie", resources.getString(R.string.strip_content_description))
+        assertEquals("Pas 1 de 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))
+    }
+
+    @Test
     fun unsupportedDeviceLanguageFallsBackToEnglishResources() {
         val resources = resourcesFor(languageTag = "de")
 
