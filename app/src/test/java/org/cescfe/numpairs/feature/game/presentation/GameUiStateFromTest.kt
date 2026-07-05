@@ -16,6 +16,8 @@ import org.cescfe.numpairs.domain.puzzle.support.hiddenTile
 import org.cescfe.numpairs.domain.puzzle.support.knownPuzzleWithAssignments
 import org.cescfe.numpairs.domain.puzzle.support.puzzleWithRepeatedSixes
 import org.cescfe.numpairs.domain.puzzle.support.withTile
+import org.cescfe.numpairs.feature.game.presentation.support.solvedPuzzleWithKnownStripAndAssignments
+import org.cescfe.numpairs.feature.game.presentation.support.solvedTileAssignments
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue

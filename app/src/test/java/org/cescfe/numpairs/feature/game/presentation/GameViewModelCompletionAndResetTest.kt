@@ -3,6 +3,10 @@ package org.cescfe.numpairs.feature.game.presentation
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
+import org.cescfe.numpairs.feature.game.presentation.support.enterStripValue
+import org.cescfe.numpairs.feature.game.presentation.support.incompletePuzzleOneOperatorSelectionAwayFromMismatchedCompletion
+import org.cescfe.numpairs.feature.game.presentation.support.incompletePuzzleOneOperatorSelectionAwayFromSolvedCompletion
+import org.cescfe.numpairs.feature.game.presentation.support.solvedPuzzleWithKnownStripAndAssignments
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
