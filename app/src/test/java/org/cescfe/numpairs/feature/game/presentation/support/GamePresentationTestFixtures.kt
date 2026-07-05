@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.feature.game.presentation
+package org.cescfe.numpairs.feature.game.presentation.support
 
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Expression
@@ -11,6 +11,7 @@ import org.cescfe.numpairs.domain.puzzle.support.TileAssignment
 import org.cescfe.numpairs.domain.puzzle.support.assignedTile
 import org.cescfe.numpairs.domain.puzzle.support.defaultKnownStripValues
 import org.cescfe.numpairs.domain.puzzle.support.knownPuzzleWithAssignments
+import org.cescfe.numpairs.feature.game.presentation.GameViewModel
 
 fun solvedTileAssignments(): List<TileAssignment> = listOf(
     TileAssignment(leftEntryId = 0, operator = Operator.ADDITION, rightEntryId = 1),

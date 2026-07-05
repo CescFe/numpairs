@@ -1,6 +1,7 @@
 package org.cescfe.numpairs.feature.game.presentation
 
 import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
+import org.cescfe.numpairs.feature.game.presentation.support.solvedPuzzleWithKnownStripAndAssignments
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
