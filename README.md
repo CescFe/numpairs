@@ -10,11 +10,11 @@ The project is being built iteratively, starting with a small playable prototype
 
 ### Implemented baseline: v3 - Guided Play & Rules Onboarding
 
-Historical snapshots: [prd-v0.md](./docs/product/prd/prd-v0.md), [prd-v1.md](./docs/product/prd/prd-v1.md), [prd-v2.md](./docs/product/prd/prd-v2.md), [prd-v3.md](./docs/product/prd/prd-v3.md)
+Historical snapshots: [prd-v0.md](./docs/product/prd/prd-v0.md), [prd-v1.md](./docs/product/prd/prd-v1.md), [prd-v2.md](./docs/product/prd/prd-v2.md), [prd-v3.md](./docs/product/prd/prd-v3.md), [prd-v4.md](./docs/product/prd/prd-v4.md)
 
 ### Active product milestone: v4 - Visual Design System & UI Refinement
 
-Canonical product reference: [prd-v4.md](./docs/product/prd/prd-v4.md)
+Canonical product reference: [prd-v5.md](./docs/product/prd/prd-v5.md)
 
 ---
 
@@ -83,9 +83,8 @@ Current responsibilities are split as follows:
 
 ## Documentation
 
-- Canonical PRD: [prd-v4.md](./docs/product/prd/prd-v4.md)
+- Canonical PRD: [prd-v5.md](./docs/product/prd/prd-v5.md)
 - Product Requirements Documents: `docs/product/prd/`
-- Product roadmap: [roadmap.md](./docs/product/roadmap.md)
 - Visual design system: [visual-design-system.md](./docs/product/visual-design-system.md)
 - Rules helper requirements: [rules-helper.md](./docs/product/rules-helper.md)
 - Puzzle generation: [puzzle-generation.md](./docs/product/puzzle-generation.md)
