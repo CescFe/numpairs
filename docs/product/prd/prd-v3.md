@@ -138,26 +138,6 @@ That baseline does not yet include:
 - Keep generated puzzle generation and validation unchanged unless a tutorial requirement explicitly needs a shared abstraction
 - Prepare room for future guided onboarding without building a full onboarding framework in v3
 
-### Testing
-
-- Add UI tests for opening and closing the rules helper
-- Verify the helper is available in generated `4 Pairs`
-- Verify the helper is not shown in Tutorial
-- Verify helper content does not alter game state
-- Add tests for Tutorial entry using authored tutorial puzzle scenarios
-- Preserve existing generated `4 Pairs` replay tests
-
-### Documentation
-
-- Document the rules helper content and intended behavior
-- Use `docs/product/rules-helper.md` as the v3 reference for helper availability, presentation, content scope, and non-goals
-- Document the first tutorial MVP and possible future tutorial iterations
-- Use `docs/product/tutorial.md` as the v3 reference for Tutorial MVP learning goals, authored content, guided steps, and future tutorial ideas
-- Update UI behavior documentation with top bar helper behavior
-- Keep `docs/game-rules.md` as the source of truth for actual rules
-- Keep `docs/product/puzzle-generation.md` as the source of truth for the v2 generated `4 Pairs` generation profile
-- Update README and supporting product docs to align with v3
-
 ---
 
 ## Out Of Scope
@@ -185,20 +165,3 @@ That baseline does not yet include:
 - Generated `4 Pairs` behavior from v2 remains unchanged
 - Tutorial and generated mode state remain isolated
 - Documentation reflects rules help and tutorial behavior
-
----
-
-## Documentation Alignment Notes
-
-These notes reflect the intended documentation alignment for the v3 milestone at the time it was active.
-
-- `README.md` should identify `prd-v3.md` as the canonical product reference while treating v2 as the implemented baseline
-- `docs/product/rules-helper.md` should define the rules helper requirements, top app bar entry point, dialog behavior, content scope, and open questions
-- `docs/product/tutorial.md` should define the Tutorial MVP learning goals, authored walkthrough steps, active learning model, generated-mode boundaries, and deferred future tutorial ideas
-- `docs/game-rules.md` should remain the source of truth for the underlying puzzle rules
-- `docs/ui-behavior.md` should remain the source of truth for in-puzzle interaction behavior and should be extended when the rules helper interaction is implemented
-- `docs/product/puzzle-generation.md` should remain focused on generated `4 Pairs` construction and validation, not tutorial authorship
-- `docs/product/ux-decisions.md` continues to capture layout and visual rationale that applies to the puzzle screen carried forward into v3
-- `docs/ubiquitous-language.md` should be updated when rules helper or tutorial terms become part of the shared product language
-
-The intentional scope boundary is that v3 improves comprehension around the existing v2 gameplay loop. It does not expand the generated content model, add new puzzle modes, or introduce answer assistance.
