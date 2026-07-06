@@ -34,7 +34,13 @@ The solved puzzle is the generator's source of truth. The initial puzzle is the 
 
 ---
 
-## `4 Pairs Low`
+## Difficulty Profiles
+
+Generated puzzle profiles define size, value constraints, result constraints, masking, and validation expectations for each generated mode.
+
+### `4 Pairs Low`
+
+Status: implemented.
 
 Shape:
 
@@ -42,45 +48,98 @@ Shape:
 - 8 strip entries
 - 8 board tiles
 
-Strip and result rules:
+Strip values:
 
-- Strip values are distinct integers in `2..20`.
-- Strip values are sorted ascending.
-- Multiplication results must not exceed `150`.
-- All 8 board results must be distinct.
+- range: `2..20`
+- uniqueness: values do not repeat
+- `1`: excluded
+
+Result constraints:
+
+- multiplication result limit: `150`
+- board result duplicates: not allowed
 
 Initial masking:
 
-- All tile expressions start hidden.
-- Exactly 3 strip entries are known.
-- Exactly 5 strip entries are hidden.
-- The highest strip value is always known.
-- Known entries should be distributed across the strip and belong to different solution pairs where possible.
-- No more than 2 hidden strip entries should appear consecutively when possible.
+- tile expressions: all hidden
+- known strip entries: 3
+- hidden strip entries: 5
+- required anchor: highest strip value is known
+- distribution: known entries should be spread across the strip and belong to different solution pairs where possible
+- hidden run limit: no more than 2 consecutive hidden strip entries when possible
+
+Generation expectations:
+
+- generation uses bounded attempts and rejects invalid candidates
+- board tiles may be shuffled independently from strip order
+
+Validation expectations:
+
+- the solved puzzle satisfies all `4 Pairs Low` value and result constraints
+- the initial puzzle follows the `4 Pairs Low` masking policy
+- the solved puzzle is accepted by shared NumPairs completion validation
+
+Solving-tip implications:
+
+- prime board results are strong addition-tile signals because `1` is excluded
+- factor checks remain approachable because values are small and products are capped
+- the visible highest strip value acts as a deduction anchor
+- player-facing low-difficulty tips are documented in `docs/product/solving-tips-low-difficulty.md`
 
 These constraints keep the first generated mode approachable, reduce arithmetic load, and avoid duplicate-result ambiguity.
 
 ---
 
-## `8 Pairs Medium`
+### `8 Pairs Medium`
 
-`8 Pairs Medium` is the planned v5 profile for the larger generated mode.
+Status: planned for v5; must be fully defined before generator implementation.
 
-The profile must be defined before generator implementation. Required decisions:
+Shape:
 
-- strip value range
-- whether values may repeat
-- whether `1` is allowed
-- multiplication result limit
-- duplicate board-result policy
-- known/hidden strip entry counts
-- anchor placement and distribution rules
-- maximum hidden-run expectations
-- deterministic generation expectations
-- bounded failure behavior
-- which low-difficulty solving tips still apply
+- 8 solution pairs
+- 16 strip entries
+- 16 board tiles
 
-Until those decisions are documented, implementation should not assume that `8 Pairs Medium` simply doubles `4 Pairs Low`.
+Strip values:
+
+- range: TBD
+- uniqueness/repetition policy: TBD
+- ordering: ascending
+- `1`: TBD
+
+Result constraints:
+
+- multiplication result limit: TBD
+- board result duplicate policy: TBD
+
+Initial masking:
+
+- tile expressions: all hidden
+- known strip entries: TBD
+- hidden strip entries: TBD
+- required anchors: TBD
+- distribution: TBD
+- hidden run limit: TBD
+
+Generation expectations:
+
+- deterministic generation support for tests: required
+- bounded attempts / failure handling: required
+- board tile shuffling: TBD
+
+Validation expectations:
+
+- the solved puzzle must satisfy all `8 Pairs Medium` value and result constraints
+- the initial puzzle must follow the `8 Pairs Medium` masking policy
+- the solved puzzle must be accepted by shared NumPairs completion validation
+- unique-solution guarantees remain out of scope unless explicitly added to this profile
+
+Solving-tip implications:
+
+- TBD: decide which `4 Pairs Low` tips still apply
+- TBD: decide whether `8 Pairs Medium` needs separate player-facing tips
+
+Until the TBD decisions are resolved, implementation should not assume that `8 Pairs Medium` simply doubles `4 Pairs Low`.
 
 ---
 
