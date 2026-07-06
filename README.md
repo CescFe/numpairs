@@ -10,11 +10,16 @@ Players complete hidden expressions on a board by using numbers from a strip. Th
 
 ### Implemented baseline: v4 - Visual Design System & UI Refinement
 
-Historical snapshots: [prd-v0.md](./docs/product/prd/prd-v0.md), [prd-v1.md](./docs/product/prd/prd-v1.md), [prd-v2.md](./docs/product/prd/prd-v2.md), [prd-v3.md](./docs/product/prd/prd-v3.md), [prd-v4.md](./docs/product/prd/prd-v4.md)
+Historical snapshots: 
+- 🔧 [PRD v0 Playable Prototype](./docs/product/prd/prd-v0.md)
+- ✨ [PRD v1 Product Polish & Technical Hardening](./docs/product/prd/prd-v1.md)
+- 🧩 [PRD v2 Puzzle Generation & Replay Loop](./docs/product/prd/prd-v2.md)
+- 🎓 [PRD v3 Guided Play & Rules Onboarding](./docs/product/prd/prd-v3.md)
+- 🎨 [PRD v4 Visual Design System & UI Refinement](./docs/product/prd/prd-v4.md)
 
 ### Active product milestone: v5 - Bigger Challenges with 8 Pairs
 
-Canonical product reference: [prd-v5.md](./docs/product/prd/prd-v5.md)
+🧠 [PRD v5 Bigger Challenges with 8 Pairs](./docs/product/prd/prd-v5.md)
 
 ---
 
@@ -75,7 +80,7 @@ Core responsibilities:
 - Rules helper requirements: [rules-helper.md](./docs/product/rules-helper.md)
 - Puzzle generation: [puzzle-generation.md](./docs/product/puzzle-generation.md)
 - UX decisions: `docs/product/ux-decisions.md`
-- Future in-game calculator proposal: [in-game-calculator.md](./docs/product/in-game-calculator.md)
+- Future in-game calculator proposal: [in-game-calculator.md](docs/backlog/in-game-calculator.md)
 - Architectural Decision Records: `docs/technical/adr/`
 - Game rules: `docs/game-rules.md`
 - Ubiquitous Language: `docs/ubiquitous-language.md`
