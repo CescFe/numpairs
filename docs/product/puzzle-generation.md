@@ -104,7 +104,6 @@ Strip values:
 
 - range: TBD
 - uniqueness/repetition policy: TBD
-- ordering: ascending
 - `1`: TBD
 
 Result constraints:
