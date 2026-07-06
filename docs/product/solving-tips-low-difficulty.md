@@ -3,27 +3,23 @@
 ## Document Status
 
 - Status: supporting product reference for Solving tips
-- Applies to: current low-difficulty generated `4 Pairs`
-- Related references:
-  - `docs/product/solving-tips.md`
-  - `docs/product/puzzle-generation.md`
-  - `docs/game-rules.md`
+- Applies to: generated `4 Pairs Low`
 
-This document records Solving tips that are strongly tied to the current low-difficulty generation model. These tips may need to be rewritten, hidden, or removed when additional difficulty levels are introduced.
+This document records Solving tips that depend on the generated `4 Pairs Low` profile. The profile configuration lives in `docs/product/puzzle-generation.md`.
 
 ---
 
 ## Low-Difficulty Assumptions
 
-Current low-difficulty generated `4 Pairs` puzzles have constraints that make some strategies especially useful:
+`4 Pairs Low` has constraints that make some strategies especially useful. The exact generation profile is documented in `docs/product/puzzle-generation.md`; the player-facing implications are:
 
-- strip values are in the range `2..20`
-- strip values do not repeat
-- strip values do not include `1`
-- multiplication results are capped
-- board results are distinct
+- `1` is excluded, so prime board results are strong addition-tile signals
+- strip values are distinct and small enough for factor checks to stay approachable
+- multiplication results are capped, so large results are usually product candidates
+- board results are distinct, reducing duplicate-result ambiguity
+- the highest strip value is visible, giving players an anchor for large products and impossible sums
 
-These constraints are product assumptions for the first generated mode, not universal NumPairs rules.
+These are profile-specific assumptions, not universal NumPairs rules.
 
 ---
 
@@ -33,7 +29,7 @@ The first `Practice tips` CTA should teach exactly two low-difficulty strategies
 
 ### 1. Identify A Sum Using A Prime Result
 
-In current low-difficulty puzzles, strip values do not include `1`.
+In `4 Pairs Low`, strip values do not include `1`.
 
 Because of that, a prime grid result cannot be produced by multiplying two strip values. A prime result should be treated as a strong signal that the tile is an addition tile.
 
@@ -41,7 +37,7 @@ Recommended step copy:
 
 > In low difficulty, the strip never includes 1, so prime results are always sums. Complete the prime result as an addition tile.
 
-This tip should be documented and implemented as low-difficulty-specific. It should be revisited if a future difficulty allows `1`, changes the strip value range, or introduces different operations.
+This tip is low-difficulty-specific. It should be revisited if a future profile allows `1`, changes the strip value range, or introduces different operations.
 
 ### 2. Narrow A Product By Checking Factors, Then Confirm The Matching Pair's Sum
 
@@ -53,7 +49,7 @@ Recommended step copy:
 
 > Product tiles can only use factors of their result. Find two strip values that multiply to the product, then use the same pair to complete its matching sum.
 
-This tip is strongly aligned with current low-difficulty puzzles because the value range is small and the multiplication cap keeps factor checks approachable.
+This tip is strongly aligned with `4 Pairs Low` because the value range is small and the multiplication cap keeps factor checks approachable.
 
 ---
 
@@ -63,13 +59,13 @@ The first low-difficulty Solving tips dialog should show concise strategy guidan
 
 ### Prime Results Are Addition Tiles
 
-Current low-difficulty strip values start at `2`, so there is no `1`.
+`4 Pairs Low` strip values start at `2`, so there is no `1`.
 
 If a visible grid result is prime, it cannot be made by multiplying two strip values. The player should treat it as an addition tile.
 
 ### Large Results Are Usually Product Tiles
 
-Current low-difficulty strip values are small, so addition results stay relatively small.
+`4 Pairs Low` strip values are small, so addition results stay relatively small.
 
 Very large grid results are strong product candidates. This should be written as a practical shortcut rather than as a formal numeric threshold.
 
@@ -87,7 +83,7 @@ Before solving grid tiles, the player can use the visible neighbors around a hid
 
 ### The Highest Visible Number Is A Strong Anchor
 
-The current low-difficulty generator always reveals the highest strip value.
+`4 Pairs Low` always reveals the highest strip value.
 
 The player can use this visible high value to test large product candidates and to rule out addition candidates that are too small.
 
@@ -133,7 +129,7 @@ Recommended sections and copy:
 
 ## Future Difficulty Guidance
 
-Any future difficulty level should explicitly decide whether these tips still apply.
+Any future difficulty profile should explicitly decide whether these tips still apply.
 
 Examples:
 
