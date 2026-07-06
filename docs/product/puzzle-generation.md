@@ -4,7 +4,7 @@
 
 - Status: product reference for generated puzzle construction
 - Current implemented profile: generated `4 Pairs Low`
-- Planned v5 profile: generated `8 Pairs Medium`, to be defined before implementation
+- Planned v5 profile: generated `8 Pairs Medium`
 - Related references:
   - `docs/product/prd/prd-v5.md`
   - `docs/game-rules.md`
@@ -92,7 +92,7 @@ These constraints keep the first generated mode approachable, reduce arithmetic 
 
 ### `8 Pairs Medium`
 
-Status: planned for v5; must be fully defined before generator implementation.
+Status: planned for v5; defined for implementation.
 
 Shape:
 
@@ -102,29 +102,36 @@ Shape:
 
 Strip values:
 
-- range: TBD
-- uniqueness/repetition policy: TBD
-- `1`: TBD
+- range: `1..99`
+- repetition policy: repeated values are allowed, but no value may appear more than twice
+- `1`: allowed
 
 Result constraints:
 
-- multiplication result limit: TBD
-- board result duplicate policy: TBD
+- multiplication result limit: `1000`
+- board result duplicates: not allowed
+- product anchor mix: 2 to 4 multiplication results should be greater than `198`
 
 Initial masking:
 
 - tile expressions: all hidden
-- known strip entries: TBD
-- hidden strip entries: TBD
-- required anchors: TBD
-- distribution: TBD
-- hidden run limit: TBD
+- known strip entries: 6 to 7
+- hidden strip entries: 9 to 10
+- required anchors: none
+- distribution: unrestricted
+- hidden run limit: no more than 4 consecutive hidden strip entries
+- high-value mask bias:
+  - last strip entry hidden target: 20%
+  - second-last strip entry hidden target: 40%
+  - third-last strip entry hidden target: 40%
 
 Generation expectations:
 
 - deterministic generation support for tests: required
 - bounded attempts / failure handling: required
-- board tile shuffling: TBD
+- board tile shuffling: enabled
+- prime-product decoy target: around 30% of generated puzzles should include one solution pair made of `1` and a prime number
+- probabilistic targets should guide generation variety without making the generator hang when other hard constraints cannot satisfy them
 
 Validation expectations:
 
@@ -135,10 +142,10 @@ Validation expectations:
 
 Solving-tip implications:
 
-- TBD: decide which `4 Pairs Low` tips still apply
-- TBD: decide whether `8 Pairs Medium` needs separate player-facing tips
-
-Until the TBD decisions are resolved, implementation should not assume that `8 Pairs Medium` simply doubles `4 Pairs Low`.
+- `4 Pairs Low` prime-result guidance does not generally apply because `1` is allowed
+- repeated values make strip-entry identity more important than numeric value alone
+- product factor checks still apply, but the larger value range and product limit make them less beginner-oriented
+- `8 Pairs Medium` may need separate player-facing tips if solving tips are exposed for this mode
 
 ---
 
