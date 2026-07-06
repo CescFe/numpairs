@@ -1,4 +1,4 @@
-# PRD - NumPairs (v0 Historical Snapshot)
+# PRD - NumPairs 🔧 v0 Playable Prototype
 
 > Historical note: this document captures the original playable prototype scope. It remains as a historical snapshot and was later superseded.
 

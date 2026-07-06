@@ -1,4 +1,4 @@
-# PRD - NumPairs (v1 Historical Snapshot)
+# PRD - NumPairs ✨ v1 Product Polish & Technical Hardening
 
 > Historical note: this document captures the original product polish & technical hardening scope. It remains as a historical snapshot and was later superseded.
 
@@ -107,17 +107,6 @@ These expectations align with the detailed interaction rules defined in `docs/ui
 - Refactor code for readability and maintainability
 - Review and tighten MVVM boundaries
 
-### Testing
-
-- Increase high-value coverage for product-critical behavior
-- Remove redundant or low-signal tests
-
-### Documentation
-
-- Add `docs/product/prd/prd-v1.md` as the canonical PRD
-- Keep `docs/product/prd/prd-v0.md` as the historical prototype snapshot
-- Align roadmap, README, and supporting product docs with the NumPairs naming and v1 scope
-
 ---
 
 ## Out Of Scope
@@ -141,15 +130,3 @@ These expectations align with the detailed interaction rules defined in `docs/ui
 - The app has a coherent first impression through branded iconography and splash behavior
 - The UI is more polished and accessible
 - Documentation reflects the real system and the intended v1 product baseline
-
----
-
-## Documentation Alignment Notes
-
-- `README.md` is the lightweight repository overview and should point to this PRD as the canonical product document
-- `docs/product/roadmap.md` defines milestone sequencing and should stay aligned with the v1 scope summarized here
-- `docs/ui-behavior.md` defines detailed interaction behavior for strip, tile, selector, and validation flows
-- `docs/product/ux-decisions.md` captures layout and visual rationale that supports this PRD
-- `docs/game-rules.md` and `docs/ubiquitous-language.md` define the rules and terminology used throughout the product docs
-
-No intentional product-level divergence is documented between this PRD and the supporting product documents listed above. If implementation changes create a mismatch, the corresponding product docs should be updated together.

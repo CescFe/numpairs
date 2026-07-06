@@ -1,4 +1,4 @@
-# PRD - NumPairs (v2)
+# PRD - NumPairs 🧩 v2 Puzzle Generation & Replay Loop
 
 > Historical note: this document captures the original puzzle generation & replay loop scope. It remains as a historical snapshot and was later superseded.
 
@@ -140,20 +140,6 @@ Generation starts from a solved puzzle, derives the initial player-facing puzzle
 - Keep the handcrafted tutorial puzzle as a separate content source from generated puzzles
 - Prepare extensible puzzle and mode models for future growth
 
-### Testing
-
-- Add unit tests for puzzle validation logic
-- Add unit tests that verify generated puzzles are internally valid
-- Validate the existing handcrafted seed puzzle through the solver service
-- Cover deterministic generation behavior where it materially improves confidence
-
-### Documentation
-
-- Add `docs/product/prd/prd-v2.md` as the canonical PRD
-- Keep `docs/product/prd/prd-v0.md` and `docs/product/prd/prd-v1.md` as historical snapshots
-- Document puzzle generation constraints and low-difficulty assumptions
-- Update roadmap, README, and supporting product docs to align with the v2 gameplay loop
-
 ---
 
 ## Out Of Scope
@@ -183,16 +169,3 @@ Generation starts from a solved puzzle, derives the initial player-facing puzzle
 - Puzzle generation architecture is isolated, testable, and extensible
 - The existing handcrafted seed puzzle passes validation through the solver service
 - Documentation reflects v2 as the active product reference while preserving v0 and v1 as historical snapshots
-
----
-
-## Documentation Alignment Notes
-
-- `README.md` should identify `prd-v2.md` as the canonical product reference while still distinguishing the implemented v1 baseline from the active v2 milestone
-- `docs/product/roadmap.md` should treat `v1 - Product Polish & Technical Hardening` as the current implemented baseline and `v2 - Puzzle Generation & Replay Loop` as the next milestone
-- `docs/product/puzzle-generation.md` should define the generated `4 Pairs` construction process, low-difficulty constraints, and initial-state masking rules
-- `docs/ui-behavior.md` should remain the source of truth for in-puzzle interaction behavior shared by tutorial and generated modes; it intentionally does not define splash, menu, or replay routing
-- `docs/product/ux-decisions.md` continues to capture layout and visual rationale that applies to the puzzle screen carried forward into v2
-- `docs/game-rules.md` and `docs/ubiquitous-language.md` remain the source of truth for the core rules and terminology used by both handcrafted and generated puzzles
-
-The only intentional scope difference is that `docs/ui-behavior.md` is narrower than this PRD: it specifies puzzle-screen interaction details, while this PRD covers the broader product loop, generation architecture, and navigation expectations introduced in v2.

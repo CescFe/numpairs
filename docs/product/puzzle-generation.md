@@ -2,117 +2,106 @@
 
 ## Document Status
 
-- Status: v2 product reference for generated puzzle content
-- Applies to: generated `4 Pairs` mode
+- Status: product reference for generated puzzle construction
+- Current implemented profile: generated `4 Pairs Low`
+- Planned v5 profile: generated `8 Pairs Medium`, to be defined before implementation
 - Related references:
-  - `docs/product/prd/prd-v2.md`
+  - `docs/product/prd/prd-v5.md`
   - `docs/game-rules.md`
   - `docs/ubiquitous-language.md`
 
-This document records the first generation model for NumPairs v2. It defines how low-difficulty generated puzzles are produced and how a fully solved puzzle is converted into the initial player-facing state.
+This document owns generated puzzle construction, difficulty profiles, solved-to-initial masking, validation expectations, deterministic generation, and failure bounds.
 
 ---
 
-## Purpose
+## Shared Generation Model
 
-The v2 generator should create replayable `4 Pairs` puzzles that are easy to understand, internally valid, and consistent with the existing game rules.
+Generated puzzles start from a fully solved puzzle and derive the initial player-facing puzzle from it.
 
-The generator should prioritize clarity over variety. Advanced balancing, progression, and guaranteed unique solutions remain out of scope for v2.
+Shared rules:
+
+- The strip contains an even number of stable strip entries.
+- Each solution pair contributes exactly two board tiles:
+  - one addition tile
+  - one multiplication tile
+- Pairing and validation use strip-entry identity, not only numeric value.
+- Strip values are displayed in ascending numeric order.
+- Board tile order may be shuffled independently from strip order.
+- Initial puzzles hide tile expressions while keeping tile results visible.
+- Generated puzzles must be validated before display.
+
+The solved puzzle is the generator's source of truth. The initial puzzle is the player-facing masked version.
 
 ---
 
-## 4 Pairs Mode
+## `4 Pairs Low`
 
-A generated `4 Pairs` puzzle has:
+Shape:
 
-- 8 strip entries
 - 4 solution pairs
+- 8 strip entries
 - 8 board tiles
-- one addition tile and one multiplication tile for each solution pair
 
-Each strip entry is a unique game element with a stable identity. Pairing and validation operate on strip entry identity, not only on numeric value.
+Strip and result rules:
 
-The strip is displayed in ascending numeric order. Board tile order may be shuffled independently from strip order.
+- Strip values are distinct integers in `2..20`.
+- Strip values are sorted ascending.
+- Multiplication results must not exceed `150`.
+- All 8 board results must be distinct.
 
----
+Initial masking:
 
-## Generation Flow
-
-Generation should start from a fully solved puzzle and then derive the initial puzzle shown to the player.
-
-1. Generate 8 distinct strip values in the inclusive range `2..20`.
-2. Sort the values in ascending order and assign stable strip entry identities.
-3. Create 4 disjoint unordered pairs from the 8 strip entries.
-4. Generate 2 solved tiles for each pair:
-   - one addition expression
-   - one multiplication expression
-5. Reject and resample puzzles that violate the low-difficulty constraints.
-6. Shuffle the 8 generated tiles for board presentation.
-7. Convert the solved puzzle into an initial puzzle by hiding all tile expressions and masking selected strip entries.
-8. Validate the initial puzzle before presenting it to the player.
-
-The solved puzzle is the generator's internal source of truth. The initial puzzle is the player-facing version derived from it.
-
----
-
-## Low-Difficulty Rules
-
-The first generated mode should use a narrow low-difficulty rule set:
-
-- Strip values are positive integers in the inclusive range `2..20`.
-- Strip values do not repeat.
-- Strip values are displayed in ascending order.
-- Multiplication results should not exceed `150`.
-- All 8 board results should be distinct.
-- Each solution pair contributes exactly one sum result and one product result.
-- Tile expressions start hidden: left operand, operator, and right operand are all hidden.
-- Grid results are visible from the start.
-
-These constraints are intentionally conservative. They reduce arithmetic load, avoid duplicate-result ambiguity, and keep the generated puzzles suitable for a first replayable mode.
-
----
-
-## Initial State Masking
-
-The initial player-facing puzzle should hide all tile expressions and hide 5 of the 8 strip entries.
-
-Exactly 3 strip entries should be known from the start:
-
+- All tile expressions start hidden.
+- Exactly 3 strip entries are known.
+- Exactly 5 strip entries are hidden.
 - The highest strip value is always known.
-- Known strip entries should be distributed across the sorted strip.
-- Known strip entries should belong to different solution pairs where possible.
-- The mask should avoid long hidden runs; for v2, no more than 2 hidden strip entries should appear consecutively when possible.
+- Known entries should be distributed across the strip and belong to different solution pairs where possible.
+- No more than 2 hidden strip entries should appear consecutively when possible.
 
-The distributed known entries act as anchors for deduction. They should make the puzzle approachable without revealing a complete pair outright as the default behavior.
+These constraints keep the first generated mode approachable, reduce arithmetic load, and avoid duplicate-result ambiguity.
+
+---
+
+## `8 Pairs Medium`
+
+`8 Pairs Medium` is the planned v5 profile for the larger generated mode.
+
+The profile must be defined before generator implementation. Required decisions:
+
+- strip value range
+- whether values may repeat
+- whether `1` is allowed
+- multiplication result limit
+- duplicate board-result policy
+- known/hidden strip entry counts
+- anchor placement and distribution rules
+- maximum hidden-run expectations
+- deterministic generation expectations
+- bounded failure behavior
+- which low-difficulty solving tips still apply
+
+Until those decisions are documented, implementation should not assume that `8 Pairs Medium` simply doubles `4 Pairs Low`.
 
 ---
 
 ## Validation Expectations
 
-Generated puzzles must be validated before presentation.
-
-Validation and solver behavior are internal generation safeguards. They are not player-facing v2 features and do not imply hints, solution reveal, or any UI for inspecting solver output.
-
 Validation should confirm that:
 
-- The strip has exactly 8 entries.
-- The board has exactly 8 tiles.
-- The strip is sorted and follows the selected low-difficulty value constraints.
-- The solved puzzle contains 4 valid solution pairs.
-- Each strip entry is used once in an addition expression and once in a multiplication expression.
-- Addition and multiplication tiles for a pair reference the same unordered strip entry pair.
-- The initial puzzle hides all tile expressions.
-- The initial puzzle exposes exactly 3 known strip entries and hides exactly 5 strip entries.
-- The generated puzzle satisfies the v2 low-difficulty rules.
+- strip entry count and board tile count match the selected profile
+- the solved puzzle satisfies the selected profile's value and result constraints
+- each strip entry is used once in addition and once in multiplication
+- addition and multiplication tiles for a pair reference the same unordered strip-entry pair
+- the initial puzzle hides all tile expressions
+- the initial puzzle follows the selected profile's strip masking policy
+- the generated puzzle satisfies shared NumPairs rules
 
-Guaranteed unique solutions are not required for v2. The solver may validate internal consistency and solveability, but uniqueness is explicitly out of scope. Generated puzzles should never be shown if they fail internal consistency validation.
+Guaranteed unique solutions are not required unless explicitly added to a future profile. Generated puzzles should never be shown if they fail internal consistency validation.
 
 ---
 
 ## Documentation Boundaries
 
-`docs/game-rules.md` remains the source of truth for core NumPairs rules shared by handcrafted and generated puzzles.
-
-`docs/product/prd/prd-v2.md` remains the historical product reference for the v2 generation milestone.
-
-This document is the v2 reference for generated puzzle construction, low-difficulty assumptions, and the solved-to-initial puzzle transformation.
+- `docs/game-rules.md` owns core NumPairs rules shared by handcrafted and generated puzzles.
+- `docs/product/prd/prd-v5.md` owns v5 product scope.
+- `docs/ubiquitous-language.md` owns shared terminology.

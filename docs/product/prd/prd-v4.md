@@ -1,31 +1,6 @@
-# PRD - NumPairs (v4)
+# PRD - NumPairs 🎨 v4 - Visual Design System & UI Refinement
 
-## Document Status
-
-- Status: canonical PRD for the `v4 - Visual Design System & UI Refinement` milestone
-- Supersedes: `docs/product/prd/prd-v3.md`
-- Feature baseline inherited from: `v3 - Guided Play & Rules Onboarding`
-- Current visual implementation direction: one fixed NumPairs premium theme, independent from Android dynamic color and system light/dark theme
-- Related references:
-  - `README.md`
-  - `docs/product/roadmap.md`
-  - `docs/product/visual-design-system.md`
-  - `docs/product/visual-direction.md`
-  - `docs/product/ux-decisions.md`
-  - `docs/ui-behavior.md`
-  - `docs/product/rules-helper.md`
-  - `docs/product/tutorial.md`
-  - `docs/product/puzzle-generation.md`
-  - `docs/game-rules.md`
-  - `docs/ubiquitous-language.md`
-
-This document defines the product baseline that v4 is intended to establish.
-
-`prd-v0.md`, `prd-v1.md`, `prd-v2.md`, and `prd-v3.md` remain in the repository as historical milestone snapshots. `prd-v4.md` is the canonical reference for the current NumPairs product direction, scope, and documentation alignment.
-
-Implementation alignment note: the v4 app theme is now implemented through `NumPairsTheme` as one fixed dark-leaning NumPairs color scheme. The app should not branch its primary UI presentation through Android dynamic color or system light/dark theme switching.
-
----
+> Historical note: this document captures the original visual design system & UI refinement scope. It remains as a historical snapshot and was later superseded.
 
 ## Product Summary
 
@@ -184,28 +159,6 @@ At the start of v4, that baseline did not yet include:
 - Add or update Compose previews for representative component states where they materially help visual review
 - Avoid a broad UI rewrite; refine the existing Compose structure incrementally
 
-### Testing And QA
-
-- Preserve existing unit and UI behavior tests
-- Add or update UI tests only where visual refactoring risks changing behavior or semantics
-- Verify the fixed default theme behavior
-- Verify small-screen readability for the menu, strip, board, selectors, and dialogs
-- Verify accessibility basics:
-  - minimum touch targets
-  - meaningful content descriptions
-  - state descriptions where relevant
-  - contrast between foreground, background, and state colors
-  - text remains usable with Android font scaling
-
-### Documentation
-
-- Add `docs/product/prd/prd-v4.md` as the canonical PRD
-- Add `docs/product/visual-design-system.md` as the v4 design-system and visual-decision reference
-- Keep `docs/product/visual-direction.md` as the historical v1 identity reference for logo and launcher direction
-- Update `docs/product/roadmap.md` to reflect v4 as the active milestone
-- Update `README.md` to point to the v4 PRD and visual design system reference
-- Update `docs/product/ux-decisions.md` and `docs/ui-behavior.md` only when v4 changes layout rationale or interaction-facing visual behavior
-
 ---
 
 ## Out Of Scope
@@ -241,19 +194,3 @@ At the start of v4, that baseline did not yet include:
 - Existing v3 functionality remains stable after UI refinement
 - The codebase has clearer shared visual defaults for future features to reuse
 - Documentation reflects v4 as the active product reference
-
----
-
-## Documentation Alignment Notes
-
-- `README.md` should identify `prd-v4.md` as the canonical product reference while treating v3 as the implemented baseline
-- `docs/product/roadmap.md` should treat `v3 - Guided Play & Rules Onboarding` as the completed baseline and `v4 - Visual Design System & UI Refinement` as the active milestone
-- `docs/product/visual-design-system.md` should define v4 visual principles, final theme decisions, reusable component roles, accessibility expectations, QA notes, and any remaining open design questions
-- `docs/product/visual-direction.md` should remain the source of truth for the v1 logo, launcher icon, and shape-first identity rationale
-- `docs/product/ux-decisions.md` should remain the place for layout rationale that applies to the puzzle screen
-- `docs/ui-behavior.md` should remain the source of truth for in-puzzle interaction behavior and should only change if v4 visual refinement changes user-facing behavior
-- `docs/product/rules-helper.md` and `docs/product/tutorial.md` should remain focused on content and behavior rather than broad visual system decisions
-- `docs/product/puzzle-generation.md` should remain focused on generated `4 Pairs` construction and validation
-- `docs/game-rules.md` and `docs/ubiquitous-language.md` should remain the source of truth for rules and terminology
-
-The intentional scope boundary is that v4 improves presentation, consistency, and design-system readiness around the existing product. It does not expand gameplay content, change rules, or introduce new assistance systems.

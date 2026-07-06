@@ -1,148 +1,92 @@
-# PRD - NumPairs (v5)
-
-## Document Status
-
-- Status: canonical PRD for the `v5 - Bigger Challenges with 8 Pairs` milestone
-- Supersedes: `docs/product/prd/prd-v4.md`
-- Feature baseline inherited from: `v4 - Visual Design System & UI Refinement`
-- Current gameplay expansion direction: support larger generated puzzle sizes through reusable game mode and puzzle size modeling
-- Related references:
-  - `README.md`
-  - `docs/product/roadmap.md`
-  - `docs/product/puzzle-generation.md`
-  - `docs/product/visual-design-system.md`
-  - `docs/product/visual-direction.md`
-  - `docs/product/ux-decisions.md`
-  - `docs/ui-behavior.md`
-  - `docs/product/rules-helper.md`
-  - `docs/product/tutorial.md`
-  - `docs/game-rules.md`
-  - `docs/ubiquitous-language.md`
-
-This document defines the product baseline that v5 is intended to establish.
-
-`prd-v0.md`, `prd-v1.md`, `prd-v2.md`, `prd-v3.md`, and `prd-v4.md` remain in the repository as historical milestone snapshots. `prd-v5.md` is the canonical reference for the current NumPairs product direction, scope, and documentation alignment.
-
-Implementation alignment note: v5 should add `8 Pairs` as a larger generated mode without changing the core NumPairs rules, the existing generated `4 Pairs` behavior, or the Tutorial learning flow.
-
----
+# PRD - NumPairs 🧠 v5 Bigger Challenges with 8 Pairs
 
 ## Product Summary
 
-NumPairs is a native Android arithmetic deduction puzzle.
+NumPairs is a native Android arithmetic deduction puzzle. Players complete hidden board expressions using numbers from a strip. Each strip pair produces one addition tile and one multiplication tile, and completion is validated through strip-entry identity, pair matching, and tile correctness.
 
-Players use numbers from a strip to complete hidden expressions on a board. Each pair of strip entries generates one addition result and one multiplication result, and the player must resolve the puzzle by deducing missing numbers, selecting operators, and matching pairings correctly.
-
-v2 established the replayable generated `4 Pairs` loop. v3 improved comprehension through rules help and guided tutorial work. v4 refined the visual system and app presentation. v5 expands the replayable generated experience by introducing `8 Pairs`, a larger puzzle size with 8 pairs, 16 board tiles, and 16 strip numbers.
-
-`8 Pairs` should use the same expression model, operator set, operand/result constraints, validation behavior, interaction model, tile states, and completion flow as generated `4 Pairs`.
+v5 adds `8 Pairs` as a larger generated mode with 8 pairs, 16 strip entries, and 16 board tiles. It should preserve the same core rules, expression model, operator set, validation behavior, interaction model, tile states, and completion flow as generated `4 Pairs`.
 
 ---
 
 ## Product Goal
 
-Add a larger generated puzzle mode that gives players a bigger challenge while keeping NumPairs' rules, interactions, validation behavior, and visual system coherent.
+Add a larger generated puzzle mode without adding new mechanics.
 
-The product goal is not to add new mechanics. The goal is to make puzzle size a reusable part of the product model so `4 Pairs`, `8 Pairs`, and future generated sizes can be supported without parallel implementations.
+The implementation should make puzzle size a reusable product concept so `4 Pairs`, `8 Pairs`, and future generated sizes can share generation, validation, game-screen, and navigation patterns instead of becoming parallel implementations.
 
 ---
 
 ## Problem Statement
 
-The current generated gameplay experience is centered on `4 Pairs`.
+Generated play currently assumes `4 Pairs`. That limits replayable depth and creates technical risk if larger modes are added by copying existing code.
 
-That mode proves the core replayable loop, but it gives players only one generated puzzle size. As the product grows, treating `4 Pairs` as a fixed special case creates several risks:
+v5 should address these risks:
 
-- generated-mode logic can become duplicated when larger puzzle sizes are added
-- board and strip assumptions can remain hard-coded to 8 tiles and 8 strip entries
-- validation and completion behavior can drift between modes if each mode is implemented separately
-- generation may become slower or less reliable as the puzzle size increases
-- a larger puzzle can become cramped on phone screens if layout decisions are not explicit
-- documentation can keep describing generated play as `4 Pairs` only even after more modes exist
-
-v5 should make the app:
-
-- capable of offering `8 Pairs` as a first-class generated mode
-- reusable enough to support future puzzle sizes without a major rewrite
-- careful to preserve existing `4 Pairs` and Tutorial behavior
-- clear about which rules are shared across modes and which details are size-specific
-- practical to use on supported phone screens despite the larger board and strip
+- hard-coded 8-entry strip and 8-tile board assumptions
+- duplicated generated-mode routing, provider, and session logic
+- validation or completion drift between generated modes
+- slower or unbounded generation for larger puzzles
+- cramped board and strip layout on phone screens
+- documentation that describes generated play as `4 Pairs` only
 
 ---
 
 ## Target Users
 
-- Returning players who understand `4 Pairs` and want a larger challenge
-- Casual puzzle players who expect the same controls and rules across generated modes
-- Mobile-first players who need the larger board and strip to remain readable and tappable
-- Contributors who need generated mode behavior to be modeled through reusable concepts rather than one-off mode code
-- Product maintainers who need documentation to distinguish shared rules from puzzle-size-specific decisions
+- Returning players who want a larger challenge after learning `4 Pairs`
+- Casual puzzle players who expect the same rules and controls across generated modes
+- Mobile-first players who need 16 tiles and 16 strip entries to remain readable
+- Contributors who need generated modes to be modeled through reusable concepts
 
 ---
 
 ## Current Baseline At Start Of v5
 
-The product entering v5 is the `v4 - Visual Design System & UI Refinement` baseline.
+The v4 baseline includes:
 
-That baseline includes:
+- `Splash -> Menu` startup
+- Tutorial and generated `4 Pairs` entry points
+- reusable Game route and screen behavior
+- generated low-difficulty `4 Pairs`
+- internal generation, validation, and solver services
+- completion replay and return-to-menu actions
+- isolated Tutorial and generated-mode state
+- rules helper and solving tips for generated `4 Pairs`
+- an 8-entry strip and 8-tile board for generated `4 Pairs`
+- direct strip editing, tile editing, validation feedback, and success feedback
+- fixed NumPairs visual theme and documented visual system
+- documented game rules, UI behavior, UX rationale, and terminology
 
-- a branded Android launch experience with splash support
-- a `Splash -> Menu` startup flow
-- mode selection between `Tutorial` and generated `4 Pairs`
-- a reusable game route and screen shared by gameplay modes
-- generated low-difficulty `4 Pairs` puzzles
-- internal generation, validation, and solver services for generated puzzles
-- generated puzzle replay from the completion flow
-- return-to-menu action from generated puzzle completion
-- isolated game state between Tutorial and generated modes
-- gameplay rules help available from generated `4 Pairs`
-- tutorial-oriented instructional content and authored learning flow
-- an 8-tile result board and an 8-entry number strip for generated `4 Pairs`
-- direct strip editing and tile editing through contextual UI
-- local incorrect-tile feedback and whole-puzzle completion feedback
-- a fixed NumPairs visual theme independent from Android dynamic color and system light/dark theme
-- documented visual design system decisions for colors, typography, spacing, shape, component states, and accessibility expectations
-- documented in-puzzle interaction behavior and layout rationale
-
-At the start of v5, that baseline does not yet include:
+The baseline does not yet include:
 
 - generated `8 Pairs`
 - a menu entry point for larger generated puzzles
-- 16-tile board rendering in generated play
-- a 16-entry strip in generated play
-- a reusable puzzle size model that fully separates mode configuration from `4 Pairs` implementation details
-- validation and generation coverage for larger generated puzzle sizes
-- documented layout decisions for larger generated boards and strips
-- updated documentation that presents generated play as supporting both `4 Pairs` and `8 Pairs`
+- 16-entry strip or 16-tile board rendering
+- a reusable puzzle-size model covering both generated modes
+- generation and validation coverage for larger puzzle sizes
+- documented layout decisions for larger boards and strips
 
 ---
 
 ## Product Principles
 
-- Expand generated content without changing the core rules
-- Treat puzzle size as product configuration, not as duplicated game logic
-- Preserve `4 Pairs` behavior unless a change is explicitly documented as shared architecture work
-- Keep Tutorial independent from generated-mode expansion
-- Validate generated puzzles before showing them to players
-- Bound generation work so the app does not hang when a larger puzzle cannot be generated
-- Make larger layouts usable through clear hierarchy, spacing, and scrolling decisions
-- Reuse the v4 visual system instead of creating a separate look for `8 Pairs`
-- Document shared rules and size-specific behavior before expanding further
+- Expand generated content without changing core rules
+- Treat puzzle size as configuration, not duplicated game logic
+- Preserve Tutorial and generated `4 Pairs` behavior
+- Validate generated puzzles before display
+- Keep generation bounded and deterministic where needed for tests
+- Reuse the v4 visual system for both generated modes
+- Document shared rules once and keep size-specific decisions in generation and UX docs
 
 ---
 
 ## Core UX Expectations
 
-- Players can choose `8 Pairs` from the Menu Screen
-- Players can still choose Tutorial and generated `4 Pairs` from the Menu Screen
-- Choosing `8 Pairs` starts a generated puzzle with 16 strip numbers and 16 board tiles
-- `8 Pairs` follows the same rules and interaction model as generated `4 Pairs`
-- Players can select strip numbers, assign hidden values, reset player-entered values, validate tile state, and complete the puzzle
-- Tile states remain understandable with a larger board
-- Strip values remain individually readable and selectable with 16 entries
-- Completion and validation feedback remain visible and understandable in the larger layout
-- The larger puzzle does not introduce scoring, progression, timers, persistence, or new assistance systems
-- Existing Tutorial and generated `4 Pairs` flows continue to work unchanged
+- Menu offers Tutorial, generated `4 Pairs`, and generated `8 Pairs`
+- `8 Pairs` starts a generated puzzle with 16 strip entries and 16 board tiles
+- Players use the same interactions as `4 Pairs`: edit strip entries, assign operands/operators, reset tiles, validate state, and complete the puzzle
+- Tile states, strip values, validation feedback, and completion feedback remain understandable in the larger layout
+- No scoring, timers, progression, persistence, or new assistance systems are introduced
 
 ---
 
@@ -151,168 +95,87 @@ At the start of v5, that baseline does not yet include:
 ### Game Mode And Puzzle Size Model
 
 - Add `8 Pairs` as a first-class generated game mode
-- Model `8 Pairs` consistently with the existing generated `4 Pairs` mode
-- Introduce or refine a reusable game mode / puzzle size abstraction that can describe:
-  - mode id
-  - display name
+- Introduce or refine shared mode/size configuration for:
+  - mode id and display name
   - pair count
+  - strip entry count
   - board tile count
-  - strip size
   - generated vs Tutorial/static behavior where relevant
-  - layout hints where needed by the UI
-- Migrate or align `4 Pairs` with the shared model without changing its behavior
-- Avoid duplicating domain logic that can be shared through the reusable mode / puzzle size abstraction
-- Ensure `8 Pairs` defines:
-  - 8 pairs
-  - 16 strip numbers
-  - 16 board tiles
-  - the same expression model used by `4 Pairs`
-  - the same operator set, operand/result constraints, validation rules, tile states, and completion rules used by `4 Pairs`
+  - UI layout hints where needed
+- Align generated `4 Pairs` with the shared model without behavior changes
 
 ### Puzzle Generation And Validation
 
-- Extend puzzle generation to support `8 Pairs`
-- Generate valid `8 Pairs` puzzles before showing them to the player
-- Define a valid generated puzzle as one that:
-  - satisfies the shared NumPairs expression rules
-  - has a consistent solved board and strip
-  - can be completed through the existing gameplay interaction model
-  - is accepted by the existing validation / solver approach
+- Extend generation to support `8 Pairs`
+- Define and implement an `8 Pairs` difficulty profile before generator work
+- Generate a solved puzzle first, derive the initial player-facing puzzle, then validate before display
 - Reuse existing validation and solver logic where possible
-- Preserve existing `4 Pairs` generation behavior
-- Add deterministic generation support where useful for tests
-- Ensure generation has bounded attempts or clear failure handling so the app does not hang if a puzzle cannot be generated
-- Keep unique-solution guarantees out of scope unless they are already provided by the current validation approach
-- Ensure generated `8 Pairs` puzzles can be completed end-to-end
+- Preserve generated `4 Pairs` behavior
+- Support deterministic generation for tests
+- Use bounded attempts or clear failure handling
+- Keep unique-solution guarantees out of scope unless already supported by the current validation approach
+
+A valid generated puzzle must:
+
+- satisfy shared NumPairs rules
+- have a consistent solved board and strip
+- be completable through the existing interaction model
+- be accepted by the current validation/solver approach
 
 ### Navigation And Menu
 
-- Add an `8 Pairs` entry point to the Menu Screen
-- Keep the existing Tutorial and generated `4 Pairs` entry points unchanged
-- Ensure the selected mode is correctly passed to the Game Screen
-- Make the new mode feel like a natural extension of the current menu structure
-- Ensure Tutorial may continue using its existing fixed puzzle/setup and is not forced into generated-mode behavior by the shared architecture
+- Add an `8 Pairs` menu entry
+- Pass the selected generated mode to the Game screen correctly
+- Keep Tutorial and generated `4 Pairs` entry points unchanged
+- Keep Tutorial independent from generated-mode architecture
 
-### Game Screen Representation
+### Game Screen And Layout
 
-- Render an `8 Pairs` board with 16 tiles
-- Render an `8 Pairs` strip with 16 numbers
-- Use an explicit layout strategy for the larger mode, such as a `4x4` board or another layout that remains readable on supported phone screens
-- Preserve existing interactions:
-  - selecting strip numbers
-  - assigning values to hidden operands/results
-  - resetting player-entered values
-  - validating tile state
-  - showing validation feedback
-  - completing the puzzle
-- Ensure all existing tile states remain understandable in the larger layout
-- Preserve existing generated `4 Pairs` Game Screen behavior
-
-### UI/UX Refinement
-
-- Refine the `8 Pairs` layout so it remains usable on small Android screens
-- Review board density, spacing, touch targets, scrolling behavior, and visual hierarchy
-- Ensure the 16-number strip remains readable, individually selectable, and practical to interact with
-- Avoid making the larger mode feel cramped or visually overwhelming
-- Ensure there is no clipped text, overlapping UI, or unusable touch target at common compact phone widths
-- Ensure completion and validation feedback remain visible and understandable with the larger layout
-- Reuse the existing visual design system introduced in v4
-- Avoid a full adaptive layout redesign beyond what is needed to make `8 Pairs` usable
-
-### Testing And QA
-
-- Add unit tests for the shared game mode / puzzle size configuration
-- Add unit tests for `8 Pairs` domain configuration
-- Add unit tests for `8 Pairs` puzzle generation
-- Add unit tests to verify generated `8 Pairs` puzzles are valid according to the current validation / solver approach
-- Add deterministic generation tests using fixed seeds where useful
-- Add tests to ensure `4 Pairs` behavior remains unchanged after introducing the shared abstraction
-- Add a generation sanity test to catch obvious performance or bounded-attempt regressions
-- Add UI tests or preview coverage for the new Menu Screen entry point
-- Add UI tests or preview coverage for the 16-tile Game Screen layout where valuable
-- Add coverage for the selected mode being passed correctly from Menu Screen to Game Screen
-
-### Documentation
-
-- Add `docs/product/prd/prd-v5.md` as the canonical PRD
-- Update `README.md` to identify `prd-v5.md` as the canonical product reference once v5 becomes the active milestone
-- Update `docs/product/roadmap.md` to reflect v5 as the active milestone and v4 as the completed baseline
-- Update `docs/product/puzzle-generation.md` to describe generated puzzle sizes instead of only generated `4 Pairs`
-- Update `docs/game-rules.md` if any wording assumes that generated play only has 4 pairs
-- Update `docs/ui-behavior.md` if the larger mode changes user-facing layout or interaction behavior
-- Update `docs/product/ux-decisions.md` with layout rationale for the larger board and strip
-- Update `docs/ubiquitous-language.md` when reusable game mode, puzzle size, or `8 Pairs` terminology becomes part of the shared language
-- Keep `docs/product/tutorial.md` focused on Tutorial behavior rather than generated-mode expansion
-- Keep `docs/product/rules-helper.md` focused on rules-help content and availability
-- Keep `docs/product/visual-design-system.md` as the source of truth for visual roles reused by both generated modes
+- Render 16 tiles and 16 strip entries for `8 Pairs`
+- Use a responsive board with 2-4 columns depending on width
+- Render the 16-entry strip in two rows of 8 entries by default
+- Preserve existing tile, strip, validation, and completion interactions
+- Avoid clipped text, overlapping UI, and unusable touch targets on compact phones
 
 ---
 
 ## Suggested Implementation Phases
 
-1. Introduce the shared game mode / puzzle size model.
-2. Migrate or align generated `4 Pairs` with the shared model without behavior changes.
-3. Extend generation and validation support for `8 Pairs`.
-4. Add deterministic generation coverage for tests.
-5. Add the `8 Pairs` Menu Screen entry point and navigation wiring.
-6. Refine the Game Screen layout for 16 tiles and 16 strip numbers.
-7. Add focused unit, UI, and preview coverage.
-8. Update PRD-adjacent documentation once implementation decisions become concrete.
+1. Define the `8 Pairs` difficulty profile in documentation.
+2. Introduce shared generated mode / puzzle-size configuration.
+3. Align generated `4 Pairs` with the shared model.
+4. Generalize generation and validation for larger puzzle sizes.
+5. Implement `8 Pairs` generation and provider wiring.
+6. Add menu/navigation support.
+7. Refine Game screen layout for 16 tiles and 16 strip entries.
+8. Add focused tests and update supporting docs.
 
 ---
 
 ## Out Of Scope
 
-- New gameplay rules
-- New operators
-- New scoring system
-- Persistence or save state
-- Daily puzzles
-- User progression
-- Online features
-- Difficulty expansion beyond the existing generation assumptions
-- Guaranteed unique puzzle solutions, unless already supported by the current validation approach
-- Adaptive hints
-- Solver-backed help
-- Puzzle-specific answer reveal
+- New gameplay rules or operators
+- Scoring, timers, progression, persistence, daily puzzles, online features
+- Difficulty expansion beyond the initial `8 Pairs` profile
+- Guaranteed unique solutions unless already supported by current validation
+- Adaptive hints, solver-backed help, or answer reveal
 - Advanced animations
 - Tablet-specific redesign
-- Full adaptive layout redesign beyond what is needed for `8 Pairs`
-- Changes to Tutorial content unless required by shared architecture
-- Changes to generated `4 Pairs` gameplay behavior
+- Full adaptive layout redesign beyond what `8 Pairs` needs
+- Tutorial content changes unless required by shared architecture
+- Generated `4 Pairs` gameplay changes
 
 ---
 
 ## Success Criteria
 
 - Users can choose `8 Pairs` from the Menu Screen
-- `8 Pairs` starts a generated puzzle with 16 strip numbers and 16 board tiles
-- `8 Pairs` follows the same core rules as generated `4 Pairs`
-- `8 Pairs` uses the same expression model, operator set, operand/result constraints, validation rules, tile states, and completion rules as generated `4 Pairs`
-- Generated `8 Pairs` puzzles are validated before being shown to the player
-- Generated `8 Pairs` puzzles can be completed end-to-end
-- Generation is deterministic where needed for tests
-- Generation failure is bounded and handled cleanly
+- `8 Pairs` starts a generated puzzle with 16 strip entries and 16 board tiles
+- `8 Pairs` follows the same core rules and interaction model as generated `4 Pairs`
+- Generated `8 Pairs` puzzles are validated before display and can be completed end-to-end
+- Generation is deterministic where needed for tests and bounded on failure
 - The larger board and strip remain readable and usable on supported phone screens
-- The 16-number strip remains practical to interact with
-- Existing Tutorial and generated `4 Pairs` flows continue working unchanged
-- Game mode handling is reusable enough to support future puzzle sizes without major rewrites
-- Tests cover the new mode and protect existing `4 Pairs` behavior
-- Documentation reflects `8 Pairs` as a supported generated game mode
-
----
-
-## Documentation Alignment Notes
-
-- `README.md` should identify `prd-v5.md` as the canonical product reference while treating v4 as the implemented baseline
-- `docs/product/roadmap.md` should treat `v4 - Visual Design System & UI Refinement` as the completed baseline and `v5 - Bigger Challenges with 8 Pairs` as the active milestone
-- `docs/product/puzzle-generation.md` should document both generated `4 Pairs` and generated `8 Pairs`, including shared construction rules, size-specific configuration, deterministic generation expectations, validation expectations, and bounded failure behavior
-- `docs/game-rules.md` should remain the source of truth for the underlying puzzle rules and should describe shared generated-mode rules without implying that generated puzzles always have 4 pairs
-- `docs/ui-behavior.md` should remain the source of truth for in-puzzle interaction behavior and should be extended only when the larger mode creates user-facing layout or interaction behavior worth documenting
-- `docs/product/ux-decisions.md` should capture layout rationale for the larger board, 16-entry strip, density, spacing, scrolling behavior, and compact-screen tradeoffs
-- `docs/ubiquitous-language.md` should define or refine shared terms such as generated mode, game mode, puzzle size, pair count, `4 Pairs`, and `8 Pairs`
-- `docs/product/visual-design-system.md` should remain the source of truth for shared visual roles and should only change if `8 Pairs` requires a reusable visual-system decision
-- `docs/product/tutorial.md` should continue to describe Tutorial content and should not become coupled to generated `8 Pairs`
-- `docs/product/rules-helper.md` should continue to describe rules-help content and availability; it should only change if help availability changes for generated modes
-
-The intentional scope boundary is that v5 expands generated puzzle size while preserving the core NumPairs rules and existing gameplay behavior. It does not add new mechanics, progression, scoring, persistence, online features, or a new assistance system.
+- Tutorial and generated `4 Pairs` flows continue working unchanged
+- Shared mode handling can support future puzzle sizes without major rewrites
+- Tests cover the new mode and protect existing behavior
+- Documentation reflects `8 Pairs` as a supported generated mode
