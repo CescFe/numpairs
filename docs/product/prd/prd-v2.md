@@ -152,7 +152,7 @@ Generation starts from a solved puzzle, derives the initial player-facing puzzle
 - Add `docs/product/prd/prd-v2.md` as the canonical PRD
 - Keep `docs/product/prd/prd-v0.md` and `docs/product/prd/prd-v1.md` as historical snapshots
 - Document puzzle generation constraints and low-difficulty assumptions
-- Update roadmap, README, and supporting product docs to align with the v2 gameplay loop
+- Update README and supporting product docs to align with the v2 gameplay loop
 
 ---
 
@@ -189,7 +189,6 @@ Generation starts from a solved puzzle, derives the initial player-facing puzzle
 ## Documentation Alignment Notes
 
 - `README.md` should identify `prd-v2.md` as the canonical product reference while still distinguishing the implemented v1 baseline from the active v2 milestone
-- `docs/product/roadmap.md` should treat `v1 - Product Polish & Technical Hardening` as the current implemented baseline and `v2 - Puzzle Generation & Replay Loop` as the next milestone
 - `docs/product/puzzle-generation.md` should define the generated `4 Pairs` construction process, low-difficulty constraints, and initial-state masking rules
 - `docs/ui-behavior.md` should remain the source of truth for in-puzzle interaction behavior shared by tutorial and generated modes; it intentionally does not define splash, menu, or replay routing
 - `docs/product/ux-decisions.md` continues to capture layout and visual rationale that applies to the puzzle screen carried forward into v2

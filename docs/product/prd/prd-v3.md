@@ -156,7 +156,7 @@ That baseline does not yet include:
 - Update UI behavior documentation with top bar helper behavior
 - Keep `docs/game-rules.md` as the source of truth for actual rules
 - Keep `docs/product/puzzle-generation.md` as the source of truth for the v2 generated `4 Pairs` generation profile
-- Update roadmap, README, and supporting product docs to align with v3
+- Update README and supporting product docs to align with v3
 
 ---
 
@@ -193,7 +193,6 @@ That baseline does not yet include:
 These notes reflect the intended documentation alignment for the v3 milestone at the time it was active.
 
 - `README.md` should identify `prd-v3.md` as the canonical product reference while treating v2 as the implemented baseline
-- `docs/product/roadmap.md` should treat `v2 - Puzzle Generation & Replay Loop` as the completed baseline and `v3 - Guided Play & Rules Onboarding` as the active milestone
 - `docs/product/rules-helper.md` should define the rules helper requirements, top app bar entry point, dialog behavior, content scope, and open questions
 - `docs/product/tutorial.md` should define the Tutorial MVP learning goals, authored walkthrough steps, active learning model, generated-mode boundaries, and deferred future tutorial ideas
 - `docs/game-rules.md` should remain the source of truth for the underlying puzzle rules

@@ -8,7 +8,6 @@
 - Current visual implementation direction: one fixed NumPairs premium theme, independent from Android dynamic color and system light/dark theme
 - Related references:
   - `README.md`
-  - `docs/product/roadmap.md`
   - `docs/product/visual-design-system.md`
   - `docs/product/visual-direction.md`
   - `docs/product/ux-decisions.md`
@@ -202,7 +201,6 @@ At the start of v4, that baseline did not yet include:
 - Add `docs/product/prd/prd-v4.md` as the canonical PRD
 - Add `docs/product/visual-design-system.md` as the v4 design-system and visual-decision reference
 - Keep `docs/product/visual-direction.md` as the historical v1 identity reference for logo and launcher direction
-- Update `docs/product/roadmap.md` to reflect v4 as the active milestone
 - Update `README.md` to point to the v4 PRD and visual design system reference
 - Update `docs/product/ux-decisions.md` and `docs/ui-behavior.md` only when v4 changes layout rationale or interaction-facing visual behavior
 
@@ -247,7 +245,6 @@ At the start of v4, that baseline did not yet include:
 ## Documentation Alignment Notes
 
 - `README.md` should identify `prd-v4.md` as the canonical product reference while treating v3 as the implemented baseline
-- `docs/product/roadmap.md` should treat `v3 - Guided Play & Rules Onboarding` as the completed baseline and `v4 - Visual Design System & UI Refinement` as the active milestone
 - `docs/product/visual-design-system.md` should define v4 visual principles, final theme decisions, reusable component roles, accessibility expectations, QA notes, and any remaining open design questions
 - `docs/product/visual-direction.md` should remain the source of truth for the v1 logo, launcher icon, and shape-first identity rationale
 - `docs/product/ux-decisions.md` should remain the place for layout rationale that applies to the puzzle screen

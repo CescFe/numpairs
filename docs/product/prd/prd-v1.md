@@ -116,7 +116,7 @@ These expectations align with the detailed interaction rules defined in `docs/ui
 
 - Add `docs/product/prd/prd-v1.md` as the canonical PRD
 - Keep `docs/product/prd/prd-v0.md` as the historical prototype snapshot
-- Align roadmap, README, and supporting product docs with the NumPairs naming and v1 scope
+- Align README and supporting product docs with the NumPairs naming and v1 scope
 
 ---
 
@@ -147,7 +147,6 @@ These expectations align with the detailed interaction rules defined in `docs/ui
 ## Documentation Alignment Notes
 
 - `README.md` is the lightweight repository overview and should point to this PRD as the canonical product document
-- `docs/product/roadmap.md` defines milestone sequencing and should stay aligned with the v1 scope summarized here
 - `docs/ui-behavior.md` defines detailed interaction behavior for strip, tile, selector, and validation flows
 - `docs/product/ux-decisions.md` captures layout and visual rationale that supports this PRD
 - `docs/game-rules.md` and `docs/ubiquitous-language.md` define the rules and terminology used throughout the product docs

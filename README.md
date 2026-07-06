@@ -1,18 +1,18 @@
 # NumPairs
 
-NumPairs is a native Android puzzle game inspired by arithmetic grid challenges.
+NumPairs is a native Android arithmetic deduction puzzle.
 
-The project is being built iteratively, starting with a small playable prototype and expanding later with stronger gameplay rules, better presentation, and more game modes.
+Players complete hidden expressions on a board by using numbers from a strip. The project is built iteratively through documented product milestones.
 
 ---
 
 ## Current Status
 
-### Implemented baseline: v3 - Guided Play & Rules Onboarding
+### Implemented baseline: v4 - Visual Design System & UI Refinement
 
 Historical snapshots: [prd-v0.md](./docs/product/prd/prd-v0.md), [prd-v1.md](./docs/product/prd/prd-v1.md), [prd-v2.md](./docs/product/prd/prd-v2.md), [prd-v3.md](./docs/product/prd/prd-v3.md), [prd-v4.md](./docs/product/prd/prd-v4.md)
 
-### Active product milestone: v4 - Visual Design System & UI Refinement
+### Active product milestone: v5 - Bigger Challenges with 8 Pairs
 
 Canonical product reference: [prd-v5.md](./docs/product/prd/prd-v5.md)
 
@@ -47,20 +47,10 @@ Current core concepts:
 ```text
 app/
 ├── src/main/java/org/cescfe/numpairs/
-│   ├── MainActivity.kt
-│   ├── data/puzzle/seed/
-│   ├── domain/fourpairs/
-│   ├── domain/puzzle/
-│   ├── feature/fourpairs/
-│   ├── feature/game/
-│   │   ├── GameRoute.kt
-│   │   ├── presentation/
-│   │   └── ui/
-│   │       └── components/
-│   ├── feature/menu/
+│   ├── domain/
+│   ├── feature/
+│   ├── data/
 │   └── ui/
-│       ├── navigation/
-│       └── theme/
 docs/
 ├── product/
 ├── technical/adr/
@@ -68,16 +58,12 @@ docs/
 └── ubiquitous-language.md
 ```
 
-Current responsibilities are split as follows:
+Core responsibilities:
 
-- `data/puzzle/seed`: handcrafted puzzle data currently used by Tutorial and ready to be replaced by authored tutorial content.
-- `domain/puzzle`: puzzle rules, validation, assignments, and core domain types.
-- `domain/fourpairs`: generated `4 Pairs` rules, generation, and validation-facing domain models.
-- `feature/fourpairs`: generated `4 Pairs` route and puzzle provider wiring.
-- `feature/game`: reusable Game feature entry point plus its `presentation` and `ui` subpackages.
-- `feature/game/ui/components`: Game-specific Compose building blocks such as tiles and chips.
-- `feature/menu`: menu entry point for selecting Tutorial or generated `4 Pairs`.
-- `ui/navigation` and `ui/theme`: app-level navigation wiring and shared theming.
+- `domain`: puzzle model, rules, validation, assignments, and generated puzzle logic.
+- `feature`: Menu, Tutorial, generated modes, and reusable Game screen behavior.
+- `data`: seed puzzle and persistence-backed preferences.
+- `ui`: app navigation, theme, and shared visual defaults.
 
 ---
 
