@@ -1,4 +1,4 @@
-# PRD - NumPairs (v2)
+# PRD - NumPairs 🧩 v2 Puzzle Generation & Replay Loop
 
 > Historical note: this document captures the original puzzle generation & replay loop scope. It remains as a historical snapshot and was later superseded.
 

@@ -1,4 +1,4 @@
-# PRD - NumPairs (v3)
+# PRD - NumPairs 🎓 v3 Guided Play & Rules Onboarding
 
 > Historical note: this document captures the original guided play % rules onboarding scope. It remains as a historical snapshot and was later superseded.
 

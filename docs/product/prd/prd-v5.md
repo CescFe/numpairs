@@ -1,25 +1,4 @@
-# PRD - NumPairs (v5)
-
-## Document Status
-
-- Status: canonical PRD for `v5 - Bigger Challenges with 8 Pairs`
-- Supersedes: `docs/product/prd/prd-v4.md`
-- Baseline inherited from: `v4 - Visual Design System & UI Refinement`
-- Product direction: support larger generated puzzle sizes through reusable mode and puzzle-size modeling
-- Related references:
-  - `README.md`
-  - `docs/product/puzzle-generation.md`
-  - `docs/product/visual-design-system.md`
-  - `docs/product/ux-decisions.md`
-  - `docs/ui-behavior.md`
-  - `docs/product/rules-helper.md`
-  - `docs/product/tutorial.md`
-  - `docs/game-rules.md`
-  - `docs/ubiquitous-language.md`
-
-`prd-v0.md` through `prd-v4.md` remain historical snapshots. `prd-v5.md` is the active product reference.
-
----
+# PRD - NumPairs 🧠 v5 Bigger Challenges with 8 Pairs
 
 ## Product Summary
 
@@ -158,24 +137,6 @@ A valid generated puzzle must:
 - Preserve existing tile, strip, validation, and completion interactions
 - Avoid clipped text, overlapping UI, and unusable touch targets on compact phones
 
-### Testing And QA
-
-- Cover shared puzzle-size configuration
-- Cover `8 Pairs` generation, determinism, validation, and failure bounds
-- Protect generated `4 Pairs` behavior after shared refactors
-- Cover menu entry, navigation, 16-entry strip rendering, 16-tile board rendering, and basic interactions
-- Add completion coverage with a controlled solvable `8 Pairs` puzzle
-
-### Documentation
-
-- Keep `docs/product/prd/prd-v5.md` as the active PRD
-- Update `docs/product/puzzle-generation.md` with generated puzzle sizes and difficulty profiles
-- Update `docs/game-rules.md` only if wording incorrectly assumes generated play always has 4 pairs
-- Update `docs/ui-behavior.md` only for user-facing layout or interaction changes
-- Update `docs/product/ux-decisions.md` with larger-board and larger-strip layout rationale
-- Update `docs/ubiquitous-language.md` with shared mode, puzzle-size, and `8 Pairs` terms
-- Keep Tutorial, rules helper, and visual-system docs focused on their existing source-of-truth roles
-
 ---
 
 ## Suggested Implementation Phases
@@ -218,18 +179,3 @@ A valid generated puzzle must:
 - Shared mode handling can support future puzzle sizes without major rewrites
 - Tests cover the new mode and protect existing behavior
 - Documentation reflects `8 Pairs` as a supported generated mode
-
----
-
-## Documentation Alignment Notes
-
-- `README.md` identifies `prd-v5.md` as the canonical product reference and v4 as the implemented baseline
-- `docs/product/puzzle-generation.md` owns generated construction rules, difficulty profiles, masking, validation, determinism, and failure bounds
-- `docs/game-rules.md` owns core rules shared by handcrafted and generated puzzles
-- `docs/ui-behavior.md` owns in-puzzle interaction behavior
-- `docs/product/ux-decisions.md` owns layout rationale for larger boards and strips
-- `docs/ubiquitous-language.md` owns shared terminology
-- `docs/product/visual-design-system.md` owns reusable visual roles
-- `docs/product/tutorial.md` and `docs/product/rules-helper.md` stay focused on onboarding and help behavior
-
-The scope boundary is that v5 expands generated puzzle size while preserving core rules and existing gameplay behavior.

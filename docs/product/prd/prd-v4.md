@@ -1,4 +1,4 @@
-# PRD - NumPairs (v4)
+# PRD - NumPairs 🎨 v4 - Visual Design System & UI Refinement
 
 > Historical note: this document captures the original visual design system & UI refinement scope. It remains as a historical snapshot and was later superseded.
 

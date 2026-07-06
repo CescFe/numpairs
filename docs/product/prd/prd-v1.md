@@ -1,4 +1,4 @@
-# PRD - NumPairs (v1 Historical Snapshot)
+# PRD - NumPairs ✨ v1 Product Polish & Technical Hardening
 
 > Historical note: this document captures the original product polish & technical hardening scope. It remains as a historical snapshot and was later superseded.
 
