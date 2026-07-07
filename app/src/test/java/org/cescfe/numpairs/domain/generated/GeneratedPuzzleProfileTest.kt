@@ -139,7 +139,7 @@ class GeneratedPuzzleProfileTest {
     fun strip_value_policy_rejects_invalid_construction() {
         assertThrows(IllegalArgumentException::class.java) {
             StripValuePolicy(
-                valueRange = 2..1,
+                valueRange = emptyIntRange(start = 2, endInclusive = 1),
                 maxOccurrencesPerValue = 1
             )
         }
@@ -214,7 +214,7 @@ class GeneratedPuzzleProfileTest {
         assertThrows(IllegalArgumentException::class.java) {
             InitialStripMaskPolicy(
                 stripEntryCount = 8,
-                knownEntryCountRange = 3..2,
+                knownEntryCountRange = emptyIntRange(start = 3, endInclusive = 2),
                 requiredAnchors = emptySet(),
                 distributionPolicy = StripKnownEntryDistributionPolicy.UNRESTRICTED,
                 maxConsecutiveHiddenEntries = 2
@@ -246,3 +246,5 @@ class GeneratedPuzzleProfileTest {
         }
     }
 }
+
+private fun emptyIntRange(start: Int, endInclusive: Int): IntRange = start..endInclusive
