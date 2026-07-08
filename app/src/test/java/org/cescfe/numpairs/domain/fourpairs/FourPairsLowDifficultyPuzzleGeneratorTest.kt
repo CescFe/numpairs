@@ -1,5 +1,7 @@
 package org.cescfe.numpairs.domain.fourpairs
 
+import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerator
+import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfiles
 import org.cescfe.numpairs.domain.puzzle.assignment.IndexedResolvedTileAssignment
 import org.cescfe.numpairs.domain.puzzle.assignment.resolvedTileAssignments
 import org.cescfe.numpairs.domain.puzzle.model.Expression
@@ -22,6 +24,18 @@ class FourPairsLowDifficultyPuzzleGeneratorTest {
         assertEquals(generatedPuzzle.initialPuzzle, initialPuzzle)
         assertEquals(PuzzleCompletionState.INCOMPLETE, initialPuzzle.completionState)
         assertInitialPuzzleMask(initialPuzzle)
+    }
+
+    @Test
+    fun generate_with_solution_delegates_to_the_reusable_four_pairs_low_profile_generator() {
+        val generatedPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 2026).generateWithSolution()
+        val reusableGeneratedPuzzle = GeneratedPairsPuzzleGenerator(
+            profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW,
+            seed = 2026
+        ).generateWithSolution()
+
+        assertEquals(reusableGeneratedPuzzle.initialPuzzle, generatedPuzzle.initialPuzzle)
+        assertEquals(reusableGeneratedPuzzle.solvedPuzzle, generatedPuzzle.solvedPuzzle)
     }
 
     @Test
