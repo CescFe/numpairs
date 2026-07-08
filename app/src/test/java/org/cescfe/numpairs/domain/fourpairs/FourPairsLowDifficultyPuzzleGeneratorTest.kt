@@ -15,6 +15,7 @@ import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+@Suppress("DEPRECATION")
 class FourPairsLowDifficultyPuzzleGeneratorTest {
     @Test
     fun generate_returns_the_initial_player_facing_puzzle() {

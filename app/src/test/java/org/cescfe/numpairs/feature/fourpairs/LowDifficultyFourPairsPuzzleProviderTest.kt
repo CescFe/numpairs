@@ -1,7 +1,8 @@
 package org.cescfe.numpairs.feature.fourpairs
 
-import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyPuzzleGenerator
 import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyRules
+import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerator
+import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfiles
 import org.cescfe.numpairs.domain.puzzle.model.Expression
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
@@ -27,7 +28,10 @@ class LowDifficultyFourPairsPuzzleProviderTest {
 
     @Test
     fun seeded_provider_uses_the_domain_generator_initial_puzzle() {
-        val expectedPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 1234).generate()
+        val expectedPuzzle = GeneratedPairsPuzzleGenerator(
+            profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW,
+            seed = 1234
+        ).generate()
 
         val providedPuzzle = LowDifficultyFourPairsPuzzleProvider(seed = 1234).nextPuzzle()
 
