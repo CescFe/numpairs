@@ -1,6 +1,8 @@
-package org.cescfe.numpairs.domain.generated
+package org.cescfe.numpairs.domain.generated.internal
 
 import kotlin.random.Random
+import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
+import org.cescfe.numpairs.domain.generated.StripKnownEntryDistributionPolicy
 
 internal class GeneratedStripMaskSelector(private val profile: GeneratedPuzzleProfile, private val random: Random) {
     fun selectKnownEntryIds(pairs: List<GeneratedPairsEntryPair>): Set<Int>? {

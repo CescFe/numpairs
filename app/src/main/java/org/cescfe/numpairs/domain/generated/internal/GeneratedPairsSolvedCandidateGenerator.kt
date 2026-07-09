@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.domain.generated
+package org.cescfe.numpairs.domain.generated.internal
 
 internal class GeneratedPairsSolvedCandidateGenerator(private val valuePairSelector: GeneratedPairsValuePairSelector) {
     fun generate(generationTargets: GeneratedPairsGenerationTargets): GeneratedPairsSolvedCandidate? {

@@ -1,6 +1,9 @@
-package org.cescfe.numpairs.domain.generated
+package org.cescfe.numpairs.domain.generated.internal
 
 import kotlin.random.Random
+import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
+import org.cescfe.numpairs.domain.generated.ResultConstraints
+import org.cescfe.numpairs.domain.generated.StripValuePolicy
 
 internal class GeneratedPairsValuePairSelector(
     private val profile: GeneratedPuzzleProfile,

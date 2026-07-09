@@ -1,4 +1,7 @@
-package org.cescfe.numpairs.domain.generated
+package org.cescfe.numpairs.domain.generated.internal
+
+import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
+import org.cescfe.numpairs.domain.generated.RequiredKnownStripAnchor
 
 internal const val GENERATED_PAIRS_PROBABILITY_PERCENT_UPPER_BOUND = 100
 

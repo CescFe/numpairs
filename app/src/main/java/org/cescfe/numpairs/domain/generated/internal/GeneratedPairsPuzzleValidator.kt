@@ -1,5 +1,8 @@
-package org.cescfe.numpairs.domain.generated
+package org.cescfe.numpairs.domain.generated.internal
 
+import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzle
+import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
+import org.cescfe.numpairs.domain.generated.StripKnownEntryDistributionPolicy
 import org.cescfe.numpairs.domain.puzzle.model.Expression
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle

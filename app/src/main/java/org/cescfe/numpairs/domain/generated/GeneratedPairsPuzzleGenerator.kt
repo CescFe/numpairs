@@ -1,6 +1,12 @@
 package org.cescfe.numpairs.domain.generated
 
 import kotlin.random.Random
+import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsGenerationTargetSelector
+import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsPuzzleAssembler
+import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsPuzzleValidator
+import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSolvedCandidateGenerator
+import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsValuePairSelector
+import org.cescfe.numpairs.domain.generated.internal.GeneratedStripMaskSelector
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
 class GeneratedPairsPuzzleGenerator(

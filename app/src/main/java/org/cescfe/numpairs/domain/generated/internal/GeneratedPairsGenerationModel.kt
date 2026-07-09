@@ -1,4 +1,6 @@
-package org.cescfe.numpairs.domain.generated
+package org.cescfe.numpairs.domain.generated.internal
+
+import org.cescfe.numpairs.domain.generated.ProductAnchorMix
 
 internal data class GeneratedPairsStripEntry(val id: Int, val value: Int)
 

@@ -1,6 +1,7 @@
-package org.cescfe.numpairs.domain.generated
+package org.cescfe.numpairs.domain.generated.internal
 
 import kotlin.random.Random
+import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
 import org.cescfe.numpairs.domain.puzzle.assignment.ResolvedOperandAssignment
 import org.cescfe.numpairs.domain.puzzle.construction.resolvedTile
 import org.cescfe.numpairs.domain.puzzle.construction.withHiddenExpression
