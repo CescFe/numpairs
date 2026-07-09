@@ -38,13 +38,14 @@ class GeneratedPairsPuzzleGenerator(
     fun generate(): Puzzle = generateWithSolution().initialPuzzle
 
     fun generateWithSolution(): GeneratedPairsPuzzle {
+        val generationTargets = selectGenerationTargets()
+
         repeat(maxAttempts) {
-            val entries = generateSolvedEntries() ?: return@repeat
-            val pairs = generatePairs(entries = entries) ?: return@repeat
-            val knownEntryIds = selectKnownEntryIds(pairs = pairs) ?: return@repeat
+            val solvedCandidate = generateSolvedCandidate(generationTargets = generationTargets) ?: return@repeat
+            val knownEntryIds = selectKnownEntryIds(pairs = solvedCandidate.pairs) ?: return@repeat
             val solvedPuzzle = buildSolvedPuzzle(
-                entries = entries,
-                pairs = pairs
+                entries = solvedCandidate.entries,
+                pairs = solvedCandidate.pairs
             )
             val generatedPuzzle = GeneratedPairsPuzzle(
                 initialPuzzle = buildInitialPuzzle(
@@ -54,7 +55,7 @@ class GeneratedPairsPuzzleGenerator(
                 solvedPuzzle = solvedPuzzle
             )
 
-            if (generatedPuzzle.isValidGeneratedPuzzle(pairs = pairs)) {
+            if (generatedPuzzle.isValidGeneratedPuzzle(pairs = solvedCandidate.pairs)) {
                 return generatedPuzzle
             }
         }
@@ -64,67 +65,105 @@ class GeneratedPairsPuzzleGenerator(
         )
     }
 
-    private fun generateSolvedEntries(): List<GeneratedPairsStripEntry>? {
-        val values = profile.stripValuePolicy.valueRange
-            .flatMap { value ->
-                List(profile.stripValuePolicy.maxOccurrencesPerValue) { value }
-            }
-            .shuffled(random)
-            .take(profile.size.stripEntryCount)
-            .sorted()
+    private fun selectGenerationTargets(): GeneratedPairsGenerationTargets {
+        val primeProductDecoyTarget = profile.generationPolicy.primeProductDecoyTarget
+        val primeProductDecoyPairTargetCount = if (primeProductDecoyTarget == null) {
+            0
+        } else if (
+            primeProductDecoyTarget.pairPattern == PrimeProductDecoyPairPattern.ONE_AND_PRIME &&
+            random.nextInt(PROBABILITY_PERCENT_UPPER_BOUND) < primeProductDecoyTarget.targetPuzzlePercent.value
+        ) {
+            primeProductDecoyTarget.targetPairCount
+        } else {
+            0
+        }
 
-        return values
-            .takeIf { selectedValues -> selectedValues.size == profile.size.stripEntryCount }
-            ?.mapIndexed { index, value ->
+        return GeneratedPairsGenerationTargets(
+            primeProductDecoyPairTargetCount = primeProductDecoyPairTargetCount
+        )
+    }
+
+    private fun generateSolvedCandidate(
+        generationTargets: GeneratedPairsGenerationTargets
+    ): GeneratedPairsSolvedCandidate? {
+        val selectedValuePairs = chooseValuePairs(
+            candidatePairs = candidateValuePairsForProfile().shuffled(random),
+            selectedPairs = emptyList(),
+            valueOccurrences = emptyMap(),
+            usedResults = emptySet(),
+            productAnchorCount = 0,
+            primeProductDecoyCount = 0,
+            generationTargets = generationTargets
+        ) ?: return null
+        val entries = selectedValuePairs
+            .flatMap { pair -> listOf(pair.firstValue, pair.secondValue) }
+            .sorted()
+            .mapIndexed { index, value ->
                 GeneratedPairsStripEntry(
                     id = index,
                     value = value
                 )
             }
+
+        return GeneratedPairsSolvedCandidate(
+            entries = entries,
+            pairs = selectedValuePairs.toEntryPairs(entries = entries)
+        )
     }
 
-    private fun generatePairs(entries: List<GeneratedPairsStripEntry>): List<GeneratedPairsEntryPair>? = choosePairs(
-        remainingEntries = entries,
-        selectedPairs = emptyList(),
-        usedResults = emptySet(),
-        productAnchorCount = 0
-    )
-
-    private fun choosePairs(
-        remainingEntries: List<GeneratedPairsStripEntry>,
-        selectedPairs: List<GeneratedPairsEntryPair>,
+    private fun chooseValuePairs(
+        candidatePairs: List<GeneratedPairsValuePair>,
+        selectedPairs: List<GeneratedPairsValuePair>,
+        valueOccurrences: Map<Int, Int>,
         usedResults: Set<Int>,
-        productAnchorCount: Int
-    ): List<GeneratedPairsEntryPair>? {
+        productAnchorCount: Int,
+        primeProductDecoyCount: Int,
+        generationTargets: GeneratedPairsGenerationTargets
+    ): List<GeneratedPairsValuePair>? {
         if (!canStillSatisfyProductAnchorMix(
                 productAnchorCount = productAnchorCount,
-                remainingPairSlots = remainingEntries.size / 2
+                remainingPairSlots = profile.size.pairCount - selectedPairs.size
             )
         ) {
             return null
         }
 
-        if (remainingEntries.isEmpty()) {
+        if (selectedPairs.size == profile.size.pairCount) {
             return selectedPairs.takeIf { pairs ->
-                pairs.size == profile.size.pairCount && pairs.hasExpectedProductAnchorMix()
+                pairs.hasExpectedValuePairProductAnchorMix()
             }
         }
 
-        return candidatePairsFor(entries = remainingEntries).firstNotNullOfOrNull { candidatePair ->
+        val orderedCandidatePairs = if (generationTargets.shouldPreferPrimeProductDecoy(primeProductDecoyCount)) {
+            candidatePairs.sortedByDescending { pair ->
+                if (pair.isPrimeProductDecoy()) 1 else 0
+            }
+        } else {
+            candidatePairs
+        }
+
+        return orderedCandidatePairs.firstNotNullOfOrNull { candidatePair ->
             if (
                 !candidatePair.canBeAddedTo(
+                    valueOccurrences = valueOccurrences,
                     usedResults = usedResults,
-                    resultConstraints = profile.resultConstraints
+                    resultConstraints = profile.resultConstraints,
+                    stripValuePolicy = profile.stripValuePolicy
                 )
             ) {
                 return@firstNotNullOfOrNull null
             }
 
-            choosePairs(
-                remainingEntries = remainingEntries.without(candidatePair),
+            chooseValuePairs(
+                candidatePairs = candidatePairs,
                 selectedPairs = selectedPairs + candidatePair,
+                valueOccurrences = valueOccurrences.with(candidatePair),
                 usedResults = usedResults + candidatePair.resultValues,
-                productAnchorCount = productAnchorCount + candidatePair.productAnchorIncrement()
+                productAnchorCount = productAnchorCount + candidatePair.productAnchorIncrement(
+                    productAnchorMix = profile.resultConstraints.productAnchorMix
+                ),
+                primeProductDecoyCount = primeProductDecoyCount + candidatePair.primeProductDecoyIncrement(),
+                generationTargets = generationTargets
             )
         }
     }
@@ -136,6 +175,15 @@ class GeneratedPairsPuzzleGenerator(
             productAnchorCount + remainingPairSlots >= productAnchorMix.countRange.first
     }
 
+    private fun List<GeneratedPairsValuePair>.hasExpectedValuePairProductAnchorMix(): Boolean {
+        val productAnchorMix = profile.resultConstraints.productAnchorMix ?: return true
+        val productAnchorCount = count { pair ->
+            pair.product > productAnchorMix.productResultGreaterThan
+        }
+
+        return productAnchorCount in productAnchorMix.countRange
+    }
+
     private fun List<GeneratedPairsEntryPair>.hasExpectedProductAnchorMix(): Boolean {
         val productAnchorMix = profile.resultConstraints.productAnchorMix ?: return true
         val productAnchorCount = count { pair ->
@@ -145,24 +193,30 @@ class GeneratedPairsPuzzleGenerator(
         return productAnchorCount in productAnchorMix.countRange
     }
 
-    private fun GeneratedPairsEntryPair.productAnchorIncrement(): Int {
-        val productAnchorMix = profile.resultConstraints.productAnchorMix ?: return 0
-
-        return if (product > productAnchorMix.productResultGreaterThan) 1 else 0
-    }
-
-    private fun candidatePairsFor(entries: List<GeneratedPairsStripEntry>): List<GeneratedPairsEntryPair> {
-        val firstEntry = entries.first()
-
-        return entries
-            .drop(1)
-            .shuffled(random)
-            .map { secondEntry ->
-                GeneratedPairsEntryPair(
-                    firstEntry = firstEntry,
-                    secondEntry = secondEntry
+    private fun candidateValuePairsForProfile(): List<GeneratedPairsValuePair> = buildList {
+        profile.stripValuePolicy.valueRange.forEach { firstValue ->
+            (firstValue..profile.stripValuePolicy.valueRange.last).forEach { secondValue ->
+                val candidatePair = GeneratedPairsValuePair(
+                    firstValue = firstValue,
+                    secondValue = secondValue
                 )
+
+                if (
+                    candidatePair.requiredOccurrencesByValue()
+                        .all { (_, occurrenceCount) ->
+                            occurrenceCount <= profile.stripValuePolicy.maxOccurrencesPerValue
+                        } &&
+                    candidatePair.canBeAddedTo(
+                        valueOccurrences = emptyMap(),
+                        usedResults = emptySet(),
+                        resultConstraints = profile.resultConstraints,
+                        stripValuePolicy = profile.stripValuePolicy
+                    )
+                ) {
+                    add(candidatePair)
+                }
             }
+        }
     }
 
     private fun buildSolvedPuzzle(
@@ -401,36 +455,99 @@ data class GeneratedPairsPuzzle(val initialPuzzle: Puzzle, val solvedPuzzle: Puz
 
 private data class GeneratedPairsStripEntry(val id: Int, val value: Int)
 
+private data class GeneratedPairsSolvedCandidate(
+    val entries: List<GeneratedPairsStripEntry>,
+    val pairs: List<GeneratedPairsEntryPair>
+)
+
+private data class GeneratedPairsGenerationTargets(val primeProductDecoyPairTargetCount: Int) {
+    fun shouldPreferPrimeProductDecoy(currentPrimeProductDecoyCount: Int): Boolean =
+        currentPrimeProductDecoyCount < primeProductDecoyPairTargetCount
+}
+
+private data class GeneratedPairsValuePair(val firstValue: Int, val secondValue: Int) {
+    val sum: Int = firstValue + secondValue
+    val product: Int = firstValue * secondValue
+    val resultValues: Set<Int> = setOf(sum, product)
+
+    fun requiredOccurrencesByValue(): Map<Int, Int> = listOf(firstValue, secondValue)
+        .groupingBy { value -> value }
+        .eachCount()
+
+    fun productAnchorIncrement(productAnchorMix: ProductAnchorMix?): Int =
+        if (productAnchorMix != null && product > productAnchorMix.productResultGreaterThan) 1 else 0
+
+    fun primeProductDecoyIncrement(): Int = if (isPrimeProductDecoy()) 1 else 0
+
+    fun isPrimeProductDecoy(): Boolean = firstValue == 1 && secondValue.isPrime() ||
+        secondValue == 1 && firstValue.isPrime()
+}
+
 private data class GeneratedPairsEntryPair(
     val firstEntry: GeneratedPairsStripEntry,
     val secondEntry: GeneratedPairsStripEntry
 ) {
-    val sum: Int = firstEntry.value + secondEntry.value
     val product: Int = firstEntry.value * secondEntry.value
-    val resultValues: Set<Int> = setOf(sum, product)
     val entryIds: Set<Int> = setOf(firstEntry.id, secondEntry.id)
     val key: GeneratedPairsEntryPairKey = GeneratedPairsEntryPairKey(
         firstEntryId = minOf(firstEntry.id, secondEntry.id),
         secondEntryId = maxOf(firstEntry.id, secondEntry.id)
     )
-
-    fun contains(entry: GeneratedPairsStripEntry): Boolean = entry.id == firstEntry.id || entry.id == secondEntry.id
 }
 
-private fun GeneratedPairsEntryPair.canBeAddedTo(usedResults: Set<Int>, resultConstraints: ResultConstraints): Boolean {
+private fun GeneratedPairsValuePair.canBeAddedTo(
+    valueOccurrences: Map<Int, Int>,
+    usedResults: Set<Int>,
+    resultConstraints: ResultConstraints,
+    stripValuePolicy: StripValuePolicy
+): Boolean {
     if (product > resultConstraints.maxMultiplicationResult) {
         return false
     }
 
-    return resultConstraints.allowsDuplicateBoardResults ||
-        resultValues.size == 2 &&
-        resultValues.none { result -> result in usedResults }
+    if (!resultConstraints.allowsDuplicateBoardResults &&
+        (resultValues.size != 2 || resultValues.any { result -> result in usedResults })
+    ) {
+        return false
+    }
+
+    return requiredOccurrencesByValue().all { (value, newOccurrenceCount) ->
+        valueOccurrences.getOrDefault(value, 0) + newOccurrenceCount <= stripValuePolicy.maxOccurrencesPerValue
+    }
 }
 
-private fun List<GeneratedPairsStripEntry>.without(pair: GeneratedPairsEntryPair): List<GeneratedPairsStripEntry> =
-    filterNot { entry ->
-        pair.contains(entry)
+private fun Map<Int, Int>.with(pair: GeneratedPairsValuePair): Map<Int, Int> {
+    val updatedOccurrences = toMutableMap()
+
+    pair.requiredOccurrencesByValue().forEach { (value, occurrenceCount) ->
+        updatedOccurrences[value] = updatedOccurrences.getOrDefault(value, 0) + occurrenceCount
     }
+
+    return updatedOccurrences
+}
+
+private fun List<GeneratedPairsValuePair>.toEntryPairs(
+    entries: List<GeneratedPairsStripEntry>
+): List<GeneratedPairsEntryPair> {
+    val unusedEntriesByValue = entries
+        .groupBy(GeneratedPairsStripEntry::value)
+        .mapValues { (_, entriesForValue) -> entriesForValue.toMutableList() }
+
+    return map { pair ->
+        GeneratedPairsEntryPair(
+            firstEntry = unusedEntriesByValue.takeEntry(value = pair.firstValue),
+            secondEntry = unusedEntriesByValue.takeEntry(value = pair.secondValue)
+        )
+    }
+}
+
+private fun Map<Int, MutableList<GeneratedPairsStripEntry>>.takeEntry(value: Int): GeneratedPairsStripEntry {
+    val entries = requireNotNull(get(value)) {
+        "Generated value pair references a missing strip value."
+    }
+
+    return entries.removeAt(0)
+}
 
 private data class GeneratedPairsEntryPairKey(val firstEntryId: Int, val secondEntryId: Int)
 
@@ -472,4 +589,18 @@ private fun List<Int>.combinations(size: Int): List<Set<Int>> {
     }
 
     return combinations
+}
+
+private fun Int.isPrime(): Boolean {
+    if (this < 2) {
+        return false
+    }
+
+    for (candidateDivisor in 2..this / 2) {
+        if (this % candidateDivisor == 0) {
+            return false
+        }
+    }
+
+    return true
 }
