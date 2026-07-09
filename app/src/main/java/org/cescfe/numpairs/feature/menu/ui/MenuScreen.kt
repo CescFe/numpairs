@@ -71,15 +71,12 @@ fun MenuScreen(
                     ) {
                         MenuButtonText(text = stringResource(R.string.menu_four_pairs_button))
                     }
-                    Button(
+                    NumPairsComponents.PrimaryCtaButton(
                         onClick = onEightPairsSelected,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(NumPairsComponents.ButtonHeight)
-                            .testTag(MenuScreenTestTags.EIGHT_PAIRS_BUTTON),
-                        shape = NumPairsComponents.MediumShape,
-                        colors = NumPairsComponents.secondaryButtonColors(),
-                        border = NumPairsComponents.secondaryButtonBorder()
+                            .testTag(MenuScreenTestTags.EIGHT_PAIRS_BUTTON)
                     ) {
                         MenuButtonText(text = stringResource(R.string.menu_eight_pairs_button))
                     }
