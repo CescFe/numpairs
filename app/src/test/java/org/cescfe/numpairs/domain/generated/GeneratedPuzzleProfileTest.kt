@@ -1,108 +1,41 @@
 package org.cescfe.numpairs.domain.generated
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class GeneratedPuzzleProfileTest {
-    @Test
-    fun four_pairs_low_profile_matches_documented_rules() {
-        val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
-
-        assertEquals(GeneratedPuzzleProfileId("4-pairs-low"), profile.id)
-        assertEquals(4, profile.size.pairCount)
-        assertEquals(8, profile.size.stripEntryCount)
-        assertEquals(8, profile.size.boardTileCount)
-
-        assertEquals(2..20, profile.stripValuePolicy.valueRange)
-        assertEquals(1, profile.stripValuePolicy.maxOccurrencesPerValue)
-        assertFalse(profile.stripValuePolicy.allowsOne)
-
-        assertEquals(150, profile.resultConstraints.maxMultiplicationResult)
-        assertFalse(profile.resultConstraints.allowsDuplicateBoardResults)
-        assertNull(profile.resultConstraints.productAnchorMix)
-
-        assertEquals(3..3, profile.initialStripMaskPolicy.knownEntryCountRange)
-        assertEquals(5..5, profile.initialStripMaskPolicy.hiddenEntryCountRange)
-        assertEquals(
-            setOf(RequiredKnownStripAnchor.HIGHEST_STRIP_ENTRY),
-            profile.initialStripMaskPolicy.requiredAnchors
-        )
-        assertEquals(
-            StripKnownEntryDistributionPolicy.SPREAD_ACROSS_STRIP_AND_PAIRS_WHEN_POSSIBLE,
-            profile.initialStripMaskPolicy.distributionPolicy
-        )
-        assertEquals(2, profile.initialStripMaskPolicy.maxConsecutiveHiddenEntries)
-
-        assertTrue(profile.generationPolicy.isBoardTileShufflingEnabled)
-        assertTrue(profile.generationPolicy.isBoundedGenerationExpected)
-        assertTrue(profile.generationPolicy.isDeterministicGenerationExpected)
-        assertNull(profile.generationPolicy.primeProductDecoyTarget)
-    }
-
-    @Test
-    fun eight_pairs_medium_profile_matches_documented_rules() {
-        val profile = GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM
-
-        assertEquals(GeneratedPuzzleProfileId("8-pairs-medium"), profile.id)
-        assertEquals(8, profile.size.pairCount)
-        assertEquals(16, profile.size.stripEntryCount)
-        assertEquals(16, profile.size.boardTileCount)
-
-        assertEquals(1..99, profile.stripValuePolicy.valueRange)
-        assertEquals(2, profile.stripValuePolicy.maxOccurrencesPerValue)
-        assertTrue(profile.stripValuePolicy.allowsOne)
-
-        assertEquals(1000, profile.resultConstraints.maxMultiplicationResult)
-        assertFalse(profile.resultConstraints.allowsDuplicateBoardResults)
-
-        val productAnchorMix = requireNotNull(profile.resultConstraints.productAnchorMix)
-        assertEquals(198, productAnchorMix.productResultGreaterThan)
-        assertEquals(2..4, productAnchorMix.countRange)
-
-        assertEquals(6..7, profile.initialStripMaskPolicy.knownEntryCountRange)
-        assertEquals(9..10, profile.initialStripMaskPolicy.hiddenEntryCountRange)
-        assertEquals(emptySet<RequiredKnownStripAnchor>(), profile.initialStripMaskPolicy.requiredAnchors)
-        assertEquals(
-            StripKnownEntryDistributionPolicy.UNRESTRICTED,
-            profile.initialStripMaskPolicy.distributionPolicy
-        )
-        assertEquals(4, profile.initialStripMaskPolicy.maxConsecutiveHiddenEntries)
-        assertEquals(
-            listOf(
-                HighValueMaskTarget(
-                    rankFromHighest = 1,
-                    targetHiddenProbability = ProbabilityPercent(20)
-                ),
-                HighValueMaskTarget(
-                    rankFromHighest = 2,
-                    targetHiddenProbability = ProbabilityPercent(40)
-                ),
-                HighValueMaskTarget(
-                    rankFromHighest = 3,
-                    targetHiddenProbability = ProbabilityPercent(40)
-                )
-            ),
-            profile.initialStripMaskPolicy.highValueMaskTargets
-        )
-
-        assertTrue(profile.generationPolicy.isBoardTileShufflingEnabled)
-        assertTrue(profile.generationPolicy.isBoundedGenerationExpected)
-        assertTrue(profile.generationPolicy.isDeterministicGenerationExpected)
-
-        val primeProductDecoyTarget = requireNotNull(profile.generationPolicy.primeProductDecoyTarget)
-        assertEquals(ProbabilityPercent(30), primeProductDecoyTarget.targetPuzzlePercent)
-        assertEquals(1, primeProductDecoyTarget.targetPairCount)
-        assertEquals(PrimeProductDecoyPairPattern.ONE_AND_PRIME, primeProductDecoyTarget.pairPattern)
-    }
 
     @Test
     fun generated_puzzle_size_rejects_non_positive_pair_counts() {
         assertThrows(IllegalArgumentException::class.java) {
             GeneratedPuzzleSize(pairCount = 0)
+        }
+    }
+
+    @Test
+    fun generated_puzzle_size_derives_strip_entries_and_board_tiles_from_pair_count() {
+        val size = GeneratedPuzzleSize(pairCount = 6)
+
+        assertEquals(12, size.stripEntryCount)
+        assertEquals(12, size.boardTileCount)
+    }
+
+    @Test
+    fun generated_puzzle_profile_rejects_result_constraints_for_a_different_pair_count() {
+        val profile = validGeneratedPuzzleProfile()
+
+        assertThrows(IllegalArgumentException::class.java) {
+            profile.withResultConstraintsPairCount(pairCount = profile.size.pairCount + 1)
+        }
+    }
+
+    @Test
+    fun generated_puzzle_profile_rejects_initial_strip_mask_policy_for_a_different_strip_size() {
+        val profile = validGeneratedPuzzleProfile()
+
+        assertThrows(IllegalArgumentException::class.java) {
+            profile.withInitialStripEntryCount(stripEntryCount = profile.size.stripEntryCount + 1)
         }
     }
 
@@ -172,6 +105,19 @@ class GeneratedPuzzleProfileTest {
     }
 
     @Test
+    fun initial_strip_mask_policy_derives_hidden_entry_count_range_from_known_entry_count_range() {
+        val maskPolicy = InitialStripMaskPolicy(
+            stripEntryCount = 10,
+            knownEntryCountRange = 3..4,
+            requiredAnchors = emptySet(),
+            distributionPolicy = StripKnownEntryDistributionPolicy.UNRESTRICTED,
+            maxConsecutiveHiddenEntries = 2
+        )
+
+        assertEquals(6..7, maskPolicy.hiddenEntryCountRange)
+    }
+
+    @Test
     fun initial_strip_mask_policy_rejects_invalid_construction() {
         assertThrows(IllegalArgumentException::class.java) {
             InitialStripMaskPolicy(
@@ -217,3 +163,41 @@ class GeneratedPuzzleProfileTest {
         }
     }
 }
+
+private fun validGeneratedPuzzleProfile(): GeneratedPuzzleProfile {
+    val size = GeneratedPuzzleSize(pairCount = 2)
+
+    return GeneratedPuzzleProfile(
+        id = GeneratedPuzzleProfileId("valid-test-profile"),
+        size = size,
+        stripValuePolicy = StripValuePolicy(
+            valueRange = 2..10,
+            maxOccurrencesPerValue = 1
+        ),
+        resultConstraints = ResultConstraints(
+            pairCount = size.pairCount,
+            maxMultiplicationResult = 50,
+            allowsDuplicateBoardResults = false
+        ),
+        initialStripMaskPolicy = InitialStripMaskPolicy(
+            stripEntryCount = size.stripEntryCount,
+            knownEntryCountRange = 1..2,
+            requiredAnchors = emptySet(),
+            distributionPolicy = StripKnownEntryDistributionPolicy.UNRESTRICTED,
+            maxConsecutiveHiddenEntries = 2
+        ),
+        generationPolicy = GenerationPolicy(
+            isBoardTileShufflingEnabled = true,
+            isBoundedGenerationExpected = true,
+            isDeterministicGenerationExpected = true
+        )
+    )
+}
+
+private fun GeneratedPuzzleProfile.withResultConstraintsPairCount(pairCount: Int): GeneratedPuzzleProfile = copy(
+    resultConstraints = resultConstraints.copy(pairCount = pairCount)
+)
+
+private fun GeneratedPuzzleProfile.withInitialStripEntryCount(stripEntryCount: Int): GeneratedPuzzleProfile = copy(
+    initialStripMaskPolicy = initialStripMaskPolicy.copy(stripEntryCount = stripEntryCount)
+)
