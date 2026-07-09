@@ -6,6 +6,7 @@
     <!-- Menu screen -->
     <string name="menu_tutorial_button">Tutorial</string>
     <string name="menu_four_pairs_button">Jugar 4 pares</string>
+    <string name="menu_eight_pairs_button">Jugar 8 pares</string>
 
     <!-- Four pairs screen -->
     <string name="four_pairs_screen_title">4 pares</string>

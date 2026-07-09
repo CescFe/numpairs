@@ -15,8 +15,8 @@ import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
-import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyPuzzleGenerator
-import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyRules
+import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerator
+import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfiles
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
@@ -35,11 +35,13 @@ class FourPairsCompletionActionsTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
+    private val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
+
     @Test
     fun newPuzzleActionGeneratesFreshPuzzleAndClearsPreviousGameState() {
-        val firstSolvedPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 2026).generateWithSolution().solvedPuzzle
+        val firstSolvedPuzzle = fourPairsGenerator(seed = 2026).generateWithSolution().solvedPuzzle
         val firstPuzzle = firstSolvedPuzzle.withHiddenOperatorAt(tileIndex = 0)
-        val secondPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 42).generate()
+        val secondPuzzle = fourPairsGenerator(seed = 42).generate()
         assertNotEquals(firstPuzzle.board.tiles[0].result, secondPuzzle.board.tiles[0].result)
         val puzzleProvider = QueueFourPairsPuzzleProvider(firstPuzzle, secondPuzzle)
 
@@ -76,7 +78,7 @@ class FourPairsCompletionActionsTest {
 
     @Test
     fun returnToMenuActionNavigatesBackToMenuAfterCompletion() {
-        val solvedPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 81).generateWithSolution().solvedPuzzle
+        val solvedPuzzle = fourPairsGenerator(seed = 81).generateWithSolution().solvedPuzzle
         val initialPuzzle = solvedPuzzle.withHiddenOperatorAt(tileIndex = 0)
         val puzzleProvider = QueueFourPairsPuzzleProvider(initialPuzzle)
 
@@ -100,7 +102,7 @@ class FourPairsCompletionActionsTest {
 
     @Test
     fun rulesHelperOpensAndDismissesInFourPairsWithoutRegeneratingPuzzle() {
-        val initialPuzzle = FourPairsLowDifficultyPuzzleGenerator(seed = 1234).generate()
+        val initialPuzzle = fourPairsGenerator(seed = 1234).generate()
         val puzzleProvider = QueueFourPairsPuzzleProvider(initialPuzzle)
 
         setContent(puzzleProvider = puzzleProvider)
@@ -222,7 +224,7 @@ class FourPairsCompletionActionsTest {
             .onNodeWithTag(GameScreenTestTags.STRIP)
             .performScrollTo()
 
-        repeat(FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT) { index ->
+        repeat(profile.size.stripEntryCount) { index ->
             val contentDescriptions = composeTestRule
                 .onNodeWithTag(GameScreenTestTags.stripItem(index))
                 .fetchSemanticsNode()
@@ -254,6 +256,11 @@ class FourPairsCompletionActionsTest {
                 )
             }
         )
+    )
+
+    private fun fourPairsGenerator(seed: Int): GeneratedPairsPuzzleGenerator = GeneratedPairsPuzzleGenerator(
+        profile = profile,
+        seed = seed
     )
 
     private fun string(stringResId: Int, vararg formatArgs: Any): String = if (formatArgs.isEmpty()) {

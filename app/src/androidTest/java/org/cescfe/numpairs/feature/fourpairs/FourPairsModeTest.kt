@@ -12,7 +12,7 @@ import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.MainActivity
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyRules
+import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfiles
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
@@ -26,6 +26,8 @@ class FourPairsModeTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
+    private val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
+
     @Test
     fun selectingFourPairsFromMenuShowsGeneratedPlayablePuzzleContent() {
         navigateToFourPairs()
@@ -38,7 +40,7 @@ class FourPairsModeTest {
             .onNodeWithTag(GameScreenTestTags.STRIP)
             .assertIsDisplayed()
 
-        repeat(FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT) { index ->
+        repeat(profile.size.stripEntryCount) { index ->
             composeTestRule
                 .onNodeWithTag(GameScreenTestTags.stripItem(index))
                 .fetchSemanticsNode()
@@ -53,7 +55,7 @@ class FourPairsModeTest {
             .performScrollTo()
             .assertIsDisplayed()
 
-        repeat(FourPairsLowDifficultyRules.BOARD_TILE_COUNT) { tileIndex ->
+        repeat(profile.size.boardTileCount) { tileIndex ->
             composeTestRule
                 .onNodeWithTag(GameScreenTestTags.tile(tileIndex))
                 .fetchSemanticsNode()
@@ -179,7 +181,7 @@ class FourPairsModeTest {
         val knownEntryIds = mutableListOf<Int>()
         val hiddenEntryIds = mutableListOf<Int>()
 
-        repeat(FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT) { index ->
+        repeat(profile.size.stripEntryCount) { index ->
             val contentDescriptions = composeTestRule
                 .onNodeWithTag(GameScreenTestTags.stripItem(index))
                 .fetchSemanticsNode()

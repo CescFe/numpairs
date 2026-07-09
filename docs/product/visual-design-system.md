@@ -480,7 +480,7 @@ Final compact treatment:
 - Keep an opaque or subtle marker surface so the chip surface behind the marker does not visually bleed through.
 - Preserve accessibility content descriptions for the operator and state descriptions for available versus used.
 
-Narrow-screen readability is a hard constraint for this feature. If persistent usage markers compete with three-digit values or destabilize the single-row strip, prefer a smaller two-segment treatment over larger badge-like elements.
+Narrow-screen readability is a hard constraint for this feature. If persistent usage markers compete with a strip value, reduce the number of columns and add balanced rows before reducing label clarity or enlarging the markers.
 
 The implemented strip indicator treatment was checked by static Compose/layout review on 2026-06-21. The indicators overlay the chip edge instead of taking space from the centered label; strip labels remain single-line; chip tap behavior remains unchanged; and the indicator text uses the puzzle micro-label style so it scales with Android font settings without becoming the dominant chip content. This pass intentionally did not run on an emulator or physical device.
 
@@ -644,11 +644,11 @@ Narrow-screen readability review:
 - Game content scrolls vertically, uses `16dp` horizontal screen padding, and keeps the strip above the board.
 - Board tiles reflow by available width and stay within `112dp` to `144dp`, with `12dp` gaps and centered rows.
 - Tile expression slots keep stable widths and minimum heights; operator slots stay fixed at `28dp`.
-- The number strip remains a compact single row of eight chips with `48dp` minimum chip height and `4dp` gaps.
+- The number strip uses at most eight columns. Eight entries use one row when their labels fit; sixteen entries use two rows of eight by default. On narrower widths or larger font scales, it reduces to balanced rows before chips become too narrow.
 - Strip usage indicators render as compact `+` / `×` overlays above visible strip chips, so they do not reduce the centered label's available row space.
-- Three-digit strip labels and usage indicators were checked by static layout review against the current equal-width strip row, `4dp` chip gaps, and stable chip min-height.
+- Strip chips have a bounded width, `48dp` minimum height, `4dp` horizontal gaps, and reserved vertical space for usage indicators so adjacent rows do not overlap.
 - Dialog and helper content uses constrained scroll regions (`420dp` helper content max height, `320dp` operand sheet max height).
-- The tightest narrow-screen area remains the single-row number strip with three-digit labels; keep it on the visual QA watch list for any future device pass.
+- The strip layout should remain on the visual QA watch list for future device passes, especially for larger accessibility font scales and future profiles with wider numeric values.
 
 Increased font-scale review for puzzle-critical text:
 
