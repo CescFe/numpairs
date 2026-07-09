@@ -8,6 +8,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryRepository
+import org.cescfe.numpairs.feature.eightpairs.DefaultEightPairsPuzzleProvider
+import org.cescfe.numpairs.feature.eightpairs.EightPairsPuzzleProvider
+import org.cescfe.numpairs.feature.eightpairs.EightPairsRoute
 import org.cescfe.numpairs.feature.fourpairs.DefaultFourPairsPuzzleProvider
 import org.cescfe.numpairs.feature.fourpairs.FourPairsPuzzleProvider
 import org.cescfe.numpairs.feature.fourpairs.FourPairsRoute
@@ -18,6 +21,7 @@ sealed interface AppDestination {
     data object Menu : AppDestination
     data object Tutorial : AppDestination
     data object FourPairs : AppDestination
+    data object EightPairs : AppDestination
 }
 
 @Composable
@@ -25,7 +29,8 @@ fun AppNavigation(
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     modifier: Modifier = Modifier,
     startDestination: AppDestination = AppDestination.Menu,
-    fourPairsPuzzleProvider: FourPairsPuzzleProvider = DefaultFourPairsPuzzleProvider
+    fourPairsPuzzleProvider: FourPairsPuzzleProvider = DefaultFourPairsPuzzleProvider,
+    eightPairsPuzzleProvider: EightPairsPuzzleProvider = DefaultEightPairsPuzzleProvider
 ) {
     var currentDestination by remember(startDestination) {
         mutableStateOf(startDestination)
@@ -46,6 +51,9 @@ fun AppNavigation(
             },
             onFourPairsSelected = {
                 currentDestination = AppDestination.FourPairs
+            },
+            onEightPairsSelected = {
+                currentDestination = AppDestination.EightPairs
             }
         )
         AppDestination.Tutorial -> TutorialRoute(
@@ -56,6 +64,11 @@ fun AppNavigation(
             modifier = modifier,
             puzzleProvider = fourPairsPuzzleProvider,
             topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
+            onNavigateBack = navigateToMenu
+        )
+        AppDestination.EightPairs -> EightPairsRoute(
+            modifier = modifier,
+            puzzleProvider = eightPairsPuzzleProvider,
             onNavigateBack = navigateToMenu
         )
     }

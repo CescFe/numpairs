@@ -16,6 +16,8 @@ class LocalizationResourceTest {
         val resources = resourcesFor(languageTag = "es")
 
         assertEquals("Jugar 4 pares", resources.getString(R.string.menu_four_pairs_button))
+        assertEquals("Jugar 8 pares", resources.getString(R.string.menu_eight_pairs_button))
+        assertEquals("8 pares", resources.getString(R.string.eight_pairs_screen_title))
         assertEquals("Serie", resources.getString(R.string.strip_content_description))
         assertEquals("Paso 1 de 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))
     }
@@ -25,6 +27,8 @@ class LocalizationResourceTest {
         val resources = resourcesFor(languageTag = "ca")
 
         assertEquals("Juga a 4 parelles", resources.getString(R.string.menu_four_pairs_button))
+        assertEquals("Juga a 8 parelles", resources.getString(R.string.menu_eight_pairs_button))
+        assertEquals("8 parelles", resources.getString(R.string.eight_pairs_screen_title))
         assertEquals("Sèrie", resources.getString(R.string.strip_content_description))
         assertEquals("Pas 1 de 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))
     }
@@ -34,6 +38,8 @@ class LocalizationResourceTest {
         val resources = resourcesFor(languageTag = "de")
 
         assertEquals("Play 4 pairs", resources.getString(R.string.menu_four_pairs_button))
+        assertEquals("Play 8 pairs", resources.getString(R.string.menu_eight_pairs_button))
+        assertEquals("8 pairs", resources.getString(R.string.eight_pairs_screen_title))
         assertEquals("Strip", resources.getString(R.string.strip_content_description))
         assertEquals("Step 1 of 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))
     }

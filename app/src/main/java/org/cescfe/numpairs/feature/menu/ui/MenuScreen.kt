@@ -32,7 +32,8 @@ import org.cescfe.numpairs.ui.theme.NumPairsTheme
 fun MenuScreen(
     modifier: Modifier = Modifier,
     onTutorialSelected: () -> Unit = {},
-    onFourPairsSelected: () -> Unit = {}
+    onFourPairsSelected: () -> Unit = {},
+    onEightPairsSelected: () -> Unit = {}
 ) {
     Scaffold(
         modifier = modifier
@@ -69,6 +70,18 @@ fun MenuScreen(
                             .testTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
                     ) {
                         MenuButtonText(text = stringResource(R.string.menu_four_pairs_button))
+                    }
+                    Button(
+                        onClick = onEightPairsSelected,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(NumPairsComponents.ButtonHeight)
+                            .testTag(MenuScreenTestTags.EIGHT_PAIRS_BUTTON),
+                        shape = NumPairsComponents.MediumShape,
+                        colors = NumPairsComponents.secondaryButtonColors(),
+                        border = NumPairsComponents.secondaryButtonBorder()
+                    ) {
+                        MenuButtonText(text = stringResource(R.string.menu_eight_pairs_button))
                     }
                     Button(
                         onClick = onTutorialSelected,

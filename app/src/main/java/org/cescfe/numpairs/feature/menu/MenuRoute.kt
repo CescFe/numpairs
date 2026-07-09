@@ -8,11 +8,13 @@ import org.cescfe.numpairs.feature.menu.ui.MenuScreen
 fun MenuRoute(
     modifier: Modifier = Modifier,
     onTutorialSelected: () -> Unit = {},
-    onFourPairsSelected: () -> Unit = {}
+    onFourPairsSelected: () -> Unit = {},
+    onEightPairsSelected: () -> Unit = {}
 ) {
     MenuScreen(
         modifier = modifier,
         onTutorialSelected = onTutorialSelected,
-        onFourPairsSelected = onFourPairsSelected
+        onFourPairsSelected = onFourPairsSelected,
+        onEightPairsSelected = onEightPairsSelected
     )
 }
