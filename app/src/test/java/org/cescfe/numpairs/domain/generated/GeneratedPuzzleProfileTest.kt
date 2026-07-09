@@ -1,6 +1,5 @@
 package org.cescfe.numpairs.domain.generated
 
-import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyRules
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -42,34 +41,6 @@ class GeneratedPuzzleProfileTest {
         assertTrue(profile.generationPolicy.isBoundedGenerationExpected)
         assertTrue(profile.generationPolicy.isDeterministicGenerationExpected)
         assertNull(profile.generationPolicy.primeProductDecoyTarget)
-    }
-
-    @Test
-    fun four_pairs_low_profile_matches_existing_low_difficulty_constants() {
-        val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
-
-        assertEquals(FourPairsLowDifficultyRules.PAIR_COUNT, profile.size.pairCount)
-        assertEquals(FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT, profile.size.stripEntryCount)
-        assertEquals(FourPairsLowDifficultyRules.BOARD_TILE_COUNT, profile.size.boardTileCount)
-        assertEquals(FourPairsLowDifficultyRules.stripValueRange, profile.stripValuePolicy.valueRange)
-        assertEquals(FourPairsLowDifficultyRules.MIN_STRIP_VALUE, profile.stripValuePolicy.valueRange.first)
-        assertEquals(FourPairsLowDifficultyRules.MAX_STRIP_VALUE, profile.stripValuePolicy.valueRange.last)
-        assertEquals(
-            FourPairsLowDifficultyRules.MAX_MULTIPLICATION_RESULT,
-            profile.resultConstraints.maxMultiplicationResult
-        )
-        assertEquals(
-            FourPairsLowDifficultyRules.KNOWN_STRIP_ENTRY_COUNT..FourPairsLowDifficultyRules.KNOWN_STRIP_ENTRY_COUNT,
-            profile.initialStripMaskPolicy.knownEntryCountRange
-        )
-        assertEquals(
-            FourPairsLowDifficultyRules.HIDDEN_STRIP_ENTRY_COUNT..FourPairsLowDifficultyRules.HIDDEN_STRIP_ENTRY_COUNT,
-            profile.initialStripMaskPolicy.hiddenEntryCountRange
-        )
-        assertEquals(
-            FourPairsLowDifficultyRules.MAX_CONSECUTIVE_HIDDEN_ENTRIES,
-            profile.initialStripMaskPolicy.maxConsecutiveHiddenEntries
-        )
     }
 
     @Test
@@ -139,7 +110,7 @@ class GeneratedPuzzleProfileTest {
     fun strip_value_policy_rejects_invalid_construction() {
         assertThrows(IllegalArgumentException::class.java) {
             StripValuePolicy(
-                valueRange = emptyIntRange(start = 2, endInclusive = 1),
+                valueRange = IntRange.EMPTY,
                 maxOccurrencesPerValue = 1
             )
         }
@@ -214,7 +185,7 @@ class GeneratedPuzzleProfileTest {
         assertThrows(IllegalArgumentException::class.java) {
             InitialStripMaskPolicy(
                 stripEntryCount = 8,
-                knownEntryCountRange = emptyIntRange(start = 3, endInclusive = 2),
+                knownEntryCountRange = IntRange.EMPTY,
                 requiredAnchors = emptySet(),
                 distributionPolicy = StripKnownEntryDistributionPolicy.UNRESTRICTED,
                 maxConsecutiveHiddenEntries = 2
@@ -246,5 +217,3 @@ class GeneratedPuzzleProfileTest {
         }
     }
 }
-
-private fun emptyIntRange(start: Int, endInclusive: Int): IntRange = start..endInclusive

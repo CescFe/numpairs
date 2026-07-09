@@ -1,6 +1,5 @@
 package org.cescfe.numpairs.domain.generated
 
-import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyRules
 import org.cescfe.numpairs.domain.puzzle.assignment.IndexedResolvedTileAssignment
 import org.cescfe.numpairs.domain.puzzle.assignment.resolvedTileAssignments
 import org.cescfe.numpairs.domain.puzzle.model.Expression
@@ -18,24 +17,29 @@ import org.junit.Test
 class GeneratedPairsPuzzleGeneratorTest {
     @Test
     fun generate_returns_the_initial_player_facing_puzzle() {
+        val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
         val generatedPuzzle = GeneratedPairsPuzzleGenerator(
-            profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW,
+            profile = profile,
             seed = 2026
         ).generateWithSolution()
         val initialPuzzle = GeneratedPairsPuzzleGenerator(
-            profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW,
+            profile = profile,
             seed = 2026
         ).generate()
 
         assertEquals(generatedPuzzle.initialPuzzle, initialPuzzle)
         assertEquals(PuzzleCompletionState.INCOMPLETE, initialPuzzle.completionState)
-        assertInitialPuzzleMask(initialPuzzle)
+        assertInitialPuzzleMask(
+            puzzle = initialPuzzle,
+            profile = profile
+        )
     }
 
     @Test
     fun four_pairs_low_profile_generation_satisfies_profile_constraints() {
+        val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
         val generatedPuzzle = GeneratedPairsPuzzleGenerator(
-            profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW,
+            profile = profile,
             seed = 42
         ).generateWithSolution()
         val solvedPuzzle = generatedPuzzle.solvedPuzzle
@@ -45,38 +49,48 @@ class GeneratedPairsPuzzleGeneratorTest {
 
         assertEquals(PuzzleCompletionState.SOLVED, solvedPuzzle.completionState)
         assertEquals(PuzzleCompletionState.INCOMPLETE, initialPuzzle.completionState)
-        assertEquals(FourPairsLowDifficultyRules.PAIR_COUNT, solvedPuzzle.additionTiles().size)
-        assertEquals(FourPairsLowDifficultyRules.PAIR_COUNT, solvedPuzzle.multiplicationTiles().size)
-        assertEquals(FourPairsLowDifficultyRules.BOARD_TILE_COUNT, solvedPuzzle.board.tiles.size)
-        assertEquals(FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT, solvedPuzzle.strip.entries.size)
+        assertEquals(profile.size.pairCount, solvedPuzzle.additionTiles().size)
+        assertEquals(profile.size.pairCount, solvedPuzzle.multiplicationTiles().size)
+        assertEquals(profile.size.boardTileCount, solvedPuzzle.board.tiles.size)
+        assertEquals(profile.size.stripEntryCount, solvedPuzzle.strip.entries.size)
 
         assertEquals(solvedStripValues.sorted(), solvedStripValues)
-        assertEquals(solvedStripValues.size, solvedStripValues.toSet().size)
-        assertTrue(solvedStripValues.all { value -> value in FourPairsLowDifficultyRules.stripValueRange })
-        assertFalse(1 in solvedStripValues)
+        assertTrue(solvedStripValues.all { value -> value in profile.stripValuePolicy.valueRange })
+        assertTrue(
+            solvedStripValues.groupingBy { value -> value }
+                .eachCount()
+                .all { (_, occurrenceCount) ->
+                    occurrenceCount <= profile.stripValuePolicy.maxOccurrencesPerValue
+                }
+        )
+        if (!profile.stripValuePolicy.allowsOne) {
+            assertFalse(1 in solvedStripValues)
+        }
 
         assertTrue(
             solvedPuzzle.multiplicationTiles().all { tile ->
-                tile.result <= FourPairsLowDifficultyRules.MAX_MULTIPLICATION_RESULT
+                tile.result <= profile.resultConstraints.maxMultiplicationResult
             }
         )
-        assertEquals(
-            FourPairsLowDifficultyRules.BOARD_TILE_COUNT,
-            solvedPuzzle.board.tiles.map(Tile::result).toSet().size
-        )
+        if (!profile.resultConstraints.allowsDuplicateBoardResults) {
+            assertEquals(
+                profile.size.boardTileCount,
+                solvedPuzzle.board.tiles.map(Tile::result).toSet().size
+            )
+        }
 
         assertEquals(solvedPuzzle.board.tiles.map(Tile::result), initialPuzzle.board.tiles.map(Tile::result))
         assertTrue(initialPuzzle.board.tiles.all(Tile::hasHiddenExpression))
-        assertEquals(FourPairsLowDifficultyRules.KNOWN_STRIP_ENTRY_COUNT, initialKnownEntryIds.size)
-        assertEquals(
-            FourPairsLowDifficultyRules.HIDDEN_STRIP_ENTRY_COUNT,
-            initialPuzzle.strip.entries.count { entry -> entry.item == StripItem.Hidden }
+        assertTrue(initialKnownEntryIds.size in profile.initialStripMaskPolicy.knownEntryCountRange)
+        assertTrue(
+            initialPuzzle.strip.entries.count { entry -> entry.item == StripItem.Hidden } in
+                profile.initialStripMaskPolicy.hiddenEntryCountRange
         )
-        assertTrue(FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT - 1 in initialKnownEntryIds)
+        assertTrue(profile.requiredHighestStripEntryId in initialKnownEntryIds)
         assertTrue(
             initialKnownEntryIds.maxConsecutiveHiddenEntries(
-                totalEntryCount = FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT
-            ) <= FourPairsLowDifficultyRules.MAX_CONSECUTIVE_HIDDEN_ENTRIES
+                totalEntryCount = profile.size.stripEntryCount
+            ) <= profile.initialStripMaskPolicy.maxConsecutiveHiddenEntries
         )
     }
 
@@ -96,14 +110,15 @@ class GeneratedPairsPuzzleGeneratorTest {
 
     @Test
     fun solved_puzzle_uses_matching_addition_and_multiplication_pairs() {
+        val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
         val solvedPuzzle = GeneratedPairsPuzzleGenerator(
-            profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW,
+            profile = profile,
             seed = 81
         ).generateWithSolution().solvedPuzzle
         val additionPairs = solvedPuzzle.pairKeysFor(operator = Operator.ADDITION)
         val multiplicationPairs = solvedPuzzle.pairKeysFor(operator = Operator.MULTIPLICATION)
 
-        assertEquals(FourPairsLowDifficultyRules.PAIR_COUNT, additionPairs.size)
+        assertEquals(profile.size.pairCount, additionPairs.size)
         assertEquals(additionPairs, multiplicationPairs)
         assertEquals(PuzzleCompletionState.SOLVED, solvedPuzzle.completionState)
     }
@@ -137,20 +152,20 @@ class GeneratedPairsPuzzleGeneratorTest {
 
     @Test
     fun known_strip_anchors_are_distributed_and_belong_to_different_pairs() {
+        val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
         val generatedPuzzle = GeneratedPairsPuzzleGenerator(
-            profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW,
+            profile = profile,
             seed = 99
         ).generateWithSolution()
         val initialKnownEntryIds = generatedPuzzle.initialPuzzle.knownEntryIds()
-        val highestEntryId = FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT - 1
         val pairKeyByEntryId = generatedPuzzle.solvedPuzzle.pairKeyByEntryId()
 
-        assertEquals(FourPairsLowDifficultyRules.KNOWN_STRIP_ENTRY_COUNT, initialKnownEntryIds.size)
-        assertTrue(highestEntryId in initialKnownEntryIds)
+        assertTrue(initialKnownEntryIds.size in profile.initialStripMaskPolicy.knownEntryCountRange)
+        assertTrue(profile.requiredHighestStripEntryId in initialKnownEntryIds)
         assertTrue(
             initialKnownEntryIds.maxConsecutiveHiddenEntries(
-                totalEntryCount = FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT
-            ) <= FourPairsLowDifficultyRules.MAX_CONSECUTIVE_HIDDEN_ENTRIES
+                totalEntryCount = profile.size.stripEntryCount
+            ) <= profile.initialStripMaskPolicy.maxConsecutiveHiddenEntries
         )
         assertEquals(
             initialKnownEntryIds.size,
@@ -159,12 +174,12 @@ class GeneratedPairsPuzzleGeneratorTest {
     }
 }
 
-private fun assertInitialPuzzleMask(puzzle: Puzzle) {
+private fun assertInitialPuzzleMask(puzzle: Puzzle, profile: GeneratedPuzzleProfile) {
     assertTrue(puzzle.board.tiles.all(Tile::hasHiddenExpression))
-    assertEquals(FourPairsLowDifficultyRules.KNOWN_STRIP_ENTRY_COUNT, puzzle.knownEntryIds().size)
-    assertEquals(
-        FourPairsLowDifficultyRules.HIDDEN_STRIP_ENTRY_COUNT,
-        puzzle.strip.entries.count { entry -> entry.item == StripItem.Hidden }
+    assertTrue(puzzle.knownEntryIds().size in profile.initialStripMaskPolicy.knownEntryCountRange)
+    assertTrue(
+        puzzle.strip.entries.count { entry -> entry.item == StripItem.Hidden } in
+            profile.initialStripMaskPolicy.hiddenEntryCountRange
     )
 }
 
@@ -213,6 +228,9 @@ private val IndexedResolvedTileAssignment.pairKey: TestPairKey
     )
 
 private data class TestPairKey(val firstEntryId: Int, val secondEntryId: Int)
+
+private val GeneratedPuzzleProfile.requiredHighestStripEntryId: Int
+    get() = size.stripEntryCount - 1
 
 private fun Set<Int>.maxConsecutiveHiddenEntries(totalEntryCount: Int): Int {
     var currentHiddenCount = 0

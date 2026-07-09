@@ -1,6 +1,5 @@
 package org.cescfe.numpairs.feature.fourpairs
 
-import org.cescfe.numpairs.domain.fourpairs.FourPairsLowDifficultyRules
 import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerator
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfiles
 import org.cescfe.numpairs.domain.puzzle.model.Expression
@@ -14,16 +13,24 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class LowDifficultyFourPairsPuzzleProviderTest {
+
     @Test
     fun returns_a_generated_initial_puzzle() {
+        val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
         val puzzle = LowDifficultyFourPairsPuzzleProvider(seed = 2026).nextPuzzle()
 
-        assertEquals(FourPairsLowDifficultyRules.BOARD_TILE_COUNT, puzzle.board.tiles.size)
-        assertEquals(FourPairsLowDifficultyRules.STRIP_ENTRY_COUNT, puzzle.strip.entries.size)
+        assertEquals(profile.size.boardTileCount, puzzle.board.tiles.size)
+        assertEquals(profile.size.stripEntryCount, puzzle.strip.entries.size)
         assertEquals(PuzzleCompletionState.INCOMPLETE, puzzle.completionState)
         assertTrue(puzzle.board.tiles.all(Tile::hasHiddenExpression))
-        assertEquals(3, puzzle.strip.entries.count { entry -> entry.item is StripItem.Known })
-        assertEquals(5, puzzle.strip.entries.count { entry -> entry.item == StripItem.Hidden })
+        assertTrue(
+            puzzle.strip.entries.count { entry -> entry.item is StripItem.Known } in
+                profile.initialStripMaskPolicy.knownEntryCountRange
+        )
+        assertTrue(
+            puzzle.strip.entries.count { entry -> entry.item == StripItem.Hidden } in
+                profile.initialStripMaskPolicy.hiddenEntryCountRange
+        )
     }
 
     @Test
