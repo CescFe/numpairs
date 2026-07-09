@@ -1,36 +1,13 @@
 package org.cescfe.numpairs.domain.generated
 
-import org.cescfe.numpairs.domain.puzzle.model.Expression
-import org.cescfe.numpairs.domain.puzzle.model.Operator
-import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class EightPairsMediumGeneratedPairsPuzzleGeneratorTest {
-
-    @Test
-    fun generate_returns_the_initial_player_facing_puzzle() {
-        val profile = GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM
-        val generatedPuzzle = GeneratedPairsPuzzleGenerator(
-            profile = profile,
-            seed = 2026
-        ).generateWithSolution()
-        val initialPuzzle = GeneratedPairsPuzzleGenerator(
-            profile = profile,
-            seed = 2026
-        ).generate()
-
-        assertEquals(generatedPuzzle.initialPuzzle, initialPuzzle)
-        assertInitialPuzzleStructure(
-            puzzle = initialPuzzle,
-            profile = profile
-        )
-    }
 
     @Test
     fun eight_pairs_medium_profile_generation_satisfies_profile_constraints() {
@@ -72,7 +49,7 @@ class EightPairsMediumGeneratedPairsPuzzleGeneratorTest {
         assertTrue(productAnchorCount in productAnchorMix.countRange)
 
         assertEquals(solvedBoardResults, initialPuzzle.board.tiles.map(Tile::result))
-        assertInitialPuzzleStructure(
+        assertGeneratedInitialPuzzleStructure(
             puzzle = initialPuzzle,
             profile = profile
         )
@@ -91,34 +68,6 @@ class EightPairsMediumGeneratedPairsPuzzleGeneratorTest {
         ).generateWithSolution()
 
         assertEquals(firstPuzzle, secondPuzzle)
-    }
-
-    @Test
-    fun generator_rejects_non_positive_max_attempts() {
-        assertThrows(IllegalArgumentException::class.java) {
-            GeneratedPairsPuzzleGenerator(
-                profile = GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM,
-                maxAttempts = 0
-            )
-        }
-    }
-
-    @Test
-    fun generator_fails_after_bounded_attempts_when_profile_cannot_be_satisfied() {
-        val profile = GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM
-        val impossibleProfile = profile.copy(
-            resultConstraints = profile.resultConstraints.copy(
-                maxMultiplicationResult = 1
-            )
-        )
-
-        assertThrows(IllegalStateException::class.java) {
-            GeneratedPairsPuzzleGenerator(
-                profile = impossibleProfile,
-                seed = 2026,
-                maxAttempts = 1
-            ).generateWithSolution()
-        }
     }
 
     @Test
@@ -153,87 +102,4 @@ class EightPairsMediumGeneratedPairsPuzzleGeneratorTest {
         assertTrue(containsPrimeProductDecoy)
         assertTrue(containsHiddenHighValueTarget)
     }
-}
-
-private fun assertInitialPuzzleStructure(puzzle: Puzzle, profile: GeneratedPuzzleProfile) {
-    val knownEntryIds = puzzle.knownEntryIds()
-
-    assertEquals(PuzzleCompletionState.INCOMPLETE, puzzle.completionState)
-    assertEquals(profile.size.boardTileCount, puzzle.board.tiles.size)
-    assertEquals(profile.size.stripEntryCount, puzzle.strip.entries.size)
-    assertTrue(puzzle.board.tiles.all(Tile::hasHiddenExpression))
-    assertTrue(knownEntryIds.size in profile.initialStripMaskPolicy.knownEntryCountRange)
-    assertTrue(
-        puzzle.strip.entries.count { entry -> entry.item == StripItem.Hidden } in
-            profile.initialStripMaskPolicy.hiddenEntryCountRange
-    )
-    assertTrue(
-        knownEntryIds.maxConsecutiveHiddenEntries(
-            totalEntryCount = profile.size.stripEntryCount
-        ) <= profile.initialStripMaskPolicy.maxConsecutiveHiddenEntries
-    )
-}
-
-private fun Puzzle.requireKnownStripValues(): List<Int> = strip.entries.map { entry ->
-    (entry.item as StripItem.Known).value
-}
-
-private fun Puzzle.additionTiles(): List<Tile> = tilesFor(operator = Operator.ADDITION)
-
-private fun Puzzle.multiplicationTiles(): List<Tile> = tilesFor(operator = Operator.MULTIPLICATION)
-
-private fun Puzzle.tilesFor(operator: Operator): List<Tile> = board.tiles.filter { tile ->
-    tile.expression.operator == operator
-}
-
-private fun Tile.hasHiddenExpression(): Boolean = expression.leftOperand == Expression.Operand.Hidden &&
-    expression.operator == Operator.Hidden &&
-    expression.rightOperand == Expression.Operand.Hidden
-
-private fun Tile.isPrimeProductDecoy(): Boolean {
-    val leftOperand = expression.leftOperand as? Expression.Operand.Known ?: return false
-    val rightOperand = expression.rightOperand as? Expression.Operand.Known ?: return false
-
-    return expression.operator == Operator.MULTIPLICATION &&
-        (
-            leftOperand.value == 1 &&
-                rightOperand.value.isPrime() ||
-                rightOperand.value == 1 &&
-                leftOperand.value.isPrime()
-            )
-}
-
-private fun Puzzle.knownEntryIds(): Set<Int> = strip.entries
-    .filter { entry -> entry.item is StripItem.Known }
-    .map { entry -> entry.id }
-    .toSet()
-
-private fun Set<Int>.maxConsecutiveHiddenEntries(totalEntryCount: Int): Int {
-    var currentHiddenCount = 0
-    var maxHiddenCount = 0
-
-    repeat(totalEntryCount) { entryId ->
-        if (entryId in this) {
-            currentHiddenCount = 0
-        } else {
-            currentHiddenCount++
-            maxHiddenCount = maxOf(maxHiddenCount, currentHiddenCount)
-        }
-    }
-
-    return maxHiddenCount
-}
-
-private fun Int.isPrime(): Boolean {
-    if (this < 2) {
-        return false
-    }
-
-    for (candidateDivisor in 2..this / 2) {
-        if (this % candidateDivisor == 0) {
-            return false
-        }
-    }
-
-    return true
 }
