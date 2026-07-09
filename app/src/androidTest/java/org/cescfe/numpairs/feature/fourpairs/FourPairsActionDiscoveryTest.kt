@@ -3,6 +3,7 @@ package org.cescfe.numpairs.feature.fourpairs
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -45,10 +46,16 @@ class FourPairsActionDiscoveryTest {
             .onNodeWithTag(GameScreenTestTags.HINT_ACTION)
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION_DISCOVERY_DOT)
+            .onNodeWithTag(
+                GameScreenTestTags.RULES_HELPER_ACTION_DISCOVERY_DOT,
+                useUnmergedTree = true
+            )
             .assertDoesNotExist()
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.HINT_ACTION_DISCOVERY_DOT)
+            .onNodeWithTag(
+                GameScreenTestTags.HINT_ACTION_DISCOVERY_DOT,
+                useUnmergedTree = true
+            )
             .assertDoesNotExist()
     }
 
@@ -69,11 +76,21 @@ class FourPairsActionDiscoveryTest {
             assertFalse(actionDiscoveryRepository.state.value.hasSeenHelpAction)
             assertFalse(actionDiscoveryRepository.state.value.hasSeenHintAction)
         }
+        waitForDiscoveryDots(
+            rulesHelperDotVisible = true,
+            hintDotVisible = true
+        )
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION_DISCOVERY_DOT)
+            .onNodeWithTag(
+                GameScreenTestTags.RULES_HELPER_ACTION_DISCOVERY_DOT,
+                useUnmergedTree = true
+            )
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.HINT_ACTION_DISCOVERY_DOT)
+            .onNodeWithTag(
+                GameScreenTestTags.HINT_ACTION_DISCOVERY_DOT,
+                useUnmergedTree = true
+            )
             .assertIsDisplayed()
 
         composeTestRule
@@ -88,11 +105,21 @@ class FourPairsActionDiscoveryTest {
             assertTrue(actionDiscoveryRepository.state.value.hasSeenHelpAction)
             assertFalse(actionDiscoveryRepository.state.value.hasSeenHintAction)
         }
+        waitForDiscoveryDots(
+            rulesHelperDotVisible = false,
+            hintDotVisible = true
+        )
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION_DISCOVERY_DOT)
+            .onNodeWithTag(
+                GameScreenTestTags.RULES_HELPER_ACTION_DISCOVERY_DOT,
+                useUnmergedTree = true
+            )
             .assertDoesNotExist()
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.HINT_ACTION_DISCOVERY_DOT)
+            .onNodeWithTag(
+                GameScreenTestTags.HINT_ACTION_DISCOVERY_DOT,
+                useUnmergedTree = true
+            )
             .assertIsDisplayed()
 
         composeTestRule
@@ -112,13 +139,39 @@ class FourPairsActionDiscoveryTest {
             assertTrue(actionDiscoveryRepository.state.value.hasSeenHelpAction)
             assertTrue(actionDiscoveryRepository.state.value.hasSeenHintAction)
         }
+        waitForDiscoveryDots(
+            rulesHelperDotVisible = false,
+            hintDotVisible = false
+        )
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION_DISCOVERY_DOT)
+            .onNodeWithTag(
+                GameScreenTestTags.RULES_HELPER_ACTION_DISCOVERY_DOT,
+                useUnmergedTree = true
+            )
             .assertDoesNotExist()
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.HINT_ACTION_DISCOVERY_DOT)
+            .onNodeWithTag(
+                GameScreenTestTags.HINT_ACTION_DISCOVERY_DOT,
+                useUnmergedTree = true
+            )
             .assertDoesNotExist()
     }
+
+    private fun waitForDiscoveryDots(rulesHelperDotVisible: Boolean, hintDotVisible: Boolean) {
+        composeTestRule.waitUntil {
+            hasDiscoveryDot(
+                testTag = GameScreenTestTags.RULES_HELPER_ACTION_DISCOVERY_DOT
+            ) == rulesHelperDotVisible &&
+                hasDiscoveryDot(
+                    testTag = GameScreenTestTags.HINT_ACTION_DISCOVERY_DOT
+                ) == hintDotVisible
+        }
+    }
+
+    private fun hasDiscoveryDot(testTag: String): Boolean = composeTestRule
+        .onAllNodesWithTag(testTag, useUnmergedTree = true)
+        .fetchSemanticsNodes()
+        .isNotEmpty()
 
     private class LoadingTopAppBarActionDiscoveryRepository : TopAppBarActionDiscoveryRepository {
         override val discoveryState: Flow<TopAppBarActionDiscoveryState> = emptyFlow()

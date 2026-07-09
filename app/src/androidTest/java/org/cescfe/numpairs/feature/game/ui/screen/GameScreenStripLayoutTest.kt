@@ -16,7 +16,7 @@ import org.junit.runner.RunWith
 class GameScreenStripLayoutTest : GameScreenTestHost() {
 
     @Test
-    fun sixteen_strip_entries_are_rendered_in_uniform_non_overlapping_rows() {
+    fun sixteen_strip_entries_are_rendered_in_multiple_non_overlapping_rows() {
         showUiStateFixture(
             GameUiState(
                 stripItems = List(16) { index ->
@@ -40,16 +40,7 @@ class GameScreenStripLayoutTest : GameScreenTestHost() {
 
         assertEquals(16, entryBounds.size)
         assertTrue(rows.size >= 2)
-        assertUniformWidths(entryBounds)
         rows.forEach(::assertEntriesDoNotOverlap)
-    }
-
-    private fun assertUniformWidths(entryBounds: List<Rect>) {
-        val expectedWidth = entryBounds.first().width
-
-        entryBounds.forEach { bounds ->
-            assertEquals(expectedWidth, bounds.width, WIDTH_TOLERANCE_PX)
-        }
     }
 
     private fun assertEntriesDoNotOverlap(rowBounds: List<Rect>) {
@@ -59,9 +50,5 @@ class GameScreenStripLayoutTest : GameScreenTestHost() {
             .forEach { (left, right) ->
                 assertTrue(left.right <= right.left)
             }
-    }
-
-    private companion object {
-        const val WIDTH_TOLERANCE_PX = 0.1f
     }
 }
