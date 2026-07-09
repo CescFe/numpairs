@@ -10,6 +10,9 @@
     <!-- Four pairs screen -->
     <string name="four_pairs_screen_title">4 pares</string>
 
+    <!-- Eight pairs screen -->
+    <string name="eight_pairs_screen_title">8 pares</string>
+
     <!-- Tutorial screen -->
     <string name="tutorial_screen_title">Tutorial</string>
     <string name="tutorial_step_indicator">Paso %1$d de %2$d</string>

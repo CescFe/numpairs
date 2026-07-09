@@ -14,11 +14,10 @@ import kotlinx.coroutines.launch
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryState
-import org.cescfe.numpairs.domain.puzzle.model.Puzzle
-import org.cescfe.numpairs.feature.game.GameCompletionActions
-import org.cescfe.numpairs.feature.game.GameRoute
 import org.cescfe.numpairs.feature.game.ui.actions.HintAction
 import org.cescfe.numpairs.feature.game.ui.help.SolvingTipsDialog
+import org.cescfe.numpairs.feature.generated.GeneratedModeRoute
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleProvider
 import org.cescfe.numpairs.feature.tutorial.TutorialMode
 import org.cescfe.numpairs.feature.tutorial.TutorialOverlayHost
 
@@ -34,11 +33,10 @@ fun FourPairsRoute(
     val actionDiscoveryState: TopAppBarActionDiscoveryState? by topAppBarActionDiscoveryRepository.discoveryState
         .collectAsState(initial = null)
     val coroutineScope = rememberCoroutineScope()
-    val gameSessionFactory = remember(puzzleProvider) {
-        FourPairsGameSessionFactory(puzzleProvider = puzzleProvider)
-    }
-    var gameSession by remember(gameSessionFactory) {
-        mutableStateOf(gameSessionFactory.create())
+    val generatedPuzzleProvider = remember(puzzleProvider) {
+        GeneratedPuzzleProvider {
+            puzzleProvider.nextPuzzle()
+        }
     }
     var requestedTutorialOverlayMode by rememberSaveable {
         mutableStateOf<TutorialMode?>(null)
@@ -56,17 +54,10 @@ fun FourPairsRoute(
         },
         modifier = modifier
     ) {
-        GameRoute(
+        GeneratedModeRoute(
             title = stringResource(R.string.four_pairs_screen_title),
-            initialPuzzle = gameSession.initialPuzzle,
             gameSessionKey = FOUR_PAIRS_GAME_SESSION_KEY,
-            puzzleResetKey = gameSession.id,
-            completionActions = GameCompletionActions(
-                onNewPuzzleRequested = {
-                    gameSession = gameSessionFactory.create()
-                },
-                onReturnToMenuRequested = onNavigateBack
-            ),
+            puzzleProvider = generatedPuzzleProvider,
             isRulesHelperEnabled = true,
             isRulesHelperActionDiscoveryDotVisible = actionDiscoveryState?.hasSeenHelpAction == false,
             onRulesHelperActionTapped = {
@@ -105,17 +96,6 @@ fun FourPairsRoute(
             )
         }
     }
-}
-
-private data class GeneratedFourPairsGameSession(val id: Int, val initialPuzzle: Puzzle)
-
-private class FourPairsGameSessionFactory(private val puzzleProvider: FourPairsPuzzleProvider) {
-    private var nextGameSessionId = 0
-
-    fun create(): GeneratedFourPairsGameSession = GeneratedFourPairsGameSession(
-        id = nextGameSessionId++,
-        initialPuzzle = puzzleProvider.nextPuzzle()
-    )
 }
 
 private const val FOUR_PAIRS_GAME_SESSION_KEY = "four-pairs"
