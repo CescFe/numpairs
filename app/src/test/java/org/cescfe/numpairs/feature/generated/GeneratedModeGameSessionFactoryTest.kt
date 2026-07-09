@@ -15,7 +15,7 @@ class GeneratedModeGameSessionFactoryTest {
             )
         )
         val factory = GeneratedModeGameSessionFactory(
-            puzzleProvider = GeneratedPuzzleProvider {
+            puzzleProvider = {
                 providedPuzzles.removeFirst()
             }
         )
