@@ -2,11 +2,6 @@ package org.cescfe.numpairs.feature.game.ui.screen
 
 import androidx.compose.ui.unit.Dp
 
-internal fun calculateStripChipWidth(availableWidth: Dp, chipCount: Int): Dp {
-    val totalSpacing = STRIP_CHIP_SPACING * (chipCount - 1)
-    return (availableWidth - totalSpacing) / chipCount
-}
-
 internal fun calculateBoardColumnCount(availableWidth: Dp): Int {
     val columnsThatFit = (
         (availableWidth.value + BOARD_TILE_SPACING.value) /

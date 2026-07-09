@@ -124,12 +124,12 @@ The indicators must not rely on color alone. The symbols, border or fill treatme
 
 Used strip indicators use the player-owned focus blue treatment. Available strip indicators use the subtle surface treatment. Strip usage indicators must not show the red conflict treatment; live rule conflicts are handled by local tile feedback, the contextual conflict message, and operand selector badges.
 
-The strip remains a narrow-screen constraint. Usage indicators must stay compact enough that visible strip values, including three-digit values, remain readable and the single-row strip layout remains stable.
+The strip remains a narrow-screen constraint. Usage indicators must stay compact enough that visible strip values, including three-digit values, remain readable. When a chip would become too narrow, the strip uses fewer columns and balanced additional rows rather than compressing the label.
 
 Implementation QA notes for the current strip indicator treatment:
 
-- Narrow-screen readability was checked by static Compose/layout review on 2026-06-21: strip chip widths are calculated from the available row width, chips keep a single-row layout with `4dp` gaps, labels stay centered and single-line, and the `+` / `×` pills sit over the chip edge instead of consuming label space.
-- Increased font-scale behavior was checked by static implementation review on 2026-06-21: strip labels and indicators use shared `sp` text styles, chip height and tap behavior remain stable, and three-digit labels remain the primary readable content. This was not a device or emulator visual pass.
+- The strip layout uses at most eight columns, `4dp` horizontal gaps, bounded chip widths, and balanced rows. Sixteen entries render as two rows of eight when their labels fit.
+- Increased font-scale behavior is handled by measuring the widest visible or editable label before choosing columns. Strip labels and indicators retain their shared `sp` text styles, and this remains subject to future device visual QA.
 
 ---
 

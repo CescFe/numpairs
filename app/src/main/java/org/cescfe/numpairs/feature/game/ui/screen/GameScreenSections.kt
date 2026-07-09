@@ -9,18 +9,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.Dp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.StripEntryRange
@@ -35,8 +40,10 @@ import org.cescfe.numpairs.feature.game.presentation.TileUiState
 import org.cescfe.numpairs.feature.game.ui.components.strip.AvailableNumberChip
 import org.cescfe.numpairs.feature.game.ui.components.strip.AvailableNumberChipStyle
 import org.cescfe.numpairs.feature.game.ui.components.strip.AvailableNumberInputChip
+import org.cescfe.numpairs.feature.game.ui.components.strip.CHIP_HORIZONTAL_CONTENT_INSET
 import org.cescfe.numpairs.feature.game.ui.components.tile.PuzzleTile
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
+import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
 
 @Composable
 internal fun BoardSection(
@@ -163,6 +170,10 @@ internal fun StripSection(
 ) {
     val stripContentDescription = stringResource(R.string.strip_content_description)
     val stripEntryFeedbackText = stripItemEntryInput?.feedbackText()
+    val minimumChipWidth = requiredStripChipWidth(
+        stripItems = stripItems,
+        stripItemEntryInput = stripItemEntryInput
+    )
 
     Surface(
         modifier = modifier
@@ -187,71 +198,42 @@ internal fun StripSection(
             verticalArrangement = Arrangement.spacedBy(STRIP_ENTRY_FEEDBACK_TOP_SPACING)
         ) {
             BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                val chipCount = stripItems.size
-                val chipWidth = calculateStripChipWidth(
+                val gridLayout = calculateStripGridLayout(
                     availableWidth = maxWidth,
-                    chipCount = chipCount
+                    entryCount = stripItems.size,
+                    minimumChipWidth = minimumChipWidth,
+                    maximumChipWidth = STRIP_CHIP_MAX_WIDTH
                 )
 
-                Row(
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(STRIP_CHIP_SPACING)
+                    verticalArrangement = Arrangement.spacedBy(STRIP_ROW_SPACING)
                 ) {
-                    stripItems.forEachIndexed { index, stripItem ->
-                        val chipStyle = when (stripItem.visualStyle) {
-                            StripItemVisualStyle.KNOWN -> AvailableNumberChipStyle.KNOWN
-                            StripItemVisualStyle.HIDDEN -> AvailableNumberChipStyle.HIDDEN
-                            StripItemVisualStyle.PLAYER_ENTERED -> AvailableNumberChipStyle.PLAYER_ENTERED
-                        }
-                        val activeInput = stripItemEntryInput?.takeIf { input -> input.stripItemIndex == index }
-                        val chipModifier = Modifier
-                            .width(chipWidth)
-                            .testTag(GameScreenTestTags.stripItem(index))
-                        val additionUsageIndicatorTestTag = GameScreenTestTags.stripUsageIndicator(
-                            index = index,
-                            operator = Operator.ADDITION
-                        )
-                        val multiplicationUsageIndicatorTestTag = GameScreenTestTags.stripUsageIndicator(
-                            index = index,
-                            operator = Operator.MULTIPLICATION
-                        )
-                        val isHighlighted = highlightState.isStripEntryHighlighted(index)
-
-                        if (activeInput != null) {
-                            AvailableNumberInputChip(
-                                value = activeInput.draftText,
-                                onValueChange = onStripItemEntryInputChanged,
-                                onDone = onStripItemEntryInputConfirmed,
-                                onFocusLost = onStripItemEntryInputFocusLost,
-                                modifier = chipModifier,
-                                contentDescription = stripItemContentDescription(stripItem),
-                                additionUsed = stripItem.additionUsed,
-                                multiplicationUsed = stripItem.multiplicationUsed,
-                                inputTestTag = GameScreenTestTags.STRIP_ENTRY_INPUT,
-                                additionUsageIndicatorTestTag = additionUsageIndicatorTestTag,
-                                multiplicationUsageIndicatorTestTag = multiplicationUsageIndicatorTestTag,
-                                isHighlighted = isHighlighted,
-                                style = chipStyle,
-                                isInvalid = activeInput.isInvalid,
-                                errorMessage = stripEntryFeedbackText?.takeIf { activeInput.isInvalid }
-                            )
-                        } else {
-                            AvailableNumberChip(
-                                label = stripItem.label,
-                                modifier = chipModifier,
-                                contentDescription = stripItemContentDescription(stripItem),
-                                additionUsed = stripItem.additionUsed,
-                                multiplicationUsed = stripItem.multiplicationUsed,
-                                additionUsageIndicatorTestTag = additionUsageIndicatorTestTag,
-                                multiplicationUsageIndicatorTestTag = multiplicationUsageIndicatorTestTag,
-                                isHighlighted = isHighlighted,
-                                style = chipStyle,
-                                onClick = if (stripItem.isEntryEnabled && isStripItemEnabled(index)) {
-                                    { onStripItemTapped(index) }
-                                } else {
-                                    null
+                    gridLayout.entryIndexesByRow.forEach { entryIndexes ->
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(
+                                modifier = Modifier.wrapContentWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(STRIP_CHIP_SPACING)
+                            ) {
+                                entryIndexes.forEach { index ->
+                                    StripEntryChip(
+                                        stripItemIndex = index,
+                                        stripItem = stripItems[index],
+                                        chipWidth = gridLayout.chipWidth,
+                                        stripItemEntryInput = stripItemEntryInput,
+                                        stripEntryFeedbackText = stripEntryFeedbackText,
+                                        onStripItemTapped = onStripItemTapped,
+                                        onStripItemEntryInputChanged = onStripItemEntryInputChanged,
+                                        onStripItemEntryInputConfirmed = onStripItemEntryInputConfirmed,
+                                        onStripItemEntryInputFocusLost = onStripItemEntryInputFocusLost,
+                                        isStripItemEnabled = isStripItemEnabled,
+                                        isHighlighted = highlightState.isStripEntryHighlighted(index)
+                                    )
                                 }
-                            )
+                            }
                         }
                     }
                 }
@@ -267,6 +249,104 @@ internal fun StripSection(
             }
         }
     }
+}
+
+@Composable
+private fun StripEntryChip(
+    stripItemIndex: Int,
+    stripItem: StripItemUiState,
+    chipWidth: Dp,
+    stripItemEntryInput: StripItemEntryInputUiState?,
+    stripEntryFeedbackText: String?,
+    onStripItemTapped: (Int) -> Unit,
+    onStripItemEntryInputChanged: (String) -> Unit,
+    onStripItemEntryInputConfirmed: () -> Unit,
+    onStripItemEntryInputFocusLost: () -> Unit,
+    isStripItemEnabled: (Int) -> Boolean,
+    isHighlighted: Boolean
+) {
+    val chipStyle = when (stripItem.visualStyle) {
+        StripItemVisualStyle.KNOWN -> AvailableNumberChipStyle.KNOWN
+        StripItemVisualStyle.HIDDEN -> AvailableNumberChipStyle.HIDDEN
+        StripItemVisualStyle.PLAYER_ENTERED -> AvailableNumberChipStyle.PLAYER_ENTERED
+    }
+    val activeInput = stripItemEntryInput?.takeIf { input -> input.stripItemIndex == stripItemIndex }
+    val chipModifier = Modifier
+        .width(chipWidth)
+        .testTag(GameScreenTestTags.stripItem(stripItemIndex))
+    val additionUsageIndicatorTestTag = GameScreenTestTags.stripUsageIndicator(
+        index = stripItemIndex,
+        operator = Operator.ADDITION
+    )
+    val multiplicationUsageIndicatorTestTag = GameScreenTestTags.stripUsageIndicator(
+        index = stripItemIndex,
+        operator = Operator.MULTIPLICATION
+    )
+
+    if (activeInput != null) {
+        AvailableNumberInputChip(
+            value = activeInput.draftText,
+            onValueChange = onStripItemEntryInputChanged,
+            onDone = onStripItemEntryInputConfirmed,
+            onFocusLost = onStripItemEntryInputFocusLost,
+            modifier = chipModifier,
+            contentDescription = stripItemContentDescription(stripItem),
+            additionUsed = stripItem.additionUsed,
+            multiplicationUsed = stripItem.multiplicationUsed,
+            inputTestTag = GameScreenTestTags.STRIP_ENTRY_INPUT,
+            additionUsageIndicatorTestTag = additionUsageIndicatorTestTag,
+            multiplicationUsageIndicatorTestTag = multiplicationUsageIndicatorTestTag,
+            isHighlighted = isHighlighted,
+            style = chipStyle,
+            isInvalid = activeInput.isInvalid,
+            errorMessage = stripEntryFeedbackText?.takeIf { activeInput.isInvalid }
+        )
+    } else {
+        AvailableNumberChip(
+            label = stripItem.label,
+            modifier = chipModifier,
+            contentDescription = stripItemContentDescription(stripItem),
+            additionUsed = stripItem.additionUsed,
+            multiplicationUsed = stripItem.multiplicationUsed,
+            additionUsageIndicatorTestTag = additionUsageIndicatorTestTag,
+            multiplicationUsageIndicatorTestTag = multiplicationUsageIndicatorTestTag,
+            isHighlighted = isHighlighted,
+            style = chipStyle,
+            onClick = if (stripItem.isEntryEnabled && isStripItemEnabled(stripItemIndex)) {
+                { onStripItemTapped(stripItemIndex) }
+            } else {
+                null
+            }
+        )
+    }
+}
+
+@Composable
+private fun requiredStripChipWidth(
+    stripItems: List<StripItemUiState>,
+    stripItemEntryInput: StripItemEntryInputUiState?
+): Dp {
+    val density = LocalDensity.current
+    val textMeasurer = rememberTextMeasurer()
+    val labels = buildList {
+        addAll(stripItems.map(StripItemUiState::label))
+        stripItemEntryInput?.let { input ->
+            add(input.draftText.ifEmpty { "?" })
+            input.validRange.maximumValue?.let { maximumValue ->
+                add(maximumValue.toString())
+            }
+        }
+    }
+    val widestLabelWidth = labels.maxOfOrNull { label ->
+        textMeasurer.measure(
+            text = AnnotatedString(label),
+            style = NumPairsTextStyles.StripValue
+        ).size.width
+    } ?: 0
+
+    return with(density) {
+        widestLabelWidth.toDp() + CHIP_HORIZONTAL_CONTENT_INSET
+    }.coerceAtLeast(STRIP_CHIP_MIN_WIDTH)
 }
 
 @Composable

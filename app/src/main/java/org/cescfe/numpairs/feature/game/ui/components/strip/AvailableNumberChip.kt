@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -95,13 +94,14 @@ fun AvailableNumberChip(
     ) {
         AvailableNumberChipSurface(
             label = label,
+            modifier = Modifier.padding(top = CHIP_USAGE_INDICATOR_RESERVED_HEIGHT),
             chipColors = chipColors,
             chipBorder = chipBorder,
             onClick = onClick
         )
         if (style != AvailableNumberChipStyle.HIDDEN) {
             Row(
-                modifier = Modifier.offset(y = -CHIP_USAGE_INDICATOR_OVERLAY_LIFT),
+                modifier = Modifier.align(Alignment.TopCenter),
                 horizontalArrangement = Arrangement.spacedBy(CHIP_USAGE_INDICATOR_SPACING),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -164,7 +164,9 @@ fun AvailableNumberInputChip(
         contentAlignment = Alignment.TopCenter
     ) {
         Surface(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .padding(top = CHIP_USAGE_INDICATOR_RESERVED_HEIGHT)
+                .fillMaxWidth(),
             shape = NumPairsComponents.MediumShape,
             color = chipColors.containerColor,
             contentColor = chipColors.contentColor,
@@ -215,7 +217,7 @@ fun AvailableNumberInputChip(
                         modifier = Modifier
                             .fillMaxWidth()
                             .defaultMinSize(minHeight = CHIP_MIN_HEIGHT)
-                            .padding(horizontal = 4.dp),
+                            .padding(horizontal = CHIP_CONTENT_HORIZONTAL_PADDING),
                         contentAlignment = Alignment.Center
                     ) {
                         innerTextField()
@@ -225,7 +227,7 @@ fun AvailableNumberInputChip(
         }
         if (style != AvailableNumberChipStyle.HIDDEN) {
             Row(
-                modifier = Modifier.offset(y = -CHIP_USAGE_INDICATOR_OVERLAY_LIFT),
+                modifier = Modifier.align(Alignment.TopCenter),
                 horizontalArrangement = Arrangement.spacedBy(CHIP_USAGE_INDICATOR_SPACING),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -247,13 +249,14 @@ fun AvailableNumberInputChip(
 @Composable
 private fun AvailableNumberChipSurface(
     label: String,
+    modifier: Modifier,
     chipColors: AvailableNumberChipColors,
     chipBorder: BorderStroke,
     onClick: (() -> Unit)?
 ) {
     if (onClick == null) {
         Surface(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(),
             shape = NumPairsComponents.MediumShape,
             color = chipColors.containerColor,
             contentColor = chipColors.contentColor,
@@ -264,7 +267,7 @@ private fun AvailableNumberChipSurface(
         }
     } else {
         Surface(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(),
             onClick = onClick,
             shape = NumPairsComponents.MediumShape,
             color = chipColors.containerColor,
@@ -283,7 +286,7 @@ private fun AvailableNumberChipContent(label: String) {
         modifier = Modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = CHIP_MIN_HEIGHT)
-            .padding(horizontal = 4.dp),
+            .padding(horizontal = CHIP_CONTENT_HORIZONTAL_PADDING),
         contentAlignment = Alignment.Center
     ) {
         AvailableNumberChipLabel(label = label)
@@ -296,7 +299,7 @@ private fun AvailableNumberChipLabel(label: String) {
         text = label,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 2.dp),
+            .padding(horizontal = CHIP_LABEL_HORIZONTAL_PADDING),
         style = NumPairsTextStyles.StripValue,
         textAlign = TextAlign.Center,
         maxLines = 1,
