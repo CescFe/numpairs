@@ -1,9 +1,9 @@
 package org.cescfe.numpairs.domain.generated.internal
 
 internal class GeneratedPairsSolvedCandidateGenerator(private val valuePairSelector: GeneratedPairsValuePairSelector) {
-    fun generate(generationTargets: GeneratedPairsGenerationTargets): GeneratedPairsSolvedCandidate? {
+    fun generate(variationPlan: GeneratedPairsVariationPlan): GeneratedPairsSolvedCandidate? {
         val selectedValuePairs = valuePairSelector.selectValuePairs(
-            generationTargets = generationTargets
+            variationPlan = variationPlan
         ) ?: return null
         val entries = selectedValuePairs
             .flatMap { pair -> listOf(pair.firstValue, pair.secondValue) }

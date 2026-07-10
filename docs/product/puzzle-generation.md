@@ -133,6 +133,14 @@ Generation expectations:
 - prime-product decoy target: around 30% of generated puzzles should include one solution pair made of `1` and a prime number
 - probabilistic targets should guide generation variety without making the generator hang when other hard constraints cannot satisfy them
 
+Probabilistic target semantics:
+
+- Percentages describe the intended frequency of the trait in the final generated-puzzle population, not only the probability of preferring that trait during search.
+- One variation plan is sampled per generated puzzle. For every configured target, the plan explicitly requests both outcomes: inclusion or exclusion of a prime-product decoy, and hidden or known visibility for each targeted high-value strip entry.
+- Candidate selection treats the complete variation plan as strict during bounded search and returns a matching puzzle whenever a compatible candidate is found.
+- Hard validity constraints always take precedence. If a variation plan is infeasible, generation may relax the soft plan and return a hard-valid puzzle instead of failing or retrying without a bound.
+- The built-in profile is characterized over the deterministic seed corpus `1..500`. Each observed target frequency must remain within `±5` percentage points of its configured percentage.
+
 Validation expectations:
 
 - the solved puzzle must satisfy all `8 Pairs Medium` value and result constraints

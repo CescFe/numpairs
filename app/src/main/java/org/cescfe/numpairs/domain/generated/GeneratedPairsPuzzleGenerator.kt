@@ -1,11 +1,13 @@
 package org.cescfe.numpairs.domain.generated
 
 import kotlin.random.Random
-import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsGenerationTargetSelector
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsPuzzleAssembler
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsPuzzleValidator
+import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSolvedCandidate
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSolvedCandidateGenerator
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsValuePairSelector
+import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsVariationPlanOutcome
+import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsVariationPlanSelector
 import org.cescfe.numpairs.domain.generated.internal.GeneratedStripMaskSelector
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
@@ -20,7 +22,7 @@ class GeneratedPairsPuzzleGenerator(
         }
     }
 
-    private val generationTargetSelector = GeneratedPairsGenerationTargetSelector(
+    private val variationPlanSelector = GeneratedPairsVariationPlanSelector(
         profile = profile,
         random = random
     )
@@ -53,25 +55,36 @@ class GeneratedPairsPuzzleGenerator(
     fun generate(): Puzzle = generateWithSolution().initialPuzzle
 
     fun generateWithSolution(): GeneratedPairsPuzzle {
-        val generationTargets = generationTargetSelector.select()
+        val variationPlan = variationPlanSelector.select()
+        var fallbackCandidate: GeneratedPairsPuzzleCandidate? = null
 
         repeat(maxAttempts) {
             val solvedCandidate = solvedCandidateGenerator.generate(
-                generationTargets = generationTargets
+                variationPlan = variationPlan
             ) ?: return@repeat
-            val knownEntryIds = stripMaskSelector.selectKnownEntryIds(
-                pairs = solvedCandidate.pairs
+            val stripMaskSelection = stripMaskSelector.selectKnownEntryIds(
+                pairs = solvedCandidate.pairs,
+                variationPlan = variationPlan
             ) ?: return@repeat
-            val solvedPuzzle = puzzleAssembler.buildSolvedPuzzle(candidate = solvedCandidate)
-            val generatedPuzzle = GeneratedPairsPuzzle(
-                initialPuzzle = puzzleAssembler.buildInitialPuzzle(
-                    solvedPuzzle = solvedPuzzle,
-                    knownEntryIds = knownEntryIds
-                ),
-                solvedPuzzle = solvedPuzzle
+            val candidate = GeneratedPairsPuzzleCandidate(
+                solvedCandidate = solvedCandidate,
+                knownEntryIds = stripMaskSelection.knownEntryIds
             )
 
-            if (puzzleValidator.isValid(generatedPuzzle = generatedPuzzle, pairs = solvedCandidate.pairs)) {
+            if (stripMaskSelection.variationPlanOutcome == GeneratedPairsVariationPlanOutcome.FALLBACK) {
+                if (fallbackCandidate == null) {
+                    fallbackCandidate = candidate
+                }
+                return@repeat
+            }
+
+            buildValidGeneratedPuzzle(candidate = candidate)?.let { generatedPuzzle ->
+                return generatedPuzzle
+            }
+        }
+
+        fallbackCandidate?.let { candidate ->
+            buildValidGeneratedPuzzle(candidate = candidate)?.let { generatedPuzzle ->
                 return generatedPuzzle
             }
         }
@@ -81,7 +94,30 @@ class GeneratedPairsPuzzleGenerator(
         )
     }
 
+    private fun buildValidGeneratedPuzzle(candidate: GeneratedPairsPuzzleCandidate): GeneratedPairsPuzzle? {
+        val solvedPuzzle = puzzleAssembler.buildSolvedPuzzle(candidate = candidate.solvedCandidate)
+        val generatedPuzzle = GeneratedPairsPuzzle(
+            initialPuzzle = puzzleAssembler.buildInitialPuzzle(
+                solvedPuzzle = solvedPuzzle,
+                knownEntryIds = candidate.knownEntryIds
+            ),
+            solvedPuzzle = solvedPuzzle
+        )
+
+        return generatedPuzzle.takeIf {
+            puzzleValidator.isValid(
+                generatedPuzzle = generatedPuzzle,
+                pairs = candidate.solvedCandidate.pairs
+            )
+        }
+    }
+
     companion object {
         private const val DEFAULT_MAX_ATTEMPTS = 50
     }
 }
+
+private data class GeneratedPairsPuzzleCandidate(
+    val solvedCandidate: GeneratedPairsSolvedCandidate,
+    val knownEntryIds: Set<Int>
+)

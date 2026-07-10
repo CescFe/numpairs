@@ -9,16 +9,37 @@ internal class GeneratedPairsValuePairSelector(
     private val profile: GeneratedPuzzleProfile,
     private val random: Random
 ) {
-    fun selectValuePairs(generationTargets: GeneratedPairsGenerationTargets): List<GeneratedPairsValuePair>? =
-        chooseValuePairs(
-            candidatePairs = candidateValuePairsForProfile().shuffled(random),
-            selectedPairs = emptyList(),
-            valueOccurrences = emptyMap(),
-            usedResults = emptySet(),
-            productAnchorCount = 0,
-            primeProductDecoyCount = 0,
-            generationTargets = generationTargets
+    fun selectValuePairs(variationPlan: GeneratedPairsVariationPlan): List<GeneratedPairsValuePair>? {
+        val candidatePairs = candidateValuePairsForProfile().shuffled(random)
+        val plannedPairs = chooseValuePairs(
+            candidatePairs = candidatePairs,
+            primeProductDecoyDirective = variationPlan.primeProductDecoyDirective
         )
+
+        if (plannedPairs != null ||
+            variationPlan.primeProductDecoyDirective == GeneratedPairsPrimeProductDecoyDirective.Unrestricted
+        ) {
+            return plannedPairs
+        }
+
+        return chooseValuePairs(
+            candidatePairs = candidatePairs,
+            primeProductDecoyDirective = GeneratedPairsPrimeProductDecoyDirective.Unrestricted
+        )
+    }
+
+    private fun chooseValuePairs(
+        candidatePairs: List<GeneratedPairsValuePair>,
+        primeProductDecoyDirective: GeneratedPairsPrimeProductDecoyDirective
+    ): List<GeneratedPairsValuePair>? = chooseValuePairs(
+        candidatePairs = candidatePairs,
+        selectedPairs = emptyList(),
+        valueOccurrences = emptyMap(),
+        usedResults = emptySet(),
+        productAnchorCount = 0,
+        primeProductDecoyCount = 0,
+        primeProductDecoyDirective = primeProductDecoyDirective
+    )
 
     private fun chooseValuePairs(
         candidatePairs: List<GeneratedPairsValuePair>,
@@ -27,7 +48,7 @@ internal class GeneratedPairsValuePairSelector(
         usedResults: Set<Int>,
         productAnchorCount: Int,
         primeProductDecoyCount: Int,
-        generationTargets: GeneratedPairsGenerationTargets
+        primeProductDecoyDirective: GeneratedPairsPrimeProductDecoyDirective
     ): List<GeneratedPairsValuePair>? {
         if (!canStillSatisfyProductAnchorMix(
                 productAnchorCount = productAnchorCount,
@@ -37,13 +58,26 @@ internal class GeneratedPairsValuePairSelector(
             return null
         }
 
+        if (!primeProductDecoyDirective.canStillBeSatisfied(
+                currentPairCount = primeProductDecoyCount,
+                remainingPairSlots = profile.size.pairCount - selectedPairs.size
+            )
+        ) {
+            return null
+        }
+
         if (selectedPairs.size == profile.size.pairCount) {
             return selectedPairs.takeIf { pairs ->
-                pairs.hasExpectedProductAnchorMix()
+                pairs.hasExpectedProductAnchorMix() &&
+                    primeProductDecoyDirective.isSatisfiedBy(pairCount = primeProductDecoyCount)
             }
         }
 
-        val orderedCandidatePairs = if (generationTargets.shouldPreferPrimeProductDecoy(primeProductDecoyCount)) {
+        val orderedCandidatePairs = if (
+            primeProductDecoyDirective.shouldPreferPrimeProductDecoy(
+                currentPairCount = primeProductDecoyCount
+            )
+        ) {
             candidatePairs.sortedByDescending { pair ->
                 if (pair.isPrimeProductDecoy()) 1 else 0
             }
@@ -63,6 +97,12 @@ internal class GeneratedPairsValuePairSelector(
                 return@firstNotNullOfOrNull null
             }
 
+            val updatedPrimeProductDecoyCount =
+                primeProductDecoyCount + candidatePair.primeProductDecoyIncrement()
+            if (!primeProductDecoyDirective.allows(pairCount = updatedPrimeProductDecoyCount)) {
+                return@firstNotNullOfOrNull null
+            }
+
             chooseValuePairs(
                 candidatePairs = candidatePairs,
                 selectedPairs = selectedPairs + candidatePair,
@@ -71,8 +111,8 @@ internal class GeneratedPairsValuePairSelector(
                 productAnchorCount = productAnchorCount + candidatePair.productAnchorIncrement(
                     productAnchorMix = profile.resultConstraints.productAnchorMix
                 ),
-                primeProductDecoyCount = primeProductDecoyCount + candidatePair.primeProductDecoyIncrement(),
-                generationTargets = generationTargets
+                primeProductDecoyCount = updatedPrimeProductDecoyCount,
+                primeProductDecoyDirective = primeProductDecoyDirective
             )
         }
     }
@@ -119,6 +159,32 @@ internal class GeneratedPairsValuePairSelector(
         }
     }
 }
+
+private val GeneratedPairsPrimeProductDecoyDirective.requiredPairCount: Int?
+    get() = when (this) {
+        GeneratedPairsPrimeProductDecoyDirective.Unrestricted -> null
+        GeneratedPairsPrimeProductDecoyDirective.Exclude -> 0
+        is GeneratedPairsPrimeProductDecoyDirective.Include -> pairCount
+    }
+
+private fun GeneratedPairsPrimeProductDecoyDirective.canStillBeSatisfied(
+    currentPairCount: Int,
+    remainingPairSlots: Int
+): Boolean {
+    val requiredPairCount = requiredPairCount ?: return true
+
+    return currentPairCount <= requiredPairCount &&
+        currentPairCount + remainingPairSlots >= requiredPairCount
+}
+
+private fun GeneratedPairsPrimeProductDecoyDirective.isSatisfiedBy(pairCount: Int): Boolean =
+    requiredPairCount?.let { requiredPairCount -> pairCount == requiredPairCount } ?: true
+
+private fun GeneratedPairsPrimeProductDecoyDirective.shouldPreferPrimeProductDecoy(currentPairCount: Int): Boolean =
+    requiredPairCount?.let { requiredPairCount -> currentPairCount < requiredPairCount } ?: false
+
+private fun GeneratedPairsPrimeProductDecoyDirective.allows(pairCount: Int): Boolean =
+    requiredPairCount?.let { requiredPairCount -> pairCount <= requiredPairCount } ?: true
 
 private fun GeneratedPairsValuePair.canBeAddedTo(
     valueOccurrences: Map<Int, Int>,
