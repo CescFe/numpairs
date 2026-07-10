@@ -1,9 +1,12 @@
 package org.cescfe.numpairs.domain.generated
 
+import kotlin.random.Random
+import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsStripEntryVisibilityDirective
+import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsVariationPlanSelector
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class GeneratedPairsPuzzleGeneratorTest {
@@ -38,39 +41,58 @@ class GeneratedPairsPuzzleGeneratorTest {
     }
 
     @Test
-    fun generator_fails_after_bounded_attempts_when_profile_cannot_be_satisfied() {
-        val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
-        val impossibleProfile = profile.copy(
-            resultConstraints = profile.resultConstraints.copy(
-                maxMultiplicationResult = 1
-            )
-        )
-
-        assertThrows(IllegalStateException::class.java) {
-            GeneratedPairsPuzzleGenerator(
-                profile = impossibleProfile,
-                seed = 2026,
-                maxAttempts = 1
-            ).generateWithSolution()
-        }
-    }
-
-    @Test
     fun generator_returns_a_hard_valid_fallback_when_the_soft_mask_plan_is_infeasible() {
-        val baseProfile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
-        val profile = baseProfile.copy(
-            initialStripMaskPolicy = baseProfile.initialStripMaskPolicy.copy(
-                highValueMaskTargets = listOf(
-                    HighValueMaskTarget(
-                        rankFromHighest = 1,
-                        targetHiddenProbability = ProbabilityPercent(100)
+        val size = GeneratedPuzzleSize(pairCount = 2)
+        val profile = GeneratedPuzzleProfile.create(
+            definition = GeneratedPuzzleProfileDefinition(
+                id = GeneratedPuzzleProfileId("joint-soft-mask-fallback"),
+                size = size,
+                stripValuePolicy = StripValuePolicy(
+                    valueRange = 2..5,
+                    maxOccurrencesPerValue = 1
+                ),
+                resultConstraints = ResultConstraints(
+                    maxMultiplicationResult = 25,
+                    allowsDuplicateBoardResults = false
+                ),
+                initialStripMaskPolicy = InitialStripMaskPolicy(
+                    knownEntryCountRange = 1..1,
+                    requiredAnchors = emptySet(),
+                    distributionPolicy = StripKnownEntryDistributionPolicy.UNRESTRICTED,
+                    maxConsecutiveHiddenEntries = 3
+                ),
+                generationPolicy = GenerationPolicy(
+                    isBoardTileShufflingEnabled = true
+                ),
+                varietyPolicy = GeneratedPuzzleVarietyPolicy(
+                    highValueMaskTargets = listOf(
+                        HighValueMaskTarget(
+                            rankFromHighest = 1,
+                            targetHiddenProbability = ProbabilityPercent(0)
+                        ),
+                        HighValueMaskTarget(
+                            rankFromHighest = 2,
+                            targetHiddenProbability = ProbabilityPercent(1)
+                        )
                     )
                 )
             )
+        ).getOrThrow()
+        val seed = 2026
+        val sampledPlan = GeneratedPairsVariationPlanSelector(
+            profile = profile,
+            random = Random(seed)
+        ).select()
+        val targetedEntryIds = setOf(size.stripEntryCount - 1, size.stripEntryCount - 2)
+
+        assertEquals(
+            targetedEntryIds.associateWith { GeneratedPairsStripEntryVisibilityDirective.KNOWN },
+            sampledPlan.stripEntryVisibilityDirectives
         )
+
         val generatedPuzzle = GeneratedPairsPuzzleGenerator(
             profile = profile,
-            seed = 2026,
+            seed = seed,
             maxAttempts = 1
         ).generateWithSolution()
 
@@ -78,6 +100,11 @@ class GeneratedPairsPuzzleGeneratorTest {
             puzzle = generatedPuzzle.initialPuzzle,
             profile = profile
         )
-        assertTrue(generatedPuzzle.initialPuzzle.strip.entries.last().item is StripItem.Known)
+        assertFalse(
+            targetedEntryIds.all { entryId ->
+                generatedPuzzle.initialPuzzle.strip.entries.single { entry -> entry.id == entryId }.item is
+                    StripItem.Known
+            }
+        )
     }
 }

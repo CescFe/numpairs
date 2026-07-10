@@ -8,28 +8,59 @@ data class GeneratedPuzzleProfileId(val value: String) {
     }
 }
 
-data class GeneratedPuzzleProfile(
+data class GeneratedPuzzleProfileDefinition(
     val id: GeneratedPuzzleProfileId,
     val size: GeneratedPuzzleSize,
     val stripValuePolicy: StripValuePolicy,
     val resultConstraints: ResultConstraints,
     val initialStripMaskPolicy: InitialStripMaskPolicy,
-    val generationPolicy: GenerationPolicy
-) {
-    init {
-        require(resultConstraints.pairCount == size.pairCount) {
-            "Result constraints must use the generated puzzle pair count."
-        }
-        require(initialStripMaskPolicy.stripEntryCount == size.stripEntryCount) {
-            "Initial strip mask policy must use the generated puzzle strip entry count."
+    val generationPolicy: GenerationPolicy,
+    val varietyPolicy: GeneratedPuzzleVarietyPolicy = GeneratedPuzzleVarietyPolicy()
+)
+
+class GeneratedPuzzleProfile private constructor(definition: GeneratedPuzzleProfileDefinition) {
+    val id: GeneratedPuzzleProfileId = definition.id
+    val size: GeneratedPuzzleSize = definition.size
+    val stripValuePolicy: StripValuePolicy = definition.stripValuePolicy
+    val resultConstraints: ResultConstraints = definition.resultConstraints
+    val initialStripMaskPolicy: InitialStripMaskPolicy = definition.initialStripMaskPolicy
+    val generationPolicy: GenerationPolicy = definition.generationPolicy
+    val varietyPolicy: GeneratedPuzzleVarietyPolicy = definition.varietyPolicy
+
+    val hiddenEntryCountRange: IntRange = initialStripMaskPolicy.knownEntryCountRange.let { knownCountRange ->
+        (size.stripEntryCount - knownCountRange.last)..(size.stripEntryCount - knownCountRange.first)
+    }
+
+    companion object {
+        fun create(definition: GeneratedPuzzleProfileDefinition): GeneratedPuzzleProfileCreation {
+            val snapshot = definition.snapshot()
+            val violations = GeneratedPuzzleProfileSpecification.violationsFor(definition = snapshot)
+
+            return if (violations.isEmpty()) {
+                GeneratedPuzzleProfileCreation.Created(profile = GeneratedPuzzleProfile(definition = snapshot))
+            } else {
+                GeneratedPuzzleProfileCreation.Rejected(violations = violations)
+            }
         }
     }
 }
+
+private fun GeneratedPuzzleProfileDefinition.snapshot(): GeneratedPuzzleProfileDefinition = copy(
+    initialStripMaskPolicy = initialStripMaskPolicy.copy(
+        requiredAnchors = initialStripMaskPolicy.requiredAnchors.toSet()
+    ),
+    varietyPolicy = varietyPolicy.copy(
+        highValueMaskTargets = varietyPolicy.highValueMaskTargets.toList()
+    )
+)
 
 data class GeneratedPuzzleSize(val pairCount: Int) {
     init {
         require(pairCount > 0) {
             "Generated puzzle pair count must be positive."
+        }
+        require(pairCount <= Int.MAX_VALUE / 2) {
+            "Generated puzzle pair count is too large."
         }
     }
 
@@ -55,26 +86,13 @@ data class StripValuePolicy(val valueRange: IntRange, val maxOccurrencesPerValue
 }
 
 data class ResultConstraints(
-    val pairCount: Int,
     val maxMultiplicationResult: Int,
     val allowsDuplicateBoardResults: Boolean,
     val productAnchorMix: ProductAnchorMix? = null
 ) {
     init {
-        require(pairCount > 0) {
-            "Result constraint pair count must be positive."
-        }
         require(maxMultiplicationResult > 0) {
             "Maximum multiplication result must be positive."
-        }
-
-        productAnchorMix?.let { anchorMix ->
-            require(!anchorMix.countRange.isEmpty()) {
-                "Product-anchor count range must not be empty."
-            }
-            require(anchorMix.countRange.first >= 0 && anchorMix.countRange.last <= pairCount) {
-                "Product-anchor count range must fit within the generated puzzle pair count."
-            }
         }
     }
 }
@@ -84,50 +102,47 @@ data class ProductAnchorMix(val productResultGreaterThan: Int, val countRange: I
         require(productResultGreaterThan >= 0) {
             "Product-anchor threshold must not be negative."
         }
+        require(!countRange.isEmpty() && countRange.first >= 0) {
+            "Product-anchor count range must contain non-negative counts."
+        }
     }
 }
 
 data class InitialStripMaskPolicy(
-    val stripEntryCount: Int,
     val knownEntryCountRange: IntRange,
     val requiredAnchors: Set<RequiredKnownStripAnchor>,
     val distributionPolicy: StripKnownEntryDistributionPolicy,
-    val maxConsecutiveHiddenEntries: Int,
-    val highValueMaskTargets: List<HighValueMaskTarget> = emptyList()
+    val maxConsecutiveHiddenEntries: Int
 ) {
     init {
-        require(stripEntryCount > 0) {
-            "Initial strip mask policy strip entry count must be positive."
-        }
-        require(!knownEntryCountRange.isEmpty()) {
-            "Known strip entry count range must not be empty."
-        }
-        require(knownEntryCountRange.first >= 0 && knownEntryCountRange.last <= stripEntryCount) {
-            "Known strip entry count range must fit within the generated puzzle strip entry count."
+        require(!knownEntryCountRange.isEmpty() && knownEntryCountRange.first >= 0) {
+            "Known strip entry count range must contain non-negative counts."
         }
         require(maxConsecutiveHiddenEntries > 0) {
             "Maximum consecutive hidden strip entries must be positive."
         }
-
-        highValueMaskTargets.forEach { target ->
-            require(target.rankFromHighest in 1..stripEntryCount) {
-                "High-value mask target rank must fit within the generated puzzle strip entry count."
-            }
-        }
     }
-
-    val hiddenEntryCountRange: IntRange =
-        (stripEntryCount - knownEntryCountRange.last)..(stripEntryCount - knownEntryCountRange.first)
 }
 
 enum class RequiredKnownStripAnchor {
     HIGHEST_STRIP_ENTRY
 }
 
+internal fun Set<RequiredKnownStripAnchor>.resolveEntryIds(stripEntryCount: Int): Set<Int> = map { anchor ->
+    when (anchor) {
+        RequiredKnownStripAnchor.HIGHEST_STRIP_ENTRY -> stripEntryCount - 1
+    }
+}.toSet()
+
 enum class StripKnownEntryDistributionPolicy {
     SPREAD_ACROSS_STRIP_AND_PAIRS_WHEN_POSSIBLE,
     UNRESTRICTED
 }
+
+data class GeneratedPuzzleVarietyPolicy(
+    val highValueMaskTargets: List<HighValueMaskTarget> = emptyList(),
+    val primeProductDecoyTarget: PrimeProductDecoyTarget? = null
+)
 
 data class HighValueMaskTarget(val rankFromHighest: Int, val targetHiddenProbability: ProbabilityPercent)
 
@@ -139,12 +154,7 @@ data class ProbabilityPercent(val value: Int) {
     }
 }
 
-data class GenerationPolicy(
-    val isBoardTileShufflingEnabled: Boolean,
-    val isBoundedGenerationExpected: Boolean,
-    val isDeterministicGenerationExpected: Boolean,
-    val primeProductDecoyTarget: PrimeProductDecoyTarget? = null
-)
+data class GenerationPolicy(val isBoardTileShufflingEnabled: Boolean)
 
 data class PrimeProductDecoyTarget(
     val targetPuzzlePercent: ProbabilityPercent,

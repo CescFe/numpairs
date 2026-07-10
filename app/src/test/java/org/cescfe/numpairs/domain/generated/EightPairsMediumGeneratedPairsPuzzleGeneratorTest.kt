@@ -80,7 +80,7 @@ class EightPairsMediumGeneratedPairsPuzzleGeneratorTest {
                 seed = seed
             ).generateWithSolution()
         }
-        val primeProductDecoyTarget = requireNotNull(profile.generationPolicy.primeProductDecoyTarget)
+        val primeProductDecoyTarget = requireNotNull(profile.varietyPolicy.primeProductDecoyTarget)
         val primeProductDecoyPuzzleCount = generatedPuzzles.count { puzzle ->
             puzzle.solvedPuzzle.multiplicationTiles().any(Tile::isPrimeProductDecoy)
         }
@@ -90,7 +90,7 @@ class EightPairsMediumGeneratedPairsPuzzleGeneratorTest {
             sampleSize = generatedPuzzles.size,
             targetPercentage = primeProductDecoyTarget.targetPuzzlePercent
         )
-        profile.initialStripMaskPolicy.highValueMaskTargets.forEach { target ->
+        profile.varietyPolicy.highValueMaskTargets.forEach { target ->
             val targetEntryIndex = profile.size.stripEntryCount - target.rankFromHighest
             val hiddenPuzzleCount = generatedPuzzles.count { puzzle ->
                 puzzle.initialPuzzle.strip.entries[targetEntryIndex].item == StripItem.Hidden

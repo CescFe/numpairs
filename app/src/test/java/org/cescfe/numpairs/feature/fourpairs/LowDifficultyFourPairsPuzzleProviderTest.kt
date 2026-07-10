@@ -29,7 +29,7 @@ class LowDifficultyFourPairsPuzzleProviderTest {
         )
         assertTrue(
             puzzle.strip.entries.count { entry -> entry.item == StripItem.Hidden } in
-                profile.initialStripMaskPolicy.hiddenEntryCountRange
+                profile.hiddenEntryCountRange
         )
     }
 

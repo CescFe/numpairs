@@ -25,7 +25,7 @@ internal class GeneratedPairsVariationPlanSelector(
     )
 
     private fun selectPrimeProductDecoyDirective(): GeneratedPairsPrimeProductDecoyDirective {
-        val primeProductDecoyTarget = profile.generationPolicy.primeProductDecoyTarget
+        val primeProductDecoyTarget = profile.varietyPolicy.primeProductDecoyTarget
             ?: return GeneratedPairsPrimeProductDecoyDirective.Unrestricted
 
         return when (primeProductDecoyTarget.pairPattern) {
@@ -42,7 +42,7 @@ internal class GeneratedPairsVariationPlanSelector(
     }
 
     private fun selectStripEntryVisibilityDirectives(): Map<Int, GeneratedPairsStripEntryVisibilityDirective> =
-        profile.initialStripMaskPolicy.highValueMaskTargets.associate { target ->
+        profile.varietyPolicy.highValueMaskTargets.associate { target ->
             val entryId = profile.size.stripEntryCount - target.rankFromHighest
             val directive = if (shouldApply(probability = target.targetHiddenProbability)) {
                 GeneratedPairsStripEntryVisibilityDirective.HIDDEN

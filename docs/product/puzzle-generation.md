@@ -38,6 +38,18 @@ The solved puzzle is the generator's source of truth. The initial puzzle is the 
 
 Generated puzzle profiles define size, value constraints, result constraints, masking, and validation expectations for each generated mode.
 
+Profile definitions are not usable directly. They must be created through the generated-profile factory, which derives board, strip, and hidden-entry counts from puzzle size and returns either a validated profile or a non-empty set of typed compatibility violations.
+
+Profile concerns are separated as follows:
+
+- hard rules cover strip values, arithmetic results, product anchors, initial mask shape, required anchors, hidden runs, and distribution
+- soft variety policy covers high-value masking frequencies and prime-product decoy frequencies
+- generation execution concerns such as attempt limits and deterministic entropy are supplied to the generator rather than stored as passive profile flags
+
+Soft targets that are structurally unreachable for the profile are rejected during profile creation. Bounded fallback remains available for a sampled plan that is infeasible only for the candidates explored during that generation run.
+
+Selectors and final generated-puzzle validation use the same hard-rule objects. Final validation returns a report with stable rule identifiers and context for every failed rule; it does not stop at the first failure.
+
 ### `4 Pairs Low`
 
 Status: implemented.

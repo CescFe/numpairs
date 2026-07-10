@@ -2,9 +2,10 @@ package org.cescfe.numpairs.domain.generated.internal
 
 import kotlin.random.Random
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
-import org.cescfe.numpairs.domain.generated.StripKnownEntryDistributionPolicy
 
 internal class GeneratedStripMaskSelector(private val profile: GeneratedPuzzleProfile, private val random: Random) {
+    private val hardRule = GeneratedPuzzleHardRuleSet.from(profile = profile).stripMask
+
     fun selectKnownEntryIds(
         pairs: List<GeneratedPairsEntryPair>,
         variationPlan: GeneratedPairsVariationPlan
@@ -46,32 +47,14 @@ internal class GeneratedStripMaskSelector(private val profile: GeneratedPuzzlePr
     private fun hardValidKnownEntryIdCandidates(
         knownEntryCount: Int,
         pairs: List<GeneratedPairsEntryPair>
-    ): List<Set<Int>> {
-        val pairKeyByEntryId = pairs.flatMap { pair ->
-            pair.entryIds.map { entryId -> entryId to pair.key }
-        }.toMap()
-
-        val candidates = knownEntryIdCandidatesFor(knownEntryCount = knownEntryCount)
-            .filter { knownEntryIds ->
-                knownEntryIds.maxGeneratedPairsConsecutiveHiddenEntries(
-                    totalEntryCount = profile.size.stripEntryCount
-                ) <=
-                    profile.initialStripMaskPolicy.maxConsecutiveHiddenEntries
-            }
-
-        return when (profile.initialStripMaskPolicy.distributionPolicy) {
-            StripKnownEntryDistributionPolicy.SPREAD_ACROSS_STRIP_AND_PAIRS_WHEN_POSSIBLE -> {
-                candidates.filter { knownEntryIds ->
-                    knownEntryIds
-                        .map { entryId -> pairKeyByEntryId.getValue(entryId) }
-                        .toSet()
-                        .size == knownEntryIds.size
-                }
-            }
-
-            StripKnownEntryDistributionPolicy.UNRESTRICTED -> candidates
+    ): List<Set<Int>> = knownEntryIdCandidatesFor(knownEntryCount = knownEntryCount)
+        .filter { knownEntryIds ->
+            hardRule.isSatisfied(
+                knownEntryIds = knownEntryIds,
+                hiddenEntryCount = profile.size.stripEntryCount - knownEntryIds.size,
+                pairKeys = pairs.mapTo(mutableSetOf(), GeneratedPairsEntryPair::key)
+            )
         }
-    }
 
     private fun Set<Int>.matches(visibilityDirectives: Map<Int, GeneratedPairsStripEntryVisibilityDirective>): Boolean =
         visibilityDirectives.all { (entryId, directive) ->

@@ -2,13 +2,13 @@ package org.cescfe.numpairs.domain.generated.internal
 
 import kotlin.random.Random
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
-import org.cescfe.numpairs.domain.generated.ResultConstraints
-import org.cescfe.numpairs.domain.generated.StripValuePolicy
 
 internal class GeneratedPairsValuePairSelector(
     private val profile: GeneratedPuzzleProfile,
     private val random: Random
 ) {
+    private val hardRules = GeneratedPuzzleHardRuleSet.from(profile = profile).valuePairs
+
     fun selectValuePairs(variationPlan: GeneratedPairsVariationPlan): List<GeneratedPairsValuePair>? {
         val candidatePairs = candidateValuePairsForProfile().shuffled(random)
         val plannedPairs = chooseValuePairs(
@@ -50,7 +50,7 @@ internal class GeneratedPairsValuePairSelector(
         primeProductDecoyCount: Int,
         primeProductDecoyDirective: GeneratedPairsPrimeProductDecoyDirective
     ): List<GeneratedPairsValuePair>? {
-        if (!canStillSatisfyProductAnchorMix(
+        if (!hardRules.canStillSatisfyProductAnchorMix(
                 productAnchorCount = productAnchorCount,
                 remainingPairSlots = profile.size.pairCount - selectedPairs.size
             )
@@ -68,7 +68,7 @@ internal class GeneratedPairsValuePairSelector(
 
         if (selectedPairs.size == profile.size.pairCount) {
             return selectedPairs.takeIf { pairs ->
-                pairs.hasExpectedProductAnchorMix() &&
+                hardRules.isComplete(pairs = pairs) &&
                     primeProductDecoyDirective.isSatisfiedBy(pairCount = primeProductDecoyCount)
             }
         }
@@ -87,11 +87,10 @@ internal class GeneratedPairsValuePairSelector(
 
         return orderedCandidatePairs.firstNotNullOfOrNull { candidatePair ->
             if (
-                !candidatePair.canBeAddedTo(
+                !hardRules.canBeAdded(
+                    pair = candidatePair,
                     valueOccurrences = valueOccurrences,
-                    usedResults = usedResults,
-                    resultConstraints = profile.resultConstraints,
-                    stripValuePolicy = profile.stripValuePolicy
+                    usedResults = usedResults
                 )
             ) {
                 return@firstNotNullOfOrNull null
@@ -108,29 +107,11 @@ internal class GeneratedPairsValuePairSelector(
                 selectedPairs = selectedPairs + candidatePair,
                 valueOccurrences = valueOccurrences.with(candidatePair),
                 usedResults = usedResults + candidatePair.resultValues,
-                productAnchorCount = productAnchorCount + candidatePair.productAnchorIncrement(
-                    productAnchorMix = profile.resultConstraints.productAnchorMix
-                ),
+                productAnchorCount = productAnchorCount + hardRules.productAnchorIncrement(pair = candidatePair),
                 primeProductDecoyCount = updatedPrimeProductDecoyCount,
                 primeProductDecoyDirective = primeProductDecoyDirective
             )
         }
-    }
-
-    private fun canStillSatisfyProductAnchorMix(productAnchorCount: Int, remainingPairSlots: Int): Boolean {
-        val productAnchorMix = profile.resultConstraints.productAnchorMix ?: return true
-
-        return productAnchorCount <= productAnchorMix.countRange.last &&
-            productAnchorCount + remainingPairSlots >= productAnchorMix.countRange.first
-    }
-
-    private fun List<GeneratedPairsValuePair>.hasExpectedProductAnchorMix(): Boolean {
-        val productAnchorMix = profile.resultConstraints.productAnchorMix ?: return true
-        val productAnchorCount = count { pair ->
-            pair.product > productAnchorMix.productResultGreaterThan
-        }
-
-        return productAnchorCount in productAnchorMix.countRange
     }
 
     private fun candidateValuePairsForProfile(): List<GeneratedPairsValuePair> = buildList {
@@ -142,15 +123,10 @@ internal class GeneratedPairsValuePairSelector(
                 )
 
                 if (
-                    candidatePair.requiredOccurrencesByValue()
-                        .all { (_, occurrenceCount) ->
-                            occurrenceCount <= profile.stripValuePolicy.maxOccurrencesPerValue
-                        } &&
-                    candidatePair.canBeAddedTo(
+                    hardRules.canBeAdded(
+                        pair = candidatePair,
                         valueOccurrences = emptyMap(),
-                        usedResults = emptySet(),
-                        resultConstraints = profile.resultConstraints,
-                        stripValuePolicy = profile.stripValuePolicy
+                        usedResults = emptySet()
                     )
                 ) {
                     add(candidatePair)
@@ -185,27 +161,6 @@ private fun GeneratedPairsPrimeProductDecoyDirective.shouldPreferPrimeProductDec
 
 private fun GeneratedPairsPrimeProductDecoyDirective.allows(pairCount: Int): Boolean =
     requiredPairCount?.let { requiredPairCount -> pairCount <= requiredPairCount } ?: true
-
-private fun GeneratedPairsValuePair.canBeAddedTo(
-    valueOccurrences: Map<Int, Int>,
-    usedResults: Set<Int>,
-    resultConstraints: ResultConstraints,
-    stripValuePolicy: StripValuePolicy
-): Boolean {
-    if (product > resultConstraints.maxMultiplicationResult) {
-        return false
-    }
-
-    if (!resultConstraints.allowsDuplicateBoardResults &&
-        (resultValues.size != 2 || resultValues.any { result -> result in usedResults })
-    ) {
-        return false
-    }
-
-    return requiredOccurrencesByValue().all { (value, newOccurrenceCount) ->
-        valueOccurrences.getOrDefault(value, 0) + newOccurrenceCount <= stripValuePolicy.maxOccurrencesPerValue
-    }
-}
 
 private fun Map<Int, Int>.with(pair: GeneratedPairsValuePair): Map<Int, Int> {
     val updatedOccurrences = toMutableMap()

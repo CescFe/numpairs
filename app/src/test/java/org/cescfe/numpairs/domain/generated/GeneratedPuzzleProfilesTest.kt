@@ -25,7 +25,7 @@ class GeneratedPuzzleProfilesTest {
         assertNull(profile.resultConstraints.productAnchorMix)
 
         assertEquals(3..3, profile.initialStripMaskPolicy.knownEntryCountRange)
-        assertEquals(5..5, profile.initialStripMaskPolicy.hiddenEntryCountRange)
+        assertEquals(5..5, profile.hiddenEntryCountRange)
         assertEquals(
             setOf(RequiredKnownStripAnchor.HIGHEST_STRIP_ENTRY),
             profile.initialStripMaskPolicy.requiredAnchors
@@ -37,9 +37,7 @@ class GeneratedPuzzleProfilesTest {
         assertEquals(2, profile.initialStripMaskPolicy.maxConsecutiveHiddenEntries)
 
         assertTrue(profile.generationPolicy.isBoardTileShufflingEnabled)
-        assertTrue(profile.generationPolicy.isBoundedGenerationExpected)
-        assertTrue(profile.generationPolicy.isDeterministicGenerationExpected)
-        assertNull(profile.generationPolicy.primeProductDecoyTarget)
+        assertNull(profile.varietyPolicy.primeProductDecoyTarget)
     }
 
     @Test
@@ -63,7 +61,7 @@ class GeneratedPuzzleProfilesTest {
         assertEquals(2..4, productAnchorMix.countRange)
 
         assertEquals(6..7, profile.initialStripMaskPolicy.knownEntryCountRange)
-        assertEquals(9..10, profile.initialStripMaskPolicy.hiddenEntryCountRange)
+        assertEquals(9..10, profile.hiddenEntryCountRange)
         assertEquals(emptySet<RequiredKnownStripAnchor>(), profile.initialStripMaskPolicy.requiredAnchors)
         assertEquals(
             StripKnownEntryDistributionPolicy.UNRESTRICTED,
@@ -85,14 +83,12 @@ class GeneratedPuzzleProfilesTest {
                     targetHiddenProbability = ProbabilityPercent(40)
                 )
             ),
-            profile.initialStripMaskPolicy.highValueMaskTargets
+            profile.varietyPolicy.highValueMaskTargets
         )
 
         assertTrue(profile.generationPolicy.isBoardTileShufflingEnabled)
-        assertTrue(profile.generationPolicy.isBoundedGenerationExpected)
-        assertTrue(profile.generationPolicy.isDeterministicGenerationExpected)
 
-        val primeProductDecoyTarget = requireNotNull(profile.generationPolicy.primeProductDecoyTarget)
+        val primeProductDecoyTarget = requireNotNull(profile.varietyPolicy.primeProductDecoyTarget)
         assertEquals(ProbabilityPercent(30), primeProductDecoyTarget.targetPuzzlePercent)
         assertEquals(1, primeProductDecoyTarget.targetPairCount)
         assertEquals(PrimeProductDecoyPairPattern.ONE_AND_PRIME, primeProductDecoyTarget.pairPattern)
