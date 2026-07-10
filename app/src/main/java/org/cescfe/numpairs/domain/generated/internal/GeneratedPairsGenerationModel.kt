@@ -9,9 +9,38 @@ internal data class GeneratedPairsSolvedCandidate(
     val pairs: List<GeneratedPairsEntryPair>
 )
 
-internal data class GeneratedPairsGenerationTargets(val primeProductDecoyPairTargetCount: Int) {
-    fun shouldPreferPrimeProductDecoy(currentPrimeProductDecoyCount: Int): Boolean =
-        currentPrimeProductDecoyCount < primeProductDecoyPairTargetCount
+internal data class GeneratedPairsVariationPlan(
+    val primeProductDecoyDirective: GeneratedPairsPrimeProductDecoyDirective,
+    val stripEntryVisibilityDirectives: Map<Int, GeneratedPairsStripEntryVisibilityDirective>
+)
+
+internal sealed interface GeneratedPairsPrimeProductDecoyDirective {
+    data object Unrestricted : GeneratedPairsPrimeProductDecoyDirective
+
+    data object Exclude : GeneratedPairsPrimeProductDecoyDirective
+
+    data class Include(val pairCount: Int) : GeneratedPairsPrimeProductDecoyDirective {
+        init {
+            require(pairCount > 0) {
+                "A prime-product decoy inclusion directive requires a positive pair count."
+            }
+        }
+    }
+}
+
+internal enum class GeneratedPairsStripEntryVisibilityDirective {
+    KNOWN,
+    HIDDEN
+}
+
+internal data class GeneratedPairsStripMaskSelection(
+    val knownEntryIds: Set<Int>,
+    val variationPlanOutcome: GeneratedPairsVariationPlanOutcome
+)
+
+internal enum class GeneratedPairsVariationPlanOutcome {
+    HONORED,
+    FALLBACK
 }
 
 internal data class GeneratedPairsValuePair(val firstValue: Int, val secondValue: Int) {

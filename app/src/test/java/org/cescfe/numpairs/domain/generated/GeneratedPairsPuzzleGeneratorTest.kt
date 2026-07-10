@@ -1,7 +1,9 @@
 package org.cescfe.numpairs.domain.generated
 
+import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class GeneratedPairsPuzzleGeneratorTest {
@@ -51,5 +53,31 @@ class GeneratedPairsPuzzleGeneratorTest {
                 maxAttempts = 1
             ).generateWithSolution()
         }
+    }
+
+    @Test
+    fun generator_returns_a_hard_valid_fallback_when_the_soft_mask_plan_is_infeasible() {
+        val baseProfile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
+        val profile = baseProfile.copy(
+            initialStripMaskPolicy = baseProfile.initialStripMaskPolicy.copy(
+                highValueMaskTargets = listOf(
+                    HighValueMaskTarget(
+                        rankFromHighest = 1,
+                        targetHiddenProbability = ProbabilityPercent(100)
+                    )
+                )
+            )
+        )
+        val generatedPuzzle = GeneratedPairsPuzzleGenerator(
+            profile = profile,
+            seed = 2026,
+            maxAttempts = 1
+        ).generateWithSolution()
+
+        assertGeneratedInitialPuzzleStructure(
+            puzzle = generatedPuzzle.initialPuzzle,
+            profile = profile
+        )
+        assertTrue(generatedPuzzle.initialPuzzle.strip.entries.last().item is StripItem.Known)
     }
 }

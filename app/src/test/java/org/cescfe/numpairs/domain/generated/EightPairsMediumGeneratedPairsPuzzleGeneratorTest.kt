@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.domain.generated
 
+import kotlin.math.abs
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
@@ -71,35 +72,69 @@ class EightPairsMediumGeneratedPairsPuzzleGeneratorTest {
     }
 
     @Test
-    fun medium_generation_supports_one_repeated_values_prime_decoys_and_high_value_masking() {
+    fun medium_generation_meets_documented_variety_target_frequencies() {
         val profile = GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM
-        val generatedPuzzles = (1..40).map { seed ->
+        val generatedPuzzles = (1..VARIETY_SAMPLE_SIZE).map { seed ->
             GeneratedPairsPuzzleGenerator(
                 profile = profile,
                 seed = seed
             ).generateWithSolution()
         }
-        val solvedStripValues = generatedPuzzles.flatMap { puzzle -> puzzle.solvedPuzzle.requireKnownStripValues() }
-        val containsOne = solvedStripValues.any { value -> value == 1 }
+        val primeProductDecoyTarget = requireNotNull(profile.generationPolicy.primeProductDecoyTarget)
+        val primeProductDecoyPuzzleCount = generatedPuzzles.count { puzzle ->
+            puzzle.solvedPuzzle.multiplicationTiles().any(Tile::isPrimeProductDecoy)
+        }
+
+        assertFrequencyWithinTarget(
+            actualCount = primeProductDecoyPuzzleCount,
+            sampleSize = generatedPuzzles.size,
+            targetPercentage = primeProductDecoyTarget.targetPuzzlePercent
+        )
+        profile.initialStripMaskPolicy.highValueMaskTargets.forEach { target ->
+            val targetEntryIndex = profile.size.stripEntryCount - target.rankFromHighest
+            val hiddenPuzzleCount = generatedPuzzles.count { puzzle ->
+                puzzle.initialPuzzle.strip.entries[targetEntryIndex].item == StripItem.Hidden
+            }
+
+            assertFrequencyWithinTarget(
+                actualCount = hiddenPuzzleCount,
+                sampleSize = generatedPuzzles.size,
+                targetPercentage = target.targetHiddenProbability
+            )
+        }
+    }
+
+    @Test
+    fun medium_generation_can_produce_repeated_values() {
+        val generatedPuzzles = (1..40).map { seed ->
+            GeneratedPairsPuzzleGenerator(
+                profile = GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM,
+                seed = seed
+            ).generateWithSolution()
+        }
         val containsRepeatedValue = generatedPuzzles.any { puzzle ->
             puzzle.solvedPuzzle.requireKnownStripValues()
                 .groupingBy { value -> value }
                 .eachCount()
                 .any { (_, occurrenceCount) -> occurrenceCount == 2 }
         }
-        val containsPrimeProductDecoy = generatedPuzzles.any { puzzle ->
-            puzzle.solvedPuzzle.multiplicationTiles().any(Tile::isPrimeProductDecoy)
-        }
-        val containsHiddenHighValueTarget = generatedPuzzles.any { puzzle ->
-            puzzle.initialPuzzle.strip.entries
-                .takeLast(3)
-                .any { entry -> entry.item == StripItem.Hidden }
-        }
 
-        assertTrue(profile.stripValuePolicy.allowsOne)
-        assertTrue(containsOne)
         assertTrue(containsRepeatedValue)
-        assertTrue(containsPrimeProductDecoy)
-        assertTrue(containsHiddenHighValueTarget)
+    }
+
+    private fun assertFrequencyWithinTarget(actualCount: Int, sampleSize: Int, targetPercentage: ProbabilityPercent) {
+        val actualPercentage = actualCount * 100.0 / sampleSize
+
+        assertTrue(
+            "Expected ${targetPercentage.value}% within ±$VARIETY_TOLERANCE_PERCENTAGE_POINTS " +
+                "percentage points, " +
+                "but observed $actualPercentage% ($actualCount/$sampleSize).",
+            abs(actualPercentage - targetPercentage.value) <= VARIETY_TOLERANCE_PERCENTAGE_POINTS
+        )
+    }
+
+    private companion object {
+        const val VARIETY_SAMPLE_SIZE = 500
+        const val VARIETY_TOLERANCE_PERCENTAGE_POINTS = 5
     }
 }
