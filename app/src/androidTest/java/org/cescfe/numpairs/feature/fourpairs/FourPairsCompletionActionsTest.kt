@@ -15,15 +15,18 @@ import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
+import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerationOutcome
 import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerator
+import org.cescfe.numpairs.domain.generated.GeneratedPuzzleGenerationRequest
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfiles
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.generated.GeneratedModes
-import org.cescfe.numpairs.feature.generated.GeneratedPuzzleProvider
-import org.cescfe.numpairs.feature.generated.GeneratedPuzzleProviderFactory
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
@@ -42,9 +45,9 @@ class FourPairsCompletionActionsTest {
 
     @Test
     fun newPuzzleActionGeneratesFreshPuzzleAndClearsPreviousGameState() {
-        val firstSolvedPuzzle = fourPairsGenerator(seed = 2026).generateWithSolution().solvedPuzzle
+        val firstSolvedPuzzle = generatedPuzzle(seed = 2026).solvedPuzzle
         val firstPuzzle = firstSolvedPuzzle.withHiddenOperatorAt(tileIndex = 0)
-        val secondPuzzle = fourPairsGenerator(seed = 42).generate()
+        val secondPuzzle = generatedPuzzle(seed = 42).initialPuzzle
         assertNotEquals(firstPuzzle.board.tiles[0].result, secondPuzzle.board.tiles[0].result)
         val puzzleProvider = QueueGeneratedPuzzleProvider(firstPuzzle, secondPuzzle)
 
@@ -81,7 +84,7 @@ class FourPairsCompletionActionsTest {
 
     @Test
     fun returnToMenuActionNavigatesBackToMenuAfterCompletion() {
-        val solvedPuzzle = fourPairsGenerator(seed = 81).generateWithSolution().solvedPuzzle
+        val solvedPuzzle = generatedPuzzle(seed = 81).solvedPuzzle
         val initialPuzzle = solvedPuzzle.withHiddenOperatorAt(tileIndex = 0)
         val puzzleProvider = QueueGeneratedPuzzleProvider(initialPuzzle)
 
@@ -105,7 +108,7 @@ class FourPairsCompletionActionsTest {
 
     @Test
     fun rulesHelperOpensAndDismissesInFourPairsWithoutRegeneratingPuzzle() {
-        val initialPuzzle = fourPairsGenerator(seed = 1234).generate()
+        val initialPuzzle = generatedPuzzle(seed = 1234).initialPuzzle
         val puzzleProvider = QueueGeneratedPuzzleProvider(initialPuzzle)
 
         setContent(puzzleProvider = puzzleProvider)
@@ -158,7 +161,7 @@ class FourPairsCompletionActionsTest {
         assertEquals(initialStripMask, currentStripMask())
     }
 
-    private fun setContent(puzzleProvider: GeneratedPuzzleProvider) {
+    private fun setContent(puzzleProvider: QueueGeneratedPuzzleProvider) {
         val actionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository()
 
         composeTestRule.setContent {
@@ -166,7 +169,7 @@ class FourPairsCompletionActionsTest {
                 AppNavigation(
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository,
                     generatedModeRegistry = GeneratedModes.registry,
-                    generatedPuzzleProviderFactory = fourPairsProviderFactory(puzzleProvider = puzzleProvider)
+                    generatedPuzzleGenerationUseCaseFactory = fourPairsProviderFactory(puzzleProvider = puzzleProvider)
                 )
             }
         }
@@ -262,10 +265,14 @@ class FourPairsCompletionActionsTest {
         )
     )
 
-    private fun fourPairsGenerator(seed: Int): GeneratedPairsPuzzleGenerator = GeneratedPairsPuzzleGenerator(
-        profile = profile,
-        seed = seed
-    )
+    private fun generatedPuzzle(seed: Int) = when (
+        val outcome = GeneratedPairsPuzzleGenerator(profile = profile).generate(
+            request = GeneratedPuzzleGenerationRequest(profile = profile, seed = seed)
+        )
+    ) {
+        is GeneratedPairsPuzzleGenerationOutcome.Generated -> outcome.puzzle
+        is GeneratedPairsPuzzleGenerationOutcome.Failed -> error("Expected a generated 4 Pairs puzzle.")
+    }
 
     private fun string(stringResId: Int, vararg formatArgs: Any): String = if (formatArgs.isEmpty()) {
         composeTestRule.activity.getString(stringResId)
@@ -273,17 +280,23 @@ class FourPairsCompletionActionsTest {
         composeTestRule.activity.getString(stringResId, *formatArgs)
     }
 
-    private fun fourPairsProviderFactory(puzzleProvider: GeneratedPuzzleProvider): GeneratedPuzzleProviderFactory =
-        GeneratedPuzzleProviderFactory { mode ->
-            require(mode == GeneratedModes.FOUR_PAIRS)
-            puzzleProvider
+    private fun fourPairsProviderFactory(
+        puzzleProvider: QueueGeneratedPuzzleProvider
+    ): GeneratedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory { mode ->
+        require(mode == GeneratedModes.FOUR_PAIRS)
+        GeneratedPuzzleGenerationUseCase { request ->
+            GeneratedPuzzleGenerationResult.Generated(
+                request = request,
+                initialPuzzle = puzzleProvider.nextPuzzle()
+            )
         }
+    }
 
-    private class QueueGeneratedPuzzleProvider(private vararg val puzzles: Puzzle) : GeneratedPuzzleProvider {
+    private class QueueGeneratedPuzzleProvider(private vararg val puzzles: Puzzle) {
         var requestCount = 0
             private set
 
-        override fun nextPuzzle(): Puzzle {
+        fun nextPuzzle(): Puzzle {
             val puzzle = puzzles.getOrNull(requestCount)
                 ?: error("No fake 4 Pairs puzzle configured for request $requestCount.")
             requestCount += 1

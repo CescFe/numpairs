@@ -13,10 +13,7 @@ class EightPairsMediumGeneratedPairsPuzzleGeneratorTest {
     @Test
     fun eight_pairs_medium_profile_generation_satisfies_profile_constraints() {
         val profile = GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM
-        val generatedPuzzle = GeneratedPairsPuzzleGenerator(
-            profile = profile,
-            seed = 42
-        ).generateWithSolution()
+        val generatedPuzzle = generatedPuzzle(profile = profile, seed = 42)
         val solvedPuzzle = generatedPuzzle.solvedPuzzle
         val initialPuzzle = generatedPuzzle.initialPuzzle
         val solvedStripValues = solvedPuzzle.requireKnownStripValues()
@@ -59,14 +56,8 @@ class EightPairsMediumGeneratedPairsPuzzleGeneratorTest {
     @Test
     fun eight_pairs_medium_profile_generation_is_deterministic_for_the_same_seed() {
         val profile = GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM
-        val firstPuzzle = GeneratedPairsPuzzleGenerator(
-            profile = profile,
-            seed = 1234
-        ).generateWithSolution()
-        val secondPuzzle = GeneratedPairsPuzzleGenerator(
-            profile = profile,
-            seed = 1234
-        ).generateWithSolution()
+        val firstPuzzle = generatedPuzzle(profile = profile, seed = 1234)
+        val secondPuzzle = generatedPuzzle(profile = profile, seed = 1234)
 
         assertEquals(firstPuzzle, secondPuzzle)
     }
@@ -75,10 +66,7 @@ class EightPairsMediumGeneratedPairsPuzzleGeneratorTest {
     fun medium_generation_meets_documented_variety_target_frequencies() {
         val profile = GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM
         val generatedPuzzles = (1..VARIETY_SAMPLE_SIZE).map { seed ->
-            GeneratedPairsPuzzleGenerator(
-                profile = profile,
-                seed = seed
-            ).generateWithSolution()
+            generatedPuzzle(profile = profile, seed = seed)
         }
         val primeProductDecoyTarget = requireNotNull(profile.varietyPolicy.primeProductDecoyTarget)
         val primeProductDecoyPuzzleCount = generatedPuzzles.count { puzzle ->
@@ -107,10 +95,7 @@ class EightPairsMediumGeneratedPairsPuzzleGeneratorTest {
     @Test
     fun medium_generation_can_produce_repeated_values() {
         val generatedPuzzles = (1..40).map { seed ->
-            GeneratedPairsPuzzleGenerator(
-                profile = GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM,
-                seed = seed
-            ).generateWithSolution()
+            generatedPuzzle(profile = GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM, seed = seed)
         }
         val containsRepeatedValue = generatedPuzzles.any { puzzle ->
             puzzle.solvedPuzzle.requireKnownStripValues()

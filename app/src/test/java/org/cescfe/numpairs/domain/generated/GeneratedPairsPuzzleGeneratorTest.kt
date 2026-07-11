@@ -8,6 +8,7 @@ import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class GeneratedPairsPuzzleGeneratorTest {
@@ -15,14 +16,8 @@ class GeneratedPairsPuzzleGeneratorTest {
     @Test
     fun generate_returns_the_initial_player_facing_puzzle() {
         val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
-        val generatedPuzzle = GeneratedPairsPuzzleGenerator(
-            profile = profile,
-            seed = 2026
-        ).generateWithSolution()
-        val initialPuzzle = GeneratedPairsPuzzleGenerator(
-            profile = profile,
-            seed = 2026
-        ).generate()
+        val generatedPuzzle = generatedPuzzle(profile = profile, seed = 2026)
+        val initialPuzzle = generatedPuzzle.initialPuzzle
 
         assertEquals(generatedPuzzle.initialPuzzle, initialPuzzle)
         assertGeneratedInitialPuzzleStructure(
@@ -32,13 +27,48 @@ class GeneratedPairsPuzzleGeneratorTest {
     }
 
     @Test
-    fun generator_rejects_non_positive_max_attempts() {
+    fun generation_execution_policy_rejects_non_positive_max_attempts() {
         assertThrows(IllegalArgumentException::class.java) {
-            GeneratedPairsPuzzleGenerator(
-                profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW,
-                maxAttempts = 0
-            )
+            GeneratedPuzzleGenerationExecutionPolicy(maxAttempts = 0)
         }
+    }
+
+    @Test
+    fun generator_reports_exact_search_budget_exhaustion_as_a_typed_failure() {
+        val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
+        val request = GeneratedPuzzleGenerationRequest(
+            profile = profile,
+            seed = 2026,
+            executionPolicy = GeneratedPuzzleGenerationExecutionPolicy(
+                maxAttempts = 10,
+                maxSearchWork = 1
+            )
+        )
+
+        val outcome = GeneratedPairsPuzzleGenerator(profile = profile).generate(request = request)
+
+        val failure = outcome as GeneratedPairsPuzzleGenerationOutcome.Failed
+        assertEquals(GeneratedPairsPuzzleGenerationFailureReason.SearchBudgetExhausted, failure.reason)
+        assertEquals(profile.id, failure.request.profileId)
+        assertEquals(1, failure.attemptsUsed)
+        assertEquals(1, failure.searchWorkConsumed)
+    }
+
+    @Test
+    fun generator_reports_cancellation_without_consuming_search_work() {
+        val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
+        val request = GeneratedPuzzleGenerationRequest(profile = profile, seed = 2026)
+
+        val outcome = GeneratedPairsPuzzleGenerator(profile = profile).generate(
+            request = request,
+            cancellation = { true }
+        )
+
+        val failure = outcome as GeneratedPairsPuzzleGenerationOutcome.Failed
+        assertEquals(GeneratedPairsPuzzleGenerationFailureReason.Cancelled, failure.reason)
+        assertEquals(0, failure.attemptsUsed)
+        assertEquals(0, failure.searchWorkConsumed)
+        assertTrue(failure.candidateRejections.isEmpty())
     }
 
     @Test
@@ -94,11 +124,11 @@ class GeneratedPairsPuzzleGeneratorTest {
             sampledPlan.stripEntryVisibilityDirectives
         )
 
-        val generatedPuzzle = GeneratedPairsPuzzleGenerator(
+        val generatedPuzzle = generatedPuzzle(
             profile = profile,
             seed = seed,
-            maxAttempts = 1
-        ).generateWithSolution()
+            executionPolicy = GeneratedPuzzleGenerationExecutionPolicy(maxAttempts = 1)
+        )
 
         assertGeneratedInitialPuzzleStructure(
             puzzle = generatedPuzzle.initialPuzzle,

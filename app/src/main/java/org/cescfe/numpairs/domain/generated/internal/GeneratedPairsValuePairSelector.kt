@@ -14,14 +14,32 @@ internal class GeneratedPairsValuePairSelector(
         hardRules = GeneratedPuzzleHardRuleSet.from(profile = profile).valuePairs
     )
 
-    fun selectValuePairs(variationPlan: GeneratedPairsVariationPlan): List<GeneratedPairsValuePair>? {
+    fun selectValuePairs(variationPlan: GeneratedPairsVariationPlan): List<GeneratedPairsValuePair>? =
+        when (val outcome = selectValuePairsWithControl(variationPlan = variationPlan, searchControl = null)) {
+            is GeneratedPairsSearchOutcome.Found -> outcome.value
+            GeneratedPairsSearchOutcome.NoCandidate,
+            GeneratedPairsSearchOutcome.BudgetExhausted,
+            GeneratedPairsSearchOutcome.Cancelled -> null
+        }
+
+    fun selectValuePairs(
+        variationPlan: GeneratedPairsVariationPlan,
+        searchControl: GeneratedPairsSearchControl
+    ): GeneratedPairsSearchOutcome<List<GeneratedPairsValuePair>> =
+        selectValuePairsWithControl(variationPlan = variationPlan, searchControl = searchControl)
+
+    private fun selectValuePairsWithControl(
+        variationPlan: GeneratedPairsVariationPlan,
+        searchControl: GeneratedPairsSearchControl?
+    ): GeneratedPairsSearchOutcome<List<GeneratedPairsValuePair>> {
         val candidatePairs = candidateValuePairsForProfile().shuffled(random)
         val plannedPairs = chooseValuePairs(
             candidatePairs = candidatePairs,
-            primeProductDecoyDirective = variationPlan.primeProductDecoyDirective
+            primeProductDecoyDirective = variationPlan.primeProductDecoyDirective,
+            searchControl = searchControl
         )
 
-        if (plannedPairs != null ||
+        if (plannedPairs !is GeneratedPairsSearchOutcome.NoCandidate ||
             variationPlan.primeProductDecoyDirective == GeneratedPairsPrimeProductDecoyDirective.Unrestricted
         ) {
             return plannedPairs
@@ -29,21 +47,24 @@ internal class GeneratedPairsValuePairSelector(
 
         return chooseValuePairs(
             candidatePairs = candidatePairs,
-            primeProductDecoyDirective = GeneratedPairsPrimeProductDecoyDirective.Unrestricted
+            primeProductDecoyDirective = GeneratedPairsPrimeProductDecoyDirective.Unrestricted,
+            searchControl = searchControl
         )
     }
 
     private fun chooseValuePairs(
         candidatePairs: List<GeneratedPairsValuePair>,
-        primeProductDecoyDirective: GeneratedPairsPrimeProductDecoyDirective
-    ): List<GeneratedPairsValuePair>? = chooseValuePairs(
+        primeProductDecoyDirective: GeneratedPairsPrimeProductDecoyDirective,
+        searchControl: GeneratedPairsSearchControl?
+    ): GeneratedPairsSearchOutcome<List<GeneratedPairsValuePair>> = chooseValuePairs(
         candidatePairs = candidatePairs,
         selectedPairs = emptyList(),
         valueOccurrences = emptyMap(),
         usedResults = emptySet(),
         productAnchorCount = 0,
         primeProductDecoyCount = 0,
-        primeProductDecoyDirective = primeProductDecoyDirective
+        primeProductDecoyDirective = primeProductDecoyDirective,
+        searchControl = searchControl
     )
 
     private fun chooseValuePairs(
@@ -53,14 +74,21 @@ internal class GeneratedPairsValuePairSelector(
         usedResults: Set<Int>,
         productAnchorCount: Int,
         primeProductDecoyCount: Int,
-        primeProductDecoyDirective: GeneratedPairsPrimeProductDecoyDirective
-    ): List<GeneratedPairsValuePair>? {
+        primeProductDecoyDirective: GeneratedPairsPrimeProductDecoyDirective,
+        searchControl: GeneratedPairsSearchControl?
+    ): GeneratedPairsSearchOutcome<List<GeneratedPairsValuePair>> {
+        searchControl?.check()?.let { result ->
+            if (result != GeneratedPairsSearchControlResult.Continue) {
+                return result.toSearchOutcome()
+            }
+        }
+
         if (!hardRules.canStillSatisfyProductAnchorMix(
                 productAnchorCount = productAnchorCount,
                 remainingPairSlots = profile.size.pairCount - selectedPairs.size
             )
         ) {
-            return null
+            return GeneratedPairsSearchOutcome.NoCandidate
         }
 
         if (!primeProductDecoyDirective.canStillBeSatisfied(
@@ -68,13 +96,17 @@ internal class GeneratedPairsValuePairSelector(
                 remainingPairSlots = profile.size.pairCount - selectedPairs.size
             )
         ) {
-            return null
+            return GeneratedPairsSearchOutcome.NoCandidate
         }
 
         if (selectedPairs.size == profile.size.pairCount) {
-            return selectedPairs.takeIf { pairs ->
-                hardRules.isComplete(pairs = pairs) &&
-                    primeProductDecoyDirective.isSatisfiedBy(pairCount = primeProductDecoyCount)
+            return if (
+                hardRules.isComplete(pairs = selectedPairs) &&
+                primeProductDecoyDirective.isSatisfiedBy(pairCount = primeProductDecoyCount)
+            ) {
+                GeneratedPairsSearchOutcome.Found(selectedPairs)
+            } else {
+                GeneratedPairsSearchOutcome.NoCandidate
             }
         }
 
@@ -90,7 +122,13 @@ internal class GeneratedPairsValuePairSelector(
             candidatePairs
         }
 
-        return orderedCandidatePairs.firstNotNullOfOrNull { candidatePair ->
+        orderedCandidatePairs.forEach { candidatePair ->
+            searchControl?.consumeCandidateExpansion()?.let { result ->
+                if (result != GeneratedPairsSearchControlResult.Continue) {
+                    return result.toSearchOutcome()
+                }
+            }
+
             if (
                 !hardRules.canBeAdded(
                     pair = candidatePair,
@@ -98,25 +136,35 @@ internal class GeneratedPairsValuePairSelector(
                     usedResults = usedResults
                 )
             ) {
-                return@firstNotNullOfOrNull null
+                return@forEach
             }
 
             val updatedPrimeProductDecoyCount =
                 primeProductDecoyCount + candidatePair.primeProductDecoyIncrement()
             if (!primeProductDecoyDirective.allows(pairCount = updatedPrimeProductDecoyCount)) {
-                return@firstNotNullOfOrNull null
+                return@forEach
             }
 
-            chooseValuePairs(
-                candidatePairs = candidatePairs,
-                selectedPairs = selectedPairs + candidatePair,
-                valueOccurrences = valueOccurrences.with(candidatePair),
-                usedResults = usedResults + candidatePair.resultValues,
-                productAnchorCount = productAnchorCount + hardRules.productAnchorIncrement(pair = candidatePair),
-                primeProductDecoyCount = updatedPrimeProductDecoyCount,
-                primeProductDecoyDirective = primeProductDecoyDirective
-            )
+            when (
+                val outcome = chooseValuePairs(
+                    candidatePairs = candidatePairs,
+                    selectedPairs = selectedPairs + candidatePair,
+                    valueOccurrences = valueOccurrences.with(candidatePair),
+                    usedResults = usedResults + candidatePair.resultValues,
+                    productAnchorCount = productAnchorCount + hardRules.productAnchorIncrement(pair = candidatePair),
+                    primeProductDecoyCount = updatedPrimeProductDecoyCount,
+                    primeProductDecoyDirective = primeProductDecoyDirective,
+                    searchControl = searchControl
+                )
+            ) {
+                is GeneratedPairsSearchOutcome.Found -> return outcome
+                GeneratedPairsSearchOutcome.BudgetExhausted,
+                GeneratedPairsSearchOutcome.Cancelled -> return outcome
+                GeneratedPairsSearchOutcome.NoCandidate -> Unit
+            }
         }
+
+        return GeneratedPairsSearchOutcome.NoCandidate
     }
 
     private fun candidateValuePairsForProfile(): List<GeneratedPairsValuePair> = buildList {

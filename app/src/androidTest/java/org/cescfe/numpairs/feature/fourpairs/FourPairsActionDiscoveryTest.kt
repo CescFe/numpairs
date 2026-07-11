@@ -13,8 +13,10 @@ import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryReposito
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryState
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
+import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
-import org.cescfe.numpairs.feature.generated.GeneratedPuzzleProvider
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -34,7 +36,7 @@ class FourPairsActionDiscoveryTest {
         composeTestRule.setContent {
             NumPairsTheme {
                 FourPairsRoute(
-                    puzzleProvider = GeneratedPuzzleProvider { samplePuzzle },
+                    generationUseCase = generatedPuzzleUseCase(puzzle = samplePuzzle),
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository
                 )
             }
@@ -67,7 +69,7 @@ class FourPairsActionDiscoveryTest {
         composeTestRule.setContent {
             NumPairsTheme {
                 FourPairsRoute(
-                    puzzleProvider = GeneratedPuzzleProvider { samplePuzzle },
+                    generationUseCase = generatedPuzzleUseCase(puzzle = samplePuzzle),
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository
                 )
             }
@@ -168,6 +170,14 @@ class FourPairsActionDiscoveryTest {
                 ) == hintDotVisible
         }
     }
+
+    private fun generatedPuzzleUseCase(puzzle: Puzzle): GeneratedPuzzleGenerationUseCase =
+        GeneratedPuzzleGenerationUseCase { request ->
+            GeneratedPuzzleGenerationResult.Generated(
+                request = request,
+                initialPuzzle = puzzle
+            )
+        }
 
     private fun hasDiscoveryDot(testTag: String): Boolean = composeTestRule
         .onAllNodesWithTag(testTag, useUnmergedTree = true)

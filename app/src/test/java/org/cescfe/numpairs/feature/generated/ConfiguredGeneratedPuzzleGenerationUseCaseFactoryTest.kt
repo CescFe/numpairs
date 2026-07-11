@@ -1,10 +1,11 @@
 package org.cescfe.numpairs.feature.generated
 
-import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import org.cescfe.numpairs.domain.generated.GeneratedPuzzleGenerationRequest
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfileDefinition
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfileId
-import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfiles
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleSize
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleVarietyPolicy
 import org.cescfe.numpairs.domain.generated.GenerationPolicy
@@ -24,13 +25,18 @@ import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class ConfiguredGeneratedPuzzleProviderFactoryTest {
+class ConfiguredGeneratedPuzzleGenerationUseCaseFactoryTest {
     @Test
-    fun every_registered_mode_uses_its_configured_profile_and_a_shared_context() {
-        val factory = ConfiguredGeneratedPuzzleProviderFactory()
+    fun every_registered_mode_uses_its_configured_profile_and_a_shared_context() = runBlocking {
+        val factory = ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
+            generationDispatcher = Dispatchers.Unconfined
+        )
 
         GeneratedModes.registry.all.forEach { mode ->
-            val puzzle = factory.create(modeId = mode.id, seed = 2026).nextPuzzle()
+            val outcome = factory.create(mode = mode).generate(
+                GeneratedPuzzleGenerationRequest(profile = mode.profile, seed = 2026)
+            )
+            val puzzle = (outcome as GeneratedPuzzleGenerationResult.Generated).initialPuzzle
 
             assertEquals(mode.profile.size.boardTileCount, puzzle.board.tiles.size)
             assertEquals(mode.profile.size.stripEntryCount, puzzle.strip.entries.size)
@@ -52,29 +58,35 @@ class ConfiguredGeneratedPuzzleProviderFactoryTest {
     }
 
     @Test
-    fun seeded_mode_provider_delegates_to_the_domain_generator_for_the_resolved_profile() {
-        val expectedPuzzle = GeneratedPairsPuzzleGenerator(
-            profile = GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM,
-            seed = 1234
-        ).generate()
+    fun identical_requests_produce_identical_puzzles_without_sharing_a_generator_random_stream() = runBlocking {
+        val mode = GeneratedModes.EIGHT_PAIRS
+        val factory = ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
+            generationDispatcher = Dispatchers.Unconfined
+        )
+        val request = GeneratedPuzzleGenerationRequest(profile = mode.profile, seed = 1234)
 
-        val providedPuzzle = ConfiguredGeneratedPuzzleProviderFactory()
-            .create(modeId = GeneratedModes.EIGHT_PAIRS.id, seed = 1234)
-            .nextPuzzle()
+        val first = factory.create(mode = mode).generate(request)
+        val second = factory.create(mode = mode).generate(request)
 
-        assertEquals(expectedPuzzle, providedPuzzle)
+        assertEquals(first, second)
     }
 
     @Test
-    fun a_test_only_third_mode_needs_only_one_configuration_entry() {
+    fun a_test_only_third_mode_needs_only_one_configuration_entry() = runBlocking {
         val thirdMode = GeneratedModeConfiguration(
             id = GeneratedModeId("test-two-pairs"),
             profile = testTwoPairsProfile()
         )
         val registry = GeneratedModeRegistry(GeneratedModes.registry.all + thirdMode)
-        val factory = ConfiguredGeneratedPuzzleProviderFactory(modeRegistry = registry)
+        val factory = ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
+            modeRegistry = registry,
+            generationDispatcher = Dispatchers.Unconfined
+        )
 
-        val puzzle = factory.create(modeId = thirdMode.id, seed = 42).nextPuzzle()
+        val outcome = factory.create(mode = thirdMode).generate(
+            GeneratedPuzzleGenerationRequest(profile = thirdMode.profile, seed = 42)
+        )
+        val puzzle = (outcome as GeneratedPuzzleGenerationResult.Generated).initialPuzzle
 
         assertEquals(thirdMode.profile.size.boardTileCount, puzzle.board.tiles.size)
         assertEquals(thirdMode.profile.size.stripEntryCount, puzzle.strip.entries.size)

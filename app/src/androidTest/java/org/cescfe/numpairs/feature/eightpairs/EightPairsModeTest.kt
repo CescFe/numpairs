@@ -19,8 +19,9 @@ import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.generated.GeneratedModes
-import org.cescfe.numpairs.feature.generated.GeneratedPuzzleProvider
-import org.cescfe.numpairs.feature.generated.GeneratedPuzzleProviderFactory
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
@@ -111,7 +112,7 @@ class EightPairsModeTest {
                 AppNavigation(
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
                     generatedModeRegistry = GeneratedModes.registry,
-                    generatedPuzzleProviderFactory = eightPairsProviderFactory(puzzleProvider = puzzleProvider)
+                    generatedPuzzleGenerationUseCaseFactory = eightPairsProviderFactory(puzzleProvider = puzzleProvider)
                 )
             }
         }
@@ -150,17 +151,23 @@ class EightPairsModeTest {
 
     private fun string(stringResId: Int): String = composeTestRule.activity.getString(stringResId)
 
-    private fun eightPairsProviderFactory(puzzleProvider: GeneratedPuzzleProvider): GeneratedPuzzleProviderFactory =
-        GeneratedPuzzleProviderFactory { mode ->
-            require(mode == GeneratedModes.EIGHT_PAIRS)
-            puzzleProvider
+    private fun eightPairsProviderFactory(
+        puzzleProvider: RecordingGeneratedPuzzleProvider
+    ): GeneratedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory { mode ->
+        require(mode == GeneratedModes.EIGHT_PAIRS)
+        GeneratedPuzzleGenerationUseCase { request ->
+            GeneratedPuzzleGenerationResult.Generated(
+                request = request,
+                initialPuzzle = puzzleProvider.nextPuzzle()
+            )
         }
+    }
 
-    private class RecordingGeneratedPuzzleProvider(private val puzzle: Puzzle) : GeneratedPuzzleProvider {
+    private class RecordingGeneratedPuzzleProvider(private val puzzle: Puzzle) {
         var requestCount = 0
             private set
 
-        override fun nextPuzzle(): Puzzle {
+        fun nextPuzzle(): Puzzle {
             requestCount += 1
             return puzzle
         }

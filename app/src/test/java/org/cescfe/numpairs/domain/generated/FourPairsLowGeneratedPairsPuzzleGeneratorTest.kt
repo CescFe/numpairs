@@ -14,10 +14,7 @@ class FourPairsLowGeneratedPairsPuzzleGeneratorTest {
     @Test
     fun four_pairs_low_profile_generation_satisfies_profile_constraints() {
         val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
-        val generatedPuzzle = GeneratedPairsPuzzleGenerator(
-            profile = profile,
-            seed = 42
-        ).generateWithSolution()
+        val generatedPuzzle = generatedPuzzle(profile = profile, seed = 42)
         val solvedPuzzle = generatedPuzzle.solvedPuzzle
         val initialPuzzle = generatedPuzzle.initialPuzzle
         val solvedStripValues = solvedPuzzle.requireKnownStripValues()
@@ -65,14 +62,8 @@ class FourPairsLowGeneratedPairsPuzzleGeneratorTest {
     @Test
     fun four_pairs_low_profile_generation_is_deterministic_for_the_same_seed() {
         val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
-        val firstPuzzle = GeneratedPairsPuzzleGenerator(
-            profile = profile,
-            seed = 1234
-        ).generateWithSolution()
-        val secondPuzzle = GeneratedPairsPuzzleGenerator(
-            profile = profile,
-            seed = 1234
-        ).generateWithSolution()
+        val firstPuzzle = generatedPuzzle(profile = profile, seed = 1234)
+        val secondPuzzle = generatedPuzzle(profile = profile, seed = 1234)
 
         assertEquals(firstPuzzle, secondPuzzle)
     }
@@ -80,10 +71,7 @@ class FourPairsLowGeneratedPairsPuzzleGeneratorTest {
     @Test
     fun solved_puzzle_uses_matching_addition_and_multiplication_pairs() {
         val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
-        val solvedPuzzle = GeneratedPairsPuzzleGenerator(
-            profile = profile,
-            seed = 81
-        ).generateWithSolution().solvedPuzzle
+        val solvedPuzzle = generatedPuzzle(profile = profile, seed = 81).solvedPuzzle
         val analysis = solvedPuzzle.analyzeResolvedPuzzle()
         val additionPairs = analysis.solutionPairsFor(operator = Operator.ADDITION)
         val multiplicationPairs = analysis.solutionPairsFor(operator = Operator.MULTIPLICATION)
@@ -96,10 +84,7 @@ class FourPairsLowGeneratedPairsPuzzleGeneratorTest {
     @Test
     fun known_strip_anchors_are_distributed_and_belong_to_different_pairs() {
         val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
-        val generatedPuzzle = GeneratedPairsPuzzleGenerator(
-            profile = profile,
-            seed = 99
-        ).generateWithSolution()
+        val generatedPuzzle = generatedPuzzle(profile = profile, seed = 99)
         val initialKnownEntryIds = generatedPuzzle.initialPuzzle.knownEntryIds()
         val analysis = generatedPuzzle.solvedPuzzle.analyzeResolvedPuzzle()
         val solutionPairByEntryId = analysis.resolvedAssignments

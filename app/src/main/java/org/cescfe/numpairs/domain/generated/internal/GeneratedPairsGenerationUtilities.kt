@@ -27,25 +27,23 @@ internal fun Set<StripEntryId>.maxGeneratedPairsConsecutiveHiddenEntries(totalEn
     return maxHiddenCount
 }
 
-internal fun <T> List<T>.combinations(size: Int): List<Set<T>> {
+internal fun <T> List<T>.combinationsSequence(size: Int): Sequence<Set<T>> = sequence {
     if (size == 0) {
-        return listOf(emptySet())
+        yield(emptySet())
+        return@sequence
     }
-    if (size > this.size) {
-        return emptyList()
+    if (size > this@combinationsSequence.size) {
+        return@sequence
     }
 
-    val combinations = mutableListOf<Set<T>>()
-    val lastStartIndex = this.size - size
+    val lastStartIndex = this@combinationsSequence.size - size
 
     for (index in 0..lastStartIndex) {
-        val firstValue = this[index]
-        val remainingValues = drop(index + 1)
+        val firstValue = this@combinationsSequence[index]
+        val remainingValues = this@combinationsSequence.drop(index + 1)
 
-        remainingValues.combinations(size = size - 1).forEach { remainingCombination ->
-            combinations += remainingCombination + firstValue
+        remainingValues.combinationsSequence(size = size - 1).forEach { remainingCombination ->
+            yield(remainingCombination + firstValue)
         }
     }
-
-    return combinations
 }
