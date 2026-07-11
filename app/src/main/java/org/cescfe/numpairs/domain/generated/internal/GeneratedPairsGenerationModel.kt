@@ -81,7 +81,6 @@ internal data class GeneratedPairsEntryPair(
 ) : GeneratedPairsPairValues {
     override val firstValue: Int = firstEntry.value
     override val secondValue: Int = secondEntry.value
-    val entryIds: Set<Int> = setOf(firstEntry.id, secondEntry.id)
     val key: GeneratedPairsEntryPairKey = GeneratedPairsEntryPairKey(
         firstEntryId = minOf(firstEntry.id, secondEntry.id),
         secondEntryId = maxOf(firstEntry.id, secondEntry.id)
