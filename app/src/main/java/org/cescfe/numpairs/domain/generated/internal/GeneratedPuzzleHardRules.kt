@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.domain.generated.internal
 
+import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleValidationViolation
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzlePairSpecification
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzlePairValues
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
@@ -9,6 +10,8 @@ import org.cescfe.numpairs.domain.generated.StripKnownEntryDistributionPolicy
 import org.cescfe.numpairs.domain.generated.StripValuePolicy
 import org.cescfe.numpairs.domain.generated.acceptsBoardResults
 import org.cescfe.numpairs.domain.generated.isAnchor
+import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
+import org.cescfe.numpairs.domain.puzzle.assignment.UnorderedStripEntryPair
 
 internal data class GeneratedPuzzleHardRuleSet(
     val valuePairs: GeneratedValuePairRuleSet,
@@ -154,19 +157,19 @@ internal class GeneratedMultiplicationResultRule(private val constraints: Result
 
 internal class GeneratedStripMaskRule(private val profile: GeneratedPuzzleProfile) {
     fun isSatisfied(
-        knownEntryIds: Set<Int>,
+        knownEntryIds: Set<StripEntryId>,
         hiddenEntryCount: Int,
-        pairKeys: Set<GeneratedPairsEntryPairKey>
+        solutionPairs: Set<UnorderedStripEntryPair>
     ): Boolean = violationsFor(
         knownEntryIds = knownEntryIds,
         hiddenEntryCount = hiddenEntryCount,
-        pairKeys = pairKeys
+        solutionPairs = solutionPairs
     ).isEmpty()
 
     fun violationsFor(
-        knownEntryIds: Set<Int>,
+        knownEntryIds: Set<StripEntryId>,
         hiddenEntryCount: Int,
-        pairKeys: Set<GeneratedPairsEntryPairKey>
+        solutionPairs: Set<UnorderedStripEntryPair>
     ): List<GeneratedPairsPuzzleValidationViolation> = buildList {
         if (knownEntryIds.size !in profile.initialStripMaskPolicy.knownEntryCountRange) {
             add(
@@ -206,7 +209,7 @@ internal class GeneratedStripMaskRule(private val profile: GeneratedPuzzleProfil
             )
         }
 
-        if (!hasExpectedDistribution(knownEntryIds = knownEntryIds, pairKeys = pairKeys)) {
+        if (!hasExpectedDistribution(knownEntryIds = knownEntryIds, solutionPairs = solutionPairs)) {
             add(
                 GeneratedPairsPuzzleValidationViolation.KnownStripEntryDistributionMismatch(
                     knownEntryIds = knownEntryIds
@@ -215,23 +218,25 @@ internal class GeneratedStripMaskRule(private val profile: GeneratedPuzzleProfil
         }
     }
 
-    private fun hasExpectedDistribution(knownEntryIds: Set<Int>, pairKeys: Set<GeneratedPairsEntryPairKey>): Boolean =
-        when (profile.initialStripMaskPolicy.distributionPolicy) {
-            StripKnownEntryDistributionPolicy.SPREAD_ACROSS_STRIP_AND_PAIRS_WHEN_POSSIBLE -> {
-                val pairKeyByEntryId = pairKeys.flatMap { pairKey ->
-                    listOf(
-                        pairKey.firstEntryId to pairKey,
-                        pairKey.secondEntryId to pairKey
-                    )
-                }.toMap()
-                val knownPairKeys = knownEntryIds.mapNotNull(pairKeyByEntryId::get)
+    private fun hasExpectedDistribution(
+        knownEntryIds: Set<StripEntryId>,
+        solutionPairs: Set<UnorderedStripEntryPair>
+    ): Boolean = when (profile.initialStripMaskPolicy.distributionPolicy) {
+        StripKnownEntryDistributionPolicy.SPREAD_ACROSS_STRIP_AND_PAIRS_WHEN_POSSIBLE -> {
+            val solutionPairByEntryId = solutionPairs.flatMap { solutionPair ->
+                listOf(
+                    solutionPair.firstEntryId to solutionPair,
+                    solutionPair.secondEntryId to solutionPair
+                )
+            }.toMap()
+            val knownSolutionPairs = knownEntryIds.mapNotNull(solutionPairByEntryId::get)
 
-                knownPairKeys.size == knownEntryIds.size &&
-                    knownPairKeys.toSet().size == knownEntryIds.size
-            }
-
-            StripKnownEntryDistributionPolicy.UNRESTRICTED -> true
+            knownSolutionPairs.size == knownEntryIds.size &&
+                knownSolutionPairs.toSet().size == knownEntryIds.size
         }
+
+        StripKnownEntryDistributionPolicy.UNRESTRICTED -> true
+    }
 }
 
 private fun GeneratedPairsPairValues.toProfilePairValues(): GeneratedPuzzlePairValues = GeneratedPuzzlePairValues(

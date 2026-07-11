@@ -20,9 +20,9 @@ class ResolvedTileAssignmentTest {
 
         assertEquals(
             ResolvedTileAssignment(
-                leftOperand = ResolvedOperandAssignment(stripEntryId = 2, value = 6),
+                leftOperand = ResolvedOperandAssignment(stripEntryId = StripEntryId(2), value = 6),
                 operator = Operator.ADDITION,
-                rightOperand = ResolvedOperandAssignment(stripEntryId = 4, value = 25)
+                rightOperand = ResolvedOperandAssignment(stripEntryId = StripEntryId(4), value = 25)
             ),
             tile.resolvedStripEntryAssignment()
         )
@@ -75,15 +75,15 @@ class ResolvedTileAssignmentTest {
             listOf(
                 IndexedResolvedTileAssignment(
                     tileIndex = 0,
-                    leftOperand = ResolvedOperandAssignment(stripEntryId = 2, value = 6),
+                    leftOperand = ResolvedOperandAssignment(stripEntryId = StripEntryId(2), value = 6),
                     operator = Operator.ADDITION,
-                    rightOperand = ResolvedOperandAssignment(stripEntryId = 4, value = 25)
+                    rightOperand = ResolvedOperandAssignment(stripEntryId = StripEntryId(4), value = 25)
                 ),
                 IndexedResolvedTileAssignment(
                     tileIndex = 5,
-                    leftOperand = ResolvedOperandAssignment(stripEntryId = 2, value = 6),
+                    leftOperand = ResolvedOperandAssignment(stripEntryId = StripEntryId(2), value = 6),
                     operator = Operator.MULTIPLICATION,
-                    rightOperand = ResolvedOperandAssignment(stripEntryId = 4, value = 25)
+                    rightOperand = ResolvedOperandAssignment(stripEntryId = StripEntryId(4), value = 25)
                 )
             ),
             board.resolvedTileAssignments()
@@ -112,15 +112,15 @@ class ResolvedTileAssignmentTest {
             listOf(
                 IndexedResolvedTileAssignment(
                     tileIndex = 0,
-                    leftOperand = ResolvedOperandAssignment(stripEntryId = 0, value = 6),
+                    leftOperand = ResolvedOperandAssignment(stripEntryId = StripEntryId(0), value = 6),
                     operator = Operator.ADDITION,
-                    rightOperand = ResolvedOperandAssignment(stripEntryId = 1, value = 6)
+                    rightOperand = ResolvedOperandAssignment(stripEntryId = StripEntryId(1), value = 6)
                 ),
                 IndexedResolvedTileAssignment(
                     tileIndex = 1,
-                    leftOperand = ResolvedOperandAssignment(stripEntryId = 1, value = 6),
+                    leftOperand = ResolvedOperandAssignment(stripEntryId = StripEntryId(1), value = 6),
                     operator = Operator.MULTIPLICATION,
-                    rightOperand = ResolvedOperandAssignment(stripEntryId = 0, value = 6)
+                    rightOperand = ResolvedOperandAssignment(stripEntryId = StripEntryId(0), value = 6)
                 )
             ),
             puzzle.resolvedTileAssignments()

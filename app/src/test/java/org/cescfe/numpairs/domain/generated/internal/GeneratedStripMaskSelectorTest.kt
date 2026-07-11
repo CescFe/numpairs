@@ -2,6 +2,7 @@ package org.cescfe.numpairs.domain.generated.internal
 
 import kotlin.random.Random
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfiles
+import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -13,9 +14,9 @@ class GeneratedStripMaskSelectorTest {
     @Test
     fun mixed_visibility_plan_is_honored_when_a_valid_mask_exists() {
         val profile = GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM
-        val highestEntryId = profile.size.stripEntryCount - 1
-        val secondHighestEntryId = profile.size.stripEntryCount - 2
-        val thirdHighestEntryId = profile.size.stripEntryCount - 3
+        val highestEntryId = StripEntryId(profile.size.stripEntryCount - 1)
+        val secondHighestEntryId = StripEntryId(profile.size.stripEntryCount - 2)
+        val thirdHighestEntryId = StripEntryId(profile.size.stripEntryCount - 3)
         val selection = GeneratedStripMaskSelector(
             profile = profile,
             random = Random(42)
@@ -40,7 +41,7 @@ class GeneratedStripMaskSelectorTest {
     @Test
     fun selector_checks_every_known_count_before_falling_back() {
         val profile = GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM
-        val requiredKnownEntryIds = setOf(0, 2, 4, 6, 8, 10, 12)
+        val requiredKnownEntryIds = setOf(0, 2, 4, 6, 8, 10, 12).map(::StripEntryId).toSet()
         val selection = GeneratedStripMaskSelector(
             profile = profile,
             random = Random(42)
@@ -61,7 +62,7 @@ class GeneratedStripMaskSelectorTest {
     @Test
     fun visibility_conflict_falls_back_without_overriding_a_hard_anchor() {
         val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
-        val highestEntryId = profile.size.stripEntryCount - 1
+        val highestEntryId = StripEntryId(profile.size.stripEntryCount - 1)
         val selection = GeneratedStripMaskSelector(
             profile = profile,
             random = Random(42)
@@ -81,7 +82,7 @@ class GeneratedStripMaskSelectorTest {
 }
 
 private fun variationPlan(
-    visibilityDirectives: Map<Int, GeneratedPairsStripEntryVisibilityDirective>
+    visibilityDirectives: Map<StripEntryId, GeneratedPairsStripEntryVisibilityDirective>
 ): GeneratedPairsVariationPlan = GeneratedPairsVariationPlan(
     primeProductDecoyDirective = GeneratedPairsPrimeProductDecoyDirective.Unrestricted,
     stripEntryVisibilityDirectives = visibilityDirectives
@@ -93,11 +94,11 @@ private fun entryPairs(pairCount: Int): List<GeneratedPairsEntryPair> = List(pai
 
     GeneratedPairsEntryPair(
         firstEntry = GeneratedPairsStripEntry(
-            id = firstEntryId,
+            id = StripEntryId(firstEntryId),
             value = firstEntryId + 1
         ),
         secondEntry = GeneratedPairsStripEntry(
-            id = secondEntryId,
+            id = StripEntryId(secondEntryId),
             value = secondEntryId + 1
         )
     )

@@ -24,12 +24,12 @@ fun resolvedTile(
         expression = Expression(
             leftOperand = Expression.Operand.Known(
                 value = leftOperand.value,
-                stripEntryId = leftOperand.stripEntryId
+                stripEntryId = leftOperand.stripEntryId.value
             ),
             operator = operator,
             rightOperand = Expression.Operand.Known(
                 value = rightOperand.value,
-                stripEntryId = rightOperand.stripEntryId
+                stripEntryId = rightOperand.stripEntryId.value
             )
         ),
         result = operator.apply(

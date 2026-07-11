@@ -1,15 +1,22 @@
-package org.cescfe.numpairs.domain.generated.internal
+package org.cescfe.numpairs.domain.generated
 
+import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
+import org.cescfe.numpairs.domain.puzzle.assignment.UnorderedStripEntryPair
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 
-internal data class GeneratedPairsPuzzleValidationReport(
-    val violations: List<GeneratedPairsPuzzleValidationViolation>
-) {
-    val isValid: Boolean
-        get() = violations.isEmpty()
+sealed interface GeneratedPairsPuzzleCreation {
+    data class Created(val puzzle: GeneratedPairsPuzzle) : GeneratedPairsPuzzleCreation
+
+    data class Rejected(val violations: List<GeneratedPairsPuzzleValidationViolation>) : GeneratedPairsPuzzleCreation {
+        init {
+            require(violations.isNotEmpty()) {
+                "A rejected generated puzzle requires at least one violation."
+            }
+        }
+    }
 }
 
-internal sealed interface GeneratedPairsPuzzleValidationViolation {
+sealed interface GeneratedPairsPuzzleValidationViolation {
     val ruleId: GeneratedPairsPuzzleValidationRuleId
 
     data class SolvedPuzzleNotSolved(val completionState: PuzzleCompletionState) :
@@ -37,7 +44,8 @@ internal sealed interface GeneratedPairsPuzzleValidationViolation {
         override val ruleId = GeneratedPairsPuzzleValidationRuleId.INITIAL_STRIP_ENTRY_COUNT_MISMATCH
     }
 
-    data class InitialTileExpressionsNotHidden(val tileIndexes: List<Int>) : GeneratedPairsPuzzleValidationViolation {
+    data class InitialTileExpressionsNotHidden(val tileIndexes: List<Int>) :
+        GeneratedPairsPuzzleValidationViolation {
         override val ruleId = GeneratedPairsPuzzleValidationRuleId.INITIAL_TILE_EXPRESSIONS_NOT_HIDDEN
     }
 
@@ -45,24 +53,30 @@ internal sealed interface GeneratedPairsPuzzleValidationViolation {
         override val ruleId = GeneratedPairsPuzzleValidationRuleId.BOARD_RESULTS_MISMATCH
     }
 
-    data class InitialStripEntryIdentitiesMismatch(val solvedEntryIds: List<Int>, val initialEntryIds: List<Int>) :
-        GeneratedPairsPuzzleValidationViolation {
+    data class InitialStripEntryIdentitiesMismatch(
+        val solvedEntryIds: List<StripEntryId>,
+        val initialEntryIds: List<StripEntryId>
+    ) : GeneratedPairsPuzzleValidationViolation {
         override val ruleId = GeneratedPairsPuzzleValidationRuleId.INITIAL_STRIP_ENTRY_IDENTITIES_MISMATCH
     }
 
-    data class InitialVisibleStripValueMismatch(val entryIds: Set<Int>) : GeneratedPairsPuzzleValidationViolation {
+    data class InitialVisibleStripValueMismatch(val entryIds: Set<StripEntryId>) :
+        GeneratedPairsPuzzleValidationViolation {
         override val ruleId = GeneratedPairsPuzzleValidationRuleId.INITIAL_VISIBLE_STRIP_VALUE_MISMATCH
     }
 
-    data class InitialStripItemsNotMasked(val entryIds: Set<Int>) : GeneratedPairsPuzzleValidationViolation {
+    data class InitialStripItemsNotMasked(val entryIds: Set<StripEntryId>) :
+        GeneratedPairsPuzzleValidationViolation {
         override val ruleId = GeneratedPairsPuzzleValidationRuleId.INITIAL_STRIP_ITEMS_NOT_MASKED
     }
 
-    data class SolvedStripValuesNotFullyKnown(val entryIds: Set<Int>) : GeneratedPairsPuzzleValidationViolation {
+    data class SolvedStripValuesNotFullyKnown(val entryIds: Set<StripEntryId>) :
+        GeneratedPairsPuzzleValidationViolation {
         override val ruleId = GeneratedPairsPuzzleValidationRuleId.SOLVED_STRIP_VALUES_NOT_FULLY_KNOWN
     }
 
-    data class SolvedStripValuesNotSorted(val observedValues: List<Int>) : GeneratedPairsPuzzleValidationViolation {
+    data class SolvedStripValuesNotSorted(val observedValues: List<Int>) :
+        GeneratedPairsPuzzleValidationViolation {
         override val ruleId = GeneratedPairsPuzzleValidationRuleId.SOLVED_STRIP_VALUES_NOT_SORTED
     }
 
@@ -71,7 +85,7 @@ internal sealed interface GeneratedPairsPuzzleValidationViolation {
         override val ruleId = GeneratedPairsPuzzleValidationRuleId.SOLVED_TILE_ASSIGNMENTS_INCOMPLETE
     }
 
-    data class SolvedOperandEntryReferenceInvalid(val unknownEntryIdsByTileIndex: Map<Int, Set<Int>>) :
+    data class SolvedOperandEntryReferenceInvalid(val unknownEntryIdsByTileIndex: Map<Int, Set<StripEntryId>>) :
         GeneratedPairsPuzzleValidationViolation {
         override val ruleId = GeneratedPairsPuzzleValidationRuleId.SOLVED_OPERAND_ENTRY_REFERENCE_INVALID
     }
@@ -81,15 +95,15 @@ internal sealed interface GeneratedPairsPuzzleValidationViolation {
     }
 
     data class SolvedStripEntryUsageMismatch(
-        val additionUsageByEntryId: Map<Int, Int>,
-        val multiplicationUsageByEntryId: Map<Int, Int>
+        val additionUsageByEntryId: Map<StripEntryId, Int>,
+        val multiplicationUsageByEntryId: Map<StripEntryId, Int>
     ) : GeneratedPairsPuzzleValidationViolation {
         override val ruleId = GeneratedPairsPuzzleValidationRuleId.SOLVED_STRIP_ENTRY_USAGE_MISMATCH
     }
 
     data class SolvedSumProductPairingMismatch(
-        val additionPairs: Set<GeneratedPairsEntryPairKey>,
-        val multiplicationPairs: Set<GeneratedPairsEntryPairKey>
+        val additionPairs: Set<UnorderedStripEntryPair>,
+        val multiplicationPairs: Set<UnorderedStripEntryPair>
     ) : GeneratedPairsPuzzleValidationViolation {
         override val ruleId = GeneratedPairsPuzzleValidationRuleId.SOLVED_SUM_PRODUCT_PAIRING_MISMATCH
     }
@@ -128,7 +142,7 @@ internal sealed interface GeneratedPairsPuzzleValidationViolation {
         override val ruleId = GeneratedPairsPuzzleValidationRuleId.HIDDEN_STRIP_ENTRY_COUNT_OUTSIDE_RANGE
     }
 
-    data class RequiredKnownStripAnchorMissing(val missingEntryIds: Set<Int>) :
+    data class RequiredKnownStripAnchorMissing(val missingEntryIds: Set<StripEntryId>) :
         GeneratedPairsPuzzleValidationViolation {
         override val ruleId = GeneratedPairsPuzzleValidationRuleId.REQUIRED_KNOWN_STRIP_ANCHOR_MISSING
     }
@@ -138,13 +152,13 @@ internal sealed interface GeneratedPairsPuzzleValidationViolation {
         override val ruleId = GeneratedPairsPuzzleValidationRuleId.HIDDEN_STRIP_RUN_EXCEEDED
     }
 
-    data class KnownStripEntryDistributionMismatch(val knownEntryIds: Set<Int>) :
+    data class KnownStripEntryDistributionMismatch(val knownEntryIds: Set<StripEntryId>) :
         GeneratedPairsPuzzleValidationViolation {
         override val ruleId = GeneratedPairsPuzzleValidationRuleId.KNOWN_STRIP_ENTRY_DISTRIBUTION_MISMATCH
     }
 }
 
-internal enum class GeneratedPairsPuzzleValidationRuleId(val code: String) {
+enum class GeneratedPairsPuzzleValidationRuleId(val code: String) {
     SOLVED_PUZZLE_NOT_SOLVED("generated.solved-puzzle-not-solved"),
     SOLVED_BOARD_TILE_COUNT_MISMATCH("generated.solved-board-tile-count-mismatch"),
     SOLVED_STRIP_ENTRY_COUNT_MISMATCH("generated.solved-strip-entry-count-mismatch"),

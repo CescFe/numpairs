@@ -6,11 +6,8 @@ import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.Tile
 
-data class ResolvedOperandAssignment(val stripEntryId: Int, val value: Int) {
+data class ResolvedOperandAssignment(val stripEntryId: StripEntryId, val value: Int) {
     init {
-        require(stripEntryId >= 0) {
-            "Strip entry id must be non-negative."
-        }
         require(value > 0) {
             "Resolved operand value must be a positive integer."
         }
@@ -80,7 +77,7 @@ private val Expression.Operand.resolvedOperandAssignment: ResolvedOperandAssignm
         Expression.Operand.Hidden -> null
         is Expression.Operand.Known -> stripEntryId?.let { resolvedStripEntryId ->
             ResolvedOperandAssignment(
-                stripEntryId = resolvedStripEntryId,
+                stripEntryId = StripEntryId(resolvedStripEntryId),
                 value = value
             )
         }

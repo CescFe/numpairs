@@ -3,8 +3,10 @@ package org.cescfe.numpairs.domain.generated.internal
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzlePairValues
 import org.cescfe.numpairs.domain.generated.PrimeProductDecoyPairPattern
 import org.cescfe.numpairs.domain.generated.matches
+import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
+import org.cescfe.numpairs.domain.puzzle.assignment.UnorderedStripEntryPair
 
-internal data class GeneratedPairsStripEntry(val id: Int, val value: Int)
+internal data class GeneratedPairsStripEntry(val id: StripEntryId, val value: Int)
 
 internal data class GeneratedPairsSolvedCandidate(
     val entries: List<GeneratedPairsStripEntry>,
@@ -13,7 +15,7 @@ internal data class GeneratedPairsSolvedCandidate(
 
 internal data class GeneratedPairsVariationPlan(
     val primeProductDecoyDirective: GeneratedPairsPrimeProductDecoyDirective,
-    val stripEntryVisibilityDirectives: Map<Int, GeneratedPairsStripEntryVisibilityDirective>
+    val stripEntryVisibilityDirectives: Map<StripEntryId, GeneratedPairsStripEntryVisibilityDirective>
 )
 
 internal sealed interface GeneratedPairsPrimeProductDecoyDirective {
@@ -36,7 +38,7 @@ internal enum class GeneratedPairsStripEntryVisibilityDirective {
 }
 
 internal data class GeneratedPairsStripMaskSelection(
-    val knownEntryIds: Set<Int>,
+    val knownEntryIds: Set<StripEntryId>,
     val variationPlanOutcome: GeneratedPairsVariationPlanOutcome
 )
 
@@ -81,10 +83,8 @@ internal data class GeneratedPairsEntryPair(
 ) : GeneratedPairsPairValues {
     override val firstValue: Int = firstEntry.value
     override val secondValue: Int = secondEntry.value
-    val key: GeneratedPairsEntryPairKey = GeneratedPairsEntryPairKey(
-        firstEntryId = minOf(firstEntry.id, secondEntry.id),
-        secondEntryId = maxOf(firstEntry.id, secondEntry.id)
+    val solutionPair: UnorderedStripEntryPair = UnorderedStripEntryPair.of(
+        firstEntryId = firstEntry.id,
+        secondEntryId = secondEntry.id
     )
 }
-
-internal data class GeneratedPairsEntryPairKey(val firstEntryId: Int, val secondEntryId: Int)

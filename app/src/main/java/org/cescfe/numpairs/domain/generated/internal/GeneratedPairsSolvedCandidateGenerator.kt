@@ -1,5 +1,7 @@
 package org.cescfe.numpairs.domain.generated.internal
 
+import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
+
 internal class GeneratedPairsSolvedCandidateGenerator(private val valuePairSelector: GeneratedPairsValuePairSelector) {
     fun generate(variationPlan: GeneratedPairsVariationPlan): GeneratedPairsSolvedCandidate? {
         val selectedValuePairs = valuePairSelector.selectValuePairs(
@@ -10,7 +12,7 @@ internal class GeneratedPairsSolvedCandidateGenerator(private val valuePairSelec
             .sorted()
             .mapIndexed { index, value ->
                 GeneratedPairsStripEntry(
-                    id = index,
+                    id = StripEntryId(index),
                     value = value
                 )
             }

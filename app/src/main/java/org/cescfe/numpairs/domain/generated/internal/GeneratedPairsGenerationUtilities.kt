@@ -2,20 +2,21 @@ package org.cescfe.numpairs.domain.generated.internal
 
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
 import org.cescfe.numpairs.domain.generated.resolveEntryIds
+import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
 
 internal const val GENERATED_PAIRS_PROBABILITY_PERCENT_UPPER_BOUND = 100
 
-internal fun GeneratedPuzzleProfile.requiredKnownEntryIds(): Set<Int> =
+internal fun GeneratedPuzzleProfile.requiredKnownEntryIds(): Set<StripEntryId> =
     initialStripMaskPolicy.requiredAnchors.resolveEntryIds(
         stripEntryCount = size.stripEntryCount
-    )
+    ).mapTo(mutableSetOf(), ::StripEntryId)
 
-internal fun Set<Int>.maxGeneratedPairsConsecutiveHiddenEntries(totalEntryCount: Int): Int {
+internal fun Set<StripEntryId>.maxGeneratedPairsConsecutiveHiddenEntries(totalEntryCount: Int): Int {
     var currentHiddenCount = 0
     var maxHiddenCount = 0
 
     repeat(totalEntryCount) { entryId ->
-        if (entryId in this) {
+        if (StripEntryId(entryId) in this) {
             currentHiddenCount = 0
         } else {
             currentHiddenCount++
@@ -26,7 +27,7 @@ internal fun Set<Int>.maxGeneratedPairsConsecutiveHiddenEntries(totalEntryCount:
     return maxHiddenCount
 }
 
-internal fun List<Int>.combinations(size: Int): List<Set<Int>> {
+internal fun <T> List<T>.combinations(size: Int): List<Set<T>> {
     if (size == 0) {
         return listOf(emptySet())
     }
@@ -34,7 +35,7 @@ internal fun List<Int>.combinations(size: Int): List<Set<Int>> {
         return emptyList()
     }
 
-    val combinations = mutableListOf<Set<Int>>()
+    val combinations = mutableListOf<Set<T>>()
     val lastStartIndex = this.size - size
 
     for (index in 0..lastStartIndex) {

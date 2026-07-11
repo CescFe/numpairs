@@ -1,6 +1,7 @@
 package org.cescfe.numpairs.feature.tutorial
 
 import org.cescfe.numpairs.domain.puzzle.assignment.ResolvedOperandAssignment
+import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
 import org.cescfe.numpairs.domain.puzzle.construction.hiddenExpression
 import org.cescfe.numpairs.domain.puzzle.construction.resolvedTile
 import org.cescfe.numpairs.domain.puzzle.model.Board
@@ -31,12 +32,12 @@ internal fun solvedPuzzle(stripValues: List<Int>, tileDefinitions: List<TileDefi
     tiles = tileDefinitions.map { tileDefinition ->
         resolvedTile(
             leftOperand = ResolvedOperandAssignment(
-                stripEntryId = tileDefinition.leftStripEntryId,
+                stripEntryId = StripEntryId(tileDefinition.leftStripEntryId),
                 value = stripValues[tileDefinition.leftStripEntryId]
             ),
             operator = tileDefinition.operator,
             rightOperand = ResolvedOperandAssignment(
-                stripEntryId = tileDefinition.rightStripEntryId,
+                stripEntryId = StripEntryId(tileDefinition.rightStripEntryId),
                 value = stripValues[tileDefinition.rightStripEntryId]
             )
         )
