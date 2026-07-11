@@ -52,9 +52,6 @@ sealed interface GeneratedPairsPuzzleGenerationOutcome {
     val attemptsUsed: Int
     val searchWorkConsumed: Int
 
-    val profileId: GeneratedPuzzleProfileId
-        get() = request.profileId
-
     data class Generated(
         override val request: GeneratedPuzzleGenerationRequest,
         val puzzle: GeneratedPairsPuzzle,

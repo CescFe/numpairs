@@ -1,14 +1,12 @@
-@file:Suppress("DEPRECATION")
-
 package org.cescfe.numpairs.domain.generated.internal
 
 import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzle
 import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleCreation
-import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerator
 import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleValidationRuleId
 import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleValidationViolation
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfiles
+import org.cescfe.numpairs.domain.generated.generatedPuzzle
 import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
 import org.cescfe.numpairs.domain.puzzle.assignment.resolvedTileAssignments
 import org.cescfe.numpairs.domain.puzzle.model.Board
@@ -455,10 +453,7 @@ private data class GeneratedPuzzleValidationFixture(
 private fun generatedPuzzleFixture(
     profile: GeneratedPuzzleProfile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
 ): GeneratedPuzzleValidationFixture {
-    val generatedPuzzle = GeneratedPairsPuzzleGenerator(
-        profile = profile,
-        seed = 42
-    ).generateWithSolution()
+    val generatedPuzzle = generatedPuzzle(profile = profile, seed = 42)
 
     return GeneratedPuzzleValidationFixture(
         profile = profile,

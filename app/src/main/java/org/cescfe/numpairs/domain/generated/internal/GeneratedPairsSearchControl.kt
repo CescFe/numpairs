@@ -18,7 +18,7 @@ internal class GeneratedPairsSearchControl(
         else -> GeneratedPairsSearchControlResult.Continue
     }
 
-    fun consumeCandidateExpansion(): GeneratedPairsSearchControlResult = when (val result = check()) {
+    fun consumeCandidateExpansion(): GeneratedPairsSearchControlResult = when (check()) {
         GeneratedPairsSearchControlResult.Continue -> {
             consumedWork++
             GeneratedPairsSearchControlResult.Continue

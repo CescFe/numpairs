@@ -152,13 +152,12 @@ private fun rememberGameViewModel(initialPuzzle: Puzzle, gameSessionKey: String)
 }
 
 private class GameViewModelFactory(private val initialPuzzle: Puzzle) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(GameViewModel::class.java)) {
-            return GameViewModel(initialPuzzle = initialPuzzle) as T
+        require(modelClass.isAssignableFrom(GameViewModel::class.java)) {
+            "Unsupported ViewModel type ${modelClass.name}."
         }
 
-        error("Unknown ViewModel class ${modelClass.name}")
+        return requireNotNull(modelClass.cast(GameViewModel(initialPuzzle = initialPuzzle)))
     }
 }
 

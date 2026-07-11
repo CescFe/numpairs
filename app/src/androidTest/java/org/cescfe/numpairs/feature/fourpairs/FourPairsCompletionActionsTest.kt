@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package org.cescfe.numpairs.feature.fourpairs
 
 import androidx.activity.ComponentActivity
@@ -17,7 +15,9 @@ import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
+import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerationOutcome
 import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerator
+import org.cescfe.numpairs.domain.generated.GeneratedPuzzleGenerationRequest
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfiles
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Operator
@@ -45,9 +45,9 @@ class FourPairsCompletionActionsTest {
 
     @Test
     fun newPuzzleActionGeneratesFreshPuzzleAndClearsPreviousGameState() {
-        val firstSolvedPuzzle = fourPairsGenerator(seed = 2026).generateWithSolution().solvedPuzzle
+        val firstSolvedPuzzle = generatedPuzzle(seed = 2026).solvedPuzzle
         val firstPuzzle = firstSolvedPuzzle.withHiddenOperatorAt(tileIndex = 0)
-        val secondPuzzle = fourPairsGenerator(seed = 42).generate()
+        val secondPuzzle = generatedPuzzle(seed = 42).initialPuzzle
         assertNotEquals(firstPuzzle.board.tiles[0].result, secondPuzzle.board.tiles[0].result)
         val puzzleProvider = QueueGeneratedPuzzleProvider(firstPuzzle, secondPuzzle)
 
@@ -84,7 +84,7 @@ class FourPairsCompletionActionsTest {
 
     @Test
     fun returnToMenuActionNavigatesBackToMenuAfterCompletion() {
-        val solvedPuzzle = fourPairsGenerator(seed = 81).generateWithSolution().solvedPuzzle
+        val solvedPuzzle = generatedPuzzle(seed = 81).solvedPuzzle
         val initialPuzzle = solvedPuzzle.withHiddenOperatorAt(tileIndex = 0)
         val puzzleProvider = QueueGeneratedPuzzleProvider(initialPuzzle)
 
@@ -108,7 +108,7 @@ class FourPairsCompletionActionsTest {
 
     @Test
     fun rulesHelperOpensAndDismissesInFourPairsWithoutRegeneratingPuzzle() {
-        val initialPuzzle = fourPairsGenerator(seed = 1234).generate()
+        val initialPuzzle = generatedPuzzle(seed = 1234).initialPuzzle
         val puzzleProvider = QueueGeneratedPuzzleProvider(initialPuzzle)
 
         setContent(puzzleProvider = puzzleProvider)
@@ -265,10 +265,14 @@ class FourPairsCompletionActionsTest {
         )
     )
 
-    private fun fourPairsGenerator(seed: Int): GeneratedPairsPuzzleGenerator = GeneratedPairsPuzzleGenerator(
-        profile = profile,
-        seed = seed
-    )
+    private fun generatedPuzzle(seed: Int) = when (
+        val outcome = GeneratedPairsPuzzleGenerator(profile = profile).generate(
+            request = GeneratedPuzzleGenerationRequest(profile = profile, seed = seed)
+        )
+    ) {
+        is GeneratedPairsPuzzleGenerationOutcome.Generated -> outcome.puzzle
+        is GeneratedPairsPuzzleGenerationOutcome.Failed -> error("Expected a generated 4 Pairs puzzle.")
+    }
 
     private fun string(stringResId: Int, vararg formatArgs: Any): String = if (formatArgs.isEmpty()) {
         composeTestRule.activity.getString(stringResId)

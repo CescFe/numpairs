@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package org.cescfe.numpairs.domain.generated
 
 import kotlin.random.Random
@@ -18,14 +16,8 @@ class GeneratedPairsPuzzleGeneratorTest {
     @Test
     fun generate_returns_the_initial_player_facing_puzzle() {
         val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
-        val generatedPuzzle = GeneratedPairsPuzzleGenerator(
-            profile = profile,
-            seed = 2026
-        ).generateWithSolution()
-        val initialPuzzle = GeneratedPairsPuzzleGenerator(
-            profile = profile,
-            seed = 2026
-        ).generate()
+        val generatedPuzzle = generatedPuzzle(profile = profile, seed = 2026)
+        val initialPuzzle = generatedPuzzle.initialPuzzle
 
         assertEquals(generatedPuzzle.initialPuzzle, initialPuzzle)
         assertGeneratedInitialPuzzleStructure(
@@ -132,11 +124,11 @@ class GeneratedPairsPuzzleGeneratorTest {
             sampledPlan.stripEntryVisibilityDirectives
         )
 
-        val generatedPuzzle = GeneratedPairsPuzzleGenerator(
+        val generatedPuzzle = generatedPuzzle(
             profile = profile,
             seed = seed,
-            maxAttempts = 1
-        ).generateWithSolution()
+            executionPolicy = GeneratedPuzzleGenerationExecutionPolicy(maxAttempts = 1)
+        )
 
         assertGeneratedInitialPuzzleStructure(
             puzzle = generatedPuzzle.initialPuzzle,

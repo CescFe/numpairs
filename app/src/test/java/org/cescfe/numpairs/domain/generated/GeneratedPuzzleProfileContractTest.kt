@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package org.cescfe.numpairs.domain.generated
 
 import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
@@ -24,10 +22,7 @@ class GeneratedPuzzleProfileContractTest {
 
         GeneratedPuzzleProfiles.ALL.forEach { profile ->
             CONTRACT_SEEDS.forEach { seed ->
-                val generatedPuzzle = GeneratedPairsPuzzleGenerator(
-                    profile = profile,
-                    seed = seed
-                ).generateWithSolution()
+                val generatedPuzzle = generatedPuzzle(profile = profile, seed = seed)
 
                 assertContract(
                     generatedPuzzle = generatedPuzzle,
@@ -37,7 +32,7 @@ class GeneratedPuzzleProfileContractTest {
                 assertEquals(
                     "${profile.id.value} must be deterministic for seed $seed.",
                     generatedPuzzle,
-                    GeneratedPairsPuzzleGenerator(profile = profile, seed = seed).generateWithSolution()
+                    generatedPuzzle(profile = profile, seed = seed)
                 )
             }
         }

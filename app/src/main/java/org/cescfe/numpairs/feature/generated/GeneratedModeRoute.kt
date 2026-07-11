@@ -254,11 +254,20 @@ private class GeneratedPuzzleViewModelFactory(
     private val mode: GeneratedModeConfiguration,
     private val generationUseCase: GeneratedPuzzleGenerationUseCase
 ) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T = GeneratedPuzzleViewModel(
-        mode = mode,
-        generationUseCase = generationUseCase
-    ) as T
+    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+        require(modelClass.isAssignableFrom(GeneratedPuzzleViewModel::class.java)) {
+            "Unsupported ViewModel type ${modelClass.name}."
+        }
+
+        return requireNotNull(
+            modelClass.cast(
+                GeneratedPuzzleViewModel(
+                    mode = mode,
+                    generationUseCase = generationUseCase
+                )
+            )
+        )
+    }
 }
 
 private tailrec fun Context.findComponentActivity(): ComponentActivity? = when (this) {

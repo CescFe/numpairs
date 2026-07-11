@@ -11,62 +11,19 @@ import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsVariationPlan
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsVariationPlanSelector
 import org.cescfe.numpairs.domain.generated.internal.GeneratedStripMaskSelector
 import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
-import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
 /**
- * Its request-based API is stateless: each call receives its own seed and execution policy, so
- * concurrent requests never share a mutable random stream.
+ * Each call receives its own seed and execution policy, so concurrent requests never share a
+ * mutable random stream.
  */
 class GeneratedPairsPuzzleGenerator(private val context: GeneratedPuzzleGenerationContext) {
     private val profile: GeneratedPuzzleProfile = context.profile
-    private var legacyRequest: GeneratedPuzzleGenerationRequest? = null
 
     constructor(profile: GeneratedPuzzleProfile) : this(
         context = GeneratedPuzzleGenerationContext.forProfile(profile = profile)
     )
 
-    @Deprecated(
-        message = "Pass an explicit GeneratedPuzzleGenerationRequest and handle its typed outcome.",
-        replaceWith = ReplaceWith("generate(request)")
-    )
-    constructor(
-        profile: GeneratedPuzzleProfile,
-        seed: Int,
-        maxAttempts: Int = DEFAULT_MAX_ATTEMPTS
-    ) : this(profile = profile) {
-        legacyRequest = GeneratedPuzzleGenerationRequest(
-            profile = profile,
-            seed = seed,
-            executionPolicy = GeneratedPuzzleGenerationExecutionPolicy(maxAttempts = maxAttempts)
-        )
-    }
-
-    @Deprecated(
-        message = "Pass an explicit GeneratedPuzzleGenerationRequest and handle its typed outcome.",
-        replaceWith = ReplaceWith("generate(request).requireGeneratedPuzzle().initialPuzzle")
-    )
-    @Suppress("DEPRECATION")
-    fun generate(): Puzzle = generateWithSolution().initialPuzzle
-
-    @Deprecated(
-        message = "Pass an explicit GeneratedPuzzleGenerationRequest and handle its typed outcome.",
-        replaceWith = ReplaceWith("generate(request).requireGeneratedPuzzle()")
-    )
-    fun generateWithSolution(): GeneratedPairsPuzzle = generate(
-        request = requireNotNull(legacyRequest) {
-            "The legacy generation API requires a seed configured in the constructor."
-        }
-    ).requireGeneratedPuzzle()
-
     fun generate(
-        request: GeneratedPuzzleGenerationRequest,
-        cancellation: GeneratedPuzzleGenerationCancellation = GeneratedPuzzleGenerationCancellation.None
-    ): GeneratedPairsPuzzleGenerationOutcome = generateWithSolution(
-        request = request,
-        cancellation = cancellation
-    )
-
-    fun generateWithSolution(
         request: GeneratedPuzzleGenerationRequest,
         cancellation: GeneratedPuzzleGenerationCancellation = GeneratedPuzzleGenerationCancellation.None
     ): GeneratedPairsPuzzleGenerationOutcome {
@@ -225,20 +182,6 @@ class GeneratedPairsPuzzleGenerator(private val context: GeneratedPuzzleGenerati
             is GeneratedPairsPuzzleCreation.Rejected -> GeneratedPuzzleBuildOutcome.Rejected(creation.violations)
         }
     }
-}
-
-private const val DEFAULT_MAX_ATTEMPTS = 50
-
-class GeneratedPairsPuzzleGenerationFailedException(val failure: GeneratedPairsPuzzleGenerationOutcome.Failed) :
-    RuntimeException(
-        "Generated puzzle creation failed for profile ${failure.request.profileId.value}: ${failure.reason}."
-    )
-
-fun GeneratedPairsPuzzleGenerationOutcome.requireGeneratedPuzzle(): GeneratedPairsPuzzle = when (this) {
-    is GeneratedPairsPuzzleGenerationOutcome.Generated -> puzzle
-    is GeneratedPairsPuzzleGenerationOutcome.Failed -> throw GeneratedPairsPuzzleGenerationFailedException(
-        failure = this
-    )
 }
 
 private fun failure(
