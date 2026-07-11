@@ -1,11 +1,5 @@
 package org.cescfe.numpairs.domain.generated
 
-/**
- * Deterministic limits for one generated-puzzle request.
- *
- * Search work counts candidate expansions, rather than elapsed time, so a seeded request has a
- * reproducible outcome.
- */
 data class GeneratedPuzzleGenerationExecutionPolicy(
     val maxAttempts: Int = DEFAULT_MAX_ATTEMPTS,
     val maxSearchWork: Int = DEFAULT_MAX_SEARCH_WORK
@@ -25,7 +19,6 @@ data class GeneratedPuzzleGenerationExecutionPolicy(
     }
 }
 
-/** The complete, reproducible provenance of one generated-puzzle run. */
 data class GeneratedPuzzleGenerationRequest(
     val profile: GeneratedPuzzleProfile,
     val seed: Int,
@@ -35,10 +28,6 @@ data class GeneratedPuzzleGenerationRequest(
         get() = profile.id
 }
 
-/**
- * Domain-level cancellation probe. It deliberately has no coroutine dependency so generation can
- * also be used by non-Android callers.
- */
 fun interface GeneratedPuzzleGenerationCancellation {
     fun isCancellationRequested(): Boolean
 

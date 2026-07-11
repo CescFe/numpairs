@@ -35,11 +35,6 @@ internal sealed interface GeneratedPuzzleGenerationUiState {
     ) : GeneratedPuzzleGenerationUiState
 }
 
-/**
- * Retains a generated session across recomposition and configuration recreation. Process-death
- * restoration is intentionally not supported because a [Puzzle] is not persisted as navigation
- * state; a fresh request is created when the user enters the mode again.
- */
 internal class GeneratedPuzzleViewModel(
     private val mode: GeneratedModeConfiguration,
     private val generationUseCase: GeneratedPuzzleGenerationUseCase,

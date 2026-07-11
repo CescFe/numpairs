@@ -3,6 +3,7 @@ package org.cescfe.numpairs.domain.generated
 import kotlin.random.Random
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsPuzzleAssembler
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSearchControl
+import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSearchControlResult
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSearchOutcome
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSolvedCandidate
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSolvedCandidateGenerator
@@ -12,10 +13,6 @@ import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsVariationPlan
 import org.cescfe.numpairs.domain.generated.internal.GeneratedStripMaskSelector
 import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
 
-/**
- * Each call receives its own seed and execution policy, so concurrent requests never share a
- * mutable random stream.
- */
 class GeneratedPairsPuzzleGenerator(private val context: GeneratedPuzzleGenerationContext) {
     private val profile: GeneratedPuzzleProfile = context.profile
 
@@ -56,7 +53,7 @@ class GeneratedPairsPuzzleGenerator(private val context: GeneratedPuzzleGenerati
 
         while (attemptsUsed < request.executionPolicy.maxAttempts) {
             when (val controlResult = searchControl.check()) {
-                is org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSearchControlResult.Continue -> Unit
+                is GeneratedPairsSearchControlResult.Continue -> Unit
                 else -> return failure(
                     request = request,
                     attemptsUsed = attemptsUsed,
@@ -198,14 +195,14 @@ private fun failure(
     candidateRejections = rejections.toList()
 )
 
-private fun org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSearchControlResult.failureReason():
+private fun GeneratedPairsSearchControlResult.failureReason():
     GeneratedPairsPuzzleGenerationFailureReason =
     when (this) {
-        org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSearchControlResult.Continue ->
+        GeneratedPairsSearchControlResult.Continue ->
             error("A continuing search control result cannot terminate generation.")
-        org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSearchControlResult.BudgetExhausted ->
+        GeneratedPairsSearchControlResult.BudgetExhausted ->
             GeneratedPairsPuzzleGenerationFailureReason.SearchBudgetExhausted
-        org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSearchControlResult.Cancelled ->
+        GeneratedPairsSearchControlResult.Cancelled ->
             GeneratedPairsPuzzleGenerationFailureReason.Cancelled
     }
 
