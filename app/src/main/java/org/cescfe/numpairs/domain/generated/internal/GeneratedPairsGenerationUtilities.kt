@@ -1,16 +1,14 @@
 package org.cescfe.numpairs.domain.generated.internal
 
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
-import org.cescfe.numpairs.domain.generated.RequiredKnownStripAnchor
+import org.cescfe.numpairs.domain.generated.resolveEntryIds
 
 internal const val GENERATED_PAIRS_PROBABILITY_PERCENT_UPPER_BOUND = 100
 
 internal fun GeneratedPuzzleProfile.requiredKnownEntryIds(): Set<Int> =
-    initialStripMaskPolicy.requiredAnchors.map { anchor ->
-        when (anchor) {
-            RequiredKnownStripAnchor.HIGHEST_STRIP_ENTRY -> size.stripEntryCount - 1
-        }
-    }.toSet()
+    initialStripMaskPolicy.requiredAnchors.resolveEntryIds(
+        stripEntryCount = size.stripEntryCount
+    )
 
 internal fun Set<Int>.maxGeneratedPairsConsecutiveHiddenEntries(totalEntryCount: Int): Int {
     var currentHiddenCount = 0

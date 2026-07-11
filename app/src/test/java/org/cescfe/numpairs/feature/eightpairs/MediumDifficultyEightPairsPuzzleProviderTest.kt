@@ -70,5 +70,5 @@ private fun assertInitialStripMaskMatchesProfile(
     profile: GeneratedPuzzleProfile
 ) {
     assertTrue(knownEntryCount in profile.initialStripMaskPolicy.knownEntryCountRange)
-    assertTrue(hiddenEntryCount in profile.initialStripMaskPolicy.hiddenEntryCountRange)
+    assertTrue(hiddenEntryCount in profile.hiddenEntryCountRange)
 }

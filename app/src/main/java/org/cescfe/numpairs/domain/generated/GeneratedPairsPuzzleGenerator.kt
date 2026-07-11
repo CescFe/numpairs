@@ -105,10 +105,7 @@ class GeneratedPairsPuzzleGenerator(
         )
 
         return generatedPuzzle.takeIf {
-            puzzleValidator.isValid(
-                generatedPuzzle = generatedPuzzle,
-                pairs = candidate.solvedCandidate.pairs
-            )
+            puzzleValidator.validate(generatedPuzzle = generatedPuzzle).isValid
         }
     }
 

@@ -19,7 +19,7 @@ internal fun assertGeneratedInitialPuzzleStructure(puzzle: Puzzle, profile: Gene
     assertTrue(knownEntryIds.size in profile.initialStripMaskPolicy.knownEntryCountRange)
     assertTrue(
         puzzle.strip.entries.count { entry -> entry.item == StripItem.Hidden } in
-            profile.initialStripMaskPolicy.hiddenEntryCountRange
+            profile.hiddenEntryCountRange
     )
     assertTrue(
         knownEntryIds.maxConsecutiveHiddenEntries(

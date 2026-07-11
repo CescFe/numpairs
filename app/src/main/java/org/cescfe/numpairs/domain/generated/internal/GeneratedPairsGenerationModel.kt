@@ -1,6 +1,8 @@
 package org.cescfe.numpairs.domain.generated.internal
 
-import org.cescfe.numpairs.domain.generated.ProductAnchorMix
+import org.cescfe.numpairs.domain.generated.GeneratedPuzzlePairValues
+import org.cescfe.numpairs.domain.generated.PrimeProductDecoyPairPattern
+import org.cescfe.numpairs.domain.generated.matches
 
 internal data class GeneratedPairsStripEntry(val id: Int, val value: Int)
 
@@ -43,32 +45,42 @@ internal enum class GeneratedPairsVariationPlanOutcome {
     FALLBACK
 }
 
-internal data class GeneratedPairsValuePair(val firstValue: Int, val secondValue: Int) {
-    val sum: Int = firstValue + secondValue
-    val product: Int = firstValue * secondValue
-    val resultValues: Set<Int> = setOf(sum, product)
+internal interface GeneratedPairsPairValues {
+    val firstValue: Int
+    val secondValue: Int
+
+    val sum: Int
+        get() = firstValue + secondValue
+
+    val product: Int
+        get() = firstValue * secondValue
+
+    val resultValues: Set<Int>
+        get() = setOf(sum, product)
 
     fun requiredOccurrencesByValue(): Map<Int, Int> = listOf(firstValue, secondValue)
         .groupingBy { value -> value }
         .eachCount()
 
-    fun productAnchorIncrement(productAnchorMix: ProductAnchorMix?): Int =
-        if (productAnchorMix != null && product > productAnchorMix.productResultGreaterThan) 1 else 0
-
     fun primeProductDecoyIncrement(): Int = if (isPrimeProductDecoy()) 1 else 0
 
-    fun isPrimeProductDecoy(): Boolean = firstValue == 1 &&
-        secondValue.isPrime() ||
-        secondValue == 1 &&
-        firstValue.isPrime()
+    fun isPrimeProductDecoy(): Boolean = PrimeProductDecoyPairPattern.ONE_AND_PRIME.matches(
+        pair = GeneratedPuzzlePairValues(
+            firstValue = firstValue,
+            secondValue = secondValue
+        )
+    )
 }
+
+internal data class GeneratedPairsValuePair(override val firstValue: Int, override val secondValue: Int) :
+    GeneratedPairsPairValues
 
 internal data class GeneratedPairsEntryPair(
     val firstEntry: GeneratedPairsStripEntry,
     val secondEntry: GeneratedPairsStripEntry
-) {
-    val product: Int = firstEntry.value * secondEntry.value
-    val entryIds: Set<Int> = setOf(firstEntry.id, secondEntry.id)
+) : GeneratedPairsPairValues {
+    override val firstValue: Int = firstEntry.value
+    override val secondValue: Int = secondEntry.value
     val key: GeneratedPairsEntryPairKey = GeneratedPairsEntryPairKey(
         firstEntryId = minOf(firstEntry.id, secondEntry.id),
         secondEntryId = maxOf(firstEntry.id, secondEntry.id)
@@ -76,19 +88,3 @@ internal data class GeneratedPairsEntryPair(
 }
 
 internal data class GeneratedPairsEntryPairKey(val firstEntryId: Int, val secondEntryId: Int)
-
-private fun Int.isPrime(): Boolean {
-    if (this < 2) {
-        return false
-    }
-
-    var candidateDivisor = 2
-    while (candidateDivisor * candidateDivisor <= this) {
-        if (this % candidateDivisor == 0) {
-            return false
-        }
-        candidateDivisor++
-    }
-
-    return true
-}

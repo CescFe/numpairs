@@ -1,9 +1,11 @@
 package org.cescfe.numpairs.domain.generated.internal
 
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
+import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfileDefinition
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfiles
 import org.cescfe.numpairs.domain.generated.HighValueMaskTarget
 import org.cescfe.numpairs.domain.generated.ProbabilityPercent
+import org.cescfe.numpairs.domain.generated.getOrThrow
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -106,21 +108,28 @@ class GeneratedPairsVariationPlanSelectorTest {
     }
 }
 
-private fun GeneratedPuzzleProfile.withTargetProbabilities(percentage: Int): GeneratedPuzzleProfile = copy(
-    initialStripMaskPolicy = initialStripMaskPolicy.copy(
-        highValueMaskTargets = initialStripMaskPolicy.highValueMaskTargets.map { target ->
-            HighValueMaskTarget(
-                rankFromHighest = target.rankFromHighest,
-                targetHiddenProbability = ProbabilityPercent(percentage)
+private fun GeneratedPuzzleProfile.withTargetProbabilities(percentage: Int): GeneratedPuzzleProfile =
+    GeneratedPuzzleProfile.create(
+        definition = GeneratedPuzzleProfileDefinition(
+            id = id,
+            size = size,
+            stripValuePolicy = stripValuePolicy,
+            resultConstraints = resultConstraints,
+            initialStripMaskPolicy = initialStripMaskPolicy,
+            generationPolicy = generationPolicy,
+            varietyPolicy = varietyPolicy.copy(
+                highValueMaskTargets = varietyPolicy.highValueMaskTargets.map { target ->
+                    HighValueMaskTarget(
+                        rankFromHighest = target.rankFromHighest,
+                        targetHiddenProbability = ProbabilityPercent(percentage)
+                    )
+                },
+                primeProductDecoyTarget = requireNotNull(varietyPolicy.primeProductDecoyTarget).copy(
+                    targetPuzzlePercent = ProbabilityPercent(percentage)
+                )
             )
-        }
-    ),
-    generationPolicy = generationPolicy.copy(
-        primeProductDecoyTarget = requireNotNull(generationPolicy.primeProductDecoyTarget).copy(
-            targetPuzzlePercent = ProbabilityPercent(percentage)
         )
-    )
-)
+    ).getOrThrow()
 
 private fun GeneratedPairsVariationPlan.visibilityDirectiveForRank(
     profile: GeneratedPuzzleProfile,
@@ -129,6 +138,6 @@ private fun GeneratedPairsVariationPlan.visibilityDirectiveForRank(
     stripEntryVisibilityDirectives[profile.size.stripEntryCount - rankFromHighest]
 
 private fun GeneratedPuzzleProfile.targetedHighValueEntryIds(): Set<Int> =
-    initialStripMaskPolicy.highValueMaskTargets.map { target ->
+    varietyPolicy.highValueMaskTargets.map { target ->
         size.stripEntryCount - target.rankFromHighest
     }.toSet()

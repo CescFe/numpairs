@@ -2,6 +2,7 @@ package org.cescfe.numpairs.domain.generated.internal
 
 import kotlin.random.Random
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
+import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfileDefinition
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfileId
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfiles
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleSize
@@ -10,6 +11,7 @@ import org.cescfe.numpairs.domain.generated.InitialStripMaskPolicy
 import org.cescfe.numpairs.domain.generated.ResultConstraints
 import org.cescfe.numpairs.domain.generated.StripKnownEntryDistributionPolicy
 import org.cescfe.numpairs.domain.generated.StripValuePolicy
+import org.cescfe.numpairs.domain.generated.getOrThrow
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
@@ -97,29 +99,27 @@ private fun variationPlan(
 private fun singlePairProfile(id: String, valueRange: IntRange, maxMultiplicationResult: Int): GeneratedPuzzleProfile {
     val size = GeneratedPuzzleSize(pairCount = 1)
 
-    return GeneratedPuzzleProfile(
-        id = GeneratedPuzzleProfileId(id),
-        size = size,
-        stripValuePolicy = StripValuePolicy(
-            valueRange = valueRange,
-            maxOccurrencesPerValue = 1
-        ),
-        resultConstraints = ResultConstraints(
-            pairCount = size.pairCount,
-            maxMultiplicationResult = maxMultiplicationResult,
-            allowsDuplicateBoardResults = false
-        ),
-        initialStripMaskPolicy = InitialStripMaskPolicy(
-            stripEntryCount = size.stripEntryCount,
-            knownEntryCountRange = 1..1,
-            requiredAnchors = emptySet(),
-            distributionPolicy = StripKnownEntryDistributionPolicy.UNRESTRICTED,
-            maxConsecutiveHiddenEntries = 1
-        ),
-        generationPolicy = GenerationPolicy(
-            isBoardTileShufflingEnabled = false,
-            isBoundedGenerationExpected = true,
-            isDeterministicGenerationExpected = true
+    return GeneratedPuzzleProfile.create(
+        definition = GeneratedPuzzleProfileDefinition(
+            id = GeneratedPuzzleProfileId(id),
+            size = size,
+            stripValuePolicy = StripValuePolicy(
+                valueRange = valueRange,
+                maxOccurrencesPerValue = 1
+            ),
+            resultConstraints = ResultConstraints(
+                maxMultiplicationResult = maxMultiplicationResult,
+                allowsDuplicateBoardResults = false
+            ),
+            initialStripMaskPolicy = InitialStripMaskPolicy(
+                knownEntryCountRange = 1..1,
+                requiredAnchors = emptySet(),
+                distributionPolicy = StripKnownEntryDistributionPolicy.UNRESTRICTED,
+                maxConsecutiveHiddenEntries = 1
+            ),
+            generationPolicy = GenerationPolicy(
+                isBoardTileShufflingEnabled = false
+            )
         )
-    )
+    ).getOrThrow()
 }
