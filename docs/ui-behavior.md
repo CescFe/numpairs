@@ -58,7 +58,7 @@ The rules helper action should be available in generated `4 Pairs` for v3. It sh
 
 - Tapping the rules helper action opens a modal dialog.
 - The helper dialog explains core rules using concise, player-facing language.
-- The helper is informational only and must not reveal puzzle-specific answers, hidden values, pairings, hints, or solver output.
+- The helper is informational only and must not reveal puzzle-specific answers, hidden values, pairings, hints, or automated answer output.
 - The helper can be closed by tapping a visible close icon.
 - Tapping outside the dialog closes the helper.
 - System back closes the helper before triggering the route-level back behavior.

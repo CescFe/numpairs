@@ -5,9 +5,14 @@ import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
 
 internal class GeneratedPairsValuePairSelector(
     private val profile: GeneratedPuzzleProfile,
-    private val random: Random
+    private val random: Random,
+    private val hardRules: GeneratedValuePairRuleSet
 ) {
-    private val hardRules = GeneratedPuzzleHardRuleSet.from(profile = profile).valuePairs
+    constructor(profile: GeneratedPuzzleProfile, random: Random) : this(
+        profile = profile,
+        random = random,
+        hardRules = GeneratedPuzzleHardRuleSet.from(profile = profile).valuePairs
+    )
 
     fun selectValuePairs(variationPlan: GeneratedPairsVariationPlan): List<GeneratedPairsValuePair>? {
         val candidatePairs = candidateValuePairsForProfile().shuffled(random)

@@ -25,6 +25,7 @@ import org.cescfe.numpairs.domain.puzzle.model.Strip
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenRobot
+import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -177,7 +178,7 @@ class GameRouteTest {
                     GameRouteMode.FOUR_PAIRS -> GameRoute(
                         title = "4 pairs",
                         initialPuzzle = fourPairsPuzzle,
-                        gameSessionKey = "four-pairs"
+                        gameSessionKey = GeneratedModes.FOUR_PAIRS.id.value
                     )
                 }
             }

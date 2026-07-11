@@ -27,7 +27,7 @@ The surface should answer a different question from Rules helper:
 - Rules helper explains what the game rules are.
 - Solving tips explain how a player can start reasoning through a puzzle.
 
-Solving tips are general strategy guidance. They should not inspect the current puzzle, reveal answers, choose the next move, expose solver output, or adapt to the player's exact board state.
+Solving tips are general strategy guidance. They should not inspect the current puzzle, reveal answers, choose the next move, expose automated answer output, or adapt to the player's exact board state.
 
 ---
 
@@ -42,7 +42,7 @@ The first practice experience should:
 - use authored puzzle content rather than generated puzzle content
 - teach strategy through real puzzle actions
 - avoid contextual answer reveal
-- avoid solver-backed suggestions
+- avoid puzzle-specific automated suggestions
 - preserve the underlying generated `4 Pairs` puzzle when opened as an overlay
 - show local completion feedback when the practice puzzle is solved
 
@@ -98,7 +98,7 @@ Solving tips must not:
 - reveal hidden strip values from the current puzzle
 - identify correct pairings for the current puzzle
 - suggest the current puzzle's next move
-- call or expose the solver
+- generate or expose puzzle-specific answers
 - autofill strip entries or tile expressions
 - replace Rules helper
 - replace the `Learn basics` tutorial

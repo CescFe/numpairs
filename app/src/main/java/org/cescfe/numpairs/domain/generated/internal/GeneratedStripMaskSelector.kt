@@ -4,8 +4,16 @@ import kotlin.random.Random
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
 import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
 
-internal class GeneratedStripMaskSelector(private val profile: GeneratedPuzzleProfile, private val random: Random) {
-    private val hardRule = GeneratedPuzzleHardRuleSet.from(profile = profile).stripMask
+internal class GeneratedStripMaskSelector(
+    private val profile: GeneratedPuzzleProfile,
+    private val random: Random,
+    private val hardRule: GeneratedStripMaskRule
+) {
+    constructor(profile: GeneratedPuzzleProfile, random: Random) : this(
+        profile = profile,
+        random = random,
+        hardRule = GeneratedPuzzleHardRuleSet.from(profile = profile).stripMask
+    )
 
     fun selectKnownEntryIds(
         pairs: List<GeneratedPairsEntryPair>,

@@ -403,9 +403,9 @@ The menu is the first usable app screen after splash. It should look like a deli
 Expectations:
 
 - show `NumPairs` clearly
-- make generated `4 Pairs` the primary replayable action
+- make generated modes prominent replayable actions
 - present Tutorial as a guided learning option
-- make Tutorial and `4 Pairs` entries feel like proper product cards or actions
+- make Tutorial and generated-mode entries feel like proper product cards or actions
 - avoid a marketing landing-page layout
 - keep actions large enough for touch
 - keep copy concise
@@ -629,7 +629,7 @@ Review scope:
 
 Main flows checked by implementation review:
 
-- Menu: `MenuScreen` uses the fixed `NumPairsTheme`, one primary generated `4 Pairs` CTA, one lower-emphasis Tutorial action, centered bounded content, and the jade app title.
+- Menu: `MenuScreen` uses the fixed `NumPairsTheme`, primary CTAs for the implemented generated modes, one lower-emphasis Tutorial action, centered bounded content, and the jade app title.
 - Tutorial: `TutorialRoute` and `TutorialOverlayHost` reuse the same themed game surface and instructional overlay path instead of introducing a separate visual language.
 - Generated `4 Pairs`: `FourPairsRoute` uses the shared `GameScreen`, fixed theme, completion actions, Rules Helper entry point, and Solving Tips entry point.
 - Rules Helper: `RulesHelperDialog` uses the raised surface, shared shape, Inter content hierarchy, themed close action, scroll fades, and a low-noise Tutorial action.

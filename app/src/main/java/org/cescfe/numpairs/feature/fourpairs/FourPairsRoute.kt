@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -16,7 +15,9 @@ import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryState
 import org.cescfe.numpairs.feature.game.ui.actions.HintAction
 import org.cescfe.numpairs.feature.game.ui.help.SolvingTipsDialog
+import org.cescfe.numpairs.feature.generated.GeneratedModeConfiguration
 import org.cescfe.numpairs.feature.generated.GeneratedModeRoute
+import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleProvider
 import org.cescfe.numpairs.feature.tutorial.TutorialMode
 import org.cescfe.numpairs.feature.tutorial.TutorialOverlayHost
@@ -25,7 +26,8 @@ import org.cescfe.numpairs.feature.tutorial.TutorialOverlayHost
 fun FourPairsRoute(
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     modifier: Modifier = Modifier,
-    puzzleProvider: FourPairsPuzzleProvider = DefaultFourPairsPuzzleProvider,
+    puzzleProvider: GeneratedPuzzleProvider,
+    mode: GeneratedModeConfiguration = GeneratedModes.FOUR_PAIRS,
     tutorialOverlayMode: TutorialMode? = null,
     onTutorialOverlayClosed: () -> Unit = {},
     onNavigateBack: () -> Unit = {}
@@ -33,11 +35,6 @@ fun FourPairsRoute(
     val actionDiscoveryState: TopAppBarActionDiscoveryState? by topAppBarActionDiscoveryRepository.discoveryState
         .collectAsState(initial = null)
     val coroutineScope = rememberCoroutineScope()
-    val generatedPuzzleProvider = remember(puzzleProvider) {
-        GeneratedPuzzleProvider {
-            puzzleProvider.nextPuzzle()
-        }
-    }
     var requestedTutorialOverlayMode by rememberSaveable {
         mutableStateOf<TutorialMode?>(null)
     }
@@ -55,9 +52,9 @@ fun FourPairsRoute(
         modifier = modifier
     ) {
         GeneratedModeRoute(
+            mode = mode,
             title = stringResource(R.string.four_pairs_screen_title),
-            gameSessionKey = FOUR_PAIRS_GAME_SESSION_KEY,
-            puzzleProvider = generatedPuzzleProvider,
+            puzzleProvider = puzzleProvider,
             isRulesHelperEnabled = true,
             isRulesHelperActionDiscoveryDotVisible = actionDiscoveryState?.hasSeenHelpAction == false,
             onRulesHelperActionTapped = {
@@ -97,5 +94,3 @@ fun FourPairsRoute(
         }
     }
 }
-
-private const val FOUR_PAIRS_GAME_SESSION_KEY = "four-pairs"

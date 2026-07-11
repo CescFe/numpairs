@@ -16,8 +16,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
-import org.cescfe.numpairs.feature.fourpairs.FourPairsPuzzleProvider
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
+import org.cescfe.numpairs.feature.generated.GeneratedModes
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleProvider
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleProviderFactory
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.feature.tutorial.TutorialContent
 import org.cescfe.numpairs.feature.tutorial.TutorialMode
@@ -36,7 +38,7 @@ class AppNavigationLearningFlowTest {
 
     @Test
     fun inGameLearningActionsOpenTutorialOverlaysAndReturnToCurrentFourPairsScreen() {
-        val puzzleProvider = QueueFourPairsPuzzleProvider(samplePuzzle)
+        val puzzleProvider = QueueGeneratedPuzzleProvider(samplePuzzle)
         setContent(puzzleProvider = puzzleProvider)
 
         navigateToFourPairs()
@@ -52,14 +54,15 @@ class AppNavigationLearningFlowTest {
         assertEquals(1, puzzleProvider.requestCount)
     }
 
-    private fun setContent(puzzleProvider: FourPairsPuzzleProvider) {
+    private fun setContent(puzzleProvider: GeneratedPuzzleProvider) {
         val actionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository()
 
         composeTestRule.setContent {
             NumPairsTheme {
                 AppNavigation(
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository,
-                    fourPairsPuzzleProvider = puzzleProvider
+                    generatedModeRegistry = GeneratedModes.registry,
+                    generatedPuzzleProviderFactory = fourPairsProviderFactory(puzzleProvider = puzzleProvider)
                 )
             }
         }
@@ -181,7 +184,13 @@ class AppNavigationLearningFlowTest {
         composeTestRule.activity.getString(stringResId, *formatArgs)
     }
 
-    private class QueueFourPairsPuzzleProvider(private val puzzle: Puzzle) : FourPairsPuzzleProvider {
+    private fun fourPairsProviderFactory(puzzleProvider: GeneratedPuzzleProvider): GeneratedPuzzleProviderFactory =
+        GeneratedPuzzleProviderFactory { mode ->
+            require(mode == GeneratedModes.FOUR_PAIRS)
+            puzzleProvider
+        }
+
+    private class QueueGeneratedPuzzleProvider(private val puzzle: Puzzle) : GeneratedPuzzleProvider {
         var requestCount = 0
             private set
 

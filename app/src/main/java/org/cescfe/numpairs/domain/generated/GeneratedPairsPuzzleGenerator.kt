@@ -12,10 +12,12 @@ import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
 class GeneratedPairsPuzzleGenerator(
-    private val profile: GeneratedPuzzleProfile,
+    private val context: GeneratedPuzzleGenerationContext,
     private val random: Random = Random.Default,
     private val maxAttempts: Int = DEFAULT_MAX_ATTEMPTS
 ) {
+    private val profile: GeneratedPuzzleProfile = context.profile
+
     init {
         require(maxAttempts > 0) {
             "Maximum generation attempts must be positive."
@@ -29,12 +31,14 @@ class GeneratedPairsPuzzleGenerator(
     private val solvedCandidateGenerator = GeneratedPairsSolvedCandidateGenerator(
         valuePairSelector = GeneratedPairsValuePairSelector(
             profile = profile,
-            random = random
+            random = random,
+            hardRules = context.hardRules.valuePairs
         )
     )
     private val stripMaskSelector = GeneratedStripMaskSelector(
         profile = profile,
-        random = random
+        random = random,
+        hardRule = context.hardRules.stripMask
     )
     private val puzzleAssembler = GeneratedPairsPuzzleAssembler(
         profile = profile,
@@ -42,10 +46,30 @@ class GeneratedPairsPuzzleGenerator(
     )
     constructor(
         profile: GeneratedPuzzleProfile,
+        random: Random = Random.Default,
+        maxAttempts: Int = DEFAULT_MAX_ATTEMPTS
+    ) : this(
+        context = GeneratedPuzzleGenerationContext.forProfile(profile = profile),
+        random = random,
+        maxAttempts = maxAttempts
+    )
+
+    constructor(
+        profile: GeneratedPuzzleProfile,
         seed: Int,
         maxAttempts: Int = DEFAULT_MAX_ATTEMPTS
     ) : this(
-        profile = profile,
+        context = GeneratedPuzzleGenerationContext.forProfile(profile = profile),
+        random = Random(seed),
+        maxAttempts = maxAttempts
+    )
+
+    constructor(
+        context: GeneratedPuzzleGenerationContext,
+        seed: Int,
+        maxAttempts: Int = DEFAULT_MAX_ATTEMPTS
+    ) : this(
+        context = context,
         random = Random(seed),
         maxAttempts = maxAttempts
     )
@@ -96,7 +120,7 @@ class GeneratedPairsPuzzleGenerator(
         val solvedPuzzle = puzzleAssembler.buildSolvedPuzzle(candidate = candidate.solvedCandidate)
         return when (
             val creation = GeneratedPairsPuzzle.fromSolvedPuzzle(
-                profile = profile,
+                context = context,
                 solvedPuzzle = solvedPuzzle,
                 knownEntryIds = candidate.knownEntryIds
             )
