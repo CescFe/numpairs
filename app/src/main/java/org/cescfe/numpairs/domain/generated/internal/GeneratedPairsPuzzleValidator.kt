@@ -2,7 +2,6 @@ package org.cescfe.numpairs.domain.generated.internal
 
 import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleValidationViolation
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleGenerationContext
-import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
 import org.cescfe.numpairs.domain.puzzle.assignment.ResolvedPuzzleAnalysis
 import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
 import org.cescfe.numpairs.domain.puzzle.assignment.analyzeResolvedPuzzle
@@ -13,13 +12,9 @@ import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
 
-internal class GeneratedPairsPuzzleValidator(private val context: GeneratedPuzzleGenerationContext) {
-    private val profile: GeneratedPuzzleProfile = context.profile
-    private val hardRules: GeneratedPuzzleHardRuleSet = context.hardRules
-
-    constructor(profile: GeneratedPuzzleProfile) : this(
-        context = GeneratedPuzzleGenerationContext.forProfile(profile = profile)
-    )
+internal class GeneratedPairsPuzzleValidator(context: GeneratedPuzzleGenerationContext) {
+    private val profile = context.profile
+    private val hardRules = context.hardRules
 
     fun validate(initialPuzzle: Puzzle, solvedPuzzle: Puzzle): GeneratedPairsPuzzleValidationReport {
         val solvedAnalysis = solvedPuzzle.analyzeResolvedPuzzle()
