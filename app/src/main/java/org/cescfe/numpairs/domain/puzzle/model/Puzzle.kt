@@ -1,9 +1,7 @@
 package org.cescfe.numpairs.domain.puzzle.model
 
 import org.cescfe.numpairs.domain.puzzle.validation.hasIncorrectTiles
-import org.cescfe.numpairs.domain.puzzle.validation.hasInvalidStripEntryUsage
-import org.cescfe.numpairs.domain.puzzle.validation.hasMismatchedSumProductPairings
-import org.cescfe.numpairs.domain.puzzle.validation.hasMissingResolvedTileAssignments
+import org.cescfe.numpairs.domain.puzzle.validation.resolvedAssignmentCompletionState
 
 data class Puzzle(val board: Board, val strip: Strip) {
     init {
@@ -25,10 +23,7 @@ data class Puzzle(val board: Board, val strip: Strip) {
         get() = when {
             isIncomplete -> PuzzleCompletionState.INCOMPLETE
             hasIncorrectTiles -> PuzzleCompletionState.INCORRECT_TILES
-            hasMissingResolvedTileAssignments -> PuzzleCompletionState.MISSING_STRIP_ENTRY_IDENTITIES
-            hasMismatchedSumProductPairings -> PuzzleCompletionState.MISMATCHED_SUM_PRODUCT_PAIRINGS
-            hasInvalidStripEntryUsage -> PuzzleCompletionState.INVALID_STRIP_ENTRY_USAGE
-            else -> PuzzleCompletionState.SOLVED
+            else -> resolvedAssignmentCompletionState ?: PuzzleCompletionState.SOLVED
         }
 
     val isSolved: Boolean

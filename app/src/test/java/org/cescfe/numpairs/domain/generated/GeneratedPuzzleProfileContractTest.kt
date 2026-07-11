@@ -1,9 +1,7 @@
 package org.cescfe.numpairs.domain.generated
 
-import org.cescfe.numpairs.domain.puzzle.assignment.IndexedResolvedTileAssignment
 import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
-import org.cescfe.numpairs.domain.puzzle.assignment.UnorderedStripEntryPair
-import org.cescfe.numpairs.domain.puzzle.assignment.resolvedTileAssignments
+import org.cescfe.numpairs.domain.puzzle.assignment.analyzeResolvedPuzzle
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
@@ -49,7 +47,8 @@ class GeneratedPuzzleProfileContractTest {
         val solvedEntriesById = solvedPuzzle.strip.entries.associate { entry ->
             StripEntryId(entry.id) to (entry.item as StripItem.Known).value
         }
-        val assignments = solvedPuzzle.resolvedTileAssignments()
+        val solvedAnalysis = solvedPuzzle.analyzeResolvedPuzzle()
+        val assignments = solvedAnalysis.resolvedAssignments
         val context = "${profile.id.value}, seed $seed"
 
         assertEquals(context, PuzzleCompletionState.SOLVED, solvedPuzzle.completionState)
@@ -96,14 +95,14 @@ class GeneratedPuzzleProfileContractTest {
                 assignment.rightOperand.value
             )
         }
-        assertUsageOncePerOperator(
-            assignments = assignments,
-            stripEntryIds = solvedEntriesById.keys,
-            context = context
-        )
+        listOf(Operator.ADDITION, Operator.MULTIPLICATION).forEach { operator ->
+            solvedEntriesById.keys.forEach { entryId ->
+                assertEquals(context, 1, solvedAnalysis.usageCountsFor(operator)[entryId])
+            }
+        }
 
-        val additionPairs = assignments.pairKeysFor(operator = Operator.ADDITION)
-        val multiplicationPairs = assignments.pairKeysFor(operator = Operator.MULTIPLICATION)
+        val additionPairs = solvedAnalysis.solutionPairsFor(operator = Operator.ADDITION)
+        val multiplicationPairs = solvedAnalysis.solutionPairsFor(operator = Operator.MULTIPLICATION)
         assertEquals(context, profile.size.pairCount, additionPairs.size)
         assertEquals(context, additionPairs, multiplicationPairs)
 
@@ -145,10 +144,10 @@ class GeneratedPuzzleProfileContractTest {
             val additionPairByEntryId = assignments
                 .filter { assignment -> assignment.operator == Operator.ADDITION }
                 .flatMap { assignment ->
-                    val pairKey = assignment.pairKey
+                    val solutionPair = solvedAnalysis.solutionPairByTileIndex.getValue(assignment.tileIndex)
                     listOf(
-                        assignment.leftOperand.stripEntryId to pairKey,
-                        assignment.rightOperand.stripEntryId to pairKey
+                        assignment.leftOperand.stripEntryId to solutionPair,
+                        assignment.rightOperand.stripEntryId to solutionPair
                     )
                 }.toMap()
             assertEquals(
@@ -161,40 +160,10 @@ class GeneratedPuzzleProfileContractTest {
         assertEquals(context, PuzzleCompletionState.INCOMPLETE, initialPuzzle.completionState)
     }
 
-    private fun assertUsageOncePerOperator(
-        assignments: List<IndexedResolvedTileAssignment>,
-        stripEntryIds: Set<StripEntryId>,
-        context: String
-    ) {
-        listOf(Operator.ADDITION, Operator.MULTIPLICATION).forEach { operator ->
-            val usageCounts = assignments
-                .filter { assignment -> assignment.operator == operator }
-                .flatMap { assignment ->
-                    listOf(assignment.leftOperand.stripEntryId, assignment.rightOperand.stripEntryId)
-                }.groupingBy { entryId -> entryId }
-                .eachCount()
-
-            stripEntryIds.forEach { entryId ->
-                assertEquals(context, 1, usageCounts[entryId])
-            }
-        }
-    }
-
     private companion object {
         val CONTRACT_SEEDS = listOf(1, 2, 7, 42, 99, 2026)
     }
 }
-
-private fun List<IndexedResolvedTileAssignment>.pairKeysFor(operator: Operator): Set<UnorderedStripEntryPair> =
-    filter { assignment -> assignment.operator == operator }
-        .map(IndexedResolvedTileAssignment::pairKey)
-        .toSet()
-
-private val IndexedResolvedTileAssignment.pairKey: UnorderedStripEntryPair
-    get() = UnorderedStripEntryPair.of(
-        firstEntryId = leftOperand.stripEntryId,
-        secondEntryId = rightOperand.stripEntryId
-    )
 
 private fun GeneratedPuzzleProfile.requiredKnownEntryIdsForContract(): Set<Int> =
     initialStripMaskPolicy.requiredAnchors.map { anchor ->

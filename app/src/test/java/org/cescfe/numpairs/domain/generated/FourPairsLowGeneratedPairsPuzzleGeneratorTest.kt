@@ -1,10 +1,7 @@
 package org.cescfe.numpairs.domain.generated
 
-import org.cescfe.numpairs.domain.puzzle.assignment.IndexedResolvedTileAssignment
-import org.cescfe.numpairs.domain.puzzle.assignment.UnorderedStripEntryPair
-import org.cescfe.numpairs.domain.puzzle.assignment.resolvedTileAssignments
+import org.cescfe.numpairs.domain.puzzle.assignment.analyzeResolvedPuzzle
 import org.cescfe.numpairs.domain.puzzle.model.Operator
-import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.model.Tile
 import org.junit.Assert.assertEquals
@@ -87,8 +84,9 @@ class FourPairsLowGeneratedPairsPuzzleGeneratorTest {
             profile = profile,
             seed = 81
         ).generateWithSolution().solvedPuzzle
-        val additionPairs = solvedPuzzle.pairKeysFor(operator = Operator.ADDITION)
-        val multiplicationPairs = solvedPuzzle.pairKeysFor(operator = Operator.MULTIPLICATION)
+        val analysis = solvedPuzzle.analyzeResolvedPuzzle()
+        val additionPairs = analysis.solutionPairsFor(operator = Operator.ADDITION)
+        val multiplicationPairs = analysis.solutionPairsFor(operator = Operator.MULTIPLICATION)
 
         assertEquals(profile.size.pairCount, additionPairs.size)
         assertEquals(additionPairs, multiplicationPairs)
@@ -103,7 +101,16 @@ class FourPairsLowGeneratedPairsPuzzleGeneratorTest {
             seed = 99
         ).generateWithSolution()
         val initialKnownEntryIds = generatedPuzzle.initialPuzzle.knownEntryIds()
-        val pairKeyByEntryId = generatedPuzzle.solvedPuzzle.pairKeyByEntryId()
+        val analysis = generatedPuzzle.solvedPuzzle.analyzeResolvedPuzzle()
+        val solutionPairByEntryId = analysis.resolvedAssignments
+            .filter { assignment -> assignment.operator == Operator.ADDITION }
+            .flatMap { assignment ->
+                val solutionPair = analysis.solutionPairByTileIndex.getValue(assignment.tileIndex)
+                listOf(
+                    assignment.leftOperand.stripEntryId.value to solutionPair,
+                    assignment.rightOperand.stripEntryId.value to solutionPair
+                )
+            }.toMap()
 
         assertTrue(initialKnownEntryIds.size in profile.initialStripMaskPolicy.knownEntryCountRange)
         assertTrue(profile.requiredHighestStripEntryId in initialKnownEntryIds)
@@ -114,30 +121,7 @@ class FourPairsLowGeneratedPairsPuzzleGeneratorTest {
         )
         assertEquals(
             initialKnownEntryIds.size,
-            initialKnownEntryIds.map { entryId -> pairKeyByEntryId.getValue(entryId) }.toSet().size
+            initialKnownEntryIds.map { entryId -> solutionPairByEntryId.getValue(entryId) }.toSet().size
         )
     }
 }
-
-private fun Puzzle.pairKeysFor(operator: Operator): Set<UnorderedStripEntryPair> = resolvedTileAssignments()
-    .filter { assignment -> assignment.operator == operator }
-    .map(IndexedResolvedTileAssignment::pairKey)
-    .toSet()
-
-private fun Puzzle.pairKeyByEntryId(): Map<Int, UnorderedStripEntryPair> = resolvedTileAssignments()
-    .filter { assignment -> assignment.operator == Operator.ADDITION }
-    .flatMap { assignment ->
-        val pairKey = assignment.pairKey
-
-        listOf(
-            assignment.leftOperand.stripEntryId.value to pairKey,
-            assignment.rightOperand.stripEntryId.value to pairKey
-        )
-    }
-    .toMap()
-
-private val IndexedResolvedTileAssignment.pairKey: UnorderedStripEntryPair
-    get() = UnorderedStripEntryPair.of(
-        firstEntryId = leftOperand.stripEntryId,
-        secondEntryId = rightOperand.stripEntryId
-    )
