@@ -195,8 +195,7 @@ private fun failure(
     candidateRejections = rejections.toList()
 )
 
-private fun GeneratedPairsSearchControlResult.failureReason():
-    GeneratedPairsPuzzleGenerationFailureReason =
+private fun GeneratedPairsSearchControlResult.failureReason(): GeneratedPairsPuzzleGenerationFailureReason =
     when (this) {
         GeneratedPairsSearchControlResult.Continue ->
             error("A continuing search control result cannot terminate generation.")

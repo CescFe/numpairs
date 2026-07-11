@@ -171,14 +171,13 @@ class FourPairsActionDiscoveryTest {
         }
     }
 
-    private fun generatedPuzzleUseCase(
-        puzzle: Puzzle
-    ): GeneratedPuzzleGenerationUseCase = GeneratedPuzzleGenerationUseCase { request ->
-        GeneratedPuzzleGenerationResult.Generated(
-            request = request,
-            initialPuzzle = puzzle
-        )
-    }
+    private fun generatedPuzzleUseCase(puzzle: Puzzle): GeneratedPuzzleGenerationUseCase =
+        GeneratedPuzzleGenerationUseCase { request ->
+            GeneratedPuzzleGenerationResult.Generated(
+                request = request,
+                initialPuzzle = puzzle
+            )
+        }
 
     private fun hasDiscoveryDot(testTag: String): Boolean = composeTestRule
         .onAllNodesWithTag(testTag, useUnmergedTree = true)
