@@ -390,7 +390,7 @@ Out of scope for the first Tutorial MVP:
 - free step skipping before required actions are completed
 - timer-only step advancement that does not depend on player action
 - adaptive hints
-- solver-backed suggestions
+- puzzle-specific automated suggestions
 - answer reveal
 - tutorial-specific error feedback for unrelated guided-step actions
 - rules helper access inside Tutorial
@@ -470,7 +470,7 @@ Possible feedback patterns:
 - if a player uses unrelated operands across sum and product tiles, remind them that one pair creates both results
 - if the player repeatedly tries exhausted operands, explain strip entry usage at a high level
 
-Feedback should not reveal hidden strip values, correct pairings, exact next moves, or solver output.
+Feedback should not reveal hidden strip values, correct pairings, exact next moves, or automated answer output.
 
 ### Graduated Guidance
 

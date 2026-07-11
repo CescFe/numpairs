@@ -21,6 +21,9 @@ import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
+import org.cescfe.numpairs.feature.generated.GeneratedModes
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleProvider
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleProviderFactory
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
@@ -43,7 +46,7 @@ class FourPairsCompletionActionsTest {
         val firstPuzzle = firstSolvedPuzzle.withHiddenOperatorAt(tileIndex = 0)
         val secondPuzzle = fourPairsGenerator(seed = 42).generate()
         assertNotEquals(firstPuzzle.board.tiles[0].result, secondPuzzle.board.tiles[0].result)
-        val puzzleProvider = QueueFourPairsPuzzleProvider(firstPuzzle, secondPuzzle)
+        val puzzleProvider = QueueGeneratedPuzzleProvider(firstPuzzle, secondPuzzle)
 
         setContent(puzzleProvider = puzzleProvider)
 
@@ -80,7 +83,7 @@ class FourPairsCompletionActionsTest {
     fun returnToMenuActionNavigatesBackToMenuAfterCompletion() {
         val solvedPuzzle = fourPairsGenerator(seed = 81).generateWithSolution().solvedPuzzle
         val initialPuzzle = solvedPuzzle.withHiddenOperatorAt(tileIndex = 0)
-        val puzzleProvider = QueueFourPairsPuzzleProvider(initialPuzzle)
+        val puzzleProvider = QueueGeneratedPuzzleProvider(initialPuzzle)
 
         setContent(puzzleProvider = puzzleProvider)
 
@@ -103,7 +106,7 @@ class FourPairsCompletionActionsTest {
     @Test
     fun rulesHelperOpensAndDismissesInFourPairsWithoutRegeneratingPuzzle() {
         val initialPuzzle = fourPairsGenerator(seed = 1234).generate()
-        val puzzleProvider = QueueFourPairsPuzzleProvider(initialPuzzle)
+        val puzzleProvider = QueueGeneratedPuzzleProvider(initialPuzzle)
 
         setContent(puzzleProvider = puzzleProvider)
 
@@ -155,14 +158,15 @@ class FourPairsCompletionActionsTest {
         assertEquals(initialStripMask, currentStripMask())
     }
 
-    private fun setContent(puzzleProvider: FourPairsPuzzleProvider) {
+    private fun setContent(puzzleProvider: GeneratedPuzzleProvider) {
         val actionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository()
 
         composeTestRule.setContent {
             NumPairsTheme {
                 AppNavigation(
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository,
-                    fourPairsPuzzleProvider = puzzleProvider
+                    generatedModeRegistry = GeneratedModes.registry,
+                    generatedPuzzleProviderFactory = fourPairsProviderFactory(puzzleProvider = puzzleProvider)
                 )
             }
         }
@@ -269,7 +273,13 @@ class FourPairsCompletionActionsTest {
         composeTestRule.activity.getString(stringResId, *formatArgs)
     }
 
-    private class QueueFourPairsPuzzleProvider(private vararg val puzzles: Puzzle) : FourPairsPuzzleProvider {
+    private fun fourPairsProviderFactory(puzzleProvider: GeneratedPuzzleProvider): GeneratedPuzzleProviderFactory =
+        GeneratedPuzzleProviderFactory { mode ->
+            require(mode == GeneratedModes.FOUR_PAIRS)
+            puzzleProvider
+        }
+
+    private class QueueGeneratedPuzzleProvider(private vararg val puzzles: Puzzle) : GeneratedPuzzleProvider {
         var requestCount = 0
             private set
 

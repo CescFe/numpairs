@@ -3,8 +3,7 @@
 ## Document Status
 
 - Status: product reference for generated puzzle construction
-- Current implemented profile: generated `4 Pairs Low`
-- Planned v5 profile: generated `8 Pairs Medium`
+- Implemented profiles: generated `4 Pairs Low` and `8 Pairs Medium`
 - Related references:
   - `docs/product/prd/prd-v5.md`
   - `docs/game-rules.md`
@@ -48,7 +47,7 @@ Profile concerns are separated as follows:
 
 Soft targets that are structurally unreachable for the profile are rejected during profile creation. Bounded fallback remains available for a sampled plan that is infeasible only for the candidates explored during that generation run.
 
-Selectors and final generated-puzzle validation use the same hard-rule objects. Final validation returns a report with stable rule identifiers and context for every failed rule; it does not stop at the first failure.
+The application composition resolves a stable generated-mode identifier to one profile and creates one immutable hard-rule context for that profile. Candidate selection and final generated-puzzle validation receive that same context. Final validation returns a report with stable rule identifiers and context for every failed rule; it does not stop at the first failure.
 
 ### `4 Pairs Low`
 
@@ -104,7 +103,7 @@ These constraints keep the first generated mode approachable, reduce arithmetic 
 
 ### `8 Pairs Medium`
 
-Status: planned for v5; defined for implementation.
+Status: implemented.
 
 Shape:
 

@@ -6,6 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import org.cescfe.numpairs.data.preferences.createTopAppBarActionDiscoveryRepository
+import org.cescfe.numpairs.feature.generated.ConfiguredGeneratedPuzzleProviderFactory
+import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
@@ -15,11 +17,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val topAppBarActionDiscoveryRepository = createTopAppBarActionDiscoveryRepository(applicationContext)
+        val generatedModeRegistry = GeneratedModes.registry
+        val generatedPuzzleProviderFactory = ConfiguredGeneratedPuzzleProviderFactory(
+            modeRegistry = generatedModeRegistry
+        )
 
         setContent {
             NumPairsTheme {
                 AppNavigation(
-                    topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository
+                    topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
+                    generatedModeRegistry = generatedModeRegistry,
+                    generatedPuzzleProviderFactory = generatedPuzzleProviderFactory
                 )
             }
         }

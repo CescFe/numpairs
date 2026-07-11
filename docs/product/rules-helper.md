@@ -18,7 +18,7 @@ This document defines the first rules helper requirements before UI implementati
 
 The rules helper should let players understand or refresh the core NumPairs rules without leaving the current puzzle.
 
-It exists to explain how the game works. It is not a hint system, a solver, or a tutorial engine.
+It exists to explain how the game works. It is not a hint system, an answer engine, or a tutorial engine.
 
 ---
 
@@ -150,7 +150,7 @@ Recommended content shape:
 - short title
 - concise grouped sections or bullet-style rows
 - plain player-facing language
-- no implementation terms such as solver, provider, generator, or validation service
+- no implementation terms such as provider, generator, or validation service
 
 Examples with concrete numbers are not required for the first version. They may be used only if the rule cannot be explained clearly without one.
 
@@ -164,7 +164,7 @@ The helper must not:
 - reveal hidden strip values
 - identify correct pairings for the current puzzle
 - suggest the next move
-- call or expose the solver
+- generate or expose puzzle-specific answers
 - auto-fill strip entries or tiles
 - change validation behavior
 - replace the authored Tutorial experience

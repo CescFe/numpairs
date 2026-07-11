@@ -13,8 +13,8 @@ import org.cescfe.numpairs.feature.game.GameRoute
 
 @Composable
 fun GeneratedModeRoute(
+    mode: GeneratedModeConfiguration,
     title: String,
-    gameSessionKey: String,
     puzzleProvider: GeneratedPuzzleProvider,
     modifier: Modifier = Modifier,
     isRulesHelperEnabled: Boolean = false,
@@ -35,7 +35,7 @@ fun GeneratedModeRoute(
         title = title,
         initialPuzzle = gameSession.initialPuzzle,
         modifier = modifier,
-        gameSessionKey = gameSessionKey,
+        gameSessionKey = mode.id.value,
         puzzleResetKey = gameSession.id,
         completionActions = GameCompletionActions(
             onNewPuzzleRequested = {

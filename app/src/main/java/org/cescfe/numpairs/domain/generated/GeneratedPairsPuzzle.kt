@@ -16,10 +16,20 @@ data class GeneratedPairsPuzzle private constructor(val initialPuzzle: Puzzle, v
             profile: GeneratedPuzzleProfile,
             initialPuzzle: Puzzle,
             solvedPuzzle: Puzzle
+        ): GeneratedPairsPuzzleCreation = create(
+            context = GeneratedPuzzleGenerationContext.forProfile(profile = profile),
+            initialPuzzle = initialPuzzle,
+            solvedPuzzle = solvedPuzzle
+        )
+
+        internal fun create(
+            context: GeneratedPuzzleGenerationContext,
+            initialPuzzle: Puzzle,
+            solvedPuzzle: Puzzle
         ): GeneratedPairsPuzzleCreation {
             val initialSnapshot = initialPuzzle.snapshot()
             val solvedSnapshot = solvedPuzzle.snapshot()
-            val report = GeneratedPairsPuzzleValidator(profile = profile).validate(
+            val report = GeneratedPairsPuzzleValidator(context = context).validate(
                 initialPuzzle = initialSnapshot,
                 solvedPuzzle = solvedSnapshot
             )
@@ -40,8 +50,18 @@ data class GeneratedPairsPuzzle private constructor(val initialPuzzle: Puzzle, v
             profile: GeneratedPuzzleProfile,
             solvedPuzzle: Puzzle,
             knownEntryIds: Set<StripEntryId>
+        ): GeneratedPairsPuzzleCreation = fromSolvedPuzzle(
+            context = GeneratedPuzzleGenerationContext.forProfile(profile = profile),
+            solvedPuzzle = solvedPuzzle,
+            knownEntryIds = knownEntryIds
+        )
+
+        internal fun fromSolvedPuzzle(
+            context: GeneratedPuzzleGenerationContext,
+            solvedPuzzle: Puzzle,
+            knownEntryIds: Set<StripEntryId>
         ): GeneratedPairsPuzzleCreation {
-            val validator = GeneratedPairsPuzzleValidator(profile = profile)
+            val validator = GeneratedPairsPuzzleValidator(context = context)
             val solvedSnapshot = solvedPuzzle.snapshot()
             val solvedReport = validator.validateSolvedPuzzle(solvedPuzzle = solvedSnapshot)
             if (!solvedReport.isValid) {

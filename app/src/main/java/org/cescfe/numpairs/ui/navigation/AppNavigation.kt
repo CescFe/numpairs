@@ -7,30 +7,30 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryRepository
-import org.cescfe.numpairs.feature.eightpairs.DefaultEightPairsPuzzleProvider
-import org.cescfe.numpairs.feature.eightpairs.EightPairsPuzzleProvider
-import org.cescfe.numpairs.feature.eightpairs.EightPairsRoute
-import org.cescfe.numpairs.feature.fourpairs.DefaultFourPairsPuzzleProvider
-import org.cescfe.numpairs.feature.fourpairs.FourPairsPuzzleProvider
 import org.cescfe.numpairs.feature.fourpairs.FourPairsRoute
+import org.cescfe.numpairs.feature.generated.GeneratedModeId
+import org.cescfe.numpairs.feature.generated.GeneratedModeRegistry
+import org.cescfe.numpairs.feature.generated.GeneratedModeRoute
+import org.cescfe.numpairs.feature.generated.GeneratedModes
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleProviderFactory
 import org.cescfe.numpairs.feature.menu.MenuRoute
 import org.cescfe.numpairs.feature.tutorial.TutorialRoute
 
 sealed interface AppDestination {
     data object Menu : AppDestination
     data object Tutorial : AppDestination
-    data object FourPairs : AppDestination
-    data object EightPairs : AppDestination
+    data class GeneratedMode(val modeId: GeneratedModeId) : AppDestination
 }
 
 @Composable
 fun AppNavigation(
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
+    generatedModeRegistry: GeneratedModeRegistry,
+    generatedPuzzleProviderFactory: GeneratedPuzzleProviderFactory,
     modifier: Modifier = Modifier,
-    startDestination: AppDestination = AppDestination.Menu,
-    fourPairsPuzzleProvider: FourPairsPuzzleProvider = DefaultFourPairsPuzzleProvider,
-    eightPairsPuzzleProvider: EightPairsPuzzleProvider = DefaultEightPairsPuzzleProvider
+    startDestination: AppDestination = AppDestination.Menu
 ) {
     var currentDestination by remember(startDestination) {
         mutableStateOf(startDestination)
@@ -43,33 +43,48 @@ fun AppNavigation(
         navigateToMenu()
     }
 
-    when (currentDestination) {
+    when (val destination = currentDestination) {
         AppDestination.Menu -> MenuRoute(
             modifier = modifier,
             onTutorialSelected = {
                 currentDestination = AppDestination.Tutorial
             },
             onFourPairsSelected = {
-                currentDestination = AppDestination.FourPairs
+                currentDestination = AppDestination.GeneratedMode(modeId = GeneratedModes.FOUR_PAIRS.id)
             },
             onEightPairsSelected = {
-                currentDestination = AppDestination.EightPairs
+                currentDestination = AppDestination.GeneratedMode(modeId = GeneratedModes.EIGHT_PAIRS.id)
             }
         )
         AppDestination.Tutorial -> TutorialRoute(
             modifier = modifier,
             onNavigateBack = navigateToMenu
         )
-        AppDestination.FourPairs -> FourPairsRoute(
-            modifier = modifier,
-            puzzleProvider = fourPairsPuzzleProvider,
-            topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
-            onNavigateBack = navigateToMenu
-        )
-        AppDestination.EightPairs -> EightPairsRoute(
-            modifier = modifier,
-            puzzleProvider = eightPairsPuzzleProvider,
-            onNavigateBack = navigateToMenu
-        )
+        is AppDestination.GeneratedMode -> {
+            val mode = generatedModeRegistry.resolve(id = destination.modeId)
+            val puzzleProvider = remember(generatedPuzzleProviderFactory, mode.id) {
+                generatedPuzzleProviderFactory.create(mode = mode)
+            }
+
+            when (mode.id) {
+                GeneratedModes.FOUR_PAIRS.id -> FourPairsRoute(
+                    modifier = modifier,
+                    mode = mode,
+                    puzzleProvider = puzzleProvider,
+                    topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
+                    onNavigateBack = navigateToMenu
+                )
+
+                else -> GeneratedModeRoute(
+                    mode = mode,
+                    title = mode.titleResourceIdOrNull()?.let { titleResourceId ->
+                        stringResource(id = titleResourceId)
+                    } ?: mode.id.value,
+                    puzzleProvider = puzzleProvider,
+                    modifier = modifier,
+                    onNavigateBack = navigateToMenu
+                )
+            }
+        }
     }
 }

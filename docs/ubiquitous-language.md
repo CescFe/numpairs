@@ -6,7 +6,12 @@ A complete game instance containing a board and a strip of available numbers.
 ## Generated Puzzle
 A puzzle produced by a generator rather than authored by hand.
 
-Generated puzzles are used by the `4 Pairs` mode.
+Generated puzzles are used by generated gameplay modes. A mode selects one difficulty profile and presents its player-facing initial puzzle.
+
+## Generated Mode
+A replayable gameplay configuration identified by a stable generated-mode identity.
+
+A generated mode resolves to one difficulty profile in the application layer. The mode identity is used for profile selection, navigation, and game-session identity; Android strings and mode-specific learning capabilities remain outside the profile.
 
 ## Tutorial
 A gameplay mode that teaches the core NumPairs rules through authored content and guided player practice.
@@ -16,12 +21,12 @@ Tutorial is a learning surface, not generated replayable content, a rules helper
 ## Authored Tutorial Puzzle
 A handcrafted puzzle selected for teaching clarity in Tutorial mode.
 
-An authored tutorial puzzle may use custom tutorial composition rules and may share core game rules and UI interactions with generated `4 Pairs`, but its content is chosen by design rather than produced by the puzzle generator.
+An authored tutorial puzzle may use custom tutorial composition rules and may share core game rules and UI interactions with generated modes, but its content is chosen by design rather than produced by the puzzle generator.
 
 ## Initial Puzzle
 The player-facing puzzle state shown at the start of play.
 
-For generated `4 Pairs`, the initial puzzle is derived from a solved puzzle by hiding tile expressions and masking selected strip entries.
+For a generated puzzle, the initial puzzle is derived from a solved puzzle by hiding tile expressions and masking selected strip entries according to its selected profile.
 
 ## Solved Puzzle
 The fully resolved puzzle used internally as the source of truth for generation and validation.
@@ -146,24 +151,19 @@ An operand selection choice may be:
 The correct assignment of operands and operators needed to solve the puzzle.
 
 ## Solution Pair
-An unordered pair of strip entries that produces one addition tile and one multiplication tile in `4 Pairs`.
+An unordered pair of strip entries that produces one addition tile and one multiplication tile in a generated puzzle.
 
 The addition and multiplication tiles for a solution pair must reference the same two strip entry identities.
 
 ## Puzzle Generator
 A domain service that creates generated puzzles.
 
-The v2 `4 Pairs` generator builds a solved puzzle first, derives the initial puzzle from it, and validates the generated result before it can be shown to the player.
+The generator builds a solved puzzle first, derives the initial puzzle from it, and validates the generated aggregate before it can be shown to the player.
 
 ## Puzzle Validator
-A domain service or validation rule set that checks whether a puzzle is internally consistent and satisfies the expected generation constraints.
-
-## Solver
-An internal domain service used for validation and confidence in generated or handcrafted puzzles.
-
-The solver is not a player-facing feature. It does not imply hints, solution reveal, or guaranteed unique solutions.
+A domain validation boundary that checks shared completion facts and, for generated puzzles, the selected profile and solved-to-initial transformation. It returns typed violations rather than solving or revealing a puzzle for the player.
 
 ## Rules Helper
 An informational gameplay UI surface that explains the core NumPairs rules.
 
-The rules helper is not a hint system, tutorial engine, solver, or answer reveal feature.
+The rules helper is not a hint system, tutorial engine, or answer reveal feature.

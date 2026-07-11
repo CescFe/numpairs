@@ -8,18 +8,19 @@ Players complete hidden expressions on a board by using numbers from a strip. Th
 
 ## Current Status
 
-### Implemented baseline: v4 - Visual Design System & UI Refinement
+### Implemented baseline: v5 - Shared Generated Modes
 
-Historical snapshots: 
+Historical snapshots:
 - 🔧 [PRD v0 Playable Prototype](./docs/product/prd/prd-v0.md)
 - ✨ [PRD v1 Product Polish & Technical Hardening](./docs/product/prd/prd-v1.md)
 - 🧩 [PRD v2 Puzzle Generation & Replay Loop](./docs/product/prd/prd-v2.md)
 - 🎓 [PRD v3 Guided Play & Rules Onboarding](./docs/product/prd/prd-v3.md)
 - 🎨 [PRD v4 Visual Design System & UI Refinement](./docs/product/prd/prd-v4.md)
+- 🧠 [PRD v5 Bigger Challenges with 8 Pairs](./docs/product/prd/prd-v5.md)
 
-### Active product milestone: v5 - Bigger Challenges with 8 Pairs
+The PRDs are historical planning snapshots. Current generated-mode and profile behavior is documented in [puzzle-generation.md](./docs/product/puzzle-generation.md).
 
-🧠 [PRD v5 Bigger Challenges with 8 Pairs](./docs/product/prd/prd-v5.md)
+Both built-in generated profiles are implemented: `4 Pairs Low` and `8 Pairs Medium`.
 
 ---
 

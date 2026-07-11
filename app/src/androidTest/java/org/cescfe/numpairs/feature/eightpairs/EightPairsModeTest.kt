@@ -18,6 +18,9 @@ import org.cescfe.numpairs.domain.puzzle.model.Strip
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
+import org.cescfe.numpairs.feature.generated.GeneratedModes
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleProvider
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleProviderFactory
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
@@ -100,14 +103,15 @@ class EightPairsModeTest {
             .assertDoesNotExist()
     }
 
-    private fun setContent(): RecordingEightPairsPuzzleProvider {
-        val puzzleProvider = RecordingEightPairsPuzzleProvider(initialEightPairsPuzzle())
+    private fun setContent(): RecordingGeneratedPuzzleProvider {
+        val puzzleProvider = RecordingGeneratedPuzzleProvider(initialEightPairsPuzzle())
 
         composeTestRule.setContent {
             NumPairsTheme {
                 AppNavigation(
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
-                    eightPairsPuzzleProvider = puzzleProvider
+                    generatedModeRegistry = GeneratedModes.registry,
+                    generatedPuzzleProviderFactory = eightPairsProviderFactory(puzzleProvider = puzzleProvider)
                 )
             }
         }
@@ -146,7 +150,13 @@ class EightPairsModeTest {
 
     private fun string(stringResId: Int): String = composeTestRule.activity.getString(stringResId)
 
-    private class RecordingEightPairsPuzzleProvider(private val puzzle: Puzzle) : EightPairsPuzzleProvider {
+    private fun eightPairsProviderFactory(puzzleProvider: GeneratedPuzzleProvider): GeneratedPuzzleProviderFactory =
+        GeneratedPuzzleProviderFactory { mode ->
+            require(mode == GeneratedModes.EIGHT_PAIRS)
+            puzzleProvider
+        }
+
+    private class RecordingGeneratedPuzzleProvider(private val puzzle: Puzzle) : GeneratedPuzzleProvider {
         var requestCount = 0
             private set
 

@@ -1,5 +1,7 @@
 # PRD - NumPairs 🧠 v5 Bigger Challenges with 8 Pairs
 
+> Historical planning snapshot. The v5 generated-mode work is implemented; see `docs/product/puzzle-generation.md` and the README for current behavior and status.
+
 ## Product Summary
 
 NumPairs is a native Android arithmetic deduction puzzle. Players complete hidden board expressions using numbers from a strip. Each strip pair produces one addition tile and one multiplication tile, and completion is validated through strip-entry identity, pair matching, and tile correctness.
