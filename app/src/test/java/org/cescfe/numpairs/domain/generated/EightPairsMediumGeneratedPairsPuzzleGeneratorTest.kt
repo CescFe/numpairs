@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package org.cescfe.numpairs.domain.generated
 
 import kotlin.math.abs

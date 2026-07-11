@@ -49,6 +49,14 @@ Soft targets that are structurally unreachable for the profile are rejected duri
 
 The application composition resolves a stable generated-mode identifier to one profile and creates one immutable hard-rule context for that profile. Candidate selection and final generated-puzzle validation receive that same context. Final validation returns a report with stable rule identifiers and context for every failed rule; it does not stop at the first failure.
 
+## Generation Execution And Recovery
+
+Every run is an explicit request containing its profile, seed, and positive execution policy. The policy bounds both top-level attempts and candidate-expansion search work. Exhaustion and cancellation return typed outcomes carrying the profile identifier, consumed attempts, consumed work, and candidate-rejection diagnostics. Final aggregate-validation violations remain in those diagnostics.
+
+Value-pair and strip-mask searches share the same budget and observe cancellation. Strip-mask selection enumerates candidate masks lazily, so it does not first materialize all combinations in memory.
+
+The application executes generation on an injected non-main dispatcher. The generated-mode presentation owner exposes loading, ready, and recoverable-failure states; replay keeps the completed session visible until a replacement is ready, and duplicate replay requests are ignored. A generated session survives recomposition and configuration recreation. Process-death restoration is intentionally out of scope: the complete puzzle session is not persisted and entering the mode after process death creates a new request.
+
 ### `4 Pairs Low`
 
 Status: implemented.

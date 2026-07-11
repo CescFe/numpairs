@@ -18,7 +18,7 @@ import org.cescfe.numpairs.feature.game.ui.help.SolvingTipsDialog
 import org.cescfe.numpairs.feature.generated.GeneratedModeConfiguration
 import org.cescfe.numpairs.feature.generated.GeneratedModeRoute
 import org.cescfe.numpairs.feature.generated.GeneratedModes
-import org.cescfe.numpairs.feature.generated.GeneratedPuzzleProvider
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
 import org.cescfe.numpairs.feature.tutorial.TutorialMode
 import org.cescfe.numpairs.feature.tutorial.TutorialOverlayHost
 
@@ -26,7 +26,7 @@ import org.cescfe.numpairs.feature.tutorial.TutorialOverlayHost
 fun FourPairsRoute(
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     modifier: Modifier = Modifier,
-    puzzleProvider: GeneratedPuzzleProvider,
+    generationUseCase: GeneratedPuzzleGenerationUseCase,
     mode: GeneratedModeConfiguration = GeneratedModes.FOUR_PAIRS,
     tutorialOverlayMode: TutorialMode? = null,
     onTutorialOverlayClosed: () -> Unit = {},
@@ -54,7 +54,7 @@ fun FourPairsRoute(
         GeneratedModeRoute(
             mode = mode,
             title = stringResource(R.string.four_pairs_screen_title),
-            puzzleProvider = puzzleProvider,
+            generationUseCase = generationUseCase,
             isRulesHelperEnabled = true,
             isRulesHelperActionDiscoveryDotVisible = actionDiscoveryState?.hasSeenHelpAction == false,
             onRulesHelperActionTapped = {

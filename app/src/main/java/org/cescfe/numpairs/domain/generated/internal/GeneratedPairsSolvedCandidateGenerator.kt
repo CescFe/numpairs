@@ -22,6 +22,40 @@ internal class GeneratedPairsSolvedCandidateGenerator(private val valuePairSelec
             pairs = selectedValuePairs.toEntryPairs(entries = entries)
         )
     }
+
+    fun generate(
+        variationPlan: GeneratedPairsVariationPlan,
+        searchControl: GeneratedPairsSearchControl
+    ): GeneratedPairsSearchOutcome<GeneratedPairsSolvedCandidate> = when (
+        val selection = valuePairSelector.selectValuePairs(
+            variationPlan = variationPlan,
+            searchControl = searchControl
+        )
+    ) {
+        is GeneratedPairsSearchOutcome.Found -> {
+            val selectedValuePairs = selection.value
+            val entries = selectedValuePairs
+                .flatMap { pair -> listOf(pair.firstValue, pair.secondValue) }
+                .sorted()
+                .mapIndexed { index, value ->
+                    GeneratedPairsStripEntry(
+                        id = StripEntryId(index),
+                        value = value
+                    )
+                }
+
+            GeneratedPairsSearchOutcome.Found(
+                GeneratedPairsSolvedCandidate(
+                    entries = entries,
+                    pairs = selectedValuePairs.toEntryPairs(entries = entries)
+                )
+            )
+        }
+
+        GeneratedPairsSearchOutcome.NoCandidate -> GeneratedPairsSearchOutcome.NoCandidate
+        GeneratedPairsSearchOutcome.BudgetExhausted -> GeneratedPairsSearchOutcome.BudgetExhausted
+        GeneratedPairsSearchOutcome.Cancelled -> GeneratedPairsSearchOutcome.Cancelled
+    }
 }
 
 private fun List<GeneratedPairsValuePair>.toEntryPairs(

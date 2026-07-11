@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package org.cescfe.numpairs.feature.fourpairs
 
 import androidx.activity.ComponentActivity
@@ -22,8 +24,9 @@ import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.generated.GeneratedModes
-import org.cescfe.numpairs.feature.generated.GeneratedPuzzleProvider
-import org.cescfe.numpairs.feature.generated.GeneratedPuzzleProviderFactory
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
@@ -158,7 +161,7 @@ class FourPairsCompletionActionsTest {
         assertEquals(initialStripMask, currentStripMask())
     }
 
-    private fun setContent(puzzleProvider: GeneratedPuzzleProvider) {
+    private fun setContent(puzzleProvider: QueueGeneratedPuzzleProvider) {
         val actionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository()
 
         composeTestRule.setContent {
@@ -166,7 +169,7 @@ class FourPairsCompletionActionsTest {
                 AppNavigation(
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository,
                     generatedModeRegistry = GeneratedModes.registry,
-                    generatedPuzzleProviderFactory = fourPairsProviderFactory(puzzleProvider = puzzleProvider)
+                    generatedPuzzleGenerationUseCaseFactory = fourPairsProviderFactory(puzzleProvider = puzzleProvider)
                 )
             }
         }
@@ -273,17 +276,23 @@ class FourPairsCompletionActionsTest {
         composeTestRule.activity.getString(stringResId, *formatArgs)
     }
 
-    private fun fourPairsProviderFactory(puzzleProvider: GeneratedPuzzleProvider): GeneratedPuzzleProviderFactory =
-        GeneratedPuzzleProviderFactory { mode ->
-            require(mode == GeneratedModes.FOUR_PAIRS)
-            puzzleProvider
+    private fun fourPairsProviderFactory(
+        puzzleProvider: QueueGeneratedPuzzleProvider
+    ): GeneratedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory { mode ->
+        require(mode == GeneratedModes.FOUR_PAIRS)
+        GeneratedPuzzleGenerationUseCase { request ->
+            GeneratedPuzzleGenerationResult.Generated(
+                request = request,
+                initialPuzzle = puzzleProvider.nextPuzzle()
+            )
         }
+    }
 
-    private class QueueGeneratedPuzzleProvider(private vararg val puzzles: Puzzle) : GeneratedPuzzleProvider {
+    private class QueueGeneratedPuzzleProvider(private vararg val puzzles: Puzzle) {
         var requestCount = 0
             private set
 
-        override fun nextPuzzle(): Puzzle {
+        fun nextPuzzle(): Puzzle {
             val puzzle = puzzles.getOrNull(requestCount)
                 ?: error("No fake 4 Pairs puzzle configured for request $requestCount.")
             requestCount += 1

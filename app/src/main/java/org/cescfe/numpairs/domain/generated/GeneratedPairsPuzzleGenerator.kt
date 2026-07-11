@@ -2,6 +2,8 @@ package org.cescfe.numpairs.domain.generated
 
 import kotlin.random.Random
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsPuzzleAssembler
+import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSearchControl
+import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSearchOutcome
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSolvedCandidate
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSolvedCandidateGenerator
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsValuePairSelector
@@ -11,112 +13,206 @@ import org.cescfe.numpairs.domain.generated.internal.GeneratedStripMaskSelector
 import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
-class GeneratedPairsPuzzleGenerator(
-    private val context: GeneratedPuzzleGenerationContext,
-    private val random: Random = Random.Default,
-    private val maxAttempts: Int = DEFAULT_MAX_ATTEMPTS
-) {
+/**
+ * Its request-based API is stateless: each call receives its own seed and execution policy, so
+ * concurrent requests never share a mutable random stream.
+ */
+class GeneratedPairsPuzzleGenerator(private val context: GeneratedPuzzleGenerationContext) {
     private val profile: GeneratedPuzzleProfile = context.profile
+    private var legacyRequest: GeneratedPuzzleGenerationRequest? = null
 
-    init {
-        require(maxAttempts > 0) {
-            "Maximum generation attempts must be positive."
-        }
+    constructor(profile: GeneratedPuzzleProfile) : this(
+        context = GeneratedPuzzleGenerationContext.forProfile(profile = profile)
+    )
+
+    @Deprecated(
+        message = "Pass an explicit GeneratedPuzzleGenerationRequest and handle its typed outcome.",
+        replaceWith = ReplaceWith("generate(request)")
+    )
+    constructor(
+        profile: GeneratedPuzzleProfile,
+        seed: Int,
+        maxAttempts: Int = DEFAULT_MAX_ATTEMPTS
+    ) : this(profile = profile) {
+        legacyRequest = GeneratedPuzzleGenerationRequest(
+            profile = profile,
+            seed = seed,
+            executionPolicy = GeneratedPuzzleGenerationExecutionPolicy(maxAttempts = maxAttempts)
+        )
     }
 
-    private val variationPlanSelector = GeneratedPairsVariationPlanSelector(
-        profile = profile,
-        random = random
+    @Deprecated(
+        message = "Pass an explicit GeneratedPuzzleGenerationRequest and handle its typed outcome.",
+        replaceWith = ReplaceWith("generate(request).requireGeneratedPuzzle().initialPuzzle")
     )
-    private val solvedCandidateGenerator = GeneratedPairsSolvedCandidateGenerator(
-        valuePairSelector = GeneratedPairsValuePairSelector(
-            profile = profile,
-            random = random,
-            hardRules = context.hardRules.valuePairs
-        )
-    )
-    private val stripMaskSelector = GeneratedStripMaskSelector(
-        profile = profile,
-        random = random,
-        hardRule = context.hardRules.stripMask
-    )
-    private val puzzleAssembler = GeneratedPairsPuzzleAssembler(
-        profile = profile,
-        random = random
-    )
-    constructor(
-        profile: GeneratedPuzzleProfile,
-        random: Random = Random.Default,
-        maxAttempts: Int = DEFAULT_MAX_ATTEMPTS
-    ) : this(
-        context = GeneratedPuzzleGenerationContext.forProfile(profile = profile),
-        random = random,
-        maxAttempts = maxAttempts
-    )
-
-    constructor(
-        profile: GeneratedPuzzleProfile,
-        seed: Int,
-        maxAttempts: Int = DEFAULT_MAX_ATTEMPTS
-    ) : this(
-        context = GeneratedPuzzleGenerationContext.forProfile(profile = profile),
-        random = Random(seed),
-        maxAttempts = maxAttempts
-    )
-
-    constructor(
-        context: GeneratedPuzzleGenerationContext,
-        seed: Int,
-        maxAttempts: Int = DEFAULT_MAX_ATTEMPTS
-    ) : this(
-        context = context,
-        random = Random(seed),
-        maxAttempts = maxAttempts
-    )
-
+    @Suppress("DEPRECATION")
     fun generate(): Puzzle = generateWithSolution().initialPuzzle
 
-    fun generateWithSolution(): GeneratedPairsPuzzle {
-        val variationPlan = variationPlanSelector.select()
-        var fallbackCandidate: GeneratedPairsPuzzleCandidate? = null
+    @Deprecated(
+        message = "Pass an explicit GeneratedPuzzleGenerationRequest and handle its typed outcome.",
+        replaceWith = ReplaceWith("generate(request).requireGeneratedPuzzle()")
+    )
+    fun generateWithSolution(): GeneratedPairsPuzzle = generate(
+        request = requireNotNull(legacyRequest) {
+            "The legacy generation API requires a seed configured in the constructor."
+        }
+    ).requireGeneratedPuzzle()
 
-        repeat(maxAttempts) {
-            val solvedCandidate = solvedCandidateGenerator.generate(
-                variationPlan = variationPlan
-            ) ?: return@repeat
-            val stripMaskSelection = stripMaskSelector.selectKnownEntryIds(
-                pairs = solvedCandidate.pairs,
-                variationPlan = variationPlan
-            ) ?: return@repeat
+    fun generate(
+        request: GeneratedPuzzleGenerationRequest,
+        cancellation: GeneratedPuzzleGenerationCancellation = GeneratedPuzzleGenerationCancellation.None
+    ): GeneratedPairsPuzzleGenerationOutcome = generateWithSolution(
+        request = request,
+        cancellation = cancellation
+    )
+
+    fun generateWithSolution(
+        request: GeneratedPuzzleGenerationRequest,
+        cancellation: GeneratedPuzzleGenerationCancellation = GeneratedPuzzleGenerationCancellation.None
+    ): GeneratedPairsPuzzleGenerationOutcome {
+        require(request.profileId == profile.id) {
+            "Generation request profile ${request.profileId.value} does not match generator profile ${profile.id.value}."
+        }
+
+        val random = Random(request.seed)
+        val searchControl = GeneratedPairsSearchControl(
+            executionPolicy = request.executionPolicy,
+            cancellation = cancellation
+        )
+        val variationPlan = GeneratedPairsVariationPlanSelector(profile = profile, random = random).select()
+        val solvedCandidateGenerator = GeneratedPairsSolvedCandidateGenerator(
+            valuePairSelector = GeneratedPairsValuePairSelector(
+                profile = profile,
+                random = random,
+                hardRules = context.hardRules.valuePairs
+            )
+        )
+        val stripMaskSelector = GeneratedStripMaskSelector(
+            profile = profile,
+            random = random,
+            hardRule = context.hardRules.stripMask
+        )
+        val puzzleAssembler = GeneratedPairsPuzzleAssembler(profile = profile, random = random)
+        val rejections = mutableListOf<GeneratedPairsPuzzleCandidateRejection>()
+        var fallbackCandidate: GeneratedPairsPuzzleCandidate? = null
+        var attemptsUsed = 0
+
+        while (attemptsUsed < request.executionPolicy.maxAttempts) {
+            when (val controlResult = searchControl.check()) {
+                is org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSearchControlResult.Continue -> Unit
+                else -> return failure(
+                    request = request,
+                    attemptsUsed = attemptsUsed,
+                    searchControl = searchControl,
+                    reason = controlResult.failureReason(),
+                    rejections = rejections
+                )
+            }
+
+            attemptsUsed++
+            val solvedCandidate = when (
+                val outcome = solvedCandidateGenerator.generate(
+                    variationPlan = variationPlan,
+                    searchControl = searchControl
+                )
+            ) {
+                is GeneratedPairsSearchOutcome.Found -> outcome.value
+                GeneratedPairsSearchOutcome.NoCandidate -> {
+                    rejections +=
+                        GeneratedPairsPuzzleCandidateRejection.ValuePairSelectionFailed(attempt = attemptsUsed)
+                    continue
+                }
+
+                GeneratedPairsSearchOutcome.BudgetExhausted,
+                GeneratedPairsSearchOutcome.Cancelled -> return failure(
+                    request = request,
+                    attemptsUsed = attemptsUsed,
+                    searchControl = searchControl,
+                    reason = outcome.failureReason(),
+                    rejections = rejections
+                )
+            }
+            val stripMaskSelection = when (
+                val outcome = stripMaskSelector.selectKnownEntryIds(
+                    pairs = solvedCandidate.pairs,
+                    variationPlan = variationPlan,
+                    searchControl = searchControl
+                )
+            ) {
+                is GeneratedPairsSearchOutcome.Found -> outcome.value
+                GeneratedPairsSearchOutcome.NoCandidate -> {
+                    rejections +=
+                        GeneratedPairsPuzzleCandidateRejection.StripMaskSelectionFailed(attempt = attemptsUsed)
+                    continue
+                }
+
+                GeneratedPairsSearchOutcome.BudgetExhausted,
+                GeneratedPairsSearchOutcome.Cancelled -> return failure(
+                    request = request,
+                    attemptsUsed = attemptsUsed,
+                    searchControl = searchControl,
+                    reason = outcome.failureReason(),
+                    rejections = rejections
+                )
+            }
             val candidate = GeneratedPairsPuzzleCandidate(
                 solvedCandidate = solvedCandidate,
                 knownEntryIds = stripMaskSelection.knownEntryIds
             )
 
             if (stripMaskSelection.variationPlanOutcome == GeneratedPairsVariationPlanOutcome.FALLBACK) {
-                if (fallbackCandidate == null) {
-                    fallbackCandidate = candidate
-                }
-                return@repeat
+                fallbackCandidate = fallbackCandidate ?: candidate
+                continue
             }
 
-            buildValidGeneratedPuzzle(candidate = candidate)?.let { generatedPuzzle ->
-                return generatedPuzzle
+            when (val outcome = buildValidGeneratedPuzzle(candidate = candidate, puzzleAssembler = puzzleAssembler)) {
+                is GeneratedPuzzleBuildOutcome.Created -> return GeneratedPairsPuzzleGenerationOutcome.Generated(
+                    request = request,
+                    puzzle = outcome.puzzle,
+                    attemptsUsed = attemptsUsed,
+                    searchWorkConsumed = searchControl.searchWorkConsumed
+                )
+
+                is GeneratedPuzzleBuildOutcome.Rejected -> {
+                    rejections += GeneratedPairsPuzzleCandidateRejection.FinalValidationFailed(
+                        attempt = attemptsUsed,
+                        violations = outcome.violations
+                    )
+                }
             }
         }
 
         fallbackCandidate?.let { candidate ->
-            buildValidGeneratedPuzzle(candidate = candidate)?.let { generatedPuzzle ->
-                return generatedPuzzle
+            when (val outcome = buildValidGeneratedPuzzle(candidate = candidate, puzzleAssembler = puzzleAssembler)) {
+                is GeneratedPuzzleBuildOutcome.Created -> return GeneratedPairsPuzzleGenerationOutcome.Generated(
+                    request = request,
+                    puzzle = outcome.puzzle,
+                    attemptsUsed = attemptsUsed,
+                    searchWorkConsumed = searchControl.searchWorkConsumed
+                )
+
+                is GeneratedPuzzleBuildOutcome.Rejected -> {
+                    rejections += GeneratedPairsPuzzleCandidateRejection.FinalValidationFailed(
+                        attempt = attemptsUsed,
+                        violations = outcome.violations
+                    )
+                }
             }
         }
 
-        error(
-            "Unable to generate a generated pairs puzzle for profile ${profile.id.value} after $maxAttempts attempts."
+        return failure(
+            request = request,
+            attemptsUsed = attemptsUsed,
+            searchControl = searchControl,
+            reason = GeneratedPairsPuzzleGenerationFailureReason.AttemptsExhausted,
+            rejections = rejections
         )
     }
 
-    private fun buildValidGeneratedPuzzle(candidate: GeneratedPairsPuzzleCandidate): GeneratedPairsPuzzle? {
+    private fun buildValidGeneratedPuzzle(
+        candidate: GeneratedPairsPuzzleCandidate,
+        puzzleAssembler: GeneratedPairsPuzzleAssembler
+    ): GeneratedPuzzleBuildOutcome {
         val solvedPuzzle = puzzleAssembler.buildSolvedPuzzle(candidate = candidate.solvedCandidate)
         return when (
             val creation = GeneratedPairsPuzzle.fromSolvedPuzzle(
@@ -125,17 +221,64 @@ class GeneratedPairsPuzzleGenerator(
                 knownEntryIds = candidate.knownEntryIds
             )
         ) {
-            is GeneratedPairsPuzzleCreation.Created -> creation.puzzle
-            is GeneratedPairsPuzzleCreation.Rejected -> null
+            is GeneratedPairsPuzzleCreation.Created -> GeneratedPuzzleBuildOutcome.Created(creation.puzzle)
+            is GeneratedPairsPuzzleCreation.Rejected -> GeneratedPuzzleBuildOutcome.Rejected(creation.violations)
         }
     }
+}
 
-    companion object {
-        private const val DEFAULT_MAX_ATTEMPTS = 50
+private const val DEFAULT_MAX_ATTEMPTS = 50
+
+class GeneratedPairsPuzzleGenerationFailedException(val failure: GeneratedPairsPuzzleGenerationOutcome.Failed) :
+    RuntimeException(
+        "Generated puzzle creation failed for profile ${failure.request.profileId.value}: ${failure.reason}."
+    )
+
+fun GeneratedPairsPuzzleGenerationOutcome.requireGeneratedPuzzle(): GeneratedPairsPuzzle = when (this) {
+    is GeneratedPairsPuzzleGenerationOutcome.Generated -> puzzle
+    is GeneratedPairsPuzzleGenerationOutcome.Failed -> throw GeneratedPairsPuzzleGenerationFailedException(
+        failure = this
+    )
+}
+
+private fun failure(
+    request: GeneratedPuzzleGenerationRequest,
+    attemptsUsed: Int,
+    searchControl: GeneratedPairsSearchControl,
+    reason: GeneratedPairsPuzzleGenerationFailureReason,
+    rejections: List<GeneratedPairsPuzzleCandidateRejection>
+): GeneratedPairsPuzzleGenerationOutcome.Failed = GeneratedPairsPuzzleGenerationOutcome.Failed(
+    request = request,
+    attemptsUsed = attemptsUsed,
+    searchWorkConsumed = searchControl.searchWorkConsumed,
+    reason = reason,
+    candidateRejections = rejections.toList()
+)
+
+private fun org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSearchControlResult.failureReason():
+    GeneratedPairsPuzzleGenerationFailureReason =
+    when (this) {
+        org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSearchControlResult.Continue ->
+            error("A continuing search control result cannot terminate generation.")
+        org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSearchControlResult.BudgetExhausted ->
+            GeneratedPairsPuzzleGenerationFailureReason.SearchBudgetExhausted
+        org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSearchControlResult.Cancelled ->
+            GeneratedPairsPuzzleGenerationFailureReason.Cancelled
     }
+
+private fun GeneratedPairsSearchOutcome<*>.failureReason(): GeneratedPairsPuzzleGenerationFailureReason = when (this) {
+    GeneratedPairsSearchOutcome.BudgetExhausted -> GeneratedPairsPuzzleGenerationFailureReason.SearchBudgetExhausted
+    GeneratedPairsSearchOutcome.Cancelled -> GeneratedPairsPuzzleGenerationFailureReason.Cancelled
+    is GeneratedPairsSearchOutcome.Found,
+    GeneratedPairsSearchOutcome.NoCandidate -> error("A non-terminal search outcome cannot terminate generation.")
 }
 
 private data class GeneratedPairsPuzzleCandidate(
     val solvedCandidate: GeneratedPairsSolvedCandidate,
     val knownEntryIds: Set<StripEntryId>
 )
+
+private sealed interface GeneratedPuzzleBuildOutcome {
+    data class Created(val puzzle: GeneratedPairsPuzzle) : GeneratedPuzzleBuildOutcome
+    data class Rejected(val violations: List<GeneratedPairsPuzzleValidationViolation>) : GeneratedPuzzleBuildOutcome
+}

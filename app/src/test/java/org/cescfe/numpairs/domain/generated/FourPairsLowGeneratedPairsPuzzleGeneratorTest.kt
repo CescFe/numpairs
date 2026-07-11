@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package org.cescfe.numpairs.domain.generated
 
 import org.cescfe.numpairs.domain.puzzle.assignment.analyzeResolvedPuzzle

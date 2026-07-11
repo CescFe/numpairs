@@ -18,8 +18,9 @@ import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.generated.GeneratedModes
-import org.cescfe.numpairs.feature.generated.GeneratedPuzzleProvider
-import org.cescfe.numpairs.feature.generated.GeneratedPuzzleProviderFactory
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.feature.tutorial.TutorialContent
 import org.cescfe.numpairs.feature.tutorial.TutorialMode
@@ -54,7 +55,7 @@ class AppNavigationLearningFlowTest {
         assertEquals(1, puzzleProvider.requestCount)
     }
 
-    private fun setContent(puzzleProvider: GeneratedPuzzleProvider) {
+    private fun setContent(puzzleProvider: QueueGeneratedPuzzleProvider) {
         val actionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository()
 
         composeTestRule.setContent {
@@ -62,7 +63,7 @@ class AppNavigationLearningFlowTest {
                 AppNavigation(
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository,
                     generatedModeRegistry = GeneratedModes.registry,
-                    generatedPuzzleProviderFactory = fourPairsProviderFactory(puzzleProvider = puzzleProvider)
+                    generatedPuzzleGenerationUseCaseFactory = fourPairsProviderFactory(puzzleProvider = puzzleProvider)
                 )
             }
         }
@@ -184,17 +185,23 @@ class AppNavigationLearningFlowTest {
         composeTestRule.activity.getString(stringResId, *formatArgs)
     }
 
-    private fun fourPairsProviderFactory(puzzleProvider: GeneratedPuzzleProvider): GeneratedPuzzleProviderFactory =
-        GeneratedPuzzleProviderFactory { mode ->
-            require(mode == GeneratedModes.FOUR_PAIRS)
-            puzzleProvider
+    private fun fourPairsProviderFactory(
+        puzzleProvider: QueueGeneratedPuzzleProvider
+    ): GeneratedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory { mode ->
+        require(mode == GeneratedModes.FOUR_PAIRS)
+        GeneratedPuzzleGenerationUseCase { request ->
+            GeneratedPuzzleGenerationResult.Generated(
+                request = request,
+                initialPuzzle = puzzleProvider.nextPuzzle()
+            )
         }
+    }
 
-    private class QueueGeneratedPuzzleProvider(private val puzzle: Puzzle) : GeneratedPuzzleProvider {
+    private class QueueGeneratedPuzzleProvider(private val puzzle: Puzzle) {
         var requestCount = 0
             private set
 
-        override fun nextPuzzle(): Puzzle {
+        fun nextPuzzle(): Puzzle {
             requestCount += 1
             return puzzle
         }

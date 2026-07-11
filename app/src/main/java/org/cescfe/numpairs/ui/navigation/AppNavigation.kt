@@ -14,7 +14,7 @@ import org.cescfe.numpairs.feature.generated.GeneratedModeId
 import org.cescfe.numpairs.feature.generated.GeneratedModeRegistry
 import org.cescfe.numpairs.feature.generated.GeneratedModeRoute
 import org.cescfe.numpairs.feature.generated.GeneratedModes
-import org.cescfe.numpairs.feature.generated.GeneratedPuzzleProviderFactory
+import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.feature.menu.MenuRoute
 import org.cescfe.numpairs.feature.tutorial.TutorialRoute
 
@@ -28,7 +28,7 @@ sealed interface AppDestination {
 fun AppNavigation(
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     generatedModeRegistry: GeneratedModeRegistry,
-    generatedPuzzleProviderFactory: GeneratedPuzzleProviderFactory,
+    generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory,
     modifier: Modifier = Modifier,
     startDestination: AppDestination = AppDestination.Menu
 ) {
@@ -62,15 +62,15 @@ fun AppNavigation(
         )
         is AppDestination.GeneratedMode -> {
             val mode = generatedModeRegistry.resolve(id = destination.modeId)
-            val puzzleProvider = remember(generatedPuzzleProviderFactory, mode.id) {
-                generatedPuzzleProviderFactory.create(mode = mode)
+            val generationUseCase = remember(generatedPuzzleGenerationUseCaseFactory, mode.id) {
+                generatedPuzzleGenerationUseCaseFactory.create(mode = mode)
             }
 
             when (mode.id) {
                 GeneratedModes.FOUR_PAIRS.id -> FourPairsRoute(
                     modifier = modifier,
                     mode = mode,
-                    puzzleProvider = puzzleProvider,
+                    generationUseCase = generationUseCase,
                     topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
                     onNavigateBack = navigateToMenu
                 )
@@ -80,7 +80,7 @@ fun AppNavigation(
                     title = mode.titleResourceIdOrNull()?.let { titleResourceId ->
                         stringResource(id = titleResourceId)
                     } ?: mode.id.value,
-                    puzzleProvider = puzzleProvider,
+                    generationUseCase = generationUseCase,
                     modifier = modifier,
                     onNavigateBack = navigateToMenu
                 )
