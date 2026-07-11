@@ -4,6 +4,7 @@ import kotlin.random.Random
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
 import org.cescfe.numpairs.domain.generated.PrimeProductDecoyPairPattern
 import org.cescfe.numpairs.domain.generated.ProbabilityPercent
+import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
 
 internal class GeneratedPairsVariationPlanSelector(
     private val profile: GeneratedPuzzleProfile,
@@ -41,9 +42,9 @@ internal class GeneratedPairsVariationPlanSelector(
         }
     }
 
-    private fun selectStripEntryVisibilityDirectives(): Map<Int, GeneratedPairsStripEntryVisibilityDirective> =
+    private fun selectStripEntryVisibilityDirectives(): Map<StripEntryId, GeneratedPairsStripEntryVisibilityDirective> =
         profile.varietyPolicy.highValueMaskTargets.associate { target ->
-            val entryId = profile.size.stripEntryCount - target.rankFromHighest
+            val entryId = StripEntryId(profile.size.stripEntryCount - target.rankFromHighest)
             val directive = if (shouldApply(probability = target.targetHiddenProbability)) {
                 GeneratedPairsStripEntryVisibilityDirective.HIDDEN
             } else {

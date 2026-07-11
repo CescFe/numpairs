@@ -1,6 +1,7 @@
 package org.cescfe.numpairs.domain.generated
 
 import org.cescfe.numpairs.domain.puzzle.assignment.IndexedResolvedTileAssignment
+import org.cescfe.numpairs.domain.puzzle.assignment.UnorderedStripEntryPair
 import org.cescfe.numpairs.domain.puzzle.assignment.resolvedTileAssignments
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
@@ -118,27 +119,25 @@ class FourPairsLowGeneratedPairsPuzzleGeneratorTest {
     }
 }
 
-private fun Puzzle.pairKeysFor(operator: Operator): Set<TestPairKey> = resolvedTileAssignments()
+private fun Puzzle.pairKeysFor(operator: Operator): Set<UnorderedStripEntryPair> = resolvedTileAssignments()
     .filter { assignment -> assignment.operator == operator }
     .map(IndexedResolvedTileAssignment::pairKey)
     .toSet()
 
-private fun Puzzle.pairKeyByEntryId(): Map<Int, TestPairKey> = resolvedTileAssignments()
+private fun Puzzle.pairKeyByEntryId(): Map<Int, UnorderedStripEntryPair> = resolvedTileAssignments()
     .filter { assignment -> assignment.operator == Operator.ADDITION }
     .flatMap { assignment ->
         val pairKey = assignment.pairKey
 
         listOf(
-            assignment.leftOperand.stripEntryId to pairKey,
-            assignment.rightOperand.stripEntryId to pairKey
+            assignment.leftOperand.stripEntryId.value to pairKey,
+            assignment.rightOperand.stripEntryId.value to pairKey
         )
     }
     .toMap()
 
-private val IndexedResolvedTileAssignment.pairKey: TestPairKey
-    get() = TestPairKey(
-        firstEntryId = minOf(leftOperand.stripEntryId, rightOperand.stripEntryId),
-        secondEntryId = maxOf(leftOperand.stripEntryId, rightOperand.stripEntryId)
+private val IndexedResolvedTileAssignment.pairKey: UnorderedStripEntryPair
+    get() = UnorderedStripEntryPair.of(
+        firstEntryId = leftOperand.stripEntryId,
+        secondEntryId = rightOperand.stripEntryId
     )
-
-private data class TestPairKey(val firstEntryId: Int, val secondEntryId: Int)

@@ -6,6 +6,7 @@ import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfiles
 import org.cescfe.numpairs.domain.generated.HighValueMaskTarget
 import org.cescfe.numpairs.domain.generated.ProbabilityPercent
 import org.cescfe.numpairs.domain.generated.getOrThrow
+import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -135,9 +136,9 @@ private fun GeneratedPairsVariationPlan.visibilityDirectiveForRank(
     profile: GeneratedPuzzleProfile,
     rankFromHighest: Int
 ): GeneratedPairsStripEntryVisibilityDirective? =
-    stripEntryVisibilityDirectives[profile.size.stripEntryCount - rankFromHighest]
+    stripEntryVisibilityDirectives[StripEntryId(profile.size.stripEntryCount - rankFromHighest)]
 
-private fun GeneratedPuzzleProfile.targetedHighValueEntryIds(): Set<Int> =
+private fun GeneratedPuzzleProfile.targetedHighValueEntryIds(): Set<StripEntryId> =
     varietyPolicy.highValueMaskTargets.map { target ->
-        size.stripEntryCount - target.rankFromHighest
+        StripEntryId(size.stripEntryCount - target.rankFromHighest)
     }.toSet()

@@ -1,34 +1,55 @@
 package org.cescfe.numpairs.domain.generated.internal
 
-import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzle
+import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleValidationViolation
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
 import org.cescfe.numpairs.domain.puzzle.assignment.IndexedResolvedTileAssignment
+import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
+import org.cescfe.numpairs.domain.puzzle.assignment.UnorderedStripEntryPair
 import org.cescfe.numpairs.domain.puzzle.assignment.resolvedTileAssignments
 import org.cescfe.numpairs.domain.puzzle.model.Expression
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
-import org.cescfe.numpairs.domain.puzzle.model.StripEntry
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
 
 internal class GeneratedPairsPuzzleValidator(private val profile: GeneratedPuzzleProfile) {
     private val hardRules = GeneratedPuzzleHardRuleSet.from(profile = profile)
 
-    fun validate(generatedPuzzle: GeneratedPairsPuzzle): GeneratedPairsPuzzleValidationReport {
-        val solvedPuzzle = generatedPuzzle.solvedPuzzle
-        val initialPuzzle = generatedPuzzle.initialPuzzle
-        val solvedKnownValuesById = solvedPuzzle.knownStripValuesById()
+    fun validate(initialPuzzle: Puzzle, solvedPuzzle: Puzzle): GeneratedPairsPuzzleValidationReport {
         val assignments = solvedPuzzle.resolvedTileAssignments()
-        val additionPairKeys = assignments.pairKeysFor(operator = Operator.ADDITION)
+        val additionSolutionPairs = assignments.solutionPairsFor(operator = Operator.ADDITION)
 
         val violations = buildList {
-            addPuzzleStateViolations(generatedPuzzle = generatedPuzzle)
+            addAll(validateSolvedPuzzle(solvedPuzzle = solvedPuzzle).violations)
+            addInitialPuzzleShapeViolations(initialPuzzle = initialPuzzle)
             addTransformationViolations(
                 initialPuzzle = initialPuzzle,
                 solvedPuzzle = solvedPuzzle,
-                solvedKnownValuesById = solvedKnownValuesById
+                solvedKnownValuesById = solvedPuzzle.knownStripValuesById()
             )
+
+            val knownEntryIds = initialPuzzle.knownStripEntryIds()
+            addAll(
+                hardRules.stripMask.violationsFor(
+                    knownEntryIds = knownEntryIds,
+                    hiddenEntryCount = initialPuzzle.strip.entries.count { entry ->
+                        entry.item == StripItem.Hidden
+                    },
+                    solutionPairs = additionSolutionPairs
+                )
+            )
+        }
+
+        return GeneratedPairsPuzzleValidationReport(violations = violations)
+    }
+
+    fun validateSolvedPuzzle(solvedPuzzle: Puzzle): GeneratedPairsPuzzleValidationReport {
+        val solvedKnownValuesById = solvedPuzzle.knownStripValuesById()
+        val assignments = solvedPuzzle.resolvedTileAssignments()
+
+        val violations = buildList {
+            addSolvedPuzzleStateViolations(solvedPuzzle = solvedPuzzle)
             addSolvedStripViolations(
                 solvedPuzzle = solvedPuzzle,
                 solvedKnownValuesById = solvedKnownValuesById
@@ -54,28 +75,14 @@ internal class GeneratedPairsPuzzleValidator(private val profile: GeneratedPuzzl
                         }
                 )
             )
-
-            val knownEntryIds = initialPuzzle.knownStripEntryIds()
-            addAll(
-                hardRules.stripMask.violationsFor(
-                    knownEntryIds = knownEntryIds,
-                    hiddenEntryCount = initialPuzzle.strip.entries.count { entry ->
-                        entry.item == StripItem.Hidden
-                    },
-                    pairKeys = additionPairKeys
-                )
-            )
         }
 
         return GeneratedPairsPuzzleValidationReport(violations = violations)
     }
 
-    private fun MutableList<GeneratedPairsPuzzleValidationViolation>.addPuzzleStateViolations(
-        generatedPuzzle: GeneratedPairsPuzzle
+    private fun MutableList<GeneratedPairsPuzzleValidationViolation>.addSolvedPuzzleStateViolations(
+        solvedPuzzle: Puzzle
     ) {
-        val solvedPuzzle = generatedPuzzle.solvedPuzzle
-        val initialPuzzle = generatedPuzzle.initialPuzzle
-
         if (solvedPuzzle.completionState != PuzzleCompletionState.SOLVED) {
             add(
                 GeneratedPairsPuzzleValidationViolation.SolvedPuzzleNotSolved(
@@ -99,6 +106,11 @@ internal class GeneratedPairsPuzzleValidator(private val profile: GeneratedPuzzl
                 )
             )
         }
+    }
+
+    private fun MutableList<GeneratedPairsPuzzleValidationViolation>.addInitialPuzzleShapeViolations(
+        initialPuzzle: Puzzle
+    ) {
         if (initialPuzzle.board.tiles.size != profile.size.boardTileCount) {
             add(
                 GeneratedPairsPuzzleValidationViolation.InitialBoardTileCountMismatch(
@@ -120,7 +132,7 @@ internal class GeneratedPairsPuzzleValidator(private val profile: GeneratedPuzzl
     private fun MutableList<GeneratedPairsPuzzleValidationViolation>.addTransformationViolations(
         initialPuzzle: Puzzle,
         solvedPuzzle: Puzzle,
-        solvedKnownValuesById: Map<Int, Int>
+        solvedKnownValuesById: Map<StripEntryId, Int>
     ) {
         val nonHiddenTileIndexes = initialPuzzle.board.tiles.mapIndexedNotNull { tileIndex, tile ->
             tileIndex.takeUnless { tile.hasHiddenExpression() }
@@ -146,8 +158,8 @@ internal class GeneratedPairsPuzzleValidator(private val profile: GeneratedPuzzl
             )
         }
 
-        val solvedEntryIds = solvedPuzzle.strip.entries.map(StripEntry::id)
-        val initialEntryIds = initialPuzzle.strip.entries.map(StripEntry::id)
+        val solvedEntryIds = solvedPuzzle.strip.entries.map { entry -> StripEntryId(entry.id) }
+        val initialEntryIds = initialPuzzle.strip.entries.map { entry -> StripEntryId(entry.id) }
         if (initialEntryIds != solvedEntryIds) {
             add(
                 GeneratedPairsPuzzleValidationViolation.InitialStripEntryIdentitiesMismatch(
@@ -159,7 +171,7 @@ internal class GeneratedPairsPuzzleValidator(private val profile: GeneratedPuzzl
 
         val mismatchedVisibleEntryIds = initialPuzzle.strip.entries.mapNotNullTo(mutableSetOf()) { entry ->
             val knownItem = entry.item as? StripItem.Known ?: return@mapNotNullTo null
-            entry.id.takeUnless { solvedKnownValuesById[entry.id] == knownItem.value }
+            StripEntryId(entry.id).takeUnless { entryId -> solvedKnownValuesById[entryId] == knownItem.value }
         }
         if (mismatchedVisibleEntryIds.isNotEmpty()) {
             add(
@@ -170,7 +182,7 @@ internal class GeneratedPairsPuzzleValidator(private val profile: GeneratedPuzzl
         }
 
         val playerEnteredEntryIds = initialPuzzle.strip.entries.mapNotNullTo(mutableSetOf()) { entry ->
-            entry.id.takeIf { entry.item is StripItem.PlayerEntered }
+            StripEntryId(entry.id).takeIf { entry.item is StripItem.PlayerEntered }
         }
         if (playerEnteredEntryIds.isNotEmpty()) {
             add(
@@ -183,10 +195,10 @@ internal class GeneratedPairsPuzzleValidator(private val profile: GeneratedPuzzl
 
     private fun MutableList<GeneratedPairsPuzzleValidationViolation>.addSolvedStripViolations(
         solvedPuzzle: Puzzle,
-        solvedKnownValuesById: Map<Int, Int>
+        solvedKnownValuesById: Map<StripEntryId, Int>
     ) {
         val nonKnownEntryIds = solvedPuzzle.strip.entries.mapNotNullTo(mutableSetOf()) { entry ->
-            entry.id.takeUnless { entry.item is StripItem.Known }
+            StripEntryId(entry.id).takeUnless { entry.item is StripItem.Known }
         }
         if (nonKnownEntryIds.isNotEmpty()) {
             add(
@@ -196,7 +208,9 @@ internal class GeneratedPairsPuzzleValidator(private val profile: GeneratedPuzzl
             )
         }
 
-        val values = solvedPuzzle.strip.entries.mapNotNull { entry -> solvedKnownValuesById[entry.id] }
+        val values = solvedPuzzle.strip.entries.mapNotNull { entry ->
+            solvedKnownValuesById[StripEntryId(entry.id)]
+        }
         if (values != values.sorted()) {
             add(
                 GeneratedPairsPuzzleValidationViolation.SolvedStripValuesNotSorted(
@@ -208,7 +222,7 @@ internal class GeneratedPairsPuzzleValidator(private val profile: GeneratedPuzzl
 
     private fun MutableList<GeneratedPairsPuzzleValidationViolation>.addAssignmentViolations(
         solvedPuzzle: Puzzle,
-        solvedKnownValuesById: Map<Int, Int>,
+        solvedKnownValuesById: Map<StripEntryId, Int>,
         assignments: List<IndexedResolvedTileAssignment>
     ) {
         if (assignments.size != solvedPuzzle.board.tiles.size) {
@@ -248,7 +262,7 @@ internal class GeneratedPairsPuzzleValidator(private val profile: GeneratedPuzzl
             )
         }
 
-        val solvedEntryIds = solvedPuzzle.strip.entries.mapTo(mutableSetOf(), StripEntry::id)
+        val solvedEntryIds = solvedPuzzle.strip.entries.mapTo(mutableSetOf()) { entry -> StripEntryId(entry.id) }
         val additionUsageByEntryId = assignments.usageCountsFor(operator = Operator.ADDITION)
         val multiplicationUsageByEntryId = assignments.usageCountsFor(operator = Operator.MULTIPLICATION)
         val allReferencedEntryIds = additionUsageByEntryId.keys + multiplicationUsageByEntryId.keys
@@ -264,8 +278,8 @@ internal class GeneratedPairsPuzzleValidator(private val profile: GeneratedPuzzl
             )
         }
 
-        val additionPairs = assignments.pairKeysFor(operator = Operator.ADDITION)
-        val multiplicationPairs = assignments.pairKeysFor(operator = Operator.MULTIPLICATION)
+        val additionPairs = assignments.solutionPairsFor(operator = Operator.ADDITION)
+        val multiplicationPairs = assignments.solutionPairsFor(operator = Operator.MULTIPLICATION)
         if (additionPairs != multiplicationPairs) {
             add(
                 GeneratedPairsPuzzleValidationViolation.SolvedSumProductPairingMismatch(
@@ -281,34 +295,28 @@ private fun Tile.hasHiddenExpression(): Boolean = expression.leftOperand == Expr
     expression.operator == Operator.Hidden &&
     expression.rightOperand == Expression.Operand.Hidden
 
-private fun Puzzle.knownStripValuesById(): Map<Int, Int> = strip.entries.mapNotNull { entry ->
-    (entry.item as? StripItem.Known)?.let { item -> entry.id to item.value }
+private fun Puzzle.knownStripValuesById(): Map<StripEntryId, Int> = strip.entries.mapNotNull { entry ->
+    (entry.item as? StripItem.Known)?.let { item -> StripEntryId(entry.id) to item.value }
 }.toMap()
 
-private fun Puzzle.knownStripEntryIds(): Set<Int> = strip.entries
+private fun Puzzle.knownStripEntryIds(): Set<StripEntryId> = strip.entries
     .filter { entry -> entry.item is StripItem.Known }
-    .mapTo(mutableSetOf(), StripEntry::id)
+    .mapTo(mutableSetOf()) { entry -> StripEntryId(entry.id) }
 
-private val IndexedResolvedTileAssignment.operandEntryIds: List<Int>
+private val IndexedResolvedTileAssignment.operandEntryIds: List<StripEntryId>
     get() = listOf(leftOperand.stripEntryId, rightOperand.stripEntryId)
 
-private fun List<IndexedResolvedTileAssignment>.usageCountsFor(operator: Operator): Map<Int, Int> =
+private fun List<IndexedResolvedTileAssignment>.usageCountsFor(operator: Operator): Map<StripEntryId, Int> =
     filter { assignment -> assignment.operator == operator }
         .flatMap(IndexedResolvedTileAssignment::operandEntryIds)
         .groupingBy { entryId -> entryId }
         .eachCount()
 
-private fun List<IndexedResolvedTileAssignment>.pairKeysFor(operator: Operator): Set<GeneratedPairsEntryPairKey> =
+private fun List<IndexedResolvedTileAssignment>.solutionPairsFor(operator: Operator): Set<UnorderedStripEntryPair> =
     filter { assignment -> assignment.operator == operator }
         .mapTo(mutableSetOf()) { assignment ->
-            GeneratedPairsEntryPairKey(
-                firstEntryId = minOf(
-                    assignment.leftOperand.stripEntryId,
-                    assignment.rightOperand.stripEntryId
-                ),
-                secondEntryId = maxOf(
-                    assignment.leftOperand.stripEntryId,
-                    assignment.rightOperand.stripEntryId
-                )
+            UnorderedStripEntryPair.of(
+                firstEntryId = assignment.leftOperand.stripEntryId,
+                secondEntryId = assignment.rightOperand.stripEntryId
             )
         }

@@ -1,9 +1,13 @@
 package org.cescfe.numpairs.domain.generated.internal
 
 import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzle
+import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleCreation
 import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerator
+import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleValidationRuleId
+import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleValidationViolation
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfiles
+import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
 import org.cescfe.numpairs.domain.puzzle.assignment.resolvedTileAssignments
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Expression
@@ -13,7 +17,6 @@ import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.model.Strip
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -22,22 +25,27 @@ class GeneratedPairsPuzzleValidatorTest {
     @Test
     fun valid_generated_puzzle_has_an_empty_validation_report() {
         val fixture = generatedPuzzleFixture()
-        val report = fixture.validator.validate(generatedPuzzle = fixture.generatedPuzzle)
+        val creation = GeneratedPairsPuzzle.create(
+            profile = fixture.profile,
+            initialPuzzle = fixture.generatedPuzzle.initialPuzzle,
+            solvedPuzzle = fixture.generatedPuzzle.solvedPuzzle
+        )
 
-        assertTrue(report.isValid)
-        assertTrue(report.violations.isEmpty())
+        assertEquals(
+            fixture.generatedPuzzle,
+            (creation as GeneratedPairsPuzzleCreation.Created).puzzle
+        )
     }
 
     @Test
     fun validation_report_collects_independent_typed_violations_without_short_circuiting() {
         val fixture = generatedPuzzleFixture()
-        val invalidPuzzle = GeneratedPairsPuzzle(
+        val report = rejectedCreation(
+            profile = fixture.profile,
             initialPuzzle = fixture.generatedPuzzle.solvedPuzzle,
             solvedPuzzle = fixture.generatedPuzzle.initialPuzzle
         )
-        val report = fixture.validator.validate(generatedPuzzle = invalidPuzzle)
 
-        assertFalse(report.isValid)
         assertEquals(
             PuzzleCompletionState.INCOMPLETE,
             report.violations
@@ -78,6 +86,44 @@ class GeneratedPairsPuzzleValidatorTest {
     }
 
     @Test
+    fun initial_board_result_reordering_is_rejected_at_aggregate_creation() {
+        val fixture = generatedPuzzleFixture()
+        val initialPuzzle = fixture.generatedPuzzle.initialPuzzle
+        val reorderedInitialPuzzle = initialPuzzle.copy(
+            board = Board(tiles = initialPuzzle.board.tiles.reversed())
+        )
+
+        val rejection = rejectedCreation(
+            profile = fixture.profile,
+            initialPuzzle = reorderedInitialPuzzle,
+            solvedPuzzle = fixture.generatedPuzzle.solvedPuzzle
+        )
+
+        assertTrue(
+            rejection.violations.any {
+                it is GeneratedPairsPuzzleValidationViolation.BoardResultsMismatch
+            }
+        )
+    }
+
+    @Test
+    fun incomplete_solved_puzzle_is_rejected_before_initial_state_derivation() {
+        val fixture = generatedPuzzleFixture()
+        val creation = GeneratedPairsPuzzle.fromSolvedPuzzle(
+            profile = fixture.profile,
+            solvedPuzzle = fixture.generatedPuzzle.initialPuzzle,
+            knownEntryIds = emptySet()
+        )
+        val rejection = creation as GeneratedPairsPuzzleCreation.Rejected
+
+        assertTrue(
+            rejection.violations.any {
+                it is GeneratedPairsPuzzleValidationViolation.SolvedPuzzleNotSolved
+            }
+        )
+    }
+
+    @Test
     fun value_and_result_rules_are_evaluated_from_the_assembled_solved_puzzle() {
         val fixture = generatedPuzzleFixture()
         val solvedPuzzle = fixture.generatedPuzzle.solvedPuzzle
@@ -103,13 +149,14 @@ class GeneratedPairsPuzzleValidatorTest {
                 entry
             }
         }
-        val invalidPuzzle = fixture.generatedPuzzle.copy(
+        val report = rejectedCreation(
+            profile = fixture.profile,
+            initialPuzzle = fixture.generatedPuzzle.initialPuzzle,
             solvedPuzzle = Puzzle(
                 board = Board(tiles = changedTiles),
                 strip = Strip.fromEntries(entries = changedEntries)
             )
         )
-        val report = fixture.validator.validate(generatedPuzzle = invalidPuzzle)
 
         assertEquals(
             setOf(1_000),
@@ -155,7 +202,11 @@ class GeneratedPairsPuzzleValidatorTest {
         val mediumPuzzle = generatedPuzzleFixture(
             profile = GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM
         ).generatedPuzzle
-        val report = lowFixture.validator.validate(generatedPuzzle = mediumPuzzle)
+        val report = rejectedCreation(
+            profile = lowFixture.profile,
+            initialPuzzle = mediumPuzzle.initialPuzzle,
+            solvedPuzzle = mediumPuzzle.solvedPuzzle
+        )
 
         assertEquals(
             GeneratedPairsPuzzleValidationViolation.SolvedBoardTileCountMismatch(
@@ -192,10 +243,11 @@ class GeneratedPairsPuzzleValidatorTest {
                 tile
             }
         }
-        val invalidPuzzle = fixture.generatedPuzzle.copy(
+        val report = rejectedCreation(
+            profile = fixture.profile,
+            initialPuzzle = fixture.generatedPuzzle.initialPuzzle,
             solvedPuzzle = solvedPuzzle.copy(board = Board(tiles = changedTiles))
         )
-        val report = fixture.validator.validate(generatedPuzzle = invalidPuzzle)
         val violation = report.violations
             .filterIsInstance<GeneratedPairsPuzzleValidationViolation.ProductAnchorMixOutsideRange>()
             .single()
@@ -219,10 +271,11 @@ class GeneratedPairsPuzzleValidatorTest {
                 else -> entry
             }
         }
-        val invalidPuzzle = fixture.generatedPuzzle.copy(
-            initialPuzzle = initialPuzzle.copy(strip = Strip.fromEntries(entries = changedEntries))
+        val report = rejectedCreation(
+            profile = fixture.profile,
+            initialPuzzle = initialPuzzle.copy(strip = Strip.fromEntries(entries = changedEntries)),
+            solvedPuzzle = fixture.generatedPuzzle.solvedPuzzle
         )
-        val report = fixture.validator.validate(generatedPuzzle = invalidPuzzle)
 
         assertTrue(
             report.violations.any {
@@ -230,7 +283,7 @@ class GeneratedPairsPuzzleValidatorTest {
             }
         )
         assertEquals(
-            setOf(highestKnownEntry.id),
+            setOf(StripEntryId(highestKnownEntry.id)),
             report.violations
                 .filterIsInstance<GeneratedPairsPuzzleValidationViolation.InitialVisibleStripValueMismatch>()
                 .single()
@@ -254,16 +307,17 @@ class GeneratedPairsPuzzleValidatorTest {
         val changedTiles = solvedPuzzle.board.tiles.toMutableList().apply {
             this[assignment.tileIndex] = changedTile
         }
-        val invalidPuzzle = fixture.generatedPuzzle.copy(
+        val report = rejectedCreation(
+            profile = fixture.profile,
+            initialPuzzle = fixture.generatedPuzzle.initialPuzzle,
             solvedPuzzle = solvedPuzzle.copy(board = Board(tiles = changedTiles))
         )
-        val report = fixture.validator.validate(generatedPuzzle = invalidPuzzle)
         val invalidReference = report.violations
             .filterIsInstance<GeneratedPairsPuzzleValidationViolation.SolvedOperandEntryReferenceInvalid>()
             .single()
 
         assertEquals(
-            mapOf(assignment.tileIndex to setOf(unknownEntryId)),
+            mapOf(assignment.tileIndex to setOf(StripEntryId(unknownEntryId))),
             invalidReference.unknownEntryIdsByTileIndex
         )
         assertTrue(
@@ -282,7 +336,8 @@ class GeneratedPairsPuzzleValidatorTest {
         assertTrue(pairingMismatch.additionPairs != pairingMismatch.multiplicationPairs)
         assertTrue(
             (pairingMismatch.additionPairs + pairingMismatch.multiplicationPairs).any { pair ->
-                unknownEntryId == pair.firstEntryId || unknownEntryId == pair.secondEntryId
+                StripEntryId(unknownEntryId) == pair.firstEntryId ||
+                    StripEntryId(unknownEntryId) == pair.secondEntryId
             }
         )
     }
@@ -299,13 +354,14 @@ class GeneratedPairsPuzzleValidatorTest {
                 entry.copy(item = StripItem.Hidden)
             }
         }
-        val invalidPuzzle = fixture.generatedPuzzle.copy(
-            initialPuzzle = initialPuzzle.copy(strip = Strip.fromEntries(entries = changedEntries))
+        val report = rejectedCreation(
+            profile = fixture.profile,
+            initialPuzzle = initialPuzzle.copy(strip = Strip.fromEntries(entries = changedEntries)),
+            solvedPuzzle = fixture.generatedPuzzle.solvedPuzzle
         )
-        val report = fixture.validator.validate(generatedPuzzle = invalidPuzzle)
 
         assertEquals(
-            setOf(fixture.profile.size.stripEntryCount - 1),
+            setOf(StripEntryId(fixture.profile.size.stripEntryCount - 1)),
             report.violations
                 .filterIsInstance<GeneratedPairsPuzzleValidationViolation.RequiredKnownStripAnchorMissing>()
                 .single()
@@ -337,13 +393,14 @@ class GeneratedPairsPuzzleValidatorTest {
                 entry
             }
         }
-        val invalidPuzzle = fixture.generatedPuzzle.copy(
-            initialPuzzle = initialPuzzle.copy(strip = Strip.fromEntries(entries = changedEntries))
+        val report = rejectedCreation(
+            profile = fixture.profile,
+            initialPuzzle = initialPuzzle.copy(strip = Strip.fromEntries(entries = changedEntries)),
+            solvedPuzzle = fixture.generatedPuzzle.solvedPuzzle
         )
-        val report = fixture.validator.validate(generatedPuzzle = invalidPuzzle)
 
         assertEquals(
-            setOf(hiddenEntry.id),
+            setOf(StripEntryId(hiddenEntry.id)),
             report.violations
                 .filterIsInstance<GeneratedPairsPuzzleValidationViolation.InitialStripItemsNotMasked>()
                 .single()
@@ -390,8 +447,7 @@ class GeneratedPairsPuzzleValidatorTest {
 
 private data class GeneratedPuzzleValidationFixture(
     val profile: GeneratedPuzzleProfile,
-    val generatedPuzzle: GeneratedPairsPuzzle,
-    val validator: GeneratedPairsPuzzleValidator
+    val generatedPuzzle: GeneratedPairsPuzzle
 )
 
 private fun generatedPuzzleFixture(
@@ -404,7 +460,16 @@ private fun generatedPuzzleFixture(
 
     return GeneratedPuzzleValidationFixture(
         profile = profile,
-        generatedPuzzle = generatedPuzzle,
-        validator = GeneratedPairsPuzzleValidator(profile = profile)
+        generatedPuzzle = generatedPuzzle
     )
 }
+
+private fun rejectedCreation(
+    profile: GeneratedPuzzleProfile,
+    initialPuzzle: Puzzle,
+    solvedPuzzle: Puzzle
+): GeneratedPairsPuzzleCreation.Rejected = GeneratedPairsPuzzle.create(
+    profile = profile,
+    initialPuzzle = initialPuzzle,
+    solvedPuzzle = solvedPuzzle
+) as GeneratedPairsPuzzleCreation.Rejected

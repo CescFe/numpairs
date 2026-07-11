@@ -2,13 +2,13 @@ package org.cescfe.numpairs.domain.generated
 
 import kotlin.random.Random
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsPuzzleAssembler
-import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsPuzzleValidator
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSolvedCandidate
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsSolvedCandidateGenerator
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsValuePairSelector
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsVariationPlanOutcome
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsVariationPlanSelector
 import org.cescfe.numpairs.domain.generated.internal.GeneratedStripMaskSelector
+import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
 class GeneratedPairsPuzzleGenerator(
@@ -40,8 +40,6 @@ class GeneratedPairsPuzzleGenerator(
         profile = profile,
         random = random
     )
-    private val puzzleValidator = GeneratedPairsPuzzleValidator(profile = profile)
-
     constructor(
         profile: GeneratedPuzzleProfile,
         seed: Int,
@@ -96,16 +94,15 @@ class GeneratedPairsPuzzleGenerator(
 
     private fun buildValidGeneratedPuzzle(candidate: GeneratedPairsPuzzleCandidate): GeneratedPairsPuzzle? {
         val solvedPuzzle = puzzleAssembler.buildSolvedPuzzle(candidate = candidate.solvedCandidate)
-        val generatedPuzzle = GeneratedPairsPuzzle(
-            initialPuzzle = puzzleAssembler.buildInitialPuzzle(
+        return when (
+            val creation = GeneratedPairsPuzzle.fromSolvedPuzzle(
+                profile = profile,
                 solvedPuzzle = solvedPuzzle,
                 knownEntryIds = candidate.knownEntryIds
-            ),
-            solvedPuzzle = solvedPuzzle
-        )
-
-        return generatedPuzzle.takeIf {
-            puzzleValidator.validate(generatedPuzzle = generatedPuzzle).isValid
+            )
+        ) {
+            is GeneratedPairsPuzzleCreation.Created -> creation.puzzle
+            is GeneratedPairsPuzzleCreation.Rejected -> null
         }
     }
 
@@ -116,5 +113,5 @@ class GeneratedPairsPuzzleGenerator(
 
 private data class GeneratedPairsPuzzleCandidate(
     val solvedCandidate: GeneratedPairsSolvedCandidate,
-    val knownEntryIds: Set<Int>
+    val knownEntryIds: Set<StripEntryId>
 )

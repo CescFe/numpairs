@@ -1,10 +1,11 @@
 package org.cescfe.numpairs.domain.puzzle.validation
 
 import org.cescfe.numpairs.domain.puzzle.assignment.IndexedResolvedTileAssignment
+import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
+import org.cescfe.numpairs.domain.puzzle.assignment.UnorderedStripEntryPair
 import org.cescfe.numpairs.domain.puzzle.assignment.resolvedTileAssignments
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
-import org.cescfe.numpairs.domain.puzzle.model.StripEntry
 import org.cescfe.numpairs.domain.puzzle.model.TileResolutionState
 
 internal val Puzzle.hasIncorrectTiles: Boolean
@@ -19,7 +20,7 @@ internal val Puzzle.hasMissingResolvedTileAssignments: Boolean
 val Puzzle.hasInvalidStripEntryUsage: Boolean
     get() {
         val resolvedAssignments = validatedResolvedAssignmentsOrNull() ?: return false
-        val stripEntryIds = strip.entries.map(StripEntry::id)
+        val stripEntryIds = strip.entries.map { entry -> StripEntryId(entry.id) }
         val additionUsageCounts = resolvedAssignments.usageCountsFor(operator = Operator.ADDITION)
         val multiplicationUsageCounts = resolvedAssignments.usageCountsFor(operator = Operator.MULTIPLICATION)
 
@@ -41,8 +42,6 @@ val Puzzle.mismatchedSumProductPairingTileIndexes: List<Int>
         }
     }
 
-private data class UnorderedStripEntryPair(val firstStripEntryId: Int, val secondStripEntryId: Int)
-
 private fun Puzzle.resolvedAssignmentsForCompletedBoardOrNull(): List<IndexedResolvedTileAssignment>? {
     if (isIncomplete || hasIncorrectTiles) {
         return null
@@ -56,7 +55,7 @@ private fun Puzzle.validatedResolvedAssignmentsOrNull(): List<IndexedResolvedTil
     return resolvedAssignments.takeIf { assignments -> assignments.size == board.tiles.size }
 }
 
-private fun List<IndexedResolvedTileAssignment>.usageCountsFor(operator: Operator): Map<Int, Int> =
+private fun List<IndexedResolvedTileAssignment>.usageCountsFor(operator: Operator): Map<StripEntryId, Int> =
     filter { assignment ->
         assignment.operator == operator
     }.flatMap { assignment ->
@@ -80,12 +79,7 @@ private fun List<IndexedResolvedTileAssignment>.unorderedStripEntryPairsFor(
     .toSet()
 
 private val IndexedResolvedTileAssignment.unorderedStripEntryPair: UnorderedStripEntryPair
-    get() {
-        val firstStripEntryId = minOf(leftOperand.stripEntryId, rightOperand.stripEntryId)
-        val secondStripEntryId = maxOf(leftOperand.stripEntryId, rightOperand.stripEntryId)
-
-        return UnorderedStripEntryPair(
-            firstStripEntryId = firstStripEntryId,
-            secondStripEntryId = secondStripEntryId
-        )
-    }
+    get() = UnorderedStripEntryPair.of(
+        firstEntryId = leftOperand.stripEntryId,
+        secondEntryId = rightOperand.stripEntryId
+    )

@@ -3,6 +3,7 @@ package org.cescfe.numpairs.domain.generated
 import kotlin.random.Random
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsStripEntryVisibilityDirective
 import org.cescfe.numpairs.domain.generated.internal.GeneratedPairsVariationPlanSelector
+import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -83,7 +84,10 @@ class GeneratedPairsPuzzleGeneratorTest {
             profile = profile,
             random = Random(seed)
         ).select()
-        val targetedEntryIds = setOf(size.stripEntryCount - 1, size.stripEntryCount - 2)
+        val targetedEntryIds = setOf(
+            StripEntryId(size.stripEntryCount - 1),
+            StripEntryId(size.stripEntryCount - 2)
+        )
 
         assertEquals(
             targetedEntryIds.associateWith { GeneratedPairsStripEntryVisibilityDirective.KNOWN },
@@ -102,7 +106,7 @@ class GeneratedPairsPuzzleGeneratorTest {
         )
         assertFalse(
             targetedEntryIds.all { entryId ->
-                generatedPuzzle.initialPuzzle.strip.entries.single { entry -> entry.id == entryId }.item is
+                generatedPuzzle.initialPuzzle.strip.entries.single { entry -> entry.id == entryId.value }.item is
                     StripItem.Known
             }
         )

@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicReference
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.puzzle.assignment.ResolvedOperandAssignment
+import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
 import org.cescfe.numpairs.domain.puzzle.construction.resolvedTile
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Operator
@@ -219,8 +220,8 @@ private enum class GameRouteMode {
 private const val TOP_BAR_ACTION_TAG = "game_route_top_bar_action"
 
 private fun solvedOnePairPuzzle(): Puzzle {
-    val firstOperand = ResolvedOperandAssignment(value = 1, stripEntryId = 0)
-    val secondOperand = ResolvedOperandAssignment(value = 2, stripEntryId = 1)
+    val firstOperand = ResolvedOperandAssignment(value = 1, stripEntryId = StripEntryId(0))
+    val secondOperand = ResolvedOperandAssignment(value = 2, stripEntryId = StripEntryId(1))
 
     return Puzzle(
         board = Board(

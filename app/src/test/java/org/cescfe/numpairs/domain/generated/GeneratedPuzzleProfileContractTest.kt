@@ -1,6 +1,8 @@
 package org.cescfe.numpairs.domain.generated
 
 import org.cescfe.numpairs.domain.puzzle.assignment.IndexedResolvedTileAssignment
+import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
+import org.cescfe.numpairs.domain.puzzle.assignment.UnorderedStripEntryPair
 import org.cescfe.numpairs.domain.puzzle.assignment.resolvedTileAssignments
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
@@ -45,7 +47,7 @@ class GeneratedPuzzleProfileContractTest {
         val solvedPuzzle = generatedPuzzle.solvedPuzzle
         val initialPuzzle = generatedPuzzle.initialPuzzle
         val solvedEntriesById = solvedPuzzle.strip.entries.associate { entry ->
-            entry.id to (entry.item as StripItem.Known).value
+            StripEntryId(entry.id) to (entry.item as StripItem.Known).value
         }
         val assignments = solvedPuzzle.resolvedTileAssignments()
         val context = "${profile.id.value}, seed $seed"
@@ -65,7 +67,8 @@ class GeneratedPuzzleProfileContractTest {
         initialPuzzle.strip.entries.forEach { entry ->
             when (val item = entry.item) {
                 StripItem.Hidden -> Unit
-                is StripItem.Known -> assertEquals(context, solvedEntriesById.getValue(entry.id), item.value)
+                is StripItem.Known ->
+                    assertEquals(context, solvedEntriesById.getValue(StripEntryId(entry.id)), item.value)
                 is StripItem.PlayerEntered -> fail("$context must not start with player-entered strip values.")
             }
         }
@@ -151,7 +154,7 @@ class GeneratedPuzzleProfileContractTest {
             assertEquals(
                 context,
                 knownEntryIds.size,
-                knownEntryIds.map { entryId -> additionPairByEntryId.getValue(entryId) }.toSet().size
+                knownEntryIds.map { entryId -> additionPairByEntryId.getValue(StripEntryId(entryId)) }.toSet().size
             )
         }
 
@@ -160,7 +163,7 @@ class GeneratedPuzzleProfileContractTest {
 
     private fun assertUsageOncePerOperator(
         assignments: List<IndexedResolvedTileAssignment>,
-        stripEntryIds: Set<Int>,
+        stripEntryIds: Set<StripEntryId>,
         context: String
     ) {
         listOf(Operator.ADDITION, Operator.MULTIPLICATION).forEach { operator ->
@@ -182,15 +185,15 @@ class GeneratedPuzzleProfileContractTest {
     }
 }
 
-private fun List<IndexedResolvedTileAssignment>.pairKeysFor(operator: Operator): Set<ContractPairKey> =
+private fun List<IndexedResolvedTileAssignment>.pairKeysFor(operator: Operator): Set<UnorderedStripEntryPair> =
     filter { assignment -> assignment.operator == operator }
         .map(IndexedResolvedTileAssignment::pairKey)
         .toSet()
 
-private val IndexedResolvedTileAssignment.pairKey: ContractPairKey
-    get() = ContractPairKey(
-        firstEntryId = minOf(leftOperand.stripEntryId, rightOperand.stripEntryId),
-        secondEntryId = maxOf(leftOperand.stripEntryId, rightOperand.stripEntryId)
+private val IndexedResolvedTileAssignment.pairKey: UnorderedStripEntryPair
+    get() = UnorderedStripEntryPair.of(
+        firstEntryId = leftOperand.stripEntryId,
+        secondEntryId = rightOperand.stripEntryId
     )
 
 private fun GeneratedPuzzleProfile.requiredKnownEntryIdsForContract(): Set<Int> =
@@ -199,5 +202,3 @@ private fun GeneratedPuzzleProfile.requiredKnownEntryIdsForContract(): Set<Int> 
             RequiredKnownStripAnchor.HIGHEST_STRIP_ENTRY -> size.stripEntryCount - 1
         }
     }.toSet()
-
-private data class ContractPairKey(val firstEntryId: Int, val secondEntryId: Int)

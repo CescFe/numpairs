@@ -4,8 +4,6 @@ import kotlin.random.Random
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
 import org.cescfe.numpairs.domain.puzzle.assignment.ResolvedOperandAssignment
 import org.cescfe.numpairs.domain.puzzle.construction.resolvedTile
-import org.cescfe.numpairs.domain.puzzle.construction.withHiddenExpression
-import org.cescfe.numpairs.domain.puzzle.construction.withKnownEntriesOnly
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
@@ -28,13 +26,6 @@ internal class GeneratedPairsPuzzleAssembler(private val profile: GeneratedPuzzl
             strip = Strip.fromItems(items = candidate.entries.map { entry -> StripItem.Known(entry.value) })
         )
     }
-
-    fun buildInitialPuzzle(solvedPuzzle: Puzzle, knownEntryIds: Set<Int>): Puzzle = Puzzle(
-        board = Board(
-            tiles = solvedPuzzle.board.tiles.map(Tile::withHiddenExpression)
-        ),
-        strip = solvedPuzzle.strip.withKnownEntriesOnly(knownEntryIds = knownEntryIds)
-    )
 }
 
 private fun GeneratedPairsEntryPair.solvedTiles(): List<Tile> = listOf(
