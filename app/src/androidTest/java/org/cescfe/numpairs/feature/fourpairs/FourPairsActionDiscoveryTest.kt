@@ -13,6 +13,7 @@ import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryReposito
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryState
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
+import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
@@ -171,7 +172,7 @@ class FourPairsActionDiscoveryTest {
     }
 
     private fun generatedPuzzleUseCase(
-        puzzle: org.cescfe.numpairs.domain.puzzle.model.Puzzle
+        puzzle: Puzzle
     ): GeneratedPuzzleGenerationUseCase = GeneratedPuzzleGenerationUseCase { request ->
         GeneratedPuzzleGenerationResult.Generated(
             request = request,

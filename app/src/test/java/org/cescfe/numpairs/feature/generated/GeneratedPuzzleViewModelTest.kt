@@ -10,6 +10,7 @@ import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerationFailureReason
 import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerationOutcome
 import org.cescfe.numpairs.domain.generated.GeneratedPuzzleGenerationRequest
+import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -70,9 +71,9 @@ class GeneratedPuzzleViewModelTest {
 }
 
 private class ControlledGeneratedPuzzleUseCase(
-    private val firstPuzzle: CompletableDeferred<org.cescfe.numpairs.domain.puzzle.model.Puzzle>,
+    private val firstPuzzle: CompletableDeferred<Puzzle>,
     private val replayFailure: CompletableDeferred<Boolean>,
-    private val retryPuzzle: CompletableDeferred<org.cescfe.numpairs.domain.puzzle.model.Puzzle>
+    private val retryPuzzle: CompletableDeferred<Puzzle>
 ) : GeneratedPuzzleGenerationUseCase {
     val requests = mutableListOf<GeneratedPuzzleGenerationRequest>()
 
