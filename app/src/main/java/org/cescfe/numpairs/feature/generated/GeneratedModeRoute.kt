@@ -105,7 +105,7 @@ fun GeneratedModeRoute(
                     overlay = {
                         GeneratedPuzzleFailureDialog(
                             onRetry = viewModel::retry,
-                            onDismiss = viewModel::dismissFailure
+                            onNavigateBack = onNavigateBack
                         )
                     }
                 )
@@ -226,9 +226,9 @@ private fun GeneratedPuzzleInitialFailureScreen(modifier: Modifier, onRetry: () 
 }
 
 @Composable
-private fun GeneratedPuzzleFailureDialog(onRetry: () -> Unit, onDismiss: () -> Unit) {
+private fun GeneratedPuzzleFailureDialog(onRetry: () -> Unit, onNavigateBack: () -> Unit) {
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = onNavigateBack,
         shape = NumPairsComponents.LargeShape,
         containerColor = NumPairsComponents.raisedSurfaceColor(),
         titleContentColor = MaterialTheme.colorScheme.onSurface,
@@ -256,9 +256,9 @@ private fun GeneratedPuzzleFailureDialog(onRetry: () -> Unit, onDismiss: () -> U
             }
         },
         dismissButton = {
-            Button(onClick = onDismiss) {
+            Button(onClick = onNavigateBack) {
                 Text(
-                    text = stringResource(R.string.generated_puzzle_keep_current_button),
+                    text = stringResource(R.string.generated_puzzle_back_to_menu_button),
                     style = MaterialTheme.typography.labelLarge
                 )
             }

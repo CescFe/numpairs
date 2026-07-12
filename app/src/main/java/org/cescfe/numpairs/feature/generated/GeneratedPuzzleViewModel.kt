@@ -90,13 +90,6 @@ internal class GeneratedPuzzleViewModel(
         )
     }
 
-    fun dismissFailure() {
-        val state = _uiState.value as? GeneratedPuzzleGenerationUiState.Failed ?: return
-        state.previousSession?.let { previousSession ->
-            _uiState.value = GeneratedPuzzleGenerationUiState.Ready(session = previousSession)
-        }
-    }
-
     private fun startGeneration(request: GeneratedPuzzleGenerationRequest, previousSession: GeneratedModeGameSession?) {
         if (generationJob != null) {
             return
