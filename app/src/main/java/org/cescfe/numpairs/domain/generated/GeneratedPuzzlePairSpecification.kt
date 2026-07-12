@@ -11,12 +11,20 @@ internal class GeneratedPuzzlePairSpecification(
     private val stripValuePolicy: StripValuePolicy,
     private val resultConstraints: ResultConstraints
 ) {
-    fun eligiblePairs(): List<GeneratedPuzzlePairValues> = buildList {
+    fun eligiblePairs(
+        workTracker: GeneratedPuzzleProfileValidationWorkTracker
+    ): GeneratedPuzzleProfileBoundedEvaluation<List<GeneratedPuzzlePairValues>> {
+        val pairs = mutableListOf<GeneratedPuzzlePairValues>()
+
         for (firstValue in stripValuePolicy.valueRange) {
             if (!resultConstraints.acceptsMultiplicationResult(firstValue.toLong() * firstValue)) {
                 break
             }
             for (secondValue in firstValue..stripValuePolicy.valueRange.last) {
+                workTracker.consume(GeneratedPuzzleProfileValidationWorkKind.CATALOG_EXPANSION)?.let { violation ->
+                    return GeneratedPuzzleProfileBoundedEvaluation.LimitExceeded(violation = violation)
+                }
+
                 val pair = GeneratedPuzzlePairValues(
                     firstValue = firstValue,
                     secondValue = secondValue
@@ -25,10 +33,12 @@ internal class GeneratedPuzzlePairSpecification(
                     break
                 }
                 if (isLocallyEligible(pair = pair)) {
-                    add(pair)
+                    pairs += pair
                 }
             }
         }
+
+        return GeneratedPuzzleProfileBoundedEvaluation.Completed(value = pairs)
     }
 
     fun isLocallyEligible(pair: GeneratedPuzzlePairValues): Boolean = stripValuePolicy.accepts(values = pair.values) &&
@@ -53,29 +63,37 @@ internal class GeneratedPuzzlePairSpecification(
             stripValuePolicy.maxOccurrencesPerValue / occurrencesPerPair
         }
 
-    fun canSelectPairCount(candidatePairs: List<GeneratedPuzzlePairValues>, targetPairCount: Int): Boolean =
-        canSelectPairs(
-            candidatePairs = candidatePairs,
-            targetPairCount = targetPairCount,
-            selectedPairCount = 0,
-            valueOccurrences = emptyMap(),
-            usedResults = emptySet(),
-            productAnchorCount = 0,
-            productAnchorMix = null,
-            failedStates = mutableSetOf()
-        )
+    fun canSelectPairCount(
+        candidatePairs: List<GeneratedPuzzlePairValues>,
+        targetPairCount: Int,
+        workTracker: GeneratedPuzzleProfileValidationWorkTracker
+    ): GeneratedPuzzleProfileBoundedEvaluation<Boolean> = canSelectPairs(
+        candidatePairs = candidatePairs,
+        targetPairCount = targetPairCount,
+        selectedPairCount = 0,
+        valueOccurrences = emptyMap(),
+        usedResults = emptySet(),
+        productAnchorCount = 0,
+        productAnchorMix = null,
+        failedStates = mutableSetOf(),
+        workTracker = workTracker
+    )
 
-    fun canSelectCompletePairSet(candidatePairs: List<GeneratedPuzzlePairValues>, targetPairCount: Int): Boolean =
-        canSelectPairs(
-            candidatePairs = candidatePairs,
-            targetPairCount = targetPairCount,
-            selectedPairCount = 0,
-            valueOccurrences = emptyMap(),
-            usedResults = emptySet(),
-            productAnchorCount = 0,
-            productAnchorMix = resultConstraints.productAnchorMix,
-            failedStates = mutableSetOf()
-        )
+    fun canSelectCompletePairSet(
+        candidatePairs: List<GeneratedPuzzlePairValues>,
+        targetPairCount: Int,
+        workTracker: GeneratedPuzzleProfileValidationWorkTracker
+    ): GeneratedPuzzleProfileBoundedEvaluation<Boolean> = canSelectPairs(
+        candidatePairs = candidatePairs,
+        targetPairCount = targetPairCount,
+        selectedPairCount = 0,
+        valueOccurrences = emptyMap(),
+        usedResults = emptySet(),
+        productAnchorCount = 0,
+        productAnchorMix = resultConstraints.productAnchorMix,
+        failedStates = mutableSetOf(),
+        workTracker = workTracker
+    )
 
     private fun canSelectPairs(
         candidatePairs: List<GeneratedPuzzlePairValues>,
@@ -85,8 +103,9 @@ internal class GeneratedPuzzlePairSpecification(
         usedResults: Set<Int>,
         productAnchorCount: Int,
         productAnchorMix: ProductAnchorMix?,
-        failedStates: MutableSet<PairSelectionState>
-    ): Boolean {
+        failedStates: MutableSet<PairSelectionState>,
+        workTracker: GeneratedPuzzleProfileValidationWorkTracker
+    ): GeneratedPuzzleProfileBoundedEvaluation<Boolean> {
         val remainingPairCount = targetPairCount - selectedPairCount
         if (productAnchorMix != null &&
             (
@@ -94,10 +113,12 @@ internal class GeneratedPuzzlePairSpecification(
                     productAnchorCount + remainingPairCount < productAnchorMix.countRange.first
                 )
         ) {
-            return false
+            return GeneratedPuzzleProfileBoundedEvaluation.Completed(value = false)
         }
         if (selectedPairCount == targetPairCount) {
-            return productAnchorMix == null || productAnchorCount in productAnchorMix.countRange
+            return GeneratedPuzzleProfileBoundedEvaluation.Completed(
+                value = productAnchorMix == null || productAnchorCount in productAnchorMix.countRange
+            )
         }
 
         val state = PairSelectionState(
@@ -106,37 +127,51 @@ internal class GeneratedPuzzlePairSpecification(
             usedResults = usedResults,
             productAnchorCount = productAnchorCount
         )
-        if (!failedStates.add(state)) {
-            return false
+        if (state in failedStates) {
+            return GeneratedPuzzleProfileBoundedEvaluation.Completed(value = false)
         }
+        workTracker.consume(GeneratedPuzzleProfileValidationWorkKind.PAIR_SELECTION_STATE)?.let { violation ->
+            return GeneratedPuzzleProfileBoundedEvaluation.LimitExceeded(violation = violation)
+        }
+        failedStates += state
 
-        return candidatePairs.any { candidatePair ->
+        candidatePairs.forEach { candidatePair ->
             if (!canBeAdded(
                     pair = candidatePair,
                     valueOccurrences = valueOccurrences,
                     usedResults = usedResults
                 )
             ) {
-                return@any false
+                return@forEach
             }
 
-            canSelectPairs(
-                candidatePairs = candidatePairs,
-                targetPairCount = targetPairCount,
-                selectedPairCount = selectedPairCount + 1,
-                valueOccurrences = valueOccurrences.with(pair = candidatePair),
-                usedResults = usedResults + candidatePair.results.map(Long::toInt),
-                productAnchorCount = productAnchorCount + if (
-                    productAnchorMix?.isAnchor(product = candidatePair.product.toInt()) == true
-                ) {
-                    1
-                } else {
-                    0
-                },
-                productAnchorMix = productAnchorMix,
-                failedStates = failedStates
-            )
+            when (
+                val selection = canSelectPairs(
+                    candidatePairs = candidatePairs,
+                    targetPairCount = targetPairCount,
+                    selectedPairCount = selectedPairCount + 1,
+                    valueOccurrences = valueOccurrences.with(pair = candidatePair),
+                    usedResults = usedResults + candidatePair.results.map(Long::toInt),
+                    productAnchorCount = productAnchorCount + if (
+                        productAnchorMix?.isAnchor(product = candidatePair.product.toInt()) == true
+                    ) {
+                        1
+                    } else {
+                        0
+                    },
+                    productAnchorMix = productAnchorMix,
+                    failedStates = failedStates,
+                    workTracker = workTracker
+                )
+            ) {
+                is GeneratedPuzzleProfileBoundedEvaluation.LimitExceeded -> return selection
+                is GeneratedPuzzleProfileBoundedEvaluation.Completed -> if (selection.value) {
+                    return selection
+                }
+            }
         }
+
+        return GeneratedPuzzleProfileBoundedEvaluation.Completed(value = false)
     }
 }
 

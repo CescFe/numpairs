@@ -37,7 +37,8 @@ enum class GeneratedPuzzleProfileRuleId(val code: String) {
     PRIME_DECOY_TARGET_COUNT("profile.prime-decoy-target-count"),
     PRIME_DECOY_TARGET_FEASIBILITY("profile.prime-decoy-target-feasibility"),
     ELIGIBLE_VALUE_PAIR_CATALOG("profile.eligible-value-pair-catalog"),
-    ARITHMETIC_RESULT_RANGE("profile.arithmetic-result-range")
+    ARITHMETIC_RESULT_RANGE("profile.arithmetic-result-range"),
+    VALIDATION_WORK_LIMIT("profile.validation-work-limit")
 }
 
 sealed interface GeneratedPuzzleProfileViolation {
@@ -151,5 +152,13 @@ sealed interface GeneratedPuzzleProfileViolation {
 
     data class ArithmeticResultMayOverflow(val maximumStripValue: Int) : GeneratedPuzzleProfileViolation {
         override val ruleId: GeneratedPuzzleProfileRuleId = GeneratedPuzzleProfileRuleId.ARITHMETIC_RESULT_RANGE
+    }
+
+    data class ValidationWorkLimitExceeded(
+        val workKind: GeneratedPuzzleProfileValidationWorkKind,
+        val configuredLimit: Int,
+        val consumedWork: Int
+    ) : GeneratedPuzzleProfileViolation {
+        override val ruleId: GeneratedPuzzleProfileRuleId = GeneratedPuzzleProfileRuleId.VALIDATION_WORK_LIMIT
     }
 }

@@ -32,9 +32,15 @@ class GeneratedPuzzleProfile private constructor(definition: GeneratedPuzzleProf
     }
 
     companion object {
-        fun create(definition: GeneratedPuzzleProfileDefinition): GeneratedPuzzleProfileCreation {
+        fun create(
+            definition: GeneratedPuzzleProfileDefinition,
+            validationLimits: GeneratedPuzzleProfileValidationLimits = GeneratedPuzzleProfileValidationLimits()
+        ): GeneratedPuzzleProfileCreation {
             val snapshot = definition.snapshot()
-            val violations = GeneratedPuzzleProfileSpecification.violationsFor(definition = snapshot)
+            val violations = GeneratedPuzzleProfileSpecification.violationsFor(
+                definition = snapshot,
+                validationLimits = validationLimits
+            )
 
             return if (violations.isEmpty()) {
                 GeneratedPuzzleProfileCreation.Created(profile = GeneratedPuzzleProfile(definition = snapshot))

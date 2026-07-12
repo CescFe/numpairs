@@ -25,6 +25,92 @@ class GeneratedPuzzleProfileTest {
     }
 
     @Test
+    fun factory_accepts_a_definition_at_each_configured_validation_limit() {
+        val creation = GeneratedPuzzleProfile.create(
+            definition = smallestBoundedDefinition(),
+            validationLimits = GeneratedPuzzleProfileValidationLimits(
+                maxCatalogExpansions = 2,
+                maxPairSelectionStates = 1,
+                maxMaskStates = 3
+            )
+        )
+
+        assertTrue(creation is GeneratedPuzzleProfileCreation.Created)
+    }
+
+    @Test
+    fun first_catalog_expansion_beyond_the_limit_returns_typed_context() {
+        val rejected = GeneratedPuzzleProfile.create(
+            definition = smallestBoundedDefinition(),
+            validationLimits = GeneratedPuzzleProfileValidationLimits(
+                maxCatalogExpansions = 1,
+                maxPairSelectionStates = 100,
+                maxMaskStates = 100
+            )
+        ) as GeneratedPuzzleProfileCreation.Rejected
+
+        val violation = rejected.violations
+            .filterIsInstance<GeneratedPuzzleProfileViolation.ValidationWorkLimitExceeded>()
+            .single()
+        assertEquals(GeneratedPuzzleProfileValidationWorkKind.CATALOG_EXPANSION, violation.workKind)
+        assertEquals(1, violation.configuredLimit)
+        assertEquals(1, violation.consumedWork)
+    }
+
+    @Test
+    fun pair_selection_and_mask_state_limits_return_their_own_work_kind() {
+        val pairSelectionRejected = GeneratedPuzzleProfile.create(
+            definition = validDefinition(),
+            validationLimits = GeneratedPuzzleProfileValidationLimits(
+                maxCatalogExpansions = 100,
+                maxPairSelectionStates = 1,
+                maxMaskStates = 100
+            )
+        ) as GeneratedPuzzleProfileCreation.Rejected
+        val maskRejected = GeneratedPuzzleProfile.create(
+            definition = smallestBoundedDefinition(),
+            validationLimits = GeneratedPuzzleProfileValidationLimits(
+                maxCatalogExpansions = 2,
+                maxPairSelectionStates = 1,
+                maxMaskStates = 2
+            )
+        ) as GeneratedPuzzleProfileCreation.Rejected
+
+        assertEquals(
+            GeneratedPuzzleProfileValidationWorkKind.PAIR_SELECTION_STATE,
+            pairSelectionRejected.singleLimitViolation().workKind
+        )
+        assertEquals(
+            GeneratedPuzzleProfileValidationWorkKind.MASK_STATE,
+            maskRejected.singleLimitViolation().workKind
+        )
+    }
+
+    @Test(timeout = 1_000)
+    fun unsupported_large_catalog_is_rejected_without_materializing_the_candidate_space() {
+        val definition = smallestBoundedDefinition().copy(
+            stripValuePolicy = StripValuePolicy(valueRange = 1..46_340, maxOccurrencesPerValue = 1),
+            resultConstraints = ResultConstraints(
+                maxMultiplicationResult = Int.MAX_VALUE,
+                allowsDuplicateBoardResults = false
+            )
+        )
+
+        val rejected = GeneratedPuzzleProfile.create(
+            definition = definition,
+            validationLimits = GeneratedPuzzleProfileValidationLimits(
+                maxCatalogExpansions = 5,
+                maxPairSelectionStates = 100,
+                maxMaskStates = 100
+            )
+        ) as GeneratedPuzzleProfileCreation.Rejected
+
+        val violation = rejected.singleLimitViolation()
+        assertEquals(GeneratedPuzzleProfileValidationWorkKind.CATALOG_EXPANSION, violation.workKind)
+        assertEquals(5, violation.consumedWork)
+    }
+
+    @Test
     fun factory_rejects_each_structural_contradiction_with_a_stable_rule_id() {
         val cases = listOf(
             InvalidProfileCase(
@@ -379,7 +465,8 @@ class GeneratedPuzzleProfileTest {
                 "profile.prime-decoy-target-count",
                 "profile.prime-decoy-target-feasibility",
                 "profile.eligible-value-pair-catalog",
-                "profile.arithmetic-result-range"
+                "profile.arithmetic-result-range",
+                "profile.validation-work-limit"
             ),
             GeneratedPuzzleProfileRuleId.entries.map(GeneratedPuzzleProfileRuleId::code)
         )
@@ -416,6 +503,15 @@ class GeneratedPuzzleProfileTest {
         assertThrows(IllegalArgumentException::class.java) {
             ProbabilityPercent(101)
         }
+        assertThrows(IllegalArgumentException::class.java) {
+            GeneratedPuzzleProfileValidationLimits(maxCatalogExpansions = 0)
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            GeneratedPuzzleProfileValidationLimits(maxPairSelectionStates = 0)
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            GeneratedPuzzleProfileValidationLimits(maxMaskStates = 0)
+        }
     }
 }
 
@@ -423,6 +519,32 @@ private data class InvalidProfileCase(
     val name: String,
     val definition: GeneratedPuzzleProfileDefinition,
     val expectedRuleId: GeneratedPuzzleProfileRuleId
+)
+
+private fun GeneratedPuzzleProfileCreation.Rejected.singleLimitViolation():
+    GeneratedPuzzleProfileViolation.ValidationWorkLimitExceeded =
+    violations
+        .filterIsInstance<GeneratedPuzzleProfileViolation.ValidationWorkLimitExceeded>()
+        .single()
+
+private fun smallestBoundedDefinition(): GeneratedPuzzleProfileDefinition = GeneratedPuzzleProfileDefinition(
+    id = GeneratedPuzzleProfileId("smallest-bounded-profile"),
+    size = GeneratedPuzzleSize(pairCount = 1),
+    stripValuePolicy = StripValuePolicy(
+        valueRange = 2..3,
+        maxOccurrencesPerValue = 1
+    ),
+    resultConstraints = ResultConstraints(
+        maxMultiplicationResult = 6,
+        allowsDuplicateBoardResults = false
+    ),
+    initialStripMaskPolicy = InitialStripMaskPolicy(
+        knownEntryCountRange = 1..1,
+        requiredAnchors = setOf(RequiredKnownStripAnchor.HIGHEST_STRIP_ENTRY),
+        distributionPolicy = StripKnownEntryDistributionPolicy.UNRESTRICTED,
+        maxConsecutiveHiddenEntries = 1
+    ),
+    generationPolicy = GenerationPolicy(isBoardTileShufflingEnabled = true)
 )
 
 private fun validDefinition(): GeneratedPuzzleProfileDefinition = GeneratedPuzzleProfileDefinition(
