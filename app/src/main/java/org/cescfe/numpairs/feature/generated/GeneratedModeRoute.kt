@@ -3,6 +3,7 @@ package org.cescfe.numpairs.feature.generated
 import android.content.Context
 import android.content.ContextWrapper
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,7 @@ import androidx.lifecycle.ViewModelProvider
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.GameRoute
+import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
 @Composable
 fun GeneratedModeRoute(
@@ -156,15 +158,13 @@ private fun GeneratedPuzzleInitialLoadingScreen(modifier: Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .testTag(GENERATED_PUZZLE_LOADING_TAG),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         CircularProgressIndicator()
-        Text(
-            text = stringResource(R.string.generated_puzzle_loading_message),
-            modifier = Modifier.padding(top = 16.dp)
-        )
+        GeneratedPuzzleLoadingMessage()
     }
 }
 
@@ -178,12 +178,18 @@ private fun GeneratedPuzzleLoadingOverlay() {
         verticalArrangement = Arrangement.Center
     ) {
         CircularProgressIndicator()
-        Text(
-            text = stringResource(R.string.generated_puzzle_loading_message),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(top = 16.dp)
-        )
+        GeneratedPuzzleLoadingMessage()
     }
+}
+
+@Composable
+private fun GeneratedPuzzleLoadingMessage() {
+    Text(
+        text = stringResource(R.string.generated_puzzle_loading_message),
+        modifier = Modifier.padding(top = 16.dp),
+        color = MaterialTheme.colorScheme.onBackground,
+        style = MaterialTheme.typography.titleMedium
+    )
 }
 
 @Composable
@@ -191,19 +197,30 @@ private fun GeneratedPuzzleInitialFailureScreen(modifier: Modifier, onRetry: () 
     Column(
         modifier = modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .testTag(GENERATED_PUZZLE_FAILURE_TAG),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = stringResource(R.string.generated_puzzle_failure_message))
+        Text(
+            text = stringResource(R.string.generated_puzzle_failure_message),
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.bodyLarge
+        )
         Button(
             onClick = onRetry,
             modifier = Modifier.padding(top = 16.dp)
         ) {
-            Text(text = stringResource(R.string.generated_puzzle_retry_button))
+            Text(
+                text = stringResource(R.string.generated_puzzle_retry_button),
+                style = MaterialTheme.typography.labelLarge
+            )
         }
         Button(onClick = onNavigateBack) {
-            Text(text = stringResource(R.string.generated_puzzle_back_to_menu_button))
+            Text(
+                text = stringResource(R.string.generated_puzzle_back_to_menu_button),
+                style = MaterialTheme.typography.labelLarge
+            )
         }
     }
 }
@@ -212,20 +229,38 @@ private fun GeneratedPuzzleInitialFailureScreen(modifier: Modifier, onRetry: () 
 private fun GeneratedPuzzleFailureDialog(onRetry: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        shape = NumPairsComponents.LargeShape,
+        containerColor = NumPairsComponents.raisedSurfaceColor(),
+        titleContentColor = MaterialTheme.colorScheme.onSurface,
+        textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         title = {
-            Text(text = stringResource(R.string.generated_puzzle_failure_title))
+            Text(
+                text = stringResource(R.string.generated_puzzle_failure_title),
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.titleMedium
+            )
         },
         text = {
-            Text(text = stringResource(R.string.generated_puzzle_failure_message))
+            Text(
+                text = stringResource(R.string.generated_puzzle_failure_message),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium
+            )
         },
         confirmButton = {
             Button(onClick = onRetry) {
-                Text(text = stringResource(R.string.generated_puzzle_retry_button))
+                Text(
+                    text = stringResource(R.string.generated_puzzle_retry_button),
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
         },
         dismissButton = {
             Button(onClick = onDismiss) {
-                Text(text = stringResource(R.string.generated_puzzle_keep_current_button))
+                Text(
+                    text = stringResource(R.string.generated_puzzle_keep_current_button),
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
         }
     )
