@@ -1,7 +1,7 @@
 package org.cescfe.numpairs.feature.generated
 
-import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfile
-import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfiles
+import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfile
+import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfiles
 
 @JvmInline
 value class GeneratedModeId(val value: String) {

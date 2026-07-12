@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.cescfe.numpairs.domain.generated.GeneratedPuzzleGenerationRequest
+import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
 fun interface GeneratedPuzzleSeedSource {

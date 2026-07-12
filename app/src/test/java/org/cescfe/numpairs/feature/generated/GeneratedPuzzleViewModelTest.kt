@@ -7,9 +7,9 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
-import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerationFailureReason
-import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerationOutcome
-import org.cescfe.numpairs.domain.generated.GeneratedPuzzleGenerationRequest
+import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationFailureReason
+import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
+import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.junit.After
 import org.junit.Assert.assertEquals

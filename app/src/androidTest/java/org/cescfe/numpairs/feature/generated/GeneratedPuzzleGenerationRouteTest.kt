@@ -11,9 +11,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.CompletableDeferred
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
-import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerationFailureReason
-import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerationOutcome
-import org.cescfe.numpairs.domain.generated.GeneratedPuzzleGenerationRequest
+import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationFailureReason
+import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
+import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Rule
