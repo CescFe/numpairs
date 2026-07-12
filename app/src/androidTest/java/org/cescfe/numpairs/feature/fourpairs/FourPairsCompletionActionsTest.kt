@@ -15,10 +15,10 @@ import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
-import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerationOutcome
-import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerator
-import org.cescfe.numpairs.domain.generated.GeneratedPuzzleGenerationRequest
-import org.cescfe.numpairs.domain.generated.GeneratedPuzzleProfiles
+import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
+import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerator
+import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
+import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfiles
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle

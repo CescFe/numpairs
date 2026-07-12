@@ -6,10 +6,10 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerationOutcome
-import org.cescfe.numpairs.domain.generated.GeneratedPairsPuzzleGenerator
-import org.cescfe.numpairs.domain.generated.GeneratedPuzzleGenerationContext
-import org.cescfe.numpairs.domain.generated.GeneratedPuzzleGenerationRequest
+import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
+import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerator
+import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationContext
+import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
 fun interface GeneratedPuzzleGenerationUseCase {

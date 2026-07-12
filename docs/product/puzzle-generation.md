@@ -39,6 +39,8 @@ Generated puzzle profiles define size, value constraints, result constraints, ma
 
 Profile definitions are not usable directly. They must be created through the generated-profile factory, which derives board, strip, and hidden-entry counts from puzzle size and returns either a validated profile or a non-empty set of typed compatibility violations.
 
+The profile factory owns deterministic validation limits for eligible-pair catalog expansions, pair-selection states, and mask states. These limits are supplied at creation time and are not part of the resulting difficulty profile. When a definition exceeds the supported validation envelope, creation stops with the stable `profile.validation-work-limit` violation and reports the work kind, configured limit, and consumed work.
+
 Profile concerns are separated as follows:
 
 - hard rules cover strip values, arithmetic results, product anchors, initial mask shape, required anchors, hidden runs, and distribution
