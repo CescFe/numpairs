@@ -363,17 +363,20 @@ internal fun TileOperatorSelectionMenu(
                         },
                     shape = RoundedCornerShape(TILE_OPERATOR_MENU_CORNER_RADIUS),
                     color = if (isSelected) {
-                        NumPairsComponents.successContainerColor()
+                        MaterialTheme.colorScheme.secondaryContainer
                     } else {
                         NumPairsComponents.subtleSurfaceColor()
                     },
                     contentColor = if (isSelected) {
-                        NumPairsComponents.successContentColor()
+                        MaterialTheme.colorScheme.onSecondaryContainer
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
                     },
                     border = if (isSelected) {
-                        NumPairsComponents.focusBorder()
+                        BorderStroke(
+                            width = NumPairsComponents.StrongBorderWidth,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
                     } else {
                         NumPairsComponents.subtleBorder()
                     }
