@@ -36,6 +36,7 @@
     <string name="tutorial_solving_tips_step_two_copy">Las casillas de producto solo pueden usar factores de su resultado. Encuentra dos valores de la serie que multipliquen hasta obtener el producto y luego usa el mismo par para completar su suma correspondiente.</string>
     <string name="tutorial_previous_step_button">Atrás</string>
     <string name="tutorial_next_step_button">Siguiente</string>
+    <string name="final_validation_screen_title">Comprobación final</string>
 
     <!-- Game screen: board and strip -->
     <string name="board_content_description">Tablero</string>

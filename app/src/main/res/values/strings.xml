@@ -36,6 +36,7 @@
     <string name="tutorial_solving_tips_step_two_copy">Product tiles can only use factors of their result. Find two strip values that multiply to the product, then use the same pair to complete its matching sum.</string>
     <string name="tutorial_previous_step_button">Back</string>
     <string name="tutorial_next_step_button">Next</string>
+    <string name="final_validation_screen_title">Final check</string>
 
     <!-- Game screen: board and strip -->
     <string name="board_content_description">Board</string>

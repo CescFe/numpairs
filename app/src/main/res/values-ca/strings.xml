@@ -36,6 +36,7 @@
     <string name="tutorial_solving_tips_step_two_copy">Les caselles de producte només poden usar factors del seu resultat. Troba dos valors de la sèrie que multipliquen fins a obtindre el producte i després usa la mateixa parella per a completar la suma corresponent.</string>
     <string name="tutorial_previous_step_button">Arrere</string>
     <string name="tutorial_next_step_button">Següent</string>
+    <string name="final_validation_screen_title">Comprovació final</string>
 
     <!-- Game screen: board and strip -->
     <string name="board_content_description">Tauler</string>
