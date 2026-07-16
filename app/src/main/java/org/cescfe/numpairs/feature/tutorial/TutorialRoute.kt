@@ -123,12 +123,14 @@ private fun TutorialInstructionSurface(
     }
 }
 
-private fun TutorialStep.toInteractionPolicy(scenario: TutorialScenario, uiState: GameUiState?): GameInteractionPolicy =
-    requiredAction.toInteractionPolicy(
-        scenario = scenario,
-        uiState = uiState,
-        highlightedStripEntryIds = highlightedStripEntryIds(scenario = scenario)
-    )
+internal fun TutorialStep.toInteractionPolicy(
+    scenario: TutorialScenario,
+    uiState: GameUiState?
+): GameInteractionPolicy = requiredAction.toInteractionPolicy(
+    scenario = scenario,
+    uiState = uiState,
+    highlightedStripEntryIds = highlightedStripEntryIds(scenario = scenario)
+)
 
 private fun TutorialRequiredAction.toInteractionPolicy(
     scenario: TutorialScenario,
@@ -147,6 +149,7 @@ private fun TutorialRequiredAction.toInteractionPolicy(
         canConfirmTileOperand = { _, _, _ -> false },
         canConfirmTileOperator = { _, _ -> false }
     )
+    is TutorialRequiredAction.PlaceTileOperand -> toInteractionPolicy()
     is TutorialRequiredAction.CompleteTileExpression -> toInteractionPolicy(
         scenario = scenario,
         highlightedStripEntryIds = highlightedStripEntryIds
@@ -161,6 +164,20 @@ private fun TutorialRequiredAction.toInteractionPolicy(
     )
     TutorialRequiredAction.CompleteScenario -> GameInteractionPolicy.AllowAll
 }
+
+private fun TutorialRequiredAction.PlaceTileOperand.toInteractionPolicy(): GameInteractionPolicy =
+    GameInteractionPolicy(
+        canTapStripItem = { false },
+        canConfirmStripItemEntry = { _, _ -> false },
+        canTapTileLeftOperand = { index -> index == tileIndex && slot == OperandSlot.LEFT },
+        canTapTileRightOperand = { index -> index == tileIndex && slot == OperandSlot.RIGHT },
+        canTapTileOperator = { false },
+        canTapTileReset = { false },
+        canConfirmTileOperand = { index, selectedSlot, selectedStripEntryId ->
+            index == tileIndex && selectedSlot == slot && selectedStripEntryId == stripEntryId
+        },
+        canConfirmTileOperator = { _, _ -> false }
+    )
 
 private fun TutorialRequiredAction.CompleteTileExpression.toInteractionPolicy(
     scenario: TutorialScenario,
@@ -299,12 +316,13 @@ private fun TutorialStep.highlightedStripEntryIds(scenario: TutorialScenario): S
             TutorialHighlightTarget.HiddenTileExpressions,
             TutorialHighlightTarget.StripArea,
             is TutorialHighlightTarget.TileExpressionSlots,
+            is TutorialHighlightTarget.TileOperandSlot,
             is TutorialHighlightTarget.Tiles -> Unit
         }
     }
 }
 
-private fun TutorialStep.toHighlightState(scenario: TutorialScenario, uiState: GameUiState?): GameHighlightState {
+internal fun TutorialStep.toHighlightState(scenario: TutorialScenario, uiState: GameUiState?): GameHighlightState {
     val orderedAction = requiredAction as? TutorialRequiredAction.CompleteTileExpressionsInOrder
 
     if (orderedAction != null) {
@@ -347,6 +365,12 @@ private fun TutorialStep.toHighlightState(scenario: TutorialScenario, uiState: G
             is TutorialHighlightTarget.TileExpressionSlots -> {
                 tileExpressionSlots += expressionSlotHighlights(target.tileIndex)
             }
+            is TutorialHighlightTarget.TileOperandSlot -> {
+                tileExpressionSlots += GameTileExpressionSlotHighlight(
+                    tileIndex = target.tileIndex,
+                    slot = target.slot.toGameTileExpressionSlot()
+                )
+            }
             is TutorialHighlightTarget.Tiles -> {
                 tileIndexes += target.indexes
             }
@@ -358,6 +382,11 @@ private fun TutorialStep.toHighlightState(scenario: TutorialScenario, uiState: G
         tileIndexes = tileIndexes,
         tileExpressionSlots = tileExpressionSlots
     )
+}
+
+private fun OperandSlot.toGameTileExpressionSlot(): GameTileExpressionSlot = when (this) {
+    OperandSlot.LEFT -> GameTileExpressionSlot.LEFT_OPERAND
+    OperandSlot.RIGHT -> GameTileExpressionSlot.RIGHT_OPERAND
 }
 
 private fun expressionSlotHighlights(tileIndex: Int): Set<GameTileExpressionSlotHighlight> = setOf(

@@ -1,6 +1,7 @@
 package org.cescfe.numpairs.feature.tutorial
 
 import androidx.annotation.StringRes
+import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
@@ -118,6 +119,14 @@ sealed interface TutorialHighlightTarget {
             }
         }
     }
+
+    data class TileOperandSlot(val tileIndex: Int, val slot: OperandSlot) : TutorialHighlightTarget {
+        init {
+            require(tileIndex >= 0) {
+                "Tutorial tile operand slot highlight index must be non-negative."
+            }
+        }
+    }
 }
 
 sealed interface TutorialRequiredAction {
@@ -128,6 +137,18 @@ sealed interface TutorialRequiredAction {
             }
             require(value > 0) {
                 "Tutorial strip entry action value must be positive."
+            }
+        }
+    }
+
+    data class PlaceTileOperand(val tileIndex: Int, val slot: OperandSlot, val stripEntryId: Int) :
+        TutorialRequiredAction {
+        init {
+            require(tileIndex >= 0) {
+                "Tutorial tile operand action index must be non-negative."
+            }
+            require(stripEntryId >= 0) {
+                "Tutorial tile operand strip entry id must be non-negative."
             }
         }
     }
@@ -197,6 +218,28 @@ sealed interface TutorialStepCompletionPredicate {
 
             return stripItem.label == value.toString() &&
                 stripItem.visualStyle == StripItemVisualStyle.PLAYER_ENTERED
+        }
+    }
+
+    data class TileOperandPlaced(val tileIndex: Int, val slot: OperandSlot, val value: Int) :
+        TutorialStepCompletionPredicate {
+        init {
+            require(tileIndex >= 0) {
+                "Tutorial tile operand completion index must be non-negative."
+            }
+            require(value > 0) {
+                "Tutorial tile operand completion value must be positive."
+            }
+        }
+
+        override fun isSatisfiedBy(uiState: GameUiState): Boolean {
+            val tile = uiState.tiles.getOrNull(tileIndex) ?: return false
+            val operandLabel = when (slot) {
+                OperandSlot.LEFT -> tile.leftOperandLabel
+                OperandSlot.RIGHT -> tile.rightOperandLabel
+            }
+
+            return operandLabel == value.toString()
         }
     }
 
