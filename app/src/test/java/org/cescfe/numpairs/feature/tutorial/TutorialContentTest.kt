@@ -21,6 +21,7 @@ class TutorialContentTest {
             listOf(
                 TutorialScenarioId.NUMBER_PLACEMENT,
                 TutorialScenarioId.COMPLEMENTARY_PAIR,
+                TutorialScenarioId.HIDDEN_STRIP_VALUE,
                 TutorialScenarioId.TWO_PAIR_PRACTICE,
                 TutorialScenarioId.SOLVING_TIPS_PRACTICE
             ),
