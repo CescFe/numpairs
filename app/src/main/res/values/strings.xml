@@ -27,6 +27,7 @@
     <string name="tutorial_stage_one_place_number_copy">Place 2 in the empty operand slot.</string>
     <string name="tutorial_stage_two_complete_sum_copy">Complete the sum with 2 and 3.</string>
     <string name="tutorial_stage_two_complete_product_copy">Use the same pair to complete its product.</string>
+    <string name="tutorial_stage_three_hidden_strip_value_copy">The solved expression reveals the missing strip value. Enter 3.</string>
     <string name="tutorial_step_one_copy">The main objective is to discover all unknown elements. Guess hidden values to complete an ascending list of positive integers.</string>
     <string name="tutorial_step_two_copy">Combine two numbers from the strip to form a mathematical expression that evaluates to the visible tile result. Fill the highlighted tile with two operands and one operator.</string>
     <string name="tutorial_step_three_copy">Each pair must form one sum and one product. Use the same pair to complete its product tile.</string>

@@ -4,6 +4,7 @@ object TutorialContent {
     val scenarios: List<TutorialScenario> = listOf(
         StageOneNumberPlacementContent.scenario,
         StageTwoComplementaryPairContent.scenario,
+        StageThreeHiddenStripValueContent.scenario,
         LearnBasicsTutorialContent.scenario,
         SolvingTipsPracticeContent.scenario
     )
