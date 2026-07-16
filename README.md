@@ -8,6 +8,10 @@ Players complete hidden expressions on a board by using numbers from a strip. Th
 
 ## Current Status
 
+### Active product planning: v6 - Guided First Run
+
+Current milestone planning is documented in 🎓 [PRD v6 Guided First Run](./docs/product/prd/prd-v6.md).
+
 ### Implemented baseline: v5 - Shared Generated Modes
 
 Historical snapshots:
@@ -75,13 +79,11 @@ Core responsibilities:
 
 ## Documentation
 
-- Canonical PRD: [prd-v5.md](./docs/product/prd/prd-v5.md)
 - Product Requirements Documents: `docs/product/prd/`
 - Visual design system: [visual-design-system.md](./docs/product/visual-design-system.md)
 - Rules helper requirements: [rules-helper.md](./docs/product/rules-helper.md)
 - Puzzle generation: [puzzle-generation.md](./docs/product/puzzle-generation.md)
 - UX decisions: `docs/product/ux-decisions.md`
-- Future in-game calculator proposal: [in-game-calculator.md](docs/backlog/in-game-calculator.md)
 - Architectural Decision Records: `docs/technical/adr/`
 - Game rules: `docs/game-rules.md`
 - Ubiquitous Language: `docs/ubiquitous-language.md`
