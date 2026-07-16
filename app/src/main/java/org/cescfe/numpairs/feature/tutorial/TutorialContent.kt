@@ -5,6 +5,7 @@ object TutorialContent {
         StageOneNumberPlacementContent.scenario,
         StageTwoComplementaryPairContent.scenario,
         StageThreeHiddenStripValueContent.scenario,
+        FinalValidationContent.scenario,
         LearnBasicsTutorialContent.scenario,
         SolvingTipsPracticeContent.scenario
     )
