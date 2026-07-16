@@ -34,7 +34,10 @@ class TutorialContentTest {
             TutorialContent.stepsFor(TutorialMode.SOLVING_TIPS_PRACTICE)
         )
         assertEquals(
-            setOf(TutorialScenarioId.TWO_PAIR_PRACTICE),
+            setOf(
+                TutorialScenarioId.NUMBER_PLACEMENT,
+                TutorialScenarioId.TWO_PAIR_PRACTICE
+            ),
             TutorialContent.stepsFor(TutorialMode.LEARN_BASICS).map(TutorialStep::scenarioId).toSet()
         )
         assertEquals(
@@ -123,26 +126,54 @@ class TutorialContentTest {
     }
 
     @Test
-    fun number_placement_content_is_registered_without_changing_the_active_learn_basics_steps() {
+    fun number_placement_content_is_the_first_active_learn_basics_step() {
         assertEquals(
             StageOneNumberPlacementContent.scenario,
             TutorialContent.scenario(TutorialScenarioId.NUMBER_PLACEMENT)
         )
-        assertFalse(TutorialContent.learnBasicsSteps.contains(StageOneNumberPlacementContent.step))
+        assertEquals(StageOneNumberPlacementContent.step, TutorialContent.learnBasicsSteps.first())
         assertEquals(
-            setOf(TutorialScenarioId.TWO_PAIR_PRACTICE),
-            TutorialContent.learnBasicsSteps.map(TutorialStep::scenarioId).toSet()
+            listOf(
+                TutorialScenarioId.NUMBER_PLACEMENT,
+                TutorialScenarioId.TWO_PAIR_PRACTICE,
+                TutorialScenarioId.TWO_PAIR_PRACTICE,
+                TutorialScenarioId.TWO_PAIR_PRACTICE,
+                TutorialScenarioId.TWO_PAIR_PRACTICE
+            ),
+            TutorialContent.learnBasicsSteps.map(TutorialStep::scenarioId)
         )
     }
 
     @Test
     fun learn_basics_guides_the_player_through_core_rules_before_normal_completion() {
+        val numberPlacementScenario = TutorialContent.scenario(TutorialScenarioId.NUMBER_PLACEMENT)
         val scenario = TutorialContent.scenario(TutorialScenarioId.TWO_PAIR_PRACTICE)
         val steps = TutorialContent.stepsFor(TutorialMode.LEARN_BASICS)
+        val numberPlacementCompletedPuzzle = numberPlacementScenario.initialPuzzle.copy(
+            board = Board(
+                tiles = numberPlacementScenario.initialPuzzle.board.tiles.toMutableList().apply {
+                    set(0, get(0).withLeftOperand(value = 2, stripEntryId = 0))
+                }
+            )
+        )
 
-        assertEquals(listOf(1, 2, 3, 4), steps.map(TutorialStep::order))
+        assertEquals(listOf(1, 2, 3, 4, 5), steps.map(TutorialStep::order))
 
         steps[0].assertGuidedAction(
+            expectedHighlights = listOf(
+                TutorialHighlightTarget.StripEntries(indexes = listOf(0)),
+                TutorialHighlightTarget.TileOperandSlot(tileIndex = 0, slot = OperandSlot.LEFT)
+            ),
+            expectedAction = TutorialRequiredAction.PlaceTileOperand(
+                tileIndex = 0,
+                slot = OperandSlot.LEFT,
+                stripEntryId = 0
+            ),
+            incompletePuzzle = numberPlacementScenario.initialPuzzle,
+            completePuzzle = numberPlacementCompletedPuzzle
+        )
+
+        steps[1].assertGuidedAction(
             expectedHighlights = listOf(
                 TutorialHighlightTarget.StripEntries(indexes = listOf(1))
             ),
@@ -151,7 +182,7 @@ class TutorialContentTest {
             completePuzzle = scenario.initialPuzzle.withStripValue(index = 1, value = 2)
         )
 
-        steps[1].assertGuidedAction(
+        steps[2].assertGuidedAction(
             expectedHighlights = listOf(
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0)
             ),
@@ -165,7 +196,7 @@ class TutorialContentTest {
             completePuzzle = scenario.initialPuzzle.withSolvedScenarioTiles(scenario, 0)
         )
 
-        steps[2].assertGuidedAction(
+        steps[3].assertGuidedAction(
             expectedHighlights = listOf(
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 1)
             ),
@@ -179,7 +210,7 @@ class TutorialContentTest {
             completePuzzle = scenario.initialPuzzle.withSolvedScenarioTiles(scenario, 1)
         )
 
-        steps[3].assertGuidedAction(
+        steps[4].assertGuidedAction(
             expectedHighlights = listOf(
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 2),
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 3)
@@ -195,7 +226,7 @@ class TutorialContentTest {
         val scenario = TutorialContent.scenario(TutorialScenarioId.SOLVING_TIPS_PRACTICE)
         val steps = TutorialContent.stepsFor(TutorialMode.SOLVING_TIPS_PRACTICE)
 
-        assertEquals(listOf(5, 6), steps.map(TutorialStep::order))
+        assertEquals(listOf(6, 7), steps.map(TutorialStep::order))
 
         steps[0].assertGuidedAction(
             expectedHighlights = listOf(

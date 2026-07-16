@@ -9,7 +9,7 @@ internal object SolvingTipsPracticeContent {
 
     val steps: List<TutorialStep> = listOf(
         TutorialStep(
-            order = 5,
+            order = 6,
             scenarioId = TutorialScenarioId.SOLVING_TIPS_PRACTICE,
             playerFacingCopyResId = R.string.tutorial_solving_tips_step_one_copy,
             highlightedTargets = listOf(
@@ -50,7 +50,7 @@ internal object SolvingTipsPracticeContent {
             )
         ),
         TutorialStep(
-            order = 6,
+            order = 7,
             scenarioId = TutorialScenarioId.SOLVING_TIPS_PRACTICE,
             playerFacingCopyResId = R.string.tutorial_solving_tips_step_two_copy,
             highlightedTargets = listOf(
