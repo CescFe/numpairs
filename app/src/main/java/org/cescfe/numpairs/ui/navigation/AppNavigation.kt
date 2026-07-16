@@ -16,7 +16,7 @@ import org.cescfe.numpairs.feature.generated.GeneratedModeRoute
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.feature.menu.MenuRoute
-import org.cescfe.numpairs.feature.tutorial.TutorialRoute
+import org.cescfe.numpairs.feature.tutorial.GuidedIntroductionRoute
 
 sealed interface AppDestination {
     data object Menu : AppDestination
@@ -56,7 +56,7 @@ fun AppNavigation(
                 currentDestination = AppDestination.GeneratedMode(modeId = GeneratedModes.EIGHT_PAIRS.id)
             }
         )
-        AppDestination.Tutorial -> TutorialRoute(
+        AppDestination.Tutorial -> GuidedIntroductionRoute(
             modifier = modifier,
             onNavigateBack = navigateToMenu
         )

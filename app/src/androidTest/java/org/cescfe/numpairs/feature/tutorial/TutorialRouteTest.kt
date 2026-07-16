@@ -17,12 +17,14 @@ import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import java.util.concurrent.atomic.AtomicInteger
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.game.ui.semantics.GameHighlightedKey
 import org.cescfe.numpairs.feature.tutorial.ui.TutorialScreenTestTags
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -178,6 +180,54 @@ class TutorialRouteTest {
     }
 
     @Test
+    fun stageThreeReportsGuidedCompletionExactlyOnceWithoutShowingSuccess() {
+        val completionCount = AtomicInteger(0)
+        setContent(onTutorialCompleted = { completionCount.incrementAndGet() })
+
+        completeStageTwo()
+        enterStripValue(index = 1, value = "3")
+
+        composeTestRule.waitUntil(timeoutMillis = TUTORIAL_STEP_WAIT_TIMEOUT_MS) {
+            completionCount.get() == 1
+        }
+        composeTestRule.mainClock.advanceTimeBy(TUTORIAL_AUTO_ADVANCE_TEST_WAIT_MS)
+
+        assertEquals(1, completionCount.get())
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .assertDoesNotExist()
+    }
+
+    @Test
+    fun guidedIntroductionTransitionsFromStageThreeIntoCleanFinalValidation() {
+        val completionCount = AtomicInteger(0)
+        setGuidedIntroductionContent(onIntroductionCompleted = { completionCount.incrementAndGet() })
+
+        completeStageTwo()
+        enterStripValue(index = 1, value = "3")
+
+        composeTestRule.waitUntil(timeoutMillis = TUTORIAL_STEP_WAIT_TIMEOUT_MS) {
+            composeTestRule
+                .onAllNodes(hasText(string(R.string.final_validation_screen_title)))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+
+        assertEquals(0, completionCount.get())
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.INSTRUCTION_SURFACE)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.STEP_INDICATOR)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(1))
+            .assertContentDescriptionEquals(string(R.string.strip_item_hidden_content_description))
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(1))
+        assertTileExpressionSlotsNotHighlighted(tileIndex = 0)
+    }
+
+    @Test
     fun solvingTipsPracticeHighlightsExpectedActionsAndCompletesWithSuccessOverlay() {
         setSolvingTipsPracticeTutorialContent()
 
@@ -220,10 +270,22 @@ class TutorialRouteTest {
             .assertIsDisplayed()
     }
 
-    private fun setContent() {
+    private fun setContent(onTutorialCompleted: (() -> Unit)? = null) {
         composeTestRule.setContent {
             NumPairsTheme {
-                TutorialRoute()
+                TutorialRoute(onTutorialCompleted = onTutorialCompleted)
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+    }
+
+    private fun setGuidedIntroductionContent(onIntroductionCompleted: () -> Unit) {
+        composeTestRule.setContent {
+            NumPairsTheme {
+                GuidedIntroductionRoute(onIntroductionCompleted = onIntroductionCompleted)
             }
         }
 

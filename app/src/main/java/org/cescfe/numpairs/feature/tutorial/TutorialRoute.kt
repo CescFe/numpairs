@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -38,20 +39,31 @@ import org.cescfe.numpairs.ui.theme.NumPairsComponents
 fun TutorialRoute(
     modifier: Modifier = Modifier,
     mode: TutorialMode = TutorialMode.LEARN_BASICS,
+    onTutorialCompleted: (() -> Unit)? = null,
     onNavigateBack: () -> Unit = {}
 ) {
     val steps = TutorialContent.stepsFor(mode)
     var currentStepIndex by rememberSaveable(mode) { mutableIntStateOf(0) }
+    var hasReportedCompletion by rememberSaveable(mode) { mutableStateOf(false) }
     var latestGameUiState by remember(mode) { mutableStateOf<GameUiState?>(null) }
+    val currentOnTutorialCompleted by rememberUpdatedState(onTutorialCompleted)
     val currentStep = steps[currentStepIndex]
     val currentScenario = TutorialContent.scenario(currentStep.scenarioId)
 
     LaunchedEffect(currentStepIndex, latestGameUiState) {
         val uiState = latestGameUiState ?: return@LaunchedEffect
 
-        if (currentStepIndex < steps.lastIndex && currentStep.isComplete(uiState)) {
+        if (!currentStep.isComplete(uiState)) {
+            return@LaunchedEffect
+        }
+
+        if (currentStepIndex < steps.lastIndex) {
             delay(TUTORIAL_STEP_ADVANCE_DELAY)
-            currentStepIndex = (currentStepIndex + 1).coerceAtMost(steps.lastIndex)
+            currentStepIndex += 1
+        } else if (!hasReportedCompletion && currentOnTutorialCompleted != null) {
+            delay(TUTORIAL_STEP_ADVANCE_DELAY)
+            hasReportedCompletion = true
+            currentOnTutorialCompleted?.invoke()
         }
     }
 
@@ -61,7 +73,7 @@ fun TutorialRoute(
         modifier = modifier,
         gameSessionKey = "$TUTORIAL_GAME_SESSION_KEY:$mode:${currentScenario.id}",
         puzzleResetKey = mode to currentScenario.id,
-        isSuccessOverlayEnabled = currentStepIndex == steps.lastIndex,
+        isSuccessOverlayEnabled = currentStepIndex == steps.lastIndex && onTutorialCompleted == null,
         interactionPolicy = currentStep.toInteractionPolicy(
             scenario = currentScenario,
             uiState = latestGameUiState
