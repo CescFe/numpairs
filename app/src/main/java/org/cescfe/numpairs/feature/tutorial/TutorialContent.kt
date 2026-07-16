@@ -21,5 +21,11 @@ object TutorialContent {
         TutorialMode.SOLVING_TIPS_PRACTICE -> solvingTipsPracticeSteps
     }
 
+    fun stepsFor(stage: GuidedOnboardingStage): List<TutorialStep> = when (stage) {
+        GuidedOnboardingStage.NUMBER_PLACEMENT -> listOf(StageOneNumberPlacementContent.step)
+        GuidedOnboardingStage.COMPLEMENTARY_PAIR -> StageTwoComplementaryPairContent.steps
+        GuidedOnboardingStage.HIDDEN_STRIP_VALUE -> listOf(StageThreeHiddenStripValueContent.step)
+    }
+
     fun scenario(id: TutorialScenarioId): TutorialScenario = scenarios.first { scenario -> scenario.id == id }
 }

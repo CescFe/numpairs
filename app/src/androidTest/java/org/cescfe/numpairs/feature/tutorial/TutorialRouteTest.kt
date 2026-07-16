@@ -228,6 +228,29 @@ class TutorialRouteTest {
     }
 
     @Test
+    fun guidedIntroductionCanStartAtStageTwoAndReportsItsFullBoundary() {
+        val completedStages = mutableListOf<GuidedOnboardingStage>()
+        setGuidedIntroductionContent(
+            startStage = GuidedOnboardingStage.COMPLEMENTARY_PAIR,
+            onStageCompleted = completedStages::add
+        )
+
+        assertComplementaryPairScenarioDisplayed()
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.STEP_COPY)
+            .assert(hasText(string(R.string.tutorial_stage_two_complete_sum_copy)))
+
+        completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
+        waitForStep(stepIndex = 2)
+        assertEquals(emptyList<GuidedOnboardingStage>(), completedStages)
+        completeTile(tileIndex = 1, leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1)
+        waitForStep(stepIndex = 3)
+
+        assertEquals(listOf(GuidedOnboardingStage.COMPLEMENTARY_PAIR), completedStages)
+        assertHiddenStripValueScenarioDisplayed()
+    }
+
+    @Test
     fun solvingTipsPracticeHighlightsExpectedActionsAndCompletesWithSuccessOverlay() {
         setSolvingTipsPracticeTutorialContent()
 
@@ -282,10 +305,18 @@ class TutorialRouteTest {
             .assertIsDisplayed()
     }
 
-    private fun setGuidedIntroductionContent(onIntroductionCompleted: () -> Unit) {
+    private fun setGuidedIntroductionContent(
+        startStage: GuidedOnboardingStage = GuidedOnboardingStage.NUMBER_PLACEMENT,
+        onStageCompleted: (GuidedOnboardingStage) -> Unit = {},
+        onIntroductionCompleted: () -> Unit = {}
+    ) {
         composeTestRule.setContent {
             NumPairsTheme {
-                GuidedIntroductionRoute(onIntroductionCompleted = onIntroductionCompleted)
+                GuidedIntroductionRoute(
+                    startStage = startStage,
+                    onStageCompleted = onStageCompleted,
+                    onIntroductionCompleted = onIntroductionCompleted
+                )
             }
         }
 
