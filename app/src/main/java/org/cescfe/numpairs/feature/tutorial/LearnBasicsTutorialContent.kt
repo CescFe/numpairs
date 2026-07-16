@@ -9,7 +9,7 @@ internal object LearnBasicsTutorialContent {
 
     val steps: List<TutorialStep> = listOf(
         TutorialStep(
-            order = 1,
+            order = 2,
             scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
             playerFacingCopyResId = R.string.tutorial_step_one_copy,
             highlightedTargets = listOf(
@@ -25,7 +25,7 @@ internal object LearnBasicsTutorialContent {
             )
         ),
         TutorialStep(
-            order = 2,
+            order = 3,
             scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
             playerFacingCopyResId = R.string.tutorial_step_two_copy,
             highlightedTargets = listOf(
@@ -45,7 +45,7 @@ internal object LearnBasicsTutorialContent {
             )
         ),
         TutorialStep(
-            order = 3,
+            order = 4,
             scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
             playerFacingCopyResId = R.string.tutorial_step_three_copy,
             highlightedTargets = listOf(
@@ -65,7 +65,7 @@ internal object LearnBasicsTutorialContent {
             )
         ),
         TutorialStep(
-            order = 4,
+            order = 5,
             scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
             playerFacingCopyResId = R.string.tutorial_step_four_copy,
             highlightedTargets = listOf(
