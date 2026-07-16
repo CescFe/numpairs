@@ -37,7 +37,7 @@ class TutorialContentTest {
         assertEquals(
             setOf(
                 TutorialScenarioId.NUMBER_PLACEMENT,
-                TutorialScenarioId.TWO_PAIR_PRACTICE
+                TutorialScenarioId.COMPLEMENTARY_PAIR
             ),
             TutorialContent.stepsFor(TutorialMode.LEARN_BASICS).map(TutorialStep::scenarioId).toSet()
         )
@@ -136,10 +136,8 @@ class TutorialContentTest {
         assertEquals(
             listOf(
                 TutorialScenarioId.NUMBER_PLACEMENT,
-                TutorialScenarioId.TWO_PAIR_PRACTICE,
-                TutorialScenarioId.TWO_PAIR_PRACTICE,
-                TutorialScenarioId.TWO_PAIR_PRACTICE,
-                TutorialScenarioId.TWO_PAIR_PRACTICE
+                TutorialScenarioId.COMPLEMENTARY_PAIR,
+                TutorialScenarioId.COMPLEMENTARY_PAIR
             ),
             TutorialContent.learnBasicsSteps.map(TutorialStep::scenarioId)
         )
@@ -148,7 +146,7 @@ class TutorialContentTest {
     @Test
     fun learn_basics_guides_the_player_through_core_rules_before_normal_completion() {
         val numberPlacementScenario = TutorialContent.scenario(TutorialScenarioId.NUMBER_PLACEMENT)
-        val scenario = TutorialContent.scenario(TutorialScenarioId.TWO_PAIR_PRACTICE)
+        val scenario = TutorialContent.scenario(TutorialScenarioId.COMPLEMENTARY_PAIR)
         val steps = TutorialContent.stepsFor(TutorialMode.LEARN_BASICS)
         val numberPlacementCompletedPuzzle = numberPlacementScenario.initialPuzzle.copy(
             board = Board(
@@ -158,7 +156,7 @@ class TutorialContentTest {
             )
         )
 
-        assertEquals(listOf(1, 2, 3, 4, 5), steps.map(TutorialStep::order))
+        assertEquals(listOf(1, 2, 3), steps.map(TutorialStep::order))
 
         steps[0].assertGuidedAction(
             expectedHighlights = listOf(
@@ -176,15 +174,6 @@ class TutorialContentTest {
 
         steps[1].assertGuidedAction(
             expectedHighlights = listOf(
-                TutorialHighlightTarget.StripEntries(indexes = listOf(1))
-            ),
-            expectedAction = TutorialRequiredAction.EnterStripValue(stripEntryIndex = 1, value = 2),
-            incompletePuzzle = scenario.initialPuzzle,
-            completePuzzle = scenario.initialPuzzle.withStripValue(index = 1, value = 2)
-        )
-
-        steps[2].assertGuidedAction(
-            expectedHighlights = listOf(
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0)
             ),
             expectedAction = TutorialRequiredAction.CompleteTileExpression(
@@ -197,7 +186,7 @@ class TutorialContentTest {
             completePuzzle = scenario.initialPuzzle.withSolvedScenarioTiles(scenario, 0)
         )
 
-        steps[3].assertGuidedAction(
+        steps[2].assertGuidedAction(
             expectedHighlights = listOf(
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 1)
             ),
@@ -208,17 +197,12 @@ class TutorialContentTest {
                 rightStripEntryId = 1
             ),
             incompletePuzzle = scenario.initialPuzzle,
-            completePuzzle = scenario.initialPuzzle.withSolvedScenarioTiles(scenario, 1)
-        )
-
-        steps[4].assertGuidedAction(
-            expectedHighlights = listOf(
-                TutorialHighlightTarget.TileExpressionSlots(tileIndex = 2),
-                TutorialHighlightTarget.TileExpressionSlots(tileIndex = 3)
-            ),
-            expectedAction = TutorialRequiredAction.CompleteScenario,
-            incompletePuzzle = scenario.initialPuzzle,
             completePuzzle = scenario.solvedPuzzle
+        )
+        assertFalse(
+            steps[2].isComplete(
+                GameUiState.from(scenario.initialPuzzle.withSolvedScenarioTiles(scenario, 0))
+            )
         )
     }
 
@@ -302,10 +286,6 @@ private fun Tile.hasHiddenExpression(): Boolean = expression.leftOperand == Expr
 private fun Expression.withoutEntryIds(): Expression = copy(
     leftOperand = (leftOperand as Expression.Operand.Known).copy(stripEntryId = null),
     rightOperand = (rightOperand as Expression.Operand.Known).copy(stripEntryId = null)
-)
-
-private fun Puzzle.withStripValue(index: Int, value: Int): Puzzle = copy(
-    strip = strip.withUpdatedEntry(index = index, value = value)
 )
 
 private fun Puzzle.withSolvedScenarioTiles(scenario: TutorialScenario, vararg tileIndexes: Int): Puzzle = copy(
