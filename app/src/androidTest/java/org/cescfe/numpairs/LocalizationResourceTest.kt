@@ -17,9 +17,12 @@ class LocalizationResourceTest {
 
         assertEquals("Jugar 4 pares", resources.getString(R.string.menu_four_pairs_button))
         assertEquals("Jugar 8 pares", resources.getString(R.string.menu_eight_pairs_button))
+        assertEquals("Cómo jugar", resources.getString(R.string.menu_tutorial_button))
         assertEquals("8 pares", resources.getString(R.string.eight_pairs_screen_title))
         assertEquals("Serie", resources.getString(R.string.strip_content_description))
         assertEquals("Paso 1 de 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))
+        assertEquals("Ya sé jugar", resources.getString(R.string.onboarding_early_validation_button))
+        assertEquals("Comprobación final", resources.getString(R.string.final_validation_screen_title))
     }
 
     @Test
@@ -28,9 +31,12 @@ class LocalizationResourceTest {
 
         assertEquals("Juga a 4 parelles", resources.getString(R.string.menu_four_pairs_button))
         assertEquals("Juga a 8 parelles", resources.getString(R.string.menu_eight_pairs_button))
+        assertEquals("Com jugar", resources.getString(R.string.menu_tutorial_button))
         assertEquals("8 parelles", resources.getString(R.string.eight_pairs_screen_title))
         assertEquals("Sèrie", resources.getString(R.string.strip_content_description))
         assertEquals("Pas 1 de 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))
+        assertEquals("Ja sé jugar", resources.getString(R.string.onboarding_early_validation_button))
+        assertEquals("Comprovació final", resources.getString(R.string.final_validation_screen_title))
     }
 
     @Test
@@ -39,9 +45,12 @@ class LocalizationResourceTest {
 
         assertEquals("Play 4 pairs", resources.getString(R.string.menu_four_pairs_button))
         assertEquals("Play 8 pairs", resources.getString(R.string.menu_eight_pairs_button))
+        assertEquals("How to play", resources.getString(R.string.menu_tutorial_button))
         assertEquals("8 pairs", resources.getString(R.string.eight_pairs_screen_title))
         assertEquals("Strip", resources.getString(R.string.strip_content_description))
         assertEquals("Step 1 of 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))
+        assertEquals("I know how to play", resources.getString(R.string.onboarding_early_validation_button))
+        assertEquals("Final check", resources.getString(R.string.final_validation_screen_title))
     }
 
     private fun resourcesFor(languageTag: String): Resources {

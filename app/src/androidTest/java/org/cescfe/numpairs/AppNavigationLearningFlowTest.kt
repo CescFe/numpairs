@@ -7,6 +7,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performScrollTo
@@ -14,6 +15,10 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
+import org.cescfe.numpairs.data.onboarding.OnboardingPostCorePath
+import org.cescfe.numpairs.data.onboarding.OnboardingStageCheckpoint
+import org.cescfe.numpairs.data.onboarding.OnboardingState
+import org.cescfe.numpairs.data.onboarding.REQUIRED_ONBOARDING_VERSION
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
@@ -39,20 +44,39 @@ class AppNavigationLearningFlowTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun menuTutorialLaunchesTheCombinedIntroductionAndBackReturnsToMenu() {
-        setContent(puzzleProvider = QueueGeneratedPuzzleProvider(samplePuzzle))
+    fun howToPlayReplaysFromStageOneAndBackPreservesCompletedOnboarding() {
+        val completedState = OnboardingState(
+            isInitialized = true,
+            completedVersion = REQUIRED_ONBOARDING_VERSION,
+            lastCompletedStage = OnboardingStageCheckpoint.STAGE_THREE,
+            postCorePath = OnboardingPostCorePath.CONTINUE_GUIDED
+        )
+        val onboardingRepository = FakeOnboardingRepository(initialState = completedState)
+        setContent(
+            puzzleProvider = QueueGeneratedPuzzleProvider(samplePuzzle),
+            onboardingRepository = onboardingRepository
+        )
 
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
+            .assert(hasText(string(R.string.menu_tutorial_button)))
             .performClick()
         composeTestRule
-            .onNodeWithTag(TutorialScreenTestTags.INSTRUCTION_SURFACE)
+            .onNodeWithText(string(R.string.tutorial_stage_one_place_number_copy))
             .assertIsDisplayed()
 
         pressBackUnconditionally()
 
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+        assertEquals(completedState, onboardingRepository.onboardingState.value)
+
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
+            .performClick()
+        composeTestRule
+            .onNodeWithText(string(R.string.tutorial_stage_one_place_number_copy))
             .assertIsDisplayed()
     }
 
@@ -74,13 +98,16 @@ class AppNavigationLearningFlowTest {
         assertEquals(1, puzzleProvider.requestCount)
     }
 
-    private fun setContent(puzzleProvider: QueueGeneratedPuzzleProvider) {
+    private fun setContent(
+        puzzleProvider: QueueGeneratedPuzzleProvider,
+        onboardingRepository: FakeOnboardingRepository = FakeOnboardingRepository()
+    ) {
         val actionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository()
 
         composeTestRule.setContent {
             NumPairsTheme {
                 AppNavigation(
-                    onboardingRepository = FakeOnboardingRepository(),
+                    onboardingRepository = onboardingRepository,
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository,
                     generatedModeRegistry = GeneratedModes.registry,
                     generatedPuzzleGenerationUseCaseFactory = fourPairsProviderFactory(puzzleProvider = puzzleProvider)
