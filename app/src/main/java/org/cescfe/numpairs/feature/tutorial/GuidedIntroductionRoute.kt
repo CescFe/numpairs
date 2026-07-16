@@ -16,6 +16,7 @@ fun GuidedIntroductionRoute(
     modifier: Modifier = Modifier,
     startStage: GuidedOnboardingStage = GuidedOnboardingStage.NUMBER_PLACEMENT,
     saveProgressAcrossRecreation: Boolean = true,
+    showPostCoreChoice: Boolean = true,
     onStageCompleted: suspend (GuidedOnboardingStage) -> Unit = {},
     onIntroductionCompleted: () -> Unit = {},
     onNavigateBack: () -> Unit = {}
@@ -30,37 +31,58 @@ fun GuidedIntroductionRoute(
     val currentOnIntroductionCompleted by rememberUpdatedState(onIntroductionCompleted)
     val coroutineScope = rememberCoroutineScope()
 
-    phase.guidedStage?.let { stage ->
-        var isStageCompletionInProgress by remember(stage) { mutableStateOf(false) }
-
-        TutorialRoute(
+    when (phase) {
+        GuidedIntroductionPhase.POST_CORE_CHOICE -> PostCoreChoiceScreen(
             modifier = modifier,
-            mode = TutorialMode.LEARN_BASICS,
-            guidedStage = stage,
-            saveProgressAcrossRecreation = saveProgressAcrossRecreation,
-            onTutorialCompleted = {
-                if (!isStageCompletionInProgress) {
-                    isStageCompletionInProgress = true
-                    coroutineScope.launch {
-                        currentOnStageCompleted(stage)
-                        phase = stage.nextOrNull()?.let(GuidedIntroductionPhase::from)
-                            ?: GuidedIntroductionPhase.FINAL_VALIDATION
-                    }
-                }
+            onContinueGuided = {
+                phase = GuidedIntroductionPhase.HIDDEN_STRIP_VALUE
+            },
+            onStartValidation = {
+                phase = GuidedIntroductionPhase.FINAL_VALIDATION
             },
             onNavigateBack = onNavigateBack
         )
-    } ?: FinalValidationRoute(
-        modifier = modifier,
-        onValidationSolved = currentOnIntroductionCompleted,
-        onNavigateBack = onNavigateBack,
-        onReturnToMenuRequested = onNavigateBack
-    )
+        GuidedIntroductionPhase.FINAL_VALIDATION -> FinalValidationRoute(
+            modifier = modifier,
+            onValidationSolved = currentOnIntroductionCompleted,
+            onNavigateBack = onNavigateBack,
+            onReturnToMenuRequested = onNavigateBack
+        )
+        else -> phase.guidedStage?.let { stage ->
+            var isStageCompletionInProgress by remember(stage) { mutableStateOf(false) }
+
+            TutorialRoute(
+                modifier = modifier,
+                mode = TutorialMode.LEARN_BASICS,
+                guidedStage = stage,
+                saveProgressAcrossRecreation = saveProgressAcrossRecreation,
+                onTutorialCompleted = {
+                    if (!isStageCompletionInProgress) {
+                        isStageCompletionInProgress = true
+                        coroutineScope.launch {
+                            currentOnStageCompleted(stage)
+                            phase = if (
+                                stage == GuidedOnboardingStage.COMPLEMENTARY_PAIR &&
+                                showPostCoreChoice
+                            ) {
+                                GuidedIntroductionPhase.POST_CORE_CHOICE
+                            } else {
+                                stage.nextOrNull()?.let(GuidedIntroductionPhase::from)
+                                    ?: GuidedIntroductionPhase.FINAL_VALIDATION
+                            }
+                        }
+                    }
+                },
+                onNavigateBack = onNavigateBack
+            )
+        }
+    }
 }
 
 private enum class GuidedIntroductionPhase(val guidedStage: GuidedOnboardingStage?) {
     NUMBER_PLACEMENT(GuidedOnboardingStage.NUMBER_PLACEMENT),
     COMPLEMENTARY_PAIR(GuidedOnboardingStage.COMPLEMENTARY_PAIR),
+    POST_CORE_CHOICE(null),
     HIDDEN_STRIP_VALUE(GuidedOnboardingStage.HIDDEN_STRIP_VALUE),
     FINAL_VALIDATION(null);
 

@@ -64,6 +64,8 @@ class OnboardingInitializerTest {
 
         override suspend fun recordStageCompleted(stage: OnboardingStageCheckpoint) = Unit
 
+        override suspend fun selectPostCorePath(path: OnboardingPostCorePath) = Unit
+
         override suspend fun markRequiredVersionCompleted() = Unit
     }
 

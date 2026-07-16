@@ -26,6 +26,9 @@ class DataStoreOnboardingRepository(private val dataStore: DataStore<Preferences
                 completedVersion = preferences[PreferenceKeys.COMPLETED_VERSION] ?: 0,
                 lastCompletedStage = OnboardingStageCheckpoint.fromPersistedValue(
                     preferences[PreferenceKeys.LAST_COMPLETED_STAGE] ?: 0
+                ),
+                postCorePath = OnboardingPostCorePath.fromPersistedValue(
+                    preferences[PreferenceKeys.POST_CORE_PATH] ?: 0
                 )
             )
         }
@@ -42,6 +45,22 @@ class DataStoreOnboardingRepository(private val dataStore: DataStore<Preferences
                 OnboardingInstallationKind.PRE_V6_UPGRADE -> REQUIRED_ONBOARDING_VERSION
             }
             preferences[PreferenceKeys.LAST_COMPLETED_STAGE] = OnboardingStageCheckpoint.NONE.persistedValue
+            preferences[PreferenceKeys.POST_CORE_PATH] = OnboardingPostCorePath.UNDECIDED.persistedValue
+        }
+    }
+
+    override suspend fun selectPostCorePath(path: OnboardingPostCorePath) {
+        require(path != OnboardingPostCorePath.UNDECIDED) {
+            "The selected post-core onboarding path cannot be UNDECIDED."
+        }
+
+        dataStore.edit { preferences ->
+            val currentPath = OnboardingPostCorePath.fromPersistedValue(
+                preferences[PreferenceKeys.POST_CORE_PATH] ?: 0
+            )
+            if (currentPath == OnboardingPostCorePath.UNDECIDED) {
+                preferences[PreferenceKeys.POST_CORE_PATH] = path.persistedValue
+            }
         }
     }
 
@@ -67,5 +86,6 @@ class DataStoreOnboardingRepository(private val dataStore: DataStore<Preferences
         val IS_INITIALIZED = booleanPreferencesKey("onboarding_is_initialized")
         val COMPLETED_VERSION = intPreferencesKey("onboarding_completed_version")
         val LAST_COMPLETED_STAGE = intPreferencesKey("onboarding_last_completed_stage")
+        val POST_CORE_PATH = intPreferencesKey("onboarding_post_core_path")
     }
 }

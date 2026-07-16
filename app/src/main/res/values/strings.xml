@@ -37,6 +37,10 @@
     <string name="tutorial_previous_step_button">Back</string>
     <string name="tutorial_next_step_button">Next</string>
     <string name="final_validation_screen_title">Final check</string>
+    <string name="onboarding_post_core_title">Core lesson complete</string>
+    <string name="onboarding_post_core_message">You completed a sum and product with the same pair. Continue with one more guided lesson, or demonstrate what you know in the final check.</string>
+    <string name="onboarding_continue_guided_button">Keep learning</string>
+    <string name="onboarding_early_validation_button">I know how to play</string>
 
     <!-- Game screen: board and strip -->
     <string name="board_content_description">Board</string>

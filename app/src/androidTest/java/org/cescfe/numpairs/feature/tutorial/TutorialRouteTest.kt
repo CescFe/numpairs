@@ -12,6 +12,7 @@ import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performScrollTo
@@ -203,7 +204,15 @@ class TutorialRouteTest {
         val completionCount = AtomicInteger(0)
         setGuidedIntroductionContent(onIntroductionCompleted = { completionCount.incrementAndGet() })
 
-        completeStageTwo()
+        completeStageTwo(waitForStageThree = false)
+        composeTestRule
+            .onNodeWithTag(PostCoreChoiceTestTags.SCREEN)
+            .assertIsDisplayed()
+        assertEquals(0, completionCount.get())
+        composeTestRule
+            .onNodeWithTag(PostCoreChoiceTestTags.CONTINUE_BUTTON)
+            .performClick()
+        waitForStep(stepIndex = 3)
         enterStripValue(index = 1, value = "3")
 
         composeTestRule.waitUntil(timeoutMillis = TUTORIAL_STEP_WAIT_TIMEOUT_MS) {
@@ -244,10 +253,37 @@ class TutorialRouteTest {
         waitForStep(stepIndex = 2)
         assertEquals(emptyList<GuidedOnboardingStage>(), completedStages)
         completeTile(tileIndex = 1, leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1)
-        waitForStep(stepIndex = 3)
+        composeTestRule
+            .onNodeWithTag(PostCoreChoiceTestTags.SCREEN)
+            .assertIsDisplayed()
 
         assertEquals(listOf(GuidedOnboardingStage.COMPLEMENTARY_PAIR), completedStages)
+        composeTestRule
+            .onNodeWithTag(PostCoreChoiceTestTags.CONTINUE_BUTTON)
+            .performClick()
+        waitForStep(stepIndex = 3)
         assertHiddenStripValueScenarioDisplayed()
+    }
+
+    @Test
+    fun guidedIntroductionEarlyExitStillRequiresFinalValidation() {
+        val completionCount = AtomicInteger(0)
+        setGuidedIntroductionContent(
+            startStage = GuidedOnboardingStage.COMPLEMENTARY_PAIR,
+            onIntroductionCompleted = { completionCount.incrementAndGet() }
+        )
+
+        completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
+        waitForStep(stepIndex = 2)
+        completeTile(tileIndex = 1, leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1)
+        composeTestRule
+            .onNodeWithTag(PostCoreChoiceTestTags.EARLY_VALIDATION_BUTTON)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText(string(R.string.final_validation_screen_title))
+            .assertIsDisplayed()
+        assertEquals(0, completionCount.get())
     }
 
     @Test
@@ -349,12 +385,14 @@ class TutorialRouteTest {
         waitForStep(stepIndex = 1)
     }
 
-    private fun completeStageTwo() {
+    private fun completeStageTwo(waitForStageThree: Boolean = true) {
         completeStageOne()
         completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
         waitForStep(stepIndex = 2)
         completeTile(tileIndex = 1, leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1)
-        waitForStep(stepIndex = 3)
+        if (waitForStageThree) {
+            waitForStep(stepIndex = 3)
+        }
     }
 
     private fun enterStripValue(index: Int, value: String) {
