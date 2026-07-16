@@ -91,10 +91,11 @@ class StageTwoComplementaryPairContentTest {
     }
 
     @Test
-    fun registers_stage_two_without_activating_it() {
+    fun exposes_stage_two_through_the_active_learn_basics_sequence() {
         assertEquals(scenario, TutorialContent.scenario(TutorialScenarioId.COMPLEMENTARY_PAIR))
-        assertFalse(
-            TutorialContent.learnBasicsSteps.any { step ->
+        assertEquals(
+            steps,
+            TutorialContent.learnBasicsSteps.filter { step ->
                 step.scenarioId == TutorialScenarioId.COMPLEMENTARY_PAIR
             }
         )
