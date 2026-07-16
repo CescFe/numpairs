@@ -37,6 +37,10 @@
     <string name="tutorial_previous_step_button">Arrere</string>
     <string name="tutorial_next_step_button">Següent</string>
     <string name="final_validation_screen_title">Comprovació final</string>
+    <string name="onboarding_post_core_title">Lliçó essencial completada</string>
+    <string name="onboarding_post_core_message">Has completat una suma i un producte amb la mateixa parella. Continua amb una lliçó guiada més o demostra el que saps a la comprovació final.</string>
+    <string name="onboarding_continue_guided_button">Continuar aprenent</string>
+    <string name="onboarding_early_validation_button">Ja sé jugar</string>
 
     <!-- Game screen: board and strip -->
     <string name="board_content_description">Tauler</string>

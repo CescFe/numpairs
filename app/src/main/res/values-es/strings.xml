@@ -37,6 +37,10 @@
     <string name="tutorial_previous_step_button">Atrás</string>
     <string name="tutorial_next_step_button">Siguiente</string>
     <string name="final_validation_screen_title">Comprobación final</string>
+    <string name="onboarding_post_core_title">Lección esencial completada</string>
+    <string name="onboarding_post_core_message">Has completado una suma y un producto con la misma pareja. Continúa con una lección guiada más o demuestra lo que sabes en la comprobación final.</string>
+    <string name="onboarding_continue_guided_button">Seguir aprendiendo</string>
+    <string name="onboarding_early_validation_button">Ya sé jugar</string>
 
     <!-- Game screen: board and strip -->
     <string name="board_content_description">Tablero</string>
