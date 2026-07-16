@@ -24,6 +24,7 @@
     <!-- Tutorial screen -->
     <string name="tutorial_screen_title">Tutorial</string>
     <string name="tutorial_step_indicator">Paso %1$d de %2$d</string>
+    <string name="tutorial_stage_one_place_number_copy">Coloca el 2 en el espacio de operando vacío.</string>
     <string name="tutorial_step_one_copy">El objetivo principal es descubrir todos los elementos desconocidos. Adivina los valores ocultos para completar una lista ascendente de enteros positivos.</string>
     <string name="tutorial_step_two_copy">Combina dos números de la serie para formar una expresión matemática que dé como resultado el valor visible de la casilla. Completa la casilla resaltada con dos operandos y un operador.</string>
     <string name="tutorial_step_three_copy">Cada par debe formar una suma y un producto. Usa el mismo par para completar su casilla de producto.</string>

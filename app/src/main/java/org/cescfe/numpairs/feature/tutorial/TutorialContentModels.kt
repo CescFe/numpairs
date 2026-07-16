@@ -43,6 +43,7 @@ data class TutorialScenario(
 }
 
 enum class TutorialScenarioId {
+    NUMBER_PLACEMENT,
     TWO_PAIR_PRACTICE,
     SOLVING_TIPS_PRACTICE
 }

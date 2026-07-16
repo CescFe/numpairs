@@ -2,6 +2,7 @@ package org.cescfe.numpairs.feature.tutorial
 
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Expression
+import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
@@ -18,6 +19,7 @@ class TutorialContentTest {
     fun exposes_authored_content_for_each_learning_flow() {
         assertEquals(
             listOf(
+                TutorialScenarioId.NUMBER_PLACEMENT,
                 TutorialScenarioId.TWO_PAIR_PRACTICE,
                 TutorialScenarioId.SOLVING_TIPS_PRACTICE
             ),
@@ -53,9 +55,84 @@ class TutorialContentTest {
                 scenario.initialPuzzle.board.tiles.map(Tile::result),
                 scenario.solvedPuzzle.board.tiles.map(Tile::result)
             )
+        }
+    }
+
+    @Test
+    fun existing_practice_scenarios_keep_hidden_strip_and_expression_work() {
+        listOf(
+            TutorialScenarioId.TWO_PAIR_PRACTICE,
+            TutorialScenarioId.SOLVING_TIPS_PRACTICE
+        ).forEach { scenarioId ->
+            val scenario = TutorialContent.scenario(scenarioId)
+
             assertTrue(scenario.initialPuzzle.strip.items.any { stripItem -> stripItem == StripItem.Hidden })
             assertAllTilesHaveHiddenExpressions(scenario.initialPuzzle)
         }
+    }
+
+    @Test
+    fun number_placement_scenario_leaves_only_the_target_operand_unresolved() {
+        val scenario = TutorialContent.scenario(TutorialScenarioId.NUMBER_PLACEMENT)
+        val step = StageOneNumberPlacementContent.step
+        val initialAddition = scenario.initialPuzzle.board.tiles[0]
+        val initialMultiplication = scenario.initialPuzzle.board.tiles[1]
+        val solvedAddition = scenario.solvedPuzzle.board.tiles[0]
+        val completedPuzzle = scenario.initialPuzzle.copy(
+            board = Board(
+                tiles = listOf(
+                    initialAddition.withLeftOperand(value = 2, stripEntryId = 0),
+                    initialMultiplication
+                )
+            )
+        )
+
+        assertEquals(listOf(2, 3), scenario.stripValues)
+        assertEquals(listOf(StripItem.Known(2), StripItem.Known(3)), scenario.initialPuzzle.strip.items)
+        assertEquals(2, scenario.initialPuzzle.board.tiles.size)
+        assertEquals(Expression.Operand.Hidden, initialAddition.expression.leftOperand)
+        assertEquals(Operator.ADDITION, initialAddition.expression.operator)
+        assertEquals(Expression.Operand.Known(value = 3, stripEntryId = 1), initialAddition.expression.rightOperand)
+        assertEquals(5, initialAddition.result)
+        assertEquals(Expression(2, Operator.MULTIPLICATION, 3), initialMultiplication.expression.withoutEntryIds())
+        assertEquals(6, initialMultiplication.result)
+        assertEquals(Expression.Operand.Known(value = 2, stripEntryId = 0), solvedAddition.expression.leftOperand)
+        assertEquals(
+            listOf(TutorialIntendedPair(firstStripEntryId = 0, secondStripEntryId = 1)),
+            scenario.intendedPairs
+        )
+        assertEquals(TutorialScenarioId.NUMBER_PLACEMENT, step.scenarioId)
+        assertEquals(
+            listOf(
+                TutorialHighlightTarget.StripEntries(indexes = listOf(0)),
+                TutorialHighlightTarget.TileOperandSlot(tileIndex = 0, slot = OperandSlot.LEFT)
+            ),
+            step.highlightedTargets
+        )
+        assertEquals(
+            TutorialRequiredAction.PlaceTileOperand(
+                tileIndex = 0,
+                slot = OperandSlot.LEFT,
+                stripEntryId = 0
+            ),
+            step.requiredAction
+        )
+        assertFalse(step.isComplete(GameUiState.from(scenario.initialPuzzle)))
+        assertTrue(step.isComplete(GameUiState.from(completedPuzzle)))
+        assertEquals(PuzzleCompletionState.SOLVED, completedPuzzle.completionState)
+    }
+
+    @Test
+    fun number_placement_content_is_registered_without_changing_the_active_learn_basics_steps() {
+        assertEquals(
+            StageOneNumberPlacementContent.scenario,
+            TutorialContent.scenario(TutorialScenarioId.NUMBER_PLACEMENT)
+        )
+        assertFalse(TutorialContent.learnBasicsSteps.contains(StageOneNumberPlacementContent.step))
+        assertEquals(
+            setOf(TutorialScenarioId.TWO_PAIR_PRACTICE),
+            TutorialContent.learnBasicsSteps.map(TutorialStep::scenarioId).toSet()
+        )
     }
 
     @Test
@@ -189,6 +266,11 @@ private fun assertAllTilesHaveHiddenExpressions(puzzle: Puzzle) {
 private fun Tile.hasHiddenExpression(): Boolean = expression.leftOperand == Expression.Operand.Hidden &&
     expression.operator == Operator.Hidden &&
     expression.rightOperand == Expression.Operand.Hidden
+
+private fun Expression.withoutEntryIds(): Expression = copy(
+    leftOperand = (leftOperand as Expression.Operand.Known).copy(stripEntryId = null),
+    rightOperand = (rightOperand as Expression.Operand.Known).copy(stripEntryId = null)
+)
 
 private fun Puzzle.withStripValue(index: Int, value: Int): Puzzle = copy(
     strip = strip.withUpdatedEntry(index = index, value = value)
