@@ -24,6 +24,7 @@
     <!-- Tutorial screen -->
     <string name="tutorial_screen_title">Tutorial</string>
     <string name="tutorial_step_indicator">Step %1$d of %2$d</string>
+    <string name="tutorial_stage_one_place_number_copy">Place 2 in the empty operand slot.</string>
     <string name="tutorial_step_one_copy">The main objective is to discover all unknown elements. Guess hidden values to complete an ascending list of positive integers.</string>
     <string name="tutorial_step_two_copy">Combine two numbers from the strip to form a mathematical expression that evaluates to the visible tile result. Fill the highlighted tile with two operands and one operator.</string>
     <string name="tutorial_step_three_copy">Each pair must form one sum and one product. Use the same pair to complete its product tile.</string>

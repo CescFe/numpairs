@@ -2,6 +2,7 @@ package org.cescfe.numpairs.feature.tutorial
 
 object TutorialContent {
     val scenarios: List<TutorialScenario> = listOf(
+        StageOneNumberPlacementContent.scenario,
         LearnBasicsTutorialContent.scenario,
         SolvingTipsPracticeContent.scenario
     )
