@@ -20,6 +20,7 @@ class TutorialContentTest {
         assertEquals(
             listOf(
                 TutorialScenarioId.NUMBER_PLACEMENT,
+                TutorialScenarioId.COMPLEMENTARY_PAIR,
                 TutorialScenarioId.TWO_PAIR_PRACTICE,
                 TutorialScenarioId.SOLVING_TIPS_PRACTICE
             ),
