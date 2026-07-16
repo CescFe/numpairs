@@ -22,6 +22,7 @@ class TutorialContentTest {
                 TutorialScenarioId.NUMBER_PLACEMENT,
                 TutorialScenarioId.COMPLEMENTARY_PAIR,
                 TutorialScenarioId.HIDDEN_STRIP_VALUE,
+                TutorialScenarioId.FINAL_VALIDATION,
                 TutorialScenarioId.TWO_PAIR_PRACTICE,
                 TutorialScenarioId.SOLVING_TIPS_PRACTICE
             ),
