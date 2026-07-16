@@ -87,12 +87,8 @@ class StageThreeHiddenStripValueContentTest {
     }
 
     @Test
-    fun registers_stage_three_without_activating_it() {
+    fun exposes_stage_three_as_the_final_active_learn_basics_step() {
         assertEquals(scenario, TutorialContent.scenario(TutorialScenarioId.HIDDEN_STRIP_VALUE))
-        assertFalse(
-            TutorialContent.learnBasicsSteps.any { activeStep ->
-                activeStep.scenarioId == TutorialScenarioId.HIDDEN_STRIP_VALUE
-            }
-        )
+        assertEquals(step, TutorialContent.learnBasicsSteps.last())
     }
 }

@@ -10,7 +10,8 @@ object TutorialContent {
     )
 
     val learnBasicsSteps: List<TutorialStep> = listOf(StageOneNumberPlacementContent.step) +
-        StageTwoComplementaryPairContent.steps
+        StageTwoComplementaryPairContent.steps +
+        StageThreeHiddenStripValueContent.step
     val solvingTipsPracticeSteps: List<TutorialStep> = SolvingTipsPracticeContent.steps
     val steps: List<TutorialStep> = learnBasicsSteps + solvingTipsPracticeSteps
 

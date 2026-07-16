@@ -136,19 +136,42 @@ class TutorialRouteTest {
     }
 
     @Test
-    fun completingBothStageTwoExpressionsShowsTheLearnBasicsSuccessOverlay() {
+    fun completingBothStageTwoExpressionsAdvancesIntoACleanStageThreeScenario() {
         setContent()
 
         completeStageOne()
         completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
         waitForStep(stepIndex = 2)
         completeTile(tileIndex = 1, leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1)
-        composeTestRule.mainClock.advanceTimeBy(TUTORIAL_AUTO_ADVANCE_TEST_WAIT_MS)
+        waitForStep(stepIndex = 3)
 
-        assertStepDisplayed(stepIndex = 2)
-        assertComplementaryPairScenarioDisplayed()
+        assertStepDisplayed(stepIndex = 3)
+        assertHiddenStripValueScenarioDisplayed()
         assertTileExpression(tileIndex = 0, operator = Operator.ADDITION)
         assertTileExpression(tileIndex = 1, operator = Operator.MULTIPLICATION)
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .assertDoesNotExist()
+    }
+
+    @Test
+    fun stageThreeAllowsOnlyTheHiddenValueAndCompletesLearnBasics() {
+        setContent()
+
+        completeStageTwo()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(0))
+            .assertHasNoClickAction()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
+            .performScrollTo()
+            .assertHasNoClickAction()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
+            .assertHasNoClickAction()
+
+        enterStripValue(index = 1, value = "3")
+
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
             .assertIsDisplayed()
@@ -231,6 +254,14 @@ class TutorialRouteTest {
             .onNodeWithTag(GameScreenTestTags.tileOperandOption(0), useUnmergedTree = true)
             .performClick()
         waitForStep(stepIndex = 1)
+    }
+
+    private fun completeStageTwo() {
+        completeStageOne()
+        completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
+        waitForStep(stepIndex = 2)
+        completeTile(tileIndex = 1, leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1)
+        waitForStep(stepIndex = 3)
     }
 
     private fun enterStripValue(index: Int, value: String) {
@@ -427,6 +458,23 @@ class TutorialRouteTest {
             leftValue = "2",
             rightValue = "3"
         )
+        assertTileResult(tileIndex = 1, result = 6)
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tile(2), useUnmergedTree = true)
+            .assertDoesNotExist()
+    }
+
+    private fun assertHiddenStripValueScenarioDisplayed() {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(0))
+            .performScrollTo()
+            .assertContentDescriptionEquals(string(R.string.strip_item_known_content_description, "2"))
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(1))
+            .assertContentDescriptionEquals(string(R.string.strip_item_hidden_content_description))
+        assertTileExpression(tileIndex = 0, operator = Operator.ADDITION)
+        assertTileResult(tileIndex = 0, result = 5)
+        assertTileExpression(tileIndex = 1, operator = Operator.MULTIPLICATION)
         assertTileResult(tileIndex = 1, result = 6)
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tile(2), useUnmergedTree = true)

@@ -38,7 +38,8 @@ class TutorialContentTest {
         assertEquals(
             setOf(
                 TutorialScenarioId.NUMBER_PLACEMENT,
-                TutorialScenarioId.COMPLEMENTARY_PAIR
+                TutorialScenarioId.COMPLEMENTARY_PAIR,
+                TutorialScenarioId.HIDDEN_STRIP_VALUE
             ),
             TutorialContent.stepsFor(TutorialMode.LEARN_BASICS).map(TutorialStep::scenarioId).toSet()
         )
@@ -138,7 +139,8 @@ class TutorialContentTest {
             listOf(
                 TutorialScenarioId.NUMBER_PLACEMENT,
                 TutorialScenarioId.COMPLEMENTARY_PAIR,
-                TutorialScenarioId.COMPLEMENTARY_PAIR
+                TutorialScenarioId.COMPLEMENTARY_PAIR,
+                TutorialScenarioId.HIDDEN_STRIP_VALUE
             ),
             TutorialContent.learnBasicsSteps.map(TutorialStep::scenarioId)
         )
@@ -148,6 +150,7 @@ class TutorialContentTest {
     fun learn_basics_guides_the_player_through_core_rules_before_normal_completion() {
         val numberPlacementScenario = TutorialContent.scenario(TutorialScenarioId.NUMBER_PLACEMENT)
         val scenario = TutorialContent.scenario(TutorialScenarioId.COMPLEMENTARY_PAIR)
+        val hiddenStripScenario = TutorialContent.scenario(TutorialScenarioId.HIDDEN_STRIP_VALUE)
         val steps = TutorialContent.stepsFor(TutorialMode.LEARN_BASICS)
         val numberPlacementCompletedPuzzle = numberPlacementScenario.initialPuzzle.copy(
             board = Board(
@@ -157,7 +160,7 @@ class TutorialContentTest {
             )
         )
 
-        assertEquals(listOf(1, 2, 3), steps.map(TutorialStep::order))
+        assertEquals(listOf(1, 2, 3, 4), steps.map(TutorialStep::order))
 
         steps[0].assertGuidedAction(
             expectedHighlights = listOf(
@@ -204,6 +207,16 @@ class TutorialContentTest {
             steps[2].isComplete(
                 GameUiState.from(scenario.initialPuzzle.withSolvedScenarioTiles(scenario, 0))
             )
+        )
+
+        steps[3].assertGuidedAction(
+            expectedHighlights = listOf(
+                TutorialHighlightTarget.StripEntries(indexes = listOf(1)),
+                TutorialHighlightTarget.Tiles(indexes = listOf(0))
+            ),
+            expectedAction = TutorialRequiredAction.EnterStripValue(stripEntryIndex = 1, value = 3),
+            incompletePuzzle = hiddenStripScenario.initialPuzzle,
+            completePuzzle = hiddenStripScenario.initialPuzzle.withStripValue(index = 1, value = 3)
         )
     }
 
@@ -287,6 +300,10 @@ private fun Tile.hasHiddenExpression(): Boolean = expression.leftOperand == Expr
 private fun Expression.withoutEntryIds(): Expression = copy(
     leftOperand = (leftOperand as Expression.Operand.Known).copy(stripEntryId = null),
     rightOperand = (rightOperand as Expression.Operand.Known).copy(stripEntryId = null)
+)
+
+private fun Puzzle.withStripValue(index: Int, value: Int): Puzzle = copy(
+    strip = strip.withUpdatedEntry(index = index, value = value)
 )
 
 private fun Puzzle.withSolvedScenarioTiles(scenario: TutorialScenario, vararg tileIndexes: Int): Puzzle = copy(
