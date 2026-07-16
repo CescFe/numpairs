@@ -2,12 +2,15 @@ package org.cescfe.numpairs.ui.navigation
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import org.cescfe.numpairs.data.onboarding.OnboardingRepository
+import org.cescfe.numpairs.data.onboarding.OnboardingState
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.feature.fourpairs.FourPairsRoute
 import org.cescfe.numpairs.feature.generated.GeneratedModeId
@@ -16,6 +19,8 @@ import org.cescfe.numpairs.feature.generated.GeneratedModeRoute
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.feature.menu.MenuRoute
+import org.cescfe.numpairs.feature.onboarding.OnboardingLoadingScreen
+import org.cescfe.numpairs.feature.onboarding.RequiredOnboardingRoute
 import org.cescfe.numpairs.feature.tutorial.GuidedIntroductionRoute
 
 sealed interface AppDestination {
@@ -26,11 +31,39 @@ sealed interface AppDestination {
 
 @Composable
 fun AppNavigation(
+    onboardingRepository: OnboardingRepository,
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     generatedModeRegistry: GeneratedModeRegistry,
     generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory,
     modifier: Modifier = Modifier,
     startDestination: AppDestination = AppDestination.Menu
+) {
+    val onboardingState by onboardingRepository.onboardingState.collectAsState(initial = OnboardingState())
+
+    when {
+        !onboardingState.isInitialized -> OnboardingLoadingScreen(modifier = modifier)
+        !onboardingState.isRequiredVersionComplete() -> RequiredOnboardingRoute(
+            onboardingState = onboardingState,
+            onboardingRepository = onboardingRepository,
+            modifier = modifier
+        )
+        else -> UnlockedAppNavigation(
+            topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
+            generatedModeRegistry = generatedModeRegistry,
+            generatedPuzzleGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory,
+            modifier = modifier,
+            startDestination = startDestination
+        )
+    }
+}
+
+@Composable
+private fun UnlockedAppNavigation(
+    topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
+    generatedModeRegistry: GeneratedModeRegistry,
+    generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory,
+    modifier: Modifier,
+    startDestination: AppDestination
 ) {
     var currentDestination by remember(startDestination) {
         mutableStateOf(startDestination)
