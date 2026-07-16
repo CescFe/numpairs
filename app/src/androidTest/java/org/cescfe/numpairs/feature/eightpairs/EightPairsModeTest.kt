@@ -37,7 +37,7 @@ class EightPairsModeTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun menuShowsTutorialFourPairsAndEightPairs() {
+    fun menuShowsHowToPlayFourPairsAndEightPairs() {
         setContent()
 
         composeTestRule
