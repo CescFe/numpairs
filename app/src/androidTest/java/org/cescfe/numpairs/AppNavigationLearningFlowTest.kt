@@ -38,6 +38,24 @@ class AppNavigationLearningFlowTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
+    fun menuTutorialLaunchesTheCombinedIntroductionAndBackReturnsToMenu() {
+        setContent(puzzleProvider = QueueGeneratedPuzzleProvider(samplePuzzle))
+
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.INSTRUCTION_SURFACE)
+            .assertIsDisplayed()
+
+        pressBackUnconditionally()
+
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+    }
+
+    @Test
     fun inGameLearningActionsOpenTutorialOverlaysAndReturnToCurrentFourPairsScreen() {
         val puzzleProvider = QueueGeneratedPuzzleProvider(samplePuzzle)
         setContent(puzzleProvider = puzzleProvider)
