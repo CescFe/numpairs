@@ -232,7 +232,7 @@ class TutorialRouteTest {
         val completedStages = mutableListOf<GuidedOnboardingStage>()
         setGuidedIntroductionContent(
             startStage = GuidedOnboardingStage.COMPLEMENTARY_PAIR,
-            onStageCompleted = completedStages::add
+            onStageCompleted = { stage -> completedStages += stage }
         )
 
         assertComplementaryPairScenarioDisplayed()
@@ -307,7 +307,7 @@ class TutorialRouteTest {
 
     private fun setGuidedIntroductionContent(
         startStage: GuidedOnboardingStage = GuidedOnboardingStage.NUMBER_PLACEMENT,
-        onStageCompleted: (GuidedOnboardingStage) -> Unit = {},
+        onStageCompleted: suspend (GuidedOnboardingStage) -> Unit = {},
         onIntroductionCompleted: () -> Unit = {}
     ) {
         composeTestRule.setContent {

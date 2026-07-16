@@ -40,6 +40,7 @@ fun TutorialRoute(
     modifier: Modifier = Modifier,
     mode: TutorialMode = TutorialMode.LEARN_BASICS,
     guidedStage: GuidedOnboardingStage? = null,
+    saveProgressAcrossRecreation: Boolean = true,
     onTutorialCompleted: (() -> Unit)? = null,
     onNavigateBack: () -> Unit = {}
 ) {
@@ -48,8 +49,18 @@ fun TutorialRoute(
     }
     val playbackKey = guidedStage ?: mode
     val steps = guidedStage?.let(TutorialContent::stepsFor) ?: TutorialContent.stepsFor(mode)
-    var currentStepIndex by rememberSaveable(playbackKey) { mutableIntStateOf(0) }
-    var hasReportedCompletion by rememberSaveable(playbackKey) { mutableStateOf(false) }
+    val currentStepIndexState = if (saveProgressAcrossRecreation) {
+        rememberSaveable(playbackKey) { mutableIntStateOf(0) }
+    } else {
+        remember(playbackKey) { mutableIntStateOf(0) }
+    }
+    val completionReportedState = if (saveProgressAcrossRecreation) {
+        rememberSaveable(playbackKey) { mutableStateOf(false) }
+    } else {
+        remember(playbackKey) { mutableStateOf(false) }
+    }
+    var currentStepIndex by currentStepIndexState
+    var hasReportedCompletion by completionReportedState
     var latestGameUiState by remember(playbackKey) { mutableStateOf<GameUiState?>(null) }
     val currentOnTutorialCompleted by rememberUpdatedState(onTutorialCompleted)
     val currentStep = steps[currentStepIndex]
