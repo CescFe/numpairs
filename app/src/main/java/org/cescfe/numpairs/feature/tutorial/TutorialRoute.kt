@@ -39,13 +39,18 @@ import org.cescfe.numpairs.ui.theme.NumPairsComponents
 fun TutorialRoute(
     modifier: Modifier = Modifier,
     mode: TutorialMode = TutorialMode.LEARN_BASICS,
+    guidedStage: GuidedOnboardingStage? = null,
     onTutorialCompleted: (() -> Unit)? = null,
     onNavigateBack: () -> Unit = {}
 ) {
-    val steps = TutorialContent.stepsFor(mode)
-    var currentStepIndex by rememberSaveable(mode) { mutableIntStateOf(0) }
-    var hasReportedCompletion by rememberSaveable(mode) { mutableStateOf(false) }
-    var latestGameUiState by remember(mode) { mutableStateOf<GameUiState?>(null) }
+    require(guidedStage == null || mode == TutorialMode.LEARN_BASICS) {
+        "Guided onboarding stages are available only in Learn basics mode."
+    }
+    val playbackKey = guidedStage ?: mode
+    val steps = guidedStage?.let(TutorialContent::stepsFor) ?: TutorialContent.stepsFor(mode)
+    var currentStepIndex by rememberSaveable(playbackKey) { mutableIntStateOf(0) }
+    var hasReportedCompletion by rememberSaveable(playbackKey) { mutableStateOf(false) }
+    var latestGameUiState by remember(playbackKey) { mutableStateOf<GameUiState?>(null) }
     val currentOnTutorialCompleted by rememberUpdatedState(onTutorialCompleted)
     val currentStep = steps[currentStepIndex]
     val currentScenario = TutorialContent.scenario(currentStep.scenarioId)
@@ -71,8 +76,8 @@ fun TutorialRoute(
         title = stringResource(R.string.tutorial_screen_title),
         initialPuzzle = currentScenario.initialPuzzle,
         modifier = modifier,
-        gameSessionKey = "$TUTORIAL_GAME_SESSION_KEY:$mode:${currentScenario.id}",
-        puzzleResetKey = mode to currentScenario.id,
+        gameSessionKey = "$TUTORIAL_GAME_SESSION_KEY:$playbackKey:${currentScenario.id}",
+        puzzleResetKey = playbackKey to currentScenario.id,
         isSuccessOverlayEnabled = currentStepIndex == steps.lastIndex && onTutorialCompleted == null,
         interactionPolicy = currentStep.toInteractionPolicy(
             scenario = currentScenario,

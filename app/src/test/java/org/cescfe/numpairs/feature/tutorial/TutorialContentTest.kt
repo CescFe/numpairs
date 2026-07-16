@@ -16,6 +16,22 @@ import org.junit.Test
 
 class TutorialContentTest {
     @Test
+    fun `guided onboarding stages map to their authored steps`() {
+        assertEquals(
+            listOf(StageOneNumberPlacementContent.step),
+            TutorialContent.stepsFor(GuidedOnboardingStage.NUMBER_PLACEMENT)
+        )
+        assertEquals(
+            StageTwoComplementaryPairContent.steps,
+            TutorialContent.stepsFor(GuidedOnboardingStage.COMPLEMENTARY_PAIR)
+        )
+        assertEquals(
+            listOf(StageThreeHiddenStripValueContent.step),
+            TutorialContent.stepsFor(GuidedOnboardingStage.HIDDEN_STRIP_VALUE)
+        )
+    }
+
+    @Test
     fun exposes_authored_content_for_each_learning_flow() {
         assertEquals(
             listOf(

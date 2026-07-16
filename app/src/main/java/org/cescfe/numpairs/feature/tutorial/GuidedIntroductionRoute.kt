@@ -11,31 +11,43 @@ import androidx.compose.ui.Modifier
 @Composable
 fun GuidedIntroductionRoute(
     modifier: Modifier = Modifier,
+    startStage: GuidedOnboardingStage = GuidedOnboardingStage.NUMBER_PLACEMENT,
+    onStageCompleted: (GuidedOnboardingStage) -> Unit = {},
     onIntroductionCompleted: () -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
-    var phase by rememberSaveable { mutableStateOf(GuidedIntroductionPhase.GUIDED_STAGES) }
+    var phase by rememberSaveable(startStage) { mutableStateOf(GuidedIntroductionPhase.from(startStage)) }
+    val currentOnStageCompleted by rememberUpdatedState(onStageCompleted)
     val currentOnIntroductionCompleted by rememberUpdatedState(onIntroductionCompleted)
 
-    when (phase) {
-        GuidedIntroductionPhase.GUIDED_STAGES -> TutorialRoute(
+    phase.guidedStage?.let { stage ->
+        TutorialRoute(
             modifier = modifier,
             mode = TutorialMode.LEARN_BASICS,
+            guidedStage = stage,
             onTutorialCompleted = {
-                phase = GuidedIntroductionPhase.FINAL_VALIDATION
+                currentOnStageCompleted(stage)
+                phase = stage.nextOrNull()?.let(GuidedIntroductionPhase::from)
+                    ?: GuidedIntroductionPhase.FINAL_VALIDATION
             },
             onNavigateBack = onNavigateBack
         )
-        GuidedIntroductionPhase.FINAL_VALIDATION -> FinalValidationRoute(
-            modifier = modifier,
-            onValidationSolved = currentOnIntroductionCompleted,
-            onNavigateBack = onNavigateBack,
-            onReturnToMenuRequested = onNavigateBack
-        )
-    }
+    } ?: FinalValidationRoute(
+        modifier = modifier,
+        onValidationSolved = currentOnIntroductionCompleted,
+        onNavigateBack = onNavigateBack,
+        onReturnToMenuRequested = onNavigateBack
+    )
 }
 
-private enum class GuidedIntroductionPhase {
-    GUIDED_STAGES,
-    FINAL_VALIDATION
+private enum class GuidedIntroductionPhase(val guidedStage: GuidedOnboardingStage?) {
+    NUMBER_PLACEMENT(GuidedOnboardingStage.NUMBER_PLACEMENT),
+    COMPLEMENTARY_PAIR(GuidedOnboardingStage.COMPLEMENTARY_PAIR),
+    HIDDEN_STRIP_VALUE(GuidedOnboardingStage.HIDDEN_STRIP_VALUE),
+    FINAL_VALIDATION(null);
+
+    companion object {
+        fun from(stage: GuidedOnboardingStage): GuidedIntroductionPhase = entries
+            .first { phase -> phase.guidedStage == stage }
+    }
 }
