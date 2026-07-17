@@ -123,6 +123,42 @@ class GameRouteTest {
     }
 
     @Test
+    fun exposes_initial_and_committed_puzzle_changes_to_the_caller() {
+        val observedPuzzle = AtomicReference<Puzzle?>()
+
+        composeTestRule.setContent {
+            NumPairsTheme {
+                GameRoute(
+                    title = "4 pairs",
+                    initialPuzzle = samplePuzzle,
+                    gameSessionKey = "observed-puzzle",
+                    onPuzzleChanged = observedPuzzle::set
+                )
+            }
+        }
+
+        composeTestRule.waitUntil {
+            observedPuzzle.get() == samplePuzzle
+        }
+
+        GameScreenRobot(
+            activity = composeTestRule.activity,
+            interactions = composeTestRule
+        ).tapStripItem(index = 0)
+            .enterStripValue("1")
+            .submitStripEntryInput()
+
+        composeTestRule.waitUntil {
+            observedPuzzle.get()?.strip?.items?.get(0) == StripItem.PlayerEntered(1)
+        }
+
+        assertEquals(
+            StripItem.PlayerEntered(1),
+            observedPuzzle.get()?.strip?.items?.get(0)
+        )
+    }
+
+    @Test
     fun solved_puzzle_shows_the_success_overlay_by_default() {
         composeTestRule.setContent {
             NumPairsTheme {

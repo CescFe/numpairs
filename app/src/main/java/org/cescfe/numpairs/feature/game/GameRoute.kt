@@ -38,6 +38,7 @@ fun GameRoute(
     topBarActions: @Composable RowScope.() -> Unit = {},
     contentBeforePuzzle: @Composable ColumnScope.() -> Unit = {},
     onGameUiStateChanged: (GameUiState) -> Unit = {},
+    onPuzzleChanged: (Puzzle) -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
     val gameViewModel = rememberGameViewModel(
@@ -46,9 +47,13 @@ fun GameRoute(
     )
     val uiState by gameViewModel.uiState.collectAsState()
     val currentOnGameUiStateChanged by rememberUpdatedState(onGameUiStateChanged)
+    val currentOnPuzzleChanged by rememberUpdatedState(onPuzzleChanged)
 
     LaunchedEffect(gameViewModel, puzzleResetKey) {
         gameViewModel.reset(initialPuzzle = initialPuzzle)
+        gameViewModel.currentPuzzle.collect { puzzle ->
+            currentOnPuzzleChanged(puzzle)
+        }
     }
 
     LaunchedEffect(uiState) {
