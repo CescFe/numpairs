@@ -72,6 +72,7 @@ internal class GeneratedPuzzleViewModel(
     private var generationJob: Job? = null
     private var generationToken = 0
     private var activeLaunchIntent: GeneratedModeLaunchIntent? = null
+    private var sessionWriteJob: Job? = null
 
     fun onRouteEntered(launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.DefaultNewPuzzle) {
         if (launchIntent != activeLaunchIntent) {
@@ -138,6 +139,60 @@ internal class GeneratedPuzzleViewModel(
             request = nextRequest(),
             previousSession = state.session
         )
+    }
+
+    fun onPuzzleChanged(expectedSessionId: GeneratedSessionId, puzzle: Puzzle) {
+        if (!updateVisibleSession(expectedSessionId = expectedSessionId, puzzle = puzzle)) {
+            return
+        }
+
+        val precedingWrite = sessionWriteJob
+        sessionWriteJob = viewModelScope.launch {
+            precedingWrite?.join()
+            try {
+                if (puzzle.isSolved) {
+                    generatedSessionRepository.clear(expectedSessionId = expectedSessionId)
+                } else {
+                    generatedSessionRepository.updateCurrentPuzzle(
+                        expectedSessionId = expectedSessionId,
+                        puzzle = puzzle
+                    )
+                }
+            } catch (_: IOException) {
+                // Keep the playable in-memory session when local persistence is temporarily unavailable.
+            }
+        }
+    }
+
+    private fun updateVisibleSession(expectedSessionId: GeneratedSessionId, puzzle: Puzzle): Boolean {
+        val state = _uiState.value
+        val visibleSession = when (state) {
+            is GeneratedPuzzleGenerationUiState.Ready -> state.session
+            is GeneratedPuzzleGenerationUiState.Loading -> state.previousSession
+            is GeneratedPuzzleGenerationUiState.Failed -> state.previousSession
+            GeneratedPuzzleGenerationUiState.Idle,
+            is GeneratedPuzzleGenerationUiState.Restoring,
+            is GeneratedPuzzleGenerationUiState.ResumeUnavailable -> null
+        }
+        if (
+            visibleSession?.id != expectedSessionId ||
+            visibleSession.currentPuzzle == puzzle
+        ) {
+            return false
+        }
+
+        val updatedSession = visibleSession.copy(
+            snapshot = visibleSession.snapshot.copy(currentPuzzle = puzzle)
+        )
+        _uiState.value = when (state) {
+            is GeneratedPuzzleGenerationUiState.Ready -> state.copy(session = updatedSession)
+            is GeneratedPuzzleGenerationUiState.Loading -> state.copy(previousSession = updatedSession)
+            is GeneratedPuzzleGenerationUiState.Failed -> state.copy(previousSession = updatedSession)
+            GeneratedPuzzleGenerationUiState.Idle,
+            is GeneratedPuzzleGenerationUiState.Restoring,
+            is GeneratedPuzzleGenerationUiState.ResumeUnavailable -> state
+        }
+        return true
     }
 
     private fun startResume(launchIntent: GeneratedModeLaunchIntent.ResumeSession) {

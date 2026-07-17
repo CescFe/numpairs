@@ -208,19 +208,7 @@ class GeneratedPuzzleViewModelTest {
     fun resume_rejects_missing_stale_mismatched_and_solved_sessions() {
         val expectedSessionId = GeneratedSessionId("expected")
         val solvedPuzzle = solvedPuzzleWithKnownStripAndAssignments()
-        val solvedInitialPuzzle = solvedPuzzle.copy(
-            board = solvedPuzzle.board.copy(
-                tiles = solvedPuzzle.board.tiles.map { tile ->
-                    tile.copy(
-                        expression = tile.expression.copy(
-                            leftOperand = Expression.Operand.Hidden,
-                            operator = Operator.Hidden,
-                            rightOperand = Expression.Operand.Hidden
-                        )
-                    )
-                }
-            )
-        )
+        val solvedInitialPuzzle = initialPuzzleFor(solvedPuzzle)
         val unavailableSnapshots = listOf(
             null,
             generatedSessionSnapshot(sessionId = "stale"),
@@ -262,6 +250,135 @@ class GeneratedPuzzleViewModelTest {
             assertEquals(0, generationUseCase.requestCount)
             assertTrue(repository.replaceAttempts.isEmpty())
         }
+    }
+
+    @Test
+    fun committed_puzzle_changes_update_the_visible_and_durable_session_in_order() {
+        val firstWriteGate = CompletableDeferred<Unit>()
+        val repository = RecordingGeneratedSessionRepository(firstUpdateGate = firstWriteGate)
+        val viewModel = GeneratedPuzzleViewModel(
+            mode = GeneratedModes.FOUR_PAIRS,
+            generationUseCase = generatedPuzzleUseCase(),
+            generatedSessionRepository = repository,
+            seedSource = QueueGeneratedPuzzleSeedSource(41),
+            sessionIdSource = QueueGeneratedSessionIdSource("active")
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val sessionId = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).session.id
+        val firstPuzzle = samplePuzzle.copy(
+            strip = samplePuzzle.strip.withUpdatedEntry(index = 1, value = 1)
+        )
+        val latestPuzzle = samplePuzzle.copy(
+            strip = samplePuzzle.strip.withUpdatedEntry(index = 1, value = 2)
+        )
+
+        viewModel.onPuzzleChanged(sessionId, firstPuzzle)
+        dispatcher.scheduler.runCurrent()
+        viewModel.onPuzzleChanged(sessionId, latestPuzzle)
+        dispatcher.scheduler.runCurrent()
+
+        val visibleSession = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).session
+        assertEquals(latestPuzzle, visibleSession.currentPuzzle)
+        assertEquals(samplePuzzle, repository.session.value?.currentPuzzle)
+
+        firstWriteGate.complete(Unit)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(listOf(firstPuzzle, latestPuzzle), repository.updateAttempts)
+        assertEquals(latestPuzzle, repository.session.value?.currentPuzzle)
+    }
+
+    @Test
+    fun solved_puzzle_clears_resumability_while_remaining_visible() {
+        val solvedPuzzle = solvedPuzzleWithKnownStripAndAssignments()
+        val initialPuzzle = initialPuzzleFor(solvedPuzzle)
+        val repository = RecordingGeneratedSessionRepository()
+        val viewModel = GeneratedPuzzleViewModel(
+            mode = GeneratedModes.FOUR_PAIRS,
+            generationUseCase = generatedPuzzleUseCase(CompletableDeferred(initialPuzzle)),
+            generatedSessionRepository = repository,
+            seedSource = QueueGeneratedPuzzleSeedSource(43),
+            sessionIdSource = QueueGeneratedSessionIdSource("solved")
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val sessionId = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).session.id
+
+        viewModel.onPuzzleChanged(sessionId, solvedPuzzle)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val visibleSession = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).session
+        assertEquals(solvedPuzzle, visibleSession.currentPuzzle)
+        assertEquals(listOf(sessionId), repository.clearAttempts)
+        assertNull(repository.session.value)
+    }
+
+    @Test
+    fun stale_puzzle_callback_cannot_change_a_replacement_session() {
+        val replacementPuzzle = CompletableDeferred<Puzzle>()
+        val repository = RecordingGeneratedSessionRepository()
+        val viewModel = GeneratedPuzzleViewModel(
+            mode = GeneratedModes.FOUR_PAIRS,
+            generationUseCase = QueueGeneratedPuzzleUseCase(
+                CompletableDeferred(samplePuzzle),
+                replacementPuzzle
+            ),
+            generatedSessionRepository = repository,
+            seedSource = QueueGeneratedPuzzleSeedSource(47, 53),
+            sessionIdSource = QueueGeneratedSessionIdSource("previous", "replacement")
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val previousSession = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).session
+
+        viewModel.onNewPuzzleRequested()
+        dispatcher.scheduler.runCurrent()
+        replacementPuzzle.complete(samplePuzzle)
+        dispatcher.scheduler.advanceUntilIdle()
+        val replacementSession = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).session
+        val stalePuzzle = samplePuzzle.copy(
+            strip = samplePuzzle.strip.withUpdatedEntry(index = 1, value = 2)
+        )
+
+        viewModel.onPuzzleChanged(previousSession.id, stalePuzzle)
+        viewModel.onPuzzleChanged(previousSession.id, solvedPuzzleWithKnownStripAndAssignments())
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(GeneratedSessionId("replacement"), replacementSession.id)
+        assertEquals(replacementSession.snapshot, repository.session.value)
+        assertTrue(repository.updateAttempts.isEmpty())
+        assertTrue(repository.clearAttempts.isEmpty())
+    }
+
+    @Test
+    fun cancelling_replacement_keeps_the_previous_session_visible_and_stored() {
+        val replacementPuzzle = CompletableDeferred<Puzzle>()
+        val repository = RecordingGeneratedSessionRepository()
+        val viewModel = GeneratedPuzzleViewModel(
+            mode = GeneratedModes.FOUR_PAIRS,
+            generationUseCase = QueueGeneratedPuzzleUseCase(
+                CompletableDeferred(samplePuzzle),
+                replacementPuzzle
+            ),
+            generatedSessionRepository = repository,
+            seedSource = QueueGeneratedPuzzleSeedSource(59, 61),
+            sessionIdSource = QueueGeneratedSessionIdSource("previous", "cancelled")
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val previousSession = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).session
+
+        viewModel.onNewPuzzleRequested()
+        dispatcher.scheduler.runCurrent()
+        viewModel.onRouteExited()
+        replacementPuzzle.complete(samplePuzzle)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val loading = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Loading
+        assertEquals(previousSession, loading.previousSession)
+        assertEquals(previousSession.snapshot, repository.session.value)
+        assertEquals(1, repository.replaceAttempts.size)
     }
 }
 
@@ -322,6 +439,17 @@ private class UnexpectedGeneratedPuzzleUseCase : GeneratedPuzzleGenerationUseCas
     }
 }
 
+private class QueueGeneratedPuzzleUseCase(private vararg val puzzles: CompletableDeferred<Puzzle>) :
+    GeneratedPuzzleGenerationUseCase {
+    private val remainingPuzzles = ArrayDeque(puzzles.toList())
+
+    override suspend fun generate(request: GeneratedPuzzleGenerationRequest): GeneratedPuzzleGenerationResult =
+        GeneratedPuzzleGenerationResult.Generated(
+            request = request,
+            initialPuzzle = remainingPuzzles.removeFirst().await()
+        )
+}
+
 private class QueueGeneratedPuzzleSeedSource(vararg seeds: Int) : GeneratedPuzzleSeedSource {
     private val values = ArrayDeque(seeds.toList())
 
@@ -337,11 +465,15 @@ private class QueueGeneratedSessionIdSource(vararg ids: String) : GeneratedSessi
 private class RecordingGeneratedSessionRepository(
     initialSession: GeneratedSessionSnapshot? = null,
     private val writeGate: CompletableDeferred<Unit>? = null,
-    private val replaceFailure: IOException? = null
+    private val replaceFailure: IOException? = null,
+    firstUpdateGate: CompletableDeferred<Unit>? = null
 ) : GeneratedSessionRepository {
     private val mutableSession = MutableStateFlow(initialSession)
+    private var pendingUpdateGate = firstUpdateGate
     override val session: StateFlow<GeneratedSessionSnapshot?> = mutableSession.asStateFlow()
     val replaceAttempts = mutableListOf<GeneratedSessionSnapshot>()
+    val updateAttempts = mutableListOf<Puzzle>()
+    val clearAttempts = mutableListOf<GeneratedSessionId>()
 
     override suspend fun replace(snapshot: GeneratedSessionSnapshot) {
         replaceAttempts += snapshot
@@ -353,6 +485,11 @@ private class RecordingGeneratedSessionRepository(
     }
 
     override suspend fun updateCurrentPuzzle(expectedSessionId: GeneratedSessionId, puzzle: Puzzle): Boolean {
+        updateAttempts += puzzle
+        pendingUpdateGate?.let { gate ->
+            pendingUpdateGate = null
+            gate.await()
+        }
         val snapshot = mutableSession.value
         if (snapshot?.sessionId != expectedSessionId) {
             return false
@@ -363,6 +500,7 @@ private class RecordingGeneratedSessionRepository(
     }
 
     override suspend fun clear(expectedSessionId: GeneratedSessionId): Boolean {
+        clearAttempts += expectedSessionId
         if (mutableSession.value?.sessionId != expectedSessionId) {
             return false
         }
@@ -385,4 +523,18 @@ private fun generatedSessionSnapshot(
     seed = 7,
     initialPuzzle = initialPuzzle,
     currentPuzzle = currentPuzzle
+)
+
+private fun initialPuzzleFor(solvedPuzzle: Puzzle): Puzzle = solvedPuzzle.copy(
+    board = solvedPuzzle.board.copy(
+        tiles = solvedPuzzle.board.tiles.map { tile ->
+            tile.copy(
+                expression = tile.expression.copy(
+                    leftOperand = Expression.Operand.Hidden,
+                    operator = Operator.Hidden,
+                    rightOperand = Expression.Operand.Hidden
+                )
+            )
+        }
+    )
 )
