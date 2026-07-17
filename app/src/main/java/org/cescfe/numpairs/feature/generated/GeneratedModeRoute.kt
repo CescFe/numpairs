@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
 import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.GameRoute
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
@@ -37,6 +38,7 @@ fun GeneratedModeRoute(
     mode: GeneratedModeConfiguration,
     title: String,
     generationUseCase: GeneratedPuzzleGenerationUseCase,
+    generatedSessionRepository: GeneratedSessionRepository,
     modifier: Modifier = Modifier,
     isRulesHelperEnabled: Boolean = false,
     isRulesHelperActionDiscoveryDotVisible: Boolean = false,
@@ -47,7 +49,8 @@ fun GeneratedModeRoute(
 ) {
     val viewModel = rememberGeneratedPuzzleViewModel(
         mode = mode,
-        generationUseCase = generationUseCase
+        generationUseCase = generationUseCase,
+        generatedSessionRepository = generatedSessionRepository
     )
     val uiState by viewModel.uiState.collectAsState()
 
@@ -135,7 +138,7 @@ private fun GeneratedPuzzleGameContent(
     Box(modifier = modifier.fillMaxSize()) {
         GameRoute(
             title = title,
-            initialPuzzle = session.initialPuzzle,
+            initialPuzzle = session.currentPuzzle,
             gameSessionKey = session.request.profileId.value,
             puzzleResetKey = session.id,
             completionActions = GameCompletionActions(
@@ -269,17 +272,19 @@ private fun GeneratedPuzzleFailureDialog(onRetry: () -> Unit, onNavigateBack: ()
 @Composable
 private fun rememberGeneratedPuzzleViewModel(
     mode: GeneratedModeConfiguration,
-    generationUseCase: GeneratedPuzzleGenerationUseCase
+    generationUseCase: GeneratedPuzzleGenerationUseCase,
+    generatedSessionRepository: GeneratedSessionRepository
 ): GeneratedPuzzleViewModel {
     val activity = LocalContext.current.findComponentActivity()
         ?: error("GeneratedModeRoute requires a ComponentActivity host.")
 
-    return remember(activity, mode.id, generationUseCase) {
+    return remember(activity, mode.id, generationUseCase, generatedSessionRepository) {
         ViewModelProvider(
             activity,
             GeneratedPuzzleViewModelFactory(
                 mode = mode,
-                generationUseCase = generationUseCase
+                generationUseCase = generationUseCase,
+                generatedSessionRepository = generatedSessionRepository
             )
         )["generated-puzzle-${mode.id.value}", GeneratedPuzzleViewModel::class.java]
     }
@@ -287,7 +292,8 @@ private fun rememberGeneratedPuzzleViewModel(
 
 private class GeneratedPuzzleViewModelFactory(
     private val mode: GeneratedModeConfiguration,
-    private val generationUseCase: GeneratedPuzzleGenerationUseCase
+    private val generationUseCase: GeneratedPuzzleGenerationUseCase,
+    private val generatedSessionRepository: GeneratedSessionRepository
 ) : ViewModelProvider.Factory {
     override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
         require(modelClass.isAssignableFrom(GeneratedPuzzleViewModel::class.java)) {
@@ -298,7 +304,8 @@ private class GeneratedPuzzleViewModelFactory(
             modelClass.cast(
                 GeneratedPuzzleViewModel(
                     mode = mode,
-                    generationUseCase = generationUseCase
+                    generationUseCase = generationUseCase,
+                    generatedSessionRepository = generatedSessionRepository
                 )
             )
         )

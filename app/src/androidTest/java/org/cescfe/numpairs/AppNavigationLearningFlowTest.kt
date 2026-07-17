@@ -14,6 +14,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
 import org.cescfe.numpairs.data.onboarding.OnboardingPostCorePath
 import org.cescfe.numpairs.data.onboarding.OnboardingStageCheckpoint
@@ -108,6 +109,7 @@ class AppNavigationLearningFlowTest {
             NumPairsTheme {
                 AppNavigation(
                     onboardingRepository = onboardingRepository,
+                    generatedSessionRepository = FakeGeneratedSessionRepository(),
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository,
                     generatedModeRegistry = GeneratedModes.registry,
                     generatedPuzzleGenerationUseCaseFactory = fourPairsProviderFactory(puzzleProvider = puzzleProvider)

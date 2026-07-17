@@ -14,6 +14,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
@@ -169,6 +170,7 @@ class FourPairsCompletionActionsTest {
             NumPairsTheme {
                 AppNavigation(
                     onboardingRepository = FakeOnboardingRepository(),
+                    generatedSessionRepository = FakeGeneratedSessionRepository(),
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository,
                     generatedModeRegistry = GeneratedModes.registry,
                     generatedPuzzleGenerationUseCaseFactory = fourPairsProviderFactory(puzzleProvider = puzzleProvider)

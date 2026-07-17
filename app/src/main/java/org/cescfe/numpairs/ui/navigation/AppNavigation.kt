@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.OnboardingRepository
 import org.cescfe.numpairs.data.onboarding.OnboardingState
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryRepository
@@ -32,6 +33,7 @@ sealed interface AppDestination {
 @Composable
 fun AppNavigation(
     onboardingRepository: OnboardingRepository,
+    generatedSessionRepository: GeneratedSessionRepository,
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     generatedModeRegistry: GeneratedModeRegistry,
     generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory,
@@ -48,6 +50,7 @@ fun AppNavigation(
             modifier = modifier
         )
         else -> UnlockedAppNavigation(
+            generatedSessionRepository = generatedSessionRepository,
             topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
             generatedModeRegistry = generatedModeRegistry,
             generatedPuzzleGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory,
@@ -59,6 +62,7 @@ fun AppNavigation(
 
 @Composable
 private fun UnlockedAppNavigation(
+    generatedSessionRepository: GeneratedSessionRepository,
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     generatedModeRegistry: GeneratedModeRegistry,
     generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory,
@@ -104,6 +108,7 @@ private fun UnlockedAppNavigation(
                     modifier = modifier,
                     mode = mode,
                     generationUseCase = generationUseCase,
+                    generatedSessionRepository = generatedSessionRepository,
                     topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
                     onNavigateBack = navigateToMenu
                 )
@@ -114,6 +119,7 @@ private fun UnlockedAppNavigation(
                         stringResource(id = titleResourceId)
                     } ?: mode.id.value,
                     generationUseCase = generationUseCase,
+                    generatedSessionRepository = generatedSessionRepository,
                     modifier = modifier,
                     onNavigateBack = navigateToMenu
                 )

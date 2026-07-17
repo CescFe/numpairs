@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryState
@@ -37,6 +38,7 @@ class FourPairsActionDiscoveryTest {
             NumPairsTheme {
                 FourPairsRoute(
                     generationUseCase = generatedPuzzleUseCase(puzzle = samplePuzzle),
+                    generatedSessionRepository = FakeGeneratedSessionRepository(),
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository
                 )
             }
@@ -70,6 +72,7 @@ class FourPairsActionDiscoveryTest {
             NumPairsTheme {
                 FourPairsRoute(
                     generationUseCase = generatedPuzzleUseCase(puzzle = samplePuzzle),
+                    generatedSessionRepository = FakeGeneratedSessionRepository(),
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository
                 )
             }

@@ -2,6 +2,8 @@ package org.cescfe.numpairs.feature.generated
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import java.io.IOException
+import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
@@ -9,6 +11,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
+import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
+import org.cescfe.numpairs.data.generated.session.GeneratedSessionSnapshot
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
@@ -18,6 +23,20 @@ fun interface GeneratedPuzzleSeedSource {
 
 internal object ThreadLocalGeneratedPuzzleSeedSource : GeneratedPuzzleSeedSource {
     override fun nextSeed(): Int = ThreadLocalRandom.current().nextInt()
+}
+
+fun interface GeneratedSessionIdSource {
+    fun nextId(): GeneratedSessionId
+}
+
+internal object UuidGeneratedSessionIdSource : GeneratedSessionIdSource {
+    override fun nextId(): GeneratedSessionId = GeneratedSessionId(UUID.randomUUID().toString())
+}
+
+internal sealed interface GeneratedPuzzlePreparationFailure {
+    data class Generation(val result: GeneratedPuzzleGenerationResult.Failed) : GeneratedPuzzlePreparationFailure
+
+    data object Persistence : GeneratedPuzzlePreparationFailure
 }
 
 internal sealed interface GeneratedPuzzleGenerationUiState {
@@ -30,7 +49,7 @@ internal sealed interface GeneratedPuzzleGenerationUiState {
 
     data class Failed(
         val request: GeneratedPuzzleGenerationRequest,
-        val failure: GeneratedPuzzleGenerationResult.Failed,
+        val failure: GeneratedPuzzlePreparationFailure,
         val previousSession: GeneratedModeGameSession?
     ) : GeneratedPuzzleGenerationUiState
 }
@@ -38,14 +57,15 @@ internal sealed interface GeneratedPuzzleGenerationUiState {
 internal class GeneratedPuzzleViewModel(
     private val mode: GeneratedModeConfiguration,
     private val generationUseCase: GeneratedPuzzleGenerationUseCase,
-    private val seedSource: GeneratedPuzzleSeedSource = ThreadLocalGeneratedPuzzleSeedSource
+    private val generatedSessionRepository: GeneratedSessionRepository,
+    private val seedSource: GeneratedPuzzleSeedSource = ThreadLocalGeneratedPuzzleSeedSource,
+    private val sessionIdSource: GeneratedSessionIdSource = UuidGeneratedSessionIdSource
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<GeneratedPuzzleGenerationUiState>(GeneratedPuzzleGenerationUiState.Idle)
     val uiState: StateFlow<GeneratedPuzzleGenerationUiState> = _uiState.asStateFlow()
 
     private var generationJob: Job? = null
     private var generationToken = 0
-    private var nextSessionId = 0
 
     fun onRouteEntered() {
         if (generationJob != null) {
@@ -106,29 +126,62 @@ internal class GeneratedPuzzleViewModel(
                 return@launch
             }
 
-            generationJob = null
-            _uiState.value = when (outcome) {
+            val nextState = when (outcome) {
                 is GeneratedPuzzleGenerationResult.Generated -> {
-                    GeneratedPuzzleGenerationUiState.Ready(
-                        session = GeneratedModeGameSession(
-                            id = nextSessionId++,
-                            initialPuzzle = outcome.initialPuzzle,
-                            request = outcome.request
-                        )
+                    prepareGeneratedSession(
+                        outcome = outcome,
+                        previousSession = previousSession
                     )
                 }
 
                 is GeneratedPuzzleGenerationResult.Failed -> {
                     GeneratedPuzzleGenerationUiState.Failed(
                         request = outcome.request,
-                        failure = outcome,
+                        failure = GeneratedPuzzlePreparationFailure.Generation(outcome),
                         previousSession = previousSession
                     )
                 }
             }
+            if (token != generationToken) {
+                return@launch
+            }
+
+            generationJob = null
+            _uiState.value = nextState
         }
         generationJob = job
         job.start()
+    }
+
+    private suspend fun prepareGeneratedSession(
+        outcome: GeneratedPuzzleGenerationResult.Generated,
+        previousSession: GeneratedModeGameSession?
+    ): GeneratedPuzzleGenerationUiState {
+        val sessionId = sessionIdSource.nextId()
+        val snapshot = GeneratedSessionSnapshot(
+            sessionId = sessionId,
+            modeId = mode.id.value,
+            profileId = outcome.request.profileId.value,
+            seed = outcome.request.seed,
+            initialPuzzle = outcome.initialPuzzle,
+            currentPuzzle = outcome.initialPuzzle
+        )
+
+        return try {
+            generatedSessionRepository.replace(snapshot)
+            GeneratedPuzzleGenerationUiState.Ready(
+                session = GeneratedModeGameSession(
+                    snapshot = snapshot,
+                    request = outcome.request
+                )
+            )
+        } catch (_: IOException) {
+            GeneratedPuzzleGenerationUiState.Failed(
+                request = outcome.request,
+                failure = GeneratedPuzzlePreparationFailure.Persistence,
+                previousSession = previousSession
+            )
+        }
     }
 
     private fun nextRequest(): GeneratedPuzzleGenerationRequest = GeneratedPuzzleGenerationRequest(
@@ -138,7 +191,24 @@ internal class GeneratedPuzzleViewModel(
 }
 
 internal data class GeneratedModeGameSession(
-    val id: Int,
-    val initialPuzzle: Puzzle,
+    val snapshot: GeneratedSessionSnapshot,
     val request: GeneratedPuzzleGenerationRequest
-)
+) {
+    init {
+        require(snapshot.profileId == request.profileId.value) {
+            "Generated game session profile must match its generation request."
+        }
+        require(snapshot.seed == request.seed) {
+            "Generated game session seed must match its generation request."
+        }
+    }
+
+    val id: GeneratedSessionId
+        get() = snapshot.sessionId
+
+    val initialPuzzle: Puzzle
+        get() = snapshot.initialPuzzle
+
+    val currentPuzzle: Puzzle
+        get() = snapshot.currentPuzzle
+}

@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryState
 import org.cescfe.numpairs.feature.game.ui.actions.HintAction
@@ -25,6 +26,7 @@ import org.cescfe.numpairs.feature.tutorial.TutorialOverlayHost
 @Composable
 fun FourPairsRoute(
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
+    generatedSessionRepository: GeneratedSessionRepository,
     modifier: Modifier = Modifier,
     generationUseCase: GeneratedPuzzleGenerationUseCase,
     mode: GeneratedModeConfiguration = GeneratedModes.FOUR_PAIRS,
@@ -55,6 +57,7 @@ fun FourPairsRoute(
             mode = mode,
             title = stringResource(R.string.four_pairs_screen_title),
             generationUseCase = generationUseCase,
+            generatedSessionRepository = generatedSessionRepository,
             isRulesHelperEnabled = true,
             isRulesHelperActionDiscoveryDotVisible = actionDiscoveryState?.hasSeenHelpAction == false,
             onRulesHelperActionTapped = {
