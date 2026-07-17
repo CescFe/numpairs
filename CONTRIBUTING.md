@@ -4,15 +4,31 @@ Thank you for contributing to NumPairs. The project uses small, issue-driven cha
 
 Repository automation instructions live in [AGENTS.md](AGENTS.md). This guide presents the same workflow for human contributors.
 
-## Before Starting
+## Requesting An Issue
 
-Every change should have a focused GitHub issue. Select the appropriate template:
+Use an issue to request a focused change for a future contributor. Select the appropriate template:
 
 - [Feature request](.github/ISSUE_TEMPLATE/feature.md)
 - [Bug report](.github/ISSUE_TEMPLATE/bug.md)
 - [User story](.github/ISSUE_TEMPLATE/user-story.md)
 
-For milestone work, confirm the current milestone, Project iteration, and starting work reference before creating a branch. These are delivery-specific values and should not be copied from an earlier milestone.
+Describe the context, requested outcome, and verifiable acceptance criteria without assuming that implementation has started. Add the issue to Project 11 with Project `Status: Backlog`, not `Ready For Dev` or `In Progress`.
+
+`Ready For Dev` is reserved for refined, atomic work that maintainers or an authorized planning workflow have prepared for implementation.
+
+## Implementing An Existing Issue
+
+Contributors implement an existing issue rather than creating a duplicate. Before editing code:
+
+1. Read the complete issue and its acceptance criteria.
+2. Confirm that the work is not already assigned or in progress.
+3. Confirm the current milestone, Project iteration, and work reference.
+4. Change the issue's Project `Status` to `In Progress`.
+5. Create a focused branch from an up-to-date `main`.
+
+An issue selected from `Backlog` can move directly to `In Progress` when a contributor begins implementation. A planned issue may already be in `Ready For Dev`; it must still move to `In Progress` before work starts.
+
+Milestone, iteration, and starting work reference are delivery-specific values and should not be copied from an earlier delivery batch.
 
 Unless a delivery batch specifies otherwise, feature tasks use:
 
@@ -21,8 +37,10 @@ Unless a delivery batch specifies otherwise, feature tasks use:
 - type `Task`
 - issue fields `Priority: Medium` and `Effort: Low`
 - [NumPairs Project 11](https://github.com/orgs/CescFe/projects/11)
-- Project fields `Priority: P2` and `Size: xs`
+- Project field `Size: xs`
 - the iteration and milestone selected for the current delivery batch
+
+Project `Priority` can be `P0`, `P1`, `P2`, or `P3`. Unless the delivery batch specifies a priority, use the same Project `Priority` as the most recently worked issue. Ask when there is no previous issue from which to inherit it.
 
 Issues should be atomic: one independently reviewable outcome, one branch, and one Pull Request.
 
@@ -106,6 +124,8 @@ Example:
 ```
 
 The project uses squash and merge. Required checks must pass before merging. A Pull Request must remain unmerged when the requester asks to review it first.
+
+Before merging, re-read every acceptance criterion in the associated issue. Check the box for each criterion that the implementation and validation evidence satisfy. Leave unmet criteria unchecked, and do not merge while a required criterion remains unmet.
 
 ## Completing A Milestone
 

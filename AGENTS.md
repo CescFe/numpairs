@@ -8,7 +8,6 @@ These instructions apply to the complete NumPairs repository. User instructions 
 - Use [the bug issue template](.github/ISSUE_TEMPLATE/bug.md) for defects.
 - Use [the user-story template](.github/ISSUE_TEMPLATE/user-story.md) when the requested unit of work is a user story.
 - Use [the Pull Request template](.github/pull_request_template.md) for every Pull Request.
-- Use [CONTRIBUTING.md](CONTRIBUTING.md) for the contributor-facing explanation of this workflow.
 
 Do not duplicate complete templates in issues or documentation. Follow the repository template and replace its prompts with task-specific content.
 
@@ -32,10 +31,17 @@ Unless the task specifies otherwise, use:
 - issue field `Priority`: `Medium`
 - issue field `Effort`: `Low`
 - GitHub Project: `https://github.com/orgs/CescFe/projects/11`
-- Project field `Priority`: `P2`
 - Project field `Size`: `xs`
 
 Use the iteration and milestone specified for the current delivery batch. Do not attach new work to a closed milestone unless the user explicitly requests it.
+
+Project `Priority` is contextual and ranges from `P0` to `P3`. Unless the user specifies a value, inspect the most recently worked issue and reuse its Project `Priority`. Do not treat `P2` or any other priority as a permanent default. If there is no previous issue from which to inherit priority, ask for it.
+
+Set Project `Status` according to how the issue enters the workflow:
+
+- `Backlog` when a user is requesting future work and is not starting implementation.
+- `Ready For Dev` when an authorized planning task creates an atomic, refined issue that is ready to be implemented.
+- `In Progress` immediately before implementation begins on an existing issue.
 
 Resolve GitHub node IDs, field IDs, option IDs, and iteration IDs through the GitHub API. Treat these identifiers as opaque and do not store previously observed values as permanent repository configuration.
 
@@ -49,6 +55,7 @@ For milestone delivery:
 4. Give each issue one observable outcome and one Pull Request.
 5. Write each issue in English using the selected issue template.
 6. Apply the required assignee, label, type, issue fields, Project fields, iteration, and milestone.
+7. Set Project `Status` to `Ready For Dev` for each planned issue.
 
 Do not combine unrelated product behavior, refactors, or documentation in one issue merely to reduce the number of Pull Requests.
 
@@ -127,21 +134,32 @@ When a merge is authorized, use squash and merge with this squash commit title:
 
 Do not merge while a required check is pending, unexpectedly skipped, cancelled, or failing. Merge only when the user requested an end-to-end merge cycle. If the user asks to review the Pull Request first or explicitly says not to merge, stop after creating and reporting the Pull Request.
 
+Before any authorized merge:
+
+1. Re-read the associated issue's acceptance criteria.
+2. Verify every criterion against the implemented change and available validation evidence.
+3. Mark each fulfilled acceptance-criteria checkbox as complete in the issue.
+4. Leave unmet criteria unchecked and do not merge while a required criterion remains unmet.
+
+Do not mark criteria complete merely because implementation has ended or checks are green.
+
 ## Implementation Cycle
 
 For each authorized issue:
 
-1. Update local `main` from `origin/main`.
-2. Create the issue branch using the assigned work reference.
-3. Implement only the issue acceptance criteria.
-4. Validate in proportion to the change.
-5. Review `git diff` and `git diff --check`.
-6. Commit using the required convention.
-7. Push the branch.
-8. Open and configure the Pull Request.
-9. Wait for required GitHub checks when a merge is part of the requested cycle.
-10. If checks pass and merge is authorized, squash and merge with the required title.
-11. Update local `main` before starting the next issue.
+1. Set the issue's Project `Status` to `In Progress`.
+2. Update local `main` from `origin/main`.
+3. Create the issue branch using the assigned work reference.
+4. Implement only the issue acceptance criteria.
+5. Validate in proportion to the change.
+6. Review `git diff` and `git diff --check`.
+7. Commit using the required convention.
+8. Push the branch.
+9. Open and configure the Pull Request.
+10. Wait for required GitHub checks when a merge is part of the requested cycle.
+11. Review the associated issue's acceptance criteria and mark only fulfilled criteria complete.
+12. If checks pass, every required criterion is fulfilled, and merge is authorized, squash and merge with the required title.
+13. Update local `main` before starting the next issue.
 
 Do not start dependent implementation from an unmerged branch when the requested workflow requires sequential integration into `main`.
 

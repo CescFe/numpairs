@@ -18,17 +18,23 @@ Commands and results:
 Add the verification commands and results here.
 ```
 
+## Acceptance Criteria
+
+- [ ] Every acceptance criterion in the linked issue has been reviewed against the implementation.
+- [ ] Every fulfilled acceptance-criteria checkbox has been marked complete in the linked issue.
+- [ ] No required acceptance criterion remains unmet before merge.
+
 ## Delivery Metadata
 
 - Work reference:
 - Branch:
 - Primary label:
+- Project status: `In Progress`
 - Intended squash title: `[{reference}] {Relevant sentence-case message}`
 
 ## Review Readiness
 
 - [ ] The change is limited to the related issue.
-- [ ] The issue acceptance criteria are satisfied.
 - [ ] User-facing copy is localized where required.
 - [ ] Documentation and relative links are updated where required.
 - [ ] No emulator or connected-device test was started.
