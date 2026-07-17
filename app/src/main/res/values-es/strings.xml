@@ -4,6 +4,8 @@
     <string name="back_button_content_description">Atrás</string>
 
     <!-- Menu screen -->
+    <string name="menu_resume_button">Continuar</string>
+    <string name="menu_resume_content_description">Continuar puzle de %1$s</string>
     <string name="menu_tutorial_button">Cómo jugar</string>
     <string name="menu_four_pairs_button">Jugar 4 pares</string>
     <string name="menu_eight_pairs_button">Jugar 8 pares</string>

@@ -4,6 +4,8 @@
     <string name="back_button_content_description">Back</string>
 
     <!-- Menu screen -->
+    <string name="menu_resume_button">Resume</string>
+    <string name="menu_resume_content_description">Resume %1$s puzzle</string>
     <string name="menu_tutorial_button">How to play</string>
     <string name="menu_four_pairs_button">Play 4 pairs</string>
     <string name="menu_eight_pairs_button">Play 8 pairs</string>

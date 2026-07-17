@@ -73,6 +73,10 @@ private fun UnlockedAppNavigation(
     modifier: Modifier,
     startDestination: AppDestination
 ) {
+    val generatedSessionSnapshot by generatedSessionRepository.session.collectAsState(initial = null)
+    val resumableSession = generatedSessionSnapshot.toResumableGeneratedSessionOrNull(
+        modeRegistry = generatedModeRegistry
+    )
     var currentDestination by remember(startDestination) {
         mutableStateOf(startDestination)
     }
@@ -87,6 +91,21 @@ private fun UnlockedAppNavigation(
     when (val destination = currentDestination) {
         AppDestination.Menu -> MenuRoute(
             modifier = modifier,
+            resumeModeName = resumableSession?.mode?.let { mode ->
+                mode.titleResourceIdOrNull()?.let { titleResourceId ->
+                    stringResource(id = titleResourceId)
+                } ?: mode.id.value
+            },
+            onResumeSelected = {
+                resumableSession?.let { session ->
+                    currentDestination = AppDestination.GeneratedMode(
+                        modeId = session.mode.id,
+                        launchIntent = GeneratedModeLaunchIntent.ResumeSession(
+                            expectedSessionId = session.sessionId
+                        )
+                    )
+                }
+            },
             onTutorialSelected = {
                 currentDestination = AppDestination.Tutorial
             },
