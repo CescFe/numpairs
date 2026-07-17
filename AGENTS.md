@@ -117,7 +117,6 @@ Pull Requests must:
 - link the issue with `Closes #{issue_number}`
 - be assigned to `FrancescFe` unless specified otherwise
 - use the issue's primary label, normally `feat` for feature work
-- state the work reference and verification performed
 - contain only the associated issue's scope
 
 Pull Request title format:

@@ -105,9 +105,6 @@ Push the issue branch and open a ready-for-review Pull Request against `main`. C
 
 - the closing issue reference
 - a concise outcome-oriented summary
-- the commands or checks used for verification
-- the work reference
-- the intended squash title
 
 Assign the Pull Request to `FrancescFe` and apply the issue's primary label unless the delivery batch specifies different metadata.
 
