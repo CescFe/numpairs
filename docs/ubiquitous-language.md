@@ -13,6 +13,26 @@ A replayable gameplay configuration identified by a stable generated-mode identi
 
 A generated mode resolves to one difficulty profile in the application layer. The mode identity is used for profile selection, navigation, and game-session identity; Android strings and mode-specific learning capabilities remain outside the profile.
 
+## Generated Session
+A playable generated-puzzle lifecycle identified by a stable session identity.
+
+NumPairs owns at most one generated session slot for the application, shared by all generated modes. A generated session carries its mode, profile, seed metadata, exact initial puzzle, and exact current puzzle.
+
+## Resumable Generated Session
+The generated session currently stored in the application-wide slot when its current puzzle is valid, belongs to a configured mode/profile, and is not solved.
+
+An opened but untouched generated puzzle is resumable. A solved, stale, mismatched, corrupt, unsupported, or missing snapshot is not resumable.
+
+## Generated Session Snapshot
+The versioned local representation of one generated session.
+
+The snapshot preserves stable session, mode, profile, board, tile, expression, strip-entry, and strip-item identity needed to restore the exact current puzzle. Its seed is metadata; the snapshot is not restored by regenerating from the seed.
+
+## Current Puzzle
+The latest committed domain state of the puzzle being played in a generated session.
+
+Current puzzle changes include committed strip values, operand assignments, operator assignments, and tile resets. Transient presentation state such as drafts, open selectors, dialogs, overlays, highlights, and scroll position is not part of the current puzzle.
+
 ## Tutorial
 A gameplay mode that teaches the core NumPairs rules through authored content and guided player practice.
 
