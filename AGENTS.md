@@ -114,7 +114,7 @@ Pull Requests must:
 - target `main`
 - be ready for review rather than draft unless the user requests a draft
 - use the repository Pull Request template
-- link the issue with `Closes #{issue_number}`
+- link the issue with `Resolves #{issue_number}`
 - be assigned to `FrancescFe` unless specified otherwise
 - use the issue's primary label, normally `feat` for feature work
 - contain only the associated issue's scope

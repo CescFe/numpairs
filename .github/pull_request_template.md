@@ -1,8 +1,7 @@
 ## Related Issue
 
-Closes #
+Resolves #
 
 ## Summary
 
 - Describe the outcome of this Pull Request.
-___
