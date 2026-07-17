@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.domain.puzzle.model.Board
@@ -112,6 +113,7 @@ class EightPairsModeTest {
             NumPairsTheme {
                 AppNavigation(
                     onboardingRepository = FakeOnboardingRepository(),
+                    generatedSessionRepository = FakeGeneratedSessionRepository(),
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
                     generatedModeRegistry = GeneratedModes.registry,
                     generatedPuzzleGenerationUseCaseFactory = eightPairsProviderFactory(puzzleProvider = puzzleProvider)

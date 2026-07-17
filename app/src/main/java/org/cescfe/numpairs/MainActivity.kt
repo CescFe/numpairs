@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import org.cescfe.numpairs.data.generated.session.createGeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.createOnboardingRuntime
 import org.cescfe.numpairs.data.preferences.createTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.feature.generated.ConfiguredGeneratedPuzzleGenerationUseCaseFactory
@@ -20,6 +21,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val onboardingRuntime = createOnboardingRuntime(applicationContext)
+        val generatedSessionRepository = createGeneratedSessionRepository(applicationContext)
         val topAppBarActionDiscoveryRepository = createTopAppBarActionDiscoveryRepository(applicationContext)
         val generatedModeRegistry = GeneratedModes.registry
         val generatedPuzzleGenerationUseCaseFactory = ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
@@ -33,6 +35,7 @@ class MainActivity : ComponentActivity() {
             NumPairsTheme {
                 AppNavigation(
                     onboardingRepository = onboardingRuntime.repository,
+                    generatedSessionRepository = generatedSessionRepository,
                     topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
                     generatedModeRegistry = generatedModeRegistry,
                     generatedPuzzleGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory

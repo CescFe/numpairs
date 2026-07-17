@@ -10,6 +10,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.CompletableDeferred
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationFailureReason
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
@@ -39,7 +40,8 @@ class GeneratedPuzzleGenerationRouteTest {
                 GeneratedModeRoute(
                     mode = GeneratedModes.FOUR_PAIRS,
                     title = "4 pairs",
-                    generationUseCase = useCase
+                    generationUseCase = useCase,
+                    generatedSessionRepository = FakeGeneratedSessionRepository()
                 )
             }
         }

@@ -1,11 +1,18 @@
 package org.cescfe.numpairs.feature.generated
 
+import java.io.IOException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
+import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
+import org.cescfe.numpairs.data.generated.session.GeneratedSessionSnapshot
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationFailureReason
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
@@ -13,6 +20,7 @@ import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGeneration
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -32,6 +40,39 @@ class GeneratedPuzzleViewModelTest {
     }
 
     @Test
+    fun successful_generation_is_persisted_before_readiness() {
+        val writeGate = CompletableDeferred<Unit>()
+        val repository = RecordingGeneratedSessionRepository(writeGate = writeGate)
+        val viewModel = GeneratedPuzzleViewModel(
+            mode = GeneratedModes.FOUR_PAIRS,
+            generationUseCase = generatedPuzzleUseCase(),
+            generatedSessionRepository = repository,
+            seedSource = QueueGeneratedPuzzleSeedSource(17),
+            sessionIdSource = QueueGeneratedSessionIdSource("stable-session")
+        )
+
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.runCurrent()
+
+        assertTrue(viewModel.uiState.value is GeneratedPuzzleGenerationUiState.Loading)
+        val attemptedSnapshot = repository.replaceAttempts.single()
+        assertEquals(GeneratedSessionId("stable-session"), attemptedSnapshot.sessionId)
+        assertEquals(GeneratedModes.FOUR_PAIRS.id.value, attemptedSnapshot.modeId)
+        assertEquals(GeneratedModes.FOUR_PAIRS.profile.id.value, attemptedSnapshot.profileId)
+        assertEquals(17, attemptedSnapshot.seed)
+        assertEquals(samplePuzzle, attemptedSnapshot.initialPuzzle)
+        assertEquals(samplePuzzle, attemptedSnapshot.currentPuzzle)
+        assertNull(repository.session.value)
+
+        writeGate.complete(Unit)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val ready = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready
+        assertEquals(attemptedSnapshot, repository.session.value)
+        assertEquals(attemptedSnapshot, ready.session.snapshot)
+    }
+
+    @Test
     fun replay_is_deduplicated_and_a_failure_keeps_the_completed_session_until_retry_succeeds() {
         val firstPuzzle = CompletableDeferred(samplePuzzle)
         val replayFailure = CompletableDeferred(true)
@@ -41,10 +82,13 @@ class GeneratedPuzzleViewModelTest {
             replayFailure = replayFailure,
             retryPuzzle = retryPuzzle
         )
+        val repository = RecordingGeneratedSessionRepository()
         val viewModel = GeneratedPuzzleViewModel(
             mode = GeneratedModes.FOUR_PAIRS,
             generationUseCase = useCase,
-            seedSource = QueueGeneratedPuzzleSeedSource(11, 22, 33)
+            generatedSessionRepository = repository,
+            seedSource = QueueGeneratedPuzzleSeedSource(11, 22, 33),
+            sessionIdSource = QueueGeneratedSessionIdSource("first", "retry")
         )
 
         viewModel.onRouteEntered()
@@ -58,16 +102,80 @@ class GeneratedPuzzleViewModelTest {
         assertEquals(2, useCase.requests.size)
         val failed = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Failed
         assertEquals(initialSession, failed.previousSession)
-        assertEquals(GeneratedPairsPuzzleGenerationFailureReason.AttemptsExhausted, failed.failure.failure.reason)
+        val generationFailure = failed.failure as GeneratedPuzzlePreparationFailure.Generation
+        assertEquals(
+            GeneratedPairsPuzzleGenerationFailureReason.AttemptsExhausted,
+            generationFailure.result.failure.reason
+        )
+        assertEquals(1, repository.replaceAttempts.size)
 
         viewModel.retry()
         dispatcher.scheduler.advanceUntilIdle()
 
         val ready = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready
-        assertEquals(1, ready.session.id)
+        assertEquals(GeneratedSessionId("retry"), ready.session.id)
         assertEquals(3, useCase.requests.size)
         assertEquals(listOf(11, 22, 33), useCase.requests.map(GeneratedPuzzleGenerationRequest::seed))
+        assertEquals(2, repository.replaceAttempts.size)
+        assertEquals(ready.session.snapshot, repository.session.value)
     }
+
+    @Test
+    fun generation_cancellation_does_not_replace_the_stored_session() {
+        val generatedPuzzle = CompletableDeferred<Puzzle>()
+        val existingSnapshot = generatedSessionSnapshot(sessionId = "existing")
+        val repository = RecordingGeneratedSessionRepository(initialSession = existingSnapshot)
+        val viewModel = GeneratedPuzzleViewModel(
+            mode = GeneratedModes.FOUR_PAIRS,
+            generationUseCase = generatedPuzzleUseCase(generatedPuzzle),
+            generatedSessionRepository = repository,
+            seedSource = QueueGeneratedPuzzleSeedSource(29),
+            sessionIdSource = QueueGeneratedSessionIdSource("cancelled")
+        )
+
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.runCurrent()
+        viewModel.onRouteExited()
+        generatedPuzzle.complete(samplePuzzle)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertTrue(repository.replaceAttempts.isEmpty())
+        assertEquals(existingSnapshot, repository.session.value)
+    }
+
+    @Test
+    fun persistence_failure_keeps_the_previous_stored_session_and_is_recoverable() {
+        val existingSnapshot = generatedSessionSnapshot(sessionId = "existing")
+        val repository = RecordingGeneratedSessionRepository(
+            initialSession = existingSnapshot,
+            replaceFailure = IOException("storage unavailable")
+        )
+        val viewModel = GeneratedPuzzleViewModel(
+            mode = GeneratedModes.FOUR_PAIRS,
+            generationUseCase = generatedPuzzleUseCase(),
+            generatedSessionRepository = repository,
+            seedSource = QueueGeneratedPuzzleSeedSource(31),
+            sessionIdSource = QueueGeneratedSessionIdSource("not-stored")
+        )
+
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val failed = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Failed
+        assertEquals(GeneratedPuzzlePreparationFailure.Persistence, failed.failure)
+        assertNull(failed.previousSession)
+        assertEquals(existingSnapshot, repository.session.value)
+        assertEquals(1, repository.replaceAttempts.size)
+    }
+}
+
+private fun generatedPuzzleUseCase(
+    puzzle: CompletableDeferred<Puzzle> = CompletableDeferred(samplePuzzle)
+): GeneratedPuzzleGenerationUseCase = GeneratedPuzzleGenerationUseCase { request ->
+    GeneratedPuzzleGenerationResult.Generated(
+        request = request,
+        initialPuzzle = puzzle.await()
+    )
 }
 
 private class ControlledGeneratedPuzzleUseCase(
@@ -114,3 +222,56 @@ private class QueueGeneratedPuzzleSeedSource(vararg seeds: Int) : GeneratedPuzzl
 
     override fun nextSeed(): Int = values.removeFirst()
 }
+
+private class QueueGeneratedSessionIdSource(vararg ids: String) : GeneratedSessionIdSource {
+    private val values = ArrayDeque(ids.toList())
+
+    override fun nextId(): GeneratedSessionId = GeneratedSessionId(values.removeFirst())
+}
+
+private class RecordingGeneratedSessionRepository(
+    initialSession: GeneratedSessionSnapshot? = null,
+    private val writeGate: CompletableDeferred<Unit>? = null,
+    private val replaceFailure: IOException? = null
+) : GeneratedSessionRepository {
+    private val mutableSession = MutableStateFlow(initialSession)
+    override val session: StateFlow<GeneratedSessionSnapshot?> = mutableSession.asStateFlow()
+    val replaceAttempts = mutableListOf<GeneratedSessionSnapshot>()
+
+    override suspend fun replace(snapshot: GeneratedSessionSnapshot) {
+        replaceAttempts += snapshot
+        writeGate?.await()
+        replaceFailure?.let { failure ->
+            throw failure
+        }
+        mutableSession.value = snapshot
+    }
+
+    override suspend fun updateCurrentPuzzle(expectedSessionId: GeneratedSessionId, puzzle: Puzzle): Boolean {
+        val snapshot = mutableSession.value
+        if (snapshot?.sessionId != expectedSessionId) {
+            return false
+        }
+
+        mutableSession.value = snapshot.copy(currentPuzzle = puzzle)
+        return true
+    }
+
+    override suspend fun clear(expectedSessionId: GeneratedSessionId): Boolean {
+        if (mutableSession.value?.sessionId != expectedSessionId) {
+            return false
+        }
+
+        mutableSession.value = null
+        return true
+    }
+}
+
+private fun generatedSessionSnapshot(sessionId: String): GeneratedSessionSnapshot = GeneratedSessionSnapshot(
+    sessionId = GeneratedSessionId(sessionId),
+    modeId = GeneratedModes.FOUR_PAIRS.id.value,
+    profileId = GeneratedModes.FOUR_PAIRS.profile.id.value,
+    seed = 7,
+    initialPuzzle = samplePuzzle,
+    currentPuzzle = samplePuzzle
+)
