@@ -63,7 +63,10 @@ app/
 │   └── ui/
 docs/
 ├── product/
-├── technical/adr/
+├── technical/
+│   ├── adr/
+│   ├── code-quality.md
+│   └── delivery-workflow.md
 ├── game-rules.md
 └── ubiquitous-language.md
 ```
@@ -85,6 +88,8 @@ Core responsibilities:
 - Puzzle generation: [puzzle-generation.md](./docs/product/puzzle-generation.md)
 - UX decisions: `docs/product/ux-decisions.md`
 - Architectural Decision Records: `docs/technical/adr/`
+- Delivery workflow: [delivery-workflow.md](./docs/technical/delivery-workflow.md)
+- Code quality guidelines: [code-quality.md](./docs/technical/code-quality.md)
 - Game rules: `docs/game-rules.md`
 - Ubiquitous Language: `docs/ubiquitous-language.md`
 
