@@ -8,6 +8,9 @@
         <exclude
             domain="file"
             path="datastore/onboarding.preferences_pb" />
+        <exclude
+            domain="file"
+            path="datastore/generated_session.preferences_pb" />
         <!-- TODO: Use <include> and <exclude> to control what is backed up.
         <include .../>
         <exclude .../>
@@ -17,5 +20,8 @@
         <exclude
             domain="file"
             path="datastore/onboarding.preferences_pb" />
+        <exclude
+            domain="file"
+            path="datastore/generated_session.preferences_pb" />
     </device-transfer>
 </data-extraction-rules>
