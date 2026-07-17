@@ -20,6 +20,7 @@
     <string name="generated_puzzle_failure_message">We could not create a puzzle. Please try again.</string>
     <string name="generated_puzzle_retry_button">Retry</string>
     <string name="generated_puzzle_back_to_menu_button">Back to menu</string>
+    <string name="generated_session_resume_unavailable_message">This unfinished puzzle is no longer available.</string>
 
     <!-- Tutorial screen -->
     <string name="tutorial_screen_title">Tutorial</string>

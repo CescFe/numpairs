@@ -17,6 +17,7 @@ import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryState
 import org.cescfe.numpairs.feature.game.ui.actions.HintAction
 import org.cescfe.numpairs.feature.game.ui.help.SolvingTipsDialog
 import org.cescfe.numpairs.feature.generated.GeneratedModeConfiguration
+import org.cescfe.numpairs.feature.generated.GeneratedModeLaunchIntent
 import org.cescfe.numpairs.feature.generated.GeneratedModeRoute
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
@@ -29,6 +30,7 @@ fun FourPairsRoute(
     generatedSessionRepository: GeneratedSessionRepository,
     modifier: Modifier = Modifier,
     generationUseCase: GeneratedPuzzleGenerationUseCase,
+    launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.DefaultNewPuzzle,
     mode: GeneratedModeConfiguration = GeneratedModes.FOUR_PAIRS,
     tutorialOverlayMode: TutorialMode? = null,
     onTutorialOverlayClosed: () -> Unit = {},
@@ -55,6 +57,7 @@ fun FourPairsRoute(
     ) {
         GeneratedModeRoute(
             mode = mode,
+            launchIntent = launchIntent,
             title = stringResource(R.string.four_pairs_screen_title),
             generationUseCase = generationUseCase,
             generatedSessionRepository = generatedSessionRepository,

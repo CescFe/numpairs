@@ -15,6 +15,7 @@ import org.cescfe.numpairs.data.onboarding.OnboardingState
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.feature.fourpairs.FourPairsRoute
 import org.cescfe.numpairs.feature.generated.GeneratedModeId
+import org.cescfe.numpairs.feature.generated.GeneratedModeLaunchIntent
 import org.cescfe.numpairs.feature.generated.GeneratedModeRegistry
 import org.cescfe.numpairs.feature.generated.GeneratedModeRoute
 import org.cescfe.numpairs.feature.generated.GeneratedModes
@@ -27,7 +28,10 @@ import org.cescfe.numpairs.feature.tutorial.GuidedIntroductionRoute
 sealed interface AppDestination {
     data object Menu : AppDestination
     data object Tutorial : AppDestination
-    data class GeneratedMode(val modeId: GeneratedModeId) : AppDestination
+    data class GeneratedMode(
+        val modeId: GeneratedModeId,
+        val launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.newPuzzle()
+    ) : AppDestination
 }
 
 @Composable
@@ -107,6 +111,7 @@ private fun UnlockedAppNavigation(
                 GeneratedModes.FOUR_PAIRS.id -> FourPairsRoute(
                     modifier = modifier,
                     mode = mode,
+                    launchIntent = destination.launchIntent,
                     generationUseCase = generationUseCase,
                     generatedSessionRepository = generatedSessionRepository,
                     topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
@@ -115,6 +120,7 @@ private fun UnlockedAppNavigation(
 
                 else -> GeneratedModeRoute(
                     mode = mode,
+                    launchIntent = destination.launchIntent,
                     title = mode.titleResourceIdOrNull()?.let { titleResourceId ->
                         stringResource(id = titleResourceId)
                     } ?: mode.id.value,

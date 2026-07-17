@@ -36,6 +36,7 @@ import org.cescfe.numpairs.ui.theme.NumPairsComponents
 @Composable
 fun GeneratedModeRoute(
     mode: GeneratedModeConfiguration,
+    launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.DefaultNewPuzzle,
     title: String,
     generationUseCase: GeneratedPuzzleGenerationUseCase,
     generatedSessionRepository: GeneratedSessionRepository,
@@ -54,13 +55,17 @@ fun GeneratedModeRoute(
     )
     val uiState by viewModel.uiState.collectAsState()
 
-    DisposableEffect(viewModel) {
-        viewModel.onRouteEntered()
+    DisposableEffect(viewModel, launchIntent) {
+        viewModel.onRouteEntered(launchIntent = launchIntent)
         onDispose(viewModel::onRouteExited)
     }
 
     when (val state = uiState) {
         GeneratedPuzzleGenerationUiState.Idle -> Unit
+        is GeneratedPuzzleGenerationUiState.Restoring -> {
+            GeneratedPuzzleInitialLoadingScreen(modifier = modifier)
+        }
+
         is GeneratedPuzzleGenerationUiState.Loading -> {
             state.previousSession?.let { session ->
                 GeneratedPuzzleGameContent(
@@ -115,6 +120,13 @@ fun GeneratedModeRoute(
             } ?: GeneratedPuzzleInitialFailureScreen(
                 modifier = modifier,
                 onRetry = viewModel::retry,
+                onNavigateBack = onNavigateBack
+            )
+        }
+
+        is GeneratedPuzzleGenerationUiState.ResumeUnavailable -> {
+            GeneratedSessionResumeUnavailableScreen(
+                modifier = modifier,
                 onNavigateBack = onNavigateBack
             )
         }
@@ -229,6 +241,33 @@ private fun GeneratedPuzzleInitialFailureScreen(modifier: Modifier, onRetry: () 
 }
 
 @Composable
+private fun GeneratedSessionResumeUnavailableScreen(modifier: Modifier, onNavigateBack: () -> Unit) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .testTag(GENERATED_SESSION_RESUME_UNAVAILABLE_TAG),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(R.string.generated_session_resume_unavailable_message),
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Button(
+            onClick = onNavigateBack,
+            modifier = Modifier.padding(top = 16.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.generated_puzzle_back_to_menu_button),
+                style = MaterialTheme.typography.labelLarge
+            )
+        }
+    }
+}
+
+@Composable
 private fun GeneratedPuzzleFailureDialog(onRetry: () -> Unit, onNavigateBack: () -> Unit) {
     AlertDialog(
         onDismissRequest = onNavigateBack,
@@ -320,3 +359,4 @@ private tailrec fun Context.findComponentActivity(): ComponentActivity? = when (
 
 internal const val GENERATED_PUZZLE_LOADING_TAG = "generatedPuzzleLoading"
 internal const val GENERATED_PUZZLE_FAILURE_TAG = "generatedPuzzleFailure"
+internal const val GENERATED_SESSION_RESUME_UNAVAILABLE_TAG = "generatedSessionResumeUnavailable"
