@@ -55,7 +55,7 @@ Do not reorganize packages merely to make the project resemble a generic archite
 - Prefer immutable models and copy-based state changes unless mutation has a measured and documented benefit.
 - Keep public APIs as small as the supported behavior allows.
 - Extract shared code only when the abstraction has a stable meaning. Similar-looking code is not automatically the same concept.
-- Explain surprising constraints and tradeoffs in comments; do not narrate code that is already clear.
+- Comments are strongly discouraged. If you need a comment, you probably need a refactor. Explain surprising constraints or tradeoffs in comments.
 - Remove obsolete code introduced by the current change, but avoid unrelated cleanup or speculative refactors.
 - Follow the existing formatting and naming conventions enforced by the repository tooling.
 
@@ -90,17 +90,3 @@ Design-pattern usage is not a quality target by itself. A simpler implementation
 - Test observable behavior and domain outcomes rather than private implementation details.
 - Keep tests deterministic. Control randomness, time, persistence, and external state through explicit inputs or suitable fakes.
 - Reuse focused builders, mothers, fixtures, and robots when they make intent clearer; do not create a test abstraction that obscures the scenario.
-- Compile instrumented tests as required by [the delivery workflow](delivery-workflow.md), but do not start an emulator or connected-device task on the development machine.
-
-## Change Review
-
-Before considering a code change complete, confirm:
-
-- behavior matches the issue and product sources of truth
-- domain terminology and invariants remain consistent
-- dependencies respect the repository boundaries
-- new abstractions and patterns have a concrete justification
-- tests cover the changed behavior at the lowest useful level
-- user-facing behavior includes localization and accessibility where applicable
-- architectural decisions and affected documentation are updated
-- unrelated refactors are excluded from the change
