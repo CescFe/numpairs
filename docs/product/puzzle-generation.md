@@ -6,10 +6,12 @@
 - Implemented profiles: generated `4 Pairs Low` and `8 Pairs Medium`
 - Related references:
   - `docs/product/prd/prd-v5.md`
+  - `docs/product/prd/prd-v7.md`
+  - `docs/technical/generated-session-persistence.md`
   - `docs/game-rules.md`
   - `docs/ubiquitous-language.md`
 
-This document owns generated puzzle construction, difficulty profiles, solved-to-initial masking, validation expectations, deterministic generation, and failure bounds.
+This document owns generated puzzle construction, difficulty profiles, solved-to-initial masking, validation expectations, deterministic generation, and failure bounds. The generated-session persistence and replacement boundary is documented in `docs/technical/generated-session-persistence.md`.
 
 ---
 
@@ -57,7 +59,11 @@ Every run is an explicit request containing its profile, seed, and positive exec
 
 Value-pair and strip-mask searches share the same budget and observe cancellation. Strip-mask selection enumerates candidate masks lazily, so it does not first materialize all combinations in memory.
 
-The application executes generation on an injected non-main dispatcher. The generated-mode presentation owner exposes loading, ready, and recoverable-failure states; replay keeps the completed session visible until a replacement is ready, and duplicate replay requests are ignored. A generated session survives recomposition and configuration recreation. Process-death restoration is intentionally out of scope: the complete puzzle session is not persisted and entering the mode after process death creates a new request.
+The application executes generation on an injected non-main dispatcher. The generated-mode presentation owner exposes loading, ready, restoration, resume-unavailable, and recoverable-failure states. Replay keeps the completed session visible until a replacement is stored and ready, and duplicate replay requests are ignored.
+
+Successful generation persists the exact initial puzzle before publishing it as playable. Generated play keeps one application-wide versioned session slot shared by `4 Pairs Low` and `8 Pairs Medium`. The slot stores the exact initial and current puzzles plus stable session, mode, profile, and seed metadata. Process-death restoration reads that snapshot directly; it never regenerates historical content from the seed.
+
+Committed puzzle changes update the current snapshot through the stable session id, solved puzzles clear resumability, and stale callbacks cannot mutate a replacement. Generation, storage failure, or cancellation leaves the previous unfinished slot intact. See `docs/technical/generated-session-persistence.md` for the storage, ordering, validation, and backup contract.
 
 ### `4 Pairs Low`
 
@@ -198,4 +204,6 @@ Guaranteed unique solutions are not required unless explicitly added to a future
 
 - `docs/game-rules.md` owns core NumPairs rules shared by handcrafted and generated puzzles.
 - `docs/product/prd/prd-v5.md` owns v5 product scope.
+- `docs/product/prd/prd-v7.md` owns the reliable-session and replay-control product contract.
+- `docs/technical/generated-session-persistence.md` owns the implemented session storage and coordination boundary.
 - `docs/ubiquitous-language.md` owns shared terminology.

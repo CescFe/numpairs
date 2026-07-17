@@ -1,6 +1,6 @@
 # PRD - NumPairs 🔁 v7 Reliable Sessions & Replay Controls
 
-> Active product reference for the v7 milestone. The product entering this milestone is the completed v6 Guided First Run baseline.
+> Implemented product reference for the v7 milestone. The product entering this milestone was the completed v6 Guided First Run baseline.
 
 ## Product Summary
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document defines the current in-puzzle interaction model for NumPairs.
+This document defines the current menu, generated-session routing, completion, and in-puzzle interaction model for NumPairs.
 
 It complements the game rules described in [game-rules.md](./game-rules.md) and focuses on:
 
@@ -10,10 +10,11 @@ It complements the game rules described in [game-rules.md](./game-rules.md) and 
 2. Result grid behavior
 3. Contextual editing flows
 4. Gameplay top bar helper behavior
+5. Generated-session menu, replacement, and completion behavior
 
-This is the interaction baseline shared by Tutorial and generated `4 Pairs` gameplay.
+This is the interaction baseline shared where applicable by Tutorial, generated `4 Pairs`, and generated `8 Pairs` gameplay.
 
-It intentionally focuses on in-puzzle behavior. Splash, menu, and replay routing are defined at the product level in `docs/product/prd/prd-v4.md`.
+Required-onboarding behavior is documented in `docs/product/prd/prd-v6.md`. The reliable-session product contract is documented in `docs/product/prd/prd-v7.md`, and its storage boundary is documented in `docs/technical/generated-session-persistence.md`.
 
 ---
 
@@ -44,6 +45,45 @@ In this document, strip items are rendered as chips.
 
 ---
 
+## Normal Menu And Generated Session Routing
+
+The unlocked normal menu renders actions in this order:
+
+1. `Resume`, only while one valid unfinished generated session is available
+2. `Play 4 Pairs`
+3. `Play 8 Pairs`
+4. `How to play`
+
+`Resume` and both generated-mode actions use the primary CTA treatment. `How to play` remains the final secondary action. The localized `Resume` accessibility description identifies whether the saved puzzle belongs to 4 or 8 Pairs.
+
+The application derives menu resumability from the one global generated-session slot. Missing, solved, unknown-mode, mode/profile-mismatched, corrupt, and unsupported snapshots do not expose `Resume`.
+
+Selecting `Resume` opens the saved mode and exact current puzzle without generation.
+
+Selecting either generated-mode action while a resumable session exists opens the same modal choice:
+
+- primary: `Resume`
+- secondary: start a new puzzle for the mode the player selected
+
+For the saved mode, supporting copy may use the concise secondary label `New puzzle`. For a different selected mode, copy and the secondary label identify that mode, such as `Play 8 pairs`. This variation clarifies the outcomes; it is not a separate cross-mode protection flow.
+
+The choice dialog has no visible cancel, back, close, or third action. Tapping outside or pressing system back dismisses it without navigation, generation, or session mutation. Action handling is deduplicated.
+
+Selecting `How to play`, entering required onboarding, or using Tutorial never replaces or updates the generated session.
+
+### Generated Completion And Replay
+
+A solved generated puzzle shows exactly:
+
+- primary: `Play another`
+- secondary: `Back to menu`
+
+`Play another` runs the existing bounded generation and safe-replacement pipeline. The solved puzzle remains visible while its successor is pending. Failure or cancellation keeps the completion surface available; a successfully stored successor replaces it.
+
+Solving clears menu resumability before `Back to menu` returns to the menu. There is no `Change difficulty`, restart, timer, or additional completion action.
+
+---
+
 ## Game Top Bar
 
 Gameplay screens should show:
@@ -53,6 +93,8 @@ Gameplay screens should show:
 - an optional rules helper action
 
 The rules helper action should be available in generated `4 Pairs` for v3. It should not be shown in Tutorial because Tutorial has its own guided instructional surface. It is intentionally not part of the menu screen in the first implementation.
+
+Reliable sessions do not add a new-puzzle, restart, resume, or overflow action to the gameplay TopAppBar. Session choices remain in the normal menu and completion surface.
 
 ### Rules Helper Behavior
 
