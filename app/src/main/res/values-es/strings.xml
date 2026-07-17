@@ -9,6 +9,11 @@
     <string name="menu_tutorial_button">Cómo jugar</string>
     <string name="menu_four_pairs_button">Jugar 4 pares</string>
     <string name="menu_eight_pairs_button">Jugar 8 pares</string>
+    <string name="generated_session_choice_title">Puzle sin terminar</string>
+    <string name="generated_session_choice_same_mode_message">Tienes un puzle de %1$s sin terminar. ¿Quieres continuarlo o empezar uno nuevo?</string>
+    <string name="generated_session_choice_different_mode_message">Tienes un puzle de %1$s sin terminar. ¿Quieres continuarlo o sustituirlo por uno nuevo de %2$s?</string>
+    <string name="generated_session_choice_new_puzzle_button">Nuevo puzle</string>
+    <string name="generated_session_choice_play_mode_button">Jugar %1$s</string>
 
     <!-- Four pairs screen -->
     <string name="four_pairs_screen_title">4 pares</string>
