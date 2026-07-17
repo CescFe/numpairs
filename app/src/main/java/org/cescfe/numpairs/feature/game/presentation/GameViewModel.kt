@@ -17,6 +17,9 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
     private var puzzle: Puzzle = initialPuzzle
     private var presentationState = GamePresentationState()
 
+    private val _currentPuzzle = MutableStateFlow(puzzle)
+    val currentPuzzle: StateFlow<Puzzle> = _currentPuzzle.asStateFlow()
+
     private val _uiState = MutableStateFlow(
         GameUiState.from(puzzle = puzzle, presentationState = presentationState)
     )
@@ -25,6 +28,7 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
     fun reset(initialPuzzle: Puzzle) {
         puzzle = initialPuzzle
         presentationState = GamePresentationState()
+        _currentPuzzle.value = puzzle
         publishUiState()
     }
 
@@ -242,12 +246,16 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
         val nextPresentationState = presentationState
             .updatePresentation()
             .onPuzzleChanged(isPuzzleSolved = updatedPuzzle.isSolved)
-        val hasStateChanged = updatedPuzzle != puzzle || nextPresentationState != presentationState
+        val hasPuzzleChanged = updatedPuzzle != puzzle
+        val hasStateChanged = hasPuzzleChanged || nextPresentationState != presentationState
 
         puzzle = updatedPuzzle
         presentationState = nextPresentationState
 
         if (hasStateChanged) {
+            if (hasPuzzleChanged) {
+                _currentPuzzle.value = puzzle
+            }
             publishUiState()
         }
     }
