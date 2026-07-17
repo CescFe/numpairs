@@ -7,6 +7,9 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performImeAction
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.CompletableDeferred
 import org.cescfe.numpairs.R
@@ -18,6 +21,7 @@ import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGener
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
+import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
@@ -152,6 +156,47 @@ class GeneratedPuzzleGenerationRouteTest {
         composeTestRule.runOnIdle {
             assertTrue(didNavigateBack)
             assertEquals(0, useCase.requestCount)
+        }
+    }
+
+    @Test
+    fun committed_game_change_updates_the_durable_session_without_persisting_input_drafts() {
+        val repository = FakeGeneratedSessionRepository()
+
+        composeTestRule.setContent {
+            NumPairsTheme {
+                GeneratedModeRoute(
+                    mode = GeneratedModes.FOUR_PAIRS,
+                    title = "4 pairs",
+                    generationUseCase = CountingGeneratedPuzzleUseCase(),
+                    generatedSessionRepository = repository
+                )
+            }
+        }
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(1))
+            .performScrollTo()
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
+            .performTextInput("2")
+        composeTestRule.runOnIdle {
+            assertEquals(samplePuzzle, repository.session.value?.currentPuzzle)
+        }
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
+            .performImeAction()
+        composeTestRule.waitUntil {
+            repository.session.value
+                ?.currentPuzzle
+                ?.strip
+                ?.items
+                ?.get(1) == StripItem.PlayerEntered(2)
         }
     }
 

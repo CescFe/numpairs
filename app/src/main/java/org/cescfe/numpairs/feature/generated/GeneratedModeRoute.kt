@@ -28,7 +28,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
+import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.GameRoute
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
@@ -78,6 +80,7 @@ fun GeneratedModeRoute(
                     onRulesHelperPlayTutorialRequested = onRulesHelperPlayTutorialRequested,
                     topBarActions = topBarActions,
                     onNewPuzzleRequested = viewModel::onNewPuzzleRequested,
+                    onPuzzleChanged = viewModel::onPuzzleChanged,
                     onNavigateBack = onNavigateBack,
                     overlay = { GeneratedPuzzleLoadingOverlay() }
                 )
@@ -94,6 +97,7 @@ fun GeneratedModeRoute(
             onRulesHelperPlayTutorialRequested = onRulesHelperPlayTutorialRequested,
             topBarActions = topBarActions,
             onNewPuzzleRequested = viewModel::onNewPuzzleRequested,
+            onPuzzleChanged = viewModel::onPuzzleChanged,
             onNavigateBack = onNavigateBack
         )
 
@@ -109,6 +113,7 @@ fun GeneratedModeRoute(
                     onRulesHelperPlayTutorialRequested = onRulesHelperPlayTutorialRequested,
                     topBarActions = topBarActions,
                     onNewPuzzleRequested = viewModel::onNewPuzzleRequested,
+                    onPuzzleChanged = viewModel::onPuzzleChanged,
                     onNavigateBack = onNavigateBack,
                     overlay = {
                         GeneratedPuzzleFailureDialog(
@@ -144,6 +149,7 @@ private fun GeneratedPuzzleGameContent(
     onRulesHelperPlayTutorialRequested: (() -> Unit)?,
     topBarActions: @Composable RowScope.() -> Unit,
     onNewPuzzleRequested: () -> Unit,
+    onPuzzleChanged: (GeneratedSessionId, Puzzle) -> Unit,
     onNavigateBack: () -> Unit,
     overlay: @Composable () -> Unit = {}
 ) {
@@ -162,6 +168,9 @@ private fun GeneratedPuzzleGameContent(
             onRulesHelperActionTapped = onRulesHelperActionTapped,
             onRulesHelperPlayTutorialRequested = onRulesHelperPlayTutorialRequested,
             topBarActions = topBarActions,
+            onPuzzleChanged = { puzzle ->
+                onPuzzleChanged(session.id, puzzle)
+            },
             onNavigateBack = onNavigateBack
         )
         overlay()
