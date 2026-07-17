@@ -86,8 +86,8 @@
     <string name="success_overlay_message">Puzzle Completed!</string>
     <string name="success_overlay_badge_text">OK</string>
     <string name="success_overlay_supporting_text">All pairs matched.</string>
-    <string name="success_overlay_new_puzzle_button">New puzzle</string>
-    <string name="success_overlay_return_to_menu_button">Menu</string>
+    <string name="success_overlay_new_puzzle_button">Play another</string>
+    <string name="success_overlay_return_to_menu_button">Back to menu</string>
     <string name="hint_action_content_description">Open practice hints</string>
     <string name="rules_helper_action_content_description">Rules help</string>
     <string name="rules_helper_title">How to play</string>

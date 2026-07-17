@@ -9,6 +9,7 @@ import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.espresso.Espresso.pressBackUnconditionally
@@ -34,6 +35,7 @@ import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -52,8 +54,12 @@ class FourPairsCompletionActionsTest {
         val secondPuzzle = generatedPuzzle(seed = 42).initialPuzzle
         assertNotEquals(firstPuzzle.board.tiles[0].result, secondPuzzle.board.tiles[0].result)
         val puzzleProvider = QueueGeneratedPuzzleProvider(firstPuzzle, secondPuzzle)
+        val generatedSessionRepository = FakeGeneratedSessionRepository()
 
-        setContent(puzzleProvider = puzzleProvider)
+        setContent(
+            puzzleProvider = puzzleProvider,
+            generatedSessionRepository = generatedSessionRepository
+        )
 
         navigateToFourPairs()
         completeFirstTile(operator = firstSolvedPuzzle.board.tiles[0].expression.operator)
@@ -61,6 +67,17 @@ class FourPairsCompletionActionsTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_NEW_PUZZLE)
             .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(string(R.string.success_overlay_new_puzzle_button))
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_RETURN_TO_MENU)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(string(R.string.success_overlay_return_to_menu_button))
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_NEW_PUZZLE)
             .performClick()
 
         assertEquals(2, puzzleProvider.requestCount)
@@ -82,6 +99,10 @@ class FourPairsCompletionActionsTest {
         assertEquals(5, stripMask.hiddenEntryIds.size)
         assertFirstTileExpressionIsHidden()
         assertFirstTileShowsResult(secondPuzzle.board.tiles[0].result)
+        composeTestRule.runOnIdle {
+            assertEquals(secondPuzzle, generatedSessionRepository.session.value?.currentPuzzle)
+            assertEquals(GeneratedModes.FOUR_PAIRS.id.value, generatedSessionRepository.session.value?.modeId)
+        }
     }
 
     @Test
@@ -89,8 +110,12 @@ class FourPairsCompletionActionsTest {
         val solvedPuzzle = generatedPuzzle(seed = 81).solvedPuzzle
         val initialPuzzle = solvedPuzzle.withHiddenOperatorAt(tileIndex = 0)
         val puzzleProvider = QueueGeneratedPuzzleProvider(initialPuzzle)
+        val generatedSessionRepository = FakeGeneratedSessionRepository()
 
-        setContent(puzzleProvider = puzzleProvider)
+        setContent(
+            puzzleProvider = puzzleProvider,
+            generatedSessionRepository = generatedSessionRepository
+        )
 
         navigateToFourPairs()
         completeFirstTile(operator = solvedPuzzle.board.tiles[0].expression.operator)
@@ -98,6 +123,11 @@ class FourPairsCompletionActionsTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_RETURN_TO_MENU)
             .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(string(R.string.success_overlay_return_to_menu_button))
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_RETURN_TO_MENU)
             .performClick()
 
         composeTestRule
@@ -106,6 +136,12 @@ class FourPairsCompletionActionsTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SCREEN)
             .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.RESUME_BUTTON)
+            .assertDoesNotExist()
+        composeTestRule.runOnIdle {
+            assertNull(generatedSessionRepository.session.value)
+        }
     }
 
     @Test
@@ -163,14 +199,17 @@ class FourPairsCompletionActionsTest {
         assertEquals(initialStripMask, currentStripMask())
     }
 
-    private fun setContent(puzzleProvider: QueueGeneratedPuzzleProvider) {
+    private fun setContent(
+        puzzleProvider: QueueGeneratedPuzzleProvider,
+        generatedSessionRepository: FakeGeneratedSessionRepository = FakeGeneratedSessionRepository()
+    ) {
         val actionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository()
 
         composeTestRule.setContent {
             NumPairsTheme {
                 AppNavigation(
                     onboardingRepository = FakeOnboardingRepository(),
-                    generatedSessionRepository = FakeGeneratedSessionRepository(),
+                    generatedSessionRepository = generatedSessionRepository,
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository,
                     generatedModeRegistry = GeneratedModes.registry,
                     generatedPuzzleGenerationUseCaseFactory = fourPairsProviderFactory(puzzleProvider = puzzleProvider)

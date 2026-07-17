@@ -86,8 +86,8 @@
     <string name="success_overlay_message">¡Puzle completado!</string>
     <string name="success_overlay_badge_text">OK</string>
     <string name="success_overlay_supporting_text">Todos los pares coinciden.</string>
-    <string name="success_overlay_new_puzzle_button">Nuevo puzle</string>
-    <string name="success_overlay_return_to_menu_button">Menú</string>
+    <string name="success_overlay_new_puzzle_button">Jugar otro</string>
+    <string name="success_overlay_return_to_menu_button">Volver al menú</string>
     <string name="hint_action_content_description">Abrir pistas de práctica</string>
     <string name="rules_helper_action_content_description">Ayuda de reglas</string>
     <string name="rules_helper_title">Cómo jugar</string>
