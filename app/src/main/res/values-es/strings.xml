@@ -20,6 +20,7 @@
     <string name="generated_puzzle_failure_message">No se ha podido crear un puzle. Inténtalo de nuevo.</string>
     <string name="generated_puzzle_retry_button">Reintentar</string>
     <string name="generated_puzzle_back_to_menu_button">Volver al menú</string>
+    <string name="generated_session_resume_unavailable_message">Este puzle sin terminar ya no está disponible.</string>
 
     <!-- Tutorial screen -->
     <string name="tutorial_screen_title">Tutorial</string>

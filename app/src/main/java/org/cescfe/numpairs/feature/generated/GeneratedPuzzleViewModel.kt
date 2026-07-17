@@ -10,6 +10,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
@@ -42,6 +43,8 @@ internal sealed interface GeneratedPuzzlePreparationFailure {
 internal sealed interface GeneratedPuzzleGenerationUiState {
     data object Idle : GeneratedPuzzleGenerationUiState
 
+    data class Restoring(val expectedSessionId: GeneratedSessionId) : GeneratedPuzzleGenerationUiState
+
     data class Loading(val request: GeneratedPuzzleGenerationRequest, val previousSession: GeneratedModeGameSession?) :
         GeneratedPuzzleGenerationUiState
 
@@ -52,6 +55,8 @@ internal sealed interface GeneratedPuzzleGenerationUiState {
         val failure: GeneratedPuzzlePreparationFailure,
         val previousSession: GeneratedModeGameSession?
     ) : GeneratedPuzzleGenerationUiState
+
+    data class ResumeUnavailable(val expectedSessionId: GeneratedSessionId) : GeneratedPuzzleGenerationUiState
 }
 
 internal class GeneratedPuzzleViewModel(
@@ -66,8 +71,26 @@ internal class GeneratedPuzzleViewModel(
 
     private var generationJob: Job? = null
     private var generationToken = 0
+    private var activeLaunchIntent: GeneratedModeLaunchIntent? = null
 
-    fun onRouteEntered() {
+    fun onRouteEntered(launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.DefaultNewPuzzle) {
+        if (launchIntent != activeLaunchIntent) {
+            generationToken++
+            generationJob?.cancel()
+            generationJob = null
+            activeLaunchIntent = launchIntent
+
+            when (launchIntent) {
+                is GeneratedModeLaunchIntent.NewPuzzle -> startGeneration(
+                    request = nextRequest(),
+                    previousSession = (_uiState.value as? GeneratedPuzzleGenerationUiState.Ready)?.session
+                )
+
+                is GeneratedModeLaunchIntent.ResumeSession -> startResume(launchIntent)
+            }
+            return
+        }
+
         if (generationJob != null) {
             return
         }
@@ -83,8 +106,15 @@ internal class GeneratedPuzzleViewModel(
                 previousSession = state.previousSession
             )
 
+            is GeneratedPuzzleGenerationUiState.Restoring -> startResume(
+                GeneratedModeLaunchIntent.ResumeSession(
+                    expectedSessionId = state.expectedSessionId
+                )
+            )
+
             is GeneratedPuzzleGenerationUiState.Ready,
-            is GeneratedPuzzleGenerationUiState.Failed -> Unit
+            is GeneratedPuzzleGenerationUiState.Failed,
+            is GeneratedPuzzleGenerationUiState.ResumeUnavailable -> Unit
         }
     }
 
@@ -108,6 +138,46 @@ internal class GeneratedPuzzleViewModel(
             request = nextRequest(),
             previousSession = state.session
         )
+    }
+
+    private fun startResume(launchIntent: GeneratedModeLaunchIntent.ResumeSession) {
+        if (generationJob != null) {
+            return
+        }
+
+        val token = ++generationToken
+        _uiState.value = GeneratedPuzzleGenerationUiState.Restoring(
+            expectedSessionId = launchIntent.expectedSessionId
+        )
+        val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
+            val snapshot = generatedSessionRepository.session.first()
+                ?.takeIf { storedSnapshot ->
+                    storedSnapshot.sessionId == launchIntent.expectedSessionId &&
+                        storedSnapshot.modeId == mode.id.value &&
+                        storedSnapshot.profileId == mode.profile.id.value &&
+                        !storedSnapshot.currentPuzzle.isSolved
+                }
+            if (token != generationToken) {
+                return@launch
+            }
+
+            generationJob = null
+            _uiState.value = snapshot?.let { resumableSnapshot ->
+                GeneratedPuzzleGenerationUiState.Ready(
+                    session = GeneratedModeGameSession(
+                        snapshot = resumableSnapshot,
+                        request = GeneratedPuzzleGenerationRequest(
+                            profile = mode.profile,
+                            seed = resumableSnapshot.seed
+                        )
+                    )
+                )
+            } ?: GeneratedPuzzleGenerationUiState.ResumeUnavailable(
+                expectedSessionId = launchIntent.expectedSessionId
+            )
+        }
+        generationJob = job
+        job.start()
     }
 
     private fun startGeneration(request: GeneratedPuzzleGenerationRequest, previousSession: GeneratedModeGameSession?) {

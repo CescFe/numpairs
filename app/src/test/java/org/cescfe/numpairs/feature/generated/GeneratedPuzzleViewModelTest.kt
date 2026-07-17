@@ -17,7 +17,10 @@ import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationFailureReason
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
+import org.cescfe.numpairs.domain.puzzle.model.Expression
+import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
+import org.cescfe.numpairs.feature.game.presentation.support.solvedPuzzleWithKnownStripAndAssignments
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -167,6 +170,99 @@ class GeneratedPuzzleViewModelTest {
         assertEquals(existingSnapshot, repository.session.value)
         assertEquals(1, repository.replaceAttempts.size)
     }
+
+    @Test
+    fun resume_restores_the_exact_current_puzzle_and_metadata_without_generation_or_writes() {
+        val currentPuzzle = samplePuzzle.copy(
+            strip = samplePuzzle.strip.withUpdatedEntry(index = 1, value = 1)
+        )
+        val snapshot = generatedSessionSnapshot(
+            sessionId = "resume-me",
+            currentPuzzle = currentPuzzle
+        )
+        val repository = RecordingGeneratedSessionRepository(initialSession = snapshot)
+        val generationUseCase = UnexpectedGeneratedPuzzleUseCase()
+        val viewModel = GeneratedPuzzleViewModel(
+            mode = GeneratedModes.FOUR_PAIRS,
+            generationUseCase = generationUseCase,
+            generatedSessionRepository = repository
+        )
+
+        viewModel.onRouteEntered(
+            GeneratedModeLaunchIntent.ResumeSession(
+                expectedSessionId = snapshot.sessionId
+            )
+        )
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val ready = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready
+        assertEquals(snapshot, ready.session.snapshot)
+        assertEquals(currentPuzzle, ready.session.currentPuzzle)
+        assertEquals(snapshot.seed, ready.session.request.seed)
+        assertEquals(snapshot.profileId, ready.session.request.profileId.value)
+        assertEquals(0, generationUseCase.requestCount)
+        assertTrue(repository.replaceAttempts.isEmpty())
+    }
+
+    @Test
+    fun resume_rejects_missing_stale_mismatched_and_solved_sessions() {
+        val expectedSessionId = GeneratedSessionId("expected")
+        val solvedPuzzle = solvedPuzzleWithKnownStripAndAssignments()
+        val solvedInitialPuzzle = solvedPuzzle.copy(
+            board = solvedPuzzle.board.copy(
+                tiles = solvedPuzzle.board.tiles.map { tile ->
+                    tile.copy(
+                        expression = tile.expression.copy(
+                            leftOperand = Expression.Operand.Hidden,
+                            operator = Operator.Hidden,
+                            rightOperand = Expression.Operand.Hidden
+                        )
+                    )
+                }
+            )
+        )
+        val unavailableSnapshots = listOf(
+            null,
+            generatedSessionSnapshot(sessionId = "stale"),
+            generatedSessionSnapshot(
+                sessionId = expectedSessionId.value,
+                modeId = GeneratedModes.EIGHT_PAIRS.id.value
+            ),
+            generatedSessionSnapshot(
+                sessionId = expectedSessionId.value,
+                profileId = GeneratedModes.EIGHT_PAIRS.profile.id.value
+            ),
+            generatedSessionSnapshot(
+                sessionId = expectedSessionId.value,
+                initialPuzzle = solvedInitialPuzzle,
+                currentPuzzle = solvedPuzzle
+            )
+        )
+
+        unavailableSnapshots.forEach { storedSnapshot ->
+            val repository = RecordingGeneratedSessionRepository(initialSession = storedSnapshot)
+            val generationUseCase = UnexpectedGeneratedPuzzleUseCase()
+            val viewModel = GeneratedPuzzleViewModel(
+                mode = GeneratedModes.FOUR_PAIRS,
+                generationUseCase = generationUseCase,
+                generatedSessionRepository = repository
+            )
+
+            viewModel.onRouteEntered(
+                GeneratedModeLaunchIntent.ResumeSession(
+                    expectedSessionId = expectedSessionId
+                )
+            )
+            dispatcher.scheduler.advanceUntilIdle()
+
+            assertEquals(
+                GeneratedPuzzleGenerationUiState.ResumeUnavailable(expectedSessionId),
+                viewModel.uiState.value
+            )
+            assertEquals(0, generationUseCase.requestCount)
+            assertTrue(repository.replaceAttempts.isEmpty())
+        }
+    }
 }
 
 private fun generatedPuzzleUseCase(
@@ -214,6 +310,15 @@ private class ControlledGeneratedPuzzleUseCase(
 
             else -> error("Unexpected generated puzzle request.")
         }
+    }
+}
+
+private class UnexpectedGeneratedPuzzleUseCase : GeneratedPuzzleGenerationUseCase {
+    var requestCount: Int = 0
+
+    override suspend fun generate(request: GeneratedPuzzleGenerationRequest): GeneratedPuzzleGenerationResult {
+        requestCount++
+        error("Resume must not invoke generated puzzle creation.")
     }
 }
 
@@ -267,11 +372,17 @@ private class RecordingGeneratedSessionRepository(
     }
 }
 
-private fun generatedSessionSnapshot(sessionId: String): GeneratedSessionSnapshot = GeneratedSessionSnapshot(
+private fun generatedSessionSnapshot(
+    sessionId: String,
+    modeId: String = GeneratedModes.FOUR_PAIRS.id.value,
+    profileId: String = GeneratedModes.FOUR_PAIRS.profile.id.value,
+    initialPuzzle: Puzzle = samplePuzzle,
+    currentPuzzle: Puzzle = samplePuzzle
+): GeneratedSessionSnapshot = GeneratedSessionSnapshot(
     sessionId = GeneratedSessionId(sessionId),
-    modeId = GeneratedModes.FOUR_PAIRS.id.value,
-    profileId = GeneratedModes.FOUR_PAIRS.profile.id.value,
+    modeId = modeId,
+    profileId = profileId,
     seed = 7,
-    initialPuzzle = samplePuzzle,
-    currentPuzzle = samplePuzzle
+    initialPuzzle = initialPuzzle,
+    currentPuzzle = currentPuzzle
 )
