@@ -8,11 +8,12 @@ Players complete hidden expressions on a board by using numbers from a strip. Th
 
 ## Current Status
 
-### Active product planning: v6 - Guided First Run
+### Current product work: v6 and v7
 
-Current milestone planning is documented in 🎓 [PRD v6 Guided First Run](./docs/product/prd/prd-v6.md).
+- 🎓 [PRD v6 Guided First Run](./docs/product/prd/prd-v6.md) defines the implemented guided-onboarding baseline.
+- 🔁 [PRD v7 Reliable Sessions & Replay Controls](./docs/product/prd/prd-v7.md) defines the active generated-session milestone.
 
-### Implemented baseline: v5 - Shared Generated Modes
+### Implemented generated-mode baseline: v5 - Shared Generated Modes
 
 Historical snapshots:
 - 🔧 [PRD v0 Playable Prototype](./docs/product/prd/prd-v0.md)
