@@ -1,5 +1,8 @@
 package org.cescfe.numpairs.feature.game.ui.screen
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -14,8 +17,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -42,6 +48,7 @@ import org.cescfe.numpairs.feature.game.ui.components.strip.AvailableNumberChipS
 import org.cescfe.numpairs.feature.game.ui.components.strip.AvailableNumberInputChip
 import org.cescfe.numpairs.feature.game.ui.components.strip.CHIP_HORIZONTAL_CONTENT_INSET
 import org.cescfe.numpairs.feature.game.ui.components.tile.PuzzleTile
+import org.cescfe.numpairs.feature.game.ui.semantics.completionFeedbackSemantics
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
 import org.cescfe.numpairs.ui.theme.numPairsSemanticColors
@@ -59,13 +66,40 @@ internal fun BoardSection(
     onTileOperatorSelectionConfirmed: (Operator) -> Unit,
     interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
     highlightState: GameHighlightState = GameHighlightState.None,
-    correctTileFeedbackIdsByIndex: Map<Int, Long> = emptyMap()
+    correctTileFeedbackIdsByIndex: Map<Int, Long> = emptyMap(),
+    completionFeedbackId: Long? = null
 ) {
     val boardContentDescription = stringResource(R.string.board_content_description)
+    val completionScale = remember { Animatable(1f) }
+
+    LaunchedEffect(completionFeedbackId) {
+        completionScale.snapTo(1f)
+        if (completionFeedbackId != null) {
+            completionScale.animateTo(
+                targetValue = COMPLETION_BOARD_FEEDBACK_SCALE,
+                animationSpec = tween(
+                    durationMillis = COMPLETION_BOARD_SCALE_DOWN_DURATION_MILLIS,
+                    easing = FastOutSlowInEasing
+                )
+            )
+            completionScale.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(
+                    durationMillis = COMPLETION_BOARD_SCALE_UP_DURATION_MILLIS,
+                    easing = FastOutSlowInEasing
+                )
+            )
+        }
+    }
 
     BoxWithConstraints(
         modifier = modifier
+            .graphicsLayer {
+                scaleX = completionScale.value
+                scaleY = completionScale.value
+            }
             .testTag(GameScreenTestTags.BOARD)
+            .completionFeedbackSemantics(completionFeedbackId)
             .semantics {
                 contentDescription = boardContentDescription
             }

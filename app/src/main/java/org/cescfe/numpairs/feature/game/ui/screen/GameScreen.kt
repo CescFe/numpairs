@@ -74,6 +74,7 @@ fun GameScreen(
     interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
     highlightState: GameHighlightState = GameHighlightState.None,
     correctTileFeedbackIdsByIndex: Map<Int, Long> = emptyMap(),
+    completionFeedbackId: Long? = null,
     topBarActions: @Composable RowScope.() -> Unit = {},
     contentBeforePuzzle: @Composable ColumnScope.() -> Unit = {}
 ) {
@@ -152,6 +153,7 @@ fun GameScreen(
                     interactionPolicy = interactionPolicy,
                     highlightState = highlightState,
                     correctTileFeedbackIdsByIndex = correctTileFeedbackIdsByIndex,
+                    completionFeedbackId = completionFeedbackId,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -164,7 +166,8 @@ fun GameScreen(
         ) {
             SuccessOverlay(
                 onDismiss = onSuccessOverlayDismissed,
-                completionActions = completionActions
+                completionActions = completionActions,
+                completionFeedbackId = completionFeedbackId
             )
         }
     }

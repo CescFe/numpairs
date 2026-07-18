@@ -8,6 +8,7 @@ import org.cescfe.numpairs.feature.game.presentation.support.enterStripValue
 import org.cescfe.numpairs.feature.game.presentation.support.incompletePuzzleOneOperatorSelectionAwayFromSolvedCompletion
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Test
 
 class GameViewModelTileAssignmentCommitTest {
@@ -39,7 +40,14 @@ class GameViewModelTileAssignmentCommitTest {
             TileResolutionState.CORRECT,
             viewModel.currentPuzzle.value.board.tiles[1].resolutionState
         )
-        assertEquals(TileAssignmentCommit(tileIndex = 1, madeTileCorrect = true), commit)
+        assertEquals(
+            TileAssignmentCommit(
+                tileIndex = 1,
+                madeTileCorrect = true,
+                madePuzzleSolved = true
+            ),
+            commit
+        )
     }
 
     @Test
@@ -78,6 +86,24 @@ class GameViewModelTileAssignmentCommitTest {
 
         assertEquals(TileAssignmentCommit(tileIndex = 1, madeTileCorrect = false), leftOperandCommit)
         assertEquals(TileAssignmentCommit(tileIndex = 1, madeTileCorrect = false), operatorCommit)
-        assertEquals(TileAssignmentCommit(tileIndex = 1, madeTileCorrect = true), rightOperandCommit)
+        assertEquals(
+            TileAssignmentCommit(
+                tileIndex = 1,
+                madeTileCorrect = true,
+                madePuzzleSolved = true
+            ),
+            rightOperandCommit
+        )
+    }
+
+    @Test
+    fun `a puzzle-solved commit must also make its tile correct`() {
+        assertThrows(IllegalArgumentException::class.java) {
+            TileAssignmentCommit(
+                tileIndex = 0,
+                madeTileCorrect = false,
+                madePuzzleSolved = true
+            )
+        }
     }
 }

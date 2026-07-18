@@ -193,7 +193,11 @@ class GameRouteTest {
         }
         composeTestRule.runOnIdle {
             assertEquals(
-                TileAssignmentCommit(tileIndex = 1, madeTileCorrect = true),
+                TileAssignmentCommit(
+                    tileIndex = 1,
+                    madeTileCorrect = true,
+                    madePuzzleSolved = true
+                ),
                 commits.single()
             )
             recompositionMarker += 1
