@@ -3,8 +3,8 @@
 ## Document Status
 
 - Status: product reference for generated puzzle construction
-- Implemented profiles: generated `4 Pairs Low` and `8 Pairs Medium`
-- v8 target profiles: generated `4 Pairs Medium` and `8 Pairs Hard`
+- Implemented profiles: generated `4 Pairs Low`, `4 Pairs Medium`, and `8 Pairs Medium`
+- Remaining v8 target profile: generated `8 Pairs Hard`
 - Related references:
   - `docs/product/prd/prd-v5.md`
   - `docs/product/prd/prd-v7.md`
@@ -221,7 +221,7 @@ These constraints keep the first generated mode approachable, reduce arithmetic 
 
 ### `4 Pairs Medium`
 
-Status: specified for v8; not implemented.
+Status: implemented in v8.
 
 Shape:
 

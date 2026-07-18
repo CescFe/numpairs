@@ -1,6 +1,9 @@
 package org.cescfe.numpairs.domain.generated.generation
 
 import kotlin.random.Random
+import org.cescfe.numpairs.domain.generated.assessment.GeneratedPairsDifficultyAssessor
+import org.cescfe.numpairs.domain.generated.assessment.GeneratedPuzzleDifficultyAssessmentOutcome
+import org.cescfe.numpairs.domain.generated.assessment.GeneratedPuzzleDifficultyPolicyEvaluation
 import org.cescfe.numpairs.domain.generated.generation.internal.GeneratedPairsPuzzleAssembler
 import org.cescfe.numpairs.domain.generated.generation.internal.GeneratedPairsSearchControl
 import org.cescfe.numpairs.domain.generated.generation.internal.GeneratedPairsSearchControlResult
@@ -123,39 +126,31 @@ class GeneratedPairsPuzzleGenerator(private val context: GeneratedPuzzleGenerati
                 continue
             }
 
-            when (val outcome = buildValidGeneratedPuzzle(candidate = candidate, puzzleAssembler = puzzleAssembler)) {
-                is GeneratedPuzzleBuildOutcome.Created -> return GeneratedPairsPuzzleGenerationOutcome.Generated(
-                    request = request,
-                    puzzle = outcome.puzzle,
-                    attemptsUsed = attemptsUsed,
-                    searchWorkConsumed = searchControl.searchWorkConsumed
-                )
-
-                is GeneratedPuzzleBuildOutcome.Rejected -> {
-                    rejections += GeneratedPairsPuzzleCandidateRejection.FinalValidationFailed(
-                        attempt = attemptsUsed,
-                        violations = outcome.violations
-                    )
-                }
-            }
+            handleBuildOutcome(
+                outcome = buildValidGeneratedPuzzle(
+                    candidate = candidate,
+                    puzzleAssembler = puzzleAssembler,
+                    cancellation = cancellation
+                ),
+                request = request,
+                attemptsUsed = attemptsUsed,
+                searchControl = searchControl,
+                rejections = rejections
+            )?.let { outcome -> return outcome }
         }
 
         fallbackCandidate?.let { candidate ->
-            when (val outcome = buildValidGeneratedPuzzle(candidate = candidate, puzzleAssembler = puzzleAssembler)) {
-                is GeneratedPuzzleBuildOutcome.Created -> return GeneratedPairsPuzzleGenerationOutcome.Generated(
-                    request = request,
-                    puzzle = outcome.puzzle,
-                    attemptsUsed = attemptsUsed,
-                    searchWorkConsumed = searchControl.searchWorkConsumed
-                )
-
-                is GeneratedPuzzleBuildOutcome.Rejected -> {
-                    rejections += GeneratedPairsPuzzleCandidateRejection.FinalValidationFailed(
-                        attempt = attemptsUsed,
-                        violations = outcome.violations
-                    )
-                }
-            }
+            handleBuildOutcome(
+                outcome = buildValidGeneratedPuzzle(
+                    candidate = candidate,
+                    puzzleAssembler = puzzleAssembler,
+                    cancellation = cancellation
+                ),
+                request = request,
+                attemptsUsed = attemptsUsed,
+                searchControl = searchControl,
+                rejections = rejections
+            )?.let { outcome -> return outcome }
         }
 
         return failure(
@@ -169,7 +164,8 @@ class GeneratedPairsPuzzleGenerator(private val context: GeneratedPuzzleGenerati
 
     private fun buildValidGeneratedPuzzle(
         candidate: GeneratedPairsPuzzleCandidate,
-        puzzleAssembler: GeneratedPairsPuzzleAssembler
+        puzzleAssembler: GeneratedPairsPuzzleAssembler,
+        cancellation: GeneratedPuzzleGenerationCancellation
     ): GeneratedPuzzleBuildOutcome {
         val solvedPuzzle = puzzleAssembler.buildSolvedPuzzle(candidate = candidate.solvedCandidate)
         return when (
@@ -179,9 +175,98 @@ class GeneratedPairsPuzzleGenerator(private val context: GeneratedPuzzleGenerati
                 knownEntryIds = candidate.knownEntryIds
             )
         ) {
-            is GeneratedPairsPuzzleCreation.Created -> GeneratedPuzzleBuildOutcome.Created(creation.puzzle)
+            is GeneratedPairsPuzzleCreation.Created -> assessDifficulty(
+                puzzle = creation.puzzle,
+                cancellation = cancellation
+            )
             is GeneratedPairsPuzzleCreation.Rejected -> GeneratedPuzzleBuildOutcome.Rejected(creation.violations)
         }
+    }
+
+    private fun assessDifficulty(
+        puzzle: GeneratedPairsPuzzle,
+        cancellation: GeneratedPuzzleGenerationCancellation
+    ): GeneratedPuzzleBuildOutcome {
+        val policy = profile.difficultyAssessmentPolicy
+            ?: return GeneratedPuzzleBuildOutcome.Created(puzzle = puzzle)
+        return when (
+            val outcome = GeneratedPairsDifficultyAssessor().assess(
+                initialPuzzle = puzzle.initialPuzzle,
+                profile = profile,
+                executionPolicy = policy.executionPolicy,
+                cancellation = { cancellation.isCancellationRequested() }
+            )
+        ) {
+            is GeneratedPuzzleDifficultyAssessmentOutcome.Assessed -> {
+                val evaluation = policy.evaluate(report = outcome.report)
+                if (evaluation.isAccepted) {
+                    GeneratedPuzzleBuildOutcome.Created(puzzle = puzzle)
+                } else {
+                    GeneratedPuzzleBuildOutcome.DifficultyRejected(evaluation = evaluation)
+                }
+            }
+
+            is GeneratedPuzzleDifficultyAssessmentOutcome.Unsatisfiable ->
+                GeneratedPuzzleBuildOutcome.DifficultyUnavailable(outcome = outcome)
+            is GeneratedPuzzleDifficultyAssessmentOutcome.WorkLimitReached ->
+                GeneratedPuzzleBuildOutcome.AssessmentWorkLimitReached
+            is GeneratedPuzzleDifficultyAssessmentOutcome.Cancelled -> GeneratedPuzzleBuildOutcome.Cancelled
+        }
+    }
+
+    private fun handleBuildOutcome(
+        outcome: GeneratedPuzzleBuildOutcome,
+        request: GeneratedPuzzleGenerationRequest,
+        attemptsUsed: Int,
+        searchControl: GeneratedPairsSearchControl,
+        rejections: MutableList<GeneratedPairsPuzzleCandidateRejection>
+    ): GeneratedPairsPuzzleGenerationOutcome? = when (outcome) {
+        is GeneratedPuzzleBuildOutcome.Created -> GeneratedPairsPuzzleGenerationOutcome.Generated(
+            request = request,
+            puzzle = outcome.puzzle,
+            attemptsUsed = attemptsUsed,
+            searchWorkConsumed = searchControl.searchWorkConsumed
+        )
+
+        is GeneratedPuzzleBuildOutcome.Rejected -> {
+            rejections += GeneratedPairsPuzzleCandidateRejection.FinalValidationFailed(
+                attempt = attemptsUsed,
+                violations = outcome.violations
+            )
+            null
+        }
+
+        is GeneratedPuzzleBuildOutcome.DifficultyRejected -> {
+            rejections += GeneratedPairsPuzzleCandidateRejection.DifficultyAssessmentRejected(
+                attempt = attemptsUsed,
+                evaluation = outcome.evaluation
+            )
+            null
+        }
+
+        is GeneratedPuzzleBuildOutcome.DifficultyUnavailable -> {
+            rejections += GeneratedPairsPuzzleCandidateRejection.DifficultyAssessmentUnavailable(
+                attempt = attemptsUsed,
+                outcome = outcome.outcome
+            )
+            null
+        }
+
+        GeneratedPuzzleBuildOutcome.AssessmentWorkLimitReached -> failure(
+            request = request,
+            attemptsUsed = attemptsUsed,
+            searchControl = searchControl,
+            reason = GeneratedPairsPuzzleGenerationFailureReason.DifficultyAssessmentWorkLimitReached,
+            rejections = rejections
+        )
+
+        GeneratedPuzzleBuildOutcome.Cancelled -> failure(
+            request = request,
+            attemptsUsed = attemptsUsed,
+            searchControl = searchControl,
+            reason = GeneratedPairsPuzzleGenerationFailureReason.Cancelled,
+            rejections = rejections
+        )
     }
 }
 
@@ -224,4 +309,10 @@ private data class GeneratedPairsPuzzleCandidate(
 private sealed interface GeneratedPuzzleBuildOutcome {
     data class Created(val puzzle: GeneratedPairsPuzzle) : GeneratedPuzzleBuildOutcome
     data class Rejected(val violations: List<GeneratedPairsPuzzleValidationViolation>) : GeneratedPuzzleBuildOutcome
+    data class DifficultyRejected(val evaluation: GeneratedPuzzleDifficultyPolicyEvaluation) :
+        GeneratedPuzzleBuildOutcome
+    data class DifficultyUnavailable(val outcome: GeneratedPuzzleDifficultyAssessmentOutcome.Unsatisfiable) :
+        GeneratedPuzzleBuildOutcome
+    data object AssessmentWorkLimitReached : GeneratedPuzzleBuildOutcome
+    data object Cancelled : GeneratedPuzzleBuildOutcome
 }

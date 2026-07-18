@@ -431,6 +431,7 @@ class GeneratedPairsPuzzleValidatorTest {
                 "generated.solved-sum-product-pairing-mismatch",
                 "generated.strip-value-outside-range",
                 "generated.strip-value-occurrence-exceeded",
+                "generated.repeated-strip-value-group-count-exceeded",
                 "generated.duplicate-board-results",
                 "generated.multiplication-result-exceeded",
                 "generated.product-anchor-mix-outside-range",

@@ -154,7 +154,7 @@ class GeneratedPuzzleProfileTest {
                     initialStripMaskPolicy = validMaskPolicy().copy(
                         knownEntryCountRange = 3..3,
                         distributionPolicy =
-                        StripKnownEntryDistributionPolicy.SPREAD_ACROSS_STRIP_AND_PAIRS_WHEN_POSSIBLE
+                        StripKnownEntryDistributionPolicy.SpreadAcrossStripAndPairsWhenPossible
                     )
                 ),
                 expectedRuleId = GeneratedPuzzleProfileRuleId.SPREAD_DISTRIBUTION_CAPACITY
@@ -376,7 +376,7 @@ class GeneratedPuzzleProfileTest {
             stripValuePolicy = StripValuePolicy(valueRange = 2..3, maxOccurrencesPerValue = 1),
             initialStripMaskPolicy = validMaskPolicy().copy(
                 knownEntryCountRange = 3..5,
-                distributionPolicy = StripKnownEntryDistributionPolicy.SPREAD_ACROSS_STRIP_AND_PAIRS_WHEN_POSSIBLE
+                distributionPolicy = StripKnownEntryDistributionPolicy.SpreadAcrossStripAndPairsWhenPossible
             ),
             resultConstraints = ResultConstraints(
                 maxMultiplicationResult = 10,
@@ -454,6 +454,7 @@ class GeneratedPuzzleProfileTest {
                 "profile.required-anchor-capacity",
                 "profile.hidden-run-feasibility",
                 "profile.spread-distribution-capacity",
+                "profile.distinct-solution-pair-distribution-feasibility",
                 "profile.high-value-target-rank",
                 "profile.duplicate-high-value-target-rank",
                 "profile.high-value-target-anchor-conflict",
@@ -464,6 +465,7 @@ class GeneratedPuzzleProfileTest {
                 "profile.product-anchor-selection-feasibility",
                 "profile.prime-decoy-target-count",
                 "profile.prime-decoy-target-feasibility",
+                "profile.repeated-value-group-target-feasibility",
                 "profile.eligible-value-pair-catalog",
                 "profile.arithmetic-result-range",
                 "profile.validation-work-limit"
@@ -493,7 +495,7 @@ class GeneratedPuzzleProfileTest {
             InitialStripMaskPolicy(
                 knownEntryCountRange = IntRange.EMPTY,
                 requiredAnchors = emptySet(),
-                distributionPolicy = StripKnownEntryDistributionPolicy.UNRESTRICTED,
+                distributionPolicy = StripKnownEntryDistributionPolicy.Unrestricted,
                 maxConsecutiveHiddenEntries = 2
             )
         }
@@ -542,7 +544,7 @@ private fun smallestBoundedDefinition(): GeneratedPuzzleProfileDefinition = Gene
     initialStripMaskPolicy = InitialStripMaskPolicy(
         knownEntryCountRange = 1..1,
         requiredAnchors = setOf(RequiredKnownStripAnchor.HIGHEST_STRIP_ENTRY),
-        distributionPolicy = StripKnownEntryDistributionPolicy.UNRESTRICTED,
+        distributionPolicy = StripKnownEntryDistributionPolicy.Unrestricted,
         maxConsecutiveHiddenEntries = 1
     ),
     generationPolicy = GenerationPolicy(isBoardTileShufflingEnabled = true)
@@ -569,7 +571,7 @@ private fun validResultConstraints(): ResultConstraints = ResultConstraints(
 private fun validMaskPolicy(): InitialStripMaskPolicy = InitialStripMaskPolicy(
     knownEntryCountRange = 2..2,
     requiredAnchors = setOf(RequiredKnownStripAnchor.HIGHEST_STRIP_ENTRY),
-    distributionPolicy = StripKnownEntryDistributionPolicy.UNRESTRICTED,
+    distributionPolicy = StripKnownEntryDistributionPolicy.Unrestricted,
     maxConsecutiveHiddenEntries = 2
 )
 

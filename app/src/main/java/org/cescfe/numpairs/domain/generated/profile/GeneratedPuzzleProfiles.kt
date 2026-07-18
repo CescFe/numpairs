@@ -1,9 +1,13 @@
 package org.cescfe.numpairs.domain.generated.profile
 
+import org.cescfe.numpairs.domain.generated.assessment.GeneratedPuzzleDifficultyAssessmentExecutionPolicy
+import org.cescfe.numpairs.domain.generated.assessment.GeneratedPuzzleDifficultyAssessmentPolicy
+
 object GeneratedPuzzleProfiles {
     val FOUR_PAIRS_LOW: GeneratedPuzzleProfile = fourPairsLow()
+    val FOUR_PAIRS_MEDIUM: GeneratedPuzzleProfile = fourPairsMedium()
     val EIGHT_PAIRS_MEDIUM: GeneratedPuzzleProfile = eightPairsMedium()
-    val ALL: List<GeneratedPuzzleProfile> = listOf(FOUR_PAIRS_LOW, EIGHT_PAIRS_MEDIUM)
+    val ALL: List<GeneratedPuzzleProfile> = listOf(FOUR_PAIRS_LOW, FOUR_PAIRS_MEDIUM, EIGHT_PAIRS_MEDIUM)
 
     private fun fourPairsLow(): GeneratedPuzzleProfile {
         val size = GeneratedPuzzleSize(pairCount = 4)
@@ -24,11 +28,79 @@ object GeneratedPuzzleProfiles {
                 initialStripMaskPolicy = InitialStripMaskPolicy(
                     knownEntryCountRange = 3..3,
                     requiredAnchors = setOf(RequiredKnownStripAnchor.HIGHEST_STRIP_ENTRY),
-                    distributionPolicy = StripKnownEntryDistributionPolicy.SPREAD_ACROSS_STRIP_AND_PAIRS_WHEN_POSSIBLE,
+                    distributionPolicy = StripKnownEntryDistributionPolicy.SpreadAcrossStripAndPairsWhenPossible,
                     maxConsecutiveHiddenEntries = 2
                 ),
                 generationPolicy = GenerationPolicy(
                     isBoardTileShufflingEnabled = true
+                )
+            )
+        ).getOrThrow()
+    }
+
+    private fun fourPairsMedium(): GeneratedPuzzleProfile {
+        val size = GeneratedPuzzleSize(pairCount = 4)
+
+        return GeneratedPuzzleProfile.create(
+            definition = GeneratedPuzzleProfileDefinition(
+                id = GeneratedPuzzleProfileId("4-pairs-medium"),
+                difficulty = DifficultyTier.MEDIUM,
+                size = size,
+                stripValuePolicy = StripValuePolicy(
+                    valueRange = 1..40,
+                    maxOccurrencesPerValue = 2,
+                    maxRepeatedValueGroupCount = 1
+                ),
+                resultConstraints = ResultConstraints(
+                    maxMultiplicationResult = 400,
+                    allowsDuplicateBoardResults = false,
+                    productAnchorMix = ProductAnchorMix(
+                        productResultGreaterThan = 80,
+                        countRange = 1..2
+                    )
+                ),
+                initialStripMaskPolicy = InitialStripMaskPolicy(
+                    knownEntryCountRange = 3..3,
+                    requiredAnchors = emptySet(),
+                    distributionPolicy = StripKnownEntryDistributionPolicy.AtLeastDistinctSolutionPairs(
+                        minimumPairCount = 2
+                    ),
+                    maxConsecutiveHiddenEntries = 3
+                ),
+                generationPolicy = GenerationPolicy(
+                    isBoardTileShufflingEnabled = true
+                ),
+                varietyPolicy = GeneratedPuzzleVarietyPolicy(
+                    highValueMaskTargets = listOf(
+                        HighValueMaskTarget(
+                            rankFromHighest = 1,
+                            targetHiddenProbability = ProbabilityPercent(25)
+                        ),
+                        HighValueMaskTarget(
+                            rankFromHighest = 2,
+                            targetHiddenProbability = ProbabilityPercent(40)
+                        )
+                    ),
+                    primeProductDecoyTarget = PrimeProductDecoyTarget(
+                        targetPuzzlePercent = ProbabilityPercent(30),
+                        targetPairCount = 1,
+                        pairPattern = PrimeProductDecoyPairPattern.ONE_AND_PRIME
+                    ),
+                    repeatedValueGroupTarget = RepeatedValueGroupTarget(
+                        targetPuzzlePercent = ProbabilityPercent(35),
+                        targetGroupCount = 1
+                    )
+                ),
+                difficultyAssessmentPolicy = GeneratedPuzzleDifficultyAssessmentPolicy(
+                    executionPolicy = GeneratedPuzzleDifficultyAssessmentExecutionPolicy(
+                        maxCandidateExpansions = 25_000,
+                        validSolutionCountLimit = 20
+                    ),
+                    minimumInitialPlausibleCandidateCount = 6,
+                    minimumInitialForcedDeductionCount = 1,
+                    minimumFirstForcedDeductionDepth = 1,
+                    minimumPlausibleDecoyCount = 1,
+                    minimumValidSolutionCount = 1
                 )
             )
         ).getOrThrow()
@@ -57,7 +129,7 @@ object GeneratedPuzzleProfiles {
                 initialStripMaskPolicy = InitialStripMaskPolicy(
                     knownEntryCountRange = 6..7,
                     requiredAnchors = emptySet(),
-                    distributionPolicy = StripKnownEntryDistributionPolicy.UNRESTRICTED,
+                    distributionPolicy = StripKnownEntryDistributionPolicy.Unrestricted,
                     maxConsecutiveHiddenEntries = 4
                 ),
                 generationPolicy = GenerationPolicy(

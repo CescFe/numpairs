@@ -31,13 +31,72 @@ class GeneratedPuzzleProfilesTest {
             profile.initialStripMaskPolicy.requiredAnchors
         )
         assertEquals(
-            StripKnownEntryDistributionPolicy.SPREAD_ACROSS_STRIP_AND_PAIRS_WHEN_POSSIBLE,
+            StripKnownEntryDistributionPolicy.SpreadAcrossStripAndPairsWhenPossible,
             profile.initialStripMaskPolicy.distributionPolicy
         )
         assertEquals(2, profile.initialStripMaskPolicy.maxConsecutiveHiddenEntries)
 
         assertTrue(profile.generationPolicy.isBoardTileShufflingEnabled)
         assertNull(profile.varietyPolicy.primeProductDecoyTarget)
+    }
+
+    @Test
+    fun four_pairs_medium_profile_matches_documented_rules() {
+        val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_MEDIUM
+
+        assertEquals(GeneratedPuzzleProfileId("4-pairs-medium"), profile.id)
+        assertEquals(DifficultyTier.MEDIUM, profile.difficulty)
+        assertEquals(4, profile.size.pairCount)
+        assertEquals(8, profile.size.stripEntryCount)
+        assertEquals(8, profile.size.boardTileCount)
+
+        assertEquals(1..40, profile.stripValuePolicy.valueRange)
+        assertEquals(2, profile.stripValuePolicy.maxOccurrencesPerValue)
+        assertEquals(1, profile.stripValuePolicy.maxRepeatedValueGroupCount)
+        assertTrue(profile.stripValuePolicy.allowsOne)
+
+        assertEquals(400, profile.resultConstraints.maxMultiplicationResult)
+        assertFalse(profile.resultConstraints.allowsDuplicateBoardResults)
+        val anchorMix = requireNotNull(profile.resultConstraints.productAnchorMix)
+        assertEquals(80, anchorMix.productResultGreaterThan)
+        assertEquals(1..2, anchorMix.countRange)
+
+        assertEquals(3..3, profile.initialStripMaskPolicy.knownEntryCountRange)
+        assertEquals(5..5, profile.hiddenEntryCountRange)
+        assertTrue(profile.initialStripMaskPolicy.requiredAnchors.isEmpty())
+        assertEquals(
+            StripKnownEntryDistributionPolicy.AtLeastDistinctSolutionPairs(minimumPairCount = 2),
+            profile.initialStripMaskPolicy.distributionPolicy
+        )
+        assertEquals(3, profile.initialStripMaskPolicy.maxConsecutiveHiddenEntries)
+
+        assertEquals(
+            listOf(
+                HighValueMaskTarget(1, ProbabilityPercent(25)),
+                HighValueMaskTarget(2, ProbabilityPercent(40))
+            ),
+            profile.varietyPolicy.highValueMaskTargets
+        )
+        val decoyTarget = requireNotNull(profile.varietyPolicy.primeProductDecoyTarget)
+        assertEquals(ProbabilityPercent(30), decoyTarget.targetPuzzlePercent)
+        assertEquals(1, decoyTarget.targetPairCount)
+        assertEquals(PrimeProductDecoyPairPattern.ONE_AND_PRIME, decoyTarget.pairPattern)
+        assertEquals(
+            RepeatedValueGroupTarget(
+                targetPuzzlePercent = ProbabilityPercent(35),
+                targetGroupCount = 1
+            ),
+            profile.varietyPolicy.repeatedValueGroupTarget
+        )
+        assertTrue(profile.generationPolicy.isBoardTileShufflingEnabled)
+        val assessmentPolicy = requireNotNull(profile.difficultyAssessmentPolicy)
+        assertEquals(25_000, assessmentPolicy.executionPolicy.maxCandidateExpansions)
+        assertEquals(20, assessmentPolicy.executionPolicy.validSolutionCountLimit)
+        assertEquals(6, assessmentPolicy.minimumInitialPlausibleCandidateCount)
+        assertEquals(1, assessmentPolicy.minimumInitialForcedDeductionCount)
+        assertEquals(1, assessmentPolicy.minimumFirstForcedDeductionDepth)
+        assertEquals(1, assessmentPolicy.minimumPlausibleDecoyCount)
+        assertEquals(1, assessmentPolicy.minimumValidSolutionCount)
     }
 
     @Test
@@ -64,7 +123,7 @@ class GeneratedPuzzleProfilesTest {
         assertEquals(9..10, profile.hiddenEntryCountRange)
         assertEquals(emptySet<RequiredKnownStripAnchor>(), profile.initialStripMaskPolicy.requiredAnchors)
         assertEquals(
-            StripKnownEntryDistributionPolicy.UNRESTRICTED,
+            StripKnownEntryDistributionPolicy.Unrestricted,
             profile.initialStripMaskPolicy.distributionPolicy
         )
         assertEquals(4, profile.initialStripMaskPolicy.maxConsecutiveHiddenEntries)

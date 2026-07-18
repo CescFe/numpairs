@@ -36,11 +36,12 @@ internal class GeneratedPairsValuePairSelector(
         val plannedPairs = chooseValuePairs(
             candidatePairs = candidatePairs,
             primeProductDecoyDirective = variationPlan.primeProductDecoyDirective,
+            repeatedValueGroupDirective = variationPlan.repeatedValueGroupDirective,
             searchControl = searchControl
         )
 
         if (plannedPairs !is GeneratedPairsSearchOutcome.NoCandidate ||
-            variationPlan.primeProductDecoyDirective == GeneratedPairsPrimeProductDecoyDirective.Unrestricted
+            variationPlan.hasNoValuePairVarietyDirectives()
         ) {
             return plannedPairs
         }
@@ -48,6 +49,7 @@ internal class GeneratedPairsValuePairSelector(
         return chooseValuePairs(
             candidatePairs = candidatePairs,
             primeProductDecoyDirective = GeneratedPairsPrimeProductDecoyDirective.Unrestricted,
+            repeatedValueGroupDirective = GeneratedPairsRepeatedValueGroupDirective.Unrestricted,
             searchControl = searchControl
         )
     }
@@ -55,6 +57,7 @@ internal class GeneratedPairsValuePairSelector(
     private fun chooseValuePairs(
         candidatePairs: List<GeneratedPairsValuePair>,
         primeProductDecoyDirective: GeneratedPairsPrimeProductDecoyDirective,
+        repeatedValueGroupDirective: GeneratedPairsRepeatedValueGroupDirective,
         searchControl: GeneratedPairsSearchControl?
     ): GeneratedPairsSearchOutcome<List<GeneratedPairsValuePair>> = chooseValuePairs(
         candidatePairs = candidatePairs,
@@ -63,7 +66,9 @@ internal class GeneratedPairsValuePairSelector(
         usedResults = emptySet(),
         productAnchorCount = 0,
         primeProductDecoyCount = 0,
+        minimumCandidateIndex = 0,
         primeProductDecoyDirective = primeProductDecoyDirective,
+        repeatedValueGroupDirective = repeatedValueGroupDirective,
         searchControl = searchControl
     )
 
@@ -74,7 +79,9 @@ internal class GeneratedPairsValuePairSelector(
         usedResults: Set<Int>,
         productAnchorCount: Int,
         primeProductDecoyCount: Int,
+        minimumCandidateIndex: Int,
         primeProductDecoyDirective: GeneratedPairsPrimeProductDecoyDirective,
+        repeatedValueGroupDirective: GeneratedPairsRepeatedValueGroupDirective,
         searchControl: GeneratedPairsSearchControl?
     ): GeneratedPairsSearchOutcome<List<GeneratedPairsValuePair>> {
         searchControl?.check()?.let { result ->
@@ -99,10 +106,20 @@ internal class GeneratedPairsValuePairSelector(
             return GeneratedPairsSearchOutcome.NoCandidate
         }
 
+        val repeatedValueGroupCount = valueOccurrences.repeatedValueGroupCount()
+        if (!repeatedValueGroupDirective.canStillBeSatisfied(
+                currentGroupCount = repeatedValueGroupCount,
+                remainingPairSlots = profile.size.pairCount - selectedPairs.size
+            )
+        ) {
+            return GeneratedPairsSearchOutcome.NoCandidate
+        }
+
         if (selectedPairs.size == profile.size.pairCount) {
             return if (
                 constraints.isComplete(pairs = selectedPairs) &&
-                primeProductDecoyDirective.isSatisfiedBy(pairCount = primeProductDecoyCount)
+                primeProductDecoyDirective.isSatisfiedBy(pairCount = primeProductDecoyCount) &&
+                repeatedValueGroupDirective.isSatisfiedBy(groupCount = repeatedValueGroupCount)
             ) {
                 GeneratedPairsSearchOutcome.Found(selectedPairs)
             } else {
@@ -110,19 +127,28 @@ internal class GeneratedPairsValuePairSelector(
             }
         }
 
-        val orderedCandidatePairs = if (
+        var orderedCandidatePairs = candidatePairs.withIndex()
+            .filter { indexedPair -> indexedPair.index >= minimumCandidateIndex }
+        if (repeatedValueGroupDirective.shouldPreferRepeatedValueGroup(
+                currentGroupCount = repeatedValueGroupCount
+            )
+        ) {
+            orderedCandidatePairs = orderedCandidatePairs.sortedByDescending { indexedPair ->
+                valueOccurrences.with(indexedPair.value).repeatedValueGroupCount() - repeatedValueGroupCount
+            }
+        }
+        if (
             primeProductDecoyDirective.shouldPreferPrimeProductDecoy(
                 currentPairCount = primeProductDecoyCount
             )
         ) {
-            candidatePairs.sortedByDescending { pair ->
-                if (pair.isPrimeProductDecoy()) 1 else 0
+            orderedCandidatePairs = orderedCandidatePairs.sortedByDescending { indexedPair ->
+                if (indexedPair.value.isPrimeProductDecoy()) 1 else 0
             }
-        } else {
-            candidatePairs
         }
 
-        orderedCandidatePairs.forEach { candidatePair ->
+        orderedCandidatePairs.forEach { indexedPair ->
+            val candidatePair = indexedPair.value
             searchControl?.consumeCandidateExpansion()?.let { result ->
                 if (result != GeneratedPairsSearchControlResult.Continue) {
                     return result.toSearchOutcome()
@@ -144,17 +170,27 @@ internal class GeneratedPairsValuePairSelector(
             if (!primeProductDecoyDirective.allows(pairCount = updatedPrimeProductDecoyCount)) {
                 return@forEach
             }
+            val updatedValueOccurrences = valueOccurrences.with(candidatePair)
+            if (!repeatedValueGroupDirective.allows(
+                    groupCount = updatedValueOccurrences.repeatedValueGroupCount()
+                )
+            ) {
+                return@forEach
+            }
 
             when (
                 val outcome = chooseValuePairs(
                     candidatePairs = candidatePairs,
                     selectedPairs = selectedPairs + candidatePair,
-                    valueOccurrences = valueOccurrences.with(candidatePair),
+                    valueOccurrences = updatedValueOccurrences,
                     usedResults = usedResults + candidatePair.resultValues,
                     productAnchorCount = productAnchorCount +
                         constraints.productAnchorIncrement(pair = candidatePair),
                     primeProductDecoyCount = updatedPrimeProductDecoyCount,
+                    minimumCandidateIndex = indexedPair.index +
+                        if (profile.resultConstraints.allowsDuplicateBoardResults) 0 else 1,
                     primeProductDecoyDirective = primeProductDecoyDirective,
+                    repeatedValueGroupDirective = repeatedValueGroupDirective,
                     searchControl = searchControl
                 )
             ) {
@@ -190,6 +226,10 @@ internal class GeneratedPairsValuePairSelector(
     }
 }
 
+private fun GeneratedPairsVariationPlan.hasNoValuePairVarietyDirectives(): Boolean =
+    primeProductDecoyDirective == GeneratedPairsPrimeProductDecoyDirective.Unrestricted &&
+        repeatedValueGroupDirective == GeneratedPairsRepeatedValueGroupDirective.Unrestricted
+
 private val GeneratedPairsPrimeProductDecoyDirective.requiredPairCount: Int?
     get() = when (this) {
         GeneratedPairsPrimeProductDecoyDirective.Unrestricted -> null
@@ -215,6 +255,34 @@ private fun GeneratedPairsPrimeProductDecoyDirective.shouldPreferPrimeProductDec
 
 private fun GeneratedPairsPrimeProductDecoyDirective.allows(pairCount: Int): Boolean =
     requiredPairCount?.let { requiredPairCount -> pairCount <= requiredPairCount } ?: true
+
+private val GeneratedPairsRepeatedValueGroupDirective.requiredGroupCount: Int?
+    get() = when (this) {
+        GeneratedPairsRepeatedValueGroupDirective.Unrestricted -> null
+        GeneratedPairsRepeatedValueGroupDirective.Exclude -> 0
+        is GeneratedPairsRepeatedValueGroupDirective.Include -> groupCount
+    }
+
+private fun GeneratedPairsRepeatedValueGroupDirective.canStillBeSatisfied(
+    currentGroupCount: Int,
+    remainingPairSlots: Int
+): Boolean {
+    val requiredGroupCount = requiredGroupCount ?: return true
+
+    return currentGroupCount <= requiredGroupCount &&
+        currentGroupCount + remainingPairSlots * 2 >= requiredGroupCount
+}
+
+private fun GeneratedPairsRepeatedValueGroupDirective.isSatisfiedBy(groupCount: Int): Boolean =
+    requiredGroupCount?.let { requiredGroupCount -> groupCount == requiredGroupCount } ?: true
+
+private fun GeneratedPairsRepeatedValueGroupDirective.shouldPreferRepeatedValueGroup(currentGroupCount: Int): Boolean =
+    requiredGroupCount?.let { requiredGroupCount -> currentGroupCount < requiredGroupCount } ?: false
+
+private fun GeneratedPairsRepeatedValueGroupDirective.allows(groupCount: Int): Boolean =
+    requiredGroupCount?.let { requiredGroupCount -> groupCount <= requiredGroupCount } ?: true
+
+private fun Map<Int, Int>.repeatedValueGroupCount(): Int = values.count { occurrenceCount -> occurrenceCount > 1 }
 
 private fun Map<Int, Int>.with(pair: GeneratedPairsValuePair): Map<Int, Int> {
     val updatedOccurrences = toMutableMap()

@@ -138,7 +138,7 @@ private fun testTwoPairsProfile(): GeneratedPuzzleProfile = GeneratedPuzzleProfi
         initialStripMaskPolicy = InitialStripMaskPolicy(
             knownEntryCountRange = 1..1,
             requiredAnchors = setOf(RequiredKnownStripAnchor.HIGHEST_STRIP_ENTRY),
-            distributionPolicy = StripKnownEntryDistributionPolicy.UNRESTRICTED,
+            distributionPolicy = StripKnownEntryDistributionPolicy.Unrestricted,
             maxConsecutiveHiddenEntries = 3
         ),
         generationPolicy = GenerationPolicy(

@@ -1,5 +1,7 @@
 package org.cescfe.numpairs.domain.generated.generation
 
+import org.cescfe.numpairs.domain.generated.assessment.GeneratedPuzzleDifficultyAssessmentOutcome
+import org.cescfe.numpairs.domain.generated.assessment.GeneratedPuzzleDifficultyPolicyEvaluation
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfile
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfileId
 import org.cescfe.numpairs.domain.generated.puzzle.GeneratedPairsPuzzle
@@ -65,6 +67,7 @@ sealed interface GeneratedPairsPuzzleGenerationOutcome {
 sealed interface GeneratedPairsPuzzleGenerationFailureReason {
     data object AttemptsExhausted : GeneratedPairsPuzzleGenerationFailureReason
     data object SearchBudgetExhausted : GeneratedPairsPuzzleGenerationFailureReason
+    data object DifficultyAssessmentWorkLimitReached : GeneratedPairsPuzzleGenerationFailureReason
     data object Cancelled : GeneratedPairsPuzzleGenerationFailureReason
 }
 
@@ -82,6 +85,28 @@ sealed interface GeneratedPairsPuzzleCandidateRejection {
         init {
             require(violations.isNotEmpty()) {
                 "A final validation rejection requires at least one violation."
+            }
+        }
+    }
+
+    data class DifficultyAssessmentRejected(
+        override val attempt: Int,
+        val evaluation: GeneratedPuzzleDifficultyPolicyEvaluation
+    ) : GeneratedPairsPuzzleCandidateRejection {
+        init {
+            require(!evaluation.isAccepted) {
+                "A difficulty-assessment rejection requires unmet policy expectations."
+            }
+        }
+    }
+
+    data class DifficultyAssessmentUnavailable(
+        override val attempt: Int,
+        val outcome: GeneratedPuzzleDifficultyAssessmentOutcome
+    ) : GeneratedPairsPuzzleCandidateRejection {
+        init {
+            require(outcome is GeneratedPuzzleDifficultyAssessmentOutcome.Unsatisfiable) {
+                "Only an unsatisfiable assessment can be recorded as unavailable."
             }
         }
     }

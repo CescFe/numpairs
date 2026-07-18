@@ -1,5 +1,7 @@
 package org.cescfe.numpairs.domain.generated.profile
 
+import org.cescfe.numpairs.domain.generated.assessment.GeneratedPuzzleDifficultyAssessmentPolicy
+
 data class GeneratedPuzzleProfileId(val value: String) {
     init {
         require(value.isNotBlank()) {
@@ -16,7 +18,8 @@ data class GeneratedPuzzleProfileDefinition(
     val resultConstraints: ResultConstraints,
     val initialStripMaskPolicy: InitialStripMaskPolicy,
     val generationPolicy: GenerationPolicy,
-    val varietyPolicy: GeneratedPuzzleVarietyPolicy = GeneratedPuzzleVarietyPolicy()
+    val varietyPolicy: GeneratedPuzzleVarietyPolicy = GeneratedPuzzleVarietyPolicy(),
+    val difficultyAssessmentPolicy: GeneratedPuzzleDifficultyAssessmentPolicy? = null
 )
 
 class GeneratedPuzzleProfile private constructor(definition: GeneratedPuzzleProfileDefinition) {
@@ -28,6 +31,7 @@ class GeneratedPuzzleProfile private constructor(definition: GeneratedPuzzleProf
     val initialStripMaskPolicy: InitialStripMaskPolicy = definition.initialStripMaskPolicy
     val generationPolicy: GenerationPolicy = definition.generationPolicy
     val varietyPolicy: GeneratedPuzzleVarietyPolicy = definition.varietyPolicy
+    val difficultyAssessmentPolicy: GeneratedPuzzleDifficultyAssessmentPolicy? = definition.difficultyAssessmentPolicy
 
     val hiddenEntryCountRange: IntRange = initialStripMaskPolicy.knownEntryCountRange.let { knownCountRange ->
         (size.stripEntryCount - knownCountRange.last)..(size.stripEntryCount - knownCountRange.first)
@@ -76,7 +80,11 @@ data class GeneratedPuzzleSize(val pairCount: Int) {
     val boardTileCount: Int = pairCount * 2
 }
 
-data class StripValuePolicy(val valueRange: IntRange, val maxOccurrencesPerValue: Int) {
+data class StripValuePolicy(
+    val valueRange: IntRange,
+    val maxOccurrencesPerValue: Int,
+    val maxRepeatedValueGroupCount: Int? = null
+) {
     init {
         require(!valueRange.isEmpty()) {
             "Strip value range must not be empty."
@@ -86,6 +94,9 @@ data class StripValuePolicy(val valueRange: IntRange, val maxOccurrencesPerValue
         }
         require(maxOccurrencesPerValue >= 1) {
             "Maximum occurrences per strip value must be at least 1."
+        }
+        require(maxRepeatedValueGroupCount == null || maxRepeatedValueGroupCount >= 0) {
+            "Maximum repeated strip-value group count must not be negative."
         }
     }
 
@@ -142,14 +153,24 @@ internal fun Set<RequiredKnownStripAnchor>.resolveEntryIds(stripEntryCount: Int)
     }
 }.toSet()
 
-enum class StripKnownEntryDistributionPolicy {
-    SPREAD_ACROSS_STRIP_AND_PAIRS_WHEN_POSSIBLE,
-    UNRESTRICTED
+sealed interface StripKnownEntryDistributionPolicy {
+    data object SpreadAcrossStripAndPairsWhenPossible : StripKnownEntryDistributionPolicy
+
+    data object Unrestricted : StripKnownEntryDistributionPolicy
+
+    data class AtLeastDistinctSolutionPairs(val minimumPairCount: Int) : StripKnownEntryDistributionPolicy {
+        init {
+            require(minimumPairCount > 0) {
+                "Minimum distinct solution-pair count must be positive."
+            }
+        }
+    }
 }
 
 data class GeneratedPuzzleVarietyPolicy(
     val highValueMaskTargets: List<HighValueMaskTarget> = emptyList(),
-    val primeProductDecoyTarget: PrimeProductDecoyTarget? = null
+    val primeProductDecoyTarget: PrimeProductDecoyTarget? = null,
+    val repeatedValueGroupTarget: RepeatedValueGroupTarget? = null
 )
 
 data class HighValueMaskTarget(val rankFromHighest: Int, val targetHiddenProbability: ProbabilityPercent)
@@ -172,6 +193,14 @@ data class PrimeProductDecoyTarget(
     init {
         require(targetPairCount > 0) {
             "Prime-product decoy target pair count must be positive."
+        }
+    }
+}
+
+data class RepeatedValueGroupTarget(val targetPuzzlePercent: ProbabilityPercent, val targetGroupCount: Int) {
+    init {
+        require(targetGroupCount > 0) {
+            "Repeated-value target group count must be positive."
         }
     }
 }

@@ -88,14 +88,50 @@ class GeneratedPairsValuePairSelectorTest {
         assertNotNull(selectedPairs)
         assertEquals(0, selectedPairs.orEmpty().count(GeneratedPairsValuePair::isPrimeProductDecoy))
     }
+
+    @Test
+    fun repetition_plans_select_exactly_one_or_zero_repeated_value_groups() {
+        val selector = GeneratedPairsValuePairSelector(
+            profile = GeneratedPuzzleProfiles.FOUR_PAIRS_MEDIUM,
+            random = Random(42)
+        )
+        val includedPairs = requireNotNull(
+            selector.selectValuePairs(
+                variationPlan = variationPlan(
+                    repeatedValueGroupDirective = GeneratedPairsRepeatedValueGroupDirective.Include(groupCount = 1)
+                )
+            )
+        )
+        val excludedPairs = requireNotNull(
+            selector.selectValuePairs(
+                variationPlan = variationPlan(
+                    repeatedValueGroupDirective = GeneratedPairsRepeatedValueGroupDirective.Exclude
+                )
+            )
+        )
+
+        assertEquals(1, includedPairs.repeatedValueGroupCount())
+        assertEquals(0, excludedPairs.repeatedValueGroupCount())
+    }
 }
 
 private fun variationPlan(
-    primeProductDecoyDirective: GeneratedPairsPrimeProductDecoyDirective
+    primeProductDecoyDirective: GeneratedPairsPrimeProductDecoyDirective =
+        GeneratedPairsPrimeProductDecoyDirective.Unrestricted,
+    repeatedValueGroupDirective: GeneratedPairsRepeatedValueGroupDirective =
+        GeneratedPairsRepeatedValueGroupDirective.Unrestricted
 ): GeneratedPairsVariationPlan = GeneratedPairsVariationPlan(
     primeProductDecoyDirective = primeProductDecoyDirective,
+    repeatedValueGroupDirective = repeatedValueGroupDirective,
     stripEntryVisibilityDirectives = emptyMap()
 )
+
+private fun List<GeneratedPairsValuePair>.repeatedValueGroupCount(): Int =
+    flatMap { pair -> listOf(pair.firstValue, pair.secondValue) }
+        .groupingBy { value -> value }
+        .eachCount()
+        .values
+        .count { occurrenceCount -> occurrenceCount > 1 }
 
 private fun singlePairProfile(id: String, valueRange: IntRange, maxMultiplicationResult: Int): GeneratedPuzzleProfile {
     val size = GeneratedPuzzleSize(pairCount = 1)
@@ -116,7 +152,7 @@ private fun singlePairProfile(id: String, valueRange: IntRange, maxMultiplicatio
             initialStripMaskPolicy = InitialStripMaskPolicy(
                 knownEntryCountRange = 1..1,
                 requiredAnchors = emptySet(),
-                distributionPolicy = StripKnownEntryDistributionPolicy.UNRESTRICTED,
+                distributionPolicy = StripKnownEntryDistributionPolicy.Unrestricted,
                 maxConsecutiveHiddenEntries = 1
             ),
             generationPolicy = GenerationPolicy(
