@@ -48,7 +48,16 @@ internal sealed interface GeneratedPuzzleGenerationUiState {
     data class Loading(val request: GeneratedPuzzleGenerationRequest, val previousSession: GeneratedModeGameSession?) :
         GeneratedPuzzleGenerationUiState
 
-    data class Ready(val session: GeneratedModeGameSession) : GeneratedPuzzleGenerationUiState
+    data class Ready(
+        val session: GeneratedModeGameSession,
+        val replacementTransition: GeneratedPuzzleReplacementTransition? = null
+    ) : GeneratedPuzzleGenerationUiState {
+        init {
+            require(replacementTransition == null || replacementTransition.successorSessionId == session.id) {
+                "A replacement transition must target the ready session."
+            }
+        }
+    }
 
     data class Failed(
         val request: GeneratedPuzzleGenerationRequest,
@@ -139,6 +148,16 @@ internal class GeneratedPuzzleViewModel(
             request = nextRequest(),
             previousSession = state.session
         )
+    }
+
+    fun onReplacementTransitionConsumed(transition: GeneratedPuzzleReplacementTransition) {
+        val state = _uiState.value as? GeneratedPuzzleGenerationUiState.Ready ?: return
+        if (
+            state.session.id == transition.successorSessionId &&
+            state.replacementTransition == transition
+        ) {
+            _uiState.value = state.copy(replacementTransition = null)
+        }
     }
 
     fun onPuzzleChanged(expectedSessionId: GeneratedSessionId, puzzle: Puzzle) {
@@ -294,11 +313,18 @@ internal class GeneratedPuzzleViewModel(
 
         return try {
             generatedSessionRepository.replace(snapshot)
+            val session = GeneratedModeGameSession(
+                snapshot = snapshot,
+                request = outcome.request
+            )
             GeneratedPuzzleGenerationUiState.Ready(
-                session = GeneratedModeGameSession(
-                    snapshot = snapshot,
-                    request = outcome.request
-                )
+                session = session,
+                replacementTransition = previousSession?.let { predecessor ->
+                    GeneratedPuzzleReplacementTransition(
+                        predecessorSessionId = predecessor.id,
+                        successorSessionId = session.id
+                    )
+                }
             )
         } catch (_: IOException) {
             GeneratedPuzzleGenerationUiState.Failed(
@@ -313,6 +339,17 @@ internal class GeneratedPuzzleViewModel(
         profile = mode.profile,
         seed = seedSource.nextSeed()
     )
+}
+
+internal data class GeneratedPuzzleReplacementTransition(
+    val predecessorSessionId: GeneratedSessionId,
+    val successorSessionId: GeneratedSessionId
+) {
+    init {
+        require(predecessorSessionId != successorSessionId) {
+            "A replacement transition requires distinct predecessor and successor sessions."
+        }
+    }
 }
 
 internal data class GeneratedModeGameSession(
