@@ -1,6 +1,9 @@
 # PRD - NumPairs ✨ v9 Game Feel & Personalization
 
-> Planned product reference for the `v9 - Game Feel & Personalization` milestone. The implemented product baseline is v7 Reliable Sessions & Replay Controls. v9 remains independent from, and compatible with, the separate future difficulty expansion represented by v8 in the product sequence.
+> Delivered product reference for the `v9 - Game Feel & Personalization` milestone.
+> References to v7 below describe the product baseline at the start of v9; the v9 success
+> criteria now represent implemented behavior. v9 remains independent from, and compatible
+> with, the separate future difficulty expansion represented by v8 in the product sequence.
 
 ## Product Summary
 
@@ -257,11 +260,11 @@ Required outcome:
 - startup always has a safe Warm or neutral fallback
 - corrupt or unavailable theme state never blocks launch
 
-Target outcome:
+Investigated target outcome, not supported in v9 under ADR-004:
 
 - a previously selected theme is reflected by the splash on subsequent launches where it can be done reliably
 
-Best-effort outcome:
+Investigated best-effort outcome, not supported in v9 under ADR-004:
 
 - the launcher exposes a matching adaptive icon variant where the active launcher honors component-icon changes
 

@@ -2,16 +2,34 @@
 
 ## Purpose
 
-This document defines the initial visual identity direction for NumPairs.
+This document preserves the v1 visual identity direction for NumPairs and records how that
+identity is applied by the current v9 product.
 
-The goal is not to create a final brand system, but to establish a simple, reusable, and coherent visual baseline for:
+The original goal was to establish a simple, reusable, and coherent visual baseline for:
 
 - the app logo
 - the Android launcher icon
-- future Splash Screen usage
+- Splash Screen usage
 - documentation and repository assets
 
-This visual direction belongs to the `v1 - Product Polish & Technical Hardening` milestone.
+The symbol and shape decisions belong to the `v1 - Product Polish & Technical Hardening`
+milestone. The current color and platform-branding contract belongs to
+`v9 - Game Feel & Personalization`.
+
+## Current v9 Branding Contract
+
+- The NumPairs symbol geometry remains unchanged.
+- In-app logo and brand treatments follow the selected Warm, Frost, Obsidian, Terminal, or
+  Ember appearance palette.
+- The Android system splash and adaptive, round, and legacy launcher assets remain static
+  and Warm.
+- The adaptive icon includes a monochrome NumPairs layer. Android and the active launcher,
+  not NumPairs, choose the tint shown when system-themed icons are enabled.
+- NumPairs does not switch launcher components or block startup to project the stored theme
+  into platform-owned branding.
+
+The platform boundary and its rationale are recorded in
+[ADR-004](../technical/adr/adr-004-keep-v9-platform-branding-static.md).
 
 ---
 
@@ -30,11 +48,9 @@ NumPairs is a native Android number puzzle game.
 
 The core interaction is based on solving puzzle tiles by completing number expressions that match a target result.
 
-The current prototype uses Material 3 with light/dark theme adaptation and dynamic colors on Android 12+.
-
-Because of this, the visual identity should not depend on a fixed app color palette at this stage.
-
-Instead, the identity should be based primarily on:
+The v1 prototype used Material 3 light/dark adaptation and Android dynamic colors. The
+current product instead uses five deliberate, app-owned color themes. Across that evolution,
+the identity continues to be based primarily on:
 
 - recognizable shapes
 - simple composition
@@ -57,12 +73,12 @@ The visual language should communicate:
 
 The identity should remain recognizable regardless of:
 
-- light mode
-- dark mode
-- dynamic Material colors
+- the selected NumPairs color theme
+- a light or dark palette
+- launcher-controlled monochrome tint
 - future UI refinements
 
-At this stage, the visual system intentionally avoids depending on one fixed brand palette.
+Color can strengthen the in-app identity, but it must not replace the recognizable symbol.
 
 ---
 
@@ -130,7 +146,8 @@ The composition should resemble a symbolic puzzle mark rather than a complete ma
 
 ## Visual Style
 
-The v1 logo should follow a minimalist monochrome style.
+The source logo should support a minimalist monochrome presentation. In-app instances may
+use the active v9 appearance colors without changing the mark.
 
 Recommended characteristics:
 
@@ -176,11 +193,12 @@ The visual tone should balance:
 
 ## Color Direction
 
-NumPairs currently relies on Android dynamic theming.
+NumPairs uses five app-owned, color-only themes: Warm, Frost, Obsidian, Terminal, and Ember.
+In-app branding uses the selected theme's brand colors while the mark remains recognizable
+independently of any one palette.
 
-Because of this, the visual identity should remain recognizable independently of one mandatory palette.
-
-The logo should primarily exist as black characters on a white background in documentation and as a monochrome mark in product assets when appropriate.
+The logo may remain black on white in documentation and monochrome in platform assets where
+appropriate.
 
 The shape and composition are considered more important than palette consistency.
 
@@ -190,17 +208,22 @@ The shape and composition are considered more important than palette consistency
 
 The Android launcher icon should reuse the same symbolic language as the primary logo.
 
-An adaptive icon version should be prepared for Android.
+Android packages adaptive, round, legacy, and monochrome launcher forms of the mark.
 
 The launcher asset should not reuse the full white documentation canvas as-is. Instead, the adaptive icon foreground should use the symbol-only mark, centered with safe padding so it remains legible across Android launcher masks.
 
-If a monochrome launcher layer is provided, it should reuse the same simplified symbol.
+The monochrome launcher layer reuses the same simplified symbol. Android launchers control
+its themed tint from the user's system palette, so that tint is not expected to match the
+selected in-app NumPairs theme.
+
+For v9, all packaged launcher variants remain static and Warm. Runtime component or
+activity-alias switching is intentionally not used.
 
 ---
 
 ## Splash Screen Direction
 
-For v1, the Splash Screen should remain simple.
+The platform Splash Screen remains simple:
 
 Recommended composition:
 
@@ -216,9 +239,10 @@ The Splash Screen should prioritize:
 - immediate recognition
 - fast loading perception
 
-A future iteration may introduce subtle animation, transitioning from an unresolved expression to a resolved one.
-
-Animations should remain elegant and minimal.
+For v9, Android shows a static Warm system splash before Compose can resolve the DataStore
+theme preference. Once in-app content appears, its branding follows the selected palette.
+The startup path does not synchronously wait for preferences, and it does not promise a
+theme-matched platform splash.
 
 ---
 

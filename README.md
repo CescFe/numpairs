@@ -8,14 +8,23 @@ Players complete hidden expressions on a board by using numbers from a strip. Th
 
 ## Current Status
 
-### Current product work: v6 and v7
+### Current implemented product baseline: v9
 
-- 🎓 [PRD v6 Guided First Run](./docs/product/prd/prd-v6.md) defines the implemented guided-onboarding baseline.
-- 🔁 [PRD v7 Reliable Sessions & Replay Controls](./docs/product/prd/prd-v7.md) defines the implemented one-slot generated-session and replay baseline.
+- ✨ [PRD v9 Game Feel & Personalization](./docs/product/prd/prd-v9.md) defines the current color-personalization and generated-game feedback baseline.
+- 🔁 [PRD v7 Reliable Sessions & Replay Controls](./docs/product/prd/prd-v7.md) remains the foundation for the one-slot generated-session and safe-replay contract.
+- 🎓 [PRD v6 Guided First Run](./docs/product/prd/prd-v6.md) remains the foundation for required onboarding.
 
-### Implemented generated-mode baseline: v7 - Reliable Sessions & Replay Controls
+NumPairs now provides five persistent color-only themes: Warm, Frost, Obsidian, Terminal,
+and Ember. Typography, shapes, spacing, elevation, layout, controls, and gameplay meanings
+remain shared across them.
 
-Historical snapshots:
+Generated `4 Pairs Low` and `8 Pairs Medium` play adds subtle accepted-assignment haptics,
+newly-correct tile motion, a brief completion celebration, and a successor-ready replay
+transition. This feedback is not added to Tutorial or onboarding; sound and error haptics
+are not implemented.
+
+Historical milestone snapshots:
+
 - 🔧 [PRD v0 Playable Prototype](./docs/product/prd/prd-v0.md)
 - ✨ [PRD v1 Product Polish & Technical Hardening](./docs/product/prd/prd-v1.md)
 - 🧩 [PRD v2 Puzzle Generation & Replay Loop](./docs/product/prd/prd-v2.md)
@@ -23,11 +32,15 @@ Historical snapshots:
 - 🎨 [PRD v4 Visual Design System & UI Refinement](./docs/product/prd/prd-v4.md)
 - 🧠 [PRD v5 Bigger Challenges with 8 Pairs](./docs/product/prd/prd-v5.md)
 
-The PRDs are historical planning snapshots. Current generated-mode and profile behavior is documented in [puzzle-generation.md](./docs/product/puzzle-generation.md).
+PRDs preserve the product requirements and planning context for each milestone. Current
+generated-mode and profile behavior is also documented in
+[puzzle-generation.md](./docs/product/puzzle-generation.md).
 
 Both built-in generated profiles are implemented: `4 Pairs Low` and `8 Pairs Medium`.
 
-Generated play stores one exact resumable session shared by both modes, restores committed progress after process death, and replaces that session only after a successor is ready.
+Generated play stores one exact resumable session shared by both modes, restores committed
+progress after process death, and keeps the current puzzle visible until a validated
+successor is stored and ready.
 
 ---
 
@@ -89,7 +102,9 @@ Core responsibilities:
 - Visual design system: [visual-design-system.md](./docs/product/visual-design-system.md)
 - Rules helper requirements: [rules-helper.md](./docs/product/rules-helper.md)
 - Puzzle generation: [puzzle-generation.md](./docs/product/puzzle-generation.md)
+- Current UI behavior: [ui-behavior.md](./docs/ui-behavior.md)
 - Generated-session persistence: [generated-session-persistence.md](./docs/technical/generated-session-persistence.md)
+- Platform branding decision: [ADR-004](./docs/technical/adr/adr-004-keep-v9-platform-branding-static.md)
 - UX decisions: `docs/product/ux-decisions.md`
 - Architectural Decision Records: `docs/technical/adr/`
 - Delivery workflow: [delivery-workflow.md](./docs/technical/delivery-workflow.md)

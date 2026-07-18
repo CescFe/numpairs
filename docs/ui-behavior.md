@@ -2,7 +2,8 @@
 
 ## Overview
 
-This document defines the current menu, generated-session routing, completion, and in-puzzle interaction model for NumPairs.
+This document defines the current menu, personalization, generated-session routing,
+generated-game feedback, completion, and in-puzzle interaction model for NumPairs.
 
 It complements the game rules described in [game-rules.md](./game-rules.md) and focuses on:
 
@@ -11,10 +12,17 @@ It complements the game rules described in [game-rules.md](./game-rules.md) and 
 3. Contextual editing flows
 4. Gameplay top bar helper behavior
 5. Generated-session menu, replacement, and completion behavior
+6. Persistent color personalization and generated-only feedback
 
 This is the interaction baseline shared where applicable by Tutorial, generated `4 Pairs`, and generated `8 Pairs` gameplay.
 
-Required-onboarding behavior is documented in `docs/product/prd/prd-v6.md`. The reliable-session product contract is documented in `docs/product/prd/prd-v7.md`, and its storage boundary is documented in `docs/technical/generated-session-persistence.md`.
+Required-onboarding behavior is documented in
+[PRD v6](./product/prd/prd-v6.md). The reliable-session product contract is documented in
+[PRD v7](./product/prd/prd-v7.md), and its storage boundary is documented in
+[generated-session-persistence.md](./technical/generated-session-persistence.md).
+Personalization and generated-game feedback are documented in
+[PRD v9](./product/prd/prd-v9.md); the platform-branding boundary is recorded in
+[ADR-004](./technical/adr/adr-004-keep-v9-platform-branding-static.md).
 
 ---
 
@@ -53,8 +61,11 @@ The unlocked normal menu renders actions in this order:
 2. `Play 4 Pairs`
 3. `Play 8 Pairs`
 4. `How to play`
+5. `Personalization`
 
-`Resume` and both generated-mode actions use the primary CTA treatment. `How to play` remains the final secondary action. The localized `Resume` accessibility description identifies whether the saved puzzle belongs to 4 or 8 Pairs.
+`Resume` and both generated-mode actions use the primary CTA treatment. `How to play` and
+`Personalization` use the lower-emphasis secondary treatment. The localized `Resume`
+accessibility description identifies whether the saved puzzle belongs to 4 or 8 Pairs.
 
 The application derives menu resumability from the one global generated-session slot. Missing, solved, unknown-mode, mode/profile-mismatched, corrupt, and unsupported snapshots do not expose `Resume`.
 
@@ -73,16 +84,81 @@ The choice dialog has no visible cancel, back, close, or third action. Tapping o
 
 Selecting `How to play`, entering required onboarding, or using Tutorial never replaces or updates the generated session.
 
-### Generated Completion And Replay
+## Personalization
+
+Selecting `Personalization` opens an unlocked-menu destination without changing the current
+navigation, onboarding, or generated-session state.
+
+The screen presents exactly five color themes:
+
+1. Warm
+2. Frost
+3. Obsidian
+4. Terminal
+5. Ember
+
+Selecting a theme applies it immediately across the Compose application and persists its
+stable identity for later launches. Warm is the default and fallback for missing or
+unsupported stored values. Selection is communicated by label and state, not color alone.
+
+Themes change only appearance colors. Typography, shapes, spacing, elevation, layout,
+touch geometry, controls, and the semantic meaning of success, error, selection, tutorial,
+and hidden states remain shared.
+
+The screen also exposes one `Game haptics` preference. It defaults to enabled, persists
+independently from onboarding and generated sessions, and controls only accepted-assignment
+haptics in generated games. Android's system touch-feedback setting remains authoritative.
+There are no sound, error-haptic, typography, shape, motion, or difficulty controls.
+
+In-app NumPairs branding follows the selected appearance palette. The system splash and
+launcher stay static and Warm. The packaged monochrome icon remains available for Android
+system-themed icons, whose tint is controlled by the launcher rather than NumPairs.
+
+## Generated Completion And Replay
 
 A solved generated puzzle shows exactly:
 
 - primary: `Play another`
 - secondary: `Back to menu`
 
-`Play another` runs the existing bounded generation and safe-replacement pipeline. The solved puzzle remains visible while its successor is pending. Failure or cancellation keeps the completion surface available; a successfully stored successor replaces it.
+When a player action solves a generated puzzle, the board gives one brief restrained pulse
+and the completion surface enters once. Recomposition, restoration, preview state, and an
+already-solved initial puzzle do not replay the celebration. Completion actions remain
+usable throughout the final visual state.
+
+`Play another` runs the existing bounded generation and safe-replacement pipeline. The
+solved puzzle remains visible while its successor is generating, validating, or being
+stored. Failure or cancellation keeps the completion surface available. Only after a
+successor is safely stored and adopted does a brief entrance transition introduce it; the
+transition is transient and is not persisted.
 
 Solving clears menu resumability before `Back to menu` returns to the menu. There is no `Change difficulty`, restart, timer, or additional completion action.
+
+---
+
+## Generated-Game Feedback
+
+The v9 feedback contract applies only to generated `4 Pairs` and generated `8 Pairs`.
+Required onboarding, voluntary `How to play`, Tutorial, authored practice, and the generic
+game surface do not opt into it.
+
+After a generated-game action commits an accepted strip value, operand, or operator:
+
+- one subtle platform confirmation haptic is requested when the NumPairs preference is
+  enabled
+- Android may suppress the request when system touch feedback is disabled
+- no haptic is emitted for opening or dismissing selectors, editing draft text, unavailable
+  options, resets, restoration, recomposition, or rejected/error states
+
+When that committed player action changes a tile from not correct to correct, that tile
+performs one small scale response without changing its bounds, layout, or touch target. If
+the tile later becomes incorrect and a new player action makes it correct again, the new
+transition may respond again.
+
+When the same commit solves the whole generated puzzle, the completion celebration described
+above runs once. Sound and error haptics are not part of the current behavior. Motion is
+never required to understand the result, does not block interaction, and reaches the same
+final state when system animation duration is disabled.
 
 ---
 
@@ -108,7 +184,8 @@ Reliable sessions do not add a new-puzzle, restart, resume, or overflow action t
 - System back closes the helper before triggering the route-level back behavior.
 - Closing the helper preserves the current puzzle state.
 
-For content scope and product boundaries, see `docs/product/rules-helper.md`.
+For content scope and product boundaries, see
+[rules-helper.md](./product/rules-helper.md).
 
 ---
 
@@ -243,7 +320,9 @@ A tile as a whole may also be shown in one of these validation states:
 - Tapping a filled operator slot reopens the contextual selector so the value can be replaced
 - No strip item selection step is required before editing a grid slot
 
-This document defines local tile-level correctness feedback and operand/operator selection behavior. It does not define whole-puzzle validation feedback, splash, menu, or completion-routing behavior.
+This section defines local tile-level correctness feedback and operand/operator selection
+behavior. It does not define whole-puzzle validation feedback, splash, menu, or
+completion-routing behavior.
 
 ### Tile Validation Feedback
 
@@ -345,7 +424,8 @@ Recommended visual direction for the first implementation:
 - Incorrect tile: expression row in error color
 - Incorrect tile: result keeps its normal emphasis so the target value stays legible
 
-Exact colors, spacing, and animation can be refined later.
+Exact appearance colors vary by selected theme. Semantic state meanings, spacing, and shared
+motion contracts remain stable.
 
 ---
 

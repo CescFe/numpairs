@@ -2,28 +2,35 @@
 
 ## Purpose
 
-This document defines the v4 visual design direction for the NumPairs app UI.
+This document defines the current NumPairs visual design system. It originated in the
+`v4 - Visual Design System & UI Refinement` milestone and is updated through
+`v9 - Game Feel & Personalization`.
 
 The goal is to establish a practical design system for implementation, not a speculative brand book. It should guide reusable Compose theme decisions, shared component defaults, and visual QA for the existing product screens.
 
-This document belongs to the `v4 - Visual Design System & UI Refinement` milestone.
+Sections explicitly labeled as historical preserve the v4 implementation and QA context;
+the current contract is the five-theme v9 system described first.
 
 ---
 
 ## Relationship To Existing Visual Direction
 
-`docs/product/visual-direction.md` remains the source of truth for the v1 logo, launcher icon, and initial shape-first identity direction.
+[visual-direction.md](./visual-direction.md) remains the source of truth for the v1 logo,
+launcher icon, and initial shape-first identity direction.
 
 This document extends that identity into the app UI:
 
 - from logo to interface language
 - from isolated component styling to shared design decisions
-- from default Material starter colors to a fixed NumPairs premium palette
+- from default Material starter colors to five app-owned NumPairs palettes
 - from local spacing and shape choices to reusable component guidance
 
 The v1 identity principle still applies: NumPairs should be recognizable through symbols, arithmetic structure, component shapes, and clear layout.
 
-v4 adds a stronger product UI direction on top of that foundation. The logo should still work in monochrome and adaptive contexts, but the app UI should now use one deliberate NumPairs theme instead of relying on Android dynamic color or system light/dark switching.
+v4 added the Warm visual baseline. v9 preserves that foundation and adds deliberate Warm,
+Frost, Obsidian, Terminal, and Ember color themes instead of relying on Android dynamic color
+or system light/dark switching. The selected palette changes appearance and in-app branding;
+the logo geometry and every non-color design token remain stable.
 
 ---
 
@@ -91,17 +98,21 @@ The app should rely on spacing before decoration, typography before color, and h
 
 NumPairs should continue using Material 3 for platform fit, accessibility defaults, and Android conventions. The design system should define NumPairs-specific visual decisions on top of Material 3 rather than replacing it wholesale.
 
-### Fixed Palette Over Dynamic Color
+### App-Owned Palettes Over Dynamic Color
 
-Dynamic color was useful during earlier prototype and polish phases, but it is no longer the v4 product direction.
+Dynamic color was useful during earlier prototype and polish phases, but it is no longer the
+product direction.
 
-v4 should implement a fixed NumPairs premium palette so the app has a stable visual identity across devices, screenshots, and Android versions.
+NumPairs defines its own finite palettes so the app has a designed visual identity across
+devices, screenshots, and Android versions.
 
-### Single Default Theme
+### Five Color-Only Themes
 
-The v4 target is one fixed default theme with a premium dark-leaning presentation. It should remain stable regardless of the device system theme.
+Warm remains the default and safe fallback. Frost, Obsidian, Terminal, and Ember are
+user-selectable alternatives persisted by stable identity.
 
-v4 should not implement separate light and dark app themes. If later product work needs alternate themes, that should become a deliberate future milestone.
+Themes change color only. Typography, font sizes, shapes, spacing, elevation, layout, touch
+targets, interactions, and gameplay rules do not vary by theme.
 
 ### Compact Mobile-First Density
 
@@ -122,57 +133,60 @@ When a visual rule applies across screens or states, it should become a shared d
 Recommended direction:
 
 - keep Material 3 as the base
-- implement one fixed NumPairs color scheme
+- map one of five explicit NumPairs color schemes from the persisted theme identity
 - ignore system light/dark theme for app presentation
 - remove dynamic color from the default visual direction
-- replace the starter purple fallback palette with the NumPairs premium palette
+- use Warm as the missing, corrupt, or unsupported preference fallback
 - expose NumPairs-specific visual defaults only where Material roles are too generic
 
 ### Color Strategy
 
-The NumPairs UI should use a restrained premium dark-leaning color strategy:
+The NumPairs UI separates two color ownership groups:
 
-- deep warm neutral background
-- dark raised surfaces
-- warm off-white primary text
-- muted warm gray secondary text
-- one jade-green brand and action accent color
-- limited supporting state colors for player-owned focus and tutorial emphasis
-- soft red for error and invalid states
-- neutral gray for hidden and placeholder states
+- **Appearance colors** vary by theme: backgrounds, surfaces, text, outlines, brand primary,
+  brand accent, and decorative in-app branding.
+- **Gameplay semantic colors** preserve meaning across themes: success/completion,
+  error/invalid, player selection/focus, tutorial highlight, hidden/placeholder, and
+  available/used indicators.
 
-The app should avoid introducing multiple primary colors. The jade accent should carry brand personality, primary actions, selected states, positive states, and success feedback. Supporting state colors should stay narrow and functional rather than becoming alternate brand accents.
+Exact semantic lightness and containers may adapt for contrast on light or dark surfaces,
+but their recognizable families and non-color cues stay consistent. A theme must never make
+an error look like an ordinary brand accent or a selected value look completed.
+
+Theme character:
+
+| Theme | Appearance direction |
+| --- | --- |
+| Warm | Deep olive-neutral surfaces, warm cream text, and jade brand accents |
+| Frost | Very light cool-blue surfaces, blue brand primary, and restrained gold accent |
+| Obsidian | Charcoal and warm-black surfaces with elegant warm highlights |
+| Terminal | Black and near-black surfaces with phosphor-inspired green branding |
+| Ember | Cream and warm-neutral surfaces with orange and restrained red-orange branding |
 
 ### Core Color Roles
 
 The design system should describe colors by role before implementation assigns concrete values.
 
-Recommended roles:
+Appearance roles use Material `ColorScheme` for background, surface levels, content,
+outlines, primary/secondary/tertiary branding, containers, and scrim.
 
-- `appBackground`: deep warm neutral screen background
-- `surfaceBase`: dark surface for tiles, cards, dialogs, overlays, and sheets
-- `surfaceRaised`: slightly lighter dark elevated surface with subtle tonal or shadow treatment
-- `surfaceSubtle`: quiet grouped surface, such as the strip container
-- `textPrimary`: warm off-white primary text
-- `textSecondary`: muted warm gray supporting text
-- `accent`: jade green brand and interaction accent
-- `accentSoft`: lighter jade treatment for selection, active focus, and subtle highlights
-- `focus`: cool focus treatment for player-owned or currently edited values
-- `tutorialHighlight`: warm instructional highlight for guided tutorial focus
-- `error`: soft red for invalid tiles and error feedback
-- `errorSoft`: subtle red container or background treatment
-- `hidden`: neutral gray for unknown values and placeholder states
-- `borderSubtle`: low-contrast border for quiet component separation
+NumPairs semantic roles are kept in a separate theme-local contract:
 
-### Final Implemented Palette
+- `success`, `onSuccess`, `successContainer`, and `onSuccessContainer`
+- `error`, `onError`, `errorContainer`, and `onErrorContainer`
+- `selection`, `onSelection`, `selectionContainer`, and `onSelectionContainer`
+- `tutorialHighlight` and `onTutorialHighlight`
+- `hiddenContainer`, `onHiddenContainer`, and `hiddenBorder`
+
+### Implemented Theme Definitions
 
 Implementation source:
 
 - `app/src/main/java/org/cescfe/numpairs/ui/theme/Color.kt`
 - `app/src/main/java/org/cescfe/numpairs/ui/theme/Theme.kt`
-- `app/src/main/res/values/colors.xml`
+- `app/src/main/java/org/cescfe/numpairs/ui/theme/NumPairsThemeDefinition.kt`
 
-Final v4 values:
+Warm preserves the final v4 values:
 
 - App background: `#2F332A`
 - Surface base: `#3A3F34`
@@ -197,14 +211,17 @@ Final v4 values:
 
 Material role mapping:
 
-- `primary` uses jade accent.
-- `primaryContainer` uses jade soft and is reused for success containers.
-- `secondary` uses player-owned focus while `secondaryContainer` stays neutral/subtle.
-- `tertiary` uses tutorial highlight for guided focus borders.
-- `error` and `errorContainer` use the soft red family.
-- `background`, `surface`, `surfaceVariant`, and `surfaceContainer*` use the warm neutral surface family.
+- `primary` and its container carry the active theme's brand direction.
+- `secondary` and `tertiary` remain appearance roles; gameplay selection and tutorial
+  meaning come from the separate semantic contract.
+- Material `error` remains aligned with the semantic error family, while gameplay consumes
+  the explicit semantic role.
+- `background`, `surface`, `surfaceVariant`, and `surfaceContainer*` use each theme's
+  appearance surface family.
 
-The native splash and window background use the same app background, and launcher/splash accent resources use the jade accent.
+In-app branding consumes the active appearance palette. The native splash, window
+background, and launcher resources remain static Warm under
+[ADR-004](../technical/adr/adr-004-keep-v9-platform-branding-static.md).
 
 ### Gameplay State Roles
 
@@ -213,23 +230,26 @@ Gameplay states should map consistently to the core color strategy:
 - Known strip entries: stable dark or neutral surface with subtle border
 - Hidden strip entries: neutral gray treatment that clearly communicates unknown value
 - Player-entered strip entries: player-owned state with accent relationship, without overpowering the board
-- Strip usage indicators: compact neutral `+` and `×` markers; available uses subtle surface treatment, used uses player-owned focus blue, and rule conflicts are not shown in the strip
-- Selected or focused elements: accent or `accentSoft`
-- Valid or completed states: jade green
-- Invalid or incorrect states: soft red
-- Completion success: jade green
-- Completion invalid: soft red with actionable copy
+- Strip usage indicators: compact neutral `+` and `×` markers; available uses subtle surface
+  treatment, used uses semantic selection, and rule conflicts are not shown in the strip
+- Selected or focused elements: semantic selection family
+- Valid or completed states: semantic success family
+- Invalid or incorrect states: semantic error family
+- Completion success: semantic success with non-color confirmation
+- Completion invalid: semantic error with actionable copy
 
 ### Color Usage Rules
 
-- Use jade as the single brand and action accent.
-- Keep focus blue, tutorial highlight, and error red limited to their state roles.
+- Use the selected appearance palette for brand and primary action treatments.
+- Keep selection, tutorial, success, error, hidden, and usage colors limited to their
+  semantic roles.
 - Use color sparingly.
 - Do not use color as the only state cue.
 - Keep result numbers high contrast in every tile state.
 - Keep error and invalid states noticeable but not visually overwhelming.
 - Keep hidden and player-entered strip states distinct at a glance.
-- Reserve the strongest accent treatment for primary actions, selected elements, focus, and positive feedback.
+- Distinguish primary action, selection, and positive feedback even when a theme's brand hue
+  is close to one of those semantic families.
 - Avoid making every surface colorful; the board needs room for state colors to matter.
 
 ---
@@ -366,8 +386,9 @@ Recommended shape guidance:
 
 Surface guidance:
 
-- Use deep warm neutral backgrounds to reduce visual fatigue and give the app a premium, calm feel.
-- Use dark raised surfaces for tiles, cards, dialogs, and overlays.
+- Use the selected theme's background and surface hierarchy while preserving comparable
+  contrast and visual weight.
+- Use raised surfaces for tiles, cards, dialogs, and overlays.
 - Avoid nested card-heavy layouts.
 - Use grouped surfaces where they clarify the puzzle structure, especially the strip.
 - Keep tiles visually distinct from the page background.
@@ -390,7 +411,8 @@ Recommended direction:
 - Maintain enough gap between tiles for tap clarity and visual grouping.
 - Use modal surfaces and bottom sheets without crowding content against device edges.
 
-Existing layout rationale remains documented in `docs/product/ux-decisions.md`.
+Existing layout rationale remains documented in
+[ux-decisions.md](./ux-decisions.md).
 
 ---
 
@@ -405,7 +427,8 @@ Expectations:
 - show `NumPairs` clearly
 - make generated modes prominent replayable actions
 - present Tutorial as a guided learning option
-- make Tutorial and generated-mode entries feel like proper product cards or actions
+- expose Personalization as a lower-emphasis unlocked-menu action
+- make Tutorial, Personalization, and generated-mode entries feel like proper product actions
 - avoid a marketing landing-page layout
 - keep actions large enough for touch
 - keep copy concise
@@ -415,7 +438,7 @@ Expectations:
 Primary button:
 
 - accent color background
-- white text
+- contrasting `onPrimary` content
 - large corner radius
 - comfortable touch target
 - used for the main action on the screen
@@ -474,9 +497,11 @@ Final compact treatment:
 - Keep hidden strip chips indicator-free.
 - Use the same `+` and `×` semantics as the operand selector badges.
 - Use subtle surface, muted content, and subtle border for available markers.
-- Use player-owned focus blue fill, matching border, and contrasting content for used markers.
-- Do not use jade for strip usage because jade implies success or correctness.
-- Do not use red for strip usage because conflicts belong to selector badges, local tile feedback, contextual messages, and final invalid feedback.
+- Use semantic selection fill, matching border, and contrasting content for used markers.
+- Do not use theme brand or semantic success for strip usage because those imply action or
+  correctness.
+- Do not use semantic error for strip usage because conflicts belong to selector badges,
+  local tile feedback, contextual messages, and final invalid feedback.
 - Keep an opaque or subtle marker surface so the chip surface behind the marker does not visually bleed through.
 - Preserve accessibility content descriptions for the operator and state descriptions for available versus used.
 
@@ -492,8 +517,8 @@ State expectations:
 
 - Normal: clear target result and editable expression slots
 - Active slot: focused element is identifiable without disrupting layout
-- Valid or correct, if surfaced: jade green, restrained
-- Incorrect or invalid: soft red, attached to the expression or problem state
+- Valid or correct, if surfaced: semantic success, restrained
+- Incorrect or invalid: semantic error, attached to the expression or problem state
 - Mismatched pairing: distinct from simple arithmetic error if this state is surfaced
 - Highlighted/tutorial focus: visible but not confused with incorrect state
 - Completed/correct: avoid adding noisy success styling per tile unless needed
@@ -531,8 +556,8 @@ Feedback should be obvious and recoverable.
 
 Expectations:
 
-- success state uses jade green and feels rewarding but restrained
-- invalid completion uses soft red and remains actionable
+- success state uses the semantic success contract and feels rewarding but restrained
+- invalid completion uses the semantic error contract and remains actionable
 - incorrect tile state remains local and editable
 - feedback surfaces should not obscure next steps
 - color, iconography, and text should work together
@@ -543,20 +568,29 @@ Expectations:
 
 Motion should be subtle and functional.
 
-Recommended uses:
+The implemented v9 generated-game feedback adds:
 
-- opening and closing dialogs or sheets
-- highlighting tutorial focus
-- confirming completion
-- small state transitions for selected or active elements
+- a brief scale response when a committed player action makes a tile correct
+- one restrained board response and completion-overlay entrance when a player action solves
+  the puzzle
+- a short entrance for a replacement puzzle only after its successor session is safely
+  stored and adopted
+
+Those motions are enabled only by generated `4 Pairs` and `8 Pairs` routes. Tutorial,
+required onboarding, voluntary `How to play`, restored state, and recomposition do not gain
+or replay v9 feedback. Motion does not resize layout or touch targets, block actions, or
+carry meaning that is absent from the final static state.
 
 Avoid:
 
 - long decorative animation
-- advanced animations for v4
 - motion that delays interaction
 - high-energy transitions that fight puzzle concentration
 - motion that is required to understand state
+- persisted animation progress or feedback replay
+
+When Android animation duration is disabled, each treatment reaches the same usable final
+state immediately.
 
 ---
 
@@ -566,8 +600,9 @@ Visual refinement must preserve or improve accessibility.
 
 Requirements:
 
-- touch targets should remain at least 48dp where practical
-- text and icon contrast should meet accessible contrast expectations
+- interactive targets should remain at least `48dp` under the shared UI contract
+- small text should reach at least `4.5:1` contrast
+- large text and meaningful graphics should reach at least `3:1` contrast
 - color-coded states must also have non-color cues
 - content descriptions should remain meaningful for interactive elements
 - state descriptions should remain meaningful for validation states
@@ -580,8 +615,10 @@ Requirements:
 
 ## Visual Consistency Rules
 
-- Use jade as the single brand and action accent.
-- Keep supporting state colors limited to focus, tutorial highlight, and error roles.
+- Use the active theme's appearance roles for brand, surfaces, text, and primary actions.
+- Use the NumPairs semantic contract for success, error, selection, tutorial, hidden, and
+  operator-usage meaning.
+- Keep typography, shapes, spacing, elevation, layout, and touch geometry invariant.
 - Use color sparingly.
 - Rely on spacing before decoration.
 - Rely on typography before color.
@@ -591,18 +628,18 @@ Requirements:
 
 ---
 
-## Implementation Guidance
+## Current v9 Implementation Guidance
 
 Preferred implementation approach:
 
 - keep changes incremental
-- start with theme, palette, typography, and shared component defaults
-- remove dynamic color from the default theme path for v4
+- resolve a stable persisted theme identity and fall back safely to Warm
+- keep appearance `ColorScheme` roles separate from NumPairs gameplay semantic roles
 - refactor duplicated visual constants only when there is a real shared role
 - use existing component APIs where possible
-- add component previews for important state combinations
-- verify UI manually in the single default theme and narrow-screen states
-- do not add alternate theme variants in v4
+- use the shared five-theme preview parameter for Menu, Game, and Personalization
+- validate every theme's defined role pairs and narrow-screen states
+- do not add theme-dependent typography, shapes, spacing, elevation, layout, or controls
 
 Likely implementation areas:
 
@@ -616,9 +653,12 @@ The design system should not require a parallel UI framework. It should make the
 
 ---
 
-## v4 Visual QA Record
+## Historical v4 Visual QA Record
 
-This QA record captures the documentation and static implementation review for the v4 visual baseline. It intentionally does not represent an emulator or physical-device run.
+This QA record captures the documentation and static implementation review that established
+the Warm v4 visual baseline. References to one fixed theme and jade branding in this record
+describe that historical pass, not the current five-theme contract. It intentionally does
+not represent an emulator or physical-device run.
 
 Review scope:
 
@@ -663,7 +703,10 @@ Increased font-scale review for puzzle-critical text:
 
 ---
 
-## Decisions
+## Historical v4 Decisions
+
+These decisions explain the origin of the current system. Where noted, v9 deliberately
+supersedes their v4-only scope.
 
 ### Keep Material 3 As The Base
 
@@ -689,6 +732,9 @@ Rationale:
 ### Use A Single Fixed Premium Theme
 
 Decision: v4 should implement one fixed NumPairs theme instead of relying on Android dynamic color or system light/dark theme switching.
+
+Current status: superseded by v9's five explicit color-only themes. The app-owned,
+non-dynamic palette principle and Warm fallback remain.
 
 Rationale:
 
@@ -733,18 +779,18 @@ Decision: v4 should refine visuals without changing core puzzle interactions by 
 
 Rationale:
 
-- `docs/ui-behavior.md` already defines the active interaction baseline
+- [ui-behavior.md](../ui-behavior.md) already defines the active interaction baseline
 - broad behavior changes would turn the milestone into a UX redesign
 - visual polish can be evaluated more clearly when behavior remains stable
 
 ---
 
-## Open Decisions
+## Historical v4 Open Decisions
 
-- Whether to introduce a small NumPairs-specific theme wrapper beyond Material `ColorScheme`
-- Whether to keep all current tile and chip corner radii or normalize them further
-- Whether screenshot or golden testing is worth adding during v4
-- Whether launcher or splash assets need visual adjustments after UI refinement
-- Exact motion treatment for completion and tutorial focus states
+These questions were recorded at the end of v4. v9 resolved the color wrapper, platform
+branding, and generated completion-motion questions through the explicit semantic theme
+contract, [ADR-004](../technical/adr/adr-004-keep-v9-platform-branding-static.md), and the
+generated-only feedback implementation. Shape normalization and screenshot/golden testing
+remain possible future work.
 
-These open decisions should be resolved during v4 implementation only when the implementation needs them.
+No unresolved historical item changes the current v9 behavior documented above.
