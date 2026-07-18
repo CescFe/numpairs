@@ -24,6 +24,7 @@ import org.cescfe.numpairs.feature.game.presentation.support.solvedPuzzleWithKno
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -73,6 +74,7 @@ class GeneratedPuzzleViewModelTest {
         val ready = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready
         assertEquals(attemptedSnapshot, repository.session.value)
         assertEquals(attemptedSnapshot, ready.session.snapshot)
+        assertNull(ready.replacementTransition)
     }
 
     @Test
@@ -121,6 +123,87 @@ class GeneratedPuzzleViewModelTest {
         assertEquals(listOf(11, 22, 33), useCase.requests.map(GeneratedPuzzleGenerationRequest::seed))
         assertEquals(2, repository.replaceAttempts.size)
         assertEquals(ready.session.snapshot, repository.session.value)
+        assertEquals(
+            GeneratedPuzzleReplacementTransition(
+                predecessorSessionId = initialSession.id,
+                successorSessionId = ready.session.id
+            ),
+            ready.replacementTransition
+        )
+        viewModel.onReplacementTransitionConsumed(requireNotNull(ready.replacementTransition))
+        assertNull(
+            (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).replacementTransition
+        )
+    }
+
+    @Test
+    fun replacement_readiness_and_transition_metadata_wait_for_successful_adoption() {
+        val replacementWriteGate = CompletableDeferred<Unit>()
+        val repository = RecordingGeneratedSessionRepository()
+        val viewModel = GeneratedPuzzleViewModel(
+            mode = GeneratedModes.FOUR_PAIRS,
+            generationUseCase = QueueGeneratedPuzzleUseCase(
+                CompletableDeferred(samplePuzzle),
+                CompletableDeferred(samplePuzzle)
+            ),
+            generatedSessionRepository = repository,
+            seedSource = QueueGeneratedPuzzleSeedSource(101, 202),
+            sessionIdSource = QueueGeneratedSessionIdSource("previous", "successor")
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val previousSession = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).session
+        repository.nextReplaceGate = replacementWriteGate
+
+        viewModel.onNewPuzzleRequested()
+        dispatcher.scheduler.runCurrent()
+
+        val loading = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Loading
+        assertEquals(previousSession, loading.previousSession)
+        assertEquals(previousSession.snapshot, repository.session.value)
+        assertEquals(GeneratedSessionId("successor"), repository.replaceAttempts.last().sessionId)
+
+        replacementWriteGate.complete(Unit)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val ready = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready
+        assertEquals(GeneratedSessionId("successor"), ready.session.id)
+        assertEquals(ready.session.snapshot, repository.session.value)
+        assertEquals(
+            GeneratedPuzzleReplacementTransition(
+                predecessorSessionId = previousSession.id,
+                successorSessionId = ready.session.id
+            ),
+            ready.replacementTransition
+        )
+    }
+
+    @Test
+    fun replacement_transition_requires_distinct_ids_and_the_ready_successor() {
+        val readySnapshot = generatedSessionSnapshot(sessionId = "ready")
+        val readySession = GeneratedModeGameSession(
+            snapshot = readySnapshot,
+            request = GeneratedPuzzleGenerationRequest(
+                profile = GeneratedModes.FOUR_PAIRS.profile,
+                seed = readySnapshot.seed
+            )
+        )
+
+        assertThrows(IllegalArgumentException::class.java) {
+            GeneratedPuzzleReplacementTransition(
+                predecessorSessionId = readySession.id,
+                successorSessionId = readySession.id
+            )
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            GeneratedPuzzleGenerationUiState.Ready(
+                session = readySession,
+                replacementTransition = GeneratedPuzzleReplacementTransition(
+                    predecessorSessionId = GeneratedSessionId("previous"),
+                    successorSessionId = GeneratedSessionId("different-successor")
+                )
+            )
+        }
     }
 
     @Test
@@ -202,6 +285,7 @@ class GeneratedPuzzleViewModelTest {
         assertEquals(snapshot.profileId, ready.session.request.profileId.value)
         assertEquals(0, generationUseCase.requestCount)
         assertTrue(repository.replaceAttempts.isEmpty())
+        assertNull(ready.replacementTransition)
     }
 
     @Test
@@ -347,6 +431,13 @@ class GeneratedPuzzleViewModelTest {
 
         assertEquals(GeneratedSessionId("replacement"), replacementSession.id)
         assertEquals(replacementSession.snapshot, repository.session.value)
+        assertEquals(
+            GeneratedPuzzleReplacementTransition(
+                predecessorSessionId = previousSession.id,
+                successorSessionId = replacementSession.id
+            ),
+            (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).replacementTransition
+        )
         assertTrue(repository.updateAttempts.isEmpty())
         assertTrue(repository.clearAttempts.isEmpty())
     }
@@ -464,7 +555,7 @@ private class QueueGeneratedSessionIdSource(vararg ids: String) : GeneratedSessi
 
 private class RecordingGeneratedSessionRepository(
     initialSession: GeneratedSessionSnapshot? = null,
-    private val writeGate: CompletableDeferred<Unit>? = null,
+    writeGate: CompletableDeferred<Unit>? = null,
     private val replaceFailure: IOException? = null,
     firstUpdateGate: CompletableDeferred<Unit>? = null
 ) : GeneratedSessionRepository {
@@ -474,10 +565,14 @@ private class RecordingGeneratedSessionRepository(
     val replaceAttempts = mutableListOf<GeneratedSessionSnapshot>()
     val updateAttempts = mutableListOf<Puzzle>()
     val clearAttempts = mutableListOf<GeneratedSessionId>()
+    var nextReplaceGate: CompletableDeferred<Unit>? = writeGate
 
     override suspend fun replace(snapshot: GeneratedSessionSnapshot) {
         replaceAttempts += snapshot
-        writeGate?.await()
+        nextReplaceGate?.let { gate ->
+            nextReplaceGate = null
+            gate.await()
+        }
         replaceFailure?.let { failure ->
             throw failure
         }
