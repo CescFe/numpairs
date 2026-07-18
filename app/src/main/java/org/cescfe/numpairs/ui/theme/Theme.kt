@@ -17,7 +17,15 @@ internal val MaterialTheme.numPairsSemanticColors: NumPairsSemanticColors
 
 @Composable
 fun NumPairsTheme(content: @Composable () -> Unit) {
-    val themeDefinition = WarmThemeDefinition
+    NumPairsTheme(
+        themeId = NumPairsThemeId.WARM,
+        content = content
+    )
+}
+
+@Composable
+internal fun NumPairsTheme(themeId: NumPairsThemeId, content: @Composable () -> Unit) {
+    val themeDefinition = themeId.definition()
 
     CompositionLocalProvider(
         LocalNumPairsSemanticColors provides themeDefinition.semanticColors
