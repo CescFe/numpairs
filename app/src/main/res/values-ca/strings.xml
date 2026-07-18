@@ -14,6 +14,15 @@
     <string name="generated_session_choice_mode_message">Tens un puzle de %1$s sense acabar.</string>
     <string name="generated_session_choice_new_mode_button">Puzle nou de %1$s</string>
 
+    <!-- Difficulty selector -->
+    <string name="difficulty_selector_screen_title">Tria la dificultat</string>
+    <string name="difficulty_selector_supporting_text">Tria el repte que vols jugar. Totes les opcions estan disponibles.</string>
+    <string name="difficulty_selector_selected">Seleccionada</string>
+    <string name="difficulty_selector_play_button">Juga a %1$s · %2$s</string>
+    <string name="generated_difficulty_low">Baixa</string>
+    <string name="generated_difficulty_medium">Mitjana</string>
+    <string name="generated_difficulty_hard">Alta</string>
+
     <!-- Personalization screen -->
     <string name="personalization_screen_title">Personalització</string>
     <string name="personalization_brand_content_description">Logotip de NumPairs</string>
