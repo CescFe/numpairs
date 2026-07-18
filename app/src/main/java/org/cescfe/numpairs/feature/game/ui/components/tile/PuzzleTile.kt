@@ -1,5 +1,8 @@
 package org.cescfe.numpairs.feature.game.ui.components.tile
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,8 +18,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -28,6 +34,7 @@ import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.TileUiState
 import org.cescfe.numpairs.feature.game.presentation.TileVisualState
+import org.cescfe.numpairs.feature.game.ui.semantics.correctTileFeedbackSemantics
 import org.cescfe.numpairs.feature.game.ui.semantics.gameHighlightSemantics
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
@@ -39,6 +46,7 @@ fun PuzzleTile(
     tile: TileUiState,
     modifier: Modifier = Modifier,
     isHighlighted: Boolean = false,
+    correctFeedbackId: Long? = null,
     leftOperandModifier: Modifier = Modifier,
     isLeftOperandHighlighted: Boolean = false,
     leftOperandContentDescription: String? = null,
@@ -55,6 +63,7 @@ fun PuzzleTile(
     resetModifier: Modifier = Modifier,
     onResetClick: (() -> Unit)? = null
 ) {
+    val correctFeedbackScale = remember { Animatable(1f) }
     val statePalette = tileStatePalette(tile.visualState)
     val semanticColors = MaterialTheme.numPairsSemanticColors
     val tileBorder = if (isHighlighted) {
@@ -69,14 +78,39 @@ fun PuzzleTile(
         TileVisualState.NORMAL -> null
     }
 
+    LaunchedEffect(correctFeedbackId) {
+        correctFeedbackScale.snapTo(1f)
+        if (correctFeedbackId != null) {
+            correctFeedbackScale.animateTo(
+                targetValue = CORRECT_TILE_FEEDBACK_SCALE,
+                animationSpec = tween(
+                    durationMillis = CORRECT_TILE_FEEDBACK_SCALE_UP_DURATION_MILLIS,
+                    easing = FastOutSlowInEasing
+                )
+            )
+            correctFeedbackScale.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(
+                    durationMillis = CORRECT_TILE_FEEDBACK_SCALE_DOWN_DURATION_MILLIS,
+                    easing = FastOutSlowInEasing
+                )
+            )
+        }
+    }
+
     Box(
         modifier = modifier
+            .graphicsLayer {
+                scaleX = correctFeedbackScale.value
+                scaleY = correctFeedbackScale.value
+            }
             .semantics {
                 if (tileStateDescription != null) {
                     stateDescription = tileStateDescription
                 }
             }
             .gameHighlightSemantics(isHighlighted)
+            .correctTileFeedbackSemantics(correctFeedbackId)
     ) {
         Card(
             modifier = Modifier,

@@ -73,6 +73,7 @@ fun GameScreen(
     isSuccessOverlayEnabled: Boolean = true,
     interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
     highlightState: GameHighlightState = GameHighlightState.None,
+    correctTileFeedbackIdsByIndex: Map<Int, Long> = emptyMap(),
     topBarActions: @Composable RowScope.() -> Unit = {},
     contentBeforePuzzle: @Composable ColumnScope.() -> Unit = {}
 ) {
@@ -150,6 +151,7 @@ fun GameScreen(
                     onTileOperatorSelectionConfirmed = onTileOperatorSelectionConfirmed,
                     interactionPolicy = interactionPolicy,
                     highlightState = highlightState,
+                    correctTileFeedbackIdsByIndex = correctTileFeedbackIdsByIndex,
                     modifier = Modifier.fillMaxWidth()
                 )
             }

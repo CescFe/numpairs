@@ -26,6 +26,9 @@ internal const val LARGE_OPERAND_CHARACTER_COUNT = 3
 internal val HIGHLIGHTED_TILE_BORDER_WIDTH = 3.dp
 internal val HIGHLIGHTED_TILE_EXPRESSION_SLOT_BORDER_WIDTH = 2.dp
 internal val HIGHLIGHTED_TILE_EXPRESSION_SLOT_CORNER_RADIUS = 8.dp
+internal const val CORRECT_TILE_FEEDBACK_SCALE = 1.04f
+internal const val CORRECT_TILE_FEEDBACK_SCALE_UP_DURATION_MILLIS = 90
+internal const val CORRECT_TILE_FEEDBACK_SCALE_DOWN_DURATION_MILLIS = 130
 
 @Composable
 internal fun tileStatePalette(visualState: TileVisualState): TileStatePalette {
