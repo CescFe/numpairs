@@ -10,6 +10,7 @@ data class GeneratedPuzzleProfileId(val value: String) {
 
 data class GeneratedPuzzleProfileDefinition(
     val id: GeneratedPuzzleProfileId,
+    val difficulty: DifficultyTier,
     val size: GeneratedPuzzleSize,
     val stripValuePolicy: StripValuePolicy,
     val resultConstraints: ResultConstraints,
@@ -20,6 +21,7 @@ data class GeneratedPuzzleProfileDefinition(
 
 class GeneratedPuzzleProfile private constructor(definition: GeneratedPuzzleProfileDefinition) {
     val id: GeneratedPuzzleProfileId = definition.id
+    val difficulty: DifficultyTier = definition.difficulty
     val size: GeneratedPuzzleSize = definition.size
     val stripValuePolicy: StripValuePolicy = definition.stripValuePolicy
     val resultConstraints: ResultConstraints = definition.resultConstraints

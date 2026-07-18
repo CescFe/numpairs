@@ -47,7 +47,7 @@ import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
 @Composable
 fun GeneratedModeRoute(
-    mode: GeneratedModeConfiguration,
+    challenge: GeneratedChallenge,
     launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.DefaultNewPuzzle,
     title: String,
     generationUseCase: GeneratedPuzzleGenerationUseCase,
@@ -62,7 +62,7 @@ fun GeneratedModeRoute(
     onNavigateBack: () -> Unit = {}
 ) {
     val viewModel = rememberGeneratedPuzzleViewModel(
-        mode = mode,
+        challenge = challenge,
         generationUseCase = generationUseCase,
         generatedSessionRepository = generatedSessionRepository
     )
@@ -428,27 +428,29 @@ private fun GeneratedPuzzleFailureDialog(onRetry: () -> Unit, onNavigateBack: ()
 
 @Composable
 private fun rememberGeneratedPuzzleViewModel(
-    mode: GeneratedModeConfiguration,
+    challenge: GeneratedChallenge,
     generationUseCase: GeneratedPuzzleGenerationUseCase,
     generatedSessionRepository: GeneratedSessionRepository
 ): GeneratedPuzzleViewModel {
     val activity = LocalContext.current.findComponentActivity()
         ?: error("GeneratedModeRoute requires a ComponentActivity host.")
 
-    return remember(activity, mode.id, generationUseCase, generatedSessionRepository) {
+    return remember(activity, challenge.id, generationUseCase, generatedSessionRepository) {
         ViewModelProvider(
             activity,
             GeneratedPuzzleViewModelFactory(
-                mode = mode,
+                challenge = challenge,
                 generationUseCase = generationUseCase,
                 generatedSessionRepository = generatedSessionRepository
             )
-        )["generated-puzzle-${mode.id.value}", GeneratedPuzzleViewModel::class.java]
+        )[challenge.generatedPuzzleViewModelKey(), GeneratedPuzzleViewModel::class.java]
     }
 }
 
+internal fun GeneratedChallenge.generatedPuzzleViewModelKey(): String = "generated-puzzle-${id.value}"
+
 private class GeneratedPuzzleViewModelFactory(
-    private val mode: GeneratedModeConfiguration,
+    private val challenge: GeneratedChallenge,
     private val generationUseCase: GeneratedPuzzleGenerationUseCase,
     private val generatedSessionRepository: GeneratedSessionRepository
 ) : ViewModelProvider.Factory {
@@ -460,7 +462,7 @@ private class GeneratedPuzzleViewModelFactory(
         return requireNotNull(
             modelClass.cast(
                 GeneratedPuzzleViewModel(
-                    mode = mode,
+                    challenge = challenge,
                     generationUseCase = generationUseCase,
                     generatedSessionRepository = generatedSessionRepository
                 )

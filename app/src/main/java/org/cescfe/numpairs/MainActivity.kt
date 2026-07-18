@@ -34,9 +34,9 @@ class MainActivity : ComponentActivity() {
         val generatedSessionRepository = createGeneratedSessionRepository(applicationContext)
         val personalizationPreferencesRepository = createPersonalizationPreferencesRepository(applicationContext)
         val topAppBarActionDiscoveryRepository = createTopAppBarActionDiscoveryRepository(applicationContext)
-        val generatedModeRegistry = GeneratedModes.registry
+        val generatedChallengeCatalog = GeneratedModes.catalog
         val generatedPuzzleGenerationUseCaseFactory = ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
-            modeRegistry = generatedModeRegistry
+            challengeCatalog = generatedChallengeCatalog
         )
         lifecycleScope.launch {
             onboardingRuntime.initializer.initialize()
@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity() {
                     generatedSessionRepository = generatedSessionRepository,
                     personalizationPreferencesRepository = personalizationPreferencesRepository,
                     topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
-                    generatedModeRegistry = generatedModeRegistry,
+                    generatedChallengeCatalog = generatedChallengeCatalog,
                     generatedPuzzleGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory
                 )
             }

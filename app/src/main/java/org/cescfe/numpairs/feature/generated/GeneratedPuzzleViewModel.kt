@@ -69,7 +69,7 @@ internal sealed interface GeneratedPuzzleGenerationUiState {
 }
 
 internal class GeneratedPuzzleViewModel(
-    private val mode: GeneratedModeConfiguration,
+    private val challenge: GeneratedChallenge,
     private val generationUseCase: GeneratedPuzzleGenerationUseCase,
     private val generatedSessionRepository: GeneratedSessionRepository,
     private val seedSource: GeneratedPuzzleSeedSource = ThreadLocalGeneratedPuzzleSeedSource,
@@ -227,8 +227,8 @@ internal class GeneratedPuzzleViewModel(
             val snapshot = generatedSessionRepository.session.first()
                 ?.takeIf { storedSnapshot ->
                     storedSnapshot.sessionId == launchIntent.expectedSessionId &&
-                        storedSnapshot.modeId == mode.id.value &&
-                        storedSnapshot.profileId == mode.profile.id.value &&
+                        storedSnapshot.modeId == challenge.modeId.value &&
+                        storedSnapshot.profileId == challenge.profile.id.value &&
                         !storedSnapshot.currentPuzzle.isSolved
                 }
             if (token != generationToken) {
@@ -241,7 +241,7 @@ internal class GeneratedPuzzleViewModel(
                     session = GeneratedModeGameSession(
                         snapshot = resumableSnapshot,
                         request = GeneratedPuzzleGenerationRequest(
-                            profile = mode.profile,
+                            profile = challenge.profile,
                             seed = resumableSnapshot.seed
                         )
                     )
@@ -304,7 +304,7 @@ internal class GeneratedPuzzleViewModel(
         val sessionId = sessionIdSource.nextId()
         val snapshot = GeneratedSessionSnapshot(
             sessionId = sessionId,
-            modeId = mode.id.value,
+            modeId = challenge.modeId.value,
             profileId = outcome.request.profileId.value,
             seed = outcome.request.seed,
             initialPuzzle = outcome.initialPuzzle,
@@ -336,7 +336,7 @@ internal class GeneratedPuzzleViewModel(
     }
 
     private fun nextRequest(): GeneratedPuzzleGenerationRequest = GeneratedPuzzleGenerationRequest(
-        profile = mode.profile,
+        profile = challenge.profile,
         seed = seedSource.nextSeed()
     )
 }

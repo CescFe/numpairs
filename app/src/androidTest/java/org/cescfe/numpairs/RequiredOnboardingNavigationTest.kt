@@ -164,7 +164,7 @@ class RequiredOnboardingNavigationTest {
                     generatedSessionRepository = FakeGeneratedSessionRepository(),
                     personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
-                    generatedModeRegistry = GeneratedModes.registry,
+                    generatedChallengeCatalog = GeneratedModes.catalog,
                     generatedPuzzleGenerationUseCaseFactory = generatedPuzzleFactory()
                 )
             }

@@ -41,7 +41,7 @@ class PersonalizationNavigationTest {
         val snapshot = GeneratedSessionSnapshot(
             sessionId = GeneratedSessionId("personalization-session"),
             modeId = GeneratedModes.FOUR_PAIRS.id.value,
-            profileId = GeneratedModes.FOUR_PAIRS.profile.id.value,
+            profileId = GeneratedModes.FOUR_PAIRS_LOW.profile.id.value,
             seed = 919,
             initialPuzzle = samplePuzzle,
             currentPuzzle = samplePuzzle
@@ -61,7 +61,7 @@ class PersonalizationNavigationTest {
                     generatedSessionRepository = generatedSessionRepository,
                     personalizationPreferencesRepository = personalizationRepository,
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
-                    generatedModeRegistry = GeneratedModes.registry,
+                    generatedChallengeCatalog = GeneratedModes.catalog,
                     generatedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory {
                         GeneratedPuzzleGenerationUseCase { request ->
                             GeneratedPuzzleGenerationResult.Generated(

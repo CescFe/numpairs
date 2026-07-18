@@ -115,7 +115,7 @@ class GeneratedAssignmentHapticsTest {
                         generatedSessionRepository = FakeGeneratedSessionRepository(),
                         personalizationPreferencesRepository = preferencesRepository,
                         topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
-                        generatedModeRegistry = GeneratedModes.registry,
+                        generatedChallengeCatalog = GeneratedModes.catalog,
                         generatedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory {
                             GeneratedPuzzleGenerationUseCase { request ->
                                 GeneratedPuzzleGenerationResult.Generated(

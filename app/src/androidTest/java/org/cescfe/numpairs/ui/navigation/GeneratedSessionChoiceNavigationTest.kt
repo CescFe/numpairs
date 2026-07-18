@@ -28,7 +28,7 @@ import org.cescfe.numpairs.domain.puzzle.model.Strip
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
-import org.cescfe.numpairs.feature.generated.GeneratedModeConfiguration
+import org.cescfe.numpairs.feature.generated.GeneratedChallenge
 import org.cescfe.numpairs.feature.generated.GeneratedModeId
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
@@ -219,13 +219,13 @@ class GeneratedSessionChoiceNavigationTest {
                     generatedSessionRepository = repository,
                     personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
-                    generatedModeRegistry = GeneratedModes.registry,
-                    generatedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory { mode ->
+                    generatedChallengeCatalog = GeneratedModes.catalog,
+                    generatedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory { challenge ->
                         GeneratedPuzzleGenerationUseCase { request ->
-                            recorder.generatedModes += mode.id
+                            recorder.generatedModes += challenge.modeId
                             GeneratedPuzzleGenerationResult.Generated(
                                 request = request,
-                                initialPuzzle = initialPuzzleFor(mode)
+                                initialPuzzle = initialPuzzleFor(challenge)
                             )
                         }
                     }
@@ -235,10 +235,10 @@ class GeneratedSessionChoiceNavigationTest {
         return recorder
     }
 
-    private fun initialPuzzleFor(mode: GeneratedModeConfiguration): Puzzle = when (mode.id) {
+    private fun initialPuzzleFor(challenge: GeneratedChallenge): Puzzle = when (challenge.modeId) {
         GeneratedModes.FOUR_PAIRS.id -> samplePuzzle
         GeneratedModes.EIGHT_PAIRS.id -> eightPairsPuzzle()
-        else -> error("Unsupported test mode ${mode.id.value}.")
+        else -> error("Unsupported test mode ${challenge.modeId.value}.")
     }
 
     private fun eightPairsPuzzle(): Puzzle = Puzzle(
@@ -276,7 +276,7 @@ class GeneratedSessionChoiceNavigationTest {
 private fun resumableFourPairsSnapshot(): GeneratedSessionSnapshot = GeneratedSessionSnapshot(
     sessionId = GeneratedSessionId("session-choice"),
     modeId = GeneratedModes.FOUR_PAIRS.id.value,
-    profileId = GeneratedModes.FOUR_PAIRS.profile.id.value,
+    profileId = GeneratedModes.FOUR_PAIRS_LOW.profile.id.value,
     seed = 214,
     initialPuzzle = samplePuzzle,
     currentPuzzle = samplePuzzle

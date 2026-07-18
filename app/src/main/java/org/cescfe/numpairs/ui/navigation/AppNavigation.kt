@@ -15,10 +15,11 @@ import org.cescfe.numpairs.data.onboarding.OnboardingState
 import org.cescfe.numpairs.data.preferences.PersonalizationPreferencesRepository
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.feature.fourpairs.FourPairsRoute
+import org.cescfe.numpairs.feature.generated.GeneratedChallenge
+import org.cescfe.numpairs.feature.generated.GeneratedChallengeCatalog
+import org.cescfe.numpairs.feature.generated.GeneratedChallengeId
 import org.cescfe.numpairs.feature.generated.GeneratedModeConfiguration
-import org.cescfe.numpairs.feature.generated.GeneratedModeId
 import org.cescfe.numpairs.feature.generated.GeneratedModeLaunchIntent
-import org.cescfe.numpairs.feature.generated.GeneratedModeRegistry
 import org.cescfe.numpairs.feature.generated.GeneratedModeRoute
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
@@ -33,8 +34,8 @@ sealed interface AppDestination {
     data object Menu : AppDestination
     data object Tutorial : AppDestination
     data object Personalization : AppDestination
-    data class GeneratedMode(
-        val modeId: GeneratedModeId,
+    data class GeneratedChallenge(
+        val challengeId: GeneratedChallengeId,
         val launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.newPuzzle()
     ) : AppDestination
 }
@@ -45,7 +46,7 @@ fun AppNavigation(
     generatedSessionRepository: GeneratedSessionRepository,
     personalizationPreferencesRepository: PersonalizationPreferencesRepository,
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
-    generatedModeRegistry: GeneratedModeRegistry,
+    generatedChallengeCatalog: GeneratedChallengeCatalog,
     generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory,
     modifier: Modifier = Modifier,
     startDestination: AppDestination = AppDestination.Menu
@@ -63,7 +64,7 @@ fun AppNavigation(
             generatedSessionRepository = generatedSessionRepository,
             personalizationPreferencesRepository = personalizationPreferencesRepository,
             topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
-            generatedModeRegistry = generatedModeRegistry,
+            generatedChallengeCatalog = generatedChallengeCatalog,
             generatedPuzzleGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory,
             modifier = modifier,
             startDestination = startDestination
@@ -76,7 +77,7 @@ private fun UnlockedAppNavigation(
     generatedSessionRepository: GeneratedSessionRepository,
     personalizationPreferencesRepository: PersonalizationPreferencesRepository,
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
-    generatedModeRegistry: GeneratedModeRegistry,
+    generatedChallengeCatalog: GeneratedChallengeCatalog,
     generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory,
     modifier: Modifier,
     startDestination: AppDestination
@@ -84,29 +85,29 @@ private fun UnlockedAppNavigation(
     val generatedSessionSnapshot by generatedSessionRepository.session.collectAsState(initial = null)
     val personalizationPreferences by personalizationPreferencesRepository.preferences.collectAsState(initial = null)
     val resumableSession = generatedSessionSnapshot.toResumableGeneratedSessionOrNull(
-        modeRegistry = generatedModeRegistry
+        challengeCatalog = generatedChallengeCatalog
     )
-    var pendingGeneratedModeChoice by remember {
-        mutableStateOf<GeneratedModeConfiguration?>(null)
+    var pendingGeneratedChallengeChoice by remember {
+        mutableStateOf<GeneratedChallenge?>(null)
     }
     var currentDestination by remember(startDestination) {
         mutableStateOf(startDestination)
     }
     val navigateToMenu: () -> Unit = {
-        pendingGeneratedModeChoice = null
+        pendingGeneratedChallengeChoice = null
         currentDestination = AppDestination.Menu
     }
-    val navigateToNewGeneratedPuzzle: (GeneratedModeConfiguration) -> Unit = { mode ->
-        currentDestination = AppDestination.GeneratedMode(
-            modeId = mode.id,
+    val navigateToNewGeneratedPuzzle: (GeneratedChallenge) -> Unit = { challenge ->
+        currentDestination = AppDestination.GeneratedChallenge(
+            challengeId = challenge.id,
             launchIntent = GeneratedModeLaunchIntent.newPuzzle()
         )
     }
-    val onGeneratedModeSelected: (GeneratedModeConfiguration) -> Unit = { selectedMode ->
+    val onGeneratedChallengeSelected: (GeneratedChallenge) -> Unit = { selectedChallenge ->
         if (resumableSession == null) {
-            navigateToNewGeneratedPuzzle(selectedMode)
+            navigateToNewGeneratedPuzzle(selectedChallenge)
         } else {
-            pendingGeneratedModeChoice = selectedMode
+            pendingGeneratedChallengeChoice = selectedChallenge
         }
     }
 
@@ -118,11 +119,13 @@ private fun UnlockedAppNavigation(
         AppDestination.Menu -> {
             MenuRoute(
                 modifier = modifier,
-                resumeModeName = resumableSession?.mode?.localizedTitle(),
+                resumeModeName = resumableSession?.challenge?.let { challenge ->
+                    generatedChallengeCatalog.modeFor(challenge).localizedTitle()
+                },
                 onResumeSelected = {
                     resumableSession?.let { session ->
-                        currentDestination = AppDestination.GeneratedMode(
-                            modeId = session.mode.id,
+                        currentDestination = AppDestination.GeneratedChallenge(
+                            challengeId = session.challenge.id,
                             launchIntent = GeneratedModeLaunchIntent.ResumeSession(
                                 expectedSessionId = session.sessionId
                             )
@@ -136,25 +139,25 @@ private fun UnlockedAppNavigation(
                     currentDestination = AppDestination.Personalization
                 },
                 onFourPairsSelected = {
-                    onGeneratedModeSelected(GeneratedModes.FOUR_PAIRS)
+                    onGeneratedChallengeSelected(GeneratedModes.FOUR_PAIRS_LOW)
                 },
                 onEightPairsSelected = {
-                    onGeneratedModeSelected(GeneratedModes.EIGHT_PAIRS)
+                    onGeneratedChallengeSelected(GeneratedModes.EIGHT_PAIRS_MEDIUM)
                 }
             )
-            val selectedMode = pendingGeneratedModeChoice
-            if (selectedMode != null && resumableSession != null) {
-                val actionGuard = remember(selectedMode.id, resumableSession.sessionId) {
+            val selectedChallenge = pendingGeneratedChallengeChoice
+            if (selectedChallenge != null && resumableSession != null) {
+                val actionGuard = remember(selectedChallenge.id, resumableSession.sessionId) {
                     GeneratedSessionChoiceActionGuard()
                 }
                 GeneratedSessionChoiceDialog(
-                    savedModeName = resumableSession.mode.localizedTitle(),
-                    selectedModeName = selectedMode.localizedTitle(),
+                    savedModeName = generatedChallengeCatalog.modeFor(resumableSession.challenge).localizedTitle(),
+                    selectedModeName = generatedChallengeCatalog.modeFor(selectedChallenge).localizedTitle(),
                     onResume = {
                         actionGuard.handle {
-                            pendingGeneratedModeChoice = null
-                            currentDestination = AppDestination.GeneratedMode(
-                                modeId = resumableSession.mode.id,
+                            pendingGeneratedChallengeChoice = null
+                            currentDestination = AppDestination.GeneratedChallenge(
+                                challengeId = resumableSession.challenge.id,
                                 launchIntent = GeneratedModeLaunchIntent.ResumeSession(
                                     expectedSessionId = resumableSession.sessionId
                                 )
@@ -163,13 +166,13 @@ private fun UnlockedAppNavigation(
                     },
                     onNewPuzzle = {
                         actionGuard.handle {
-                            pendingGeneratedModeChoice = null
-                            navigateToNewGeneratedPuzzle(selectedMode)
+                            pendingGeneratedChallengeChoice = null
+                            navigateToNewGeneratedPuzzle(selectedChallenge)
                         }
                     },
                     onDismiss = {
                         if (!actionGuard.isHandled) {
-                            pendingGeneratedModeChoice = null
+                            pendingGeneratedChallengeChoice = null
                         }
                     }
                 )
@@ -184,16 +187,17 @@ private fun UnlockedAppNavigation(
             onNavigateBack = navigateToMenu,
             modifier = modifier
         )
-        is AppDestination.GeneratedMode -> {
-            val mode = generatedModeRegistry.resolve(id = destination.modeId)
-            val generationUseCase = remember(generatedPuzzleGenerationUseCaseFactory, mode.id) {
-                generatedPuzzleGenerationUseCaseFactory.create(mode = mode)
+        is AppDestination.GeneratedChallenge -> {
+            val challenge = generatedChallengeCatalog.resolveChallenge(id = destination.challengeId)
+            val mode = generatedChallengeCatalog.modeFor(challenge)
+            val generationUseCase = remember(generatedPuzzleGenerationUseCaseFactory, challenge.id) {
+                generatedPuzzleGenerationUseCaseFactory.create(challenge = challenge)
             }
 
             when (mode.id) {
                 GeneratedModes.FOUR_PAIRS.id -> FourPairsRoute(
                     modifier = modifier,
-                    mode = mode,
+                    challenge = challenge,
                     launchIntent = destination.launchIntent,
                     generationUseCase = generationUseCase,
                     generatedSessionRepository = generatedSessionRepository,
@@ -204,7 +208,7 @@ private fun UnlockedAppNavigation(
                 )
 
                 else -> GeneratedModeRoute(
-                    mode = mode,
+                    challenge = challenge,
                     launchIntent = destination.launchIntent,
                     title = mode.localizedTitle(),
                     generationUseCase = generationUseCase,
