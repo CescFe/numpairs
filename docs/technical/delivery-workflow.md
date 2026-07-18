@@ -162,6 +162,13 @@ For each authorized issue:
 
 Do not start dependent implementation from an unmerged branch when the requested workflow requires sequential integration into `main`.
 
+For Compose UI changes, the diff review must include a design-system consistency pass:
+
+- inspect newly introduced or configured direct Material components
+- inspect feature-local shapes, colors, typography, and other visual styling
+- compare each affected visual role with `NumPairsComponents` and the nearest analogous UI
+- identify in the Pull Request any intentional deviation from an established shared component or token
+
 ## Android Validation
 
 For application changes, run the relevant tasks sequentially:
