@@ -51,6 +51,7 @@ import org.cescfe.numpairs.feature.game.ui.semantics.OperandSelectorUsageHintVis
 import org.cescfe.numpairs.feature.game.ui.semantics.operandSelectorUsageHintVisualState
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
+import org.cescfe.numpairs.ui.theme.numPairsSemanticColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -240,10 +241,10 @@ private fun operandSelectorUsageHintColors(
 @Composable
 private fun operandSelectorPartialUsageHintColors(): OperandUsageIndicatorColors = OperandUsageIndicatorColors(
     container = NumPairsComponents.subtleSurfaceColor(),
-    content = MaterialTheme.colorScheme.secondary,
+    content = MaterialTheme.numPairsSemanticColors.selection,
     border = BorderStroke(
         width = NumPairsComponents.FocusBorderWidth,
-        color = MaterialTheme.colorScheme.secondary
+        color = MaterialTheme.numPairsSemanticColors.selection
     )
 )
 
@@ -363,19 +364,19 @@ internal fun TileOperatorSelectionMenu(
                         },
                     shape = RoundedCornerShape(TILE_OPERATOR_MENU_CORNER_RADIUS),
                     color = if (isSelected) {
-                        MaterialTheme.colorScheme.secondaryContainer
+                        MaterialTheme.numPairsSemanticColors.selectionContainer
                     } else {
                         NumPairsComponents.subtleSurfaceColor()
                     },
                     contentColor = if (isSelected) {
-                        MaterialTheme.colorScheme.onSecondaryContainer
+                        MaterialTheme.numPairsSemanticColors.onSelectionContainer
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
                     },
                     border = if (isSelected) {
                         BorderStroke(
                             width = NumPairsComponents.StrongBorderWidth,
-                            color = MaterialTheme.colorScheme.secondary
+                            color = MaterialTheme.numPairsSemanticColors.selection
                         )
                     } else {
                         NumPairsComponents.subtleBorder()

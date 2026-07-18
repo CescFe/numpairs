@@ -50,6 +50,7 @@ import org.cescfe.numpairs.feature.game.ui.semantics.stripEntryInputInvalid
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
+import org.cescfe.numpairs.ui.theme.numPairsSemanticColors
 
 enum class AvailableNumberChipStyle {
     KNOWN,
@@ -71,8 +72,9 @@ fun AvailableNumberChip(
     onClick: (() -> Unit)? = null
 ) {
     val chipColors = chipColorsFor(style)
+    val semanticColors = MaterialTheme.numPairsSemanticColors
     val chipBorder = if (isHighlighted) {
-        BorderStroke(width = HIGHLIGHTED_CHIP_BORDER_WIDTH, color = MaterialTheme.colorScheme.tertiary)
+        BorderStroke(width = HIGHLIGHTED_CHIP_BORDER_WIDTH, color = semanticColors.tutorialHighlight)
     } else {
         chipColors.border
     }
@@ -139,9 +141,10 @@ fun AvailableNumberInputChip(
     isHighlighted: Boolean = false
 ) {
     val chipColors = chipColorsFor(style)
+    val semanticColors = MaterialTheme.numPairsSemanticColors
     val chipBorder = when {
         isInvalid -> NumPairsComponents.errorBorder()
-        isHighlighted -> BorderStroke(width = HIGHLIGHTED_CHIP_BORDER_WIDTH, color = MaterialTheme.colorScheme.tertiary)
+        isHighlighted -> BorderStroke(width = HIGHLIGHTED_CHIP_BORDER_WIDTH, color = semanticColors.tutorialHighlight)
         else -> chipColors.border
     }
     val focusRequester = remember { FocusRequester() }

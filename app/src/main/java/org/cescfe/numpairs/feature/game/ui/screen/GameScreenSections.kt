@@ -44,6 +44,7 @@ import org.cescfe.numpairs.feature.game.ui.components.strip.CHIP_HORIZONTAL_CONT
 import org.cescfe.numpairs.feature.game.ui.components.tile.PuzzleTile
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
+import org.cescfe.numpairs.ui.theme.numPairsSemanticColors
 
 @Composable
 internal fun BoardSection(
@@ -360,7 +361,7 @@ private fun StripEntryFeedback(message: String, isError: Boolean, modifier: Modi
             }
         },
         color = if (isError) {
-            MaterialTheme.colorScheme.error
+            MaterialTheme.numPairsSemanticColors.error
         } else {
             MaterialTheme.colorScheme.onSurfaceVariant
         },

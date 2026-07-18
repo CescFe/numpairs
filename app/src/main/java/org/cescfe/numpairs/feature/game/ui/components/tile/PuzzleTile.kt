@@ -32,6 +32,7 @@ import org.cescfe.numpairs.feature.game.ui.semantics.gameHighlightSemantics
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
+import org.cescfe.numpairs.ui.theme.numPairsSemanticColors
 
 @Composable
 fun PuzzleTile(
@@ -55,8 +56,9 @@ fun PuzzleTile(
     onResetClick: (() -> Unit)? = null
 ) {
     val statePalette = tileStatePalette(tile.visualState)
+    val semanticColors = MaterialTheme.numPairsSemanticColors
     val tileBorder = if (isHighlighted) {
-        BorderStroke(width = HIGHLIGHTED_TILE_BORDER_WIDTH, color = MaterialTheme.colorScheme.tertiary)
+        BorderStroke(width = HIGHLIGHTED_TILE_BORDER_WIDTH, color = semanticColors.tutorialHighlight)
     } else {
         statePalette.border
     }

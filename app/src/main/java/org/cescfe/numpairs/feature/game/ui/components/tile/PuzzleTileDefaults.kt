@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.feature.game.presentation.TileVisualState
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
+import org.cescfe.numpairs.ui.theme.numPairsSemanticColors
 
 internal val TILE_HORIZONTAL_PADDING = 10.dp
 internal val TILE_VERTICAL_PADDING = 16.dp
@@ -29,6 +30,7 @@ internal val HIGHLIGHTED_TILE_EXPRESSION_SLOT_CORNER_RADIUS = 8.dp
 @Composable
 internal fun tileStatePalette(visualState: TileVisualState): TileStatePalette {
     val colorScheme = MaterialTheme.colorScheme
+    val semanticColors = MaterialTheme.numPairsSemanticColors
 
     return when (visualState) {
         TileVisualState.NORMAL -> TileStatePalette(
@@ -39,8 +41,8 @@ internal fun tileStatePalette(visualState: TileVisualState): TileStatePalette {
         )
 
         TileVisualState.INCORRECT -> TileStatePalette(
-            containerColor = colorScheme.errorContainer,
-            expressionContentColor = colorScheme.onErrorContainer,
+            containerColor = semanticColors.errorContainer,
+            expressionContentColor = semanticColors.onErrorContainer,
             resultContentColor = colorScheme.onSurface,
             border = NumPairsComponents.errorBorder()
         )
@@ -49,13 +51,13 @@ internal fun tileStatePalette(visualState: TileVisualState): TileStatePalette {
             containerColor = NumPairsComponents.raisedSurfaceColor(),
             expressionContentColor = colorScheme.onSurfaceVariant,
             resultContentColor = colorScheme.onSurface,
-            border = BorderStroke(2.dp, colorScheme.error)
+            border = BorderStroke(2.dp, semanticColors.error)
         )
 
         TileVisualState.LIVE_RULE_CONFLICT -> TileStatePalette(
-            containerColor = colorScheme.errorContainer,
-            expressionContentColor = colorScheme.onErrorContainer,
-            resultContentColor = colorScheme.onErrorContainer,
+            containerColor = semanticColors.errorContainer,
+            expressionContentColor = semanticColors.onErrorContainer,
+            resultContentColor = semanticColors.onErrorContainer,
             border = NumPairsComponents.errorBorder()
         )
     }

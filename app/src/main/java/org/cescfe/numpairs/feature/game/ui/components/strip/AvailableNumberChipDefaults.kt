@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
+import org.cescfe.numpairs.ui.theme.numPairsSemanticColors
 
 internal val CHIP_MIN_HEIGHT = 48.dp
 internal val CHIP_CONTENT_HORIZONTAL_PADDING = 4.dp
@@ -21,6 +22,7 @@ internal val HIGHLIGHTED_CHIP_BORDER_WIDTH = 3.dp
 @Composable
 internal fun chipColorsFor(style: AvailableNumberChipStyle): AvailableNumberChipColors {
     val colorScheme = MaterialTheme.colorScheme
+    val semanticColors = MaterialTheme.numPairsSemanticColors
 
     return when (style) {
         AvailableNumberChipStyle.KNOWN -> AvailableNumberChipColors(
@@ -30,20 +32,20 @@ internal fun chipColorsFor(style: AvailableNumberChipStyle): AvailableNumberChip
         )
 
         AvailableNumberChipStyle.HIDDEN -> AvailableNumberChipColors(
-            containerColor = NumPairsComponents.hiddenContainerColor(),
-            contentColor = NumPairsComponents.hiddenContentColor(),
+            containerColor = semanticColors.hiddenContainer,
+            contentColor = semanticColors.onHiddenContainer,
             border = BorderStroke(
                 width = MODIFIABLE_CHIP_BORDER_WIDTH,
-                color = colorScheme.onSurfaceVariant
+                color = semanticColors.hiddenBorder
             )
         )
 
         AvailableNumberChipStyle.PLAYER_ENTERED -> AvailableNumberChipColors(
-            containerColor = colorScheme.secondaryContainer,
-            contentColor = colorScheme.onSecondaryContainer,
+            containerColor = semanticColors.selectionContainer,
+            contentColor = semanticColors.onSelectionContainer,
             border = BorderStroke(
                 width = MODIFIABLE_CHIP_BORDER_WIDTH,
-                color = colorScheme.secondary
+                color = semanticColors.selection
             )
         )
     }
