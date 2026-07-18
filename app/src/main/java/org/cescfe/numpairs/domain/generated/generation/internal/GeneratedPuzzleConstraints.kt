@@ -13,23 +13,23 @@ import org.cescfe.numpairs.domain.generated.puzzle.GeneratedPairsPuzzleValidatio
 import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
 import org.cescfe.numpairs.domain.puzzle.assignment.UnorderedStripEntryPair
 
-internal data class GeneratedPuzzleHardRuleSet(
-    val valuePairs: GeneratedValuePairRuleSet,
-    val stripValues: GeneratedStripValueRule,
-    val boardResults: GeneratedBoardResultRule,
-    val multiplicationResults: GeneratedMultiplicationResultRule,
-    val stripMask: GeneratedStripMaskRule
+internal data class GeneratedPuzzleConstraintSet(
+    val valuePairs: GeneratedValuePairConstraintSet,
+    val stripValues: GeneratedStripValueConstraint,
+    val boardResults: GeneratedBoardResultConstraint,
+    val multiplicationResults: GeneratedMultiplicationResultConstraint,
+    val stripMask: GeneratedStripMaskConstraint
 ) {
     companion object {
-        fun from(profile: GeneratedPuzzleProfile): GeneratedPuzzleHardRuleSet {
-            val stripValues = GeneratedStripValueRule(policy = profile.stripValuePolicy)
-            val boardResults = GeneratedBoardResultRule(constraints = profile.resultConstraints)
-            val multiplicationResults = GeneratedMultiplicationResultRule(
+        fun from(profile: GeneratedPuzzleProfile): GeneratedPuzzleConstraintSet {
+            val stripValues = GeneratedStripValueConstraint(policy = profile.stripValuePolicy)
+            val boardResults = GeneratedBoardResultConstraint(constraints = profile.resultConstraints)
+            val multiplicationResults = GeneratedMultiplicationResultConstraint(
                 constraints = profile.resultConstraints
             )
 
-            return GeneratedPuzzleHardRuleSet(
-                valuePairs = GeneratedValuePairRuleSet(
+            return GeneratedPuzzleConstraintSet(
+                valuePairs = GeneratedValuePairConstraintSet(
                     pairSpecification = GeneratedPuzzlePairSpecification(
                         stripValuePolicy = profile.stripValuePolicy,
                         resultConstraints = profile.resultConstraints
@@ -42,17 +42,17 @@ internal data class GeneratedPuzzleHardRuleSet(
                 stripValues = stripValues,
                 boardResults = boardResults,
                 multiplicationResults = multiplicationResults,
-                stripMask = GeneratedStripMaskRule(profile = profile)
+                stripMask = GeneratedStripMaskConstraint(profile = profile)
             )
         }
     }
 }
 
-internal class GeneratedValuePairRuleSet(
+internal class GeneratedValuePairConstraintSet(
     private val pairSpecification: GeneratedPuzzlePairSpecification,
-    private val stripValues: GeneratedStripValueRule,
-    private val boardResults: GeneratedBoardResultRule,
-    private val multiplicationResults: GeneratedMultiplicationResultRule,
+    private val stripValues: GeneratedStripValueConstraint,
+    private val boardResults: GeneratedBoardResultConstraint,
+    private val multiplicationResults: GeneratedMultiplicationResultConstraint,
     private val productAnchorMix: ProductAnchorMix?
 ) {
     fun canBeAdded(pair: GeneratedPairsPairValues, valueOccurrences: Map<Int, Int>, usedResults: Set<Int>): Boolean =
@@ -83,7 +83,7 @@ internal class GeneratedValuePairRuleSet(
         if (productAnchorMix?.isAnchor(product = pair.product) == true) 1 else 0
 }
 
-internal class GeneratedStripValueRule(private val policy: StripValuePolicy) {
+internal class GeneratedStripValueConstraint(private val policy: StripValuePolicy) {
     fun violationsFor(values: List<Int>): List<GeneratedPairsPuzzleValidationViolation> = buildList {
         val valuesOutsideRange = values.filterTo(mutableSetOf()) { value -> value !in policy.valueRange }
         if (valuesOutsideRange.isNotEmpty()) {
@@ -109,7 +109,7 @@ internal class GeneratedStripValueRule(private val policy: StripValuePolicy) {
     }
 }
 
-internal class GeneratedBoardResultRule(private val constraints: ResultConstraints) {
+internal class GeneratedBoardResultConstraint(private val constraints: ResultConstraints) {
     fun violationsFor(results: List<Int>): List<GeneratedPairsPuzzleValidationViolation> {
         if (constraints.acceptsBoardResults(results = results.map(Int::toLong))) {
             return emptyList()
@@ -127,7 +127,7 @@ internal class GeneratedBoardResultRule(private val constraints: ResultConstrain
     }
 }
 
-internal class GeneratedMultiplicationResultRule(private val constraints: ResultConstraints) {
+internal class GeneratedMultiplicationResultConstraint(private val constraints: ResultConstraints) {
     fun violationsFor(resultsByIndex: Map<Int, Int>): List<GeneratedPairsPuzzleValidationViolation> = buildList {
         val excessiveResults = resultsByIndex.filterValues { result ->
             result > constraints.maxMultiplicationResult
@@ -155,7 +155,7 @@ internal class GeneratedMultiplicationResultRule(private val constraints: Result
     }
 }
 
-internal class GeneratedStripMaskRule(private val profile: GeneratedPuzzleProfile) {
+internal class GeneratedStripMaskConstraint(private val profile: GeneratedPuzzleProfile) {
     fun isSatisfied(
         knownEntryIds: Set<StripEntryId>,
         hiddenEntryCount: Int,

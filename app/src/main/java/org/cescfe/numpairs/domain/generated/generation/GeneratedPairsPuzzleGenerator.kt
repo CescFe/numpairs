@@ -42,13 +42,13 @@ class GeneratedPairsPuzzleGenerator(private val context: GeneratedPuzzleGenerati
             valuePairSelector = GeneratedPairsValuePairSelector(
                 profile = profile,
                 random = random,
-                hardRules = context.hardRules.valuePairs
+                constraints = context.constraints.valuePairs
             )
         )
         val stripMaskSelector = GeneratedStripMaskSelector(
             profile = profile,
             random = random,
-            hardRule = context.hardRules.stripMask
+            constraint = context.constraints.stripMask
         )
         val puzzleAssembler = GeneratedPairsPuzzleAssembler(profile = profile, random = random)
         val rejections = mutableListOf<GeneratedPairsPuzzleCandidateRejection>()

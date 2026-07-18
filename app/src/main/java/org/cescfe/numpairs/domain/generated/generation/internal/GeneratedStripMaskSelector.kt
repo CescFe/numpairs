@@ -7,12 +7,12 @@ import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
 internal class GeneratedStripMaskSelector(
     private val profile: GeneratedPuzzleProfile,
     private val random: Random,
-    private val hardRule: GeneratedStripMaskRule
+    private val constraint: GeneratedStripMaskConstraint
 ) {
     constructor(profile: GeneratedPuzzleProfile, random: Random) : this(
         profile = profile,
         random = random,
-        hardRule = GeneratedPuzzleHardRuleSet.from(profile = profile).stripMask
+        constraint = GeneratedPuzzleConstraintSet.from(profile = profile).stripMask
     )
 
     fun selectKnownEntryIds(
@@ -131,7 +131,7 @@ internal class GeneratedStripMaskSelector(
             }
 
             if (
-                !hardRule.isSatisfied(
+                !constraint.isSatisfied(
                     knownEntryIds = knownEntryIds,
                     hiddenEntryCount = profile.size.stripEntryCount - knownEntryIds.size,
                     solutionPairs = solutionPairs
