@@ -33,13 +33,19 @@ Unless the task specifies otherwise, use:
 - GitHub Project: `https://github.com/orgs/CescFe/projects/11`
 - Project field `Size`: `xs`
 
+Project 11 automates new issue intake: `Auto-add to project` adds every issue created in
+`CescFe/numpairs`, and `Item added to project` initializes its Project `Status` to `Backlog`.
+Do not add newly created repository issues to Project 11 manually. Wait for and verify both
+automation results before assigning the iteration and remaining Project fields or changing
+the Project `Status`.
+
 Use the iteration and milestone specified for the current delivery batch. Do not attach new work to a closed milestone unless the user explicitly requests it.
 
 Project `Priority` is contextual and ranges from `P0` to `P3`. Unless the user specifies a value, inspect the most recently worked issue and reuse its Project `Priority`. Do not treat `P2` or any other priority as a permanent default. If there is no previous issue from which to inherit priority, ask for it.
 
-Set Project `Status` according to how the issue enters the workflow:
+After automated intake, keep or change Project `Status` according to how the issue enters the workflow:
 
-- `Backlog` when a user is requesting future work and is not starting implementation.
+- Keep `Backlog` when a user is requesting future work and is not starting implementation.
 - `Ready For Dev` when an authorized planning task creates an atomic, refined issue that is ready to be implemented.
 - `In Progress` immediately before implementation begins on an existing issue.
 
@@ -54,8 +60,9 @@ For milestone delivery:
 3. Divide the remaining scope into independently reviewable, dependency-ordered issues.
 4. Give each issue one observable outcome and one Pull Request.
 5. Write each issue in English using the selected issue template.
-6. Apply the required assignee, label, type, issue fields, Project fields, iteration, and milestone.
-7. Set Project `Status` to `Ready For Dev` for each planned issue.
+6. Apply the required assignee, label, type, issue fields, and milestone.
+7. Wait for and verify automatic Project 11 intake and `Backlog` initialization, then apply the remaining Project fields and iteration.
+8. Set Project `Status` to `Ready For Dev` for each planned issue.
 
 Do not combine unrelated product behavior, refactors, or documentation in one issue merely to reduce the number of Pull Requests.
 
