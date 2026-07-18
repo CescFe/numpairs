@@ -109,7 +109,20 @@ class GeneratedCompletionCelebrationTest {
     }
 
     @Test
-    fun generatedModeOptsInToCompletionCelebration() {
+    fun fourPairsOptsInToCompletionCelebration() {
+        assertGeneratedModeOptsInToCompletionCelebration(
+            menuButtonTag = MenuScreenTestTags.FOUR_PAIRS_BUTTON
+        )
+    }
+
+    @Test
+    fun eightPairsOptsInToCompletionCelebration() {
+        assertGeneratedModeOptsInToCompletionCelebration(
+            menuButtonTag = MenuScreenTestTags.EIGHT_PAIRS_BUTTON
+        )
+    }
+
+    private fun assertGeneratedModeOptsInToCompletionCelebration(menuButtonTag: String) {
         composeTestRule.setContent {
             NumPairsTheme {
                 AppNavigation(
@@ -135,7 +148,7 @@ class GeneratedCompletionCelebrationTest {
         }
 
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+            .onNodeWithTag(menuButtonTag)
             .performClick()
         gameRobot()
             .scrollToBoard()

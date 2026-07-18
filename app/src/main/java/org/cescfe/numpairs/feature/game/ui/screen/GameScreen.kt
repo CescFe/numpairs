@@ -27,7 +27,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.data.preferences.PersonalizationTheme
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.model.Operator
@@ -45,6 +47,7 @@ import org.cescfe.numpairs.feature.game.ui.actions.RulesHelperAction
 import org.cescfe.numpairs.feature.game.ui.help.RulesHelperDialog
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
+import org.cescfe.numpairs.ui.theme.NumPairsThemePreviewParameterProvider
 
 @Composable
 fun GameScreen(
@@ -283,8 +286,10 @@ private fun GameScreenTopBar(
 
 @Preview(showBackground = true)
 @Composable
-private fun GameScreenPreview() {
-    NumPairsTheme {
+private fun GameScreenPreview(
+    @PreviewParameter(NumPairsThemePreviewParameterProvider::class) theme: PersonalizationTheme
+) {
+    NumPairsTheme(theme = theme) {
         GameScreen(
             title = stringResource(R.string.tutorial_screen_title),
             uiState = GameUiState.from(samplePuzzle)
@@ -294,8 +299,10 @@ private fun GameScreenPreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun GameScreenWithTopBarActionPreview() {
-    NumPairsTheme {
+private fun GameScreenWithTopBarActionPreview(
+    @PreviewParameter(NumPairsThemePreviewParameterProvider::class) theme: PersonalizationTheme
+) {
+    NumPairsTheme(theme = theme) {
         GameScreen(
             title = stringResource(R.string.tutorial_screen_title),
             uiState = GameUiState.from(samplePuzzle),

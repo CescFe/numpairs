@@ -28,11 +28,14 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.data.preferences.PersonalizationTheme
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
+import org.cescfe.numpairs.ui.theme.NumPairsThemePreviewParameterProvider
 
 @Composable
 fun MenuScreen(
@@ -171,8 +174,10 @@ private fun MenuButtonText(text: String) {
 
 @Preview(showBackground = true)
 @Composable
-private fun MenuScreenPreview() {
-    NumPairsTheme {
+private fun MenuScreenPreview(
+    @PreviewParameter(NumPairsThemePreviewParameterProvider::class) theme: PersonalizationTheme
+) {
+    NumPairsTheme(theme = theme) {
         MenuScreen()
     }
 }
