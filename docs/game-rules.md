@@ -32,7 +32,17 @@ Example:
 
 ## Result Grid
 
-The grid contains 8 tiles.
+The number of tiles in the grid depends on the puzzle size.
+
+Each solution pair contributes exactly two tiles:
+
+- one addition tile
+- one multiplication tile
+
+Current generated modes use:
+
+- `4 Pairs Low`: 4 solution pairs and 8 board tiles
+- `8 Pairs Medium`: 8 solution pairs and 16 board tiles
 
 Each tile has two rows:
 
