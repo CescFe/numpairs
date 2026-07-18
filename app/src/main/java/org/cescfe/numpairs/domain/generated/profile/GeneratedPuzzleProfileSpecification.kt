@@ -223,7 +223,8 @@ private object GeneratedPuzzleProfileStructuralEvaluator {
         definition.varietyPolicy.repeatedValueGroupTarget?.let { target ->
             val maximumConfiguredGroupCount = definition.stripValuePolicy.maxRepeatedValueGroupCount
             if (definition.stripValuePolicy.maxOccurrencesPerValue < 2 ||
-                maximumConfiguredGroupCount != null && target.targetGroupCount > maximumConfiguredGroupCount ||
+                maximumConfiguredGroupCount != null &&
+                target.targetGroupCount > maximumConfiguredGroupCount ||
                 target.targetGroupCount > definition.size.stripEntryCount / 2
             ) {
                 add(

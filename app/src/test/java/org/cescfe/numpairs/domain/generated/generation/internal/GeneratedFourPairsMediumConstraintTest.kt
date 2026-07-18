@@ -33,7 +33,8 @@ class GeneratedFourPairsMediumConstraintTest {
         assertTrue(
             violations.any { violation ->
                 violation is GeneratedPairsPuzzleValidationViolation.RepeatedStripValueGroupCountExceeded &&
-                    violation.maximumAllowed == 1 && violation.observedRepeatedValues == setOf(1, 2)
+                    violation.maximumAllowed == 1 &&
+                    violation.observedRepeatedValues == setOf(1, 2)
             }
         )
     }
