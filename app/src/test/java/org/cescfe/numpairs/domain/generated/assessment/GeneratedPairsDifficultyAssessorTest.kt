@@ -257,7 +257,7 @@ private fun ambiguousProfile(): GeneratedPuzzleProfile = GeneratedPuzzleProfile.
         initialStripMaskPolicy = InitialStripMaskPolicy(
             knownEntryCountRange = 0..0,
             requiredAnchors = emptySet(),
-            distributionPolicy = StripKnownEntryDistributionPolicy.UNRESTRICTED,
+            distributionPolicy = StripKnownEntryDistributionPolicy.Unrestricted,
             maxConsecutiveHiddenEntries = 4
         ),
         generationPolicy = GenerationPolicy(isBoardTileShufflingEnabled = true)

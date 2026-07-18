@@ -67,7 +67,12 @@ private object GeneratedPuzzleProfileStructuralEvaluator {
     ) {
         val valuePolicy = definition.stripValuePolicy
         val distinctValueCount = valuePolicy.valueRange.last.toLong() - valuePolicy.valueRange.first + 1L
-        val availableEntryCount = distinctValueCount * valuePolicy.maxOccurrencesPerValue
+        val repeatedGroupCount = minOf(
+            distinctValueCount,
+            valuePolicy.maxRepeatedValueGroupCount?.toLong() ?: distinctValueCount
+        )
+        val availableEntryCount = distinctValueCount +
+            repeatedGroupCount * (valuePolicy.maxOccurrencesPerValue - 1L)
 
         if (availableEntryCount < definition.size.stripEntryCount) {
             add(
@@ -125,6 +130,20 @@ private object GeneratedPuzzleProfileStructuralEvaluator {
                 )
             )
         }
+        (maskPolicy.distributionPolicy as? StripKnownEntryDistributionPolicy.AtLeastDistinctSolutionPairs)
+            ?.let { distributionPolicy ->
+                if (distributionPolicy.minimumPairCount > definition.size.pairCount ||
+                    distributionPolicy.minimumPairCount > maskPolicy.knownEntryCountRange.last
+                ) {
+                    add(
+                        GeneratedPuzzleProfileViolation.DistinctSolutionPairDistributionInfeasible(
+                            minimumRequiredPairCount = distributionPolicy.minimumPairCount,
+                            puzzlePairCount = definition.size.pairCount,
+                            maximumKnownEntryCount = maskPolicy.knownEntryCountRange.last
+                        )
+                    )
+                }
+            }
     }
 
     private fun MutableList<GeneratedPuzzleProfileViolation>.addProductAnchorStructureViolations(
@@ -197,6 +216,22 @@ private object GeneratedPuzzleProfileStructuralEvaluator {
                     GeneratedPuzzleProfileViolation.PrimeDecoyTargetCountOutsidePuzzle(
                         targetPairCount = target.targetPairCount,
                         pairCount = definition.size.pairCount
+                    )
+                )
+            }
+        }
+        definition.varietyPolicy.repeatedValueGroupTarget?.let { target ->
+            val maximumConfiguredGroupCount = definition.stripValuePolicy.maxRepeatedValueGroupCount
+            if (definition.stripValuePolicy.maxOccurrencesPerValue < 2 ||
+                maximumConfiguredGroupCount != null &&
+                target.targetGroupCount > maximumConfiguredGroupCount ||
+                target.targetGroupCount > definition.size.stripEntryCount / 2
+            ) {
+                add(
+                    GeneratedPuzzleProfileViolation.RepeatedValueGroupTargetUnreachable(
+                        targetGroupCount = target.targetGroupCount,
+                        maxOccurrencesPerValue = definition.stripValuePolicy.maxOccurrencesPerValue,
+                        maxRepeatedValueGroupCount = maximumConfiguredGroupCount
                     )
                 )
             }
@@ -490,6 +525,7 @@ private fun GeneratedPuzzleProfileDefinition.requiredKnownEntryIds(): Set<Int> =
 
 private fun GeneratedPuzzleProfileDefinition.maximumKnownCountAllowedByDistribution(): Int =
     when (initialStripMaskPolicy.distributionPolicy) {
-        StripKnownEntryDistributionPolicy.SPREAD_ACROSS_STRIP_AND_PAIRS_WHEN_POSSIBLE -> size.pairCount
-        StripKnownEntryDistributionPolicy.UNRESTRICTED -> size.stripEntryCount
+        StripKnownEntryDistributionPolicy.SpreadAcrossStripAndPairsWhenPossible -> size.pairCount
+        is StripKnownEntryDistributionPolicy.AtLeastDistinctSolutionPairs -> size.stripEntryCount
+        StripKnownEntryDistributionPolicy.Unrestricted -> size.stripEntryCount
     }

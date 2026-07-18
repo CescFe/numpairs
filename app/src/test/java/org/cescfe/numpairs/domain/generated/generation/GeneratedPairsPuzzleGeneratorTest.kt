@@ -105,7 +105,7 @@ class GeneratedPairsPuzzleGeneratorTest {
                 initialStripMaskPolicy = InitialStripMaskPolicy(
                     knownEntryCountRange = 1..1,
                     requiredAnchors = emptySet(),
-                    distributionPolicy = StripKnownEntryDistributionPolicy.UNRESTRICTED,
+                    distributionPolicy = StripKnownEntryDistributionPolicy.Unrestricted,
                     maxConsecutiveHiddenEntries = 3
                 ),
                 generationPolicy = GenerationPolicy(

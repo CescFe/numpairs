@@ -47,10 +47,9 @@ internal class GeneratedPuzzlePairSpecification(
 
     fun canBeAdded(pair: GeneratedPuzzlePairValues, valueOccurrences: Map<Int, Int>, usedResults: Set<Int>): Boolean =
         isLocallyEligible(pair = pair) &&
-            pair.values.groupingBy { value -> value }.eachCount().all { (value, addedOccurrences) ->
-                valueOccurrences.getOrDefault(value, 0) + addedOccurrences <=
-                    stripValuePolicy.maxOccurrencesPerValue
-            } &&
+            stripValuePolicy.accepts(
+                occurrencesByValue = valueOccurrences.with(pair = pair)
+            ) &&
             resultConstraints.acceptsAdditionalBoardResults(
                 usedResults = usedResults,
                 newResults = pair.results.mapTo(mutableSetOf(), Long::toInt)
@@ -191,10 +190,15 @@ private fun Map<Int, Int>.with(pair: GeneratedPuzzlePairValues): Map<Int, Int> {
 }
 
 internal fun StripValuePolicy.accepts(values: List<Int>): Boolean = values.all { value -> value in valueRange } &&
-    values.groupingBy { value -> value }
-        .eachCount()
-        .values
-        .all { occurrenceCount -> occurrenceCount <= maxOccurrencesPerValue }
+    accepts(occurrencesByValue = values.groupingBy { value -> value }.eachCount())
+
+internal fun StripValuePolicy.accepts(occurrencesByValue: Map<Int, Int>): Boolean =
+    occurrencesByValue.all { (value, occurrenceCount) ->
+        value in valueRange && occurrenceCount <= maxOccurrencesPerValue
+    } &&
+        maxRepeatedValueGroupCount?.let { maximumGroupCount ->
+            occurrencesByValue.values.count { occurrenceCount -> occurrenceCount > 1 } <= maximumGroupCount
+        } != false
 
 internal fun ResultConstraints.acceptsMultiplicationResult(result: Long): Boolean = result <= maxMultiplicationResult
 

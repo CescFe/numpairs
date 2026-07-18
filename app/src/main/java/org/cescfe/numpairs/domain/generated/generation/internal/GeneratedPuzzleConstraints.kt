@@ -106,6 +106,20 @@ internal class GeneratedStripValueConstraint(private val policy: StripValuePolic
                 )
             )
         }
+
+        policy.maxRepeatedValueGroupCount?.let { maximumAllowed ->
+            val repeatedValueGroups = values.groupingBy { value -> value }
+                .eachCount()
+                .filterValues { occurrenceCount -> occurrenceCount > 1 }
+            if (repeatedValueGroups.size > maximumAllowed) {
+                add(
+                    GeneratedPairsPuzzleValidationViolation.RepeatedStripValueGroupCountExceeded(
+                        maximumAllowed = maximumAllowed,
+                        observedRepeatedValues = repeatedValueGroups.keys
+                    )
+                )
+            }
+        }
     }
 }
 
@@ -222,7 +236,7 @@ internal class GeneratedStripMaskConstraint(private val profile: GeneratedPuzzle
         knownEntryIds: Set<StripEntryId>,
         solutionPairs: Set<UnorderedStripEntryPair>
     ): Boolean = when (profile.initialStripMaskPolicy.distributionPolicy) {
-        StripKnownEntryDistributionPolicy.SPREAD_ACROSS_STRIP_AND_PAIRS_WHEN_POSSIBLE -> {
+        StripKnownEntryDistributionPolicy.SpreadAcrossStripAndPairsWhenPossible -> {
             val solutionPairByEntryId = solutionPairs.flatMap { solutionPair ->
                 listOf(
                     solutionPair.firstEntryId to solutionPair,
@@ -235,7 +249,18 @@ internal class GeneratedStripMaskConstraint(private val profile: GeneratedPuzzle
                 knownSolutionPairs.toSet().size == knownEntryIds.size
         }
 
-        StripKnownEntryDistributionPolicy.UNRESTRICTED -> true
+        is StripKnownEntryDistributionPolicy.AtLeastDistinctSolutionPairs -> {
+            val policy = profile.initialStripMaskPolicy.distributionPolicy
+            val solutionPairByEntryId = solutionPairs.flatMap { solutionPair ->
+                listOf(
+                    solutionPair.firstEntryId to solutionPair,
+                    solutionPair.secondEntryId to solutionPair
+                )
+            }.toMap()
+            knownEntryIds.mapNotNull(solutionPairByEntryId::get).toSet().size >= policy.minimumPairCount
+        }
+
+        StripKnownEntryDistributionPolicy.Unrestricted -> true
     }
 }
 

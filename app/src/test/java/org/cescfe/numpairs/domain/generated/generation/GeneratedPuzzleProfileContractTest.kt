@@ -21,7 +21,7 @@ class GeneratedPuzzleProfileContractTest {
     @Test
     fun every_registered_profile_satisfies_the_shared_generation_contract() {
         assertEquals(
-            listOf("4-pairs-low", "8-pairs-medium"),
+            listOf("4-pairs-low", "4-pairs-medium", "8-pairs-medium"),
             GeneratedPuzzleProfiles.ALL.map { profile -> profile.id.value }
         )
 
@@ -83,6 +83,13 @@ class GeneratedPuzzleProfileContractTest {
                 occurrenceCount <= profile.stripValuePolicy.maxOccurrencesPerValue
             }
         )
+        profile.stripValuePolicy.maxRepeatedValueGroupCount?.let { maximumGroupCount ->
+            assertTrue(
+                context,
+                solvedValues.groupingBy { value -> value }.eachCount().values
+                    .count { occurrenceCount -> occurrenceCount > 1 } <= maximumGroupCount
+            )
+        }
 
         assertEquals(context, profile.size.boardTileCount, assignments.size)
         assignments.forEach { assignment ->
@@ -140,9 +147,8 @@ class GeneratedPuzzleProfileContractTest {
                 profile.initialStripMaskPolicy.maxConsecutiveHiddenEntries
         )
 
-        if (profile.initialStripMaskPolicy.distributionPolicy ==
-            StripKnownEntryDistributionPolicy.SPREAD_ACROSS_STRIP_AND_PAIRS_WHEN_POSSIBLE
-        ) {
+        val distributionPolicy = profile.initialStripMaskPolicy.distributionPolicy
+        if (distributionPolicy != StripKnownEntryDistributionPolicy.Unrestricted) {
             val additionPairByEntryId = assignments
                 .filter { assignment -> assignment.operator == Operator.ADDITION }
                 .flatMap { assignment ->
@@ -152,11 +158,17 @@ class GeneratedPuzzleProfileContractTest {
                         assignment.rightOperand.stripEntryId to solutionPair
                     )
                 }.toMap()
-            assertEquals(
-                context,
-                knownEntryIds.size,
-                knownEntryIds.map { entryId -> additionPairByEntryId.getValue(StripEntryId(entryId)) }.toSet().size
-            )
+            val knownSolutionPairCount = knownEntryIds
+                .map { entryId -> additionPairByEntryId.getValue(StripEntryId(entryId)) }
+                .toSet()
+                .size
+            when (distributionPolicy) {
+                StripKnownEntryDistributionPolicy.SpreadAcrossStripAndPairsWhenPossible ->
+                    assertEquals(context, knownEntryIds.size, knownSolutionPairCount)
+                is StripKnownEntryDistributionPolicy.AtLeastDistinctSolutionPairs ->
+                    assertTrue(context, knownSolutionPairCount >= distributionPolicy.minimumPairCount)
+                StripKnownEntryDistributionPolicy.Unrestricted -> error("Handled before pair-distribution analysis.")
+            }
         }
 
         assertEquals(context, PuzzleCompletionState.INCOMPLETE, initialPuzzle.completionState)

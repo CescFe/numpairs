@@ -107,6 +107,30 @@ class GeneratedPairsVariationPlanSelectorTest {
         )
         assertTrue(thresholdRolls.isEmpty())
     }
+
+    @Test
+    fun repeated_value_target_selects_exact_inclusion_or_exclusion_directives() {
+        val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_MEDIUM
+        val includeRolls = ArrayDeque(listOf(99, 34, 99, 99))
+        val includePlan = GeneratedPairsVariationPlanSelector(
+            profile = profile,
+            nextProbabilityRoll = includeRolls::removeFirst
+        ).select()
+        assertEquals(
+            GeneratedPairsRepeatedValueGroupDirective.Include(groupCount = 1),
+            includePlan.repeatedValueGroupDirective
+        )
+
+        val excludeRolls = ArrayDeque(listOf(99, 35, 99, 99))
+        val excludePlan = GeneratedPairsVariationPlanSelector(
+            profile = profile,
+            nextProbabilityRoll = excludeRolls::removeFirst
+        ).select()
+        assertEquals(
+            GeneratedPairsRepeatedValueGroupDirective.Exclude,
+            excludePlan.repeatedValueGroupDirective
+        )
+    }
 }
 
 private fun GeneratedPuzzleProfile.withTargetProbabilities(percentage: Int): GeneratedPuzzleProfile =

@@ -91,6 +91,66 @@ data class GeneratedPuzzleDifficultyAssessmentReport(
     val structuralObservations: GeneratedPuzzleStructuralObservations
 )
 
+data class GeneratedPuzzleDifficultyAssessmentPolicy(
+    val executionPolicy: GeneratedPuzzleDifficultyAssessmentExecutionPolicy,
+    val minimumInitialPlausibleCandidateCount: Int,
+    val minimumInitialForcedDeductionCount: Int,
+    val minimumFirstForcedDeductionDepth: Int,
+    val minimumPlausibleDecoyCount: Int,
+    val minimumValidSolutionCount: Int = 1
+) {
+    init {
+        require(minimumInitialPlausibleCandidateCount >= 0)
+        require(minimumInitialForcedDeductionCount >= 0)
+        require(minimumFirstForcedDeductionDepth >= 0)
+        require(minimumPlausibleDecoyCount >= 0)
+        require(minimumValidSolutionCount > 0)
+        require(executionPolicy.validSolutionCountLimit >= minimumValidSolutionCount) {
+            "Difficulty-assessment solution count limit must cover the required minimum."
+        }
+    }
+
+    fun evaluate(report: GeneratedPuzzleDifficultyAssessmentReport): GeneratedPuzzleDifficultyPolicyEvaluation {
+        val unmetRequirements = buildSet {
+            if (report.initialPlausibleCandidateCount < minimumInitialPlausibleCandidateCount) {
+                add(GeneratedPuzzleDifficultyRequirement.INITIAL_PLAUSIBLE_CANDIDATES)
+            }
+            if (report.initialForcedDeductionCount < minimumInitialForcedDeductionCount) {
+                add(GeneratedPuzzleDifficultyRequirement.INITIAL_FORCED_DEDUCTIONS)
+            }
+            if ((report.firstForcedDeductionDepth ?: -1) < minimumFirstForcedDeductionDepth) {
+                add(GeneratedPuzzleDifficultyRequirement.FIRST_FORCED_DEDUCTION_DEPTH)
+            }
+            if (report.structuralObservations.plausibleDecoyCount < minimumPlausibleDecoyCount) {
+                add(GeneratedPuzzleDifficultyRequirement.PLAUSIBLE_DECOYS)
+            }
+            if (report.boundedValidSolutionCount < minimumValidSolutionCount) {
+                add(GeneratedPuzzleDifficultyRequirement.VALID_SOLUTIONS)
+            }
+        }
+        return GeneratedPuzzleDifficultyPolicyEvaluation(
+            report = report,
+            unmetRequirements = unmetRequirements
+        )
+    }
+}
+
+data class GeneratedPuzzleDifficultyPolicyEvaluation(
+    val report: GeneratedPuzzleDifficultyAssessmentReport,
+    val unmetRequirements: Set<GeneratedPuzzleDifficultyRequirement>
+) {
+    val isAccepted: Boolean
+        get() = unmetRequirements.isEmpty()
+}
+
+enum class GeneratedPuzzleDifficultyRequirement {
+    INITIAL_PLAUSIBLE_CANDIDATES,
+    INITIAL_FORCED_DEDUCTIONS,
+    FIRST_FORCED_DEDUCTION_DEPTH,
+    PLAUSIBLE_DECOYS,
+    VALID_SOLUTIONS
+}
+
 sealed interface GeneratedPuzzleDifficultyAssessmentOutcome {
     val workConsumed: Int
 

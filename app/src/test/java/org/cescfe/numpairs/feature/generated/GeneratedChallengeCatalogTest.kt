@@ -27,18 +27,31 @@ class GeneratedChallengeCatalogTest {
             DifficultyTier.entries
         )
         assertEquals(DifficultyTier.LOW, GeneratedPuzzleProfiles.FOUR_PAIRS_LOW.difficulty)
+        assertEquals(DifficultyTier.MEDIUM, GeneratedPuzzleProfiles.FOUR_PAIRS_MEDIUM.difficulty)
         assertEquals(DifficultyTier.MEDIUM, GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM.difficulty)
     }
 
     @Test
-    fun configured_catalog_contains_only_the_two_existing_challenges() {
+    fun configured_catalog_registers_low_and_medium_for_four_pairs() {
         assertEquals("four-pairs", GeneratedModes.FOUR_PAIRS.id.value)
         assertEquals("eight-pairs", GeneratedModes.EIGHT_PAIRS.id.value)
         assertEquals("4-pairs-low", GeneratedModes.FOUR_PAIRS_LOW.profile.id.value)
+        assertEquals("4-pairs-medium", GeneratedModes.FOUR_PAIRS_MEDIUM.profile.id.value)
         assertEquals("8-pairs-medium", GeneratedModes.EIGHT_PAIRS_MEDIUM.profile.id.value)
         assertEquals(
-            listOf(GeneratedModes.FOUR_PAIRS_LOW, GeneratedModes.EIGHT_PAIRS_MEDIUM),
+            listOf(
+                GeneratedModes.FOUR_PAIRS_LOW,
+                GeneratedModes.FOUR_PAIRS_MEDIUM,
+                GeneratedModes.EIGHT_PAIRS_MEDIUM
+            ),
             GeneratedModes.catalog.allChallenges
+        )
+        assertSame(
+            GeneratedModes.FOUR_PAIRS_MEDIUM,
+            GeneratedModes.catalog.resolveChallenge(
+                modeId = GeneratedModes.FOUR_PAIRS.id,
+                difficulty = DifficultyTier.MEDIUM
+            )
         )
         assertSame(
             GeneratedModes.FOUR_PAIRS_LOW,
@@ -230,7 +243,7 @@ private fun fourPairsProfile(id: String, difficulty: DifficultyTier): GeneratedP
                 knownEntryCountRange = 3..3,
                 requiredAnchors = setOf(RequiredKnownStripAnchor.HIGHEST_STRIP_ENTRY),
                 distributionPolicy =
-                StripKnownEntryDistributionPolicy.SPREAD_ACROSS_STRIP_AND_PAIRS_WHEN_POSSIBLE,
+                StripKnownEntryDistributionPolicy.SpreadAcrossStripAndPairsWhenPossible,
                 maxConsecutiveHiddenEntries = 2
             ),
             generationPolicy = GenerationPolicy(isBoardTileShufflingEnabled = true)

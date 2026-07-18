@@ -118,6 +118,11 @@ sealed interface GeneratedPairsPuzzleValidationViolation {
         override val ruleId = GeneratedPairsPuzzleValidationRuleId.STRIP_VALUE_OCCURRENCE_EXCEEDED
     }
 
+    data class RepeatedStripValueGroupCountExceeded(val maximumAllowed: Int, val observedRepeatedValues: Set<Int>) :
+        GeneratedPairsPuzzleValidationViolation {
+        override val ruleId = GeneratedPairsPuzzleValidationRuleId.REPEATED_STRIP_VALUE_GROUP_COUNT_EXCEEDED
+    }
+
     data class DuplicateBoardResults(val duplicateResults: Set<Int>) : GeneratedPairsPuzzleValidationViolation {
         override val ruleId = GeneratedPairsPuzzleValidationRuleId.DUPLICATE_BOARD_RESULTS
     }
@@ -178,6 +183,7 @@ enum class GeneratedPairsPuzzleValidationRuleId(val code: String) {
     SOLVED_SUM_PRODUCT_PAIRING_MISMATCH("generated.solved-sum-product-pairing-mismatch"),
     STRIP_VALUE_OUTSIDE_RANGE("generated.strip-value-outside-range"),
     STRIP_VALUE_OCCURRENCE_EXCEEDED("generated.strip-value-occurrence-exceeded"),
+    REPEATED_STRIP_VALUE_GROUP_COUNT_EXCEEDED("generated.repeated-strip-value-group-count-exceeded"),
     DUPLICATE_BOARD_RESULTS("generated.duplicate-board-results"),
     MULTIPLICATION_RESULT_EXCEEDED("generated.multiplication-result-exceeded"),
     PRODUCT_ANCHOR_MIX_OUTSIDE_RANGE("generated.product-anchor-mix-outside-range"),

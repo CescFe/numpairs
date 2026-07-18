@@ -26,6 +26,7 @@ enum class GeneratedPuzzleProfileRuleId(val code: String) {
     REQUIRED_ANCHOR_CAPACITY("profile.required-anchor-capacity"),
     HIDDEN_RUN_FEASIBILITY("profile.hidden-run-feasibility"),
     SPREAD_DISTRIBUTION_CAPACITY("profile.spread-distribution-capacity"),
+    DISTINCT_SOLUTION_PAIR_DISTRIBUTION_FEASIBILITY("profile.distinct-solution-pair-distribution-feasibility"),
     HIGH_VALUE_TARGET_RANK("profile.high-value-target-rank"),
     DUPLICATE_HIGH_VALUE_TARGET_RANK("profile.duplicate-high-value-target-rank"),
     HIGH_VALUE_TARGET_ANCHOR_CONFLICT("profile.high-value-target-anchor-conflict"),
@@ -36,6 +37,7 @@ enum class GeneratedPuzzleProfileRuleId(val code: String) {
     PRODUCT_ANCHOR_SELECTION_FEASIBILITY("profile.product-anchor-selection-feasibility"),
     PRIME_DECOY_TARGET_COUNT("profile.prime-decoy-target-count"),
     PRIME_DECOY_TARGET_FEASIBILITY("profile.prime-decoy-target-feasibility"),
+    REPEATED_VALUE_GROUP_TARGET_FEASIBILITY("profile.repeated-value-group-target-feasibility"),
     ELIGIBLE_VALUE_PAIR_CATALOG("profile.eligible-value-pair-catalog"),
     ARITHMETIC_RESULT_RANGE("profile.arithmetic-result-range"),
     VALIDATION_WORK_LIMIT("profile.validation-work-limit")
@@ -71,6 +73,15 @@ sealed interface GeneratedPuzzleProfileViolation {
         GeneratedPuzzleProfileViolation {
         override val ruleId: GeneratedPuzzleProfileRuleId =
             GeneratedPuzzleProfileRuleId.SPREAD_DISTRIBUTION_CAPACITY
+    }
+
+    data class DistinctSolutionPairDistributionInfeasible(
+        val minimumRequiredPairCount: Int,
+        val puzzlePairCount: Int,
+        val maximumKnownEntryCount: Int
+    ) : GeneratedPuzzleProfileViolation {
+        override val ruleId: GeneratedPuzzleProfileRuleId =
+            GeneratedPuzzleProfileRuleId.DISTINCT_SOLUTION_PAIR_DISTRIBUTION_FEASIBILITY
     }
 
     data class HighValueTargetRankOutsidePuzzle(val rankFromHighest: Int, val stripEntryCount: Int) :
@@ -139,6 +150,15 @@ sealed interface GeneratedPuzzleProfileViolation {
     ) : GeneratedPuzzleProfileViolation {
         override val ruleId: GeneratedPuzzleProfileRuleId =
             GeneratedPuzzleProfileRuleId.PRIME_DECOY_TARGET_FEASIBILITY
+    }
+
+    data class RepeatedValueGroupTargetUnreachable(
+        val targetGroupCount: Int,
+        val maxOccurrencesPerValue: Int,
+        val maxRepeatedValueGroupCount: Int?
+    ) : GeneratedPuzzleProfileViolation {
+        override val ruleId: GeneratedPuzzleProfileRuleId =
+            GeneratedPuzzleProfileRuleId.REPEATED_VALUE_GROUP_TARGET_FEASIBILITY
     }
 
     data class InsufficientEligibleValuePairCatalog(

@@ -22,6 +22,7 @@ internal class GeneratedPairsVariationPlanSelector(
 
     fun select(): GeneratedPairsVariationPlan = GeneratedPairsVariationPlan(
         primeProductDecoyDirective = selectPrimeProductDecoyDirective(),
+        repeatedValueGroupDirective = selectRepeatedValueGroupDirective(),
         stripEntryVisibilityDirectives = selectStripEntryVisibilityDirectives()
     )
 
@@ -39,6 +40,17 @@ internal class GeneratedPairsVariationPlanSelector(
                     GeneratedPairsPrimeProductDecoyDirective.Exclude
                 }
             }
+        }
+    }
+
+    private fun selectRepeatedValueGroupDirective(): GeneratedPairsRepeatedValueGroupDirective {
+        val target = profile.varietyPolicy.repeatedValueGroupTarget
+            ?: return GeneratedPairsRepeatedValueGroupDirective.Unrestricted
+
+        return if (shouldApply(probability = target.targetPuzzlePercent)) {
+            GeneratedPairsRepeatedValueGroupDirective.Include(groupCount = target.targetGroupCount)
+        } else {
+            GeneratedPairsRepeatedValueGroupDirective.Exclude
         }
     }
 

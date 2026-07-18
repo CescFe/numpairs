@@ -15,6 +15,8 @@ internal data class GeneratedPairsSolvedCandidate(
 
 internal data class GeneratedPairsVariationPlan(
     val primeProductDecoyDirective: GeneratedPairsPrimeProductDecoyDirective,
+    val repeatedValueGroupDirective: GeneratedPairsRepeatedValueGroupDirective =
+        GeneratedPairsRepeatedValueGroupDirective.Unrestricted,
     val stripEntryVisibilityDirectives: Map<StripEntryId, GeneratedPairsStripEntryVisibilityDirective>
 )
 
@@ -27,6 +29,20 @@ internal sealed interface GeneratedPairsPrimeProductDecoyDirective {
         init {
             require(pairCount > 0) {
                 "A prime-product decoy inclusion directive requires a positive pair count."
+            }
+        }
+    }
+}
+
+internal sealed interface GeneratedPairsRepeatedValueGroupDirective {
+    data object Unrestricted : GeneratedPairsRepeatedValueGroupDirective
+
+    data object Exclude : GeneratedPairsRepeatedValueGroupDirective
+
+    data class Include(val groupCount: Int) : GeneratedPairsRepeatedValueGroupDirective {
+        init {
+            require(groupCount > 0) {
+                "A repeated-value group inclusion directive requires a positive group count."
             }
         }
     }
