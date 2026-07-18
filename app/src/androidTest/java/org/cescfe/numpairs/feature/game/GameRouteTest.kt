@@ -1,6 +1,7 @@
 package org.cescfe.numpairs.feature.game
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
@@ -24,6 +25,7 @@ import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.Strip
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
+import org.cescfe.numpairs.feature.game.presentation.TileAssignmentCommit
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenRobot
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
@@ -159,6 +161,55 @@ class GameRouteTest {
     }
 
     @Test
+    fun exposes_each_tile_assignment_commit_once_without_replaying_it() {
+        val commits = mutableListOf<TileAssignmentCommit>()
+        var recompositionMarker by mutableStateOf(0)
+        var puzzleResetKey by mutableStateOf(0)
+
+        composeTestRule.setContent {
+            NumPairsTheme {
+                Column {
+                    Text(text = recompositionMarker.toString())
+                    GameRoute(
+                        title = "4 pairs",
+                        initialPuzzle = oneOperatorAwayFromSolvedOnePairPuzzle(),
+                        gameSessionKey = "assignment-commit",
+                        puzzleResetKey = puzzleResetKey,
+                        onTileAssignmentCommitted = commits::add
+                    )
+                }
+            }
+        }
+
+        GameScreenRobot(
+            activity = composeTestRule.activity,
+            interactions = composeTestRule
+        ).scrollToBoard()
+            .tapTileOperator(index = 1)
+            .tapOperatorOption(Operator.MULTIPLICATION)
+
+        composeTestRule.waitUntil {
+            commits.size == 1
+        }
+        composeTestRule.runOnIdle {
+            assertEquals(
+                TileAssignmentCommit(tileIndex = 1, madeTileCorrect = true),
+                commits.single()
+            )
+            recompositionMarker += 1
+        }
+        composeTestRule.waitForIdle()
+        composeTestRule.runOnIdle {
+            assertEquals(1, commits.size)
+            puzzleResetKey += 1
+        }
+        composeTestRule.waitForIdle()
+        composeTestRule.runOnIdle {
+            assertEquals(1, commits.size)
+        }
+    }
+
+    @Test
     fun solved_puzzle_shows_the_success_overlay_by_default() {
         composeTestRule.setContent {
             NumPairsTheme {
@@ -280,6 +331,26 @@ private fun solvedOnePairPuzzle(): Puzzle {
                 StripItem.Known(1),
                 StripItem.Known(2)
             )
+        )
+    )
+}
+
+private fun oneOperatorAwayFromSolvedOnePairPuzzle(): Puzzle {
+    val solvedPuzzle = solvedOnePairPuzzle()
+    val multiplicationTile = solvedPuzzle.board.tiles[1]
+
+    return solvedPuzzle.copy(
+        board = Board(
+            tiles = solvedPuzzle.board.tiles.toMutableList().apply {
+                set(
+                    1,
+                    multiplicationTile.copy(
+                        expression = multiplicationTile.expression.copy(
+                            operator = Operator.Hidden
+                        )
+                    )
+                )
+            }
         )
     )
 }

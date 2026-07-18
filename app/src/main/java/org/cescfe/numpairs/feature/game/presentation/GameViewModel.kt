@@ -12,6 +12,7 @@ import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
+import org.cescfe.numpairs.domain.puzzle.model.TileResolutionState
 
 class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
     private var puzzle: Puzzle = initialPuzzle
@@ -171,26 +172,32 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
         return true
     }
 
-    fun onTileOperandSelectionConfirmed(stripEntryId: Int) {
-        val target = (presentationState.modal as? GameModalState.TileOperandSelection)?.target ?: return
+    fun onTileOperandSelectionConfirmed(stripEntryId: Int): TileAssignmentCommit? {
+        val target = (presentationState.modal as? GameModalState.TileOperandSelection)?.target ?: return null
         val updatedPuzzle = puzzle.withSelectedOperand(
             target = target,
             stripEntryId = stripEntryId
-        ) ?: return
+        ) ?: return null
 
-        commit(updatedPuzzle = updatedPuzzle) {
+        return commitTileAssignment(
+            tileIndex = target.tileIndex,
+            updatedPuzzle = updatedPuzzle
+        ) {
             dismissTileOperandSelection()
         }
     }
 
-    fun onTileOperatorSelectionConfirmed(operator: Operator) {
-        val tileIndex = (presentationState.modal as? GameModalState.TileOperatorSelection)?.tileIndex ?: return
+    fun onTileOperatorSelectionConfirmed(operator: Operator): TileAssignmentCommit? {
+        val tileIndex = (presentationState.modal as? GameModalState.TileOperatorSelection)?.tileIndex ?: return null
         val updatedPuzzle = puzzle.withSelectedOperator(
             tileIndex = tileIndex,
             operator = operator
-        ) ?: return
+        ) ?: return null
 
-        commit(updatedPuzzle = updatedPuzzle) {
+        return commitTileAssignment(
+            tileIndex = tileIndex,
+            updatedPuzzle = updatedPuzzle
+        ) {
             dismissTileOperatorSelection()
         }
     }
@@ -257,6 +264,31 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
                 _currentPuzzle.value = puzzle
             }
             publishUiState()
+        }
+    }
+
+    private fun commitTileAssignment(
+        tileIndex: Int,
+        updatedPuzzle: Puzzle,
+        updatePresentation: GamePresentationState.() -> GamePresentationState
+    ): TileAssignmentCommit? {
+        val previousTile = puzzle.board.tiles.getOrNull(tileIndex) ?: return null
+        val updatedTile = updatedPuzzle.board.tiles.getOrNull(tileIndex) ?: return null
+        val hasPuzzleChanged = updatedPuzzle != puzzle
+
+        commit(
+            updatedPuzzle = updatedPuzzle,
+            updatePresentation = updatePresentation
+        )
+
+        return if (hasPuzzleChanged) {
+            TileAssignmentCommit(
+                tileIndex = tileIndex,
+                madeTileCorrect = previousTile.resolutionState != TileResolutionState.CORRECT &&
+                    updatedTile.resolutionState == TileResolutionState.CORRECT
+            )
+        } else {
+            null
         }
     }
 

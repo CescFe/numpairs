@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.GameViewModel
+import org.cescfe.numpairs.feature.game.presentation.TileAssignmentCommit
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreen
 
 @Composable
@@ -39,6 +40,7 @@ fun GameRoute(
     contentBeforePuzzle: @Composable ColumnScope.() -> Unit = {},
     onGameUiStateChanged: (GameUiState) -> Unit = {},
     onPuzzleChanged: (Puzzle) -> Unit = {},
+    onTileAssignmentCommitted: (TileAssignmentCommit) -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
     val gameViewModel = rememberGameViewModel(
@@ -48,6 +50,7 @@ fun GameRoute(
     val uiState by gameViewModel.uiState.collectAsState()
     val currentOnGameUiStateChanged by rememberUpdatedState(onGameUiStateChanged)
     val currentOnPuzzleChanged by rememberUpdatedState(onPuzzleChanged)
+    val currentOnTileAssignmentCommitted by rememberUpdatedState(onTileAssignmentCommitted)
 
     LaunchedEffect(gameViewModel, puzzleResetKey) {
         gameViewModel.reset(initialPuzzle = initialPuzzle)
@@ -109,6 +112,7 @@ fun GameRoute(
 
             if (interactionPolicy.canConfirmTileOperand(dialog.tileIndex, dialog.slot, stripEntryId)) {
                 gameViewModel.onTileOperandSelectionConfirmed(stripEntryId)
+                    ?.let(currentOnTileAssignmentCommitted)
             }
         },
         onTileOperatorTapped = { index ->
@@ -127,6 +131,7 @@ fun GameRoute(
 
             if (interactionPolicy.canConfirmTileOperator(tileIndex, operator)) {
                 gameViewModel.onTileOperatorSelectionConfirmed(operator)
+                    ?.let(currentOnTileAssignmentCommitted)
             }
         },
         onSuccessOverlayDismissed = gameViewModel::onSuccessOverlayDismissed,
