@@ -14,7 +14,7 @@ import org.cescfe.numpairs.domain.puzzle.model.Tile
 
 internal class GeneratedPairsPuzzleValidator(context: GeneratedPuzzleGenerationContext) {
     private val profile = context.profile
-    private val hardRules = context.hardRules
+    private val constraints = context.constraints
 
     fun validate(initialPuzzle: Puzzle, solvedPuzzle: Puzzle): GeneratedPairsPuzzleValidationReport {
         val solvedAnalysis = solvedPuzzle.analyzeResolvedPuzzle()
@@ -35,7 +35,7 @@ internal class GeneratedPairsPuzzleValidator(context: GeneratedPuzzleGenerationC
 
             val knownEntryIds = initialPuzzle.knownStripEntryIds()
             addAll(
-                hardRules.stripMask.violationsFor(
+                constraints.stripMask.violationsFor(
                     knownEntryIds = knownEntryIds,
                     hiddenEntryCount = initialPuzzle.strip.entries.count { entry ->
                         entry.item == StripItem.Hidden
@@ -66,17 +66,17 @@ internal class GeneratedPairsPuzzleValidator(context: GeneratedPuzzleGenerationC
             addAssignmentViolations(solvedAnalysis = solvedAnalysis)
 
             addAll(
-                hardRules.stripValues.violationsFor(
+                constraints.stripValues.violationsFor(
                     values = solvedAnalysis.knownStripValuesByEntryId.values.toList()
                 )
             )
             addAll(
-                hardRules.boardResults.violationsFor(
+                constraints.boardResults.violationsFor(
                     results = solvedPuzzle.board.tiles.map(Tile::result)
                 )
             )
             addAll(
-                hardRules.multiplicationResults.violationsFor(
+                constraints.multiplicationResults.violationsFor(
                     resultsByIndex = solvedAnalysis.resolvedAssignments
                         .filter { assignment -> assignment.operator == Operator.MULTIPLICATION }
                         .associate { assignment ->

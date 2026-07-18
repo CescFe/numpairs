@@ -6,12 +6,12 @@ import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfile
 internal class GeneratedPairsValuePairSelector(
     private val profile: GeneratedPuzzleProfile,
     private val random: Random,
-    private val hardRules: GeneratedValuePairRuleSet
+    private val constraints: GeneratedValuePairConstraintSet
 ) {
     constructor(profile: GeneratedPuzzleProfile, random: Random) : this(
         profile = profile,
         random = random,
-        hardRules = GeneratedPuzzleHardRuleSet.from(profile = profile).valuePairs
+        constraints = GeneratedPuzzleConstraintSet.from(profile = profile).valuePairs
     )
 
     fun selectValuePairs(variationPlan: GeneratedPairsVariationPlan): List<GeneratedPairsValuePair>? =
@@ -83,7 +83,7 @@ internal class GeneratedPairsValuePairSelector(
             }
         }
 
-        if (!hardRules.canStillSatisfyProductAnchorMix(
+        if (!constraints.canStillSatisfyProductAnchorMix(
                 productAnchorCount = productAnchorCount,
                 remainingPairSlots = profile.size.pairCount - selectedPairs.size
             )
@@ -101,7 +101,7 @@ internal class GeneratedPairsValuePairSelector(
 
         if (selectedPairs.size == profile.size.pairCount) {
             return if (
-                hardRules.isComplete(pairs = selectedPairs) &&
+                constraints.isComplete(pairs = selectedPairs) &&
                 primeProductDecoyDirective.isSatisfiedBy(pairCount = primeProductDecoyCount)
             ) {
                 GeneratedPairsSearchOutcome.Found(selectedPairs)
@@ -130,7 +130,7 @@ internal class GeneratedPairsValuePairSelector(
             }
 
             if (
-                !hardRules.canBeAdded(
+                !constraints.canBeAdded(
                     pair = candidatePair,
                     valueOccurrences = valueOccurrences,
                     usedResults = usedResults
@@ -151,7 +151,8 @@ internal class GeneratedPairsValuePairSelector(
                     selectedPairs = selectedPairs + candidatePair,
                     valueOccurrences = valueOccurrences.with(candidatePair),
                     usedResults = usedResults + candidatePair.resultValues,
-                    productAnchorCount = productAnchorCount + hardRules.productAnchorIncrement(pair = candidatePair),
+                    productAnchorCount = productAnchorCount +
+                        constraints.productAnchorIncrement(pair = candidatePair),
                     primeProductDecoyCount = updatedPrimeProductDecoyCount,
                     primeProductDecoyDirective = primeProductDecoyDirective,
                     searchControl = searchControl
@@ -176,7 +177,7 @@ internal class GeneratedPairsValuePairSelector(
                 )
 
                 if (
-                    hardRules.canBeAdded(
+                    constraints.canBeAdded(
                         pair = candidatePair,
                         valueOccurrences = emptyMap(),
                         usedResults = emptySet()
