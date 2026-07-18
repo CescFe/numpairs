@@ -172,34 +172,28 @@ object NumPairsComponents {
     )
 
     @Composable
-    fun focusBorder(): BorderStroke = BorderStroke(
+    fun successBorder(): BorderStroke = BorderStroke(
         width = FocusBorderWidth,
-        color = MaterialTheme.colorScheme.primary
+        color = MaterialTheme.numPairsSemanticColors.success
     )
 
     @Composable
     fun errorBorder(): BorderStroke = BorderStroke(
         width = StrongBorderWidth,
-        color = MaterialTheme.colorScheme.error
+        color = MaterialTheme.numPairsSemanticColors.error
     )
 
     @Composable
-    fun successContainerColor() = MaterialTheme.colorScheme.primaryContainer
+    fun successContainerColor() = MaterialTheme.numPairsSemanticColors.successContainer
 
     @Composable
-    fun successContentColor() = MaterialTheme.colorScheme.onPrimaryContainer
+    fun successContentColor() = MaterialTheme.numPairsSemanticColors.onSuccessContainer
 
     @Composable
-    fun errorContainerColor() = MaterialTheme.colorScheme.errorContainer
+    fun errorContainerColor() = MaterialTheme.numPairsSemanticColors.errorContainer
 
     @Composable
-    fun errorContentColor() = MaterialTheme.colorScheme.onErrorContainer
-
-    @Composable
-    fun hiddenContainerColor() = MaterialTheme.colorScheme.surfaceVariant
-
-    @Composable
-    fun hiddenContentColor() = MaterialTheme.colorScheme.onSurfaceVariant
+    fun errorContentColor() = MaterialTheme.numPairsSemanticColors.onErrorContainer
 
     @Composable
     fun topAppBarColors(): TopAppBarColors = TopAppBarDefaults.topAppBarColors(

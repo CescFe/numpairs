@@ -37,6 +37,7 @@ import org.cescfe.numpairs.feature.game.presentation.TileUiState
 import org.cescfe.numpairs.feature.game.ui.semantics.gameHighlightSemantics
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
+import org.cescfe.numpairs.ui.theme.numPairsSemanticColors
 
 @Composable
 internal fun TileResetAction(modifier: Modifier = Modifier, onClick: () -> Unit) {
@@ -185,7 +186,7 @@ private fun Modifier.highlightBorder(isHighlighted: Boolean): Modifier = if (isH
     border(
         border = BorderStroke(
             width = HIGHLIGHTED_TILE_EXPRESSION_SLOT_BORDER_WIDTH,
-            color = MaterialTheme.colorScheme.tertiary
+            color = MaterialTheme.numPairsSemanticColors.tutorialHighlight
         ),
         shape = RoundedCornerShape(HIGHLIGHTED_TILE_EXPRESSION_SLOT_CORNER_RADIUS)
     )

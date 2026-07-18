@@ -34,6 +34,7 @@ import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
 import org.cescfe.numpairs.feature.game.presentation.RuleConflictUiState
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
+import org.cescfe.numpairs.ui.theme.numPairsSemanticColors
 
 @Composable
 internal fun SuccessOverlay(onDismiss: () -> Unit, completionActions: GameCompletionActions? = null) {
@@ -71,7 +72,7 @@ internal fun SuccessOverlay(onDismiss: () -> Unit, completionActions: GameComple
             shape = RoundedCornerShape(SUCCESS_OVERLAY_CARD_CORNER_RADIUS),
             color = NumPairsComponents.successContainerColor(),
             contentColor = NumPairsComponents.successContentColor(),
-            border = NumPairsComponents.focusBorder()
+            border = NumPairsComponents.successBorder()
         ) {
             Column(
                 modifier = Modifier
@@ -85,8 +86,8 @@ internal fun SuccessOverlay(onDismiss: () -> Unit, completionActions: GameComple
             ) {
                 Surface(
                     shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
-                    contentColor = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.numPairsSemanticColors.success.copy(alpha = 0.16f),
+                    contentColor = MaterialTheme.numPairsSemanticColors.success
                 ) {
                     Box(
                         modifier = Modifier

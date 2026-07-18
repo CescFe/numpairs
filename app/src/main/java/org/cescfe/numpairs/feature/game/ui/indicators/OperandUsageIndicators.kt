@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
+import org.cescfe.numpairs.ui.theme.numPairsSemanticColors
 
 internal enum class OperandUsageIndicatorState(@get:StringRes val stateDescriptionResId: Int) {
     AVAILABLE(R.string.tile_operand_usage_state_available),
@@ -33,8 +34,10 @@ internal val Operator.usageIndicatorSymbol: String
 internal data class OperandUsageIndicatorColors(val container: Color, val content: Color, val border: BorderStroke)
 
 @Composable
-internal fun operandUsageIndicatorColors(state: OperandUsageIndicatorState): OperandUsageIndicatorColors =
-    when (state) {
+internal fun operandUsageIndicatorColors(state: OperandUsageIndicatorState): OperandUsageIndicatorColors {
+    val semanticColors = MaterialTheme.numPairsSemanticColors
+
+    return when (state) {
         OperandUsageIndicatorState.AVAILABLE -> OperandUsageIndicatorColors(
             container = NumPairsComponents.subtleSurfaceColor(),
             content = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -42,11 +45,12 @@ internal fun operandUsageIndicatorColors(state: OperandUsageIndicatorState): Ope
         )
 
         OperandUsageIndicatorState.USED -> OperandUsageIndicatorColors(
-            container = MaterialTheme.colorScheme.secondary,
-            content = MaterialTheme.colorScheme.onSecondary,
+            container = semanticColors.selection,
+            content = semanticColors.onSelection,
             border = BorderStroke(
                 width = NumPairsComponents.ThinBorderWidth,
-                color = MaterialTheme.colorScheme.secondary
+                color = semanticColors.selection
             )
         )
     }
+}

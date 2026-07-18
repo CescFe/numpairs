@@ -1,54 +1,31 @@
 package org.cescfe.numpairs.ui.theme
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
 
-private val NumPairsColorScheme = darkColorScheme(
-    primary = NumPairsGreen,
-    onPrimary = NumPairsOnGreen,
-    primaryContainer = NumPairsGreenSoft,
-    onPrimaryContainer = NumPairsOnGreenSoft,
+private val LocalNumPairsSemanticColors = staticCompositionLocalOf {
+    WarmThemeDefinition.semanticColors
+}
 
-    secondary = NumPairsFocus,
-    onSecondary = NumPairsOnFocus,
-    secondaryContainer = NumPairsSurfaceSubtle,
-    onSecondaryContainer = NumPairsOnSurface,
-
-    tertiary = NumPairsSand,
-    onTertiary = NumPairsOnSand,
-    tertiaryContainer = NumPairsSurfaceSubtle,
-    onTertiaryContainer = NumPairsOnSurface,
-
-    background = NumPairsBackground,
-    onBackground = NumPairsOnSurface,
-
-    surface = NumPairsSurface,
-    onSurface = NumPairsOnSurface,
-
-    surfaceVariant = NumPairsSurfaceSubtle,
-    onSurfaceVariant = NumPairsOnSurfaceVariant,
-
-    surfaceContainer = NumPairsSurface,
-    surfaceContainerHigh = NumPairsSurfaceRaised,
-    surfaceContainerHighest = NumPairsSurfaceRaised,
-
-    outline = NumPairsOutline,
-    outlineVariant = NumPairsOutlineVariant,
-
-    error = NumPairsError,
-    onError = NumPairsBackground,
-    errorContainer = NumPairsErrorSoft,
-    onErrorContainer = NumPairsOnErrorSoft,
-
-    scrim = NumPairsScrim
-)
+internal val MaterialTheme.numPairsSemanticColors: NumPairsSemanticColors
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalNumPairsSemanticColors.current
 
 @Composable
 fun NumPairsTheme(content: @Composable () -> Unit) {
-    MaterialTheme(
-        colorScheme = NumPairsColorScheme,
-        typography = Typography,
-        content = content
-    )
+    val themeDefinition = WarmThemeDefinition
+
+    CompositionLocalProvider(
+        LocalNumPairsSemanticColors provides themeDefinition.semanticColors
+    ) {
+        MaterialTheme(
+            colorScheme = themeDefinition.appearanceColors,
+            typography = Typography,
+            content = content
+        )
+    }
 }
