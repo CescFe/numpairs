@@ -83,7 +83,8 @@ data class GeneratedPuzzleSize(val pairCount: Int) {
 data class StripValuePolicy(
     val valueRange: IntRange,
     val maxOccurrencesPerValue: Int,
-    val maxRepeatedValueGroupCount: Int? = null
+    val maxRepeatedValueGroupCount: Int? = null,
+    val minRepeatedValueGroupCount: Int = 0
 ) {
     init {
         require(!valueRange.isEmpty()) {
@@ -95,8 +96,17 @@ data class StripValuePolicy(
         require(maxOccurrencesPerValue >= 1) {
             "Maximum occurrences per strip value must be at least 1."
         }
+        require(minRepeatedValueGroupCount >= 0) {
+            "Minimum repeated strip-value group count must not be negative."
+        }
         require(maxRepeatedValueGroupCount == null || maxRepeatedValueGroupCount >= 0) {
             "Maximum repeated strip-value group count must not be negative."
+        }
+        require(maxRepeatedValueGroupCount == null || minRepeatedValueGroupCount <= maxRepeatedValueGroupCount) {
+            "Repeated strip-value group minimum must not exceed its maximum."
+        }
+        require(maxOccurrencesPerValue > 1 || minRepeatedValueGroupCount == 0) {
+            "Repeated strip-value groups require values to allow more than one occurrence."
         }
     }
 
@@ -183,7 +193,20 @@ data class ProbabilityPercent(val value: Int) {
     }
 }
 
-data class GenerationPolicy(val isBoardTileShufflingEnabled: Boolean)
+data class GenerationPolicy(
+    val isBoardTileShufflingEnabled: Boolean,
+    val maxAttempts: Int = 80,
+    val maxSearchWork: Int = 250_000
+) {
+    init {
+        require(maxAttempts > 0) {
+            "Maximum profile generation attempts must be positive."
+        }
+        require(maxSearchWork > 0) {
+            "Maximum profile generation search work must be positive."
+        }
+    }
+}
 
 data class PrimeProductDecoyTarget(
     val targetPuzzlePercent: ProbabilityPercent,

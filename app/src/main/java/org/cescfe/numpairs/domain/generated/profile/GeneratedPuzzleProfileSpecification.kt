@@ -82,6 +82,18 @@ private object GeneratedPuzzleProfileStructuralEvaluator {
                 )
             )
         }
+        val maximumPossibleRepeatedGroupCount = minOf(
+            distinctValueCount,
+            definition.size.stripEntryCount.toLong() / 2
+        )
+        if (valuePolicy.minRepeatedValueGroupCount > maximumPossibleRepeatedGroupCount) {
+            add(
+                GeneratedPuzzleProfileViolation.RepeatedValueGroupRangeInfeasible(
+                    minimumRequiredGroupCount = valuePolicy.minRepeatedValueGroupCount,
+                    maximumPossibleGroupCount = maximumPossibleRepeatedGroupCount.toInt()
+                )
+            )
+        }
 
         val maximumValue = valuePolicy.valueRange.last
         if (maximumValue.toLong() * maximumValue > Int.MAX_VALUE) {

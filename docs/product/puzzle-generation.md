@@ -3,8 +3,9 @@
 ## Document Status
 
 - Status: product reference for generated puzzle construction
-- Implemented profiles: generated `4 Pairs Low`, `4 Pairs Medium`, and `8 Pairs Medium`
-- Remaining v8 target profile: generated `8 Pairs Hard`
+- Implemented profiles: generated `4 Pairs Low`, `4 Pairs Medium`, `8 Pairs Medium`, and
+  `8 Pairs Hard`
+- v8 generated challenge matrix: implemented
 - Related references:
   - `docs/product/prd/prd-v5.md`
   - `docs/product/prd/prd-v7.md`
@@ -351,7 +352,7 @@ Solving-tip implications:
 
 ### `8 Pairs Hard`
 
-Status: specified for v8; not implemented.
+Status: implemented in v8.
 
 Shape:
 
@@ -399,10 +400,11 @@ Assessment expectations:
 
 - assessment must complete within the configured Hard work policy
 - at least 1 valid solution equivalence class must exist; uniqueness is not required
-- at least 1 opening fact must be derivable without speculative commitment
+- between 1 and 7 opening facts must be derivable without speculative commitment; the existing
+  `8 Pairs Medium` characterization exposes all 8 solution facts immediately
 - at least 3 locally plausible decoys must remain after direct arithmetic filtering
-- the first forced fact must require at least 2 chained propagation layers
 - at least 1 ambiguous state must remain after direct local filtering
+- the maximum observed branching factor must be at least 2
 - characterization must demonstrate greater deductive depth and ambiguity than `8 Pairs Medium`
   without exceeding the bounded Hard envelope
 

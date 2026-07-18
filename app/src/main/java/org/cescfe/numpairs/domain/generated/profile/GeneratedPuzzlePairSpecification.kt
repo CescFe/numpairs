@@ -41,13 +41,17 @@ internal class GeneratedPuzzlePairSpecification(
         return GeneratedPuzzleProfileBoundedEvaluation.Completed(value = pairs)
     }
 
-    fun isLocallyEligible(pair: GeneratedPuzzlePairValues): Boolean = stripValuePolicy.accepts(values = pair.values) &&
-        resultConstraints.acceptsMultiplicationResult(result = pair.product) &&
-        resultConstraints.acceptsBoardResults(results = pair.results)
+    fun isLocallyEligible(pair: GeneratedPuzzlePairValues): Boolean =
+        pair.values.all { value -> value in stripValuePolicy.valueRange } &&
+            stripValuePolicy.acceptsOccurrenceLimits(
+                occurrencesByValue = pair.values.groupingBy { value -> value }.eachCount()
+            ) &&
+            resultConstraints.acceptsMultiplicationResult(result = pair.product) &&
+            resultConstraints.acceptsBoardResults(results = pair.results)
 
     fun canBeAdded(pair: GeneratedPuzzlePairValues, valueOccurrences: Map<Int, Int>, usedResults: Set<Int>): Boolean =
         isLocallyEligible(pair = pair) &&
-            stripValuePolicy.accepts(
+            stripValuePolicy.acceptsOccurrenceLimits(
                 occurrencesByValue = valueOccurrences.with(pair = pair)
             ) &&
             resultConstraints.acceptsAdditionalBoardResults(
@@ -116,7 +120,8 @@ internal class GeneratedPuzzlePairSpecification(
         }
         if (selectedPairCount == targetPairCount) {
             return GeneratedPuzzleProfileBoundedEvaluation.Completed(
-                value = productAnchorMix == null || productAnchorCount in productAnchorMix.countRange
+                value = stripValuePolicy.accepts(occurrencesByValue = valueOccurrences) &&
+                    (productAnchorMix == null || productAnchorCount in productAnchorMix.countRange)
             )
         }
 
@@ -193,6 +198,10 @@ internal fun StripValuePolicy.accepts(values: List<Int>): Boolean = values.all {
     accepts(occurrencesByValue = values.groupingBy { value -> value }.eachCount())
 
 internal fun StripValuePolicy.accepts(occurrencesByValue: Map<Int, Int>): Boolean =
+    acceptsOccurrenceLimits(occurrencesByValue = occurrencesByValue) &&
+        occurrencesByValue.values.count { occurrenceCount -> occurrenceCount > 1 } >= minRepeatedValueGroupCount
+
+internal fun StripValuePolicy.acceptsOccurrenceLimits(occurrencesByValue: Map<Int, Int>): Boolean =
     occurrencesByValue.all { (value, occurrenceCount) ->
         value in valueRange && occurrenceCount <= maxOccurrencesPerValue
     } &&

@@ -113,6 +113,24 @@ class GeneratedPairsValuePairSelectorTest {
         assertEquals(1, includedPairs.repeatedValueGroupCount())
         assertEquals(0, excludedPairs.repeatedValueGroupCount())
     }
+
+    @Test
+    fun repetition_range_plan_selects_a_hard_valid_group_count() {
+        val selectedPairs = requireNotNull(
+            GeneratedPairsValuePairSelector(
+                profile = GeneratedPuzzleProfiles.EIGHT_PAIRS_HARD,
+                random = Random(42)
+            ).selectValuePairs(
+                variationPlan = variationPlan(
+                    repeatedValueGroupDirective = GeneratedPairsRepeatedValueGroupDirective.IncludeRange(
+                        groupCountRange = 1..2
+                    )
+                )
+            )
+        )
+
+        assertEquals(2, selectedPairs.repeatedValueGroupCount())
+    }
 }
 
 private fun variationPlan(

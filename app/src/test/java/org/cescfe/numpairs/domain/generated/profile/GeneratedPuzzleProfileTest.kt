@@ -450,6 +450,7 @@ class GeneratedPuzzleProfileTest {
         assertEquals(
             listOf(
                 "profile.strip-value-capacity",
+                "profile.repeated-value-group-range-feasibility",
                 "profile.known-entry-range",
                 "profile.required-anchor-capacity",
                 "profile.hidden-run-feasibility",
@@ -486,6 +487,21 @@ class GeneratedPuzzleProfileTest {
             StripValuePolicy(valueRange = 0..2, maxOccurrencesPerValue = 1)
         }
         assertThrows(IllegalArgumentException::class.java) {
+            StripValuePolicy(
+                valueRange = 1..10,
+                maxOccurrencesPerValue = 2,
+                maxRepeatedValueGroupCount = 1,
+                minRepeatedValueGroupCount = 2
+            )
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            StripValuePolicy(
+                valueRange = 1..10,
+                maxOccurrencesPerValue = 1,
+                minRepeatedValueGroupCount = 1
+            )
+        }
+        assertThrows(IllegalArgumentException::class.java) {
             ResultConstraints(maxMultiplicationResult = 0, allowsDuplicateBoardResults = false)
         }
         assertThrows(IllegalArgumentException::class.java) {
@@ -513,6 +529,9 @@ class GeneratedPuzzleProfileTest {
         }
         assertThrows(IllegalArgumentException::class.java) {
             GeneratedPuzzleProfileValidationLimits(maxMaskStates = 0)
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            GenerationPolicy(isBoardTileShufflingEnabled = true, maxAttempts = 0)
         }
     }
 }

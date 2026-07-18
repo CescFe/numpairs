@@ -5,9 +5,6 @@ import org.cescfe.numpairs.domain.generated.assessment.GeneratedPairsDifficultyA
 import org.cescfe.numpairs.domain.generated.assessment.GeneratedPuzzleDifficultyAssessmentOutcome
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfiles
 import org.cescfe.numpairs.domain.generated.profile.ProbabilityPercent
-import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
-import org.cescfe.numpairs.domain.puzzle.assignment.analyzeResolvedPuzzle
-import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
 import org.junit.Assert.assertEquals
@@ -162,20 +159,4 @@ class FourPairsMediumGeneratedPairsPuzzleGeneratorTest {
         const val VARIETY_TOLERANCE_PERCENTAGE_POINTS = 5
         val ASSESSMENT_SEEDS = 1..50
     }
-}
-
-private fun Set<Int>.distinctSolutionPairCount(
-    generatedPuzzle: org.cescfe.numpairs.domain.generated.puzzle.GeneratedPairsPuzzle
-): Int {
-    val analysis = generatedPuzzle.solvedPuzzle.analyzeResolvedPuzzle()
-    val pairByEntryId = analysis.resolvedAssignments
-        .filter { assignment -> assignment.operator == Operator.ADDITION }
-        .flatMap { assignment ->
-            val pair = analysis.solutionPairByTileIndex.getValue(assignment.tileIndex)
-            listOf(
-                assignment.leftOperand.stripEntryId to pair,
-                assignment.rightOperand.stripEntryId to pair
-            )
-        }.toMap()
-    return map { entryId -> pairByEntryId.getValue(StripEntryId(entryId)) }.toSet().size
 }

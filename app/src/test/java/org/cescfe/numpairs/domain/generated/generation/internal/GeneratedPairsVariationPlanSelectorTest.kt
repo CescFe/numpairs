@@ -131,6 +131,22 @@ class GeneratedPairsVariationPlanSelectorTest {
             excludePlan.repeatedValueGroupDirective
         )
     }
+
+    @Test
+    fun mandatory_repetition_range_does_not_consume_a_probability_roll() {
+        val profile = GeneratedPuzzleProfiles.EIGHT_PAIRS_HARD
+        val rolls = ArrayDeque(listOf(99, 99, 99, 99))
+        val plan = GeneratedPairsVariationPlanSelector(
+            profile = profile,
+            nextProbabilityRoll = rolls::removeFirst
+        ).select()
+
+        assertEquals(
+            GeneratedPairsRepeatedValueGroupDirective.IncludeRange(groupCountRange = 1..2),
+            plan.repeatedValueGroupDirective
+        )
+        assertTrue(rolls.isEmpty())
+    }
 }
 
 private fun GeneratedPuzzleProfile.withTargetProbabilities(percentage: Int): GeneratedPuzzleProfile =

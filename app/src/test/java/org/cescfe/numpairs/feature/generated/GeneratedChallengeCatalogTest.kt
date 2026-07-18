@@ -29,6 +29,7 @@ class GeneratedChallengeCatalogTest {
         assertEquals(DifficultyTier.LOW, GeneratedPuzzleProfiles.FOUR_PAIRS_LOW.difficulty)
         assertEquals(DifficultyTier.MEDIUM, GeneratedPuzzleProfiles.FOUR_PAIRS_MEDIUM.difficulty)
         assertEquals(DifficultyTier.MEDIUM, GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM.difficulty)
+        assertEquals(DifficultyTier.HARD, GeneratedPuzzleProfiles.EIGHT_PAIRS_HARD.difficulty)
     }
 
     @Test
@@ -38,11 +39,13 @@ class GeneratedChallengeCatalogTest {
         assertEquals("4-pairs-low", GeneratedModes.FOUR_PAIRS_LOW.profile.id.value)
         assertEquals("4-pairs-medium", GeneratedModes.FOUR_PAIRS_MEDIUM.profile.id.value)
         assertEquals("8-pairs-medium", GeneratedModes.EIGHT_PAIRS_MEDIUM.profile.id.value)
+        assertEquals("8-pairs-hard", GeneratedModes.EIGHT_PAIRS_HARD.profile.id.value)
         assertEquals(
             listOf(
                 GeneratedModes.FOUR_PAIRS_LOW,
                 GeneratedModes.FOUR_PAIRS_MEDIUM,
-                GeneratedModes.EIGHT_PAIRS_MEDIUM
+                GeneratedModes.EIGHT_PAIRS_MEDIUM,
+                GeneratedModes.EIGHT_PAIRS_HARD
             ),
             GeneratedModes.catalog.allChallenges
         )
@@ -65,6 +68,13 @@ class GeneratedChallengeCatalogTest {
             GeneratedModes.catalog.resolveChallenge(
                 modeId = GeneratedModes.EIGHT_PAIRS.id,
                 profileId = GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM.id
+            )
+        )
+        assertSame(
+            GeneratedModes.EIGHT_PAIRS_HARD,
+            GeneratedModes.catalog.resolveChallenge(
+                modeId = GeneratedModes.EIGHT_PAIRS.id,
+                difficulty = DifficultyTier.HARD
             )
         )
     }

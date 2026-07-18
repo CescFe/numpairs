@@ -11,8 +11,11 @@ class GeneratedPuzzleDifficultyAssessmentPolicyTest {
             executionPolicy = GeneratedPuzzleDifficultyAssessmentExecutionPolicy(validSolutionCountLimit = 20),
             minimumInitialPlausibleCandidateCount = 6,
             minimumInitialForcedDeductionCount = 1,
+            maximumInitialForcedDeductionCount = 1,
             minimumFirstForcedDeductionDepth = 1,
             minimumPlausibleDecoyCount = 1,
+            minimumMaximumBranchingFactor = 2,
+            minimumExploredAmbiguousStateCount = 1,
             minimumValidSolutionCount = 1
         )
         val acceptedReport = report(
@@ -20,19 +23,31 @@ class GeneratedPuzzleDifficultyAssessmentPolicyTest {
             initialForcedDeductionCount = 1,
             firstForcedDeductionDepth = 1,
             plausibleDecoyCount = 1,
-            validSolutionCount = 2
+            validSolutionCount = 2,
+            maximumBranchingFactor = 2,
+            exploredAmbiguousStateCount = 1
         )
 
         assertTrue(policy.evaluate(acceptedReport).isAccepted)
         assertEquals(
-            GeneratedPuzzleDifficultyRequirement.entries.toSet(),
+            setOf(
+                GeneratedPuzzleDifficultyRequirement.INITIAL_PLAUSIBLE_CANDIDATES,
+                GeneratedPuzzleDifficultyRequirement.INITIAL_FORCED_DEDUCTION_MAXIMUM,
+                GeneratedPuzzleDifficultyRequirement.FIRST_FORCED_DEDUCTION_DEPTH,
+                GeneratedPuzzleDifficultyRequirement.PLAUSIBLE_DECOYS,
+                GeneratedPuzzleDifficultyRequirement.MAXIMUM_BRANCHING_FACTOR,
+                GeneratedPuzzleDifficultyRequirement.EXPLORED_AMBIGUOUS_STATES,
+                GeneratedPuzzleDifficultyRequirement.VALID_SOLUTIONS
+            ),
             policy.evaluate(
                 report(
                     initialPlausibleCandidateCount = 5,
-                    initialForcedDeductionCount = 0,
+                    initialForcedDeductionCount = 2,
                     firstForcedDeductionDepth = null,
                     plausibleDecoyCount = 0,
-                    validSolutionCount = 0
+                    validSolutionCount = 0,
+                    maximumBranchingFactor = 0,
+                    exploredAmbiguousStateCount = 0
                 )
             ).unmetRequirements
         )
@@ -44,14 +59,16 @@ private fun report(
     initialForcedDeductionCount: Int,
     firstForcedDeductionDepth: Int?,
     plausibleDecoyCount: Int,
-    validSolutionCount: Int
+    validSolutionCount: Int,
+    maximumBranchingFactor: Int,
+    exploredAmbiguousStateCount: Int
 ): GeneratedPuzzleDifficultyAssessmentReport = GeneratedPuzzleDifficultyAssessmentReport(
     initialPlausibleCandidateCount = initialPlausibleCandidateCount,
     initialForcedDeductionCount = initialForcedDeductionCount,
     forcedDeductionCount = initialForcedDeductionCount,
     firstForcedDeductionDepth = firstForcedDeductionDepth,
-    maximumBranchingFactor = 0,
-    exploredAmbiguousStateCount = 0,
+    maximumBranchingFactor = maximumBranchingFactor,
+    exploredAmbiguousStateCount = exploredAmbiguousStateCount,
     boundedValidSolutionCount = validSolutionCount,
     isValidSolutionCountLimitReached = false,
     structuralObservations = GeneratedPuzzleStructuralObservations(
