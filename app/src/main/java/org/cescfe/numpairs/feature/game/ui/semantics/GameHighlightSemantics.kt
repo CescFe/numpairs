@@ -19,6 +19,9 @@ var SemanticsPropertyReceiver.stripEntryInputInvalid by StripEntryInputInvalidKe
 val CorrectTileFeedbackIdKey = SemanticsPropertyKey<Long>("CorrectTileFeedbackId")
 var SemanticsPropertyReceiver.correctTileFeedbackId by CorrectTileFeedbackIdKey
 
+val CompletionFeedbackIdKey = SemanticsPropertyKey<Long>("CompletionFeedbackId")
+var SemanticsPropertyReceiver.completionFeedbackId by CompletionFeedbackIdKey
+
 object OperandSelectorUsageHintVisualStateValues {
     const val AVAILABLE = "available"
     const val USED_WITH_PAIRING_AVAILABLE = "used_with_pairing_available"
@@ -37,6 +40,14 @@ internal fun Modifier.gameHighlightSemantics(isHighlighted: Boolean): Modifier =
 internal fun Modifier.correctTileFeedbackSemantics(feedbackId: Long?): Modifier = if (feedbackId != null) {
     semantics {
         correctTileFeedbackId = feedbackId
+    }
+} else {
+    this
+}
+
+internal fun Modifier.completionFeedbackSemantics(feedbackId: Long?): Modifier = if (feedbackId != null) {
+    semantics {
+        completionFeedbackId = feedbackId
     }
 } else {
     this

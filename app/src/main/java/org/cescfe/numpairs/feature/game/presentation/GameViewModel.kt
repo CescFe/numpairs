@@ -275,6 +275,7 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
         val previousTile = puzzle.board.tiles.getOrNull(tileIndex) ?: return null
         val updatedTile = updatedPuzzle.board.tiles.getOrNull(tileIndex) ?: return null
         val hasPuzzleChanged = updatedPuzzle != puzzle
+        val madePuzzleSolved = !puzzle.isSolved && updatedPuzzle.isSolved
 
         commit(
             updatedPuzzle = updatedPuzzle,
@@ -285,7 +286,8 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
             TileAssignmentCommit(
                 tileIndex = tileIndex,
                 madeTileCorrect = previousTile.resolutionState != TileResolutionState.CORRECT &&
-                    updatedTile.resolutionState == TileResolutionState.CORRECT
+                    updatedTile.resolutionState == TileResolutionState.CORRECT,
+                madePuzzleSolved = madePuzzleSolved
             )
         } else {
             null

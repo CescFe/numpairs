@@ -177,6 +177,7 @@ private fun GeneratedPuzzleGameContent(
             onRulesHelperActionTapped = onRulesHelperActionTapped,
             onRulesHelperPlayTutorialRequested = onRulesHelperPlayTutorialRequested,
             isCorrectTileMotionEnabled = true,
+            isCompletionCelebrationEnabled = true,
             topBarActions = topBarActions,
             onPuzzleChanged = { puzzle ->
                 onPuzzleChanged(session.id, puzzle)

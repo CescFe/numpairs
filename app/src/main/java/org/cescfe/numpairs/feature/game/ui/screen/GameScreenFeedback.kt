@@ -1,6 +1,9 @@
 package org.cescfe.numpairs.feature.game.ui.screen
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -20,9 +23,11 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -33,16 +38,45 @@ import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
 import org.cescfe.numpairs.feature.game.presentation.RuleConflictUiState
+import org.cescfe.numpairs.feature.game.ui.semantics.completionFeedbackSemantics
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.numPairsSemanticColors
 
 @Composable
-internal fun SuccessOverlay(onDismiss: () -> Unit, completionActions: GameCompletionActions? = null) {
+internal fun SuccessOverlay(
+    onDismiss: () -> Unit,
+    completionActions: GameCompletionActions? = null,
+    completionFeedbackId: Long? = null
+) {
     val interactionSource = remember { MutableInteractionSource() }
+    val entranceProgress = remember {
+        Animatable(if (completionFeedbackId == null) 1f else 0f)
+    }
+
+    LaunchedEffect(completionFeedbackId) {
+        if (completionFeedbackId == null) {
+            entranceProgress.snapTo(1f)
+        } else {
+            entranceProgress.snapTo(0f)
+            entranceProgress.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(
+                    durationMillis = COMPLETION_OVERLAY_ENTRANCE_DURATION_MILLIS,
+                    easing = FastOutSlowInEasing
+                )
+            )
+        }
+    }
+
     val overlayModifier = Modifier
         .fillMaxSize()
-        .background(MaterialTheme.colorScheme.scrim.copy(alpha = SUCCESS_OVERLAY_SCRIM_ALPHA))
+        .background(
+            MaterialTheme.colorScheme.scrim.copy(
+                alpha = SUCCESS_OVERLAY_SCRIM_ALPHA * entranceProgress.value
+            )
+        )
         .testTag(GameScreenTestTags.SUCCESS_OVERLAY)
+        .completionFeedbackSemantics(completionFeedbackId)
     val dismissibleOverlayModifier = if (completionActions == null) {
         overlayModifier.clickable(
             interactionSource = interactionSource,
@@ -68,7 +102,15 @@ internal fun SuccessOverlay(onDismiss: () -> Unit, completionActions: GameComple
         Surface(
             modifier = Modifier
                 .padding(horizontal = 32.dp)
-                .widthIn(max = SUCCESS_OVERLAY_CARD_MAX_WIDTH),
+                .widthIn(max = SUCCESS_OVERLAY_CARD_MAX_WIDTH)
+                .graphicsLayer {
+                    val progress = entranceProgress.value
+                    val scale = COMPLETION_OVERLAY_INITIAL_SCALE +
+                        ((1f - COMPLETION_OVERLAY_INITIAL_SCALE) * progress)
+                    scaleX = scale
+                    scaleY = scale
+                    alpha = progress
+                },
             shape = RoundedCornerShape(SUCCESS_OVERLAY_CARD_CORNER_RADIUS),
             color = NumPairsComponents.successContainerColor(),
             contentColor = NumPairsComponents.successContentColor(),

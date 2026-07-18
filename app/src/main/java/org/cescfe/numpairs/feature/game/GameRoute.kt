@@ -38,6 +38,7 @@ fun GameRoute(
     onRulesHelperPlayTutorialRequested: (() -> Unit)? = null,
     isSuccessOverlayEnabled: Boolean = true,
     isCorrectTileMotionEnabled: Boolean = false,
+    isCompletionCelebrationEnabled: Boolean = false,
     interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
     highlightState: GameHighlightState = GameHighlightState.None,
     topBarActions: @Composable RowScope.() -> Unit = {},
@@ -59,6 +60,10 @@ fun GameRoute(
     var correctTileFeedbackIdsByIndex by remember(gameViewModel, puzzleResetKey) {
         mutableStateOf(emptyMap<Int, Long>())
     }
+    var nextCompletionFeedbackId by remember(gameViewModel) { mutableLongStateOf(0L) }
+    var completionFeedbackId by remember(gameViewModel, puzzleResetKey) {
+        mutableStateOf<Long?>(null)
+    }
 
     fun handleTileAssignmentCommit(commit: TileAssignmentCommit) {
         currentOnTileAssignmentCommitted(commit)
@@ -67,6 +72,10 @@ fun GameRoute(
             nextCorrectTileFeedbackId += 1
             correctTileFeedbackIdsByIndex = correctTileFeedbackIdsByIndex +
                 (commit.tileIndex to nextCorrectTileFeedbackId)
+        }
+        if (isCompletionCelebrationEnabled && commit.madePuzzleSolved) {
+            nextCompletionFeedbackId += 1
+            completionFeedbackId = nextCompletionFeedbackId
         }
     }
 
@@ -142,6 +151,7 @@ fun GameRoute(
             if (interactionPolicy.canTapTileReset(index) && resolveActiveStripItemEntryInputIfAllowed()) {
                 gameViewModel.onTileResetTapped(index)
                 correctTileFeedbackIdsByIndex = correctTileFeedbackIdsByIndex - index
+                completionFeedbackId = null
             }
         },
         onTileOperatorSelectionDismissed = gameViewModel::onTileOperatorSelectionDismissed,
@@ -163,6 +173,7 @@ fun GameRoute(
         interactionPolicy = interactionPolicy,
         highlightState = highlightState,
         correctTileFeedbackIdsByIndex = correctTileFeedbackIdsByIndex,
+        completionFeedbackId = completionFeedbackId,
         topBarActions = topBarActions,
         contentBeforePuzzle = contentBeforePuzzle
     )
