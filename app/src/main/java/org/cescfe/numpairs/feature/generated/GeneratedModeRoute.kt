@@ -176,6 +176,7 @@ private fun GeneratedPuzzleGameContent(
             isRulesHelperActionDiscoveryDotVisible = isRulesHelperActionDiscoveryDotVisible,
             onRulesHelperActionTapped = onRulesHelperActionTapped,
             onRulesHelperPlayTutorialRequested = onRulesHelperPlayTutorialRequested,
+            isCorrectTileMotionEnabled = true,
             topBarActions = topBarActions,
             onPuzzleChanged = { puzzle ->
                 onPuzzleChanged(session.id, puzzle)

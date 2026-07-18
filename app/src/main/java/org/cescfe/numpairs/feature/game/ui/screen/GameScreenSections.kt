@@ -58,7 +58,8 @@ internal fun BoardSection(
     onTileOperatorSelectionDismissed: () -> Unit,
     onTileOperatorSelectionConfirmed: (Operator) -> Unit,
     interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
-    highlightState: GameHighlightState = GameHighlightState.None
+    highlightState: GameHighlightState = GameHighlightState.None,
+    correctTileFeedbackIdsByIndex: Map<Int, Long> = emptyMap()
 ) {
     val boardContentDescription = stringResource(R.string.board_content_description)
 
@@ -96,6 +97,7 @@ internal fun BoardSection(
                             PuzzleTile(
                                 tile = tile,
                                 isHighlighted = highlightState.isTileHighlighted(tileIndex),
+                                correctFeedbackId = correctTileFeedbackIdsByIndex[tileIndex],
                                 modifier = Modifier
                                     .testTag(GameScreenTestTags.tile(tileIndex))
                                     .width(tileWidth)

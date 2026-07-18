@@ -9,8 +9,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
@@ -34,6 +37,7 @@ fun GameRoute(
     onRulesHelperActionTapped: () -> Unit = {},
     onRulesHelperPlayTutorialRequested: (() -> Unit)? = null,
     isSuccessOverlayEnabled: Boolean = true,
+    isCorrectTileMotionEnabled: Boolean = false,
     interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
     highlightState: GameHighlightState = GameHighlightState.None,
     topBarActions: @Composable RowScope.() -> Unit = {},
@@ -51,6 +55,20 @@ fun GameRoute(
     val currentOnGameUiStateChanged by rememberUpdatedState(onGameUiStateChanged)
     val currentOnPuzzleChanged by rememberUpdatedState(onPuzzleChanged)
     val currentOnTileAssignmentCommitted by rememberUpdatedState(onTileAssignmentCommitted)
+    var nextCorrectTileFeedbackId by remember(gameViewModel) { mutableLongStateOf(0L) }
+    var correctTileFeedbackIdsByIndex by remember(gameViewModel, puzzleResetKey) {
+        mutableStateOf(emptyMap<Int, Long>())
+    }
+
+    fun handleTileAssignmentCommit(commit: TileAssignmentCommit) {
+        currentOnTileAssignmentCommitted(commit)
+
+        if (isCorrectTileMotionEnabled && commit.madeTileCorrect) {
+            nextCorrectTileFeedbackId += 1
+            correctTileFeedbackIdsByIndex = correctTileFeedbackIdsByIndex +
+                (commit.tileIndex to nextCorrectTileFeedbackId)
+        }
+    }
 
     LaunchedEffect(gameViewModel, puzzleResetKey) {
         gameViewModel.reset(initialPuzzle = initialPuzzle)
@@ -112,7 +130,7 @@ fun GameRoute(
 
             if (interactionPolicy.canConfirmTileOperand(dialog.tileIndex, dialog.slot, stripEntryId)) {
                 gameViewModel.onTileOperandSelectionConfirmed(stripEntryId)
-                    ?.let(currentOnTileAssignmentCommitted)
+                    ?.let(::handleTileAssignmentCommit)
             }
         },
         onTileOperatorTapped = { index ->
@@ -123,6 +141,7 @@ fun GameRoute(
         onTileResetTapped = { index ->
             if (interactionPolicy.canTapTileReset(index) && resolveActiveStripItemEntryInputIfAllowed()) {
                 gameViewModel.onTileResetTapped(index)
+                correctTileFeedbackIdsByIndex = correctTileFeedbackIdsByIndex - index
             }
         },
         onTileOperatorSelectionDismissed = gameViewModel::onTileOperatorSelectionDismissed,
@@ -131,7 +150,7 @@ fun GameRoute(
 
             if (interactionPolicy.canConfirmTileOperator(tileIndex, operator)) {
                 gameViewModel.onTileOperatorSelectionConfirmed(operator)
-                    ?.let(currentOnTileAssignmentCommitted)
+                    ?.let(::handleTileAssignmentCommit)
             }
         },
         onSuccessOverlayDismissed = gameViewModel::onSuccessOverlayDismissed,
@@ -143,6 +162,7 @@ fun GameRoute(
         isSuccessOverlayEnabled = isSuccessOverlayEnabled,
         interactionPolicy = interactionPolicy,
         highlightState = highlightState,
+        correctTileFeedbackIdsByIndex = correctTileFeedbackIdsByIndex,
         topBarActions = topBarActions,
         contentBeforePuzzle = contentBeforePuzzle
     )
