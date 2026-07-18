@@ -22,7 +22,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -43,6 +45,7 @@ fun GeneratedModeRoute(
     generationUseCase: GeneratedPuzzleGenerationUseCase,
     generatedSessionRepository: GeneratedSessionRepository,
     modifier: Modifier = Modifier,
+    isGeneratedGameHapticsEnabled: Boolean = true,
     isRulesHelperEnabled: Boolean = false,
     isRulesHelperActionDiscoveryDotVisible: Boolean = false,
     onRulesHelperActionTapped: () -> Unit = {},
@@ -79,6 +82,7 @@ fun GeneratedModeRoute(
                     onRulesHelperActionTapped = onRulesHelperActionTapped,
                     onRulesHelperPlayTutorialRequested = onRulesHelperPlayTutorialRequested,
                     topBarActions = topBarActions,
+                    isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,
                     onNewPuzzleRequested = viewModel::onNewPuzzleRequested,
                     onPuzzleChanged = viewModel::onPuzzleChanged,
                     onNavigateBack = onNavigateBack,
@@ -96,6 +100,7 @@ fun GeneratedModeRoute(
             onRulesHelperActionTapped = onRulesHelperActionTapped,
             onRulesHelperPlayTutorialRequested = onRulesHelperPlayTutorialRequested,
             topBarActions = topBarActions,
+            isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,
             onNewPuzzleRequested = viewModel::onNewPuzzleRequested,
             onPuzzleChanged = viewModel::onPuzzleChanged,
             onNavigateBack = onNavigateBack
@@ -112,6 +117,7 @@ fun GeneratedModeRoute(
                     onRulesHelperActionTapped = onRulesHelperActionTapped,
                     onRulesHelperPlayTutorialRequested = onRulesHelperPlayTutorialRequested,
                     topBarActions = topBarActions,
+                    isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,
                     onNewPuzzleRequested = viewModel::onNewPuzzleRequested,
                     onPuzzleChanged = viewModel::onPuzzleChanged,
                     onNavigateBack = onNavigateBack,
@@ -148,11 +154,14 @@ private fun GeneratedPuzzleGameContent(
     onRulesHelperActionTapped: () -> Unit,
     onRulesHelperPlayTutorialRequested: (() -> Unit)?,
     topBarActions: @Composable RowScope.() -> Unit,
+    isGeneratedGameHapticsEnabled: Boolean,
     onNewPuzzleRequested: () -> Unit,
     onPuzzleChanged: (GeneratedSessionId, Puzzle) -> Unit,
     onNavigateBack: () -> Unit,
     overlay: @Composable () -> Unit = {}
 ) {
+    val hapticFeedback = LocalHapticFeedback.current
+
     Box(modifier = modifier.fillMaxSize()) {
         GameRoute(
             title = title,
@@ -170,6 +179,11 @@ private fun GeneratedPuzzleGameContent(
             topBarActions = topBarActions,
             onPuzzleChanged = { puzzle ->
                 onPuzzleChanged(session.id, puzzle)
+            },
+            onTileAssignmentCommitted = {
+                if (isGeneratedGameHapticsEnabled) {
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
+                }
             },
             onNavigateBack = onNavigateBack
         )

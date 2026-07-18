@@ -82,6 +82,7 @@ private fun UnlockedAppNavigation(
     startDestination: AppDestination
 ) {
     val generatedSessionSnapshot by generatedSessionRepository.session.collectAsState(initial = null)
+    val personalizationPreferences by personalizationPreferencesRepository.preferences.collectAsState(initial = null)
     val resumableSession = generatedSessionSnapshot.toResumableGeneratedSessionOrNull(
         modeRegistry = generatedModeRegistry
     )
@@ -197,6 +198,8 @@ private fun UnlockedAppNavigation(
                     generationUseCase = generationUseCase,
                     generatedSessionRepository = generatedSessionRepository,
                     topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
+                    isGeneratedGameHapticsEnabled =
+                    personalizationPreferences?.generatedGameHapticsEnabled == true,
                     onNavigateBack = navigateToMenu
                 )
 
@@ -206,6 +209,8 @@ private fun UnlockedAppNavigation(
                     title = mode.localizedTitle(),
                     generationUseCase = generationUseCase,
                     generatedSessionRepository = generatedSessionRepository,
+                    isGeneratedGameHapticsEnabled =
+                    personalizationPreferences?.generatedGameHapticsEnabled == true,
                     modifier = modifier,
                     onNavigateBack = navigateToMenu
                 )

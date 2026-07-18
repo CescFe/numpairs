@@ -32,6 +32,7 @@ fun FourPairsRoute(
     generationUseCase: GeneratedPuzzleGenerationUseCase,
     launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.DefaultNewPuzzle,
     mode: GeneratedModeConfiguration = GeneratedModes.FOUR_PAIRS,
+    isGeneratedGameHapticsEnabled: Boolean = true,
     tutorialOverlayMode: TutorialMode? = null,
     onTutorialOverlayClosed: () -> Unit = {},
     onNavigateBack: () -> Unit = {}
@@ -61,6 +62,7 @@ fun FourPairsRoute(
             title = stringResource(R.string.four_pairs_screen_title),
             generationUseCase = generationUseCase,
             generatedSessionRepository = generatedSessionRepository,
+            isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,
             isRulesHelperEnabled = true,
             isRulesHelperActionDiscoveryDotVisible = actionDiscoveryState?.hasSeenHelpAction == false,
             onRulesHelperActionTapped = {
