@@ -123,6 +123,13 @@ sealed interface GeneratedPairsPuzzleValidationViolation {
         override val ruleId = GeneratedPairsPuzzleValidationRuleId.REPEATED_STRIP_VALUE_GROUP_COUNT_EXCEEDED
     }
 
+    data class RepeatedStripValueGroupCountBelowMinimum(
+        val minimumRequired: Int,
+        val observedRepeatedValues: Set<Int>
+    ) : GeneratedPairsPuzzleValidationViolation {
+        override val ruleId = GeneratedPairsPuzzleValidationRuleId.REPEATED_STRIP_VALUE_GROUP_COUNT_BELOW_MINIMUM
+    }
+
     data class DuplicateBoardResults(val duplicateResults: Set<Int>) : GeneratedPairsPuzzleValidationViolation {
         override val ruleId = GeneratedPairsPuzzleValidationRuleId.DUPLICATE_BOARD_RESULTS
     }
@@ -184,6 +191,7 @@ enum class GeneratedPairsPuzzleValidationRuleId(val code: String) {
     STRIP_VALUE_OUTSIDE_RANGE("generated.strip-value-outside-range"),
     STRIP_VALUE_OCCURRENCE_EXCEEDED("generated.strip-value-occurrence-exceeded"),
     REPEATED_STRIP_VALUE_GROUP_COUNT_EXCEEDED("generated.repeated-strip-value-group-count-exceeded"),
+    REPEATED_STRIP_VALUE_GROUP_COUNT_BELOW_MINIMUM("generated.repeated-strip-value-group-count-below-minimum"),
     DUPLICATE_BOARD_RESULTS("generated.duplicate-board-results"),
     MULTIPLICATION_RESULT_EXCEEDED("generated.multiplication-result-exceeded"),
     PRODUCT_ANCHOR_MIX_OUTSIDE_RANGE("generated.product-anchor-mix-outside-range"),

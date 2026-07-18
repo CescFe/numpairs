@@ -107,10 +107,18 @@ internal class GeneratedStripValueConstraint(private val policy: StripValuePolic
             )
         }
 
+        val repeatedValueGroups = values.groupingBy { value -> value }
+            .eachCount()
+            .filterValues { occurrenceCount -> occurrenceCount > 1 }
+        if (repeatedValueGroups.size < policy.minRepeatedValueGroupCount) {
+            add(
+                GeneratedPairsPuzzleValidationViolation.RepeatedStripValueGroupCountBelowMinimum(
+                    minimumRequired = policy.minRepeatedValueGroupCount,
+                    observedRepeatedValues = repeatedValueGroups.keys
+                )
+            )
+        }
         policy.maxRepeatedValueGroupCount?.let { maximumAllowed ->
-            val repeatedValueGroups = values.groupingBy { value -> value }
-                .eachCount()
-                .filterValues { occurrenceCount -> occurrenceCount > 1 }
             if (repeatedValueGroups.size > maximumAllowed) {
                 add(
                     GeneratedPairsPuzzleValidationViolation.RepeatedStripValueGroupCountExceeded(

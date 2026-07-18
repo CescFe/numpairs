@@ -95,15 +95,24 @@ data class GeneratedPuzzleDifficultyAssessmentPolicy(
     val executionPolicy: GeneratedPuzzleDifficultyAssessmentExecutionPolicy,
     val minimumInitialPlausibleCandidateCount: Int,
     val minimumInitialForcedDeductionCount: Int,
+    val maximumInitialForcedDeductionCount: Int? = null,
     val minimumFirstForcedDeductionDepth: Int,
     val minimumPlausibleDecoyCount: Int,
+    val minimumMaximumBranchingFactor: Int = 0,
+    val minimumExploredAmbiguousStateCount: Int = 0,
     val minimumValidSolutionCount: Int = 1
 ) {
     init {
         require(minimumInitialPlausibleCandidateCount >= 0)
         require(minimumInitialForcedDeductionCount >= 0)
+        require(
+            maximumInitialForcedDeductionCount == null ||
+                maximumInitialForcedDeductionCount >= minimumInitialForcedDeductionCount
+        )
         require(minimumFirstForcedDeductionDepth >= 0)
         require(minimumPlausibleDecoyCount >= 0)
+        require(minimumMaximumBranchingFactor >= 0)
+        require(minimumExploredAmbiguousStateCount >= 0)
         require(minimumValidSolutionCount > 0)
         require(executionPolicy.validSolutionCountLimit >= minimumValidSolutionCount) {
             "Difficulty-assessment solution count limit must cover the required minimum."
@@ -118,11 +127,23 @@ data class GeneratedPuzzleDifficultyAssessmentPolicy(
             if (report.initialForcedDeductionCount < minimumInitialForcedDeductionCount) {
                 add(GeneratedPuzzleDifficultyRequirement.INITIAL_FORCED_DEDUCTIONS)
             }
+            if (maximumInitialForcedDeductionCount?.let { maximum ->
+                    report.initialForcedDeductionCount > maximum
+                } == true
+            ) {
+                add(GeneratedPuzzleDifficultyRequirement.INITIAL_FORCED_DEDUCTION_MAXIMUM)
+            }
             if ((report.firstForcedDeductionDepth ?: -1) < minimumFirstForcedDeductionDepth) {
                 add(GeneratedPuzzleDifficultyRequirement.FIRST_FORCED_DEDUCTION_DEPTH)
             }
             if (report.structuralObservations.plausibleDecoyCount < minimumPlausibleDecoyCount) {
                 add(GeneratedPuzzleDifficultyRequirement.PLAUSIBLE_DECOYS)
+            }
+            if (report.maximumBranchingFactor < minimumMaximumBranchingFactor) {
+                add(GeneratedPuzzleDifficultyRequirement.MAXIMUM_BRANCHING_FACTOR)
+            }
+            if (report.exploredAmbiguousStateCount < minimumExploredAmbiguousStateCount) {
+                add(GeneratedPuzzleDifficultyRequirement.EXPLORED_AMBIGUOUS_STATES)
             }
             if (report.boundedValidSolutionCount < minimumValidSolutionCount) {
                 add(GeneratedPuzzleDifficultyRequirement.VALID_SOLUTIONS)
@@ -146,8 +167,11 @@ data class GeneratedPuzzleDifficultyPolicyEvaluation(
 enum class GeneratedPuzzleDifficultyRequirement {
     INITIAL_PLAUSIBLE_CANDIDATES,
     INITIAL_FORCED_DEDUCTIONS,
+    INITIAL_FORCED_DEDUCTION_MAXIMUM,
     FIRST_FORCED_DEDUCTION_DEPTH,
     PLAUSIBLE_DECOYS,
+    MAXIMUM_BRANCHING_FACTOR,
+    EXPLORED_AMBIGUOUS_STATES,
     VALID_SOLUTIONS
 }
 

@@ -40,6 +40,26 @@ class GeneratedFourPairsMediumConstraintTest {
     }
 
     @Test
+    fun solved_values_reject_fewer_repeated_groups_than_the_profile_requires() {
+        val violations = GeneratedStripValueConstraint(
+            policy = StripValuePolicy(
+                valueRange = 1..99,
+                maxOccurrencesPerValue = 2,
+                minRepeatedValueGroupCount = 1,
+                maxRepeatedValueGroupCount = 2
+            )
+        ).violationsFor(values = (1..16).toList())
+
+        assertTrue(
+            violations.any { violation ->
+                violation is GeneratedPairsPuzzleValidationViolation.RepeatedStripValueGroupCountBelowMinimum &&
+                    violation.minimumRequired == 1 &&
+                    violation.observedRepeatedValues.isEmpty()
+            }
+        )
+    }
+
+    @Test
     fun profile_rejects_an_unreachable_repetition_target() {
         val creation = profileCreation(
             stripValuePolicy = StripValuePolicy(
@@ -77,6 +97,24 @@ class GeneratedFourPairsMediumConstraintTest {
         assertTrue(
             (creation as GeneratedPuzzleProfileCreation.Rejected).violations.any { violation ->
                 violation is GeneratedPuzzleProfileViolation.DistinctSolutionPairDistributionInfeasible
+            }
+        )
+    }
+
+    @Test
+    fun profile_rejects_more_required_repeated_groups_than_the_puzzle_can_hold() {
+        val creation = profileCreation(
+            stripValuePolicy = StripValuePolicy(
+                valueRange = 1..40,
+                maxOccurrencesPerValue = 2,
+                minRepeatedValueGroupCount = 5,
+                maxRepeatedValueGroupCount = 5
+            )
+        )
+
+        assertTrue(
+            (creation as GeneratedPuzzleProfileCreation.Rejected).violations.any { violation ->
+                violation is GeneratedPuzzleProfileViolation.RepeatedValueGroupRangeInfeasible
             }
         )
     }

@@ -21,7 +21,7 @@ class GeneratedPuzzleProfileContractTest {
     @Test
     fun every_registered_profile_satisfies_the_shared_generation_contract() {
         assertEquals(
-            listOf("4-pairs-low", "4-pairs-medium", "8-pairs-medium"),
+            listOf("4-pairs-low", "4-pairs-medium", "8-pairs-medium", "8-pairs-hard"),
             GeneratedPuzzleProfiles.ALL.map { profile -> profile.id.value }
         )
 
@@ -90,6 +90,12 @@ class GeneratedPuzzleProfileContractTest {
                     .count { occurrenceCount -> occurrenceCount > 1 } <= maximumGroupCount
             )
         }
+        assertTrue(
+            context,
+            solvedValues.groupingBy { value -> value }.eachCount().values
+                .count { occurrenceCount -> occurrenceCount > 1 } >=
+                profile.stripValuePolicy.minRepeatedValueGroupCount
+        )
 
         assertEquals(context, profile.size.boardTileCount, assignments.size)
         assignments.forEach { assignment ->

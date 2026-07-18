@@ -21,7 +21,7 @@ data class GeneratedPuzzleGenerationExecutionPolicy(
     }
 
     private companion object {
-        const val DEFAULT_MAX_ATTEMPTS = 50
+        const val DEFAULT_MAX_ATTEMPTS = 80
         const val DEFAULT_MAX_SEARCH_WORK = 250_000
     }
 }
@@ -29,7 +29,10 @@ data class GeneratedPuzzleGenerationExecutionPolicy(
 data class GeneratedPuzzleGenerationRequest(
     val profile: GeneratedPuzzleProfile,
     val seed: Int,
-    val executionPolicy: GeneratedPuzzleGenerationExecutionPolicy = GeneratedPuzzleGenerationExecutionPolicy()
+    val executionPolicy: GeneratedPuzzleGenerationExecutionPolicy = GeneratedPuzzleGenerationExecutionPolicy(
+        maxAttempts = profile.generationPolicy.maxAttempts,
+        maxSearchWork = profile.generationPolicy.maxSearchWork
+    )
 ) {
     val profileId: GeneratedPuzzleProfileId
         get() = profile.id

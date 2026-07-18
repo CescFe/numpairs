@@ -256,31 +256,32 @@ private fun GeneratedPairsPrimeProductDecoyDirective.shouldPreferPrimeProductDec
 private fun GeneratedPairsPrimeProductDecoyDirective.allows(pairCount: Int): Boolean =
     requiredPairCount?.let { requiredPairCount -> pairCount <= requiredPairCount } ?: true
 
-private val GeneratedPairsRepeatedValueGroupDirective.requiredGroupCount: Int?
+private val GeneratedPairsRepeatedValueGroupDirective.requiredGroupCountRange: IntRange?
     get() = when (this) {
         GeneratedPairsRepeatedValueGroupDirective.Unrestricted -> null
-        GeneratedPairsRepeatedValueGroupDirective.Exclude -> 0
-        is GeneratedPairsRepeatedValueGroupDirective.Include -> groupCount
+        GeneratedPairsRepeatedValueGroupDirective.Exclude -> 0..0
+        is GeneratedPairsRepeatedValueGroupDirective.Include -> groupCount..groupCount
+        is GeneratedPairsRepeatedValueGroupDirective.IncludeRange -> groupCountRange
     }
 
 private fun GeneratedPairsRepeatedValueGroupDirective.canStillBeSatisfied(
     currentGroupCount: Int,
     remainingPairSlots: Int
 ): Boolean {
-    val requiredGroupCount = requiredGroupCount ?: return true
+    val requiredRange = requiredGroupCountRange ?: return true
 
-    return currentGroupCount <= requiredGroupCount &&
-        currentGroupCount + remainingPairSlots * 2 >= requiredGroupCount
+    return currentGroupCount <= requiredRange.last &&
+        currentGroupCount + remainingPairSlots * 2 >= requiredRange.first
 }
 
 private fun GeneratedPairsRepeatedValueGroupDirective.isSatisfiedBy(groupCount: Int): Boolean =
-    requiredGroupCount?.let { requiredGroupCount -> groupCount == requiredGroupCount } ?: true
+    requiredGroupCountRange?.let { requiredRange -> groupCount in requiredRange } ?: true
 
 private fun GeneratedPairsRepeatedValueGroupDirective.shouldPreferRepeatedValueGroup(currentGroupCount: Int): Boolean =
-    requiredGroupCount?.let { requiredGroupCount -> currentGroupCount < requiredGroupCount } ?: false
+    requiredGroupCountRange?.let { requiredRange -> currentGroupCount < requiredRange.first } ?: false
 
 private fun GeneratedPairsRepeatedValueGroupDirective.allows(groupCount: Int): Boolean =
-    requiredGroupCount?.let { requiredGroupCount -> groupCount <= requiredGroupCount } ?: true
+    requiredGroupCountRange?.let { requiredRange -> groupCount <= requiredRange.last } ?: true
 
 private fun Map<Int, Int>.repeatedValueGroupCount(): Int = values.count { occurrenceCount -> occurrenceCount > 1 }
 

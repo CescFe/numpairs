@@ -46,6 +46,14 @@ internal sealed interface GeneratedPairsRepeatedValueGroupDirective {
             }
         }
     }
+
+    data class IncludeRange(val groupCountRange: IntRange) : GeneratedPairsRepeatedValueGroupDirective {
+        init {
+            require(!groupCountRange.isEmpty() && groupCountRange.first > 0) {
+                "A repeated-value group inclusion range must contain positive counts."
+            }
+        }
+    }
 }
 
 internal enum class GeneratedPairsStripEntryVisibilityDirective {

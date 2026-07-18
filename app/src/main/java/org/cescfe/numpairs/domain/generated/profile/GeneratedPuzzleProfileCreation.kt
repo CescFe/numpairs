@@ -22,6 +22,7 @@ fun GeneratedPuzzleProfileCreation.getOrThrow(): GeneratedPuzzleProfile = when (
 
 enum class GeneratedPuzzleProfileRuleId(val code: String) {
     STRIP_VALUE_CAPACITY("profile.strip-value-capacity"),
+    REPEATED_VALUE_GROUP_RANGE_FEASIBILITY("profile.repeated-value-group-range-feasibility"),
     KNOWN_ENTRY_RANGE("profile.known-entry-range"),
     REQUIRED_ANCHOR_CAPACITY("profile.required-anchor-capacity"),
     HIDDEN_RUN_FEASIBILITY("profile.hidden-run-feasibility"),
@@ -49,6 +50,14 @@ sealed interface GeneratedPuzzleProfileViolation {
     data class InsufficientStripValueCapacity(val requiredEntryCount: Int, val availableEntryCount: Long) :
         GeneratedPuzzleProfileViolation {
         override val ruleId: GeneratedPuzzleProfileRuleId = GeneratedPuzzleProfileRuleId.STRIP_VALUE_CAPACITY
+    }
+
+    data class RepeatedValueGroupRangeInfeasible(
+        val minimumRequiredGroupCount: Int,
+        val maximumPossibleGroupCount: Int
+    ) : GeneratedPuzzleProfileViolation {
+        override val ruleId: GeneratedPuzzleProfileRuleId =
+            GeneratedPuzzleProfileRuleId.REPEATED_VALUE_GROUP_RANGE_FEASIBILITY
     }
 
     data class KnownEntryRangeOutsidePuzzle(val configuredRange: IntRange, val stripEntryCount: Int) :

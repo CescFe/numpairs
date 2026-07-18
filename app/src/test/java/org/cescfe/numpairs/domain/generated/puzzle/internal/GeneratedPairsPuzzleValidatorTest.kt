@@ -432,6 +432,7 @@ class GeneratedPairsPuzzleValidatorTest {
                 "generated.strip-value-outside-range",
                 "generated.strip-value-occurrence-exceeded",
                 "generated.repeated-strip-value-group-count-exceeded",
+                "generated.repeated-strip-value-group-count-below-minimum",
                 "generated.duplicate-board-results",
                 "generated.multiplication-result-exceeded",
                 "generated.product-anchor-mix-outside-range",

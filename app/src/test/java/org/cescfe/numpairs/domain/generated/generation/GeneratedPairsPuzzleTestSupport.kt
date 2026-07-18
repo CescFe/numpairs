@@ -1,6 +1,9 @@
 package org.cescfe.numpairs.domain.generated.generation
 
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfile
+import org.cescfe.numpairs.domain.generated.puzzle.GeneratedPairsPuzzle
+import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
+import org.cescfe.numpairs.domain.puzzle.assignment.analyzeResolvedPuzzle
 import org.cescfe.numpairs.domain.puzzle.model.Expression
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
@@ -78,6 +81,20 @@ internal fun Set<Int>.maxConsecutiveHiddenEntries(totalEntryCount: Int): Int {
     }
 
     return maxHiddenCount
+}
+
+internal fun Set<Int>.distinctSolutionPairCount(generatedPuzzle: GeneratedPairsPuzzle): Int {
+    val analysis = generatedPuzzle.solvedPuzzle.analyzeResolvedPuzzle()
+    val pairByEntryId = analysis.resolvedAssignments
+        .filter { assignment -> assignment.operator == Operator.ADDITION }
+        .flatMap { assignment ->
+            val pair = analysis.solutionPairByTileIndex.getValue(assignment.tileIndex)
+            listOf(
+                assignment.leftOperand.stripEntryId to pair,
+                assignment.rightOperand.stripEntryId to pair
+            )
+        }.toMap()
+    return map { entryId -> pairByEntryId.getValue(StripEntryId(entryId)) }.toSet().size
 }
 
 private fun Int.isPrime(): Boolean {

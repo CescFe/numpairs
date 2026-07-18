@@ -7,7 +7,9 @@ object GeneratedPuzzleProfiles {
     val FOUR_PAIRS_LOW: GeneratedPuzzleProfile = fourPairsLow()
     val FOUR_PAIRS_MEDIUM: GeneratedPuzzleProfile = fourPairsMedium()
     val EIGHT_PAIRS_MEDIUM: GeneratedPuzzleProfile = eightPairsMedium()
-    val ALL: List<GeneratedPuzzleProfile> = listOf(FOUR_PAIRS_LOW, FOUR_PAIRS_MEDIUM, EIGHT_PAIRS_MEDIUM)
+    val EIGHT_PAIRS_HARD: GeneratedPuzzleProfile = eightPairsHard()
+    val ALL: List<GeneratedPuzzleProfile> =
+        listOf(FOUR_PAIRS_LOW, FOUR_PAIRS_MEDIUM, EIGHT_PAIRS_MEDIUM, EIGHT_PAIRS_HARD)
 
     private fun fourPairsLow(): GeneratedPuzzleProfile {
         val size = GeneratedPuzzleSize(pairCount = 4)
@@ -155,6 +157,80 @@ object GeneratedPuzzleProfiles {
                         targetPairCount = 1,
                         pairPattern = PrimeProductDecoyPairPattern.ONE_AND_PRIME
                     )
+                )
+            )
+        ).getOrThrow()
+    }
+
+    private fun eightPairsHard(): GeneratedPuzzleProfile {
+        val size = GeneratedPuzzleSize(pairCount = 8)
+
+        return GeneratedPuzzleProfile.create(
+            definition = GeneratedPuzzleProfileDefinition(
+                id = GeneratedPuzzleProfileId("8-pairs-hard"),
+                difficulty = DifficultyTier.HARD,
+                size = size,
+                stripValuePolicy = StripValuePolicy(
+                    valueRange = 1..99,
+                    maxOccurrencesPerValue = 2,
+                    minRepeatedValueGroupCount = 1,
+                    maxRepeatedValueGroupCount = 2
+                ),
+                resultConstraints = ResultConstraints(
+                    maxMultiplicationResult = 1000,
+                    allowsDuplicateBoardResults = false,
+                    productAnchorMix = ProductAnchorMix(
+                        productResultGreaterThan = 198,
+                        countRange = 0..1
+                    )
+                ),
+                initialStripMaskPolicy = InitialStripMaskPolicy(
+                    knownEntryCountRange = 4..5,
+                    requiredAnchors = emptySet(),
+                    distributionPolicy = StripKnownEntryDistributionPolicy.AtLeastDistinctSolutionPairs(
+                        minimumPairCount = 3
+                    ),
+                    maxConsecutiveHiddenEntries = 5
+                ),
+                generationPolicy = GenerationPolicy(
+                    isBoardTileShufflingEnabled = true,
+                    maxAttempts = 160,
+                    maxSearchWork = 600_000
+                ),
+                varietyPolicy = GeneratedPuzzleVarietyPolicy(
+                    highValueMaskTargets = listOf(
+                        HighValueMaskTarget(
+                            rankFromHighest = 1,
+                            targetHiddenProbability = ProbabilityPercent(60)
+                        ),
+                        HighValueMaskTarget(
+                            rankFromHighest = 2,
+                            targetHiddenProbability = ProbabilityPercent(70)
+                        ),
+                        HighValueMaskTarget(
+                            rankFromHighest = 3,
+                            targetHiddenProbability = ProbabilityPercent(70)
+                        )
+                    ),
+                    primeProductDecoyTarget = PrimeProductDecoyTarget(
+                        targetPuzzlePercent = ProbabilityPercent(60),
+                        targetPairCount = 1,
+                        pairPattern = PrimeProductDecoyPairPattern.ONE_AND_PRIME
+                    )
+                ),
+                difficultyAssessmentPolicy = GeneratedPuzzleDifficultyAssessmentPolicy(
+                    executionPolicy = GeneratedPuzzleDifficultyAssessmentExecutionPolicy(
+                        maxCandidateExpansions = 100_000,
+                        validSolutionCountLimit = 50
+                    ),
+                    minimumInitialPlausibleCandidateCount = 11,
+                    minimumInitialForcedDeductionCount = 1,
+                    maximumInitialForcedDeductionCount = 7,
+                    minimumFirstForcedDeductionDepth = 1,
+                    minimumPlausibleDecoyCount = 3,
+                    minimumMaximumBranchingFactor = 2,
+                    minimumExploredAmbiguousStateCount = 1,
+                    minimumValidSolutionCount = 1
                 )
             )
         ).getOrThrow()

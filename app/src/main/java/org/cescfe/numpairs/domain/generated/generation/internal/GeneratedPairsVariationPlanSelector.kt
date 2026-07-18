@@ -45,7 +45,16 @@ internal class GeneratedPairsVariationPlanSelector(
 
     private fun selectRepeatedValueGroupDirective(): GeneratedPairsRepeatedValueGroupDirective {
         val target = profile.varietyPolicy.repeatedValueGroupTarget
-            ?: return GeneratedPairsRepeatedValueGroupDirective.Unrestricted
+        if (target == null) {
+            val minimumGroupCount = profile.stripValuePolicy.minRepeatedValueGroupCount
+            if (minimumGroupCount == 0) {
+                return GeneratedPairsRepeatedValueGroupDirective.Unrestricted
+            }
+            val maximumGroupCount = profile.stripValuePolicy.maxRepeatedValueGroupCount ?: minimumGroupCount
+            return GeneratedPairsRepeatedValueGroupDirective.IncludeRange(
+                groupCountRange = minimumGroupCount..maximumGroupCount
+            )
+        }
 
         return if (shouldApply(probability = target.targetPuzzlePercent)) {
             GeneratedPairsRepeatedValueGroupDirective.Include(groupCount = target.targetGroupCount)
