@@ -6,20 +6,55 @@ A complete game instance containing a board and a strip of available numbers.
 ## Generated Puzzle
 A puzzle produced by a generator rather than authored by hand.
 
-Generated puzzles are used by generated gameplay modes. A mode selects one difficulty profile and presents its player-facing initial puzzle.
+Generated puzzles are used by generated challenges. A challenge selects one validated generated
+puzzle profile and presents its player-facing initial puzzle.
 
 ## Generated Mode
-A replayable gameplay configuration identified by a stable generated-mode identity.
+A replayable generated-puzzle family identified by a stable generated-mode identity and puzzle
+size.
 
-A generated mode resolves to one difficulty profile in the application layer. The mode identity is used for profile selection, navigation, and game-session identity; Android strings and mode-specific learning capabilities remain outside the profile.
+`4 Pairs` and `8 Pairs` are generated modes. A mode exposes one or more explicitly supported
+generated challenges. Its identity is used for family selection, mode-specific preference, and
+generated-session identity; it does not imply one difficulty.
+
+## Difficulty Tier
+The intended deductive challenge classification independent from generated puzzle size.
+
+Supported tiers are:
+
+- low
+- medium
+- hard
+
+A tier has shared product meaning but does not own identical absolute profile constants for every
+size. Each supported challenge calibrates the tier for its mode.
+
+## Generated Challenge
+One supported playable combination of generated mode, difficulty tier, and generated puzzle
+profile.
+
+Generated challenges are registered explicitly. Unsupported size and difficulty combinations are
+absent rather than synthesized. Challenge identity owns application profile selection,
+generation, retained presentation state, navigation, and exact session resolution.
+
+## Generated Puzzle Profile
+The validated, immutable generation and difficulty-assessment configuration for one generated
+challenge.
+
+A profile owns puzzle size, value and result constraints, initial masking, variety targets, and
+assessment policy. Android strings, player preference, lock state, navigation, and
+challenge-specific learning capabilities remain outside the profile.
 
 ## Generated Session
 A playable generated-puzzle lifecycle identified by a stable session identity.
 
-NumPairs owns at most one generated session slot for the application, shared by all generated modes. A generated session carries its mode, profile, seed metadata, exact initial puzzle, and exact current puzzle.
+NumPairs owns at most one generated session slot for the application, shared by all generated
+challenges. A generated session carries the mode and profile identities that resolve its exact
+challenge, seed metadata, exact initial puzzle, and exact current puzzle.
 
 ## Resumable Generated Session
-The generated session currently stored in the application-wide slot when its current puzzle is valid, belongs to a configured mode/profile, and is not solved.
+The generated session currently stored in the application-wide slot when its current puzzle is
+valid, resolves to a configured challenge through its mode/profile identities, and is not solved.
 
 An opened but untouched generated puzzle is resumable. A solved, stale, mismatched, corrupt, unsupported, or missing snapshot is not resumable.
 

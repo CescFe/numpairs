@@ -270,7 +270,9 @@ selection, and session documentation is delivered.
 - Keep generation deterministic for tests and bounded on failure.
 - Protect the documented profile and population-variety expectations with automated tests.
 
-The supporting generation reference owns the exact profile constraints and assessment thresholds.
+The supporting generation reference owns the exact profile constraints and assessment acceptance
+semantics. Numerical assessment bands may be locked only after deterministic baseline
+characterization; v8 must not invent unevidenced score thresholds before the evaluator exists.
 
 ### `8 Pairs Hard`
 
@@ -283,7 +285,9 @@ The supporting generation reference owns the exact profile constraints and asses
   supported envelope.
 - Keep generation deterministic for tests and bounded on failure at sixteen-entry scale.
 
-The supporting generation reference owns the exact profile constraints and assessment thresholds.
+The supporting generation reference owns the exact profile constraints and assessment acceptance
+semantics. Numerical assessment bands may be locked only after deterministic baseline
+characterization; v8 must not invent unevidenced score thresholds before the evaluator exists.
 
 ### Persistent Mode Defaults
 
