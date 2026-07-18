@@ -18,14 +18,12 @@ import org.cescfe.numpairs.data.generated.session.createGeneratedSessionReposito
 import org.cescfe.numpairs.data.onboarding.createOnboardingRuntime
 import org.cescfe.numpairs.data.preferences.PersonalizationPreferences
 import org.cescfe.numpairs.data.preferences.PersonalizationPreferencesRepository
-import org.cescfe.numpairs.data.preferences.PersonalizationTheme
 import org.cescfe.numpairs.data.preferences.createPersonalizationPreferencesRepository
 import org.cescfe.numpairs.data.preferences.createTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.feature.generated.ConfiguredGeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
-import org.cescfe.numpairs.ui.theme.NumPairsThemeId
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,6 +54,7 @@ class MainActivity : ComponentActivity() {
                 AppNavigation(
                     onboardingRepository = onboardingRuntime.repository,
                     generatedSessionRepository = generatedSessionRepository,
+                    personalizationPreferencesRepository = personalizationPreferencesRepository,
                     topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
                     generatedModeRegistry = generatedModeRegistry,
                     generatedPuzzleGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory
@@ -73,15 +72,7 @@ internal fun PersonalizationThemeProvider(
     val preferences by repository.preferences.collectAsState(initial = PersonalizationPreferences())
 
     NumPairsTheme(
-        themeId = preferences.selectedTheme.toNumPairsThemeId(),
+        theme = preferences.selectedTheme,
         content = content
     )
-}
-
-private fun PersonalizationTheme.toNumPairsThemeId(): NumPairsThemeId = when (this) {
-    PersonalizationTheme.WARM -> NumPairsThemeId.WARM
-    PersonalizationTheme.FROST -> NumPairsThemeId.FROST
-    PersonalizationTheme.OBSIDIAN -> NumPairsThemeId.OBSIDIAN
-    PersonalizationTheme.TERMINAL -> NumPairsThemeId.TERMINAL
-    PersonalizationTheme.EMBER -> NumPairsThemeId.EMBER
 }

@@ -7,11 +7,29 @@
     <string name="menu_resume_button">Continua</string>
     <string name="menu_resume_content_description">Continua el puzle de %1$s</string>
     <string name="menu_tutorial_button">Com jugar</string>
+    <string name="menu_personalization_button">Personalització</string>
     <string name="menu_four_pairs_button">Juga a 4 parelles</string>
     <string name="menu_eight_pairs_button">Juga a 8 parelles</string>
     <string name="generated_session_choice_title">Puzle sense acabar</string>
     <string name="generated_session_choice_mode_message">Tens un puzle de %1$s sense acabar.</string>
     <string name="generated_session_choice_new_mode_button">Puzle nou de %1$s</string>
+
+    <!-- Personalization screen -->
+    <string name="personalization_screen_title">Personalització</string>
+    <string name="personalization_brand_content_description">Logotip de NumPairs</string>
+    <string name="personalization_theme_section_title">Tema de color</string>
+    <string name="personalization_theme_supporting_text">Els temes només canvien els colors. Els significats i controls del joc continuen igual.</string>
+    <string name="personalization_theme_selected">Seleccionat</string>
+    <string name="personalization_theme_warm">Warm</string>
+    <string name="personalization_theme_frost">Frost</string>
+    <string name="personalization_theme_obsidian">Obsidian</string>
+    <string name="personalization_theme_terminal">Terminal</string>
+    <string name="personalization_theme_ember">Ember</string>
+    <string name="personalization_feedback_section_title">Resposta del joc</string>
+    <string name="personalization_haptics_title">Resposta hàptica del joc</string>
+    <string name="personalization_haptics_supporting_text">Confirmació suau per a les assignacions vàlides en partides generades.</string>
+    <string name="personalization_haptics_enabled">Activada</string>
+    <string name="personalization_haptics_disabled">Desactivada</string>
 
     <!-- Four pairs screen -->
     <string name="four_pairs_screen_title">4 parelles</string>

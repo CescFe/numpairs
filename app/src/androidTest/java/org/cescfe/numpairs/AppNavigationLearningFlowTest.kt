@@ -20,6 +20,7 @@ import org.cescfe.numpairs.data.onboarding.OnboardingPostCorePath
 import org.cescfe.numpairs.data.onboarding.OnboardingStageCheckpoint
 import org.cescfe.numpairs.data.onboarding.OnboardingState
 import org.cescfe.numpairs.data.onboarding.REQUIRED_ONBOARDING_VERSION
+import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesRepository
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
@@ -110,6 +111,7 @@ class AppNavigationLearningFlowTest {
                 AppNavigation(
                     onboardingRepository = onboardingRepository,
                     generatedSessionRepository = FakeGeneratedSessionRepository(),
+                    personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository,
                     generatedModeRegistry = GeneratedModes.registry,
                     generatedPuzzleGenerationUseCaseFactory = fourPairsProviderFactory(puzzleProvider = puzzleProvider)

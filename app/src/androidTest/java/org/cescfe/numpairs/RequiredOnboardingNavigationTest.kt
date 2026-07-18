@@ -15,6 +15,7 @@ import org.cescfe.numpairs.data.onboarding.OnboardingStageCheckpoint
 import org.cescfe.numpairs.data.onboarding.OnboardingState
 import org.cescfe.numpairs.data.onboarding.completedOnboardingState
 import org.cescfe.numpairs.data.onboarding.incompleteOnboardingState
+import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesRepository
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
@@ -161,6 +162,7 @@ class RequiredOnboardingNavigationTest {
                 AppNavigation(
                     onboardingRepository = repository,
                     generatedSessionRepository = FakeGeneratedSessionRepository(),
+                    personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
                     generatedModeRegistry = GeneratedModes.registry,
                     generatedPuzzleGenerationUseCaseFactory = generatedPuzzleFactory()
