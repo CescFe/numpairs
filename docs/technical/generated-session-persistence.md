@@ -2,7 +2,7 @@
 
 ## Document Status
 
-- Status: implemented v7 persistence boundary with the v8 multi-profile contract documented
+- Status: implemented v7 session persistence and v8 remembered-difficulty preference boundaries
 - Product contracts: `docs/product/prd/prd-v7.md` and `docs/product/prd/prd-v8.md`
 - Related generation reference: `docs/product/puzzle-generation.md`
 - Related domain decision: `docs/technical/adr/adr-005-model-sparse-generated-challenges.md`
@@ -44,6 +44,12 @@ Opening the selector, showing a fallback, pressing Play, resuming or restoring a
 a session, completing a puzzle, and using `Play another` do not write this preference. The two mode
 values remain independent, and neither completion nor any other v8 behavior stores progression,
 locks, completion counts, rewards, or statistics.
+
+The remembered values live in the dedicated Preferences DataStore file
+`datastore/generated_difficulty_selection.preferences_pb`. This keeps the aggregate and its
+corruption recovery independent from personalization, onboarding, and the resumable generated
+session. The file stores one stable difficulty id under each stable generated-mode identity; it
+does not store display copy, profile parameters, completion data, or transient selector state.
 
 ---
 
