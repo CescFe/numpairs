@@ -14,6 +14,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import org.cescfe.numpairs.data.generated.selection.createGeneratedDifficultySelectionRepository
 import org.cescfe.numpairs.data.generated.session.createGeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.createOnboardingRuntime
 import org.cescfe.numpairs.data.preferences.PersonalizationPreferences
@@ -32,6 +33,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         val onboardingRuntime = createOnboardingRuntime(applicationContext)
         val generatedSessionRepository = createGeneratedSessionRepository(applicationContext)
+        val generatedDifficultySelectionRepository = createGeneratedDifficultySelectionRepository(applicationContext)
         val personalizationPreferencesRepository = createPersonalizationPreferencesRepository(applicationContext)
         val topAppBarActionDiscoveryRepository = createTopAppBarActionDiscoveryRepository(applicationContext)
         val generatedChallengeCatalog = GeneratedModes.catalog
@@ -54,6 +56,7 @@ class MainActivity : ComponentActivity() {
                 AppNavigation(
                     onboardingRepository = onboardingRuntime.repository,
                     generatedSessionRepository = generatedSessionRepository,
+                    generatedDifficultySelectionRepository = generatedDifficultySelectionRepository,
                     personalizationPreferencesRepository = personalizationPreferencesRepository,
                     topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
                     generatedChallengeCatalog = generatedChallengeCatalog,

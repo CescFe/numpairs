@@ -11,8 +11,8 @@
     <string name="menu_four_pairs_button">Play 4 pairs</string>
     <string name="menu_eight_pairs_button">Play 8 pairs</string>
     <string name="generated_session_choice_title">Unfinished puzzle</string>
-    <string name="generated_session_choice_mode_message">You have an unfinished %1$s puzzle.</string>
-    <string name="generated_session_choice_new_mode_button">New %1$s</string>
+    <string name="generated_session_choice_challenge_message">You have an unfinished %1$s puzzle.</string>
+    <string name="generated_session_choice_new_challenge_button">New %1$s</string>
 
     <!-- Difficulty selector -->
     <string name="difficulty_selector_screen_title">Choose difficulty</string>
@@ -22,6 +22,7 @@
     <string name="generated_difficulty_low">Low</string>
     <string name="generated_difficulty_medium">Medium</string>
     <string name="generated_difficulty_hard">Hard</string>
+    <string name="generated_challenge_title">%1$s · %2$s</string>
 
     <!-- Personalization screen -->
     <string name="personalization_screen_title">Personalization</string>

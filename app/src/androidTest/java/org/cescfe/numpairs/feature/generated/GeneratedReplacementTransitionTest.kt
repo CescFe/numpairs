@@ -15,6 +15,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.CompletableDeferred
+import org.cescfe.numpairs.data.generated.selection.FakeGeneratedDifficultySelectionRepository
 import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
 import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesRepository
@@ -32,6 +33,7 @@ import org.cescfe.numpairs.feature.game.ui.screen.GameScreenRobot
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.ui.navigation.AppNavigation
+import org.cescfe.numpairs.ui.navigation.navigateToSelectedGeneratedChallenge
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -83,6 +85,7 @@ class GeneratedReplacementTransitionTest {
                     AppNavigation(
                         onboardingRepository = FakeOnboardingRepository(),
                         generatedSessionRepository = FakeGeneratedSessionRepository(),
+                        generatedDifficultySelectionRepository = FakeGeneratedDifficultySelectionRepository(),
                         personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(
                             initialPreferences = PersonalizationPreferences(
                                 generatedGameHapticsEnabled = false
@@ -97,9 +100,7 @@ class GeneratedReplacementTransitionTest {
             }
         }
 
-        composeTestRule
-            .onNodeWithTag(menuButtonTag)
-            .performClick()
+        composeTestRule.navigateToSelectedGeneratedChallenge(menuButtonTag)
         gameRobot()
             .scrollToBoard()
             .tapTileOperator(index = 1)

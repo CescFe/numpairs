@@ -14,6 +14,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
+import org.cescfe.numpairs.data.generated.selection.FakeGeneratedDifficultySelectionRepository
 import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
 import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesRepository
@@ -24,6 +25,7 @@ import org.cescfe.numpairs.feature.game.GameRoute
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.ui.navigation.AppNavigation
+import org.cescfe.numpairs.ui.navigation.navigateToSelectedGeneratedChallenge
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -113,6 +115,7 @@ class GeneratedAssignmentHapticsTest {
                     AppNavigation(
                         onboardingRepository = FakeOnboardingRepository(),
                         generatedSessionRepository = FakeGeneratedSessionRepository(),
+                        generatedDifficultySelectionRepository = FakeGeneratedDifficultySelectionRepository(),
                         personalizationPreferencesRepository = preferencesRepository,
                         topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
                         generatedChallengeCatalog = GeneratedModes.catalog,
@@ -131,9 +134,7 @@ class GeneratedAssignmentHapticsTest {
     }
 
     private fun navigateToGeneratedMode(menuButtonTag: String) {
-        composeTestRule
-            .onNodeWithTag(menuButtonTag)
-            .performClick()
+        composeTestRule.navigateToSelectedGeneratedChallenge(menuButtonTag)
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SCREEN)
             .assertIsDisplayed()

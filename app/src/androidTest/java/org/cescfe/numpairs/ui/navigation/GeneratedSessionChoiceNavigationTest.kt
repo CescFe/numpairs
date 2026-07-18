@@ -3,6 +3,7 @@ package org.cescfe.numpairs.ui.navigation
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -13,6 +14,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.data.generated.selection.FakeGeneratedDifficultySelectionRepository
 import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionSnapshot
@@ -29,11 +31,12 @@ import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.generated.GeneratedChallenge
-import org.cescfe.numpairs.feature.generated.GeneratedModeId
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
+import org.cescfe.numpairs.feature.generated.selector.ui.GeneratedDifficultyOptionId
+import org.cescfe.numpairs.feature.generated.selector.ui.GeneratedDifficultySelectorTestTags
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
@@ -52,9 +55,7 @@ class GeneratedSessionChoiceNavigationTest {
         val repository = FakeGeneratedSessionRepository()
         val recorder = setContent(repository)
 
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
-            .performClick()
+        composeTestRule.navigateToSelectedGeneratedChallenge(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
 
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.SESSION_CHOICE_DIALOG)
@@ -63,7 +64,7 @@ class GeneratedSessionChoiceNavigationTest {
             .onNodeWithTag(GameScreenTestTags.SCREEN)
             .assertIsDisplayed()
         composeTestRule.runOnIdle {
-            assertEquals(listOf(GeneratedModes.FOUR_PAIRS.id), recorder.generatedModes)
+            assertEquals(listOf(GeneratedModes.FOUR_PAIRS_LOW), recorder.generatedChallenges)
         }
     }
 
@@ -73,16 +74,14 @@ class GeneratedSessionChoiceNavigationTest {
         val repository = FakeGeneratedSessionRepository(initialSession = snapshot)
         val recorder = setContent(repository)
 
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
-            .performClick()
+        composeTestRule.navigateToSelectedGeneratedChallenge(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
 
         assertChoiceDialogVisible()
         composeTestRule
             .onNodeWithText(
                 string(
-                    R.string.generated_session_choice_mode_message,
-                    string(R.string.four_pairs_screen_title)
+                    R.string.generated_session_choice_challenge_message,
+                    challengeName(R.string.four_pairs_screen_title, R.string.generated_difficulty_low)
                 )
             )
             .assertIsDisplayed()
@@ -92,13 +91,13 @@ class GeneratedSessionChoiceNavigationTest {
         composeTestRule
             .onNodeWithText(
                 string(
-                    R.string.generated_session_choice_new_mode_button,
-                    string(R.string.four_pairs_screen_title)
+                    R.string.generated_session_choice_new_challenge_button,
+                    challengeName(R.string.four_pairs_screen_title, R.string.generated_difficulty_low)
                 )
             )
             .assertIsDisplayed()
         composeTestRule.runOnIdle {
-            assertTrue(recorder.generatedModes.isEmpty())
+            assertTrue(recorder.generatedChallenges.isEmpty())
             assertEquals(snapshot, repository.session.value)
         }
 
@@ -110,8 +109,57 @@ class GeneratedSessionChoiceNavigationTest {
             .onNodeWithTag(GameScreenTestTags.SCREEN)
             .assertIsDisplayed()
         composeTestRule.runOnIdle {
-            assertTrue(recorder.generatedModes.isEmpty())
+            assertTrue(recorder.generatedChallenges.isEmpty())
             assertEquals(snapshot, repository.session.value)
+        }
+    }
+
+    @Test
+    fun same_mode_different_difficulty_copy_and_replacement_identify_both_challenges() {
+        val snapshot = resumableFourPairsSnapshot()
+        val repository = FakeGeneratedSessionRepository(initialSession = snapshot)
+        val difficultyRepository = FakeGeneratedDifficultySelectionRepository()
+        val recorder = setContent(
+            repository = repository,
+            difficultyRepository = difficultyRepository
+        )
+
+        composeTestRule.onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON).performClick()
+        composeTestRule
+            .onNodeWithTag(
+                GeneratedDifficultySelectorTestTags.option(
+                    GeneratedDifficultyOptionId(GeneratedModes.FOUR_PAIRS_MEDIUM.id.value)
+                )
+            )
+            .performClick()
+            .assertIsSelected()
+        composeTestRule.onNodeWithTag(GeneratedDifficultySelectorTestTags.PLAY_BUTTON).performClick()
+
+        assertChoiceDialogVisible()
+        composeTestRule
+            .onNodeWithText(
+                string(
+                    R.string.generated_session_choice_challenge_message,
+                    challengeName(R.string.four_pairs_screen_title, R.string.generated_difficulty_low)
+                )
+            )
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(
+                string(
+                    R.string.generated_session_choice_new_challenge_button,
+                    challengeName(R.string.four_pairs_screen_title, R.string.generated_difficulty_medium)
+                )
+            )
+            .performClick()
+
+        composeTestRule.onNodeWithTag(GameScreenTestTags.SCREEN).assertIsDisplayed()
+        composeTestRule.runOnIdle {
+            assertEquals(listOf(GeneratedModes.FOUR_PAIRS_MEDIUM), recorder.generatedChallenges)
+            assertEquals(
+                GeneratedModes.FOUR_PAIRS_MEDIUM.profile.id.value,
+                repository.session.value?.profileId
+            )
         }
     }
 
@@ -121,16 +169,14 @@ class GeneratedSessionChoiceNavigationTest {
         val repository = FakeGeneratedSessionRepository(initialSession = snapshot)
         val recorder = setContent(repository)
 
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_BUTTON)
-            .performClick()
+        composeTestRule.navigateToSelectedGeneratedChallenge(MenuScreenTestTags.EIGHT_PAIRS_BUTTON)
 
         assertChoiceDialogVisible()
         composeTestRule
             .onNodeWithText(
                 string(
-                    R.string.generated_session_choice_mode_message,
-                    string(R.string.four_pairs_screen_title)
+                    R.string.generated_session_choice_challenge_message,
+                    challengeName(R.string.four_pairs_screen_title, R.string.generated_difficulty_low)
                 )
             )
             .assertIsDisplayed()
@@ -140,8 +186,8 @@ class GeneratedSessionChoiceNavigationTest {
         composeTestRule
             .onNodeWithText(
                 string(
-                    R.string.generated_session_choice_new_mode_button,
-                    string(R.string.eight_pairs_screen_title)
+                    R.string.generated_session_choice_new_challenge_button,
+                    challengeName(R.string.eight_pairs_screen_title, R.string.generated_difficulty_medium)
                 )
             )
             .assertIsDisplayed()
@@ -154,7 +200,7 @@ class GeneratedSessionChoiceNavigationTest {
             .onNodeWithTag(GameScreenTestTags.SCREEN)
             .assertIsDisplayed()
         composeTestRule.runOnIdle {
-            assertEquals(listOf(GeneratedModes.EIGHT_PAIRS.id), recorder.generatedModes)
+            assertEquals(listOf(GeneratedModes.EIGHT_PAIRS_MEDIUM), recorder.generatedChallenges)
             assertEquals(GeneratedModes.EIGHT_PAIRS.id.value, repository.session.value?.modeId)
         }
     }
@@ -165,16 +211,13 @@ class GeneratedSessionChoiceNavigationTest {
         val repository = FakeGeneratedSessionRepository(initialSession = snapshot)
         val recorder = setContent(repository)
 
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_BUTTON)
-            .performClick()
+        composeTestRule.navigateToSelectedGeneratedChallenge(MenuScreenTestTags.EIGHT_PAIRS_BUTTON)
         assertChoiceDialogVisible()
         pressBackUnconditionally()
         assertDismissedWithoutSideEffects(snapshot, repository, recorder)
+        pressBackUnconditionally()
 
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
-            .performClick()
+        composeTestRule.navigateToSelectedGeneratedChallenge(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
         assertChoiceDialogVisible()
         composeTestRule
             .onRoot()
@@ -202,27 +245,32 @@ class GeneratedSessionChoiceNavigationTest {
             .onNodeWithTag(MenuScreenTestTags.SESSION_CHOICE_DIALOG)
             .assertDoesNotExist()
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.SCREEN)
+            .onNodeWithTag(GeneratedDifficultySelectorTestTags.SCREEN)
             .assertIsDisplayed()
         composeTestRule.runOnIdle {
-            assertTrue(recorder.generatedModes.isEmpty())
+            assertTrue(recorder.generatedChallenges.isEmpty())
             assertEquals(snapshot, repository.session.value)
         }
     }
 
-    private fun setContent(repository: FakeGeneratedSessionRepository): GenerationRecorder {
+    private fun setContent(
+        repository: FakeGeneratedSessionRepository,
+        difficultyRepository: FakeGeneratedDifficultySelectionRepository =
+            FakeGeneratedDifficultySelectionRepository()
+    ): GenerationRecorder {
         val recorder = GenerationRecorder()
         composeTestRule.setContent {
             NumPairsTheme {
                 AppNavigation(
                     onboardingRepository = FakeOnboardingRepository(),
                     generatedSessionRepository = repository,
+                    generatedDifficultySelectionRepository = difficultyRepository,
                     personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
                     generatedChallengeCatalog = GeneratedModes.catalog,
                     generatedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory { challenge ->
                         GeneratedPuzzleGenerationUseCase { request ->
-                            recorder.generatedModes += challenge.modeId
+                            recorder.generatedChallenges += challenge
                             GeneratedPuzzleGenerationResult.Generated(
                                 request = request,
                                 initialPuzzle = initialPuzzleFor(challenge)
@@ -264,8 +312,14 @@ class GeneratedSessionChoiceNavigationTest {
     private fun string(stringResId: Int, vararg formatArgs: Any): String =
         composeTestRule.activity.getString(stringResId, *formatArgs)
 
+    private fun challengeName(modeNameResource: Int, difficultyNameResource: Int): String = string(
+        R.string.generated_challenge_title,
+        string(modeNameResource),
+        string(difficultyNameResource)
+    )
+
     private class GenerationRecorder {
-        val generatedModes = mutableListOf<GeneratedModeId>()
+        val generatedChallenges = mutableListOf<GeneratedChallenge>()
     }
 
     private companion object {

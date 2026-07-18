@@ -10,8 +10,8 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.cescfe.numpairs.data.generated.selection.FakeGeneratedDifficultySelectionRepository
 import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
 import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesRepository
@@ -30,6 +30,7 @@ import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.game.ui.semantics.CorrectTileFeedbackIdKey
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.ui.navigation.AppNavigation
+import org.cescfe.numpairs.ui.navigation.navigateToSelectedGeneratedChallenge
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Rule
 import org.junit.Test
@@ -110,6 +111,7 @@ class CorrectTileMotionTest {
                 AppNavigation(
                     onboardingRepository = FakeOnboardingRepository(),
                     generatedSessionRepository = FakeGeneratedSessionRepository(),
+                    generatedDifficultySelectionRepository = FakeGeneratedDifficultySelectionRepository(),
                     personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(
                         initialPreferences = PersonalizationPreferences(
                             generatedGameHapticsEnabled = false
@@ -129,9 +131,7 @@ class CorrectTileMotionTest {
             }
         }
 
-        composeTestRule
-            .onNodeWithTag(menuButtonTag)
-            .performClick()
+        composeTestRule.navigateToSelectedGeneratedChallenge(menuButtonTag)
         gameRobot()
             .scrollToBoard()
             .tapTileOperator(index = 0)

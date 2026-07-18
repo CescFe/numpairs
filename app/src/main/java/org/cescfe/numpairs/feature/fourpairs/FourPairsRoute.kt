@@ -32,6 +32,7 @@ fun FourPairsRoute(
     generationUseCase: GeneratedPuzzleGenerationUseCase,
     launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.DefaultNewPuzzle,
     challenge: GeneratedChallenge = GeneratedModes.FOUR_PAIRS_LOW,
+    title: String? = null,
     isGeneratedGameHapticsEnabled: Boolean = true,
     tutorialOverlayMode: TutorialMode? = null,
     onTutorialOverlayClosed: () -> Unit = {},
@@ -59,7 +60,7 @@ fun FourPairsRoute(
         GeneratedModeRoute(
             challenge = challenge,
             launchIntent = launchIntent,
-            title = stringResource(R.string.four_pairs_screen_title),
+            title = title ?: stringResource(R.string.four_pairs_screen_title),
             generationUseCase = generationUseCase,
             generatedSessionRepository = generatedSessionRepository,
             isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,

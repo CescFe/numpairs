@@ -20,6 +20,11 @@ class LocalizationResourceTest {
         assertEquals("Cómo jugar", resources.getString(R.string.menu_tutorial_button))
         assertEquals("Personalización", resources.getString(R.string.menu_personalization_button))
         assertEquals("8 pares", resources.getString(R.string.eight_pairs_screen_title))
+        assertEquals("Alta", resources.getString(R.string.generated_difficulty_hard))
+        assertEquals(
+            "8 pares · Alta",
+            resources.getString(R.string.generated_challenge_title, "8 pares", "Alta")
+        )
         assertEquals("Serie", resources.getString(R.string.strip_content_description))
         assertEquals("Paso 1 de 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))
         assertEquals("Ya sé jugar", resources.getString(R.string.onboarding_early_validation_button))
@@ -35,6 +40,11 @@ class LocalizationResourceTest {
         assertEquals("Com jugar", resources.getString(R.string.menu_tutorial_button))
         assertEquals("Personalització", resources.getString(R.string.menu_personalization_button))
         assertEquals("8 parelles", resources.getString(R.string.eight_pairs_screen_title))
+        assertEquals("Alta", resources.getString(R.string.generated_difficulty_hard))
+        assertEquals(
+            "8 parelles · Alta",
+            resources.getString(R.string.generated_challenge_title, "8 parelles", "Alta")
+        )
         assertEquals("Sèrie", resources.getString(R.string.strip_content_description))
         assertEquals("Pas 1 de 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))
         assertEquals("Ja sé jugar", resources.getString(R.string.onboarding_early_validation_button))
@@ -50,6 +60,11 @@ class LocalizationResourceTest {
         assertEquals("How to play", resources.getString(R.string.menu_tutorial_button))
         assertEquals("Personalization", resources.getString(R.string.menu_personalization_button))
         assertEquals("8 pairs", resources.getString(R.string.eight_pairs_screen_title))
+        assertEquals("Hard", resources.getString(R.string.generated_difficulty_hard))
+        assertEquals(
+            "8 pairs · Hard",
+            resources.getString(R.string.generated_challenge_title, "8 pairs", "Hard")
+        )
         assertEquals("Strip", resources.getString(R.string.strip_content_description))
         assertEquals("Step 1 of 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))
         assertEquals("I know how to play", resources.getString(R.string.onboarding_early_validation_button))

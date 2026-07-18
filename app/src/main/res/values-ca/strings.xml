@@ -11,8 +11,8 @@
     <string name="menu_four_pairs_button">Juga a 4 parelles</string>
     <string name="menu_eight_pairs_button">Juga a 8 parelles</string>
     <string name="generated_session_choice_title">Puzle sense acabar</string>
-    <string name="generated_session_choice_mode_message">Tens un puzle de %1$s sense acabar.</string>
-    <string name="generated_session_choice_new_mode_button">Puzle nou de %1$s</string>
+    <string name="generated_session_choice_challenge_message">Tens un puzle de %1$s sense acabar.</string>
+    <string name="generated_session_choice_new_challenge_button">Puzle nou de %1$s</string>
 
     <!-- Difficulty selector -->
     <string name="difficulty_selector_screen_title">Tria la dificultat</string>
@@ -22,6 +22,7 @@
     <string name="generated_difficulty_low">Baixa</string>
     <string name="generated_difficulty_medium">Mitjana</string>
     <string name="generated_difficulty_hard">Alta</string>
+    <string name="generated_challenge_title">%1$s · %2$s</string>
 
     <!-- Personalization screen -->
     <string name="personalization_screen_title">Personalització</string>

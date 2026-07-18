@@ -51,6 +51,11 @@ corruption recovery independent from personalization, onboarding, and the resuma
 session. The file stores one stable difficulty id under each stable generated-mode identity; it
 does not store display copy, profile parameters, completion data, or transient selector state.
 
+`MainActivity` creates one application-scoped remembered-difficulty repository. Only the
+mode-specific selector route receives its write operation. Menu resume, generated-session
+restoration, generated gameplay, and `Play another` resolve their exact stored challenge without
+receiving or mutating this preference boundary.
+
 ---
 
 ## Versioned Snapshot
