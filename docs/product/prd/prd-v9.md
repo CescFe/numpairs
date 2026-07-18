@@ -233,6 +233,14 @@ Typography, shapes, spacing, elevation, interaction size, and layout remain shar
 
 Resolve platform behavior before committing to one implementation.
 
+The v9 decision is recorded in
+[ADR-004](../../technical/adr/adr-004-keep-v9-platform-branding-static.md). Android resolves
+the system starting window before NumPairs can asynchronously read its DataStore preference,
+and component-based launcher variants do not provide sufficiently reliable refresh, recents,
+shortcut, and process behavior for this release. v9 therefore keeps the existing Warm
+platform splash and launcher assets, preserves the monochrome layer for launcher-controlled
+system theming, and applies the selected palette to in-app branding only.
+
 The technical investigation must:
 
 - verify when the stored theme can be resolved relative to Android starting-window creation
@@ -357,6 +365,12 @@ Work:
 ### Stage 3 - Platform Brand Assets
 
 Outcome: splash and launcher behavior is implemented to the reliable extent supported by Android, with verified fallbacks and documented limits.
+
+Decision: [ADR-004](../../technical/adr/adr-004-keep-v9-platform-branding-static.md) records
+that the reliable v9 extent is the existing static Warm platform splash and launcher
+identity. No runtime splash or launcher component switching remains justified for this
+milestone; the selected theme continues from the system splash into theme-aware in-app
+branding once the preference is available.
 
 Work:
 
