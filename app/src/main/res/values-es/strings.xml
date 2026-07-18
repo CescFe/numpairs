@@ -11,8 +11,8 @@
     <string name="menu_four_pairs_button">Jugar 4 pares</string>
     <string name="menu_eight_pairs_button">Jugar 8 pares</string>
     <string name="generated_session_choice_title">Puzle sin terminar</string>
-    <string name="generated_session_choice_mode_message">Tienes un puzle de %1$s sin terminar.</string>
-    <string name="generated_session_choice_new_mode_button">Nuevo puzle de %1$s</string>
+    <string name="generated_session_choice_challenge_message">Tienes un puzle de %1$s sin terminar.</string>
+    <string name="generated_session_choice_new_challenge_button">Nuevo puzle de %1$s</string>
 
     <!-- Difficulty selector -->
     <string name="difficulty_selector_screen_title">Elige la dificultad</string>
@@ -22,6 +22,7 @@
     <string name="generated_difficulty_low">Baja</string>
     <string name="generated_difficulty_medium">Media</string>
     <string name="generated_difficulty_hard">Alta</string>
+    <string name="generated_challenge_title">%1$s · %2$s</string>
 
     <!-- Personalization screen -->
     <string name="personalization_screen_title">Personalización</string>

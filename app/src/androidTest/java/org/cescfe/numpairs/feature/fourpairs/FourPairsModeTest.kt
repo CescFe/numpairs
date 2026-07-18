@@ -16,6 +16,9 @@ import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfiles
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
+import org.cescfe.numpairs.feature.generated.GeneratedModes
+import org.cescfe.numpairs.feature.generated.selector.ui.GeneratedDifficultyOptionId
+import org.cescfe.numpairs.feature.generated.selector.ui.GeneratedDifficultySelectorTestTags
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -159,6 +162,16 @@ class FourPairsModeTest {
             .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
             .assertIsDisplayed()
             .performClick()
+        composeTestRule
+            .onNodeWithTag(
+                GeneratedDifficultySelectorTestTags.option(
+                    GeneratedDifficultyOptionId(GeneratedModes.FOUR_PAIRS_LOW.id.value)
+                )
+            )
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(GeneratedDifficultySelectorTestTags.PLAY_BUTTON)
+            .performClick()
 
         composeTestRule.waitUntil(timeoutMillis = PUZZLE_GENERATION_TIMEOUT_MS) {
             composeTestRule
@@ -211,7 +224,11 @@ class FourPairsModeTest {
 
     private fun backButtonContentDescription(): String = string(R.string.back_button_content_description)
 
-    private fun fourPairsScreenTitle(): String = string(R.string.four_pairs_screen_title)
+    private fun fourPairsScreenTitle(): String = string(
+        R.string.generated_challenge_title,
+        string(R.string.four_pairs_screen_title),
+        string(R.string.generated_difficulty_low)
+    )
 
     private fun string(stringResId: Int, vararg formatArgs: Any): String = if (formatArgs.isEmpty()) {
         composeTestRule.activity.getString(stringResId)

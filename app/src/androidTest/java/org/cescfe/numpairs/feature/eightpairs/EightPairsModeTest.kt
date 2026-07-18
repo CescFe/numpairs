@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.data.generated.selection.FakeGeneratedDifficultySelectionRepository
 import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
 import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesRepository
@@ -27,6 +28,7 @@ import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.ui.navigation.AppNavigation
+import org.cescfe.numpairs.ui.navigation.navigateToSelectedGeneratedChallenge
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -69,7 +71,13 @@ class EightPairsModeTest {
         navigateToEightPairs()
 
         composeTestRule
-            .onNodeWithText(string(R.string.eight_pairs_screen_title))
+            .onNodeWithText(
+                string(
+                    R.string.generated_challenge_title,
+                    string(R.string.eight_pairs_screen_title),
+                    string(R.string.generated_difficulty_medium)
+                )
+            )
             .assertIsDisplayed()
         assertEquals(1, puzzleProvider.requestCount)
     }
@@ -115,6 +123,7 @@ class EightPairsModeTest {
                 AppNavigation(
                     onboardingRepository = FakeOnboardingRepository(),
                     generatedSessionRepository = FakeGeneratedSessionRepository(),
+                    generatedDifficultySelectionRepository = FakeGeneratedDifficultySelectionRepository(),
                     personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
                     generatedChallengeCatalog = GeneratedModes.catalog,
@@ -127,10 +136,7 @@ class EightPairsModeTest {
     }
 
     private fun navigateToEightPairs() {
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_BUTTON)
-            .assertIsDisplayed()
-            .performClick()
+        composeTestRule.navigateToSelectedGeneratedChallenge(MenuScreenTestTags.EIGHT_PAIRS_BUTTON)
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SCREEN)
@@ -155,7 +161,8 @@ class EightPairsModeTest {
         )
     )
 
-    private fun string(stringResId: Int): String = composeTestRule.activity.getString(stringResId)
+    private fun string(stringResId: Int, vararg formatArgs: Any): String =
+        composeTestRule.activity.getString(stringResId, *formatArgs)
 
     private fun eightPairsProviderFactory(
         puzzleProvider: RecordingGeneratedPuzzleProvider

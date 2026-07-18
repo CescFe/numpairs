@@ -14,6 +14,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.cescfe.numpairs.data.generated.selection.FakeGeneratedDifficultySelectionRepository
 import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
 import org.cescfe.numpairs.data.onboarding.OnboardingPostCorePath
@@ -34,6 +35,7 @@ import org.cescfe.numpairs.feature.tutorial.TutorialContent
 import org.cescfe.numpairs.feature.tutorial.TutorialMode
 import org.cescfe.numpairs.feature.tutorial.ui.TutorialScreenTestTags
 import org.cescfe.numpairs.ui.navigation.AppNavigation
+import org.cescfe.numpairs.ui.navigation.navigateToSelectedGeneratedChallenge
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -111,6 +113,7 @@ class AppNavigationLearningFlowTest {
                 AppNavigation(
                     onboardingRepository = onboardingRepository,
                     generatedSessionRepository = FakeGeneratedSessionRepository(),
+                    generatedDifficultySelectionRepository = FakeGeneratedDifficultySelectionRepository(),
                     personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository,
                     generatedChallengeCatalog = GeneratedModes.catalog,
@@ -125,10 +128,7 @@ class AppNavigationLearningFlowTest {
     }
 
     private fun navigateToFourPairs() {
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
-            .assertIsDisplayed()
-            .performClick()
+        composeTestRule.navigateToSelectedGeneratedChallenge(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SCREEN)

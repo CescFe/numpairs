@@ -78,6 +78,38 @@ class GeneratedPuzzleViewModelTest {
     }
 
     @Test
+    fun hard_replay_keeps_the_exact_mode_and_profile_for_the_successor_session() {
+        val requests = mutableListOf<GeneratedPuzzleGenerationRequest>()
+        val repository = RecordingGeneratedSessionRepository()
+        val viewModel = GeneratedPuzzleViewModel(
+            challenge = GeneratedModes.EIGHT_PAIRS_HARD,
+            generationUseCase = GeneratedPuzzleGenerationUseCase { request ->
+                requests += request
+                GeneratedPuzzleGenerationResult.Generated(
+                    request = request,
+                    initialPuzzle = samplePuzzle
+                )
+            },
+            generatedSessionRepository = repository,
+            seedSource = QueueGeneratedPuzzleSeedSource(71, 73),
+            sessionIdSource = QueueGeneratedSessionIdSource("hard-first", "hard-replay")
+        )
+
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        viewModel.onNewPuzzleRequested()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val ready = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready
+        assertEquals(listOf(71, 73), requests.map(GeneratedPuzzleGenerationRequest::seed))
+        assertTrue(requests.all { request -> request.profileId == GeneratedModes.EIGHT_PAIRS_HARD.profile.id })
+        assertEquals(GeneratedSessionId("hard-replay"), ready.session.id)
+        assertEquals(GeneratedModes.EIGHT_PAIRS.id.value, ready.session.snapshot.modeId)
+        assertEquals(GeneratedModes.EIGHT_PAIRS_HARD.profile.id.value, ready.session.snapshot.profileId)
+        assertEquals(ready.session.snapshot, repository.session.value)
+    }
+
+    @Test
     fun replay_is_deduplicated_and_a_failure_keeps_the_completed_session_until_retry_succeeds() {
         val firstPuzzle = CompletableDeferred(samplePuzzle)
         val replayFailure = CompletableDeferred(true)

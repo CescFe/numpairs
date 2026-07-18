@@ -7,7 +7,7 @@ import org.cescfe.numpairs.feature.menu.ui.MenuScreen
 @Composable
 fun MenuRoute(
     modifier: Modifier = Modifier,
-    resumeModeName: String? = null,
+    resumeChallengeName: String? = null,
     onResumeSelected: () -> Unit = {},
     onTutorialSelected: () -> Unit = {},
     onPersonalizationSelected: () -> Unit = {},
@@ -16,7 +16,7 @@ fun MenuRoute(
 ) {
     MenuScreen(
         modifier = modifier,
-        resumeModeName = resumeModeName,
+        resumeChallengeName = resumeChallengeName,
         onResumeSelected = onResumeSelected,
         onTutorialSelected = onTutorialSelected,
         onPersonalizationSelected = onPersonalizationSelected,

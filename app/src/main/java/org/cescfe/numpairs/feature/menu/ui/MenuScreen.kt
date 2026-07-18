@@ -40,7 +40,7 @@ import org.cescfe.numpairs.ui.theme.NumPairsThemePreviewParameterProvider
 @Composable
 fun MenuScreen(
     modifier: Modifier = Modifier,
-    resumeModeName: String? = null,
+    resumeChallengeName: String? = null,
     onResumeSelected: () -> Unit = {},
     onTutorialSelected: () -> Unit = {},
     onPersonalizationSelected: () -> Unit = {},
@@ -75,10 +75,10 @@ fun MenuScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    resumeModeName?.let { modeName ->
+                    resumeChallengeName?.let { challengeName ->
                         val resumeContentDescription = stringResource(
                             R.string.menu_resume_content_description,
-                            modeName
+                            challengeName
                         )
                         NumPairsComponents.PrimaryCtaButton(
                             onClick = onResumeSelected,

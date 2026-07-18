@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.data.generated.selection.FakeGeneratedDifficultySelectionRepository
 import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionSnapshot
@@ -66,7 +67,7 @@ class GeneratedSessionResumeNavigationTest {
             .assertContentDescriptionEquals(
                 string(
                     R.string.menu_resume_content_description,
-                    string(R.string.four_pairs_screen_title)
+                    challengeName(R.string.four_pairs_screen_title, R.string.generated_difficulty_low)
                 )
             )
         val resumeTop = resumeNode.fetchSemanticsNode().boundsInRoot.top
@@ -121,6 +122,7 @@ class GeneratedSessionResumeNavigationTest {
                 AppNavigation(
                     onboardingRepository = FakeOnboardingRepository(),
                     generatedSessionRepository = repository,
+                    generatedDifficultySelectionRepository = FakeGeneratedDifficultySelectionRepository(),
                     personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
                     generatedChallengeCatalog = GeneratedModes.catalog,
@@ -140,6 +142,12 @@ class GeneratedSessionResumeNavigationTest {
 
     private fun string(stringResId: Int, vararg formatArgs: Any): String =
         composeTestRule.activity.getString(stringResId, *formatArgs)
+
+    private fun challengeName(modeNameResource: Int, difficultyNameResource: Int): String = string(
+        R.string.generated_challenge_title,
+        string(modeNameResource),
+        string(difficultyNameResource)
+    )
 
     private class GenerationCounter {
         var count: Int = 0

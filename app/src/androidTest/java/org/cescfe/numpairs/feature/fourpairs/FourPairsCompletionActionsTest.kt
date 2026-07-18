@@ -15,6 +15,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.data.generated.selection.FakeGeneratedDifficultySelectionRepository
 import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
 import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesRepository
@@ -33,6 +34,7 @@ import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.ui.navigation.AppNavigation
+import org.cescfe.numpairs.ui.navigation.navigateToSelectedGeneratedChallenge
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -211,6 +213,7 @@ class FourPairsCompletionActionsTest {
                 AppNavigation(
                     onboardingRepository = FakeOnboardingRepository(),
                     generatedSessionRepository = generatedSessionRepository,
+                    generatedDifficultySelectionRepository = FakeGeneratedDifficultySelectionRepository(),
                     personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository,
                     generatedChallengeCatalog = GeneratedModes.catalog,
@@ -221,10 +224,7 @@ class FourPairsCompletionActionsTest {
     }
 
     private fun navigateToFourPairs() {
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
-            .assertIsDisplayed()
-            .performClick()
+        composeTestRule.navigateToSelectedGeneratedChallenge(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
     }
 
     private fun completeFirstTile(operator: Operator) {

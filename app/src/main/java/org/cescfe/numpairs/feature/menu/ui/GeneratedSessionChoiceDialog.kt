@@ -14,8 +14,8 @@ import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
 @Composable
 internal fun GeneratedSessionChoiceDialog(
-    savedModeName: String,
-    selectedModeName: String,
+    savedChallengeName: String,
+    selectedChallengeName: String,
     onResume: () -> Unit,
     onNewPuzzle: () -> Unit,
     onDismiss: () -> Unit
@@ -36,8 +36,8 @@ internal fun GeneratedSessionChoiceDialog(
         text = {
             Text(
                 text = stringResource(
-                    R.string.generated_session_choice_mode_message,
-                    savedModeName
+                    R.string.generated_session_choice_challenge_message,
+                    savedChallengeName
                 ),
                 style = MaterialTheme.typography.bodyLarge
             )
@@ -63,8 +63,8 @@ internal fun GeneratedSessionChoiceDialog(
             ) {
                 Text(
                     text = stringResource(
-                        R.string.generated_session_choice_new_mode_button,
-                        selectedModeName
+                        R.string.generated_session_choice_new_challenge_button,
+                        selectedChallengeName
                     ),
                     style = MaterialTheme.typography.labelLarge
                 )
