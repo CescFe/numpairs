@@ -2,8 +2,9 @@
 
 ## Overview
 
-This document defines the current menu, personalization, generated-session routing,
-generated-game feedback, completion, and in-puzzle interaction model for NumPairs.
+This document defines the current menu, generated difficulty selection, personalization,
+generated-session routing, generated-game feedback, completion, and in-puzzle interaction model
+for NumPairs.
 
 It complements the game rules described in [game-rules.md](./game-rules.md) and focuses on:
 
@@ -11,8 +12,9 @@ It complements the game rules described in [game-rules.md](./game-rules.md) and 
 2. Result grid behavior
 3. Contextual editing flows
 4. Gameplay top bar helper behavior
-5. Generated-session menu, replacement, and completion behavior
-6. Persistent color personalization and generated-only feedback
+5. Generated difficulty selection and remembered defaults
+6. Generated-session menu, replacement, and completion behavior
+7. Persistent color personalization and generated-only feedback
 
 This is the interaction baseline shared where applicable by Tutorial, generated `4 Pairs`, and generated `8 Pairs` gameplay.
 
@@ -20,6 +22,9 @@ Required-onboarding behavior is documented in
 [PRD v6](./product/prd/prd-v6.md). The reliable-session product contract is documented in
 [PRD v7](./product/prd/prd-v7.md), and its storage boundary is documented in
 [generated-session-persistence.md](./technical/generated-session-persistence.md).
+Generated difficulty selection and challenge expansion are documented in
+[PRD v8](./product/prd/prd-v8.md), and the sparse challenge catalog is recorded in
+[ADR-005](./technical/adr/adr-005-model-sparse-generated-challenges.md).
 Personalization and generated-game feedback are documented in
 [PRD v9](./product/prd/prd-v9.md); the platform-branding boundary is recorded in
 [ADR-004](./technical/adr/adr-004-keep-v9-platform-branding-static.md).
@@ -37,6 +42,8 @@ Personalization and generated-game feedback are documented in
 - **Entry dialog**: the dialog used to enter or edit a number in the strip
 - **Rules helper**: an informational dialog opened from the game top app bar to explain core game rules
 - **Usage indicator**: a compact `+` or `×` marker that shows whether a visible strip entry is already used by that operator family
+- **Difficulty selector**: the mode-specific destination used to choose one supported generated
+  challenge before starting it
 
 In this document, strip items are rendered as chips.
 
@@ -53,7 +60,7 @@ In this document, strip items are rendered as chips.
 
 ---
 
-## Normal Menu And Generated Session Routing
+## Normal Menu, Difficulty Selection, And Generated Session Routing
 
 The unlocked normal menu renders actions in this order:
 
@@ -65,18 +72,57 @@ The unlocked normal menu renders actions in this order:
 
 `Resume` and both generated-mode actions use the primary CTA treatment. `How to play` and
 `Personalization` use the lower-emphasis secondary treatment. The localized `Resume`
-accessibility description identifies whether the saved puzzle belongs to 4 or 8 Pairs.
+accessibility description identifies the saved mode and difficulty, for example
+`Resume 4 Pairs · Medium puzzle`.
 
 The application derives menu resumability from the one global generated-session slot. Missing, solved, unknown-mode, mode/profile-mismatched, corrupt, and unsupported snapshots do not expose `Resume`.
 
 Selecting `Resume` opens the saved mode and exact current puzzle without generation.
 
-Selecting either generated-mode action while a resumable session exists opens the same modal choice:
+Selecting `Play 4 Pairs` or `Play 8 Pairs` always opens that mode's dedicated difficulty
+selector. Entering the selector does not generate a puzzle, replace a session, or persist a
+difficulty.
+
+### Difficulty Selector
+
+The selector shows only challenges present in the supported generated-challenge catalog:
+
+- `4 Pairs` shows `Low` and `Medium`
+- `8 Pairs` shows `Medium` and `Hard`
+
+All shown options are enabled from the beginning. The selector has no locked option, progress
+indicator, completion requirement, reward, or explanation of how to unlock content. Selection is
+communicated through label and control state rather than color alone, and every option and action
+keeps the established minimum touch target and readable text-scaling behavior.
+
+On entry, the selected option is the last supported difficulty the player explicitly chose for
+that mode. The two modes remember their choices independently. A missing, corrupt, unknown, or
+unsupported stored value is presented using `Low` for `4 Pairs` and `Medium` for `8 Pairs` without
+rewriting storage.
+
+Tapping a supported difficulty makes it the current option and immediately persists that explicit
+choice for the selected mode. Merely entering the selector, displaying a fallback, or leaving by
+system back or the visible back action does not write a preference. The back actions return to the
+normal menu without starting a puzzle or changing the generated-session slot.
+
+The primary action identifies the exact requested challenge, for example
+`Play 4 Pairs · Medium`. Activating it starts the existing resume-or-replace routing for that
+challenge. Difficulty is fixed once play begins; generated gameplay and completion do not expose a
+change-difficulty action.
+
+### Resume Or Replace
+
+Activating the selector's primary action while a resumable session exists opens the same modal
+choice:
 
 - primary: `Resume`
-- secondary: start a new puzzle for the mode the player selected
+- secondary: start a new puzzle for the mode and difficulty the player selected
 
-Both same-mode and different-mode selections use one concise supporting message: `You have an unfinished <saved mode> puzzle.` The message uses the larger body text treatment. The secondary label always identifies the requested replacement mode as `New <selected mode>`.
+Same-challenge, same-mode/different-difficulty, and different-mode selections use one concise
+supporting message: `You have an unfinished <saved mode> · <saved difficulty> puzzle.` The message
+uses the larger body text treatment. The secondary label always identifies the requested
+replacement challenge as `New <selected mode> · <selected difficulty>`. The primary action's
+accessibility description identifies the saved challenge.
 
 The primary action uses the shared primary CTA treatment and established button shape.
 
@@ -108,7 +154,8 @@ and hidden states remain shared.
 The screen also exposes one `Game haptics` preference. It defaults to enabled, persists
 independently from onboarding and generated sessions, and controls only accepted-assignment
 haptics in generated games. Android's system touch-feedback setting remains authoritative.
-There are no sound, error-haptic, typography, shape, motion, or difficulty controls.
+There are no sound, error-haptic, typography, shape, motion, or difficulty controls on the
+Personalization screen. Generated difficulty is selected only through the mode-specific selector.
 
 In-app NumPairs branding follows the selected appearance palette. The system splash and
 launcher stay static and Warm. The packaged monochrome icon remains available for Android
@@ -126,13 +173,17 @@ and the completion surface enters once. Recomposition, restoration, preview stat
 already-solved initial puzzle do not replay the celebration. Completion actions remain
 usable throughout the final visual state.
 
-`Play another` runs the existing bounded generation and safe-replacement pipeline. The
-solved puzzle remains visible while its successor is generating, validating, or being
+`Play another` runs the existing bounded generation and safe-replacement pipeline for the exact
+mode and difficulty of the completed session. It does not consult or rewrite either remembered
+selector default. The solved puzzle remains visible while its successor is generating, validating,
+or being
 stored. Failure or cancellation keeps the completion surface available. Only after a
 successor is safely stored and adopted does a brief entrance transition introduce it; the
 transition is transient and is not persisted.
 
-Solving clears menu resumability before `Back to menu` returns to the menu. There is no `Change difficulty`, restart, timer, or additional completion action.
+Solving clears menu resumability before `Back to menu` returns to the menu. Completion does not
+record progression or completion counts. There is no `Change difficulty`, restart, timer, or
+additional completion action.
 
 ---
 
@@ -167,12 +218,17 @@ final state when system animation duration is disabled.
 Gameplay screens should show:
 
 - a back navigation action
-- the current mode title
+- the current generated challenge title, such as `4 Pairs · Low` or `8 Pairs · Hard`; Tutorial
+  retains its authored title
 - an optional rules helper action
 
 The rules helper action should be available in generated `4 Pairs` for v3. It should not be shown in Tutorial because Tutorial has its own guided instructional surface. It is intentionally not part of the menu screen in the first implementation.
 
 Reliable sessions do not add a new-puzzle, restart, resume, or overflow action to the gameplay TopAppBar. Session choices remain in the normal menu and completion surface.
+
+The existing Low-specific rules helper and solving tips may remain available in `4 Pairs Medium`
+for v8. Aligning that learning content with Medium is a separate follow-up and does not alter the
+challenge identity or generated puzzle rules.
 
 ### Rules Helper Behavior
 
@@ -433,6 +489,9 @@ motion contracts remain stable.
 
 The following behaviors are intentionally left for future tickets:
 
+- Difficulty changes during an active generated puzzle
+- Difficulty locks, player progression, completion tracking, rewards, and statistics
+- Revising Low-specific solving tips for `4 Pairs Medium`
 - Advanced validation while entering or selecting values
 - Context-aware filtering of operand slot options
 - Automatic prevention of invalid operator or operand choices

@@ -2,9 +2,10 @@
 
 ## Document Status
 
-- Status: implemented technical reference for v7
-- Product contract: `docs/product/prd/prd-v7.md`
+- Status: implemented v7 persistence boundary with the v8 multi-profile contract documented
+- Product contracts: `docs/product/prd/prd-v7.md` and `docs/product/prd/prd-v8.md`
 - Related generation reference: `docs/product/puzzle-generation.md`
+- Related domain decision: `docs/technical/adr/adr-005-model-sparse-generated-challenges.md`
 
 This document owns the persistence and coordination boundary for the single resumable generated puzzle. It does not redefine puzzle rules, generation profiles, or menu copy.
 
@@ -12,15 +13,43 @@ This document owns the persistence and coordination boundary for the single resu
 
 ## Scope And Ownership
 
-NumPairs stores at most one generated session for the whole application. The slot may belong to `4 Pairs Low` or `8 Pairs Medium`; there is no independent save per mode, history, account sync, or manual save management.
+NumPairs stores at most one generated session for the whole application. The slot may belong to
+any challenge in the supported generated-challenge catalog: `4 Pairs Low`, `4 Pairs Medium`,
+`8 Pairs Medium`, or `8 Pairs Hard` in v8. There is no independent save per mode, history,
+account sync, or manual save management.
 
-`MainActivity` creates one application-scoped `GeneratedSessionRepository` from application-private storage and passes it only through generated-play and unlocked-navigation composition. Tutorial and onboarding do not receive generated-session persistence callbacks and cannot replace the slot.
+`MainActivity` creates one application-scoped `GeneratedSessionRepository` from
+application-private storage and passes it only through generated-play and unlocked-navigation
+composition. Tutorial and onboarding do not receive generated-session persistence callbacks and
+cannot replace the slot.
+
+The remembered difficulty selections are a separate preference aggregate, not generated-session
+state. Session creation and restoration may read a challenge choice supplied by navigation, but
+the generated-session repository never owns or mutates selector defaults.
+
+---
+
+## Remembered Difficulty Selection
+
+The application keeps one stable difficulty id for each generated mode in local preference
+storage. The preference boundary exposes an observable effective selection per mode and accepts
+only mode/difficulty pairs present in the supported challenge catalog.
+
+The effective fallback is `Low` for `4 Pairs` and `Medium` for `8 Pairs`. Missing, corrupt,
+unknown, and no-longer-supported stored values resolve to that fallback without writing it back.
+The only operation that writes a selector default is an explicit supported option choice made by
+the player in that mode's difficulty selector.
+
+Opening the selector, showing a fallback, pressing Play, resuming or restoring a session, replacing
+a session, completing a puzzle, and using `Play another` do not write this preference. The two mode
+values remain independent, and neither completion nor any other v8 behavior stores progression,
+locks, completion counts, rewards, or statistics.
 
 ---
 
 ## Versioned Snapshot
 
-Schema version `1` stores:
+Schema version `1` continues to store:
 
 - stable generated-session id
 - generated-mode id
@@ -29,7 +58,14 @@ Schema version `1` stores:
 - exact initial `Puzzle`
 - exact current `Puzzle`
 
-The seed is diagnostic and generation metadata. Restoration never reruns the generator because a generator or profile implementation may change after the session was created.
+The seed is diagnostic and generation metadata. Restoration never reruns the generator because a
+generator or profile implementation may change after the session was created.
+
+The stored mode/profile pair resolves one exact supported `GeneratedChallenge`; v8 does not assume
+that a mode has only one profile. The existing `4 Pairs Low` and `8 Pairs Medium` ids retain their
+meaning, so valid schema-1 snapshots for those challenges remain compatible. An unknown mode,
+unknown profile, unsupported pair, or profile whose declared mode differs from the stored mode is
+invalid session data and is exposed as an empty slot.
 
 The initial and current puzzles preserve:
 
@@ -61,7 +97,8 @@ Generated gameplay forwards only committed domain `Puzzle` changes. Draft text, 
 
 ### Create And Replace
 
-1. Generate and validate a puzzle through the bounded generation pipeline.
+1. Resolve the requested supported challenge and generate and validate a puzzle through its
+   bounded generation pipeline.
 2. Build a new versioned snapshot with identical initial and current puzzles.
 3. Store the snapshot.
 4. Publish the playable successor.
@@ -70,7 +107,10 @@ The previous slot remains intact while generation or storage is pending. Failure
 
 ### Restore
 
-Resume identifies the expected stable session id. Restoration reads the slot and requires matching session, mode, and profile ids plus an unsolved current puzzle. It then presents the exact current puzzle without invoking generation or mutating the repository.
+Resume identifies the expected stable session id. Restoration reads the slot and requires matching
+session id plus a mode/profile pair that still resolves the exact stored challenge, and an unsolved
+current puzzle. It then presents the exact current puzzle without invoking generation, consulting
+the remembered selector default, or mutating either repository.
 
 Missing, stale, mismatched, solved, corrupt, or unsupported sessions are not presented as resumable gameplay. The route offers a safe return to the menu.
 
@@ -78,7 +118,9 @@ Missing, stale, mismatched, solved, corrupt, or unsupported sessions are not pre
 
 Committed strip values, operand assignments, operator assignments, and tile resets replace `currentPuzzle` for the active id. When the puzzle becomes solved, the same identity guard clears the slot. The solved game remains visible in memory for its completion actions, but the normal menu no longer exposes `Resume`.
 
-`Play another` uses the create-and-replace pipeline. A late clear from the solved session cannot clear the successor because their stable ids differ.
+`Play another` uses the create-and-replace pipeline with the completed session's exact mode and
+profile. It does not consult or update the remembered selector default. A late clear from the
+solved session cannot clear the successor because their stable ids differ.
 
 ---
 
