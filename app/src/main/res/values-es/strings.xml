@@ -7,11 +7,29 @@
     <string name="menu_resume_button">Continuar</string>
     <string name="menu_resume_content_description">Continuar puzle de %1$s</string>
     <string name="menu_tutorial_button">Cómo jugar</string>
+    <string name="menu_personalization_button">Personalización</string>
     <string name="menu_four_pairs_button">Jugar 4 pares</string>
     <string name="menu_eight_pairs_button">Jugar 8 pares</string>
     <string name="generated_session_choice_title">Puzle sin terminar</string>
     <string name="generated_session_choice_mode_message">Tienes un puzle de %1$s sin terminar.</string>
     <string name="generated_session_choice_new_mode_button">Nuevo puzle de %1$s</string>
+
+    <!-- Personalization screen -->
+    <string name="personalization_screen_title">Personalización</string>
+    <string name="personalization_brand_content_description">Logotipo de NumPairs</string>
+    <string name="personalization_theme_section_title">Tema de color</string>
+    <string name="personalization_theme_supporting_text">Los temas solo cambian los colores. Los significados y controles del juego siguen iguales.</string>
+    <string name="personalization_theme_selected">Seleccionado</string>
+    <string name="personalization_theme_warm">Warm</string>
+    <string name="personalization_theme_frost">Frost</string>
+    <string name="personalization_theme_obsidian">Obsidian</string>
+    <string name="personalization_theme_terminal">Terminal</string>
+    <string name="personalization_theme_ember">Ember</string>
+    <string name="personalization_feedback_section_title">Respuesta del juego</string>
+    <string name="personalization_haptics_title">Respuesta háptica del juego</string>
+    <string name="personalization_haptics_supporting_text">Confirmación suave para las asignaciones válidas en partidas generadas.</string>
+    <string name="personalization_haptics_enabled">Activada</string>
+    <string name="personalization_haptics_disabled">Desactivada</string>
 
     <!-- Four pairs screen -->
     <string name="four_pairs_screen_title">4 pares</string>

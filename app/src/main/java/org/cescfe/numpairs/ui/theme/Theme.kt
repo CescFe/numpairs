@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
+import org.cescfe.numpairs.data.preferences.PersonalizationTheme
 
 private val LocalNumPairsSemanticColors = staticCompositionLocalOf {
     WarmThemeDefinition.semanticColors
@@ -18,14 +19,14 @@ internal val MaterialTheme.numPairsSemanticColors: NumPairsSemanticColors
 @Composable
 fun NumPairsTheme(content: @Composable () -> Unit) {
     NumPairsTheme(
-        themeId = NumPairsThemeId.WARM,
+        theme = PersonalizationTheme.WARM,
         content = content
     )
 }
 
 @Composable
-internal fun NumPairsTheme(themeId: NumPairsThemeId, content: @Composable () -> Unit) {
-    val themeDefinition = themeId.definition()
+internal fun NumPairsTheme(theme: PersonalizationTheme, content: @Composable () -> Unit) {
+    val themeDefinition = theme.definition()
 
     CompositionLocalProvider(
         LocalNumPairsSemanticColors provides themeDefinition.semanticColors

@@ -12,6 +12,7 @@ import androidx.compose.ui.res.stringResource
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.OnboardingRepository
 import org.cescfe.numpairs.data.onboarding.OnboardingState
+import org.cescfe.numpairs.data.preferences.PersonalizationPreferencesRepository
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.feature.fourpairs.FourPairsRoute
 import org.cescfe.numpairs.feature.generated.GeneratedModeConfiguration
@@ -25,11 +26,13 @@ import org.cescfe.numpairs.feature.menu.MenuRoute
 import org.cescfe.numpairs.feature.menu.ui.GeneratedSessionChoiceDialog
 import org.cescfe.numpairs.feature.onboarding.OnboardingLoadingScreen
 import org.cescfe.numpairs.feature.onboarding.RequiredOnboardingRoute
+import org.cescfe.numpairs.feature.personalization.PersonalizationRoute
 import org.cescfe.numpairs.feature.tutorial.GuidedIntroductionRoute
 
 sealed interface AppDestination {
     data object Menu : AppDestination
     data object Tutorial : AppDestination
+    data object Personalization : AppDestination
     data class GeneratedMode(
         val modeId: GeneratedModeId,
         val launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.newPuzzle()
@@ -40,6 +43,7 @@ sealed interface AppDestination {
 fun AppNavigation(
     onboardingRepository: OnboardingRepository,
     generatedSessionRepository: GeneratedSessionRepository,
+    personalizationPreferencesRepository: PersonalizationPreferencesRepository,
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     generatedModeRegistry: GeneratedModeRegistry,
     generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory,
@@ -57,6 +61,7 @@ fun AppNavigation(
         )
         else -> UnlockedAppNavigation(
             generatedSessionRepository = generatedSessionRepository,
+            personalizationPreferencesRepository = personalizationPreferencesRepository,
             topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
             generatedModeRegistry = generatedModeRegistry,
             generatedPuzzleGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory,
@@ -69,6 +74,7 @@ fun AppNavigation(
 @Composable
 private fun UnlockedAppNavigation(
     generatedSessionRepository: GeneratedSessionRepository,
+    personalizationPreferencesRepository: PersonalizationPreferencesRepository,
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     generatedModeRegistry: GeneratedModeRegistry,
     generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory,
@@ -125,6 +131,9 @@ private fun UnlockedAppNavigation(
                 onTutorialSelected = {
                     currentDestination = AppDestination.Tutorial
                 },
+                onPersonalizationSelected = {
+                    currentDestination = AppDestination.Personalization
+                },
                 onFourPairsSelected = {
                     onGeneratedModeSelected(GeneratedModes.FOUR_PAIRS)
                 },
@@ -168,6 +177,11 @@ private fun UnlockedAppNavigation(
         AppDestination.Tutorial -> GuidedIntroductionRoute(
             modifier = modifier,
             onNavigateBack = navigateToMenu
+        )
+        AppDestination.Personalization -> PersonalizationRoute(
+            repository = personalizationPreferencesRepository,
+            onNavigateBack = navigateToMenu,
+            modifier = modifier
         )
         is AppDestination.GeneratedMode -> {
             val mode = generatedModeRegistry.resolve(id = destination.modeId)

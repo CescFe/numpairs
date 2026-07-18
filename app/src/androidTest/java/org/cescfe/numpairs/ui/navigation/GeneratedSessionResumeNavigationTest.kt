@@ -13,6 +13,7 @@ import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionSnapshot
 import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
+import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesRepository
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
@@ -84,9 +85,15 @@ class GeneratedSessionResumeNavigationTest {
             .fetchSemanticsNode()
             .boundsInRoot
             .top
+        val personalizationTop = composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.PERSONALIZATION_BUTTON)
+            .fetchSemanticsNode()
+            .boundsInRoot
+            .top
         assertTrue(resumeTop < fourPairsTop)
         assertTrue(fourPairsTop < eightPairsTop)
         assertTrue(eightPairsTop < tutorialTop)
+        assertTrue(tutorialTop < personalizationTop)
 
         resumeNode.performClick()
 
@@ -114,6 +121,7 @@ class GeneratedSessionResumeNavigationTest {
                 AppNavigation(
                     onboardingRepository = FakeOnboardingRepository(),
                     generatedSessionRepository = repository,
+                    personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
                     generatedModeRegistry = GeneratedModes.registry,
                     generatedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory {

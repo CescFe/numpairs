@@ -2,6 +2,7 @@ package org.cescfe.numpairs.ui.theme
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import org.cescfe.numpairs.data.preferences.PersonalizationTheme
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -69,7 +70,7 @@ class NumPairsThemeDefinitionTest {
     fun `every stable theme identity resolves to one definition`() {
         assertTrue(
             "Definitions must cover every stable theme identity",
-            NumPairsThemeDefinitions.keys == NumPairsThemeId.entries.toSet()
+            NumPairsThemeDefinitions.keys == PersonalizationTheme.entries.toSet()
         )
     }
 

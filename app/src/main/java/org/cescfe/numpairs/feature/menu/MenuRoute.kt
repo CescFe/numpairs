@@ -10,6 +10,7 @@ fun MenuRoute(
     resumeModeName: String? = null,
     onResumeSelected: () -> Unit = {},
     onTutorialSelected: () -> Unit = {},
+    onPersonalizationSelected: () -> Unit = {},
     onFourPairsSelected: () -> Unit = {},
     onEightPairsSelected: () -> Unit = {}
 ) {
@@ -18,6 +19,7 @@ fun MenuRoute(
         resumeModeName = resumeModeName,
         onResumeSelected = onResumeSelected,
         onTutorialSelected = onTutorialSelected,
+        onPersonalizationSelected = onPersonalizationSelected,
         onFourPairsSelected = onFourPairsSelected,
         onEightPairsSelected = onEightPairsSelected
     )

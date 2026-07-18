@@ -17,6 +17,7 @@ import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionSnapshot
 import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
+import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesRepository
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.puzzle.model.Board
@@ -216,6 +217,7 @@ class GeneratedSessionChoiceNavigationTest {
                 AppNavigation(
                     onboardingRepository = FakeOnboardingRepository(),
                     generatedSessionRepository = repository,
+                    personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
                     generatedModeRegistry = GeneratedModes.registry,
                     generatedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory { mode ->

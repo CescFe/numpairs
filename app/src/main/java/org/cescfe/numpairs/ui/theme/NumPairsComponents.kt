@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -22,10 +23,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import org.cescfe.numpairs.R
 
 object NumPairsComponents {
     val MediumRadius = 14.dp
@@ -42,6 +45,16 @@ object NumPairsComponents {
 
     val LargeShape: Shape
         get() = RoundedCornerShape(LargeRadius)
+
+    @Composable
+    fun BrandMark(modifier: Modifier = Modifier, contentDescription: String? = null) {
+        Icon(
+            painter = painterResource(R.drawable.ic_numpairs),
+            contentDescription = contentDescription,
+            modifier = modifier,
+            tint = MaterialTheme.colorScheme.primary
+        )
+    }
 
     @Composable
     fun PrimaryCtaButton(

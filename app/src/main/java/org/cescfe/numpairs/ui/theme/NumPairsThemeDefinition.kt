@@ -5,14 +5,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
-
-internal enum class NumPairsThemeId(val persistedValue: String) {
-    WARM("warm"),
-    FROST("frost"),
-    OBSIDIAN("obsidian"),
-    TERMINAL("terminal"),
-    EMBER("ember")
-}
+import org.cescfe.numpairs.data.preferences.PersonalizationTheme
 
 @Immutable
 internal data class NumPairsSemanticColors(
@@ -37,13 +30,13 @@ internal data class NumPairsSemanticColors(
 
 @Immutable
 internal data class NumPairsThemeDefinition(
-    val id: NumPairsThemeId,
+    val id: PersonalizationTheme,
     val appearanceColors: ColorScheme,
     val semanticColors: NumPairsSemanticColors
 )
 
 internal val WarmThemeDefinition = NumPairsThemeDefinition(
-    id = NumPairsThemeId.WARM,
+    id = PersonalizationTheme.WARM,
     appearanceColors = darkColorScheme(
         primary = NumPairsGreen,
         onPrimary = NumPairsOnGreen,
@@ -96,7 +89,7 @@ internal val WarmThemeDefinition = NumPairsThemeDefinition(
 )
 
 internal val FrostThemeDefinition = NumPairsThemeDefinition(
-    id = NumPairsThemeId.FROST,
+    id = PersonalizationTheme.FROST,
     appearanceColors = lightColorScheme(
         primary = Color(0xFF215EA8),
         onPrimary = Color(0xFFFFFFFF),
@@ -149,7 +142,7 @@ internal val FrostThemeDefinition = NumPairsThemeDefinition(
 )
 
 internal val ObsidianThemeDefinition = NumPairsThemeDefinition(
-    id = NumPairsThemeId.OBSIDIAN,
+    id = PersonalizationTheme.OBSIDIAN,
     appearanceColors = darkColorScheme(
         primary = Color(0xFFD7A66A),
         onPrimary = Color(0xFF38230B),
@@ -202,7 +195,7 @@ internal val ObsidianThemeDefinition = NumPairsThemeDefinition(
 )
 
 internal val TerminalThemeDefinition = NumPairsThemeDefinition(
-    id = NumPairsThemeId.TERMINAL,
+    id = PersonalizationTheme.TERMINAL,
     appearanceColors = darkColorScheme(
         primary = Color(0xFF65D46E),
         onPrimary = Color(0xFF06250A),
@@ -255,7 +248,7 @@ internal val TerminalThemeDefinition = NumPairsThemeDefinition(
 )
 
 internal val EmberThemeDefinition = NumPairsThemeDefinition(
-    id = NumPairsThemeId.EMBER,
+    id = PersonalizationTheme.EMBER,
     appearanceColors = lightColorScheme(
         primary = Color(0xFFA33A00),
         onPrimary = Color(0xFFFFFFFF),
@@ -315,4 +308,4 @@ internal val NumPairsThemeDefinitions = listOf(
     EmberThemeDefinition
 ).associateBy(NumPairsThemeDefinition::id)
 
-internal fun NumPairsThemeId.definition(): NumPairsThemeDefinition = NumPairsThemeDefinitions.getValue(this)
+internal fun PersonalizationTheme.definition(): NumPairsThemeDefinition = NumPairsThemeDefinitions.getValue(this)

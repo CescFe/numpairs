@@ -17,6 +17,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
+import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesRepository
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerator
@@ -210,6 +211,7 @@ class FourPairsCompletionActionsTest {
                 AppNavigation(
                     onboardingRepository = FakeOnboardingRepository(),
                     generatedSessionRepository = generatedSessionRepository,
+                    personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository,
                     generatedModeRegistry = GeneratedModes.registry,
                     generatedPuzzleGenerationUseCaseFactory = fourPairsProviderFactory(puzzleProvider = puzzleProvider)

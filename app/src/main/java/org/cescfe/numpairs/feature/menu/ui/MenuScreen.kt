@@ -4,11 +4,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,6 +40,7 @@ fun MenuScreen(
     resumeModeName: String? = null,
     onResumeSelected: () -> Unit = {},
     onTutorialSelected: () -> Unit = {},
+    onPersonalizationSelected: () -> Unit = {},
     onFourPairsSelected: () -> Unit = {},
     onEightPairsSelected: () -> Unit = {}
 ) {
@@ -51,6 +56,7 @@ fun MenuScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 20.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -114,6 +120,18 @@ fun MenuScreen(
                     ) {
                         MenuButtonText(text = stringResource(R.string.menu_tutorial_button))
                     }
+                    Button(
+                        onClick = onPersonalizationSelected,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(NumPairsComponents.ButtonHeight)
+                            .testTag(MenuScreenTestTags.PERSONALIZATION_BUTTON),
+                        shape = NumPairsComponents.MediumShape,
+                        colors = NumPairsComponents.secondaryButtonColors(),
+                        border = NumPairsComponents.secondaryButtonBorder()
+                    ) {
+                        MenuButtonText(text = stringResource(R.string.menu_personalization_button))
+                    }
                 }
             }
         }
@@ -125,10 +143,16 @@ fun MenuScreen(
 private fun MenuScreenTopBar() {
     CenterAlignedTopAppBar(
         title = {
-            Text(
-                text = stringResource(R.string.app_name),
-                color = MaterialTheme.colorScheme.primary
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                NumPairsComponents.BrandMark(modifier = Modifier.size(MENU_BRAND_MARK_SIZE))
+                Text(
+                    text = stringResource(R.string.app_name),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     )
 }
@@ -154,5 +178,6 @@ private fun MenuScreenPreview() {
 }
 
 private val MENU_CONTENT_MAX_WIDTH = 360.dp
+private val MENU_BRAND_MARK_SIZE = 32.dp
 private val MENU_BUTTON_TEXT_SIZE = 22.sp
 private val MENU_BUTTON_TEXT_LINE_HEIGHT = 36.sp

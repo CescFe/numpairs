@@ -7,11 +7,29 @@
     <string name="menu_resume_button">Resume</string>
     <string name="menu_resume_content_description">Resume %1$s puzzle</string>
     <string name="menu_tutorial_button">How to play</string>
+    <string name="menu_personalization_button">Personalization</string>
     <string name="menu_four_pairs_button">Play 4 pairs</string>
     <string name="menu_eight_pairs_button">Play 8 pairs</string>
     <string name="generated_session_choice_title">Unfinished puzzle</string>
     <string name="generated_session_choice_mode_message">You have an unfinished %1$s puzzle.</string>
     <string name="generated_session_choice_new_mode_button">New %1$s</string>
+
+    <!-- Personalization screen -->
+    <string name="personalization_screen_title">Personalization</string>
+    <string name="personalization_brand_content_description">NumPairs logo</string>
+    <string name="personalization_theme_section_title">Color theme</string>
+    <string name="personalization_theme_supporting_text">Themes change colors only. Game meanings and controls stay the same.</string>
+    <string name="personalization_theme_selected">Selected</string>
+    <string name="personalization_theme_warm">Warm</string>
+    <string name="personalization_theme_frost">Frost</string>
+    <string name="personalization_theme_obsidian">Obsidian</string>
+    <string name="personalization_theme_terminal">Terminal</string>
+    <string name="personalization_theme_ember">Ember</string>
+    <string name="personalization_feedback_section_title">Game feedback</string>
+    <string name="personalization_haptics_title">Game haptics</string>
+    <string name="personalization_haptics_supporting_text">Gentle confirmation for valid assignments in generated games.</string>
+    <string name="personalization_haptics_enabled">Enabled</string>
+    <string name="personalization_haptics_disabled">Disabled</string>
 
     <!-- Four pairs screen -->
     <string name="four_pairs_screen_title">4 pairs</string>
