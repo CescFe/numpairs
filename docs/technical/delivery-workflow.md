@@ -45,7 +45,7 @@ For milestone delivery:
 3. Divide the remaining scope into independently reviewable, dependency-ordered issues.
 4. Give each issue one observable outcome and one Pull Request.
 5. Write each issue in English using the selected issue template.
-6. Apply the required assignee, label, type, issue fields, and milestone.
+6. Apply the required assignee, label, type, and milestone.
 7. Wait for and verify automatic Project 11 intake and `Backlog` initialization, then apply the remaining Project fields and iteration.
 8. Set Project `Status` to `Ready For Dev` for each planned issue.
 9. Set Project `Status` to `In Progress` immediately before implementation begins on an existing issue.
