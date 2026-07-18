@@ -1,6 +1,7 @@
 package org.cescfe.numpairs.domain.generated.generation.internal
 
 import kotlin.random.Random
+import org.cescfe.numpairs.domain.generated.profile.DifficultyTier
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfile
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfileDefinition
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfileId
@@ -102,6 +103,7 @@ private fun singlePairProfile(id: String, valueRange: IntRange, maxMultiplicatio
     return GeneratedPuzzleProfile.create(
         definition = GeneratedPuzzleProfileDefinition(
             id = GeneratedPuzzleProfileId(id),
+            difficulty = DifficultyTier.LOW,
             size = size,
             stripValuePolicy = StripValuePolicy(
                 valueRange = valueRange,

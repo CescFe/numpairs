@@ -213,7 +213,7 @@ class FourPairsCompletionActionsTest {
                     generatedSessionRepository = generatedSessionRepository,
                     personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository,
-                    generatedModeRegistry = GeneratedModes.registry,
+                    generatedChallengeCatalog = GeneratedModes.catalog,
                     generatedPuzzleGenerationUseCaseFactory = fourPairsProviderFactory(puzzleProvider = puzzleProvider)
                 )
             }
@@ -327,8 +327,8 @@ class FourPairsCompletionActionsTest {
 
     private fun fourPairsProviderFactory(
         puzzleProvider: QueueGeneratedPuzzleProvider
-    ): GeneratedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory { mode ->
-        require(mode == GeneratedModes.FOUR_PAIRS)
+    ): GeneratedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory { challenge ->
+        require(challenge == GeneratedModes.FOUR_PAIRS_LOW)
         GeneratedPuzzleGenerationUseCase { request ->
             GeneratedPuzzleGenerationResult.Generated(
                 request = request,

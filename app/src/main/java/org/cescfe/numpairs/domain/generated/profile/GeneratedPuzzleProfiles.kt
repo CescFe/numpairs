@@ -11,6 +11,7 @@ object GeneratedPuzzleProfiles {
         return GeneratedPuzzleProfile.create(
             definition = GeneratedPuzzleProfileDefinition(
                 id = GeneratedPuzzleProfileId("4-pairs-low"),
+                difficulty = DifficultyTier.LOW,
                 size = size,
                 stripValuePolicy = StripValuePolicy(
                     valueRange = 2..20,
@@ -39,6 +40,7 @@ object GeneratedPuzzleProfiles {
         return GeneratedPuzzleProfile.create(
             definition = GeneratedPuzzleProfileDefinition(
                 id = GeneratedPuzzleProfileId("8-pairs-medium"),
+                difficulty = DifficultyTier.MEDIUM,
                 size = size,
                 stripValuePolicy = StripValuePolicy(
                     valueRange = 1..99,

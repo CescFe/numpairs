@@ -113,6 +113,7 @@ private fun GeneratedPuzzleProfile.withTargetProbabilities(percentage: Int): Gen
     GeneratedPuzzleProfile.create(
         definition = GeneratedPuzzleProfileDefinition(
             id = id,
+            difficulty = difficulty,
             size = size,
             stripValuePolicy = stripValuePolicy,
             resultConstraints = resultConstraints,

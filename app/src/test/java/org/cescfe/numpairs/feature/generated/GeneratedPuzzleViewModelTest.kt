@@ -48,7 +48,7 @@ class GeneratedPuzzleViewModelTest {
         val writeGate = CompletableDeferred<Unit>()
         val repository = RecordingGeneratedSessionRepository(writeGate = writeGate)
         val viewModel = GeneratedPuzzleViewModel(
-            mode = GeneratedModes.FOUR_PAIRS,
+            challenge = GeneratedModes.FOUR_PAIRS_LOW,
             generationUseCase = generatedPuzzleUseCase(),
             generatedSessionRepository = repository,
             seedSource = QueueGeneratedPuzzleSeedSource(17),
@@ -62,7 +62,7 @@ class GeneratedPuzzleViewModelTest {
         val attemptedSnapshot = repository.replaceAttempts.single()
         assertEquals(GeneratedSessionId("stable-session"), attemptedSnapshot.sessionId)
         assertEquals(GeneratedModes.FOUR_PAIRS.id.value, attemptedSnapshot.modeId)
-        assertEquals(GeneratedModes.FOUR_PAIRS.profile.id.value, attemptedSnapshot.profileId)
+        assertEquals(GeneratedModes.FOUR_PAIRS_LOW.profile.id.value, attemptedSnapshot.profileId)
         assertEquals(17, attemptedSnapshot.seed)
         assertEquals(samplePuzzle, attemptedSnapshot.initialPuzzle)
         assertEquals(samplePuzzle, attemptedSnapshot.currentPuzzle)
@@ -89,7 +89,7 @@ class GeneratedPuzzleViewModelTest {
         )
         val repository = RecordingGeneratedSessionRepository()
         val viewModel = GeneratedPuzzleViewModel(
-            mode = GeneratedModes.FOUR_PAIRS,
+            challenge = GeneratedModes.FOUR_PAIRS_LOW,
             generationUseCase = useCase,
             generatedSessionRepository = repository,
             seedSource = QueueGeneratedPuzzleSeedSource(11, 22, 33),
@@ -141,7 +141,7 @@ class GeneratedPuzzleViewModelTest {
         val replacementWriteGate = CompletableDeferred<Unit>()
         val repository = RecordingGeneratedSessionRepository()
         val viewModel = GeneratedPuzzleViewModel(
-            mode = GeneratedModes.FOUR_PAIRS,
+            challenge = GeneratedModes.FOUR_PAIRS_LOW,
             generationUseCase = QueueGeneratedPuzzleUseCase(
                 CompletableDeferred(samplePuzzle),
                 CompletableDeferred(samplePuzzle)
@@ -184,7 +184,7 @@ class GeneratedPuzzleViewModelTest {
         val readySession = GeneratedModeGameSession(
             snapshot = readySnapshot,
             request = GeneratedPuzzleGenerationRequest(
-                profile = GeneratedModes.FOUR_PAIRS.profile,
+                profile = GeneratedModes.FOUR_PAIRS_LOW.profile,
                 seed = readySnapshot.seed
             )
         )
@@ -212,7 +212,7 @@ class GeneratedPuzzleViewModelTest {
         val existingSnapshot = generatedSessionSnapshot(sessionId = "existing")
         val repository = RecordingGeneratedSessionRepository(initialSession = existingSnapshot)
         val viewModel = GeneratedPuzzleViewModel(
-            mode = GeneratedModes.FOUR_PAIRS,
+            challenge = GeneratedModes.FOUR_PAIRS_LOW,
             generationUseCase = generatedPuzzleUseCase(generatedPuzzle),
             generatedSessionRepository = repository,
             seedSource = QueueGeneratedPuzzleSeedSource(29),
@@ -237,7 +237,7 @@ class GeneratedPuzzleViewModelTest {
             replaceFailure = IOException("storage unavailable")
         )
         val viewModel = GeneratedPuzzleViewModel(
-            mode = GeneratedModes.FOUR_PAIRS,
+            challenge = GeneratedModes.FOUR_PAIRS_LOW,
             generationUseCase = generatedPuzzleUseCase(),
             generatedSessionRepository = repository,
             seedSource = QueueGeneratedPuzzleSeedSource(31),
@@ -266,7 +266,7 @@ class GeneratedPuzzleViewModelTest {
         val repository = RecordingGeneratedSessionRepository(initialSession = snapshot)
         val generationUseCase = UnexpectedGeneratedPuzzleUseCase()
         val viewModel = GeneratedPuzzleViewModel(
-            mode = GeneratedModes.FOUR_PAIRS,
+            challenge = GeneratedModes.FOUR_PAIRS_LOW,
             generationUseCase = generationUseCase,
             generatedSessionRepository = repository
         )
@@ -302,7 +302,7 @@ class GeneratedPuzzleViewModelTest {
             ),
             generatedSessionSnapshot(
                 sessionId = expectedSessionId.value,
-                profileId = GeneratedModes.EIGHT_PAIRS.profile.id.value
+                profileId = GeneratedModes.EIGHT_PAIRS_MEDIUM.profile.id.value
             ),
             generatedSessionSnapshot(
                 sessionId = expectedSessionId.value,
@@ -315,7 +315,7 @@ class GeneratedPuzzleViewModelTest {
             val repository = RecordingGeneratedSessionRepository(initialSession = storedSnapshot)
             val generationUseCase = UnexpectedGeneratedPuzzleUseCase()
             val viewModel = GeneratedPuzzleViewModel(
-                mode = GeneratedModes.FOUR_PAIRS,
+                challenge = GeneratedModes.FOUR_PAIRS_LOW,
                 generationUseCase = generationUseCase,
                 generatedSessionRepository = repository
             )
@@ -341,7 +341,7 @@ class GeneratedPuzzleViewModelTest {
         val firstWriteGate = CompletableDeferred<Unit>()
         val repository = RecordingGeneratedSessionRepository(firstUpdateGate = firstWriteGate)
         val viewModel = GeneratedPuzzleViewModel(
-            mode = GeneratedModes.FOUR_PAIRS,
+            challenge = GeneratedModes.FOUR_PAIRS_LOW,
             generationUseCase = generatedPuzzleUseCase(),
             generatedSessionRepository = repository,
             seedSource = QueueGeneratedPuzzleSeedSource(41),
@@ -379,7 +379,7 @@ class GeneratedPuzzleViewModelTest {
         val initialPuzzle = initialPuzzleFor(solvedPuzzle)
         val repository = RecordingGeneratedSessionRepository()
         val viewModel = GeneratedPuzzleViewModel(
-            mode = GeneratedModes.FOUR_PAIRS,
+            challenge = GeneratedModes.FOUR_PAIRS_LOW,
             generationUseCase = generatedPuzzleUseCase(CompletableDeferred(initialPuzzle)),
             generatedSessionRepository = repository,
             seedSource = QueueGeneratedPuzzleSeedSource(43),
@@ -403,7 +403,7 @@ class GeneratedPuzzleViewModelTest {
         val replacementPuzzle = CompletableDeferred<Puzzle>()
         val repository = RecordingGeneratedSessionRepository()
         val viewModel = GeneratedPuzzleViewModel(
-            mode = GeneratedModes.FOUR_PAIRS,
+            challenge = GeneratedModes.FOUR_PAIRS_LOW,
             generationUseCase = QueueGeneratedPuzzleUseCase(
                 CompletableDeferred(samplePuzzle),
                 replacementPuzzle
@@ -447,7 +447,7 @@ class GeneratedPuzzleViewModelTest {
         val replacementPuzzle = CompletableDeferred<Puzzle>()
         val repository = RecordingGeneratedSessionRepository()
         val viewModel = GeneratedPuzzleViewModel(
-            mode = GeneratedModes.FOUR_PAIRS,
+            challenge = GeneratedModes.FOUR_PAIRS_LOW,
             generationUseCase = QueueGeneratedPuzzleUseCase(
                 CompletableDeferred(samplePuzzle),
                 replacementPuzzle
@@ -608,7 +608,7 @@ private class RecordingGeneratedSessionRepository(
 private fun generatedSessionSnapshot(
     sessionId: String,
     modeId: String = GeneratedModes.FOUR_PAIRS.id.value,
-    profileId: String = GeneratedModes.FOUR_PAIRS.profile.id.value,
+    profileId: String = GeneratedModes.FOUR_PAIRS_LOW.profile.id.value,
     initialPuzzle: Puzzle = samplePuzzle,
     currentPuzzle: Puzzle = samplePuzzle
 ): GeneratedSessionSnapshot = GeneratedSessionSnapshot(

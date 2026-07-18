@@ -47,7 +47,7 @@ class GeneratedReplacementTransitionTest {
     @Test
     fun fourPairsKeepsCompletionUntilTheAdoptedSuccessorTransitionsOnce() {
         assertSafeReplacementTransition(
-            mode = GeneratedModes.FOUR_PAIRS,
+            challenge = GeneratedModes.FOUR_PAIRS_LOW,
             menuButtonTag = MenuScreenTestTags.FOUR_PAIRS_BUTTON
         )
     }
@@ -55,19 +55,19 @@ class GeneratedReplacementTransitionTest {
     @Test
     fun eightPairsKeepsCompletionUntilTheAdoptedSuccessorTransitionsOnce() {
         assertSafeReplacementTransition(
-            mode = GeneratedModes.EIGHT_PAIRS,
+            challenge = GeneratedModes.EIGHT_PAIRS_MEDIUM,
             menuButtonTag = MenuScreenTestTags.EIGHT_PAIRS_BUTTON
         )
     }
 
-    private fun assertSafeReplacementTransition(mode: GeneratedModeConfiguration, menuButtonTag: String) {
+    private fun assertSafeReplacementTransition(challenge: GeneratedChallenge, menuButtonTag: String) {
         val successor = CompletableDeferred<Puzzle>()
         val puzzleProvider = ControlledReplacementPuzzleProvider(
             initialPuzzle = oneOperatorAwayFromSolvedReplacementPuzzle(),
             successor = successor
         )
-        val useCaseFactory = GeneratedPuzzleGenerationUseCaseFactory { requestedMode ->
-            require(requestedMode == mode)
+        val useCaseFactory = GeneratedPuzzleGenerationUseCaseFactory { requestedChallenge ->
+            require(requestedChallenge == challenge)
             GeneratedPuzzleGenerationUseCase { request ->
                 GeneratedPuzzleGenerationResult.Generated(
                     request = request,
@@ -89,7 +89,7 @@ class GeneratedReplacementTransitionTest {
                             )
                         ),
                         topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
-                        generatedModeRegistry = GeneratedModes.registry,
+                        generatedChallengeCatalog = GeneratedModes.catalog,
                         generatedPuzzleGenerationUseCaseFactory = useCaseFactory
                     )
                     Text(text = recompositionMarker.toString())

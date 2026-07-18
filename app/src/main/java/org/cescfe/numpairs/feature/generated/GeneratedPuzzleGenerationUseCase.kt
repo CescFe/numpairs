@@ -29,38 +29,39 @@ sealed interface GeneratedPuzzleGenerationResult {
 }
 
 fun interface GeneratedPuzzleGenerationUseCaseFactory {
-    fun create(mode: GeneratedModeConfiguration): GeneratedPuzzleGenerationUseCase
+    fun create(challenge: GeneratedChallenge): GeneratedPuzzleGenerationUseCase
 }
 
 class ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
-    private val modeRegistry: GeneratedModeRegistry = GeneratedModes.registry,
+    private val challengeCatalog: GeneratedChallengeCatalog = GeneratedModes.catalog,
     private val generationDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : GeneratedPuzzleGenerationUseCaseFactory {
-    private val contextByModeId: Map<GeneratedModeId, GeneratedPuzzleGenerationContext> =
-        modeRegistry.all.associate { mode ->
-            mode.id to GeneratedPuzzleGenerationContext.forProfile(profile = mode.profile)
+    private val contextByChallengeId: Map<GeneratedChallengeId, GeneratedPuzzleGenerationContext> =
+        challengeCatalog.allChallenges.associate { challenge ->
+            challenge.id to GeneratedPuzzleGenerationContext.forProfile(profile = challenge.profile)
         }
 
-    override fun create(mode: GeneratedModeConfiguration): GeneratedPuzzleGenerationUseCase {
-        val context = contextFor(mode = mode)
+    override fun create(challenge: GeneratedChallenge): GeneratedPuzzleGenerationUseCase {
+        val context = contextFor(challenge = challenge)
 
         return DispatcherGeneratedPuzzleGenerationUseCase(
             generationDispatcher = generationDispatcher,
             generatorFactory = { request ->
-                require(request.profileId == mode.profile.id) {
-                    "Generation request profile ${request.profileId.value} does not match mode ${mode.id.value}."
+                require(request.profileId == challenge.profile.id) {
+                    "Generation request profile ${request.profileId.value} does not match challenge " +
+                        "${challenge.id.value}."
                 }
                 GeneratedPairsPuzzleGenerator(context = context)
             }
         )
     }
 
-    internal fun contextFor(mode: GeneratedModeConfiguration): GeneratedPuzzleGenerationContext {
-        require(modeRegistry.resolve(id = mode.id) == mode) {
-            "Generated mode ${mode.id.value} is not configured by this generation use-case factory."
+    internal fun contextFor(challenge: GeneratedChallenge): GeneratedPuzzleGenerationContext {
+        require(challengeCatalog.resolveChallenge(id = challenge.id) == challenge) {
+            "Generated challenge ${challenge.id.value} is not configured by this generation use-case factory."
         }
 
-        return contextByModeId.getValue(mode.id)
+        return contextByChallengeId.getValue(challenge.id)
     }
 }
 

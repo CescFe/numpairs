@@ -117,7 +117,7 @@ class EightPairsModeTest {
                     generatedSessionRepository = FakeGeneratedSessionRepository(),
                     personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
-                    generatedModeRegistry = GeneratedModes.registry,
+                    generatedChallengeCatalog = GeneratedModes.catalog,
                     generatedPuzzleGenerationUseCaseFactory = eightPairsProviderFactory(puzzleProvider = puzzleProvider)
                 )
             }
@@ -159,8 +159,8 @@ class EightPairsModeTest {
 
     private fun eightPairsProviderFactory(
         puzzleProvider: RecordingGeneratedPuzzleProvider
-    ): GeneratedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory { mode ->
-        require(mode == GeneratedModes.EIGHT_PAIRS)
+    ): GeneratedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory { challenge ->
+        require(challenge == GeneratedModes.EIGHT_PAIRS_MEDIUM)
         GeneratedPuzzleGenerationUseCase { request ->
             GeneratedPuzzleGenerationResult.Generated(
                 request = request,

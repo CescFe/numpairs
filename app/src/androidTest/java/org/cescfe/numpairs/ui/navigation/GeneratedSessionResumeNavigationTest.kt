@@ -51,7 +51,7 @@ class GeneratedSessionResumeNavigationTest {
         val snapshot = GeneratedSessionSnapshot(
             sessionId = GeneratedSessionId("resume-from-menu"),
             modeId = GeneratedModes.FOUR_PAIRS.id.value,
-            profileId = GeneratedModes.FOUR_PAIRS.profile.id.value,
+            profileId = GeneratedModes.FOUR_PAIRS_LOW.profile.id.value,
             seed = 213,
             initialPuzzle = samplePuzzle,
             currentPuzzle = currentPuzzle
@@ -123,7 +123,7 @@ class GeneratedSessionResumeNavigationTest {
                     generatedSessionRepository = repository,
                     personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
-                    generatedModeRegistry = GeneratedModes.registry,
+                    generatedChallengeCatalog = GeneratedModes.catalog,
                     generatedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory {
                         GeneratedPuzzleGenerationUseCase { request ->
                             generationCounter.count++

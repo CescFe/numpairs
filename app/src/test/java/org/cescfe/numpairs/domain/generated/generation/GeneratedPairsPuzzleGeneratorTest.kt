@@ -3,6 +3,7 @@ package org.cescfe.numpairs.domain.generated.generation
 import kotlin.random.Random
 import org.cescfe.numpairs.domain.generated.generation.internal.GeneratedPairsStripEntryVisibilityDirective
 import org.cescfe.numpairs.domain.generated.generation.internal.GeneratedPairsVariationPlanSelector
+import org.cescfe.numpairs.domain.generated.profile.DifficultyTier
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfile
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfileDefinition
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfileId
@@ -91,6 +92,7 @@ class GeneratedPairsPuzzleGeneratorTest {
         val profile = GeneratedPuzzleProfile.create(
             definition = GeneratedPuzzleProfileDefinition(
                 id = GeneratedPuzzleProfileId("joint-soft-mask-fallback"),
+                difficulty = DifficultyTier.LOW,
                 size = size,
                 stripValuePolicy = StripValuePolicy(
                     valueRange = 2..5,

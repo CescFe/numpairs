@@ -47,7 +47,7 @@ class GeneratedPuzzleGenerationRouteTest {
         composeTestRule.setContent {
             NumPairsTheme {
                 GeneratedModeRoute(
-                    mode = GeneratedModes.FOUR_PAIRS,
+                    challenge = GeneratedModes.FOUR_PAIRS_LOW,
                     title = "4 pairs",
                     generationUseCase = useCase,
                     generatedSessionRepository = FakeGeneratedSessionRepository()
@@ -104,7 +104,7 @@ class GeneratedPuzzleGenerationRouteTest {
         composeTestRule.setContent {
             NumPairsTheme {
                 GeneratedModeRoute(
-                    mode = GeneratedModes.FOUR_PAIRS,
+                    challenge = GeneratedModes.FOUR_PAIRS_LOW,
                     launchIntent = GeneratedModeLaunchIntent.ResumeSession(snapshot.sessionId),
                     title = "4 pairs",
                     generationUseCase = useCase,
@@ -133,7 +133,7 @@ class GeneratedPuzzleGenerationRouteTest {
         composeTestRule.setContent {
             NumPairsTheme {
                 GeneratedModeRoute(
-                    mode = GeneratedModes.FOUR_PAIRS,
+                    challenge = GeneratedModes.FOUR_PAIRS_LOW,
                     launchIntent = GeneratedModeLaunchIntent.ResumeSession(
                         expectedSessionId = GeneratedSessionId("missing")
                     ),
@@ -166,7 +166,7 @@ class GeneratedPuzzleGenerationRouteTest {
         composeTestRule.setContent {
             NumPairsTheme {
                 GeneratedModeRoute(
-                    mode = GeneratedModes.FOUR_PAIRS,
+                    challenge = GeneratedModes.FOUR_PAIRS_LOW,
                     title = "4 pairs",
                     generationUseCase = CountingGeneratedPuzzleUseCase(),
                     generatedSessionRepository = repository
@@ -254,7 +254,7 @@ private class CountingGeneratedPuzzleUseCase : GeneratedPuzzleGenerationUseCase 
 private fun generatedSessionSnapshot(currentPuzzle: Puzzle) = GeneratedSessionSnapshot(
     sessionId = GeneratedSessionId("resume-session"),
     modeId = GeneratedModes.FOUR_PAIRS.id.value,
-    profileId = GeneratedModes.FOUR_PAIRS.profile.id.value,
+    profileId = GeneratedModes.FOUR_PAIRS_LOW.profile.id.value,
     seed = 211,
     initialPuzzle = samplePuzzle,
     currentPuzzle = currentPuzzle

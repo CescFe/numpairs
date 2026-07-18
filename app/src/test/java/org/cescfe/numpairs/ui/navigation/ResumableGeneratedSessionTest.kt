@@ -14,15 +14,15 @@ import org.junit.Test
 
 class ResumableGeneratedSessionTest {
     @Test
-    fun `valid unfinished snapshot resolves its configured generated mode`() {
+    fun `valid unfinished snapshot resolves its exact configured challenge`() {
         val snapshot = snapshot()
 
         assertEquals(
             ResumableGeneratedSession(
                 sessionId = snapshot.sessionId,
-                mode = GeneratedModes.FOUR_PAIRS
+                challenge = GeneratedModes.FOUR_PAIRS_LOW
             ),
-            snapshot.toResumableGeneratedSessionOrNull(GeneratedModes.registry)
+            snapshot.toResumableGeneratedSessionOrNull(GeneratedModes.catalog)
         )
     }
 
@@ -32,7 +32,7 @@ class ResumableGeneratedSessionTest {
         val unavailableSnapshots = listOf(
             null,
             snapshot(modeId = "unknown-mode"),
-            snapshot(profileId = GeneratedModes.EIGHT_PAIRS.profile.id.value),
+            snapshot(profileId = GeneratedModes.EIGHT_PAIRS_MEDIUM.profile.id.value),
             snapshot(
                 initialPuzzle = initialPuzzleFor(solvedPuzzle),
                 currentPuzzle = solvedPuzzle
@@ -42,7 +42,7 @@ class ResumableGeneratedSessionTest {
         unavailableSnapshots.forEach { unavailableSnapshot ->
             assertNull(
                 unavailableSnapshot.toResumableGeneratedSessionOrNull(
-                    modeRegistry = GeneratedModes.registry
+                    challengeCatalog = GeneratedModes.catalog
                 )
             )
         }
@@ -51,7 +51,7 @@ class ResumableGeneratedSessionTest {
 
 private fun snapshot(
     modeId: String = GeneratedModes.FOUR_PAIRS.id.value,
-    profileId: String = GeneratedModes.FOUR_PAIRS.profile.id.value,
+    profileId: String = GeneratedModes.FOUR_PAIRS_LOW.profile.id.value,
     initialPuzzle: Puzzle = samplePuzzle,
     currentPuzzle: Puzzle = samplePuzzle
 ): GeneratedSessionSnapshot = GeneratedSessionSnapshot(

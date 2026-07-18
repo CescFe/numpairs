@@ -116,7 +116,7 @@ class CorrectTileMotionTest {
                         )
                     ),
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
-                    generatedModeRegistry = GeneratedModes.registry,
+                    generatedChallengeCatalog = GeneratedModes.catalog,
                     generatedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory {
                         GeneratedPuzzleGenerationUseCase { request ->
                             GeneratedPuzzleGenerationResult.Generated(

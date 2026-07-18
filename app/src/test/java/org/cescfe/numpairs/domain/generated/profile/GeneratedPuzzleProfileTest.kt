@@ -529,6 +529,7 @@ private fun GeneratedPuzzleProfileCreation.Rejected.singleLimitViolation():
 
 private fun smallestBoundedDefinition(): GeneratedPuzzleProfileDefinition = GeneratedPuzzleProfileDefinition(
     id = GeneratedPuzzleProfileId("smallest-bounded-profile"),
+    difficulty = DifficultyTier.LOW,
     size = GeneratedPuzzleSize(pairCount = 1),
     stripValuePolicy = StripValuePolicy(
         valueRange = 2..3,
@@ -549,6 +550,7 @@ private fun smallestBoundedDefinition(): GeneratedPuzzleProfileDefinition = Gene
 
 private fun validDefinition(): GeneratedPuzzleProfileDefinition = GeneratedPuzzleProfileDefinition(
     id = GeneratedPuzzleProfileId("valid-test-profile"),
+    difficulty = DifficultyTier.LOW,
     size = GeneratedPuzzleSize(pairCount = 2),
     stripValuePolicy = StripValuePolicy(
         valueRange = 2..10,
