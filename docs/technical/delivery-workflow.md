@@ -28,22 +28,13 @@ Unless the task specifies otherwise, use:
 - assignee: `FrancescFe`
 - label for feature work: `feat`
 - issue type: `Task`
-- issue field `Priority`: `Medium`
-- issue field `Effort`: `Low`
 - GitHub Project: `https://github.com/orgs/CescFe/projects/11`
 - Project field `Size`: `xs`
+- Project field `Priority`: is contextual and ranges from `P0` to `P3`. Reuse it by inspecting the most recently worked issue.
+- Project field `Iteration`: is contextual. Reuse it by inspecting the most recently worked issue.
+- Milestone: is contextual. Use the specified for the current delivery batch.
 
-Use the iteration and milestone specified for the current delivery batch. Do not attach new work to a closed milestone unless the user explicitly requests it.
-
-Project `Priority` is contextual and ranges from `P0` to `P3`. Unless the user specifies a value, inspect the most recently worked issue and reuse its Project `Priority`. Do not treat `P2` or any other priority as a permanent default. If there is no previous issue from which to inherit priority, ask for it.
-
-Set Project `Status` according to how the issue enters the workflow:
-
-- `Backlog` when a user is requesting future work and is not starting implementation.
-- `Ready For Dev` when an authorized planning task creates an atomic, refined issue that is ready to be implemented.
-- `In Progress` immediately before implementation begins on an existing issue.
-
-Resolve GitHub node IDs, field IDs, option IDs, and iteration IDs through the GitHub API. Treat these identifiers as opaque and do not store previously observed values as permanent repository configuration.
+Resolve GitHub node IDs, option IDs, and iteration IDs through the GitHub API. Treat these identifiers as opaque and do not store previously observed values as permanent repository configuration.
 
 ## Atomic Issue Planning
 
@@ -54,8 +45,10 @@ For milestone delivery:
 3. Divide the remaining scope into independently reviewable, dependency-ordered issues.
 4. Give each issue one observable outcome and one Pull Request.
 5. Write each issue in English using the selected issue template.
-6. Apply the required assignee, label, type, issue fields, Project fields, iteration, and milestone.
-7. Set Project `Status` to `Ready For Dev` for each planned issue.
+6. Apply the required assignee, label, type, and milestone.
+7. Wait for and verify automatic Project 11 intake and `Backlog` initialization, then apply the remaining Project fields and iteration.
+8. Set Project `Status` to `Ready For Dev` for each planned issue.
+9. Set Project `Status` to `In Progress` immediately before implementation begins on an existing issue.
 
 Do not combine unrelated product behavior, refactors, or documentation in one issue merely to reduce the number of Pull Requests.
 
