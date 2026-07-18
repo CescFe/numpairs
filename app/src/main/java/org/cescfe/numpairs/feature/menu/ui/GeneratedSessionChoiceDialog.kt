@@ -1,7 +1,6 @@
 package org.cescfe.numpairs.feature.menu.ui
 
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -17,7 +16,6 @@ import org.cescfe.numpairs.ui.theme.NumPairsComponents
 internal fun GeneratedSessionChoiceDialog(
     savedModeName: String,
     selectedModeName: String,
-    isSameMode: Boolean,
     onResume: () -> Unit,
     onNewPuzzle: () -> Unit,
     onDismiss: () -> Unit
@@ -37,23 +35,15 @@ internal fun GeneratedSessionChoiceDialog(
         },
         text = {
             Text(
-                text = if (isSameMode) {
-                    stringResource(
-                        R.string.generated_session_choice_same_mode_message,
-                        savedModeName
-                    )
-                } else {
-                    stringResource(
-                        R.string.generated_session_choice_different_mode_message,
-                        savedModeName,
-                        selectedModeName
-                    )
-                },
-                style = MaterialTheme.typography.bodyMedium
+                text = stringResource(
+                    R.string.generated_session_choice_mode_message,
+                    savedModeName
+                ),
+                style = MaterialTheme.typography.bodyLarge
             )
         },
         confirmButton = {
-            Button(
+            NumPairsComponents.PrimaryCtaButton(
                 onClick = onResume,
                 modifier = Modifier.testTag(MenuScreenTestTags.SESSION_CHOICE_RESUME_BUTTON)
             ) {
@@ -72,14 +62,10 @@ internal fun GeneratedSessionChoiceDialog(
                 border = NumPairsComponents.secondaryButtonBorder()
             ) {
                 Text(
-                    text = if (isSameMode) {
-                        stringResource(R.string.generated_session_choice_new_puzzle_button)
-                    } else {
-                        stringResource(
-                            R.string.generated_session_choice_play_mode_button,
-                            selectedModeName
-                        )
-                    },
+                    text = stringResource(
+                        R.string.generated_session_choice_new_mode_button,
+                        selectedModeName
+                    ),
                     style = MaterialTheme.typography.labelLarge
                 )
             }

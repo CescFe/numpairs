@@ -10,10 +10,8 @@
     <string name="menu_four_pairs_button">Play 4 pairs</string>
     <string name="menu_eight_pairs_button">Play 8 pairs</string>
     <string name="generated_session_choice_title">Unfinished puzzle</string>
-    <string name="generated_session_choice_same_mode_message">You have an unfinished %1$s puzzle. Resume it or start a new puzzle?</string>
-    <string name="generated_session_choice_different_mode_message">You have an unfinished %1$s puzzle. Resume it or replace it with a new %2$s puzzle?</string>
-    <string name="generated_session_choice_new_puzzle_button">New puzzle</string>
-    <string name="generated_session_choice_play_mode_button">Play %1$s</string>
+    <string name="generated_session_choice_mode_message">You have an unfinished %1$s puzzle.</string>
+    <string name="generated_session_choice_new_mode_button">New %1$s</string>
 
     <!-- Four pairs screen -->
     <string name="four_pairs_screen_title">4 pairs</string>
