@@ -81,19 +81,25 @@ class PersonalizationNavigationTest {
         composeTestRule
             .onNodeWithTag(PersonalizationScreenTestTags.SCREEN)
             .assertIsDisplayed()
-        composeTestRule
-            .onNodeWithTag(PersonalizationScreenTestTags.themeOption(PersonalizationTheme.FROST))
-            .performScrollTo()
-            .performClick()
+        PersonalizationTheme.entries.forEach { theme ->
+            composeTestRule
+                .onNodeWithTag(PersonalizationScreenTestTags.themeOption(theme))
+                .performScrollTo()
+                .performClick()
+            composeTestRule.runOnIdle {
+                assertEquals(theme, personalizationRepository.state.value.selectedTheme)
+                assertEquals(snapshot, generatedSessionRepository.session.value)
+            }
+        }
         composeTestRule
             .onNodeWithTag(PersonalizationScreenTestTags.HAPTICS_TOGGLE)
             .performScrollTo()
             .performClick()
 
         composeTestRule.runOnIdle {
-            assertEquals(PersonalizationTheme.FROST, personalizationRepository.state.value.selectedTheme)
+            assertEquals(PersonalizationTheme.EMBER, personalizationRepository.state.value.selectedTheme)
             assertEquals(false, personalizationRepository.state.value.generatedGameHapticsEnabled)
-            assertEquals(Color(0xFF215EA8), latestPrimary)
+            assertEquals(Color(0xFFA33A00), latestPrimary)
             assertEquals(snapshot, generatedSessionRepository.session.value)
         }
 

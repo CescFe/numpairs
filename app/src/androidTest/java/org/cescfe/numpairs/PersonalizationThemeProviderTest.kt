@@ -20,11 +20,18 @@ class PersonalizationThemeProviderTest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun changingPreferenceUpdatesThemeWithoutForgettingChildState() {
+    fun everyPreferenceThemeUpdatesColorsWithoutForgettingChildState() {
         val repository = FakePersonalizationPreferencesRepository()
         var firstRememberedValue: Any? = null
         var latestRememberedValue: Any? = null
         var latestPrimary = Color.Unspecified
+        val expectedPrimaryByTheme = linkedMapOf(
+            PersonalizationTheme.WARM to Color(0xFF9CBD7B),
+            PersonalizationTheme.FROST to Color(0xFF215EA8),
+            PersonalizationTheme.OBSIDIAN to Color(0xFFD7A66A),
+            PersonalizationTheme.TERMINAL to Color(0xFF65D46E),
+            PersonalizationTheme.EMBER to Color(0xFFA33A00)
+        )
 
         composeTestRule.setContent {
             PersonalizationThemeProvider(repository) {
@@ -38,16 +45,14 @@ class PersonalizationThemeProviderTest {
             }
         }
 
-        composeTestRule.runOnIdle {
-            assertEquals(Color(0xFF9CBD7B), latestPrimary)
-            repository.state.value = PersonalizationPreferences(
-                selectedTheme = PersonalizationTheme.FROST
-            )
-        }
-
-        composeTestRule.runOnIdle {
-            assertEquals(Color(0xFF215EA8), latestPrimary)
-            assertSame(firstRememberedValue, latestRememberedValue)
+        expectedPrimaryByTheme.forEach { (theme, expectedPrimary) ->
+            composeTestRule.runOnIdle {
+                repository.state.value = PersonalizationPreferences(selectedTheme = theme)
+            }
+            composeTestRule.runOnIdle {
+                assertEquals(expectedPrimary, latestPrimary)
+                assertSame(firstRememberedValue, latestRememberedValue)
+            }
         }
     }
 

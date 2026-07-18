@@ -91,7 +91,20 @@ class CorrectTileMotionTest {
     }
 
     @Test
-    fun generatedRouteEnablesCorrectTileMotion() {
+    fun fourPairsRouteEnablesCorrectTileMotion() {
+        assertGeneratedRouteEnablesCorrectTileMotion(
+            menuButtonTag = MenuScreenTestTags.FOUR_PAIRS_BUTTON
+        )
+    }
+
+    @Test
+    fun eightPairsRouteEnablesCorrectTileMotion() {
+        assertGeneratedRouteEnablesCorrectTileMotion(
+            menuButtonTag = MenuScreenTestTags.EIGHT_PAIRS_BUTTON
+        )
+    }
+
+    private fun assertGeneratedRouteEnablesCorrectTileMotion(menuButtonTag: String) {
         composeTestRule.setContent {
             NumPairsTheme {
                 AppNavigation(
@@ -117,7 +130,7 @@ class CorrectTileMotionTest {
         }
 
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+            .onNodeWithTag(menuButtonTag)
             .performClick()
         gameRobot()
             .scrollToBoard()
