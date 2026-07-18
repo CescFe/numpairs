@@ -118,13 +118,23 @@ Pull Request title format:
 [{reference}] {Relevant sentence-case message}
 ```
 
-When a merge is authorized, use squash and merge with this squash commit title:
+A user request to complete an issue, delivery batch, or milestone end to end authorizes every
+in-scope merge in that delivery cycle. No additional per-Pull-Request merge confirmation is
+required. This authorization remains limited to the requested delivery scope and does not extend
+to unrelated future work.
+
+A request limited to implementation, Pull Request creation, or review does not authorize merge.
+An explicit review-first or no-merge instruction overrides a broader workflow request.
+
+For every authorized merge, use squash and merge with this squash commit title:
 
 ```text
 [{reference}] {Relevant sentence-case message}
 ```
 
-Do not merge while a required check is pending, unexpectedly skipped, cancelled, or failing. Merge only when the user requested an end-to-end merge cycle. If the user asks to review the Pull Request first or explicitly says not to merge, stop after creating and reporting the Pull Request.
+Do not merge while a required check is pending, unexpectedly skipped, cancelled, or failing. If
+the delivery is not authorized end to end, or the user asks to review the Pull Request first or
+explicitly says not to merge, stop after creating and reporting the Pull Request.
 
 Before any authorized merge:
 
@@ -150,7 +160,7 @@ For each authorized issue:
 9. Open and configure the Pull Request.
 10. Wait for required GitHub checks when a merge is part of the requested cycle.
 11. Review the associated issue's acceptance criteria and mark only fulfilled criteria complete.
-12. If checks pass, every required criterion is fulfilled, and merge is authorized, squash and merge with the required title.
+12. If checks pass, every required criterion is fulfilled, and the delivery scope authorizes merging, squash and merge with the required title without requesting per-Pull-Request confirmation.
 13. Update local `main` before starting the next issue.
 
 Do not start dependent implementation from an unmerged branch when the requested workflow requires sequential integration into `main`.

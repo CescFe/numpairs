@@ -25,7 +25,8 @@ Follow the selected template and replace its prompts with task-specific content.
 - Keep each implementation limited to one atomic issue, one branch, and one Pull Request.
 - Preserve unrelated and user-authored work already present in the worktree.
 - Verify the associated issue's acceptance criteria and mark only fulfilled criteria complete before merge.
-- Do not merge without explicit authorization or while a required check is not successful.
+- Treat a user request to complete an issue, delivery batch, or milestone end to end as merge authorization for every in-scope Pull Request; no per-PR confirmation is required.
+- Outside that authorized scope, or when the user requests review, Pull Request creation, or no merge, do not merge. Never merge while a required check is not successful.
 - Compile instrumented tests when required, but do not start an emulator or run connected-device tasks.
 - Resolve current GitHub Project field and option identifiers dynamically; do not treat opaque IDs as permanent configuration.
 - Do not introduce an architectural pattern, dependency, or refactor solely to satisfy a generic best practice.
