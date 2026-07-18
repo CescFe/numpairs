@@ -140,7 +140,6 @@ private fun UnlockedAppNavigation(
                 GeneratedSessionChoiceDialog(
                     savedModeName = resumableSession.mode.localizedTitle(),
                     selectedModeName = selectedMode.localizedTitle(),
-                    isSameMode = resumableSession.mode.id == selectedMode.id,
                     onResume = {
                         actionGuard.handle {
                             pendingGeneratedModeChoice = null

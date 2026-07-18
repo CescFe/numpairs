@@ -65,7 +65,9 @@ Selecting either generated-mode action while a resumable session exists opens th
 - primary: `Resume`
 - secondary: start a new puzzle for the mode the player selected
 
-For the saved mode, supporting copy may use the concise secondary label `New puzzle`. For a different selected mode, copy and the secondary label identify that mode, such as `Play 8 pairs`. This variation clarifies the outcomes; it is not a separate cross-mode protection flow.
+Both same-mode and different-mode selections use one concise supporting message: `You have an unfinished <saved mode> puzzle.` The message uses the larger body text treatment. The secondary label always identifies the requested replacement mode as `New <selected mode>`.
+
+The primary action uses the shared primary CTA treatment and established button shape.
 
 The choice dialog has no visible cancel, back, close, or third action. Tapping outside or pressing system back dismisses it without navigation, generation, or session mutation. Action handling is deduplicated.
 

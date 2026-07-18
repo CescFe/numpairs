@@ -10,10 +10,8 @@
     <string name="menu_four_pairs_button">Juga a 4 parelles</string>
     <string name="menu_eight_pairs_button">Juga a 8 parelles</string>
     <string name="generated_session_choice_title">Puzle sense acabar</string>
-    <string name="generated_session_choice_same_mode_message">Tens un puzle de %1$s sense acabar. Vols continuar-lo o començar-ne un de nou?</string>
-    <string name="generated_session_choice_different_mode_message">Tens un puzle de %1$s sense acabar. Vols continuar-lo o substituir-lo per un de nou de %2$s?</string>
-    <string name="generated_session_choice_new_puzzle_button">Puzle nou</string>
-    <string name="generated_session_choice_play_mode_button">Juga a %1$s</string>
+    <string name="generated_session_choice_mode_message">Tens un puzle de %1$s sense acabar.</string>
+    <string name="generated_session_choice_new_mode_button">Puzle nou de %1$s</string>
 
     <!-- Four pairs screen -->
     <string name="four_pairs_screen_title">4 parelles</string>

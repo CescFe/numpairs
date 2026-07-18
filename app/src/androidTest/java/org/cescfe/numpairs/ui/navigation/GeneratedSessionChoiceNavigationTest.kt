@@ -80,7 +80,7 @@ class GeneratedSessionChoiceNavigationTest {
         composeTestRule
             .onNodeWithText(
                 string(
-                    R.string.generated_session_choice_same_mode_message,
+                    R.string.generated_session_choice_mode_message,
                     string(R.string.four_pairs_screen_title)
                 )
             )
@@ -89,7 +89,12 @@ class GeneratedSessionChoiceNavigationTest {
             .onNodeWithTag(MenuScreenTestTags.SESSION_CHOICE_RESUME_BUTTON)
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithText(string(R.string.generated_session_choice_new_puzzle_button))
+            .onNodeWithText(
+                string(
+                    R.string.generated_session_choice_new_mode_button,
+                    string(R.string.four_pairs_screen_title)
+                )
+            )
             .assertIsDisplayed()
         composeTestRule.runOnIdle {
             assertTrue(recorder.generatedModes.isEmpty())
@@ -123,9 +128,8 @@ class GeneratedSessionChoiceNavigationTest {
         composeTestRule
             .onNodeWithText(
                 string(
-                    R.string.generated_session_choice_different_mode_message,
-                    string(R.string.four_pairs_screen_title),
-                    string(R.string.eight_pairs_screen_title)
+                    R.string.generated_session_choice_mode_message,
+                    string(R.string.four_pairs_screen_title)
                 )
             )
             .assertIsDisplayed()
@@ -135,7 +139,7 @@ class GeneratedSessionChoiceNavigationTest {
         composeTestRule
             .onNodeWithText(
                 string(
-                    R.string.generated_session_choice_play_mode_button,
+                    R.string.generated_session_choice_new_mode_button,
                     string(R.string.eight_pairs_screen_title)
                 )
             )

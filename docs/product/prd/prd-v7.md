@@ -102,8 +102,8 @@ The baseline does not include:
 - Selecting `Resume` opens the stored mode and exact committed puzzle state without generation.
 - Selecting either generated-mode action while a resumable session exists opens a modal choice.
 - The modal always offers `Resume` as its primary action.
-- The modal secondary action starts a new puzzle for the mode the player selected.
-- Same-mode and different-mode selection may use different supporting copy or secondary labels for clarity, but neither is a separate protection flow.
+- The modal identifies the unfinished puzzle's mode with one concise supporting message.
+- The modal secondary action uses `New <selected mode>` and starts a new puzzle for the mode the player selected.
 - The modal has no visible cancel, back, or close action.
 - Tapping outside the modal or pressing system back dismisses it without changing the session.
 - Selecting `How to play` never replaces or modifies the generated session.
@@ -183,18 +183,9 @@ When either `Play 4 Pairs` or `Play 8 Pairs` is selected while a resumable sessi
 - dismiss without side effects on system back
 - ignore duplicate action taps while a choice is being handled
 
-For same-mode selection:
+Use the same concise supporting copy for same-mode and different-mode selection: `You have an unfinished <saved mode> puzzle.` The secondary label always identifies the requested replacement mode as `New <selected mode>`, while the primary label remains `Resume`.
 
-- explain that the player can resume the unfinished puzzle or generate a new puzzle
-- use a concise secondary label such as `New puzzle`
-
-For different-mode selection:
-
-- explain that the unfinished puzzle can be resumed or replaced by the selected mode
-- keep the primary label as `Resume`
-- let the secondary label identify the selected mode, such as `Play 8 Pairs`
-
-Both cases use the same session ownership and replacement rules. Different copy exists only to make the selected outcome clear.
+The supporting message uses the larger body text treatment, and the primary action uses the shared primary CTA treatment and established button shape.
 
 ### Safe New-Puzzle Replacement
 
@@ -264,7 +255,7 @@ Work:
 1. Render the conditional `Resume` CTA in the required menu order and visual hierarchy.
 2. Navigate `Resume` to the stored mode and session without generation.
 3. Add the shared generated-mode selection dialog.
-4. Provide clear same-mode and different-mode copy with `Resume` primary and selected new-puzzle action secondary.
+4. Provide concise mode-aware copy with `Resume` primary and `New <selected mode>` secondary.
 5. Support outside-tap and system-back dismissal without a visible cancel action.
 6. Localize and test the flow in English, Spanish, and Catalan.
 
@@ -311,7 +302,7 @@ Work:
 - Restoration preserves stable strip-entry identities and repeated-value assignments.
 - Selecting either generated-mode CTA while a session exists shows the documented modal.
 - The modal always uses `Resume` as its primary action.
-- Same-mode and different-mode selections communicate the selected new-puzzle outcome clearly.
+- Same-mode and different-mode selections use the same concise message and communicate the selected new-puzzle outcome clearly.
 - Outside tap and system back dismiss the modal without changing the session.
 - Starting a new generated puzzle replaces the old session only after generation, validation, and storage succeed.
 - A failed or cancelled replacement leaves the previous session resumable.
