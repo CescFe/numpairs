@@ -111,7 +111,12 @@ fun TutorialRoute(
         modifier = modifier,
         gameSessionKey = "$TUTORIAL_GAME_SESSION_KEY:$playbackKey:${currentScenario.id}",
         puzzleResetKey = playbackKey to currentScenario.id,
-        isSuccessOverlayEnabled = currentStepIndex == steps.lastIndex && onTutorialCompleted == null,
+        isSuccessOverlayEnabled = isTutorialSuccessOverlayEnabled(
+            isFinalStep = currentStepIndex == steps.lastIndex,
+            currentScenarioId = currentScenario.id,
+            observedScenarioId = latestGameUiSnapshot?.scenarioId,
+            isRequiredPlayback = onTutorialCompleted != null
+        ),
         isBoardVisible = currentStep.isBoardVisible,
         stripItemEntryGuidance = stripItemEntryGuidance,
         interactionPolicy = currentStep.toInteractionPolicy(
@@ -146,6 +151,15 @@ fun TutorialRoute(
 }
 
 private data class TutorialGameUiSnapshot(val scenarioId: TutorialScenarioId, val uiState: GameUiState)
+
+internal fun isTutorialSuccessOverlayEnabled(
+    isFinalStep: Boolean,
+    currentScenarioId: TutorialScenarioId,
+    observedScenarioId: TutorialScenarioId?,
+    isRequiredPlayback: Boolean
+): Boolean = isFinalStep &&
+    observedScenarioId == currentScenarioId &&
+    !isRequiredPlayback
 
 @Composable
 private fun TutorialInstructionSurface(
