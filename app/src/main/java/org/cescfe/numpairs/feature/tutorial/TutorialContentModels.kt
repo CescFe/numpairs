@@ -110,6 +110,14 @@ sealed interface TutorialHighlightTarget {
             }
         }
     }
+
+    data class WholeTile(val tileIndex: Int) : TutorialHighlightTarget {
+        init {
+            require(tileIndex >= 0) {
+                "Tutorial whole tile highlight index must be non-negative."
+            }
+        }
+    }
 }
 
 sealed interface TutorialRequiredAction {

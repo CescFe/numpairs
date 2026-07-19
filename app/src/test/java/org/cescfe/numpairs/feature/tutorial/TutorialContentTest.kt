@@ -8,6 +8,8 @@ import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
+import org.cescfe.numpairs.feature.game.GameTileExpressionSlot
+import org.cescfe.numpairs.feature.game.GameTileExpressionSlotHighlight
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -104,7 +106,8 @@ class TutorialContentTest {
 
         steps[1].assertGuidedAction(
             expectedHighlights = listOf(
-                TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0)
+                TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0),
+                TutorialHighlightTarget.WholeTile(tileIndex = 1)
             ),
             expectedAction = TutorialRequiredAction.CompleteTileExpression(
                 tileIndex = 0,
@@ -128,6 +131,25 @@ class TutorialContentTest {
             incompletePuzzle = repeatedValueScenario.initialPuzzle,
             completePuzzle = repeatedValueScenario.solvedPuzzle
         )
+    }
+
+    @Test
+    fun learn_basics_step_two_highlights_the_editable_slots_and_complementary_product_tile() {
+        val scenario = TutorialContent.scenario(TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION)
+        val step = TutorialContent.learnBasicsSteps[1]
+
+        val highlightState = step.toHighlightState(scenario = scenario, uiState = null)
+
+        assertEquals(setOf(1), highlightState.tileIndexes)
+        assertEquals(
+            GameTileExpressionSlot.entries.mapTo(mutableSetOf()) { slot ->
+                GameTileExpressionSlotHighlight(tileIndex = 0, slot = slot)
+            },
+            highlightState.tileExpressionSlots
+        )
+        assertFalse(highlightState.isTileHighlighted(index = 0))
+        assertFalse(highlightState.isTileHighlighted(index = 2))
+        assertFalse(highlightState.isTileHighlighted(index = 3))
     }
 
     @Test
