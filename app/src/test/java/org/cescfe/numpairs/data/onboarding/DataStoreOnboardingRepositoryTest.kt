@@ -172,25 +172,6 @@ class DataStoreOnboardingRepositoryTest {
     }
 
     @Test
-    fun `post-core path is persisted once without completing onboarding`() = runBlocking {
-        val fixture = createRepository()
-        fixture.repository.initialize(OnboardingInstallationKind.FRESH_INSTALL)
-        fixture.repository.recordStageCompleted(OnboardingStageCheckpoint.STAGE_TWO)
-
-        fixture.repository.selectPostCorePath(OnboardingPostCorePath.EARLY_VALIDATION)
-        fixture.repository.selectPostCorePath(OnboardingPostCorePath.CONTINUE_GUIDED)
-
-        val state = fixture.repository.onboardingState.first()
-        assertEquals(OnboardingPostCorePath.EARLY_VALIDATION, state.postCorePath)
-        assertFalse(state.isRequiredVersionComplete())
-    }
-
-    @Test(expected = IllegalArgumentException::class)
-    fun `undecided cannot be selected as a post-core path`() = runBlocking {
-        createRepository().repository.selectPostCorePath(OnboardingPostCorePath.UNDECIDED)
-    }
-
-    @Test
     fun `state persists across repository instances`() = runBlocking {
         val dataStoreFile = createDataStoreFile()
         val firstFixture = createRepository(dataStoreFile)

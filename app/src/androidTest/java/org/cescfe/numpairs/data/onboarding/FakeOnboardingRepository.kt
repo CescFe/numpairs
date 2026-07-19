@@ -29,10 +29,6 @@ class FakeOnboardingRepository(initialState: OnboardingState = completedOnboardi
         onboardingState.value = onboardingState.value.copy(lastCompletedStage = stage)
     }
 
-    override suspend fun selectPostCorePath(path: OnboardingPostCorePath) {
-        onboardingState.value = onboardingState.value.copy(postCorePath = path)
-    }
-
     override suspend fun markTutorialCompleted() {
         resolveFirstRun(outcome = FirstRunTutorialOutcome.COMPLETED)
     }
@@ -58,10 +54,8 @@ fun completedOnboardingState(): OnboardingState = OnboardingState(
 )
 
 fun incompleteOnboardingState(
-    lastCompletedStage: OnboardingStageCheckpoint = OnboardingStageCheckpoint.NONE,
-    postCorePath: OnboardingPostCorePath = OnboardingPostCorePath.UNDECIDED
+    lastCompletedStage: OnboardingStageCheckpoint = OnboardingStageCheckpoint.NONE
 ): OnboardingState = OnboardingState(
     isInitialized = true,
-    lastCompletedStage = lastCompletedStage,
-    postCorePath = postCorePath
+    lastCompletedStage = lastCompletedStage
 )

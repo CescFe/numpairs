@@ -27,8 +27,9 @@ class LocalizationResourceTest {
         )
         assertEquals("Serie", resources.getString(R.string.strip_content_description))
         assertEquals("Paso 1 de 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))
-        assertEquals("Ya sé jugar", resources.getString(R.string.onboarding_early_validation_button))
-        assertEquals("Comprobación final", resources.getString(R.string.final_validation_screen_title))
+        assertEquals("Saltar tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
+        assertEquals("Continuar tutorial", resources.getString(R.string.onboarding_continue_tutorial_button))
+        assertEquals("Saltar igualmente", resources.getString(R.string.onboarding_skip_anyway_button))
     }
 
     @Test
@@ -47,8 +48,9 @@ class LocalizationResourceTest {
         )
         assertEquals("Sèrie", resources.getString(R.string.strip_content_description))
         assertEquals("Pas 1 de 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))
-        assertEquals("Ja sé jugar", resources.getString(R.string.onboarding_early_validation_button))
-        assertEquals("Comprovació final", resources.getString(R.string.final_validation_screen_title))
+        assertEquals("Omet el tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
+        assertEquals("Continua el tutorial", resources.getString(R.string.onboarding_continue_tutorial_button))
+        assertEquals("Omet-lo igualment", resources.getString(R.string.onboarding_skip_anyway_button))
     }
 
     @Test
@@ -67,8 +69,9 @@ class LocalizationResourceTest {
         )
         assertEquals("Strip", resources.getString(R.string.strip_content_description))
         assertEquals("Step 1 of 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))
-        assertEquals("I know how to play", resources.getString(R.string.onboarding_early_validation_button))
-        assertEquals("Final check", resources.getString(R.string.final_validation_screen_title))
+        assertEquals("Skip tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
+        assertEquals("Continue tutorial", resources.getString(R.string.onboarding_continue_tutorial_button))
+        assertEquals("Skip anyway", resources.getString(R.string.onboarding_skip_anyway_button))
     }
 
     private fun resourcesFor(languageTag: String): Resources {

@@ -18,7 +18,6 @@ import org.cescfe.numpairs.data.generated.selection.FakeGeneratedDifficultySelec
 import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
 import org.cescfe.numpairs.data.onboarding.FirstRunTutorialOutcome
-import org.cescfe.numpairs.data.onboarding.OnboardingPostCorePath
 import org.cescfe.numpairs.data.onboarding.OnboardingStageCheckpoint
 import org.cescfe.numpairs.data.onboarding.OnboardingState
 import org.cescfe.numpairs.data.onboarding.REQUIRED_ONBOARDING_VERSION
@@ -49,42 +48,43 @@ class AppNavigationLearningFlowTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun howToPlayReplaysFromStageOneAndBackPreservesCompletedOnboarding() {
-        val completedState = OnboardingState(
-            isInitialized = true,
-            completedVersion = REQUIRED_ONBOARDING_VERSION,
-            lastCompletedStage = OnboardingStageCheckpoint.STAGE_THREE,
-            postCorePath = OnboardingPostCorePath.CONTINUE_GUIDED,
-            firstRunTutorialOutcome = FirstRunTutorialOutcome.COMPLETED
-        )
-        val onboardingRepository = FakeOnboardingRepository(initialState = completedState)
+    fun howToPlayReplaysFromStepOneAndBackPreservesEveryResolvedOutcome() {
+        val initialState = resolvedOnboardingState(FirstRunTutorialOutcome.COMPLETED)
+        val onboardingRepository = FakeOnboardingRepository(initialState = initialState)
         setContent(
             puzzleProvider = QueueGeneratedPuzzleProvider(samplePuzzle),
             onboardingRepository = onboardingRepository
         )
 
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
-            .assert(hasText(string(R.string.menu_tutorial_button)))
-            .performClick()
-        composeTestRule
-            .onNodeWithText(string(R.string.tutorial_strip_introduction_copy))
-            .assertIsDisplayed()
+        FirstRunTutorialOutcome.entries
+            .filter(FirstRunTutorialOutcome::isResolved)
+            .forEach { outcome ->
+                val resolvedState = resolvedOnboardingState(outcome)
+                onboardingRepository.onboardingState.value = resolvedState
 
-        pressBackUnconditionally()
+                composeTestRule
+                    .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
+                    .assert(hasText(string(R.string.menu_tutorial_button)))
+                    .performClick()
+                composeTestRule
+                    .onNodeWithText(string(R.string.tutorial_strip_introduction_copy))
+                    .assertIsDisplayed()
 
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.SCREEN)
-            .assertIsDisplayed()
-        assertEquals(completedState, onboardingRepository.onboardingState.value)
+                pressBackUnconditionally()
 
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
-            .performClick()
-        composeTestRule
-            .onNodeWithText(string(R.string.tutorial_strip_introduction_copy))
-            .assertIsDisplayed()
+                composeTestRule
+                    .onNodeWithTag(MenuScreenTestTags.SCREEN)
+                    .assertIsDisplayed()
+                assertEquals(resolvedState, onboardingRepository.onboardingState.value)
+            }
     }
+
+    private fun resolvedOnboardingState(outcome: FirstRunTutorialOutcome): OnboardingState = OnboardingState(
+        isInitialized = true,
+        completedVersion = REQUIRED_ONBOARDING_VERSION,
+        lastCompletedStage = OnboardingStageCheckpoint.STAGE_THREE,
+        firstRunTutorialOutcome = outcome
+    )
 
     @Test
     fun inGameLearningActionsOpenTutorialOverlaysAndReturnToCurrentFourPairsScreen() {

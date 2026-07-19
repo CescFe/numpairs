@@ -11,7 +11,6 @@ import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performScrollTo
@@ -46,7 +45,7 @@ class TutorialRouteTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.BOARD)
             .assertDoesNotExist()
-        assertNoInternalStepButtons()
+        assertNoRequiredSkipAction()
         assertHighlighted(testTag = GameScreenTestTags.stripItem(1))
         assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(0))
         composeTestRule
@@ -157,93 +156,6 @@ class TutorialRouteTest {
     }
 
     @Test
-    fun guidedIntroductionTransitionsFromStageThreeIntoCleanFinalValidation() {
-        val completionCount = AtomicInteger(0)
-        setGuidedIntroductionContent(onIntroductionCompleted = { completionCount.incrementAndGet() })
-
-        completeStageTwo(waitForStageThree = false)
-        composeTestRule
-            .onNodeWithTag(PostCoreChoiceTestTags.SCREEN)
-            .assertIsDisplayed()
-        assertEquals(0, completionCount.get())
-        composeTestRule
-            .onNodeWithTag(PostCoreChoiceTestTags.CONTINUE_BUTTON)
-            .performClick()
-        waitForCopy(R.string.tutorial_stage_three_hidden_strip_value_copy)
-        enterStripValue(index = 1, value = "3")
-
-        composeTestRule.waitUntil(timeoutMillis = TUTORIAL_STEP_WAIT_TIMEOUT_MS) {
-            composeTestRule
-                .onAllNodes(hasText(string(R.string.final_validation_screen_title)))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
-
-        assertEquals(0, completionCount.get())
-        composeTestRule
-            .onNodeWithTag(TutorialScreenTestTags.INSTRUCTION_SURFACE)
-            .assertDoesNotExist()
-        composeTestRule
-            .onNodeWithTag(TutorialScreenTestTags.STEP_INDICATOR)
-            .assertDoesNotExist()
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.stripItem(1))
-            .assertContentDescriptionEquals(string(R.string.strip_item_hidden_content_description))
-        assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(1))
-        assertTileExpressionSlotsNotHighlighted(tileIndex = 0)
-    }
-
-    @Test
-    fun guidedIntroductionCanStartAtStageTwoAndReportsItsFullBoundary() {
-        val completedStages = mutableListOf<GuidedOnboardingStage>()
-        setGuidedIntroductionContent(
-            startStage = GuidedOnboardingStage.COMPLEMENTARY_PAIR,
-            onStageCompleted = { stage -> completedStages += stage }
-        )
-
-        assertComplementaryPairScenarioDisplayed()
-        composeTestRule
-            .onNodeWithTag(TutorialScreenTestTags.STEP_COPY)
-            .assert(hasText(string(R.string.tutorial_stage_two_complete_sum_copy)))
-
-        completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
-        waitForCopy(R.string.tutorial_stage_two_complete_product_copy)
-        assertEquals(emptyList<GuidedOnboardingStage>(), completedStages)
-        completeTile(tileIndex = 1, leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1)
-        composeTestRule
-            .onNodeWithTag(PostCoreChoiceTestTags.SCREEN)
-            .assertIsDisplayed()
-
-        assertEquals(listOf(GuidedOnboardingStage.COMPLEMENTARY_PAIR), completedStages)
-        composeTestRule
-            .onNodeWithTag(PostCoreChoiceTestTags.CONTINUE_BUTTON)
-            .performClick()
-        waitForCopy(R.string.tutorial_stage_three_hidden_strip_value_copy)
-        assertHiddenStripValueScenarioDisplayed()
-    }
-
-    @Test
-    fun guidedIntroductionEarlyExitStillRequiresFinalValidation() {
-        val completionCount = AtomicInteger(0)
-        setGuidedIntroductionContent(
-            startStage = GuidedOnboardingStage.COMPLEMENTARY_PAIR,
-            onIntroductionCompleted = { completionCount.incrementAndGet() }
-        )
-
-        completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
-        waitForCopy(R.string.tutorial_stage_two_complete_product_copy)
-        completeTile(tileIndex = 1, leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1)
-        composeTestRule
-            .onNodeWithTag(PostCoreChoiceTestTags.EARLY_VALIDATION_BUTTON)
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText(string(R.string.final_validation_screen_title))
-            .assertIsDisplayed()
-        assertEquals(0, completionCount.get())
-    }
-
-    @Test
     fun solvingTipsPracticeHighlightsExpectedActionsAndCompletesWithSuccessOverlay() {
         setSolvingTipsPracticeTutorialContent()
 
@@ -298,26 +210,6 @@ class TutorialRouteTest {
             .assertIsDisplayed()
     }
 
-    private fun setGuidedIntroductionContent(
-        startStage: GuidedOnboardingStage = GuidedOnboardingStage.NUMBER_PLACEMENT,
-        onStageCompleted: suspend (GuidedOnboardingStage) -> Unit = {},
-        onIntroductionCompleted: () -> Unit = {}
-    ) {
-        composeTestRule.setContent {
-            NumPairsTheme {
-                GuidedIntroductionRoute(
-                    startStage = startStage,
-                    onStageCompleted = onStageCompleted,
-                    onIntroductionCompleted = onIntroductionCompleted
-                )
-            }
-        }
-
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SCREEN)
-            .assertIsDisplayed()
-    }
-
     private fun setSolvingTipsPracticeTutorialContent() {
         composeTestRule.setContent {
             NumPairsTheme {
@@ -346,28 +238,6 @@ class TutorialRouteTest {
         completeTile(tileIndex = 1, leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1)
         completeTile(tileIndex = 2, leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3)
         completeTile(tileIndex = 3, leftStripEntryId = 2, operator = Operator.MULTIPLICATION, rightStripEntryId = 3)
-    }
-
-    private fun completeStageOne() {
-        chooseTileOperand(
-            tileIndex = 0,
-            isLeftOperand = true,
-            stripEntryId = 0
-        )
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(0), useUnmergedTree = true)
-            .performClick()
-        waitForCopy(R.string.tutorial_stage_two_complete_sum_copy)
-    }
-
-    private fun completeStageTwo(waitForStageThree: Boolean = true) {
-        completeStageOne()
-        completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
-        waitForCopy(R.string.tutorial_stage_two_complete_product_copy)
-        completeTile(tileIndex = 1, leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1)
-        if (waitForStageThree) {
-            waitForCopy(R.string.tutorial_stage_three_hidden_strip_value_copy)
-        }
     }
 
     private fun enterStripValue(index: Int, value: String) {
@@ -505,37 +375,9 @@ class TutorialRouteTest {
             .assert(hasText(string(step.playerFacingCopyResId)))
     }
 
-    private fun assertNoInternalStepButtons() {
+    private fun assertNoRequiredSkipAction() {
         composeTestRule
-            .onNodeWithTag(TutorialScreenTestTags.PREVIOUS_STEP_BUTTON)
-            .assertDoesNotExist()
-        composeTestRule
-            .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_BUTTON)
-            .assertDoesNotExist()
-    }
-
-    private fun assertComplementaryPairScenarioDisplayed() {
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.stripItem(0))
-            .performScrollTo()
-            .assertContentDescriptionEquals(
-                string(
-                    R.string.strip_item_known_content_description,
-                    "2"
-                )
-            )
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.stripItem(1))
-            .assertContentDescriptionEquals(
-                string(
-                    R.string.strip_item_known_content_description,
-                    "3"
-                )
-            )
-        assertTileResult(tileIndex = 0, result = 5)
-        assertTileResult(tileIndex = 1, result = 6)
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tile(2), useUnmergedTree = true)
+            .onNodeWithTag(TutorialScreenTestTags.SKIP_ACTION)
             .assertDoesNotExist()
     }
 
@@ -585,58 +427,6 @@ class TutorialRouteTest {
         assertTileResult(tileIndex = 1, result = 2)
         assertTileResult(tileIndex = 2, result = 5)
         assertTileResult(tileIndex = 3, result = 6)
-    }
-
-    private fun assertNumberPlacementScenarioDisplayed() {
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.stripItem(0))
-            .performScrollTo()
-            .assertContentDescriptionEquals(string(R.string.strip_item_known_content_description, "2"))
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.stripItem(1))
-            .assertContentDescriptionEquals(string(R.string.strip_item_known_content_description, "3"))
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileLeftOperand(0), useUnmergedTree = true)
-            .assertContentDescriptionEquals(string(R.string.tile_left_operand_hidden_content_description))
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
-            .assertContentDescriptionEquals(
-                string(
-                    R.string.tile_operator_content_description,
-                    Operator.ADDITION.accessibilityLabel()
-                )
-            )
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileRightOperand(0), useUnmergedTree = true)
-            .assertContentDescriptionEquals(string(R.string.tile_right_operand_content_description, "3"))
-        assertTileResult(tileIndex = 0, result = 5)
-        assertTileExpression(
-            tileIndex = 1,
-            operator = Operator.MULTIPLICATION,
-            leftValue = "2",
-            rightValue = "3"
-        )
-        assertTileResult(tileIndex = 1, result = 6)
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tile(2), useUnmergedTree = true)
-            .assertDoesNotExist()
-    }
-
-    private fun assertHiddenStripValueScenarioDisplayed() {
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.stripItem(0))
-            .performScrollTo()
-            .assertContentDescriptionEquals(string(R.string.strip_item_known_content_description, "2"))
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.stripItem(1))
-            .assertContentDescriptionEquals(string(R.string.strip_item_hidden_content_description))
-        assertTileExpression(tileIndex = 0, operator = Operator.ADDITION)
-        assertTileResult(tileIndex = 0, result = 5)
-        assertTileExpression(tileIndex = 1, operator = Operator.MULTIPLICATION)
-        assertTileResult(tileIndex = 1, result = 6)
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tile(2), useUnmergedTree = true)
-            .assertDoesNotExist()
     }
 
     private fun assertSolvingTipsPracticeScenarioDisplayed() {
@@ -711,15 +501,6 @@ class TutorialRouteTest {
         composeTestRule.waitUntil(timeoutMillis = TUTORIAL_STEP_WAIT_TIMEOUT_MS) {
             composeTestRule
                 .onAllNodes(hasText(string(step.playerFacingCopyResId)))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
-    }
-
-    private fun waitForCopy(copyResId: Int) {
-        composeTestRule.waitUntil(timeoutMillis = TUTORIAL_STEP_WAIT_TIMEOUT_MS) {
-            composeTestRule
-                .onAllNodes(hasText(string(copyResId)))
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }

@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.feature.tutorial
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
@@ -39,20 +41,22 @@ import org.cescfe.numpairs.ui.theme.NumPairsComponents
 fun TutorialRoute(
     modifier: Modifier = Modifier,
     mode: TutorialMode = TutorialMode.LEARN_BASICS,
-    guidedStage: GuidedOnboardingStage? = null,
+    startStepIndex: Int = 0,
     saveProgressAcrossRecreation: Boolean = true,
+    onStepCompleted: suspend (Int) -> Unit = {},
     onTutorialCompleted: (() -> Unit)? = null,
+    onSkipTutorialRequested: (() -> Unit)? = null,
     onNavigateBack: () -> Unit = {}
 ) {
-    require(guidedStage == null || mode == TutorialMode.LEARN_BASICS) {
-        "Guided onboarding stages are available only in Learn basics mode."
+    val playbackKey = mode
+    val steps = TutorialContent.stepsFor(mode)
+    require(startStepIndex in steps.indices) {
+        "Tutorial start step index must reference an available step."
     }
-    val playbackKey = guidedStage ?: mode
-    val steps = guidedStage?.let(TutorialContent::stepsFor) ?: TutorialContent.stepsFor(mode)
     val currentStepIndexState = if (saveProgressAcrossRecreation) {
-        rememberSaveable(playbackKey) { mutableIntStateOf(0) }
+        rememberSaveable(playbackKey, startStepIndex) { mutableIntStateOf(startStepIndex) }
     } else {
-        remember(playbackKey) { mutableIntStateOf(0) }
+        remember(playbackKey, startStepIndex) { mutableIntStateOf(startStepIndex) }
     }
     val completionReportedState = if (saveProgressAcrossRecreation) {
         rememberSaveable(playbackKey) { mutableStateOf(false) }
@@ -61,10 +65,15 @@ fun TutorialRoute(
     }
     var currentStepIndex by currentStepIndexState
     var hasReportedCompletion by completionReportedState
+    var lastReportedStepIndex by remember(playbackKey, startStepIndex) {
+        mutableIntStateOf(startStepIndex - 1)
+    }
     var latestGameUiSnapshot by remember(playbackKey) { mutableStateOf<TutorialGameUiSnapshot?>(null) }
+    val currentOnStepCompleted by rememberUpdatedState(onStepCompleted)
     val currentOnTutorialCompleted by rememberUpdatedState(onTutorialCompleted)
     val currentStep = steps[currentStepIndex]
     val currentScenario = TutorialContent.scenario(currentStep.scenarioId)
+    val currentEntryPuzzle = currentStep.entryPuzzle ?: currentScenario.initialPuzzle
     val latestGameUiState = latestGameUiSnapshot
         ?.takeIf { snapshot -> snapshot.scenarioId == currentScenario.id }
         ?.uiState
@@ -78,12 +87,16 @@ fun TutorialRoute(
         if (!currentStep.isComplete(uiState)) {
             return@LaunchedEffect
         }
+        if (lastReportedStepIndex >= currentStepIndex) {
+            return@LaunchedEffect
+        }
 
+        lastReportedStepIndex = currentStepIndex
+        delay(TUTORIAL_STEP_ADVANCE_DELAY)
+        currentOnStepCompleted(currentStepIndex)
         if (currentStepIndex < steps.lastIndex) {
-            delay(TUTORIAL_STEP_ADVANCE_DELAY)
             currentStepIndex += 1
         } else if (!hasReportedCompletion && currentOnTutorialCompleted != null) {
-            delay(TUTORIAL_STEP_ADVANCE_DELAY)
             hasReportedCompletion = true
             currentOnTutorialCompleted?.invoke()
         }
@@ -91,7 +104,7 @@ fun TutorialRoute(
 
     GameRoute(
         title = stringResource(R.string.tutorial_screen_title),
-        initialPuzzle = currentScenario.initialPuzzle,
+        initialPuzzle = currentEntryPuzzle,
         modifier = modifier,
         gameSessionKey = "$TUTORIAL_GAME_SESSION_KEY:$playbackKey:${currentScenario.id}",
         puzzleResetKey = playbackKey to currentScenario.id,
@@ -111,6 +124,7 @@ fun TutorialRoute(
                 currentStep = currentStep,
                 currentStepNumber = currentStepIndex + 1,
                 totalSteps = steps.size,
+                onSkipTutorialRequested = onSkipTutorialRequested,
                 modifier = Modifier.fillMaxWidth()
             )
         },
@@ -131,6 +145,7 @@ private fun TutorialInstructionSurface(
     currentStep: TutorialStep,
     currentStepNumber: Int,
     totalSteps: Int,
+    onSkipTutorialRequested: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -160,6 +175,20 @@ private fun TutorialInstructionSurface(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
+            onSkipTutorialRequested?.let { onSkipRequested ->
+                Text(
+                    text = stringResource(R.string.onboarding_skip_tutorial_action),
+                    modifier = Modifier
+                        .testTag(TutorialScreenTestTags.SKIP_ACTION)
+                        .clickable(
+                            role = Role.Button,
+                            onClick = onSkipRequested
+                        )
+                        .padding(vertical = 4.dp),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
 }
@@ -190,7 +219,6 @@ private fun TutorialRequiredAction.toInteractionPolicy(
         canConfirmTileOperand = { _, _, _ -> false },
         canConfirmTileOperator = { _, _ -> false }
     )
-    is TutorialRequiredAction.PlaceTileOperand -> toInteractionPolicy()
     is TutorialRequiredAction.CompleteTileExpression -> toInteractionPolicy(
         scenario = scenario,
         highlightedStripEntryIds = highlightedStripEntryIds
@@ -205,20 +233,6 @@ private fun TutorialRequiredAction.toInteractionPolicy(
     )
     TutorialRequiredAction.CompleteScenario -> GameInteractionPolicy.AllowAll
 }
-
-private fun TutorialRequiredAction.PlaceTileOperand.toInteractionPolicy(): GameInteractionPolicy =
-    GameInteractionPolicy(
-        canTapStripItem = { false },
-        canConfirmStripItemEntry = { _, _ -> false },
-        canTapTileLeftOperand = { index -> index == tileIndex && slot == OperandSlot.LEFT },
-        canTapTileRightOperand = { index -> index == tileIndex && slot == OperandSlot.RIGHT },
-        canTapTileOperator = { false },
-        canTapTileReset = { false },
-        canConfirmTileOperand = { index, selectedSlot, selectedStripEntryId ->
-            index == tileIndex && selectedSlot == slot && selectedStripEntryId == stripEntryId
-        },
-        canConfirmTileOperator = { _, _ -> false }
-    )
 
 private fun TutorialRequiredAction.CompleteTileExpression.toInteractionPolicy(
     scenario: TutorialScenario,
@@ -353,12 +367,8 @@ private fun TutorialStep.highlightedStripEntryIds(scenario: TutorialScenario): S
                 }
             }
             is TutorialHighlightTarget.StripEntries -> addAll(target.indexes)
-            TutorialHighlightTarget.GridArea,
             TutorialHighlightTarget.HiddenTileExpressions,
-            TutorialHighlightTarget.StripArea,
-            is TutorialHighlightTarget.TileExpressionSlots,
-            is TutorialHighlightTarget.TileOperandSlot,
-            is TutorialHighlightTarget.Tiles -> Unit
+            is TutorialHighlightTarget.TileExpressionSlots -> Unit
         }
     }
 }
@@ -379,13 +389,10 @@ internal fun TutorialStep.toHighlightState(scenario: TutorialScenario, uiState: 
     }
 
     val stripEntryIndexes = mutableSetOf<Int>()
-    val tileIndexes = mutableSetOf<Int>()
     val tileExpressionSlots = mutableSetOf<GameTileExpressionSlotHighlight>()
 
     highlightedTargets.forEach { target ->
         when (target) {
-            TutorialHighlightTarget.GridArea,
-            TutorialHighlightTarget.StripArea -> Unit
             TutorialHighlightTarget.HiddenStripEntries -> {
                 scenario.initialPuzzle.strip.items.forEachIndexed { index, item ->
                     if (item == StripItem.Hidden) {
@@ -406,28 +413,13 @@ internal fun TutorialStep.toHighlightState(scenario: TutorialScenario, uiState: 
             is TutorialHighlightTarget.TileExpressionSlots -> {
                 tileExpressionSlots += expressionSlotHighlights(target.tileIndex)
             }
-            is TutorialHighlightTarget.TileOperandSlot -> {
-                tileExpressionSlots += GameTileExpressionSlotHighlight(
-                    tileIndex = target.tileIndex,
-                    slot = target.slot.toGameTileExpressionSlot()
-                )
-            }
-            is TutorialHighlightTarget.Tiles -> {
-                tileIndexes += target.indexes
-            }
         }
     }
 
     return GameHighlightState(
         stripEntryIndexes = stripEntryIndexes,
-        tileIndexes = tileIndexes,
         tileExpressionSlots = tileExpressionSlots
     )
-}
-
-private fun OperandSlot.toGameTileExpressionSlot(): GameTileExpressionSlot = when (this) {
-    OperandSlot.LEFT -> GameTileExpressionSlot.LEFT_OPERAND
-    OperandSlot.RIGHT -> GameTileExpressionSlot.RIGHT_OPERAND
 }
 
 private fun expressionSlotHighlights(tileIndex: Int): Set<GameTileExpressionSlotHighlight> = setOf(

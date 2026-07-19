@@ -1,7 +1,6 @@
 package org.cescfe.numpairs.feature.tutorial
 
 import androidx.annotation.StringRes
-import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
@@ -45,10 +44,6 @@ data class TutorialScenario(
 enum class TutorialScenarioId {
     STRIP_AND_TILES_INTRODUCTION,
     REPEATED_VALUE_PRACTICE,
-    NUMBER_PLACEMENT,
-    COMPLEMENTARY_PAIR,
-    HIDDEN_STRIP_VALUE,
-    FINAL_VALIDATION,
     SOLVING_TIPS_PRACTICE
 }
 
@@ -74,7 +69,8 @@ data class TutorialStep(
     val requiredAction: TutorialRequiredAction,
     val completionPredicate: TutorialStepCompletionPredicate,
     val isBoardVisible: Boolean = true,
-    @param:StringRes val stripEntryGuidanceResId: Int? = null
+    @param:StringRes val stripEntryGuidanceResId: Int? = null,
+    val entryPuzzle: Puzzle? = null
 ) {
     init {
         require(order > 0) {
@@ -96,10 +92,6 @@ sealed interface TutorialHighlightTarget {
 
     data object HiddenTileExpressions : TutorialHighlightTarget
 
-    data object StripArea : TutorialHighlightTarget
-
-    data object GridArea : TutorialHighlightTarget
-
     data class StripEntries(val indexes: List<Int>) : TutorialHighlightTarget {
         init {
             require(indexes.isNotEmpty()) {
@@ -111,29 +103,10 @@ sealed interface TutorialHighlightTarget {
         }
     }
 
-    data class Tiles(val indexes: List<Int>) : TutorialHighlightTarget {
-        init {
-            require(indexes.isNotEmpty()) {
-                "Tutorial tile highlights must include at least one index."
-            }
-            require(indexes.all { index -> index >= 0 }) {
-                "Tutorial tile highlight indexes must be non-negative."
-            }
-        }
-    }
-
     data class TileExpressionSlots(val tileIndex: Int) : TutorialHighlightTarget {
         init {
             require(tileIndex >= 0) {
                 "Tutorial tile expression slot highlight index must be non-negative."
-            }
-        }
-    }
-
-    data class TileOperandSlot(val tileIndex: Int, val slot: OperandSlot) : TutorialHighlightTarget {
-        init {
-            require(tileIndex >= 0) {
-                "Tutorial tile operand slot highlight index must be non-negative."
             }
         }
     }
@@ -147,18 +120,6 @@ sealed interface TutorialRequiredAction {
             }
             require(value > 0) {
                 "Tutorial strip entry action value must be positive."
-            }
-        }
-    }
-
-    data class PlaceTileOperand(val tileIndex: Int, val slot: OperandSlot, val stripEntryId: Int) :
-        TutorialRequiredAction {
-        init {
-            require(tileIndex >= 0) {
-                "Tutorial tile operand action index must be non-negative."
-            }
-            require(stripEntryId >= 0) {
-                "Tutorial tile operand strip entry id must be non-negative."
             }
         }
     }
@@ -228,28 +189,6 @@ sealed interface TutorialStepCompletionPredicate {
 
             return stripItem.label == value.toString() &&
                 stripItem.visualStyle == StripItemVisualStyle.PLAYER_ENTERED
-        }
-    }
-
-    data class TileOperandPlaced(val tileIndex: Int, val slot: OperandSlot, val value: Int) :
-        TutorialStepCompletionPredicate {
-        init {
-            require(tileIndex >= 0) {
-                "Tutorial tile operand completion index must be non-negative."
-            }
-            require(value > 0) {
-                "Tutorial tile operand completion value must be positive."
-            }
-        }
-
-        override fun isSatisfiedBy(uiState: GameUiState): Boolean {
-            val tile = uiState.tiles.getOrNull(tileIndex) ?: return false
-            val operandLabel = when (slot) {
-                OperandSlot.LEFT -> tile.leftOperandLabel
-                OperandSlot.RIGHT -> tile.rightOperandLabel
-            }
-
-            return operandLabel == value.toString()
         }
     }
 
