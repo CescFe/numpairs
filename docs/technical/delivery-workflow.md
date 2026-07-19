@@ -188,7 +188,7 @@ For documentation-only changes, validate Markdown structure, relative links, con
 
 ## Milestone Completion
 
-Before closing a milestone:
+Before reporting a milestone ready for manual closure:
 
 - confirm every planned issue is closed or deliberately marked `not planned`
 - confirm every associated Pull Request is merged
@@ -197,4 +197,8 @@ Before closing a milestone:
 - run final formatting, unit-test, lint, and instrumented-test compilation checks
 - confirm the worktree is clean and synchronized with `origin/main`
 
-Close the milestone only when the user authorized completion and all required verification has passed.
+Agents must not close GitHub milestones. After every required verification passes, report the
+milestone as ready and leave the milestone open for the repository owner to close manually.
+
+End-to-end milestone delivery remains authorization to merge every in-scope Pull Request under the
+rules above. It does not authorize an agent to close the milestone.
