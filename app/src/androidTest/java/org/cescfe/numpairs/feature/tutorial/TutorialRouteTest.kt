@@ -127,14 +127,14 @@ class TutorialRouteTest {
     }
 
     @Test
-    fun stepThreeUsesNormalPuzzleInteractionsAndCompletesLearnBasics() {
+    fun stepThreeUsesNormalPuzzleInteractionsAndCompletesLearnBasicsWithoutShowingSuccess() {
         setContent()
 
         completeFocusedTutorial()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
-            .assertIsDisplayed()
+            .assertDoesNotExist()
     }
 
     @Test
