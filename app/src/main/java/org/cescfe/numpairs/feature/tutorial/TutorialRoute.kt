@@ -2,8 +2,10 @@ package org.cescfe.numpairs.feature.tutorial
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -17,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -124,12 +127,16 @@ fun TutorialRoute(
             scenario = currentScenario,
             uiState = latestGameUiState
         ),
+        bottomBar = {
+            onSkipTutorialRequested?.let { onSkipRequested ->
+                TutorialSkipBottomBar(onSkipRequested = onSkipRequested)
+            }
+        },
         contentBeforePuzzle = {
             TutorialInstructionSurface(
                 currentStep = currentStep,
                 currentStepNumber = currentStepIndex + 1,
                 totalSteps = steps.size,
-                onSkipTutorialRequested = onSkipTutorialRequested,
                 modifier = Modifier.fillMaxWidth()
             )
         },
@@ -159,7 +166,6 @@ private fun TutorialInstructionSurface(
     currentStep: TutorialStep,
     currentStepNumber: Int,
     totalSteps: Int,
-    onSkipTutorialRequested: (() -> Unit)?,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -189,21 +195,31 @@ private fun TutorialInstructionSurface(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            onSkipTutorialRequested?.let { onSkipRequested ->
-                Text(
-                    text = stringResource(R.string.onboarding_skip_tutorial_action),
-                    modifier = Modifier
-                        .testTag(TutorialScreenTestTags.SKIP_ACTION)
-                        .clickable(
-                            role = Role.Button,
-                            onClick = onSkipRequested
-                        )
-                        .padding(vertical = 4.dp),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
         }
+    }
+}
+
+@Composable
+private fun TutorialSkipBottomBar(onSkipRequested: () -> Unit, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        contentAlignment = Alignment.CenterEnd
+    ) {
+        Text(
+            text = stringResource(R.string.onboarding_skip_tutorial_action),
+            modifier = Modifier
+                .testTag(TutorialScreenTestTags.SKIP_ACTION)
+                .clickable(
+                    role = Role.Button,
+                    onClick = onSkipRequested
+                )
+                .padding(vertical = 4.dp),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
     }
 }
 
@@ -382,7 +398,8 @@ private fun TutorialStep.highlightedStripEntryIds(scenario: TutorialScenario): S
             }
             is TutorialHighlightTarget.StripEntries -> addAll(target.indexes)
             TutorialHighlightTarget.HiddenTileExpressions,
-            is TutorialHighlightTarget.TileExpressionSlots -> Unit
+            is TutorialHighlightTarget.TileExpressionSlots,
+            is TutorialHighlightTarget.WholeTile -> Unit
         }
     }
 }
@@ -403,6 +420,7 @@ internal fun TutorialStep.toHighlightState(scenario: TutorialScenario, uiState: 
     }
 
     val stripEntryIndexes = mutableSetOf<Int>()
+    val tileIndexes = mutableSetOf<Int>()
     val tileExpressionSlots = mutableSetOf<GameTileExpressionSlotHighlight>()
 
     highlightedTargets.forEach { target ->
@@ -427,11 +445,15 @@ internal fun TutorialStep.toHighlightState(scenario: TutorialScenario, uiState: 
             is TutorialHighlightTarget.TileExpressionSlots -> {
                 tileExpressionSlots += expressionSlotHighlights(target.tileIndex)
             }
+            is TutorialHighlightTarget.WholeTile -> {
+                tileIndexes += target.tileIndex
+            }
         }
     }
 
     return GameHighlightState(
         stripEntryIndexes = stripEntryIndexes,
+        tileIndexes = tileIndexes,
         tileExpressionSlots = tileExpressionSlots
     )
 }

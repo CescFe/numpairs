@@ -39,6 +39,7 @@ import org.cescfe.numpairs.feature.tutorial.ui.TutorialScreenTestTags
 import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -63,6 +64,7 @@ class RequiredOnboardingNavigationTest {
             .onNodeWithTag(TutorialScreenTestTags.STEP_COPY)
             .assert(hasText(string(R.string.tutorial_strip_introduction_copy)))
         assertRequiredSkipActionDisplayed()
+        assertRequiredSkipActionPositionedOutsideInstruction()
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.SCREEN)
             .assertDoesNotExist()
@@ -214,6 +216,26 @@ class RequiredOnboardingNavigationTest {
             .onNodeWithTag(TutorialScreenTestTags.SKIP_ACTION)
             .assertIsDisplayed()
             .assert(hasText(string(R.string.onboarding_skip_tutorial_action)))
+    }
+
+    private fun assertRequiredSkipActionPositionedOutsideInstruction() {
+        val screenBounds = composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .fetchSemanticsNode()
+            .boundsInRoot
+        val instructionBounds = composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.INSTRUCTION_SURFACE)
+            .fetchSemanticsNode()
+            .boundsInRoot
+        val skipBounds = composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.SKIP_ACTION)
+            .fetchSemanticsNode()
+            .boundsInRoot
+
+        assertTrue(skipBounds.top >= instructionBounds.bottom)
+        assertTrue(skipBounds.left >= screenBounds.center.x)
+        assertTrue(skipBounds.right <= screenBounds.right)
+        assertTrue(skipBounds.bottom < screenBounds.bottom)
     }
 
     private fun assertStillOnFirstStep(repository: FakeOnboardingRepository) {
