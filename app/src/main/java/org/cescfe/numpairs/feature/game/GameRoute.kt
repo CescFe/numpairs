@@ -44,6 +44,7 @@ fun GameRoute(
     interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
     highlightState: GameHighlightState = GameHighlightState.None,
     topBarActions: @Composable RowScope.() -> Unit = {},
+    bottomBar: @Composable () -> Unit = {},
     contentBeforePuzzle: @Composable ColumnScope.() -> Unit = {},
     onGameUiStateChanged: (GameUiState) -> Unit = {},
     onPuzzleChanged: (Puzzle) -> Unit = {},
@@ -179,6 +180,7 @@ fun GameRoute(
         correctTileFeedbackIdsByIndex = correctTileFeedbackIdsByIndex,
         completionFeedbackId = completionFeedbackId,
         topBarActions = topBarActions,
+        bottomBar = bottomBar,
         contentBeforePuzzle = contentBeforePuzzle
     )
 }
