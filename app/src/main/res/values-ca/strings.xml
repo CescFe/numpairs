@@ -62,23 +62,13 @@
     <string name="tutorial_strip_entry_guidance">Introdueix 3 per completar la sèrie del tutorial.</string>
     <string name="tutorial_tiles_introduction_copy">Una casella mostra un resultat i una expressió que has de formar. Emparella dos elements de la sèrie: cada parella ha de formar una casella de suma i una altra de producte. Completa 2 + 3 = 5.</string>
     <string name="tutorial_repeated_value_practice_copy">Resol el puzle. Recorda: la sèrie pot contindre valors repetits.</string>
-    <string name="tutorial_stage_one_place_number_copy">Col·loca el 2 en l’espai d’operand buit.</string>
-    <string name="tutorial_stage_two_complete_sum_copy">Completa la suma amb 2 i 3.</string>
-    <string name="tutorial_stage_two_complete_product_copy">Utilitza la mateixa parella per completar-ne el producte.</string>
-    <string name="tutorial_stage_three_hidden_strip_value_copy">L’expressió resolta revela el valor que falta a la sèrie. Introdueix 3.</string>
-    <string name="tutorial_step_one_copy">L’objectiu principal és descobrir tots els elements desconeguts. Endevina els valors ocults per a completar una llista ascendent d’enters positius.</string>
-    <string name="tutorial_step_two_copy">Combina dos números de la sèrie per a formar una expressió matemàtica que done com a resultat el valor visible de la casella. Completa la casella ressaltada amb dos operands i un operador.</string>
-    <string name="tutorial_step_three_copy">Cada parella ha de formar una suma i un producte. Usa la mateixa parella per a completar la seua casella de producte.</string>
-    <string name="tutorial_step_four_copy">Acaba este puzle de pràctica.</string>
+    <string name="onboarding_skip_tutorial_action">Omet el tutorial</string>
+    <string name="onboarding_skip_tutorial_title">Vols ometre el tutorial?</string>
+    <string name="onboarding_skip_tutorial_message">Si és la primera vegada que jugues a NumPairs o a jocs similars, et recomanem continuar. Podràs tornar a obrir el tutorial més tard des de Com jugar.</string>
+    <string name="onboarding_continue_tutorial_button">Continua el tutorial</string>
+    <string name="onboarding_skip_anyway_button">Omet-lo igualment</string>
     <string name="tutorial_solving_tips_step_one_copy">En dificultat baixa, cap número apareix dos vegades i la sèrie no inclou mai l’1, així que els resultats primers sempre són sumes. Completa el resultat primer com una casella de suma.</string>
     <string name="tutorial_solving_tips_step_two_copy">Les caselles de producte només poden usar factors del seu resultat. Troba dos valors de la sèrie que multipliquen fins a obtindre el producte i després usa la mateixa parella per a completar la suma corresponent.</string>
-    <string name="tutorial_previous_step_button">Arrere</string>
-    <string name="tutorial_next_step_button">Següent</string>
-    <string name="final_validation_screen_title">Comprovació final</string>
-    <string name="onboarding_post_core_title">Lliçó essencial completada</string>
-    <string name="onboarding_post_core_message">Has completat una suma i un producte amb la mateixa parella. Continua amb una lliçó guiada més o demostra el que saps a la comprovació final.</string>
-    <string name="onboarding_continue_guided_button">Continuar aprenent</string>
-    <string name="onboarding_early_validation_button">Ja sé jugar</string>
 
     <!-- Game screen: board and strip -->
     <string name="board_content_description">Tauler</string>

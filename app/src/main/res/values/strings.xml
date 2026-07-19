@@ -62,23 +62,13 @@
     <string name="tutorial_strip_entry_guidance">Enter 3 to complete the Tutorial strip.</string>
     <string name="tutorial_tiles_introduction_copy">A tile shows a result and an expression to build. Pair two strip entries: each pair must make one sum tile and one product tile. Complete 2 + 3 = 5.</string>
     <string name="tutorial_repeated_value_practice_copy">Solve the puzzle. Remember: the strip can contain repeated values.</string>
-    <string name="tutorial_stage_one_place_number_copy">Place 2 in the empty operand slot.</string>
-    <string name="tutorial_stage_two_complete_sum_copy">Complete the sum with 2 and 3.</string>
-    <string name="tutorial_stage_two_complete_product_copy">Use the same pair to complete its product.</string>
-    <string name="tutorial_stage_three_hidden_strip_value_copy">The solved expression reveals the missing strip value. Enter 3.</string>
-    <string name="tutorial_step_one_copy">The main objective is to discover all unknown elements. Guess hidden values to complete an ascending list of positive integers.</string>
-    <string name="tutorial_step_two_copy">Combine two numbers from the strip to form a mathematical expression that evaluates to the visible tile result. Fill the highlighted tile with two operands and one operator.</string>
-    <string name="tutorial_step_three_copy">Each pair must form one sum and one product. Use the same pair to complete its product tile.</string>
-    <string name="tutorial_step_four_copy">Finish this practice puzzle.</string>
+    <string name="onboarding_skip_tutorial_action">Skip tutorial</string>
+    <string name="onboarding_skip_tutorial_title">Skip the tutorial?</string>
+    <string name="onboarding_skip_tutorial_message">If you’re new to NumPairs or similar games, we recommend continuing. You can open the Tutorial again later from How to play.</string>
+    <string name="onboarding_continue_tutorial_button">Continue tutorial</string>
+    <string name="onboarding_skip_anyway_button">Skip anyway</string>
     <string name="tutorial_solving_tips_step_one_copy">In low difficulty, no number appears twice and the strip never includes 1, so prime results are always sums. Complete the prime result as an addition tile.</string>
     <string name="tutorial_solving_tips_step_two_copy">Product tiles can only use factors of their result. Find two strip values that multiply to the product, then use the same pair to complete its matching sum.</string>
-    <string name="tutorial_previous_step_button">Back</string>
-    <string name="tutorial_next_step_button">Next</string>
-    <string name="final_validation_screen_title">Final check</string>
-    <string name="onboarding_post_core_title">Core lesson complete</string>
-    <string name="onboarding_post_core_message">You completed a sum and product with the same pair. Continue with one more guided lesson, or demonstrate what you know in the final check.</string>
-    <string name="onboarding_continue_guided_button">Keep learning</string>
-    <string name="onboarding_early_validation_button">I know how to play</string>
 
     <!-- Game screen: board and strip -->
     <string name="board_content_description">Board</string>

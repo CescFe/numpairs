@@ -3,7 +3,6 @@ package org.cescfe.numpairs.feature.tutorial
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Expression
-import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
@@ -17,31 +16,11 @@ import org.junit.Test
 
 class TutorialContentTest {
     @Test
-    fun `guided onboarding stages map to their authored steps`() {
-        assertEquals(
-            listOf(StageOneNumberPlacementContent.step),
-            TutorialContent.stepsFor(GuidedOnboardingStage.NUMBER_PLACEMENT)
-        )
-        assertEquals(
-            StageTwoComplementaryPairContent.steps,
-            TutorialContent.stepsFor(GuidedOnboardingStage.COMPLEMENTARY_PAIR)
-        )
-        assertEquals(
-            listOf(StageThreeHiddenStripValueContent.step),
-            TutorialContent.stepsFor(GuidedOnboardingStage.HIDDEN_STRIP_VALUE)
-        )
-    }
-
-    @Test
     fun exposes_authored_content_for_each_learning_flow() {
         assertEquals(
             listOf(
                 TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
                 TutorialScenarioId.REPEATED_VALUE_PRACTICE,
-                TutorialScenarioId.NUMBER_PLACEMENT,
-                TutorialScenarioId.COMPLEMENTARY_PAIR,
-                TutorialScenarioId.HIDDEN_STRIP_VALUE,
-                TutorialScenarioId.FINAL_VALIDATION,
                 TutorialScenarioId.SOLVING_TIPS_PRACTICE
             ),
             TutorialContent.scenarios.map(TutorialScenario::id)
@@ -96,65 +75,6 @@ class TutorialContentTest {
     }
 
     @Test
-    fun number_placement_scenario_leaves_only_the_target_operand_unresolved() {
-        val scenario = TutorialContent.scenario(TutorialScenarioId.NUMBER_PLACEMENT)
-        val step = StageOneNumberPlacementContent.step
-        val initialAddition = scenario.initialPuzzle.board.tiles[0]
-        val initialMultiplication = scenario.initialPuzzle.board.tiles[1]
-        val solvedAddition = scenario.solvedPuzzle.board.tiles[0]
-        val completedPuzzle = scenario.initialPuzzle.copy(
-            board = Board(
-                tiles = listOf(
-                    initialAddition.withLeftOperand(value = 2, stripEntryId = 0),
-                    initialMultiplication
-                )
-            )
-        )
-
-        assertEquals(listOf(2, 3), scenario.stripValues)
-        assertEquals(listOf(StripItem.Known(2), StripItem.Known(3)), scenario.initialPuzzle.strip.items)
-        assertEquals(2, scenario.initialPuzzle.board.tiles.size)
-        assertEquals(Expression.Operand.Hidden, initialAddition.expression.leftOperand)
-        assertEquals(Operator.ADDITION, initialAddition.expression.operator)
-        assertEquals(Expression.Operand.Known(value = 3, stripEntryId = 1), initialAddition.expression.rightOperand)
-        assertEquals(5, initialAddition.result)
-        assertEquals(Expression(2, Operator.MULTIPLICATION, 3), initialMultiplication.expression.withoutEntryIds())
-        assertEquals(6, initialMultiplication.result)
-        assertEquals(Expression.Operand.Known(value = 2, stripEntryId = 0), solvedAddition.expression.leftOperand)
-        assertEquals(
-            listOf(TutorialIntendedPair(firstStripEntryId = 0, secondStripEntryId = 1)),
-            scenario.intendedPairs
-        )
-        assertEquals(TutorialScenarioId.NUMBER_PLACEMENT, step.scenarioId)
-        assertEquals(
-            listOf(
-                TutorialHighlightTarget.StripEntries(indexes = listOf(0)),
-                TutorialHighlightTarget.TileOperandSlot(tileIndex = 0, slot = OperandSlot.LEFT)
-            ),
-            step.highlightedTargets
-        )
-        assertEquals(
-            TutorialRequiredAction.PlaceTileOperand(
-                tileIndex = 0,
-                slot = OperandSlot.LEFT,
-                stripEntryId = 0
-            ),
-            step.requiredAction
-        )
-        assertFalse(step.isComplete(GameUiState.from(scenario.initialPuzzle)))
-        assertTrue(step.isComplete(GameUiState.from(completedPuzzle)))
-        assertEquals(PuzzleCompletionState.SOLVED, completedPuzzle.completionState)
-    }
-
-    @Test
-    fun legacy_guided_number_placement_content_remains_available() {
-        assertEquals(
-            StageOneNumberPlacementContent.scenario,
-            TutorialContent.scenario(TutorialScenarioId.NUMBER_PLACEMENT)
-        )
-    }
-
-    @Test
     fun learn_basics_contains_the_exact_three_step_curriculum() {
         val introductionScenario = TutorialContent.scenario(TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION)
         val repeatedValueScenario = TutorialContent.scenario(TutorialScenarioId.REPEATED_VALUE_PRACTICE)
@@ -197,6 +117,7 @@ class TutorialContentTest {
         )
         assertTrue(steps[1].isBoardVisible)
         assertEquals(null, steps[1].stripEntryGuidanceResId)
+        assertEquals(introductionWithCompletedStrip, steps[1].entryPuzzle)
 
         steps[2].assertGuidedAction(
             expectedHighlights = listOf(

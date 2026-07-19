@@ -62,23 +62,13 @@
     <string name="tutorial_strip_entry_guidance">Introduce 3 para completar la serie del tutorial.</string>
     <string name="tutorial_tiles_introduction_copy">Una casilla muestra un resultado y una expresión que debes formar. Empareja dos elementos de la serie: cada pareja debe formar una casilla de suma y otra de producto. Completa 2 + 3 = 5.</string>
     <string name="tutorial_repeated_value_practice_copy">Resuelve el puzle. Recuerda: la serie puede contener valores repetidos.</string>
-    <string name="tutorial_stage_one_place_number_copy">Coloca el 2 en el espacio de operando vacío.</string>
-    <string name="tutorial_stage_two_complete_sum_copy">Completa la suma con 2 y 3.</string>
-    <string name="tutorial_stage_two_complete_product_copy">Usa la misma pareja para completar su producto.</string>
-    <string name="tutorial_stage_three_hidden_strip_value_copy">La expresión resuelta revela el valor que falta en la serie. Introduce 3.</string>
-    <string name="tutorial_step_one_copy">El objetivo principal es descubrir todos los elementos desconocidos. Adivina los valores ocultos para completar una lista ascendente de enteros positivos.</string>
-    <string name="tutorial_step_two_copy">Combina dos números de la serie para formar una expresión matemática que dé como resultado el valor visible de la casilla. Completa la casilla resaltada con dos operandos y un operador.</string>
-    <string name="tutorial_step_three_copy">Cada par debe formar una suma y un producto. Usa el mismo par para completar su casilla de producto.</string>
-    <string name="tutorial_step_four_copy">Termina este puzle de práctica.</string>
+    <string name="onboarding_skip_tutorial_action">Saltar tutorial</string>
+    <string name="onboarding_skip_tutorial_title">¿Saltar el tutorial?</string>
+    <string name="onboarding_skip_tutorial_message">Si es la primera vez que juegas a NumPairs o a juegos similares, te recomendamos continuar. Podrás volver a abrir el tutorial más tarde desde Cómo jugar.</string>
+    <string name="onboarding_continue_tutorial_button">Continuar tutorial</string>
+    <string name="onboarding_skip_anyway_button">Saltar igualmente</string>
     <string name="tutorial_solving_tips_step_one_copy">En dificultad baja, ningún número aparece dos veces y la serie nunca incluye el 1, así que los resultados primos siempre son sumas. Completa el resultado primo como una casilla de suma.</string>
     <string name="tutorial_solving_tips_step_two_copy">Las casillas de producto solo pueden usar factores de su resultado. Encuentra dos valores de la serie que multipliquen hasta obtener el producto y luego usa el mismo par para completar su suma correspondiente.</string>
-    <string name="tutorial_previous_step_button">Atrás</string>
-    <string name="tutorial_next_step_button">Siguiente</string>
-    <string name="final_validation_screen_title">Comprobación final</string>
-    <string name="onboarding_post_core_title">Lección esencial completada</string>
-    <string name="onboarding_post_core_message">Has completado una suma y un producto con la misma pareja. Continúa con una lección guiada más o demuestra lo que sabes en la comprobación final.</string>
-    <string name="onboarding_continue_guided_button">Seguir aprendiendo</string>
-    <string name="onboarding_early_validation_button">Ya sé jugar</string>
 
     <!-- Game screen: board and strip -->
     <string name="board_content_description">Tablero</string>

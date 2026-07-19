@@ -7,6 +7,9 @@ import org.cescfe.numpairs.domain.puzzle.model.StripItem
 internal object LearnBasicsTutorialContent {
     private val stripAndTilesIntroductionScenario = stripAndTilesIntroductionScenario()
     private val repeatedValuePracticeScenario = repeatedValuePracticeScenario()
+    private val completedIntroductionStripPuzzle = stripAndTilesIntroductionScenario.initialPuzzle.copy(
+        strip = stripAndTilesIntroductionScenario.initialPuzzle.strip.withUpdatedEntry(index = 1, value = 3)
+    )
 
     val scenarios: List<TutorialScenario> = listOf(
         stripAndTilesIntroductionScenario,
@@ -50,7 +53,8 @@ internal object LearnBasicsTutorialContent {
                 leftValue = 2,
                 operator = Operator.ADDITION,
                 rightValue = 3
-            )
+            ),
+            entryPuzzle = completedIntroductionStripPuzzle
         ),
         TutorialStep(
             order = 3,

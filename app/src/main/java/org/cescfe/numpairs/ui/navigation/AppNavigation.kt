@@ -30,7 +30,7 @@ import org.cescfe.numpairs.feature.menu.ui.GeneratedSessionChoiceDialog
 import org.cescfe.numpairs.feature.onboarding.OnboardingLoadingScreen
 import org.cescfe.numpairs.feature.onboarding.RequiredOnboardingRoute
 import org.cescfe.numpairs.feature.personalization.PersonalizationRoute
-import org.cescfe.numpairs.feature.tutorial.GuidedIntroductionRoute
+import org.cescfe.numpairs.feature.tutorial.TutorialRoute
 
 sealed interface AppDestination {
     data object Menu : AppDestination
@@ -156,7 +156,7 @@ private fun UnlockedAppNavigation(
                 }
             )
         }
-        AppDestination.Tutorial -> GuidedIntroductionRoute(
+        AppDestination.Tutorial -> TutorialRoute(
             modifier = modifier,
             onNavigateBack = navigateToMenu
         )

@@ -1,18 +1,29 @@
 package org.cescfe.numpairs.feature.onboarding
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.launch
-import org.cescfe.numpairs.data.onboarding.OnboardingPostCorePath
+import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.onboarding.OnboardingRepository
 import org.cescfe.numpairs.data.onboarding.OnboardingStageCheckpoint
 import org.cescfe.numpairs.data.onboarding.OnboardingState
-import org.cescfe.numpairs.feature.tutorial.FinalValidationRoute
-import org.cescfe.numpairs.feature.tutorial.GuidedIntroductionRoute
-import org.cescfe.numpairs.feature.tutorial.GuidedOnboardingStage
-import org.cescfe.numpairs.feature.tutorial.PostCoreChoiceScreen
+import org.cescfe.numpairs.feature.tutorial.TutorialContent
+import org.cescfe.numpairs.feature.tutorial.TutorialRoute
+import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
 @Composable
 fun RequiredOnboardingRoute(
@@ -21,74 +32,135 @@ fun RequiredOnboardingRoute(
     modifier: Modifier = Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val requiredStep = onboardingState.nextRequiredStep()
+    val startStepIndex = onboardingState.nextRequiredTutorialStepIndex()
+    var isSkipConfirmationVisible by remember { mutableStateOf(false) }
+    var isSkipInProgress by remember { mutableStateOf(false) }
+    val requestSkipConfirmation = {
+        if (!isSkipInProgress) {
+            isSkipConfirmationVisible = true
+        }
+    }
 
-    BackHandler(enabled = true, onBack = {})
+    BackHandler(enabled = true, onBack = requestSkipConfirmation)
 
-    when (requiredStep) {
-        is RequiredOnboardingStep.GuidedStage -> GuidedIntroductionRoute(
+    if (startStepIndex >= TutorialContent.learnBasicsSteps.size) {
+        LaunchedEffect(onboardingRepository) {
+            onboardingRepository.markTutorialCompleted()
+        }
+        OnboardingLoadingScreen(modifier = modifier)
+    } else {
+        TutorialRoute(
             modifier = modifier,
-            startStage = requiredStep.stage,
+            startStepIndex = startStepIndex,
             saveProgressAcrossRecreation = false,
-            showPostCoreChoice = false,
-            onStageCompleted = { stage ->
-                onboardingRepository.recordStageCompleted(stage.toCheckpoint())
-            },
-            onIntroductionCompleted = {
-                coroutineScope.launch {
-                    onboardingRepository.markTutorialCompleted()
-                }
-            }
-        )
-        RequiredOnboardingStep.PostCoreChoice -> PostCoreChoiceScreen(
-            modifier = modifier,
-            onContinueGuided = {
-                coroutineScope.launch {
-                    onboardingRepository.selectPostCorePath(OnboardingPostCorePath.CONTINUE_GUIDED)
+            onStepCompleted = { completedStepIndex ->
+                completedStepIndex.toIntermediateCheckpointOrNull()?.let { checkpoint ->
+                    onboardingRepository.recordStageCompleted(checkpoint)
                 }
             },
-            onStartValidation = {
-                coroutineScope.launch {
-                    onboardingRepository.selectPostCorePath(OnboardingPostCorePath.EARLY_VALIDATION)
-                }
-            }
-        )
-        RequiredOnboardingStep.FinalValidation -> FinalValidationRoute(
-            modifier = modifier,
-            onValidationSolved = {
+            onTutorialCompleted = {
                 coroutineScope.launch {
                     onboardingRepository.markTutorialCompleted()
                 }
             },
-            onNavigateBack = {},
-            onReturnToMenuRequested = {}
+            onSkipTutorialRequested = requestSkipConfirmation,
+            onNavigateBack = requestSkipConfirmation
+        )
+    }
+
+    if (isSkipConfirmationVisible) {
+        SkipTutorialConfirmationDialog(
+            onContinueTutorial = {
+                isSkipConfirmationVisible = false
+            },
+            onSkipTutorial = {
+                if (!isSkipInProgress) {
+                    isSkipInProgress = true
+                    isSkipConfirmationVisible = false
+                    coroutineScope.launch {
+                        onboardingRepository.markTutorialSkipped()
+                    }
+                }
+            },
+            onDismiss = {
+                isSkipConfirmationVisible = false
+            }
         )
     }
 }
 
-internal fun OnboardingState.nextRequiredStep(): RequiredOnboardingStep = when (lastCompletedStage) {
-    OnboardingStageCheckpoint.NONE -> RequiredOnboardingStep.GuidedStage(GuidedOnboardingStage.NUMBER_PLACEMENT)
-    OnboardingStageCheckpoint.STAGE_ONE ->
-        RequiredOnboardingStep.GuidedStage(GuidedOnboardingStage.COMPLEMENTARY_PAIR)
-    OnboardingStageCheckpoint.STAGE_TWO -> when (postCorePath) {
-        OnboardingPostCorePath.UNDECIDED -> RequiredOnboardingStep.PostCoreChoice
-        OnboardingPostCorePath.CONTINUE_GUIDED ->
-            RequiredOnboardingStep.GuidedStage(GuidedOnboardingStage.HIDDEN_STRIP_VALUE)
-        OnboardingPostCorePath.EARLY_VALIDATION -> RequiredOnboardingStep.FinalValidation
-    }
-    OnboardingStageCheckpoint.STAGE_THREE -> RequiredOnboardingStep.FinalValidation
+@Composable
+private fun SkipTutorialConfirmationDialog(
+    onContinueTutorial: () -> Unit,
+    onSkipTutorial: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        modifier = Modifier.testTag(RequiredOnboardingTestTags.SKIP_CONFIRMATION_DIALOG),
+        onDismissRequest = onDismiss,
+        shape = NumPairsComponents.LargeShape,
+        containerColor = NumPairsComponents.raisedSurfaceColor(),
+        titleContentColor = MaterialTheme.colorScheme.onSurface,
+        textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        title = {
+            Text(
+                text = stringResource(R.string.onboarding_skip_tutorial_title),
+                style = MaterialTheme.typography.titleMedium
+            )
+        },
+        text = {
+            Text(
+                text = stringResource(R.string.onboarding_skip_tutorial_message),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        },
+        confirmButton = {
+            NumPairsComponents.PrimaryCtaButton(
+                onClick = onContinueTutorial,
+                modifier = Modifier.testTag(RequiredOnboardingTestTags.CONTINUE_TUTORIAL_BUTTON)
+            ) {
+                Text(
+                    text = stringResource(R.string.onboarding_continue_tutorial_button),
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
+        },
+        dismissButton = {
+            OutlinedButton(
+                onClick = onSkipTutorial,
+                modifier = Modifier.testTag(RequiredOnboardingTestTags.SKIP_ANYWAY_BUTTON),
+                shape = NumPairsComponents.MediumShape,
+                colors = NumPairsComponents.secondaryButtonColors(),
+                border = NumPairsComponents.secondaryButtonBorder()
+            ) {
+                Text(
+                    text = stringResource(R.string.onboarding_skip_anyway_button),
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
+        },
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true
+        )
+    )
 }
 
-internal sealed interface RequiredOnboardingStep {
-    data class GuidedStage(val stage: GuidedOnboardingStage) : RequiredOnboardingStep
-
-    data object PostCoreChoice : RequiredOnboardingStep
-
-    data object FinalValidation : RequiredOnboardingStep
+internal fun OnboardingState.nextRequiredTutorialStepIndex(): Int = when (lastCompletedStage) {
+    OnboardingStageCheckpoint.NONE -> 0
+    OnboardingStageCheckpoint.STAGE_ONE -> 1
+    OnboardingStageCheckpoint.STAGE_TWO -> 2
+    OnboardingStageCheckpoint.STAGE_THREE -> 3
 }
 
-private fun GuidedOnboardingStage.toCheckpoint(): OnboardingStageCheckpoint = when (this) {
-    GuidedOnboardingStage.NUMBER_PLACEMENT -> OnboardingStageCheckpoint.STAGE_ONE
-    GuidedOnboardingStage.COMPLEMENTARY_PAIR -> OnboardingStageCheckpoint.STAGE_TWO
-    GuidedOnboardingStage.HIDDEN_STRIP_VALUE -> OnboardingStageCheckpoint.STAGE_THREE
+private fun Int.toIntermediateCheckpointOrNull(): OnboardingStageCheckpoint? = when (this) {
+    0 -> OnboardingStageCheckpoint.STAGE_ONE
+    1 -> OnboardingStageCheckpoint.STAGE_TWO
+    else -> null
+}
+
+object RequiredOnboardingTestTags {
+    const val SKIP_CONFIRMATION_DIALOG = "onboarding_skip_confirmation_dialog"
+    const val CONTINUE_TUTORIAL_BUTTON = "onboarding_continue_tutorial_button"
+    const val SKIP_ANYWAY_BUTTON = "onboarding_skip_anyway_button"
 }

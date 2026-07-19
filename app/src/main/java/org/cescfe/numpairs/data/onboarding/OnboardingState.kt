@@ -6,7 +6,6 @@ data class OnboardingState(
     val isInitialized: Boolean = false,
     val completedVersion: Int = 0,
     val lastCompletedStage: OnboardingStageCheckpoint = OnboardingStageCheckpoint.NONE,
-    val postCorePath: OnboardingPostCorePath = OnboardingPostCorePath.UNDECIDED,
     val firstRunTutorialOutcome: FirstRunTutorialOutcome = FirstRunTutorialOutcome.UNRESOLVED
 ) {
     fun isRequiredVersionComplete(): Boolean = completedVersion >= REQUIRED_ONBOARDING_VERSION
@@ -32,18 +31,6 @@ enum class FirstRunTutorialOutcome(internal val persistedValue: Int) {
                 else -> persistedOutcome
             }
         }
-    }
-}
-
-enum class OnboardingPostCorePath(internal val persistedValue: Int) {
-    UNDECIDED(0),
-    CONTINUE_GUIDED(1),
-    EARLY_VALIDATION(2);
-
-    internal companion object {
-        fun fromPersistedValue(value: Int): OnboardingPostCorePath = entries
-            .firstOrNull { path -> path.persistedValue == value }
-            ?: UNDECIDED
     }
 }
 

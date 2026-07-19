@@ -9,8 +9,6 @@ interface OnboardingRepository {
 
     suspend fun recordStageCompleted(stage: OnboardingStageCheckpoint)
 
-    suspend fun selectPostCorePath(path: OnboardingPostCorePath)
-
     suspend fun markTutorialCompleted()
 
     suspend fun markTutorialSkipped()
