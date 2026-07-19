@@ -197,8 +197,4 @@ Before reporting a milestone ready for manual closure:
 - run final formatting, unit-test, lint, and instrumented-test compilation checks
 - confirm the worktree is clean and synchronized with `origin/main`
 
-Agents must not close GitHub milestones. After every required verification passes, report the
-milestone as ready and leave the milestone open for the repository owner to close manually.
-
-End-to-end milestone delivery remains authorization to merge every in-scope Pull Request under the
-rules above. It does not authorize an agent to close the milestone.
+Agents must not close GitHub milestones.
