@@ -81,6 +81,7 @@ fun GameScreen(
     correctTileFeedbackIdsByIndex: Map<Int, Long> = emptyMap(),
     completionFeedbackId: Long? = null,
     topBarActions: @Composable RowScope.() -> Unit = {},
+    bottomBar: @Composable () -> Unit = {},
     contentBeforePuzzle: @Composable ColumnScope.() -> Unit = {}
 ) {
     var isRulesHelperVisible by rememberSaveable { mutableStateOf(false) }
@@ -107,7 +108,8 @@ fun GameScreen(
                     isRulesHelperActionDiscoveryDotVisible = isRulesHelperActionDiscoveryDotVisible,
                     actions = topBarActions
                 )
-            }
+            },
+            bottomBar = bottomBar
         ) { innerPadding ->
             Column(
                 modifier = Modifier
