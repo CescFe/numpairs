@@ -202,11 +202,14 @@ internal fun StripSection(
     onStripItemEntryInputChanged: (String) -> Unit = {},
     onStripItemEntryInputConfirmed: () -> Unit = {},
     onStripItemEntryInputFocusLost: () -> Unit = {},
+    stripItemEntryGuidance: String? = null,
     isStripItemEnabled: (Int) -> Boolean = { true },
     highlightState: GameHighlightState = GameHighlightState.None
 ) {
     val stripContentDescription = stringResource(R.string.strip_content_description)
-    val stripEntryFeedbackText = stripItemEntryInput?.feedbackText()
+    val stripEntryFeedbackText = stripItemEntryInput?.feedbackText(
+        entryGuidance = stripItemEntryGuidance
+    )
     val minimumChipWidth = requiredStripChipWidth(
         stripItems = stripItems,
         stripItemEntryInput = stripItemEntryInput
@@ -406,10 +409,10 @@ private fun StripEntryFeedback(message: String, isError: Boolean, modifier: Modi
 }
 
 @Composable
-private fun StripItemEntryInputUiState.feedbackText(): String = if (isInvalid) {
+private fun StripItemEntryInputUiState.feedbackText(entryGuidance: String?): String = if (isInvalid) {
     validRange.invalidRangeText()
 } else {
-    validRange.validRangeText()
+    entryGuidance ?: validRange.validRangeText()
 }
 
 @Composable

@@ -61,10 +61,16 @@ fun TutorialRoute(
     }
     var currentStepIndex by currentStepIndexState
     var hasReportedCompletion by completionReportedState
-    var latestGameUiState by remember(playbackKey) { mutableStateOf<GameUiState?>(null) }
+    var latestGameUiSnapshot by remember(playbackKey) { mutableStateOf<TutorialGameUiSnapshot?>(null) }
     val currentOnTutorialCompleted by rememberUpdatedState(onTutorialCompleted)
     val currentStep = steps[currentStepIndex]
     val currentScenario = TutorialContent.scenario(currentStep.scenarioId)
+    val latestGameUiState = latestGameUiSnapshot
+        ?.takeIf { snapshot -> snapshot.scenarioId == currentScenario.id }
+        ?.uiState
+    val stripItemEntryGuidance = currentStep.stripEntryGuidanceResId?.let { guidanceResId ->
+        stringResource(guidanceResId)
+    }
 
     LaunchedEffect(currentStepIndex, latestGameUiState) {
         val uiState = latestGameUiState ?: return@LaunchedEffect
@@ -90,6 +96,8 @@ fun TutorialRoute(
         gameSessionKey = "$TUTORIAL_GAME_SESSION_KEY:$playbackKey:${currentScenario.id}",
         puzzleResetKey = playbackKey to currentScenario.id,
         isSuccessOverlayEnabled = currentStepIndex == steps.lastIndex && onTutorialCompleted == null,
+        isBoardVisible = currentStep.isBoardVisible,
+        stripItemEntryGuidance = stripItemEntryGuidance,
         interactionPolicy = currentStep.toInteractionPolicy(
             scenario = currentScenario,
             uiState = latestGameUiState
@@ -107,11 +115,16 @@ fun TutorialRoute(
             )
         },
         onGameUiStateChanged = { uiState ->
-            latestGameUiState = uiState
+            latestGameUiSnapshot = TutorialGameUiSnapshot(
+                scenarioId = currentScenario.id,
+                uiState = uiState
+            )
         },
         onNavigateBack = onNavigateBack
     )
 }
+
+private data class TutorialGameUiSnapshot(val scenarioId: TutorialScenarioId, val uiState: GameUiState)
 
 @Composable
 private fun TutorialInstructionSurface(

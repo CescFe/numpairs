@@ -87,8 +87,11 @@ class StageThreeHiddenStripValueContentTest {
     }
 
     @Test
-    fun exposes_stage_three_as_the_final_active_learn_basics_step() {
+    fun exposes_stage_three_through_the_guided_stage_mapping() {
         assertEquals(scenario, TutorialContent.scenario(TutorialScenarioId.HIDDEN_STRIP_VALUE))
-        assertEquals(step, TutorialContent.learnBasicsSteps.last())
+        assertEquals(
+            listOf(step),
+            TutorialContent.stepsFor(GuidedOnboardingStage.HIDDEN_STRIP_VALUE)
+        )
     }
 }

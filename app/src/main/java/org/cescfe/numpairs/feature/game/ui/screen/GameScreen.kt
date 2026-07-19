@@ -74,6 +74,8 @@ fun GameScreen(
     onRulesHelperActionTapped: () -> Unit = {},
     onRulesHelperPlayTutorialRequested: (() -> Unit)? = null,
     isSuccessOverlayEnabled: Boolean = true,
+    isBoardVisible: Boolean = true,
+    stripItemEntryGuidance: String? = null,
     interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
     highlightState: GameHighlightState = GameHighlightState.None,
     correctTileFeedbackIdsByIndex: Map<Int, Long> = emptyMap(),
@@ -126,6 +128,7 @@ fun GameScreen(
                     onStripItemEntryInputChanged = onStripItemEntryInputChanged,
                     onStripItemEntryInputConfirmed = onStripItemEntryInputConfirmed,
                     onStripItemEntryInputFocusLost = onStripItemEntryInputFocusLost,
+                    stripItemEntryGuidance = stripItemEntryGuidance,
                     isStripItemEnabled = interactionPolicy.canTapStripItem,
                     highlightState = highlightState,
                     modifier = Modifier.fillMaxWidth()
@@ -142,23 +145,25 @@ fun GameScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
-                BoardSection(
-                    tiles = uiState.tiles,
-                    onTileLeftOperandTapped = onTileLeftOperandTapped,
-                    onTileRightOperandTapped = onTileRightOperandTapped,
-                    onTileOperatorTapped = onTileOperatorTapped,
-                    onTileResetTapped = onTileResetTapped,
-                    tileOperatorSelectionDialog = uiState.tileOperatorSelectionDialog.restrictedBy(
-                        interactionPolicy = interactionPolicy
-                    ),
-                    onTileOperatorSelectionDismissed = onTileOperatorSelectionDismissed,
-                    onTileOperatorSelectionConfirmed = onTileOperatorSelectionConfirmed,
-                    interactionPolicy = interactionPolicy,
-                    highlightState = highlightState,
-                    correctTileFeedbackIdsByIndex = correctTileFeedbackIdsByIndex,
-                    completionFeedbackId = completionFeedbackId,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                if (isBoardVisible) {
+                    BoardSection(
+                        tiles = uiState.tiles,
+                        onTileLeftOperandTapped = onTileLeftOperandTapped,
+                        onTileRightOperandTapped = onTileRightOperandTapped,
+                        onTileOperatorTapped = onTileOperatorTapped,
+                        onTileResetTapped = onTileResetTapped,
+                        tileOperatorSelectionDialog = uiState.tileOperatorSelectionDialog.restrictedBy(
+                            interactionPolicy = interactionPolicy
+                        ),
+                        onTileOperatorSelectionDismissed = onTileOperatorSelectionDismissed,
+                        onTileOperatorSelectionConfirmed = onTileOperatorSelectionConfirmed,
+                        interactionPolicy = interactionPolicy,
+                        highlightState = highlightState,
+                        correctTileFeedbackIdsByIndex = correctTileFeedbackIdsByIndex,
+                        completionFeedbackId = completionFeedbackId,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         }
 

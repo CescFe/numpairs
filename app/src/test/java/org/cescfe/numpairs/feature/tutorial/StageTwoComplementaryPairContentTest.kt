@@ -91,14 +91,9 @@ class StageTwoComplementaryPairContentTest {
     }
 
     @Test
-    fun exposes_stage_two_through_the_active_learn_basics_sequence() {
+    fun exposes_stage_two_through_the_guided_stage_mapping() {
         assertEquals(scenario, TutorialContent.scenario(TutorialScenarioId.COMPLEMENTARY_PAIR))
-        assertEquals(
-            steps,
-            TutorialContent.learnBasicsSteps.filter { step ->
-                step.scenarioId == TutorialScenarioId.COMPLEMENTARY_PAIR
-            }
-        )
+        assertEquals(steps, TutorialContent.stepsFor(GuidedOnboardingStage.COMPLEMENTARY_PAIR))
     }
 
     private fun completeExpression(tileIndex: Int, operator: Operator): TutorialRequiredAction.CompleteTileExpression =
