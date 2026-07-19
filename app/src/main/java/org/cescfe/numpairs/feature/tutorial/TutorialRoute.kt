@@ -112,6 +112,7 @@ fun TutorialRoute(
         gameSessionKey = "$TUTORIAL_GAME_SESSION_KEY:$playbackKey:${currentScenario.id}",
         puzzleResetKey = playbackKey to currentScenario.id,
         isSuccessOverlayEnabled = isTutorialSuccessOverlayEnabled(
+            mode = mode,
             isFinalStep = currentStepIndex == steps.lastIndex,
             currentScenarioId = currentScenario.id,
             observedScenarioId = latestGameUiSnapshot?.scenarioId,
@@ -153,11 +154,13 @@ fun TutorialRoute(
 private data class TutorialGameUiSnapshot(val scenarioId: TutorialScenarioId, val uiState: GameUiState)
 
 internal fun isTutorialSuccessOverlayEnabled(
+    mode: TutorialMode,
     isFinalStep: Boolean,
     currentScenarioId: TutorialScenarioId,
     observedScenarioId: TutorialScenarioId?,
     isRequiredPlayback: Boolean
-): Boolean = isFinalStep &&
+): Boolean = mode == TutorialMode.SOLVING_TIPS_PRACTICE &&
+    isFinalStep &&
     observedScenarioId == currentScenarioId &&
     !isRequiredPlayback
 

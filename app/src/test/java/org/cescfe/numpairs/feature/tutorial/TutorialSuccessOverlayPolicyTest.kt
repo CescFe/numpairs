@@ -6,11 +6,12 @@ import org.junit.Test
 
 class TutorialSuccessOverlayPolicyTest {
     @Test
-    fun `final step waits for its own scenario state before enabling success`() {
-        val finalScenarioId = TutorialScenarioId.REPEATED_VALUE_PRACTICE
+    fun `solving tips waits for its own scenario state before enabling success`() {
+        val finalScenarioId = TutorialScenarioId.SOLVING_TIPS_PRACTICE
 
         assertFalse(
             isTutorialSuccessOverlayEnabled(
+                mode = TutorialMode.SOLVING_TIPS_PRACTICE,
                 isFinalStep = true,
                 currentScenarioId = finalScenarioId,
                 observedScenarioId = TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
@@ -19,6 +20,22 @@ class TutorialSuccessOverlayPolicyTest {
         )
         assertTrue(
             isTutorialSuccessOverlayEnabled(
+                mode = TutorialMode.SOLVING_TIPS_PRACTICE,
+                isFinalStep = true,
+                currentScenarioId = finalScenarioId,
+                observedScenarioId = finalScenarioId,
+                isRequiredPlayback = false
+            )
+        )
+    }
+
+    @Test
+    fun `learn basics never enables the success overlay`() {
+        val finalScenarioId = TutorialScenarioId.REPEATED_VALUE_PRACTICE
+
+        assertFalse(
+            isTutorialSuccessOverlayEnabled(
+                mode = TutorialMode.LEARN_BASICS,
                 isFinalStep = true,
                 currentScenarioId = finalScenarioId,
                 observedScenarioId = finalScenarioId,
@@ -29,10 +46,11 @@ class TutorialSuccessOverlayPolicyTest {
 
     @Test
     fun `required playback never enables the success overlay`() {
-        val finalScenarioId = TutorialScenarioId.REPEATED_VALUE_PRACTICE
+        val finalScenarioId = TutorialScenarioId.SOLVING_TIPS_PRACTICE
 
         assertFalse(
             isTutorialSuccessOverlayEnabled(
+                mode = TutorialMode.SOLVING_TIPS_PRACTICE,
                 isFinalStep = true,
                 currentScenarioId = finalScenarioId,
                 observedScenarioId = finalScenarioId,
