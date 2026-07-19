@@ -384,7 +384,8 @@ private fun TutorialStep.highlightedStripEntryIds(scenario: TutorialScenario): S
             }
             is TutorialHighlightTarget.StripEntries -> addAll(target.indexes)
             TutorialHighlightTarget.HiddenTileExpressions,
-            is TutorialHighlightTarget.TileExpressionSlots -> Unit
+            is TutorialHighlightTarget.TileExpressionSlots,
+            is TutorialHighlightTarget.WholeTile -> Unit
         }
     }
 }
@@ -405,6 +406,7 @@ internal fun TutorialStep.toHighlightState(scenario: TutorialScenario, uiState: 
     }
 
     val stripEntryIndexes = mutableSetOf<Int>()
+    val tileIndexes = mutableSetOf<Int>()
     val tileExpressionSlots = mutableSetOf<GameTileExpressionSlotHighlight>()
 
     highlightedTargets.forEach { target ->
@@ -429,11 +431,15 @@ internal fun TutorialStep.toHighlightState(scenario: TutorialScenario, uiState: 
             is TutorialHighlightTarget.TileExpressionSlots -> {
                 tileExpressionSlots += expressionSlotHighlights(target.tileIndex)
             }
+            is TutorialHighlightTarget.WholeTile -> {
+                tileIndexes += target.tileIndex
+            }
         }
     }
 
     return GameHighlightState(
         stripEntryIndexes = stripEntryIndexes,
+        tileIndexes = tileIndexes,
         tileExpressionSlots = tileExpressionSlots
     )
 }

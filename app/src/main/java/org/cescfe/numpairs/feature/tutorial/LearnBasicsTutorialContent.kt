@@ -40,7 +40,8 @@ internal object LearnBasicsTutorialContent {
             scenarioId = TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
             playerFacingCopyResId = R.string.tutorial_tiles_introduction_copy,
             highlightedTargets = listOf(
-                TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0)
+                TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0),
+                TutorialHighlightTarget.WholeTile(tileIndex = 1)
             ),
             requiredAction = TutorialRequiredAction.CompleteTileExpression(
                 tileIndex = 0,
