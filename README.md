@@ -12,7 +12,8 @@ Players complete hidden expressions on a board by using numbers from a strip. Th
 
 - ✨ [PRD v9 Game Feel & Personalization](./docs/product/prd/prd-v9.md) defines the current color-personalization and generated-game feedback baseline.
 - 🔁 [PRD v7 Reliable Sessions & Replay Controls](./docs/product/prd/prd-v7.md) remains the foundation for the one-slot generated-session and safe-replay contract.
-- 🎓 [PRD v6 Guided First Run](./docs/product/prd/prd-v6.md) remains the foundation for required onboarding.
+- 🎓 [PRD v6 Guided First Run](./docs/product/prd/prd-v6.md) defines the focused, explicitly
+  skippable first-run Tutorial shown before the normal menu.
 
 NumPairs now provides five persistent color-only themes: Warm, Frost, Obsidian, Terminal,
 and Ember. Typography, shapes, spacing, elevation, layout, controls, and gameplay meanings

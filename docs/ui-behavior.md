@@ -128,7 +128,21 @@ The primary action uses the shared primary CTA treatment and established button 
 
 The choice dialog has no visible cancel, back, close, or third action. Tapping outside or pressing system back dismisses it without navigation, generation, or session mutation. Action handling is deduplicated.
 
-Selecting `How to play`, entering required onboarding, or using Tutorial never replaces or updates the generated session.
+Selecting `How to play`, entering guided first run, or using Tutorial never replaces or updates the generated session.
+
+### Guided First Run And Tutorial Replay
+
+A fresh installation routes from Splash into the three-step Learn basics Tutorial before this
+menu is available. Required playback exposes a low-emphasis `Skip tutorial` action from every
+step. Requesting skip opens a confirmation dialog whose recommended action continues Tutorial and
+whose explicit alternative skips anyway. Only confirmed skip unlocks Menu early; it does not open
+a final validation puzzle.
+
+Completing the third authored Tutorial step also unlocks Menu directly. Completed, skipped,
+upgraded, and legacy-completed installations open Menu on later launches. `How to play` starts the
+same three-step content voluntarily from Step 1, remains dismissible, and never changes resolved
+first-run state. The in-game `Play tutorial` action uses the same content in an overlay while
+preserving the generated puzzle underneath.
 
 ## Personalization
 
@@ -190,7 +204,7 @@ additional completion action.
 ## Generated-Game Feedback
 
 The v9 feedback contract applies only to generated `4 Pairs` and generated `8 Pairs`.
-Required onboarding, voluntary `How to play`, Tutorial, authored practice, and the generic
+Guided first run, voluntary `How to play`, Tutorial, authored practice, and the generic
 game surface do not opt into it.
 
 After a generated-game action commits an accepted strip value, operand, or operator:

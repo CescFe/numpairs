@@ -1,39 +1,34 @@
 # PRD - NumPairs 🎓 v6 Guided First Run
 
-> Active product reference for the v6 milestone. The implemented product entering this milestone is the completed v5 baseline.
+> Active product reference for the Guided First Run milestone. This revision replaces the original mandatory-validation contract while preserving the implemented v5 baseline and versioned local first-run boundary.
 
 ## Product Summary
 
 NumPairs is a native Android arithmetic deduction puzzle. Players complete hidden board expressions using numbers from an ordered strip. Each strip pair produces one addition tile and one multiplication tile, and the puzzle is solved by recovering hidden strip values, expressions, and pair relationships.
 
-v3 introduced authored Tutorial content, guided interactions, rules help, and optional solving tips. v5 expanded replayable play to the generated `4 Pairs Low` and `8 Pairs Medium` modes.
+v3 introduced authored Tutorial content, guided interactions, rules help, and optional solving tips. v5 expanded replayable play to generated `4 Pairs Low` and `8 Pairs Medium` modes.
 
-v6 turns the essential learning path into a mandatory guided first-run experience. New players should practice the minimum required interactions and then demonstrate basic understanding in a small authored validation puzzle before the normal menu is unlocked. Broader explanations, strategies, and solving tips remain optional.
+Guided First Run makes Tutorial the recommended route before the normal menu on a fresh installation. Its purpose is focused: reduce the risk that a new player accidentally starts generated play without learning the interface, familiarize the player with the strip and tiles, and teach the basic pair rules. Tutorial completion is not a certification gate; a player may explicitly skip after acknowledging the recommendation.
 
 ---
 
 ## Product Goal
 
-Ensure that a first-time player understands the minimum NumPairs interaction model and pair relationship before entering normal play.
-
-The first-run experience should teach through real puzzle actions, require a small independent demonstration of understanding, and remain short enough that experienced players can reach validation without completing all optional instruction.
+Give first-time players a concise, action-led introduction to the strip, tiles, and sum/product pair rule before they choose a generated mode, while preserving an explicit and informed route to skip Tutorial.
 
 ---
 
 ## Problem Statement
 
-The v5 application provides several learning surfaces, but all of them are optional. A fresh launch opens the normal menu, where a player can enter a generated puzzle without first learning how strip numbers, tile expressions, and complementary sum/product pairs work.
+Opening the normal menu on a fresh installation lets an inexperienced player enter generated play before understanding the puzzle surface or rules. Conversely, forcing every player to complete a validation puzzle treats onboarding as certification and creates unnecessary friction for experienced players.
 
-This creates several onboarding risks:
+Guided First Run should therefore:
 
-- new players can reach generated play before understanding the objective
-- the existing Tutorial entry depends on the player choosing to learn first
-- acknowledging that the player already knows the rules would not prove that they understand the interaction model
-- Tutorial completion is not a persisted prerequisite for normal play
-- forcing the complete existing learning experience would also burden experienced players with optional strategy content
-- interrupted first-run progress has no product-level resume contract
-
-v6 should address these risks by requiring a concise learning core, allowing an early route to practical validation, and persisting completion locally.
+- present Tutorial before Menu by default on a fresh installation
+- teach the minimum interface and rules through real actions
+- make the recommendation clear without making completion mandatory
+- require explicit confirmation before an incomplete Tutorial is skipped
+- keep the same Tutorial safely replayable after Menu is unlocked
 
 ---
 
@@ -42,219 +37,201 @@ v6 should address these risks by requiring a concise learning core, allowing an 
 - First-time players who have not previously seen or played NumPairs
 - Casual puzzle players who benefit from learning one mechanic at a time
 - Players unfamiliar with the relationship between each pair's sum and product
-- Experienced puzzle players who can demonstrate understanding without completing the full guided path
-- Returning players who want to replay the introduction or optional learning content
-
----
-
-## Current Baseline At Start Of v6
-
-The product entering v6 is the implemented `v5 - Bigger Challenges with 8 Pairs` baseline.
-
-That baseline includes:
-
-- a branded Android launch experience with splash support
-- a `Splash -> Menu` startup flow
-- menu entry points for Tutorial, generated `4 Pairs Low`, and generated `8 Pairs Medium`
-- an authored `Learn basics` Tutorial using real strip and tile interactions
-- guided Tutorial steps with focused highlights and restricted interactions
-- automatic Tutorial progression after the required action is completed
-- a small authored two-pair Tutorial composition
-- static rules help for core game rules
-- optional `Solving tips` and authored `Practice tips` content for `4 Pairs Low`
-- generated and validated `4 Pairs Low` and `8 Pairs Medium` puzzles
-- shared gameplay interactions for entering strip values and completing tile expressions
-- local preferences used by existing discovery behavior
-- a fixed NumPairs visual system shared across menu, Tutorial, and gameplay surfaces
-
-The baseline does not yet include:
-
-- first-launch routing into a mandatory learning experience
-- a persisted onboarding completion requirement
-- versioned onboarding state
-- resumption from a completed onboarding checkpoint
-- an `I know how to play` route backed by practical validation
-- a dedicated authored final validation puzzle
-- a product distinction between mandatory first-run learning and voluntary Tutorial replay
-- an explicit upgrade policy for installations that predate v6
+- Experienced players who want to reach Menu without completing introductory practice
+- Returning players who want to replay the basic Tutorial
 
 ---
 
 ## Product Principles
 
-- Teach through real player actions rather than passive explanations
-- Require the essential learning core, not all available learning content
-- Validate understanding through play rather than self-declaration
-- Reveal only the information and available actions relevant to the current stage
+- Teach through real player actions rather than passive explanation
+- Use Tutorial to introduce the product, not to certify the player
+- Recommend learning without removing informed player choice
+- Introduce the strip before adding tile complexity
+- Keep copy concise and tied to the current authored puzzle state
 - Preserve normal gameplay controls and visual language wherever possible
-- Keep the first-run path short and focused
-- Keep basic onboarding, static rules help, and advanced solving guidance distinct
-- Persist only the onboarding state needed to provide a reliable first-run contract
-- Do not change generated puzzle rules or difficulty profiles to support onboarding
-- Treat future onboarding revisions as explicit product decisions rather than silently replaying them for every user
+- Keep basic Tutorial, static rules help, and advanced solving guidance distinct
+- Persist only the state needed for a reliable local first-run contract
+- Do not change generated puzzle rules or difficulty profiles to support Tutorial
 
 ---
 
 ## Core UX Expectations
 
-- A fresh installation enters guided onboarding before the normal menu
-- The player performs the same operand and operator interactions used in normal gameplay
-- The first two learning stages cannot be skipped
-- Guidance advances only after the required action is completed correctly
-- `I know how to play` becomes available only after the player completes a full sum/product pair
-- Choosing the early exit leads to validation and does not complete onboarding by itself
-- The final validation uses a small authored `2 Pairs` puzzle without direct step guidance
-- Only solving the final validation marks onboarding as completed
-- Restarting the application cannot bypass required onboarding
-- Completed players reach the normal menu on subsequent launches
-- Completed players can voluntarily replay basic onboarding and optional advanced learning
-- Replaying learning content does not relock normal play
+- A fresh installation routes from Splash into Tutorial before Menu
+- A low-emphasis `Skip tutorial` action is available from the first step and remains available throughout required first-run playback
+- Requesting skip opens a confirmation dialog instead of unlocking Menu immediately
+- The dialog recommends continuing Tutorial and offers an explicit `Skip anyway` alternative
+- Confirming skip opens Menu without a final check
+- Completing the three Tutorial steps opens Menu without a separate validation stage
+- Closing or restarting the application cannot expose Menu while first-run Tutorial remains unresolved
+- Completed, skipped, upgraded, and legacy-completed players reach Menu on later launches
+- Completed or skipped players can voluntarily replay the same Tutorial from its beginning
+- Voluntary replay never relocks Menu or changes the stored first-run outcome
 
 ---
 
-## v6 Scope
+## Guided First-Run Flow
 
-### Guided First-Run Flow
+### Entry
 
-The first-run experience should contain four focused authored stages.
+The fresh-install route is:
 
-#### Stage 1 - Place A Number
+```text
+Splash -> Tutorial -> Menu
+```
 
-- Use a minimal authored puzzle composition focused on one operand placement
-- Make only the number required for the lesson selectable
-- Highlight the relevant number first and the destination operand slot when appropriate
-- Require the player to perform the normal operand-selection interaction
-- Advance only after the correct number has been placed
-- Keep arithmetic and explanatory copy minimal so the interaction itself is the lesson
+Menu is reached when the player either completes Step 3 or confirms `Skip anyway`. There is no separate final-validation route.
 
-#### Stage 2 - Complete A Complementary Pair
+### Skip Confirmation
 
-- Use an authored pair with an obvious addition and multiplication result
-- Guide the player through completing one expression
-- Show that the same two strip entries must also form the complementary expression with the other operator
-- Require the player to complete both the addition and multiplication tiles
-- Treat the pair as complete only when both expressions use the intended strip entries and operators
-- Make `I know how to play` available only after this stage is completed
+Every required Tutorial step exposes one visually low-emphasis `Skip tutorial` action. It should remain in a stable location and preserve an accessible touch target.
 
-#### Stage 3 - Deduce A Hidden Strip Value
+Requesting skip opens a confirmation dialog with this content intent:
 
-- Use a small authored scenario with one hidden strip value that is easy to infer
-- Connect the visible result, its expression, and the ordered strip clearly
-- Require the player to enter the hidden strip value through the normal strip interaction
-- Reinforce that solving expressions and completing the strip are connected parts of the same puzzle
-- Keep this stage on the full guided path but allow experienced players to bypass it through the validated early exit
+- title: ask whether the player wants to skip Tutorial
+- message: recommend Tutorial for a first game, summarize that it teaches the strip, tiles, and basic rules, and state that it remains available later from `How to play`
+- recommended primary action: `Continue tutorial`
+- explicit lower-emphasis action: `Skip anyway`
 
-#### Stage 4 - Complete Final Validation
+Dismissing the dialog or selecting `Continue tutorial` preserves the current step and puzzle state. Selecting `Skip anyway` persists the skipped first-run outcome and opens Menu immediately.
 
-- Use a small authored `2 Pairs` puzzle
-- Allow the standard interaction model without direct target highlighting or step-by-step instructions
-- Keep arithmetic simple and avoid advanced ambiguity or strategy requirements
-- Require the player to solve the complete puzzle
-- Use the solved state as the only successful onboarding completion condition
+---
 
-### Required Core And Early Exit
+## Tutorial Content
 
-- Stages 1 and 2 form the mandatory guided core
-- The player cannot skip or dismiss the mandatory core to reach the normal menu
-- `I know how to play` appears only after the player has correctly completed the complementary pair in Stage 2
-- Selecting `I know how to play` skips Stage 3 and starts Stage 4
-- Selecting the early exit does not write onboarding completion
-- A player who does not select the early exit continues through Stage 3 before entering Stage 4
-- Both paths converge on the same final validation and completion rule
-- Back navigation or application restart must not provide an alternative route to the normal menu while onboarding is incomplete
+Learn basics contains exactly three authored steps.
 
-### Final Validation Puzzle
+### Step 1 - Introduce The Strip
 
-- Author the validation puzzle specifically for learning confirmation rather than generating it dynamically
-- Use exactly two strip pairs and four board tiles
-- Include enough unknown information to exercise normal strip and expression interactions
-- Avoid direct instructional highlights during normal validation progress
-- Do not reveal the intended pairings, hidden values, or next move
-- Preserve ordinary reset, correction, validation, and completion behavior where applicable
-- Mark onboarding complete only after the puzzle reaches the solved state
+Show the strip without board tiles:
 
-### Local Onboarding State
+```text
+2, ?, 4, 5
+```
 
-- Persist onboarding state locally on the device
-- Store completion as a versioned value rather than an unversioned Boolean
-- Record the last fully completed onboarding stage as a resumable checkpoint
-- Resume at the next required stage after application restart
-- Restart the current stage if the application closes before that stage is completed
-- Do not require persistence of partial strip or tile edits within an incomplete stage
-- Keep onboarding state independent from Tutorial replay state and generated puzzle sessions
-- Route users whose required onboarding version is complete directly to the normal menu
-- Do not clear completed onboarding when the player voluntarily replays learning content
+Explain that the strip contains positive integers ordered from lowest to highest and that repeated values are allowed. Avoid describing the strip as strictly increasing.
+
+Required action:
+
+- tap the hidden strip entry
+- enter `3`
+
+While the entry editor is open, replace generic range guidance with concise Tutorial guidance asking the player to enter `3`. If the player provides invalid input, feedback must remain truthful about the actual validation problem. Tutorial copy must not imply that `3` is the only value allowed by the general ascending-order rule.
+
+### Step 2 - Introduce Tiles And Pairs
+
+Preserve the visually completed strip:
+
+```text
+2, 3, 4, 5
+```
+
+Reveal four tiles in this authored state:
+
+```text
+? ? ? = 5
+2 × 3 = 6
+4 + 5 = 9
+4 × 5 = 20
+```
+
+Explain that a tile has two operands, one operator, and a visible result. Explain that strip entries form pairs and that each pair creates one addition result and one multiplication result.
+
+Required action:
+
+- complete the unresolved tile as `2 + 3 = 5` using the normal operand and operator interactions
+
+The resolved `2 × 3 = 6` tile acts as the complementary example for the same pair.
+
+### Step 3 - Solve A Two-Pair Puzzle
+
+Start a clean authored two-pair puzzle with this strip:
+
+```text
+?, ?, 2, 3
+```
+
+The completed strip is:
+
+```text
+1, 2, 2, 3
+```
+
+Show unresolved tiles with results in this order:
+
+```text
+3, 2, 5, 6
+```
+
+These results correspond to one addition and one multiplication for the `1`/`2` pair and one addition and one multiplication for the other `2`/`3` pair.
+
+Explain that the player should solve the complete puzzle and remind them that the strip may contain repeated values. Allow normal strip, operand, operator, correction, reset, and validation behavior.
+
+The two strip entries that display `2` remain distinct stable entries. Because exchanging those equal-valued entries produces an equivalent player-visible solution, Tutorial completion must accept either valid stable-entry assignment as long as all shared puzzle rules are satisfied.
+
+Solving the puzzle completes Tutorial. Required first-run playback persists the completed outcome and opens Menu; voluntary playback shows ordinary Tutorial completion without changing onboarding state.
+
+---
+
+## Local First-Run State
+
+- Persist state locally on the device
+- Keep completion versioned so future revisions define an explicit migration policy
+- Distinguish unresolved, Tutorial-completed, and Tutorial-skipped outcomes
+- Preserve immediate Menu access for installations identified as pre-v6 upgrades
+- Preserve Menu access for installations that already completed the legacy required onboarding contract
+- Record the last fully completed Tutorial step as a resumable checkpoint
+- Resume at the next step after application restart
+- Restart the current step if the application closes before that step is completed
+- Do not persist partial strip or tile edits within an incomplete step
+- Keep onboarding state independent from Tutorial replay state and generated sessions
 - Treat uninstalling or clearing application data as a new local first run
 
-Upgrade behavior for v6:
-
-- fresh installations start with onboarding version 1 incomplete
-- installations identified as upgrades from a pre-v6 version initialize onboarding version 1 as completed
-- upgraded players retain immediate menu access and can enter the guided introduction voluntarily
-- future onboarding versions must define their own migration policy instead of automatically invalidating prior completion
-
-The exact platform mechanism used to distinguish a fresh installation from an upgrade is an implementation decision, but it must satisfy this product behavior reliably.
-
-### Optional Learning And Replay
-
-- Add or refine a `How to play` entry point in the normal menu
-- Let completed players start the guided introduction voluntarily from its beginning
-- Let voluntary replay use the same authored stages and interactions as first-run onboarding
-- Keep the menu unlocked before, during, and after voluntary replay
-- Preserve `Solving tips` and `Practice tips` as optional advanced learning content
-- Keep the static rules helper available as an on-demand rules reference in supported gameplay modes
-- Keep basic guided onboarding, advanced strategy practice, and rules reference content as distinct product surfaces
+Future onboarding versions must define their own migration policy instead of automatically invalidating prior resolution.
 
 ---
 
-## Suggested Implementation Phases
+## Optional Learning And Replay
 
-1. Finalize the authored scenarios and completion conditions for all four stages.
-2. Introduce versioned local onboarding state and the pre-v6 upgrade policy.
-3. Route fresh installations into onboarding and completed installations into the menu.
-4. Implement the mandatory guided core and resumable stage progression.
-5. Implement `I know how to play` and both paths into final validation.
-6. Implement the authored `2 Pairs` validation puzzle and completion persistence.
-7. Add `How to play` and voluntary replay without changing the completed state.
-8. Validate the complete first-run, restart, upgrade, and replay experience in supported languages.
+- Keep `How to play` available from the unlocked normal menu
+- Start voluntary replay from Step 1 regardless of stored first-run checkpoints
+- Use the same three authored Tutorial steps for first run, Menu replay, and the in-game `Play tutorial` entry
+- Allow voluntary playback to return to the already-unlocked Menu or underlying generated puzzle at any time
+- Never clear, downgrade, or otherwise change a resolved first-run outcome during replay
+- Preserve Solving Tips Practice as separate advanced learning content
+- Keep the static rules helper as an on-demand rules reference in supported generated modes
 
 ---
 
 ## Out Of Scope
 
+- A mandatory final check or certification puzzle
+- Adaptive onboarding based on player behavior
 - Contextual help triggered by repeated errors or inactivity
-- Proactive action discovery intended to show Help or Hint actions
 - Solver-backed hints or next-move suggestions
 - Puzzle-specific answer reveal
 - Automatic strip entry, operand placement, or puzzle completion
-- Adaptive onboarding or difficulty based on player behavior
 - New generated puzzle modes, sizes, or difficulty profiles
 - Changes to core NumPairs rules or operators
-- Changes to generated `4 Pairs Low` or `8 Pairs Medium` construction
-- Persistence of partial edits inside an incomplete onboarding stage
-- Persistence of generated puzzle sessions
-- A full Settings screen created only to reset onboarding
-- Requiring pre-v6 players to complete onboarding after upgrading
-- Reworking all existing advanced Tutorial or solving-tips content
-- Scoring, timers, streaks, achievements, or progression systems
+- Changes to generated puzzle construction
+- Persistence of partial edits inside an incomplete Tutorial step
 - User accounts, cloud synchronization, analytics, or remote onboarding configuration
-- Advanced tutorial animations or character-led instruction
+- Scoring, timers, streaks, achievements, or progression systems
+- Advanced Tutorial animations or character-led instruction
 
 ---
 
 ## Success Criteria
 
-- A fresh installation starts with guided onboarding instead of the normal menu
-- The player physically completes the essential operand-placement and complementary-pair interactions
-- The first two learning stages cannot be skipped
-- `I know how to play` is unavailable until the mandatory complementary pair is complete
-- The early-exit path skips optional guidance without bypassing final validation
-- Onboarding is marked complete only after the final authored `2 Pairs` puzzle is solved
-- Completed stages and final completion persist reliably across application restarts
-- An interrupted player resumes without repeating fully completed required stages
-- Completed players reach the normal menu on subsequent launches
-- Existing players upgrading from a pre-v6 version retain menu access
-- Players can voluntarily replay basic onboarding and access optional advanced learning
-- Voluntary replay does not relock the menu or clear prior completion
-- Generated `4 Pairs Low` and `8 Pairs Medium` behavior remains unchanged
-- A first-time tester can complete their first generated `4 Pairs Low` puzzle without verbal explanation
+- A fresh installation starts Tutorial instead of Menu
+- A new player encounters the strip before tile interaction is introduced
+- Tutorial teaches strip ordering, repeated values, tile anatomy, and the one-sum/one-product pair rule through real actions
+- `Skip tutorial` is available from Step 1 and always requires explicit confirmation
+- Confirmed skip opens Menu without final validation
+- Solving the Step 3 authored puzzle completes Tutorial and opens Menu
+- Completion and skip outcomes persist reliably across application restarts
+- Interrupted unresolved playback resumes after completed steps
+- Existing completed and upgraded players retain Menu access
+- Voluntary replay uses the same Tutorial without relocking Menu or changing first-run state
+- Generated mode behavior remains unchanged
