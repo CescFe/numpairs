@@ -61,10 +61,10 @@
     <!-- Tutorial screen -->
     <string name="tutorial_screen_title">Tutorial</string>
     <string name="tutorial_step_indicator">Paso %1$d de %2$d</string>
-    <string name="tutorial_strip_introduction_copy">La serie ordena enteros positivos de menor a mayor; los valores pueden repetirse. Introduce 3 para completar 2, ?, 4, 5.</string>
+    <string name="tutorial_strip_introduction_copy">La lista de números va de menor a mayor. Un mismo número puede aparecer más de una vez.</string>
     <string name="tutorial_strip_entry_guidance">Introduce 3 para completar la serie del tutorial.</string>
-    <string name="tutorial_tiles_introduction_copy">Una casilla muestra un resultado y una expresión que debes formar. Empareja dos elementos de la serie: cada pareja debe formar una casilla de suma y otra de producto. Completa 2 + 3 = 5.</string>
-    <string name="tutorial_repeated_value_practice_copy">Resuelve el puzle. Recuerda: la serie puede contener valores repetidos.</string>
+    <string name="tutorial_tiles_introduction_copy">Cada casilla muestra un resultado. Elige los números y el símbolo que dan ese resultado. Usa los mismos dos números una vez con + y otra con ×.</string>
+    <string name="tutorial_repeated_value_practice_copy">Resuelve el puzle. Recuerda: la lista de números puede incluir el mismo número más de una vez.</string>
     <string name="onboarding_skip_tutorial_action">Saltar tutorial</string>
     <string name="onboarding_skip_tutorial_title">¿Saltar el tutorial?</string>
     <string name="onboarding_skip_tutorial_message">Si es la primera vez que juegas a NumPairs o a juegos similares, te recomendamos continuar. Podrás volver a abrir el tutorial más tarde desde Cómo jugar.</string>
