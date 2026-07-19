@@ -94,8 +94,8 @@ fun TutorialRoute(
             return@LaunchedEffect
         }
 
-        lastReportedStepIndex = currentStepIndex
         delay(TUTORIAL_STEP_ADVANCE_DELAY)
+        lastReportedStepIndex = currentStepIndex
         currentOnStepCompleted(currentStepIndex)
         if (currentStepIndex < steps.lastIndex) {
             currentStepIndex += 1

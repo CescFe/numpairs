@@ -1,6 +1,7 @@
 package org.cescfe.numpairs.feature.tutorial
 
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertContentDescriptionEquals
@@ -156,6 +157,54 @@ class TutorialRouteTest {
     }
 
     @Test
+    fun uninterruptedStepCompletionIsReportedExactlyOnce() {
+        val stepOneCompletionCount = AtomicInteger(0)
+        setContent(
+            onStepCompleted = { stepIndex ->
+                if (stepIndex == 0) {
+                    stepOneCompletionCount.incrementAndGet()
+                }
+            }
+        )
+
+        completeFocusedStepOne()
+        waitForStep(stepIndex = 1)
+        composeTestRule.mainClock.advanceTimeBy(TUTORIAL_AUTO_ADVANCE_TEST_WAIT_MS)
+
+        assertEquals(1, stepOneCompletionCount.get())
+    }
+
+    @Test
+    fun reopeningAfterClosingOnStepTwoAllowsStepOneToAdvanceAgain() {
+        val restartTutorial = setRestartableContent()
+        completeFocusedStepOne()
+        waitForStep(stepIndex = 1)
+
+        restartTutorial()
+        assertStepDisplayed(stepIndex = 0)
+        assertFocusedIntroductionStripDisplayed()
+        completeFocusedStepOne()
+
+        waitForStep(stepIndex = 1)
+        assertStepDisplayed(stepIndex = 1)
+    }
+
+    @Test
+    fun reopeningAfterCompletingAllStepsAllowsStepOneToAdvanceAgain() {
+        val restartTutorial = setRestartableContent()
+        completeFocusedTutorial()
+        composeTestRule.mainClock.advanceTimeBy(TUTORIAL_AUTO_ADVANCE_TEST_WAIT_MS)
+
+        restartTutorial()
+        assertStepDisplayed(stepIndex = 0)
+        assertFocusedIntroductionStripDisplayed()
+        completeFocusedStepOne()
+
+        waitForStep(stepIndex = 1)
+        assertStepDisplayed(stepIndex = 1)
+    }
+
+    @Test
     fun solvingTipsPracticeHighlightsExpectedActionsAndCompletesWithSuccessOverlay() {
         setSolvingTipsPracticeTutorialContent()
 
@@ -198,10 +247,13 @@ class TutorialRouteTest {
             .assertIsDisplayed()
     }
 
-    private fun setContent(onTutorialCompleted: (() -> Unit)? = null) {
+    private fun setContent(onStepCompleted: suspend (Int) -> Unit = {}, onTutorialCompleted: (() -> Unit)? = null) {
         composeTestRule.setContent {
             NumPairsTheme {
-                TutorialRoute(onTutorialCompleted = onTutorialCompleted)
+                TutorialRoute(
+                    onStepCompleted = onStepCompleted,
+                    onTutorialCompleted = onTutorialCompleted
+                )
             }
         }
 
@@ -220,6 +272,35 @@ class TutorialRouteTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SCREEN)
             .assertIsDisplayed()
+    }
+
+    private fun setRestartableContent(): () -> Unit {
+        val isTutorialVisible = mutableStateOf(true)
+        composeTestRule.setContent {
+            NumPairsTheme {
+                if (isTutorialVisible.value) {
+                    TutorialRoute()
+                }
+            }
+        }
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+
+        return {
+            composeTestRule.runOnUiThread {
+                isTutorialVisible.value = false
+            }
+            composeTestRule
+                .onNodeWithTag(GameScreenTestTags.SCREEN)
+                .assertDoesNotExist()
+            composeTestRule.runOnUiThread {
+                isTutorialVisible.value = true
+            }
+            composeTestRule
+                .onNodeWithTag(GameScreenTestTags.SCREEN)
+                .assertIsDisplayed()
+        }
     }
 
     private fun completeFocusedStepOne() {
