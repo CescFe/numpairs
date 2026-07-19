@@ -1,18 +1,16 @@
 package org.cescfe.numpairs.feature.tutorial
 
 object TutorialContent {
-    val scenarios: List<TutorialScenario> = listOf(
-        StageOneNumberPlacementContent.scenario,
-        StageTwoComplementaryPairContent.scenario,
-        StageThreeHiddenStripValueContent.scenario,
-        FinalValidationContent.scenario,
-        LearnBasicsTutorialContent.scenario,
-        SolvingTipsPracticeContent.scenario
-    )
+    val scenarios: List<TutorialScenario> = LearnBasicsTutorialContent.scenarios +
+        listOf(
+            StageOneNumberPlacementContent.scenario,
+            StageTwoComplementaryPairContent.scenario,
+            StageThreeHiddenStripValueContent.scenario,
+            FinalValidationContent.scenario,
+            SolvingTipsPracticeContent.scenario
+        )
 
-    val learnBasicsSteps: List<TutorialStep> = listOf(StageOneNumberPlacementContent.step) +
-        StageTwoComplementaryPairContent.steps +
-        StageThreeHiddenStripValueContent.step
+    val learnBasicsSteps: List<TutorialStep> = LearnBasicsTutorialContent.steps
     val solvingTipsPracticeSteps: List<TutorialStep> = SolvingTipsPracticeContent.steps
     val steps: List<TutorialStep> = learnBasicsSteps + solvingTipsPracticeSteps
 

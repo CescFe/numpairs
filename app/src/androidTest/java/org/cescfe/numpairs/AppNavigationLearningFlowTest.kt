@@ -68,7 +68,7 @@ class AppNavigationLearningFlowTest {
             .assert(hasText(string(R.string.menu_tutorial_button)))
             .performClick()
         composeTestRule
-            .onNodeWithText(string(R.string.tutorial_stage_one_place_number_copy))
+            .onNodeWithText(string(R.string.tutorial_strip_introduction_copy))
             .assertIsDisplayed()
 
         pressBackUnconditionally()
@@ -82,7 +82,7 @@ class AppNavigationLearningFlowTest {
             .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
             .performClick()
         composeTestRule
-            .onNodeWithText(string(R.string.tutorial_stage_one_place_number_copy))
+            .onNodeWithText(string(R.string.tutorial_strip_introduction_copy))
             .assertIsDisplayed()
     }
 

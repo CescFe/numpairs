@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.feature.tutorial
 
+import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Expression
 import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
@@ -35,11 +36,12 @@ class TutorialContentTest {
     fun exposes_authored_content_for_each_learning_flow() {
         assertEquals(
             listOf(
+                TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
+                TutorialScenarioId.REPEATED_VALUE_PRACTICE,
                 TutorialScenarioId.NUMBER_PLACEMENT,
                 TutorialScenarioId.COMPLEMENTARY_PAIR,
                 TutorialScenarioId.HIDDEN_STRIP_VALUE,
                 TutorialScenarioId.FINAL_VALIDATION,
-                TutorialScenarioId.TWO_PAIR_PRACTICE,
                 TutorialScenarioId.SOLVING_TIPS_PRACTICE
             ),
             TutorialContent.scenarios.map(TutorialScenario::id)
@@ -54,9 +56,8 @@ class TutorialContentTest {
         )
         assertEquals(
             setOf(
-                TutorialScenarioId.NUMBER_PLACEMENT,
-                TutorialScenarioId.COMPLEMENTARY_PAIR,
-                TutorialScenarioId.HIDDEN_STRIP_VALUE
+                TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
+                TutorialScenarioId.REPEATED_VALUE_PRACTICE
             ),
             TutorialContent.stepsFor(TutorialMode.LEARN_BASICS).map(TutorialStep::scenarioId).toSet()
         )
@@ -82,9 +83,9 @@ class TutorialContentTest {
     }
 
     @Test
-    fun existing_practice_scenarios_keep_hidden_strip_and_expression_work() {
+    fun practice_scenarios_keep_hidden_strip_and_expression_work() {
         listOf(
-            TutorialScenarioId.TWO_PAIR_PRACTICE,
+            TutorialScenarioId.REPEATED_VALUE_PRACTICE,
             TutorialScenarioId.SOLVING_TIPS_PRACTICE
         ).forEach { scenarioId ->
             val scenario = TutorialContent.scenario(scenarioId)
@@ -146,52 +147,40 @@ class TutorialContentTest {
     }
 
     @Test
-    fun number_placement_content_is_the_first_active_learn_basics_step() {
+    fun legacy_guided_number_placement_content_remains_available() {
         assertEquals(
             StageOneNumberPlacementContent.scenario,
             TutorialContent.scenario(TutorialScenarioId.NUMBER_PLACEMENT)
         )
-        assertEquals(StageOneNumberPlacementContent.step, TutorialContent.learnBasicsSteps.first())
-        assertEquals(
-            listOf(
-                TutorialScenarioId.NUMBER_PLACEMENT,
-                TutorialScenarioId.COMPLEMENTARY_PAIR,
-                TutorialScenarioId.COMPLEMENTARY_PAIR,
-                TutorialScenarioId.HIDDEN_STRIP_VALUE
-            ),
-            TutorialContent.learnBasicsSteps.map(TutorialStep::scenarioId)
-        )
     }
 
     @Test
-    fun learn_basics_guides_the_player_through_core_rules_before_normal_completion() {
-        val numberPlacementScenario = TutorialContent.scenario(TutorialScenarioId.NUMBER_PLACEMENT)
-        val scenario = TutorialContent.scenario(TutorialScenarioId.COMPLEMENTARY_PAIR)
-        val hiddenStripScenario = TutorialContent.scenario(TutorialScenarioId.HIDDEN_STRIP_VALUE)
+    fun learn_basics_contains_the_exact_three_step_curriculum() {
+        val introductionScenario = TutorialContent.scenario(TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION)
+        val repeatedValueScenario = TutorialContent.scenario(TutorialScenarioId.REPEATED_VALUE_PRACTICE)
         val steps = TutorialContent.stepsFor(TutorialMode.LEARN_BASICS)
-        val numberPlacementCompletedPuzzle = numberPlacementScenario.initialPuzzle.copy(
-            board = Board(
-                tiles = numberPlacementScenario.initialPuzzle.board.tiles.toMutableList().apply {
-                    set(0, get(0).withLeftOperand(value = 2, stripEntryId = 0))
-                }
-            )
-        )
+        val introductionWithCompletedStrip = introductionScenario.initialPuzzle.withStripValue(index = 1, value = 3)
 
-        assertEquals(listOf(1, 2, 3, 4), steps.map(TutorialStep::order))
+        assertEquals(listOf(1, 2, 3), steps.map(TutorialStep::order))
+        assertEquals(
+            listOf(
+                TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
+                TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
+                TutorialScenarioId.REPEATED_VALUE_PRACTICE
+            ),
+            steps.map(TutorialStep::scenarioId)
+        )
 
         steps[0].assertGuidedAction(
             expectedHighlights = listOf(
-                TutorialHighlightTarget.StripEntries(indexes = listOf(0)),
-                TutorialHighlightTarget.TileOperandSlot(tileIndex = 0, slot = OperandSlot.LEFT)
+                TutorialHighlightTarget.StripEntries(indexes = listOf(1))
             ),
-            expectedAction = TutorialRequiredAction.PlaceTileOperand(
-                tileIndex = 0,
-                slot = OperandSlot.LEFT,
-                stripEntryId = 0
-            ),
-            incompletePuzzle = numberPlacementScenario.initialPuzzle,
-            completePuzzle = numberPlacementCompletedPuzzle
+            expectedAction = TutorialRequiredAction.EnterStripValue(stripEntryIndex = 1, value = 3),
+            incompletePuzzle = introductionScenario.initialPuzzle,
+            completePuzzle = introductionWithCompletedStrip
         )
+        assertFalse(steps[0].isBoardVisible)
+        assertEquals(R.string.tutorial_strip_entry_guidance, steps[0].stripEntryGuidanceResId)
 
         steps[1].assertGuidedAction(
             expectedHighlights = listOf(
@@ -203,38 +192,64 @@ class TutorialContentTest {
                 operator = Operator.ADDITION,
                 rightStripEntryId = 1
             ),
-            incompletePuzzle = scenario.initialPuzzle,
-            completePuzzle = scenario.initialPuzzle.withSolvedScenarioTiles(scenario, 0)
+            incompletePuzzle = introductionWithCompletedStrip,
+            completePuzzle = introductionWithCompletedStrip.withSolvedScenarioTiles(introductionScenario, 0)
         )
+        assertTrue(steps[1].isBoardVisible)
+        assertEquals(null, steps[1].stripEntryGuidanceResId)
 
         steps[2].assertGuidedAction(
             expectedHighlights = listOf(
-                TutorialHighlightTarget.TileExpressionSlots(tileIndex = 1)
+                TutorialHighlightTarget.HiddenStripEntries,
+                TutorialHighlightTarget.HiddenTileExpressions
             ),
-            expectedAction = TutorialRequiredAction.CompleteTileExpression(
-                tileIndex = 1,
-                leftStripEntryId = 0,
-                operator = Operator.MULTIPLICATION,
-                rightStripEntryId = 1
-            ),
-            incompletePuzzle = scenario.initialPuzzle,
-            completePuzzle = scenario.solvedPuzzle
+            expectedAction = TutorialRequiredAction.CompleteScenario,
+            incompletePuzzle = repeatedValueScenario.initialPuzzle,
+            completePuzzle = repeatedValueScenario.solvedPuzzle
         )
-        assertFalse(
-            steps[2].isComplete(
-                GameUiState.from(scenario.initialPuzzle.withSolvedScenarioTiles(scenario, 0))
+    }
+
+    @Test
+    fun strip_and_tiles_introduction_has_the_exact_authored_state() {
+        val scenario = TutorialContent.scenario(TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION)
+        val tiles = scenario.initialPuzzle.board.tiles
+
+        assertEquals(listOf(2, 3, 4, 5), scenario.stripValues)
+        assertEquals(
+            listOf(StripItem.Known(2), StripItem.Hidden, StripItem.Known(4), StripItem.Known(5)),
+            scenario.initialPuzzle.strip.items
+        )
+        assertTrue(tiles[0].hasHiddenExpression())
+        assertEquals(Expression(2, Operator.MULTIPLICATION, 3), tiles[1].expression.withoutEntryIds())
+        assertEquals(Expression(4, Operator.ADDITION, 5), tiles[2].expression.withoutEntryIds())
+        assertEquals(Expression(4, Operator.MULTIPLICATION, 5), tiles[3].expression.withoutEntryIds())
+        assertEquals(listOf(5, 6, 9, 20), tiles.map(Tile::result))
+    }
+
+    @Test
+    fun repeated_value_practice_has_the_exact_authored_state_and_accepts_both_two_assignments() {
+        val scenario = TutorialContent.scenario(TutorialScenarioId.REPEATED_VALUE_PRACTICE)
+        val finalStep = TutorialContent.learnBasicsSteps.last()
+        val alternateSolvedPuzzle = solvedPuzzle(
+            stripValues = listOf(1, 2, 2, 3),
+            tileDefinitions = listOf(
+                TileDefinition(leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 2),
+                TileDefinition(leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 2),
+                TileDefinition(leftStripEntryId = 1, operator = Operator.ADDITION, rightStripEntryId = 3),
+                TileDefinition(leftStripEntryId = 1, operator = Operator.MULTIPLICATION, rightStripEntryId = 3)
             )
         )
 
-        steps[3].assertGuidedAction(
-            expectedHighlights = listOf(
-                TutorialHighlightTarget.StripEntries(indexes = listOf(1)),
-                TutorialHighlightTarget.Tiles(indexes = listOf(0))
-            ),
-            expectedAction = TutorialRequiredAction.EnterStripValue(stripEntryIndex = 1, value = 3),
-            incompletePuzzle = hiddenStripScenario.initialPuzzle,
-            completePuzzle = hiddenStripScenario.initialPuzzle.withStripValue(index = 1, value = 3)
+        assertEquals(listOf(1, 2, 2, 3), scenario.stripValues)
+        assertEquals(
+            listOf(StripItem.Hidden, StripItem.Hidden, StripItem.Known(2), StripItem.Known(3)),
+            scenario.initialPuzzle.strip.items
         )
+        assertEquals(listOf(3, 2, 5, 6), scenario.initialPuzzle.board.tiles.map(Tile::result))
+        assertAllTilesHaveHiddenExpressions(scenario.initialPuzzle)
+        assertEquals(PuzzleCompletionState.SOLVED, alternateSolvedPuzzle.completionState)
+        assertTrue(finalStep.isComplete(GameUiState.from(scenario.solvedPuzzle)))
+        assertTrue(finalStep.isComplete(GameUiState.from(alternateSolvedPuzzle)))
     }
 
     @Test

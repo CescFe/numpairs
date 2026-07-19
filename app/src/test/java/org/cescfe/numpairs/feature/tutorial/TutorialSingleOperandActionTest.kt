@@ -12,7 +12,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class TutorialSingleOperandActionTest {
-    private val scenario = TutorialContent.scenario(TutorialScenarioId.TWO_PAIR_PRACTICE)
+    private val scenario = TutorialContent.scenario(TutorialScenarioId.REPEATED_VALUE_PRACTICE)
     private val step = TutorialStep(
         order = 1,
         scenarioId = scenario.id,

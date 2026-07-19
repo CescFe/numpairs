@@ -5,29 +5,37 @@ import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 
 internal object LearnBasicsTutorialContent {
-    val scenario: TutorialScenario = twoPairPracticeScenario()
+    private val stripAndTilesIntroductionScenario = stripAndTilesIntroductionScenario()
+    private val repeatedValuePracticeScenario = repeatedValuePracticeScenario()
+
+    val scenarios: List<TutorialScenario> = listOf(
+        stripAndTilesIntroductionScenario,
+        repeatedValuePracticeScenario
+    )
 
     val steps: List<TutorialStep> = listOf(
         TutorialStep(
-            order = 2,
-            scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
-            playerFacingCopyResId = R.string.tutorial_step_one_copy,
+            order = 1,
+            scenarioId = TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
+            playerFacingCopyResId = R.string.tutorial_strip_introduction_copy,
             highlightedTargets = listOf(
                 TutorialHighlightTarget.StripEntries(indexes = listOf(1))
             ),
             requiredAction = TutorialRequiredAction.EnterStripValue(
                 stripEntryIndex = 1,
-                value = 2
+                value = 3
             ),
             completionPredicate = TutorialStepCompletionPredicate.StripValueEntered(
                 stripEntryIndex = 1,
-                value = 2
-            )
+                value = 3
+            ),
+            isBoardVisible = false,
+            stripEntryGuidanceResId = R.string.tutorial_strip_entry_guidance
         ),
         TutorialStep(
-            order = 3,
-            scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
-            playerFacingCopyResId = R.string.tutorial_step_two_copy,
+            order = 2,
+            scenarioId = TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
+            playerFacingCopyResId = R.string.tutorial_tiles_introduction_copy,
             highlightedTargets = listOf(
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0)
             ),
@@ -39,58 +47,70 @@ internal object LearnBasicsTutorialContent {
             ),
             completionPredicate = TutorialStepCompletionPredicate.TileExpressionCompleted(
                 tileIndex = 0,
-                leftValue = 1,
+                leftValue = 2,
                 operator = Operator.ADDITION,
-                rightValue = 2
+                rightValue = 3
             )
         ),
         TutorialStep(
-            order = 4,
-            scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
-            playerFacingCopyResId = R.string.tutorial_step_three_copy,
+            order = 3,
+            scenarioId = TutorialScenarioId.REPEATED_VALUE_PRACTICE,
+            playerFacingCopyResId = R.string.tutorial_repeated_value_practice_copy,
             highlightedTargets = listOf(
-                TutorialHighlightTarget.TileExpressionSlots(tileIndex = 1)
-            ),
-            requiredAction = TutorialRequiredAction.CompleteTileExpression(
-                tileIndex = 1,
-                leftStripEntryId = 0,
-                operator = Operator.MULTIPLICATION,
-                rightStripEntryId = 1
-            ),
-            completionPredicate = TutorialStepCompletionPredicate.TileExpressionCompleted(
-                tileIndex = 1,
-                leftValue = 1,
-                operator = Operator.MULTIPLICATION,
-                rightValue = 2
-            )
-        ),
-        TutorialStep(
-            order = 5,
-            scenarioId = TutorialScenarioId.TWO_PAIR_PRACTICE,
-            playerFacingCopyResId = R.string.tutorial_step_four_copy,
-            highlightedTargets = listOf(
-                TutorialHighlightTarget.TileExpressionSlots(tileIndex = 2),
-                TutorialHighlightTarget.TileExpressionSlots(tileIndex = 3)
+                TutorialHighlightTarget.HiddenStripEntries,
+                TutorialHighlightTarget.HiddenTileExpressions
             ),
             requiredAction = TutorialRequiredAction.CompleteScenario,
             completionPredicate = TutorialStepCompletionPredicate.ScenarioSolved
         )
     )
 
-    private fun twoPairPracticeScenario(): TutorialScenario {
-        val stripValues = listOf(1, 2, 3, 4)
+    private fun stripAndTilesIntroductionScenario(): TutorialScenario {
+        val stripValues = listOf(2, 3, 4, 5)
+        val solvedPuzzle = solvedPuzzle(
+            stripValues = stripValues,
+            tileDefinitions = listOf(
+                TileDefinition(leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1),
+                TileDefinition(leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1),
+                TileDefinition(leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3),
+                TileDefinition(leftStripEntryId = 2, operator = Operator.MULTIPLICATION, rightStripEntryId = 3)
+            )
+        )
 
         return TutorialScenario(
-            id = TutorialScenarioId.TWO_PAIR_PRACTICE,
+            id = TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
             stripValues = stripValues,
             initialPuzzle = puzzle(
                 stripItems = listOf(
-                    StripItem.Known(1),
+                    StripItem.Known(2),
                     StripItem.Hidden,
-                    StripItem.Known(3),
-                    StripItem.Known(4)
+                    StripItem.Known(4),
+                    StripItem.Known(5)
                 ),
-                tiles = hiddenTiles(results = listOf(3, 2, 7, 12))
+                tiles = listOf(hiddenTile(result = 5)) + solvedPuzzle.board.tiles.drop(1)
+            ),
+            solvedPuzzle = solvedPuzzle,
+            intendedPairs = listOf(
+                TutorialIntendedPair(firstStripEntryId = 0, secondStripEntryId = 1),
+                TutorialIntendedPair(firstStripEntryId = 2, secondStripEntryId = 3)
+            )
+        )
+    }
+
+    private fun repeatedValuePracticeScenario(): TutorialScenario {
+        val stripValues = listOf(1, 2, 2, 3)
+
+        return TutorialScenario(
+            id = TutorialScenarioId.REPEATED_VALUE_PRACTICE,
+            stripValues = stripValues,
+            initialPuzzle = puzzle(
+                stripItems = listOf(
+                    StripItem.Hidden,
+                    StripItem.Hidden,
+                    StripItem.Known(2),
+                    StripItem.Known(3)
+                ),
+                tiles = hiddenTiles(results = listOf(3, 2, 5, 6))
             ),
             solvedPuzzle = solvedPuzzle(
                 stripValues = stripValues,

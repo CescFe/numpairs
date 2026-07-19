@@ -43,11 +43,12 @@ data class TutorialScenario(
 }
 
 enum class TutorialScenarioId {
+    STRIP_AND_TILES_INTRODUCTION,
+    REPEATED_VALUE_PRACTICE,
     NUMBER_PLACEMENT,
     COMPLEMENTARY_PAIR,
     HIDDEN_STRIP_VALUE,
     FINAL_VALIDATION,
-    TWO_PAIR_PRACTICE,
     SOLVING_TIPS_PRACTICE
 }
 
@@ -71,7 +72,9 @@ data class TutorialStep(
     @param:StringRes val playerFacingCopyResId: Int,
     val highlightedTargets: List<TutorialHighlightTarget>,
     val requiredAction: TutorialRequiredAction,
-    val completionPredicate: TutorialStepCompletionPredicate
+    val completionPredicate: TutorialStepCompletionPredicate,
+    val isBoardVisible: Boolean = true,
+    @param:StringRes val stripEntryGuidanceResId: Int? = null
 ) {
     init {
         require(order > 0) {
@@ -79,6 +82,9 @@ data class TutorialStep(
         }
         require(playerFacingCopyResId != 0) {
             "Tutorial step copy string resource must be defined."
+        }
+        require(stripEntryGuidanceResId == null || stripEntryGuidanceResId != 0) {
+            "Tutorial strip entry guidance must reference a defined string resource."
         }
     }
 
