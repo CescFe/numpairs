@@ -30,6 +30,8 @@ class LocalizationResourceTest {
         assertEquals("Saltar tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
         assertEquals("Continuar tutorial", resources.getString(R.string.onboarding_continue_tutorial_button))
         assertEquals("Saltar igualmente", resources.getString(R.string.onboarding_skip_anyway_button))
+        assertEquals("No se puede abrir NumPairs", resources.getString(R.string.onboarding_startup_failure_title))
+        assertEquals("Reintentar", resources.getString(R.string.onboarding_startup_retry_button))
     }
 
     @Test
@@ -51,6 +53,8 @@ class LocalizationResourceTest {
         assertEquals("Omet el tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
         assertEquals("Continua el tutorial", resources.getString(R.string.onboarding_continue_tutorial_button))
         assertEquals("Omet-lo igualment", resources.getString(R.string.onboarding_skip_anyway_button))
+        assertEquals("No es pot obrir NumPairs", resources.getString(R.string.onboarding_startup_failure_title))
+        assertEquals("Torna-ho a provar", resources.getString(R.string.onboarding_startup_retry_button))
     }
 
     @Test
@@ -72,6 +76,8 @@ class LocalizationResourceTest {
         assertEquals("Skip tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
         assertEquals("Continue tutorial", resources.getString(R.string.onboarding_continue_tutorial_button))
         assertEquals("Skip anyway", resources.getString(R.string.onboarding_skip_anyway_button))
+        assertEquals("Unable to open NumPairs", resources.getString(R.string.onboarding_startup_failure_title))
+        assertEquals("Retry", resources.getString(R.string.onboarding_startup_retry_button))
     }
 
     private fun resourcesFor(languageTag: String): Resources {

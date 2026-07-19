@@ -57,14 +57,49 @@ fun AppNavigation(
 ) {
     val onboardingState by onboardingRepository.onboardingState.collectAsState(initial = OnboardingState())
 
-    when {
-        !onboardingState.isInitialized -> OnboardingLoadingScreen(modifier = modifier)
-        !onboardingState.isRequiredVersionComplete() -> RequiredOnboardingRoute(
+    if (!onboardingState.isInitialized) {
+        OnboardingLoadingScreen(modifier = modifier)
+    } else {
+        InitializedAppNavigation(
+            onboardingState = onboardingState,
+            onboardingRepository = onboardingRepository,
+            generatedSessionRepository = generatedSessionRepository,
+            generatedDifficultySelectionRepository = generatedDifficultySelectionRepository,
+            personalizationPreferencesRepository = personalizationPreferencesRepository,
+            topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
+            generatedChallengeCatalog = generatedChallengeCatalog,
+            generatedPuzzleGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory,
+            modifier = modifier,
+            startDestination = startDestination
+        )
+    }
+}
+
+@Composable
+internal fun InitializedAppNavigation(
+    onboardingState: OnboardingState,
+    onboardingRepository: OnboardingRepository,
+    generatedSessionRepository: GeneratedSessionRepository,
+    generatedDifficultySelectionRepository: GeneratedDifficultySelectionRepository,
+    personalizationPreferencesRepository: PersonalizationPreferencesRepository,
+    topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
+    generatedChallengeCatalog: GeneratedChallengeCatalog,
+    generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory,
+    modifier: Modifier = Modifier,
+    startDestination: AppDestination = AppDestination.Menu
+) {
+    require(onboardingState.isInitialized) {
+        "Initialized app navigation requires initialized onboarding state."
+    }
+
+    if (!onboardingState.isRequiredVersionComplete()) {
+        RequiredOnboardingRoute(
             onboardingState = onboardingState,
             onboardingRepository = onboardingRepository,
             modifier = modifier
         )
-        else -> UnlockedAppNavigation(
+    } else {
+        UnlockedAppNavigation(
             generatedSessionRepository = generatedSessionRepository,
             generatedDifficultySelectionRepository = generatedDifficultySelectionRepository,
             personalizationPreferencesRepository = personalizationPreferencesRepository,

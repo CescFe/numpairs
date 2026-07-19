@@ -52,6 +52,9 @@
     <string name="generated_puzzle_failure_title">Puzzle unavailable</string>
     <string name="generated_puzzle_failure_message">We could not create a puzzle. Please try again.</string>
     <string name="generated_puzzle_retry_button">Retry</string>
+    <string name="onboarding_startup_failure_title">Unable to open NumPairs</string>
+    <string name="onboarding_startup_failure_message">We couldn’t load your local progress. Please try again.</string>
+    <string name="onboarding_startup_retry_button">Retry</string>
     <string name="generated_puzzle_back_to_menu_button">Back to menu</string>
     <string name="generated_session_resume_unavailable_message">This unfinished puzzle is no longer available.</string>
 

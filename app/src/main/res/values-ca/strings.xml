@@ -52,6 +52,9 @@
     <string name="generated_puzzle_failure_title">Puzle no disponible</string>
     <string name="generated_puzzle_failure_message">No s’ha pogut crear un puzle. Torna-ho a provar.</string>
     <string name="generated_puzzle_retry_button">Torna-ho a provar</string>
+    <string name="onboarding_startup_failure_title">No es pot obrir NumPairs</string>
+    <string name="onboarding_startup_failure_message">No s’ha pogut carregar el teu progrés local. Torna-ho a provar.</string>
+    <string name="onboarding_startup_retry_button">Torna-ho a provar</string>
     <string name="generated_puzzle_back_to_menu_button">Torna al menú</string>
     <string name="generated_session_resume_unavailable_message">Aquest puzle sense acabar ja no està disponible.</string>
 
