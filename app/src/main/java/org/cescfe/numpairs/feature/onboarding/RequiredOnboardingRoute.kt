@@ -36,7 +36,7 @@ fun RequiredOnboardingRoute(
             },
             onIntroductionCompleted = {
                 coroutineScope.launch {
-                    onboardingRepository.markRequiredVersionCompleted()
+                    onboardingRepository.markTutorialCompleted()
                 }
             }
         )
@@ -57,7 +57,7 @@ fun RequiredOnboardingRoute(
             modifier = modifier,
             onValidationSolved = {
                 coroutineScope.launch {
-                    onboardingRepository.markRequiredVersionCompleted()
+                    onboardingRepository.markTutorialCompleted()
                 }
             },
             onNavigateBack = {},

@@ -17,6 +17,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.data.generated.selection.FakeGeneratedDifficultySelectionRepository
 import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
+import org.cescfe.numpairs.data.onboarding.FirstRunTutorialOutcome
 import org.cescfe.numpairs.data.onboarding.OnboardingPostCorePath
 import org.cescfe.numpairs.data.onboarding.OnboardingStageCheckpoint
 import org.cescfe.numpairs.data.onboarding.OnboardingState
@@ -53,7 +54,8 @@ class AppNavigationLearningFlowTest {
             isInitialized = true,
             completedVersion = REQUIRED_ONBOARDING_VERSION,
             lastCompletedStage = OnboardingStageCheckpoint.STAGE_THREE,
-            postCorePath = OnboardingPostCorePath.CONTINUE_GUIDED
+            postCorePath = OnboardingPostCorePath.CONTINUE_GUIDED,
+            firstRunTutorialOutcome = FirstRunTutorialOutcome.COMPLETED
         )
         val onboardingRepository = FakeOnboardingRepository(initialState = completedState)
         setContent(

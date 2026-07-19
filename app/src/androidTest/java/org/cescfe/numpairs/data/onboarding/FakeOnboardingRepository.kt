@@ -16,6 +16,11 @@ class FakeOnboardingRepository(initialState: OnboardingState = completedOnboardi
                 REQUIRED_ONBOARDING_VERSION
             } else {
                 0
+            },
+            firstRunTutorialOutcome = if (installationKind == OnboardingInstallationKind.PRE_V6_UPGRADE) {
+                FirstRunTutorialOutcome.PRE_V6_UPGRADE
+            } else {
+                FirstRunTutorialOutcome.UNRESOLVED
             }
         )
     }
@@ -28,14 +33,28 @@ class FakeOnboardingRepository(initialState: OnboardingState = completedOnboardi
         onboardingState.value = onboardingState.value.copy(postCorePath = path)
     }
 
-    override suspend fun markRequiredVersionCompleted() {
-        onboardingState.value = onboardingState.value.copy(completedVersion = REQUIRED_ONBOARDING_VERSION)
+    override suspend fun markTutorialCompleted() {
+        resolveFirstRun(outcome = FirstRunTutorialOutcome.COMPLETED)
+    }
+
+    override suspend fun markTutorialSkipped() {
+        resolveFirstRun(outcome = FirstRunTutorialOutcome.SKIPPED)
+    }
+
+    private fun resolveFirstRun(outcome: FirstRunTutorialOutcome) {
+        if (!onboardingState.value.isRequiredVersionComplete()) {
+            onboardingState.value = onboardingState.value.copy(
+                completedVersion = REQUIRED_ONBOARDING_VERSION,
+                firstRunTutorialOutcome = outcome
+            )
+        }
     }
 }
 
 fun completedOnboardingState(): OnboardingState = OnboardingState(
     isInitialized = true,
-    completedVersion = REQUIRED_ONBOARDING_VERSION
+    completedVersion = REQUIRED_ONBOARDING_VERSION,
+    firstRunTutorialOutcome = FirstRunTutorialOutcome.LEGACY_COMPLETED
 )
 
 fun incompleteOnboardingState(

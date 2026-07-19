@@ -11,7 +11,9 @@ interface OnboardingRepository {
 
     suspend fun selectPostCorePath(path: OnboardingPostCorePath)
 
-    suspend fun markRequiredVersionCompleted()
+    suspend fun markTutorialCompleted()
+
+    suspend fun markTutorialSkipped()
 }
 
 enum class OnboardingInstallationKind {

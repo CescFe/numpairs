@@ -1,6 +1,11 @@
 package org.cescfe.numpairs.data.onboarding
 
+import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import java.io.File
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
@@ -46,6 +51,7 @@ class DataStoreOnboardingRepositoryTest {
         assertTrue(state.isInitialized)
         assertFalse(state.isRequiredVersionComplete())
         assertEquals(OnboardingStageCheckpoint.NONE, state.lastCompletedStage)
+        assertEquals(FirstRunTutorialOutcome.UNRESOLVED, state.firstRunTutorialOutcome)
     }
 
     @Test
@@ -58,6 +64,7 @@ class DataStoreOnboardingRepositoryTest {
         assertTrue(state.isInitialized)
         assertTrue(state.isRequiredVersionComplete())
         assertEquals(REQUIRED_ONBOARDING_VERSION, state.completedVersion)
+        assertEquals(FirstRunTutorialOutcome.PRE_V6_UPGRADE, state.firstRunTutorialOutcome)
     }
 
     @Test
@@ -71,6 +78,7 @@ class DataStoreOnboardingRepositoryTest {
         val state = fixture.repository.onboardingState.first()
         assertFalse(state.isRequiredVersionComplete())
         assertEquals(OnboardingStageCheckpoint.STAGE_TWO, state.lastCompletedStage)
+        assertEquals(FirstRunTutorialOutcome.UNRESOLVED, state.firstRunTutorialOutcome)
     }
 
     @Test
@@ -93,17 +101,74 @@ class DataStoreOnboardingRepositoryTest {
     }
 
     @Test
-    fun `final completion is versioned and independent from stage checkpoint`() = runBlocking {
+    fun `tutorial completion is versioned and independent from stage checkpoint`() = runBlocking {
         val fixture = createRepository()
         fixture.repository.initialize(OnboardingInstallationKind.FRESH_INSTALL)
         fixture.repository.recordStageCompleted(OnboardingStageCheckpoint.STAGE_TWO)
 
-        fixture.repository.markRequiredVersionCompleted()
+        fixture.repository.markTutorialCompleted()
 
         val state = fixture.repository.onboardingState.first()
         assertTrue(state.isRequiredVersionComplete())
         assertEquals(REQUIRED_ONBOARDING_VERSION, state.completedVersion)
         assertEquals(OnboardingStageCheckpoint.STAGE_TWO, state.lastCompletedStage)
+        assertEquals(FirstRunTutorialOutcome.COMPLETED, state.firstRunTutorialOutcome)
+    }
+
+    @Test
+    fun `explicit skip resolves the version with a distinct outcome`() = runBlocking {
+        val fixture = createRepository()
+        fixture.repository.initialize(OnboardingInstallationKind.FRESH_INSTALL)
+
+        fixture.repository.markTutorialSkipped()
+
+        val state = fixture.repository.onboardingState.first()
+        assertTrue(state.isRequiredVersionComplete())
+        assertEquals(REQUIRED_ONBOARDING_VERSION, state.completedVersion)
+        assertEquals(FirstRunTutorialOutcome.SKIPPED, state.firstRunTutorialOutcome)
+    }
+
+    @Test
+    fun `resolved first-run outcome cannot be overwritten`() = runBlocking {
+        val fixture = createRepository()
+        fixture.repository.initialize(OnboardingInstallationKind.FRESH_INSTALL)
+        fixture.repository.markTutorialSkipped()
+
+        fixture.repository.markTutorialCompleted()
+
+        assertEquals(
+            FirstRunTutorialOutcome.SKIPPED,
+            fixture.repository.onboardingState.first().firstRunTutorialOutcome
+        )
+    }
+
+    @Test
+    fun `completed state without an outcome is recognized as legacy completion`() = runBlocking {
+        val fixture = createRepository()
+        fixture.dataStore.edit { preferences ->
+            preferences[booleanPreferencesKey("onboarding_is_initialized")] = true
+            preferences[intPreferencesKey("onboarding_completed_version")] = REQUIRED_ONBOARDING_VERSION
+        }
+
+        val state = fixture.repository.onboardingState.first()
+
+        assertTrue(state.isRequiredVersionComplete())
+        assertEquals(FirstRunTutorialOutcome.LEGACY_COMPLETED, state.firstRunTutorialOutcome)
+    }
+
+    @Test
+    fun `unknown persisted outcome falls back safely`() = runBlocking {
+        val fixture = createRepository()
+        fixture.dataStore.edit { preferences ->
+            preferences[booleanPreferencesKey("onboarding_is_initialized")] = true
+            preferences[intPreferencesKey("onboarding_completed_version")] = REQUIRED_ONBOARDING_VERSION
+            preferences[intPreferencesKey("onboarding_first_run_tutorial_outcome")] = Int.MAX_VALUE
+        }
+
+        val state = fixture.repository.onboardingState.first()
+
+        assertTrue(state.isRequiredVersionComplete())
+        assertEquals(FirstRunTutorialOutcome.LEGACY_COMPLETED, state.firstRunTutorialOutcome)
     }
 
     @Test
@@ -131,14 +196,14 @@ class DataStoreOnboardingRepositoryTest {
         val firstFixture = createRepository(dataStoreFile)
         firstFixture.repository.initialize(OnboardingInstallationKind.FRESH_INSTALL)
         firstFixture.repository.recordStageCompleted(OnboardingStageCheckpoint.STAGE_THREE)
+        firstFixture.repository.markTutorialCompleted()
         firstFixture.close()
 
         val secondFixture = createRepository(dataStoreFile)
+        val restoredState = secondFixture.repository.onboardingState.first()
 
-        assertEquals(
-            OnboardingStageCheckpoint.STAGE_THREE,
-            secondFixture.repository.onboardingState.first().lastCompletedStage
-        )
+        assertEquals(OnboardingStageCheckpoint.STAGE_THREE, restoredState.lastCompletedStage)
+        assertEquals(FirstRunTutorialOutcome.COMPLETED, restoredState.firstRunTutorialOutcome)
     }
 
     private fun createRepository(dataStoreFile: File = createDataStoreFile()): RepositoryFixture {
@@ -151,6 +216,7 @@ class DataStoreOnboardingRepositoryTest {
 
         return RepositoryFixture(
             repository = DataStoreOnboardingRepository(dataStore),
+            dataStore = dataStore,
             job = job
         )
     }
@@ -160,7 +226,11 @@ class DataStoreOnboardingRepositoryTest {
         "${UUID.randomUUID()}.preferences_pb"
     )
 
-    private data class RepositoryFixture(val repository: OnboardingRepository, private val job: Job) {
+    private data class RepositoryFixture(
+        val repository: OnboardingRepository,
+        val dataStore: DataStore<Preferences>,
+        private val job: Job
+    ) {
         suspend fun close() {
             job.cancelAndJoin()
         }

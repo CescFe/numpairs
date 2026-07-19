@@ -21,14 +21,19 @@ class DataStoreOnboardingRepository(private val dataStore: DataStore<Preferences
             }
         }
         .map { preferences ->
+            val completedVersion = preferences[PreferenceKeys.COMPLETED_VERSION] ?: 0
             OnboardingState(
                 isInitialized = preferences[PreferenceKeys.IS_INITIALIZED] ?: false,
-                completedVersion = preferences[PreferenceKeys.COMPLETED_VERSION] ?: 0,
+                completedVersion = completedVersion,
                 lastCompletedStage = OnboardingStageCheckpoint.fromPersistedValue(
                     preferences[PreferenceKeys.LAST_COMPLETED_STAGE] ?: 0
                 ),
                 postCorePath = OnboardingPostCorePath.fromPersistedValue(
                     preferences[PreferenceKeys.POST_CORE_PATH] ?: 0
+                ),
+                firstRunTutorialOutcome = FirstRunTutorialOutcome.fromPersistedValue(
+                    value = preferences[PreferenceKeys.FIRST_RUN_TUTORIAL_OUTCOME],
+                    completedVersion = completedVersion
                 )
             )
         }
@@ -40,9 +45,17 @@ class DataStoreOnboardingRepository(private val dataStore: DataStore<Preferences
             }
 
             preferences[PreferenceKeys.IS_INITIALIZED] = true
-            preferences[PreferenceKeys.COMPLETED_VERSION] = when (installationKind) {
-                OnboardingInstallationKind.FRESH_INSTALL -> 0
-                OnboardingInstallationKind.PRE_V6_UPGRADE -> REQUIRED_ONBOARDING_VERSION
+            when (installationKind) {
+                OnboardingInstallationKind.FRESH_INSTALL -> {
+                    preferences[PreferenceKeys.COMPLETED_VERSION] = 0
+                    preferences[PreferenceKeys.FIRST_RUN_TUTORIAL_OUTCOME] =
+                        FirstRunTutorialOutcome.UNRESOLVED.persistedValue
+                }
+                OnboardingInstallationKind.PRE_V6_UPGRADE -> {
+                    preferences[PreferenceKeys.COMPLETED_VERSION] = REQUIRED_ONBOARDING_VERSION
+                    preferences[PreferenceKeys.FIRST_RUN_TUTORIAL_OUTCOME] =
+                        FirstRunTutorialOutcome.PRE_V6_UPGRADE.persistedValue
+                }
             }
             preferences[PreferenceKeys.LAST_COMPLETED_STAGE] = OnboardingStageCheckpoint.NONE.persistedValue
             preferences[PreferenceKeys.POST_CORE_PATH] = OnboardingPostCorePath.UNDECIDED.persistedValue
@@ -75,10 +88,25 @@ class DataStoreOnboardingRepository(private val dataStore: DataStore<Preferences
         }
     }
 
-    override suspend fun markRequiredVersionCompleted() {
+    override suspend fun markTutorialCompleted() {
+        resolveFirstRun(outcome = FirstRunTutorialOutcome.COMPLETED)
+    }
+
+    override suspend fun markTutorialSkipped() {
+        resolveFirstRun(outcome = FirstRunTutorialOutcome.SKIPPED)
+    }
+
+    private suspend fun resolveFirstRun(outcome: FirstRunTutorialOutcome) {
+        require(outcome == FirstRunTutorialOutcome.COMPLETED || outcome == FirstRunTutorialOutcome.SKIPPED) {
+            "First-run Tutorial can be resolved only by completion or explicit skip."
+        }
+
         dataStore.edit { preferences ->
             val currentVersion = preferences[PreferenceKeys.COMPLETED_VERSION] ?: 0
-            preferences[PreferenceKeys.COMPLETED_VERSION] = maxOf(currentVersion, REQUIRED_ONBOARDING_VERSION)
+            if (currentVersion < REQUIRED_ONBOARDING_VERSION) {
+                preferences[PreferenceKeys.COMPLETED_VERSION] = REQUIRED_ONBOARDING_VERSION
+                preferences[PreferenceKeys.FIRST_RUN_TUTORIAL_OUTCOME] = outcome.persistedValue
+            }
         }
     }
 
@@ -87,5 +115,6 @@ class DataStoreOnboardingRepository(private val dataStore: DataStore<Preferences
         val COMPLETED_VERSION = intPreferencesKey("onboarding_completed_version")
         val LAST_COMPLETED_STAGE = intPreferencesKey("onboarding_last_completed_stage")
         val POST_CORE_PATH = intPreferencesKey("onboarding_post_core_path")
+        val FIRST_RUN_TUTORIAL_OUTCOME = intPreferencesKey("onboarding_first_run_tutorial_outcome")
     }
 }
