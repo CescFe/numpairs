@@ -18,6 +18,10 @@ class OnboardingInitializerTest {
 
         assertEquals(OnboardingInstallationKind.FRESH_INSTALL, repository.initializationKind)
         assertFalse(repository.onboardingState.first().isRequiredVersionComplete())
+        assertEquals(
+            FirstRunTutorialOutcome.UNRESOLVED,
+            repository.onboardingState.first().firstRunTutorialOutcome
+        )
         assertFalse(marker.wasCleared)
     }
 
@@ -30,6 +34,10 @@ class OnboardingInitializerTest {
 
         assertEquals(OnboardingInstallationKind.PRE_V6_UPGRADE, repository.initializationKind)
         assertTrue(repository.onboardingState.first().isRequiredVersionComplete())
+        assertEquals(
+            FirstRunTutorialOutcome.PRE_V6_UPGRADE,
+            repository.onboardingState.first().firstRunTutorialOutcome
+        )
         assertTrue(marker.wasCleared)
     }
 
@@ -58,6 +66,11 @@ class OnboardingInitializerTest {
                     REQUIRED_ONBOARDING_VERSION
                 } else {
                     0
+                },
+                firstRunTutorialOutcome = if (installationKind == OnboardingInstallationKind.PRE_V6_UPGRADE) {
+                    FirstRunTutorialOutcome.PRE_V6_UPGRADE
+                } else {
+                    FirstRunTutorialOutcome.UNRESOLVED
                 }
             )
         }
@@ -66,7 +79,9 @@ class OnboardingInitializerTest {
 
         override suspend fun selectPostCorePath(path: OnboardingPostCorePath) = Unit
 
-        override suspend fun markRequiredVersionCompleted() = Unit
+        override suspend fun markTutorialCompleted() = Unit
+
+        override suspend fun markTutorialSkipped() = Unit
     }
 
     private class FakePreV6UpgradeMarker(isMarked: Boolean) : PreV6UpgradeMarker {
