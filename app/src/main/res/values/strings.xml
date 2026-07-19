@@ -61,10 +61,10 @@
     <!-- Tutorial screen -->
     <string name="tutorial_screen_title">Tutorial</string>
     <string name="tutorial_step_indicator">Step %1$d of %2$d</string>
-    <string name="tutorial_strip_introduction_copy">The strip lists positive integers from lowest to highest; values may repeat. Enter 3 to complete 2, ?, 4, 5.</string>
+    <string name="tutorial_strip_introduction_copy">The number list goes from smallest to largest. The same number can appear more than once.</string>
     <string name="tutorial_strip_entry_guidance">Enter 3 to complete the Tutorial strip.</string>
-    <string name="tutorial_tiles_introduction_copy">A tile shows a result and an expression to build. Pair two strip entries: each pair must make one sum tile and one product tile. Complete 2 + 3 = 5.</string>
-    <string name="tutorial_repeated_value_practice_copy">Solve the puzzle. Remember: the strip can contain repeated values.</string>
+    <string name="tutorial_tiles_introduction_copy">Each tile shows a result. Choose the numbers and symbol that make it. Use the same two numbers once with + and once with ×.</string>
+    <string name="tutorial_repeated_value_practice_copy">Solve the puzzle. Remember: the number list can include the same number more than once.</string>
     <string name="onboarding_skip_tutorial_action">Skip tutorial</string>
     <string name="onboarding_skip_tutorial_title">Skip the tutorial?</string>
     <string name="onboarding_skip_tutorial_message">If you’re new to NumPairs or similar games, we recommend continuing. You can open the Tutorial again later from How to play.</string>
