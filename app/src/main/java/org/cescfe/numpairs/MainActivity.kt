@@ -13,7 +13,6 @@ import androidx.compose.ui.graphics.luminance
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import org.cescfe.numpairs.data.generated.selection.createGeneratedDifficultySelectionRepository
 import org.cescfe.numpairs.data.generated.session.createGeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.createOnboardingRuntime
@@ -23,15 +22,26 @@ import org.cescfe.numpairs.data.preferences.createPersonalizationPreferencesRepo
 import org.cescfe.numpairs.data.preferences.createTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.feature.generated.ConfiguredGeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.feature.generated.GeneratedModes
-import org.cescfe.numpairs.ui.navigation.AppNavigation
+import org.cescfe.numpairs.feature.onboarding.OnboardingStartupCoordinator
+import org.cescfe.numpairs.feature.onboarding.OnboardingStartupFailureScreen
+import org.cescfe.numpairs.feature.onboarding.OnboardingStartupState
+import org.cescfe.numpairs.ui.navigation.InitializedAppNavigation
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val onboardingRuntime = createOnboardingRuntime(applicationContext)
+        val onboardingStartupCoordinator = OnboardingStartupCoordinator(
+            initializer = onboardingRuntime.initializer,
+            repository = onboardingRuntime.repository,
+            coroutineScope = lifecycleScope
+        )
+        splashScreen.setKeepOnScreenCondition {
+            onboardingStartupCoordinator.state.value is OnboardingStartupState.Loading
+        }
         val generatedSessionRepository = createGeneratedSessionRepository(applicationContext)
         val generatedDifficultySelectionRepository = createGeneratedDifficultySelectionRepository(applicationContext)
         val personalizationPreferencesRepository = createPersonalizationPreferencesRepository(applicationContext)
@@ -40,12 +50,9 @@ class MainActivity : ComponentActivity() {
         val generatedPuzzleGenerationUseCaseFactory = ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
             challengeCatalog = generatedChallengeCatalog
         )
-        lifecycleScope.launch {
-            onboardingRuntime.initializer.initialize()
-        }
-
         setContent {
             PersonalizationThemeProvider(personalizationPreferencesRepository) {
+                val onboardingStartupState by onboardingStartupCoordinator.state.collectAsState()
                 val useDarkSystemBarIcons = MaterialTheme.colorScheme.background.luminance() > 0.5f
                 SideEffect {
                     WindowCompat.getInsetsController(window, window.decorView).apply {
@@ -53,15 +60,23 @@ class MainActivity : ComponentActivity() {
                         isAppearanceLightNavigationBars = useDarkSystemBarIcons
                     }
                 }
-                AppNavigation(
-                    onboardingRepository = onboardingRuntime.repository,
-                    generatedSessionRepository = generatedSessionRepository,
-                    generatedDifficultySelectionRepository = generatedDifficultySelectionRepository,
-                    personalizationPreferencesRepository = personalizationPreferencesRepository,
-                    topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
-                    generatedChallengeCatalog = generatedChallengeCatalog,
-                    generatedPuzzleGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory
-                )
+                when (val state = onboardingStartupState) {
+                    OnboardingStartupState.Loading -> Unit
+                    is OnboardingStartupState.Failure -> OnboardingStartupFailureScreen(
+                        isRetrying = state.isRetrying,
+                        onRetry = onboardingStartupCoordinator::retry
+                    )
+                    is OnboardingStartupState.Ready -> InitializedAppNavigation(
+                        onboardingState = state.onboardingState,
+                        onboardingRepository = onboardingRuntime.repository,
+                        generatedSessionRepository = generatedSessionRepository,
+                        generatedDifficultySelectionRepository = generatedDifficultySelectionRepository,
+                        personalizationPreferencesRepository = personalizationPreferencesRepository,
+                        topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
+                        generatedChallengeCatalog = generatedChallengeCatalog,
+                        generatedPuzzleGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory
+                    )
+                }
             }
         }
     }

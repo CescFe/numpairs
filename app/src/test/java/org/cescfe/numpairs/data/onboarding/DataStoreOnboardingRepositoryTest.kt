@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import java.io.File
+import java.io.IOException
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,10 +15,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertSame
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -39,6 +43,25 @@ class DataStoreOnboardingRepositoryTest {
         val fixture = createRepository()
 
         assertEquals(OnboardingState(), fixture.repository.onboardingState.first())
+    }
+
+    @Test
+    fun `read failures remain observable for startup recovery`() {
+        val expectedFailure = IOException("Synthetic onboarding read failure.")
+        val repository = DataStoreOnboardingRepository(
+            object : DataStore<Preferences> {
+                override val data = flow<Preferences> { throw expectedFailure }
+
+                override suspend fun updateData(transform: suspend (Preferences) -> Preferences): Preferences =
+                    error("No update is expected while testing a read failure.")
+            }
+        )
+
+        val actualFailure = assertThrows(IOException::class.java) {
+            runBlocking { repository.onboardingState.first() }
+        }
+
+        assertSame(expectedFailure, actualFailure)
     }
 
     @Test
