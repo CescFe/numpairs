@@ -55,13 +55,14 @@ fun AppNavigation(
     modifier: Modifier = Modifier,
     startDestination: AppDestination = AppDestination.Menu
 ) {
-    val onboardingState by onboardingRepository.onboardingState.collectAsState(initial = OnboardingState())
+    val onboardingState by onboardingRepository.onboardingState.collectAsState(initial = null)
+    val readyOnboardingState = onboardingState
 
-    if (!onboardingState.isInitialized) {
+    if (readyOnboardingState == null) {
         OnboardingLoadingScreen(modifier = modifier)
     } else {
-        InitializedAppNavigation(
-            onboardingState = onboardingState,
+        ReadyAppNavigation(
+            onboardingState = readyOnboardingState,
             onboardingRepository = onboardingRepository,
             generatedSessionRepository = generatedSessionRepository,
             generatedDifficultySelectionRepository = generatedDifficultySelectionRepository,
@@ -76,7 +77,7 @@ fun AppNavigation(
 }
 
 @Composable
-internal fun InitializedAppNavigation(
+internal fun ReadyAppNavigation(
     onboardingState: OnboardingState,
     onboardingRepository: OnboardingRepository,
     generatedSessionRepository: GeneratedSessionRepository,
@@ -88,11 +89,7 @@ internal fun InitializedAppNavigation(
     modifier: Modifier = Modifier,
     startDestination: AppDestination = AppDestination.Menu
 ) {
-    require(onboardingState.isInitialized) {
-        "Initialized app navigation requires initialized onboarding state."
-    }
-
-    if (!onboardingState.isRequiredVersionComplete()) {
+    if (!onboardingState.firstRunTutorialOutcome.isResolved) {
         RequiredOnboardingRoute(
             onboardingState = onboardingState,
             onboardingRepository = onboardingRepository,

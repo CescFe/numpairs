@@ -20,7 +20,6 @@ import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
 import org.cescfe.numpairs.data.onboarding.FirstRunTutorialOutcome
 import org.cescfe.numpairs.data.onboarding.OnboardingStageCheckpoint
 import org.cescfe.numpairs.data.onboarding.OnboardingState
-import org.cescfe.numpairs.data.onboarding.REQUIRED_ONBOARDING_VERSION
 import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesRepository
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
@@ -80,8 +79,6 @@ class AppNavigationLearningFlowTest {
     }
 
     private fun resolvedOnboardingState(outcome: FirstRunTutorialOutcome): OnboardingState = OnboardingState(
-        isInitialized = true,
-        completedVersion = REQUIRED_ONBOARDING_VERSION,
         lastCompletedStage = OnboardingStageCheckpoint.STAGE_THREE,
         firstRunTutorialOutcome = outcome
     )

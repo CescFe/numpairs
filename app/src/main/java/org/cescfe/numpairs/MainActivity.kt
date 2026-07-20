@@ -15,7 +15,7 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import org.cescfe.numpairs.data.generated.selection.createGeneratedDifficultySelectionRepository
 import org.cescfe.numpairs.data.generated.session.createGeneratedSessionRepository
-import org.cescfe.numpairs.data.onboarding.createOnboardingRuntime
+import org.cescfe.numpairs.data.onboarding.createOnboardingRepository
 import org.cescfe.numpairs.data.preferences.PersonalizationPreferences
 import org.cescfe.numpairs.data.preferences.PersonalizationPreferencesRepository
 import org.cescfe.numpairs.data.preferences.createPersonalizationPreferencesRepository
@@ -25,7 +25,7 @@ import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.onboarding.OnboardingStartupCoordinator
 import org.cescfe.numpairs.feature.onboarding.OnboardingStartupFailureScreen
 import org.cescfe.numpairs.feature.onboarding.OnboardingStartupState
-import org.cescfe.numpairs.ui.navigation.InitializedAppNavigation
+import org.cescfe.numpairs.ui.navigation.ReadyAppNavigation
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 
 class MainActivity : ComponentActivity() {
@@ -33,10 +33,9 @@ class MainActivity : ComponentActivity() {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val onboardingRuntime = createOnboardingRuntime(applicationContext)
+        val onboardingRepository = createOnboardingRepository(applicationContext)
         val onboardingStartupCoordinator = OnboardingStartupCoordinator(
-            initializer = onboardingRuntime.initializer,
-            repository = onboardingRuntime.repository,
+            repository = onboardingRepository,
             coroutineScope = lifecycleScope
         )
         splashScreen.setKeepOnScreenCondition {
@@ -66,9 +65,9 @@ class MainActivity : ComponentActivity() {
                         isRetrying = state.isRetrying,
                         onRetry = onboardingStartupCoordinator::retry
                     )
-                    is OnboardingStartupState.Ready -> InitializedAppNavigation(
+                    is OnboardingStartupState.Ready -> ReadyAppNavigation(
                         onboardingState = state.onboardingState,
-                        onboardingRepository = onboardingRuntime.repository,
+                        onboardingRepository = onboardingRepository,
                         generatedSessionRepository = generatedSessionRepository,
                         generatedDifficultySelectionRepository = generatedDifficultySelectionRepository,
                         personalizationPreferencesRepository = personalizationPreferencesRepository,

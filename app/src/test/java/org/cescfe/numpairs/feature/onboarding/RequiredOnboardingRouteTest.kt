@@ -15,7 +15,6 @@ class RequiredOnboardingRouteTest {
     }
 
     private fun state(checkpoint: OnboardingStageCheckpoint): OnboardingState = OnboardingState(
-        isInitialized = true,
         lastCompletedStage = checkpoint
     )
 }
