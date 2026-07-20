@@ -138,9 +138,10 @@ step. Requesting skip opens a confirmation dialog whose recommended action conti
 whose explicit alternative skips anyway. Only confirmed skip unlocks Menu early; it does not open
 a final validation puzzle.
 
-Completing the third authored Tutorial step also unlocks Menu directly. Completed, skipped,
-upgraded, and legacy-completed installations open Menu on later launches. `How to play` starts the
-same three-step content voluntarily from Step 1, remains dismissible, and never changes resolved
+Completing the third authored Tutorial step also unlocks Menu directly. Completed and skipped
+outcomes open Menu on later launches. Clearing all application data or reinstalling starts a new
+local first run; clearing only the application cache does not. `How to play` starts the same
+three-step content voluntarily from Step 1, remains dismissible, and never changes resolved
 first-run state. The in-game `Play tutorial` action uses the same content in an overlay while
 preserving the generated puzzle underneath.
 

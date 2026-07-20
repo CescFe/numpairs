@@ -10,13 +10,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
 import org.cescfe.numpairs.data.onboarding.FirstRunTutorialOutcome
-import org.cescfe.numpairs.data.onboarding.OnboardingInitializer
-import org.cescfe.numpairs.data.onboarding.OnboardingInstallationKind
 import org.cescfe.numpairs.data.onboarding.OnboardingRepository
 import org.cescfe.numpairs.data.onboarding.OnboardingStageCheckpoint
 import org.cescfe.numpairs.data.onboarding.OnboardingState
-import org.cescfe.numpairs.data.onboarding.PreV6UpgradeMarker
-import org.cescfe.numpairs.data.onboarding.REQUIRED_ONBOARDING_VERSION
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -25,16 +21,12 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class OnboardingStartupCoordinatorTest {
     @Test
-    fun `fresh startup initializes before publishing required Tutorial state`() = runTest {
-        val repository = StartupOnboardingRepository()
-
-        val state = startupStates(repository = repository).first()
+    fun `empty application data publishes unresolved first-run state`() = runTest {
+        val state = onboardingStartupStates(StartupOnboardingRepository()).first()
 
         val ready = state as OnboardingStartupState.Ready
-        assertTrue(ready.onboardingState.isInitialized)
-        assertFalse(ready.onboardingState.isRequiredVersionComplete())
-        assertEquals(FirstRunTutorialOutcome.UNRESOLVED, ready.onboardingState.firstRunTutorialOutcome)
-        assertEquals(listOf(OnboardingInstallationKind.FRESH_INSTALL), repository.initializationKinds)
+        assertEquals(OnboardingState(), ready.onboardingState)
+        assertFalse(ready.onboardingState.firstRunTutorialOutcome.isResolved)
     }
 
     @Test
@@ -43,36 +35,22 @@ class OnboardingStartupCoordinatorTest {
             .filter(FirstRunTutorialOutcome::isResolved)
             .forEach { outcome ->
                 val expectedState = completedState(outcome)
-                val repository = StartupOnboardingRepository(initialState = expectedState)
 
-                val state = startupStates(repository = repository).first()
+                val state = onboardingStartupStates(
+                    StartupOnboardingRepository(initialState = expectedState)
+                ).first()
 
                 assertEquals(expectedState, (state as OnboardingStartupState.Ready).onboardingState)
             }
     }
 
     @Test
-    fun `pre-v6 marker initializes upgraded users before publishing readiness`() = runTest {
-        val repository = StartupOnboardingRepository()
-        val marker = StartupUpgradeMarker(isMarked = true)
-
-        val state = startupStates(repository = repository, marker = marker).first()
-
-        val ready = state as OnboardingStartupState.Ready
-        assertTrue(ready.onboardingState.isRequiredVersionComplete())
-        assertEquals(FirstRunTutorialOutcome.PRE_V6_UPGRADE, ready.onboardingState.firstRunTutorialOutcome)
-        assertEquals(listOf(OnboardingInstallationKind.PRE_V6_UPGRADE), repository.initializationKinds)
-        assertTrue(marker.wasCleared)
-    }
-
-    @Test
     fun `transient storage read failure is retried without process restart`() = runTest {
         val repository = StartupOnboardingRepository(readFailuresRemaining = 1)
 
-        val state = startupStates(repository = repository).first()
+        val state = onboardingStartupStates(repository).first()
 
         assertTrue(state is OnboardingStartupState.Ready)
-        assertEquals(2, repository.initializationKinds.size)
         assertEquals(2, repository.readAttempts)
     }
 
@@ -80,12 +58,11 @@ class OnboardingStartupCoordinatorTest {
     fun `persistent storage read failure reaches recoverable failure state`() = runTest {
         val repository = StartupOnboardingRepository(readFailuresRemaining = Int.MAX_VALUE)
 
-        val state = startupStates(repository = repository).first()
+        val state = onboardingStartupStates(repository).first()
 
         val failure = state as OnboardingStartupState.Failure
         assertTrue(failure.cause is IOException)
         assertFalse(failure.isRetrying)
-        assertEquals(3, repository.initializationKinds.size)
         assertEquals(3, repository.readAttempts)
     }
 
@@ -119,26 +96,15 @@ class OnboardingStartupCoordinatorTest {
         assertTrue(coordinator.state.value is OnboardingStartupState.Ready)
     }
 
-    private fun startupStates(
-        repository: StartupOnboardingRepository,
-        marker: StartupUpgradeMarker = StartupUpgradeMarker()
-    ): Flow<OnboardingStartupState> = onboardingStartupStates(
-        initializer = OnboardingInitializer(repository, marker),
-        repository = repository
-    )
-
     private fun coordinator(
         repository: StartupOnboardingRepository,
         coroutineScope: CoroutineScope
     ): OnboardingStartupCoordinator = OnboardingStartupCoordinator(
-        initializer = OnboardingInitializer(repository, StartupUpgradeMarker()),
         repository = repository,
         coroutineScope = coroutineScope
     )
 
     private fun completedState(outcome: FirstRunTutorialOutcome): OnboardingState = OnboardingState(
-        isInitialized = true,
-        completedVersion = REQUIRED_ONBOARDING_VERSION,
         lastCompletedStage = OnboardingStageCheckpoint.STAGE_THREE,
         firstRunTutorialOutcome = outcome
     )
@@ -149,7 +115,6 @@ class OnboardingStartupCoordinatorTest {
     ) : OnboardingRepository {
         private val persistedState = MutableStateFlow(initialState)
 
-        val initializationKinds = mutableListOf<OnboardingInstallationKind>()
         var readAttempts = 0
             private set
 
@@ -162,44 +127,10 @@ class OnboardingStartupCoordinatorTest {
             emitAll(persistedState)
         }
 
-        override suspend fun initialize(installationKind: OnboardingInstallationKind) {
-            initializationKinds += installationKind
-            if (persistedState.value.isInitialized) {
-                return
-            }
-
-            persistedState.value = when (installationKind) {
-                OnboardingInstallationKind.FRESH_INSTALL -> OnboardingState(isInitialized = true)
-                OnboardingInstallationKind.PRE_V6_UPGRADE -> OnboardingState(
-                    isInitialized = true,
-                    completedVersion = REQUIRED_ONBOARDING_VERSION,
-                    lastCompletedStage = OnboardingStageCheckpoint.STAGE_THREE,
-                    firstRunTutorialOutcome = FirstRunTutorialOutcome.PRE_V6_UPGRADE
-                )
-            }
-        }
-
         override suspend fun recordStageCompleted(stage: OnboardingStageCheckpoint) = Unit
 
         override suspend fun markTutorialCompleted() = Unit
 
         override suspend fun markTutorialSkipped() = Unit
-    }
-
-    private class StartupUpgradeMarker(isMarked: Boolean = false) : PreV6UpgradeMarker {
-        private var marked = isMarked
-        var wasCleared = false
-            private set
-
-        override fun isMarked(): Boolean = marked
-
-        override fun mark() {
-            marked = true
-        }
-
-        override fun clear() {
-            marked = false
-            wasCleared = true
-        }
     }
 }

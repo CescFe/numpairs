@@ -1,6 +1,6 @@
 # PRD - NumPairs 🎓 v6 Guided First Run
 
-> Active product reference for the Guided First Run milestone. This revision replaces the original mandatory-validation contract while preserving the implemented v5 baseline and versioned local first-run boundary.
+> Active product reference for the Guided First Run milestone. This revision replaces the original mandatory-validation contract while preserving the implemented v5 baseline and local first-run boundary.
 
 ## Product Summary
 
@@ -65,7 +65,7 @@ Guided First Run should therefore:
 - Confirming skip opens Menu without a final check
 - Completing the three Tutorial steps opens Menu without a separate validation stage
 - Closing or restarting the application cannot expose Menu while first-run Tutorial remains unresolved
-- Completed, skipped, upgraded, and legacy-completed players reach Menu on later launches
+- Completed and skipped players reach Menu on later launches
 - Completed or skipped players can voluntarily replay the same Tutorial from its beginning
 - Voluntary replay never relocks Menu or changes the stored first-run outcome
 
@@ -177,18 +177,16 @@ Solving the puzzle completes Tutorial. Required first-run playback persists the 
 ## Local First-Run State
 
 - Persist state locally on the device
-- Keep completion versioned so future revisions define an explicit migration policy
 - Distinguish unresolved, Tutorial-completed, and Tutorial-skipped outcomes
-- Preserve immediate Menu access for installations identified as pre-v6 upgrades
-- Preserve Menu access for installations that already completed the legacy required onboarding contract
+- Treat absent local state as an unresolved first run
+- Preserve Menu access after Tutorial completion or explicit skip
 - Record the last fully completed Tutorial step as a resumable checkpoint
 - Resume at the next step after application restart
 - Restart the current step if the application closes before that step is completed
 - Do not persist partial strip or tile edits within an incomplete step
 - Keep onboarding state independent from Tutorial replay state and generated sessions
-- Treat uninstalling or clearing application data as a new local first run
-
-Future onboarding versions must define their own migration policy instead of automatically invalidating prior resolution.
+- Treat uninstalling or clearing all application data as a new local first run
+- Do not reset onboarding when only the application cache is cleared
 
 ---
 
@@ -232,6 +230,6 @@ Future onboarding versions must define their own migration policy instead of aut
 - Solving the Step 3 authored puzzle completes Tutorial and opens Menu
 - Completion and skip outcomes persist reliably across application restarts
 - Interrupted unresolved playback resumes after completed steps
-- Existing completed and upgraded players retain Menu access
+- Completed and skipped players retain Menu access
 - Voluntary replay uses the same Tutorial without relocking Menu or changing first-run state
 - Generated mode behavior remains unchanged
