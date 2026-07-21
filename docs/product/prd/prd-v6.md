@@ -140,7 +140,9 @@ Explain that a tile has two operands, one operator, and a visible result. Explai
 
 Required action:
 
-- complete the unresolved tile as `2 + 3 = 5` using the normal operand and operator interactions
+- use the normal operand selector to place `2` and `3` in either operand slot
+- expose both supported operations in the operator selector so the player can explore the normal choice
+- complete the unresolved tile as either `2 + 3 = 5` or `3 + 2 = 5`
 
 The resolved `2 × 3 = 6` tile acts as the complementary example for the same pair.
 

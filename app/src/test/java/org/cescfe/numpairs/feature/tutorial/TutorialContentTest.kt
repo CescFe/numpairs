@@ -3,6 +3,7 @@ package org.cescfe.numpairs.feature.tutorial
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Expression
+import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
@@ -11,6 +12,7 @@ import org.cescfe.numpairs.domain.puzzle.model.Tile
 import org.cescfe.numpairs.feature.game.GameTileExpressionSlot
 import org.cescfe.numpairs.feature.game.GameTileExpressionSlotHighlight
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
+import org.cescfe.numpairs.feature.game.presentation.TileUiState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -108,12 +110,7 @@ class TutorialContentTest {
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0),
                 TutorialHighlightTarget.WholeTile(tileIndex = 1)
             ),
-            expectedAction = TutorialRequiredAction.CompleteTileExpression(
-                tileIndex = 0,
-                leftStripEntryId = 0,
-                operator = Operator.ADDITION,
-                rightStripEntryId = 1
-            ),
+            expectedAction = TutorialRequiredAction.CompleteTileWithNormalInteractions(tileIndex = 0),
             incompletePuzzle = introductionWithCompletedStrip,
             completePuzzle = introductionWithCompletedStrip.withSolvedScenarioTiles(introductionScenario, 0)
         )
@@ -149,6 +146,40 @@ class TutorialContentTest {
         assertFalse(highlightState.isTileHighlighted(index = 0))
         assertFalse(highlightState.isTileHighlighted(index = 2))
         assertFalse(highlightState.isTileHighlighted(index = 3))
+    }
+
+    @Test
+    fun learn_basics_step_two_keeps_normal_choices_for_the_target_tile() {
+        val scenario = TutorialContent.scenario(TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION)
+        val policy = TutorialContent.learnBasicsSteps[1].toInteractionPolicy(scenario = scenario, uiState = null)
+
+        OperandSlot.entries.forEach { slot ->
+            assertTrue(policy.canConfirmTileOperand(0, slot, 0))
+            assertTrue(policy.canConfirmTileOperand(0, slot, 1))
+            assertFalse(policy.canConfirmTileOperand(1, slot, 0))
+        }
+        assertTrue(policy.canTapTileLeftOperand(0))
+        assertTrue(policy.canTapTileRightOperand(0))
+        assertTrue(policy.canTapTileOperator(0))
+        assertTrue(policy.canTapTileReset(0))
+        assertTrue(policy.canConfirmTileOperator(0, Operator.ADDITION))
+        assertTrue(policy.canConfirmTileOperator(0, Operator.MULTIPLICATION))
+        assertFalse(policy.canTapStripItem(0))
+        assertFalse(policy.canTapTileLeftOperand(1))
+        assertFalse(policy.canTapTileRightOperand(1))
+        assertFalse(policy.canTapTileOperator(1))
+        assertFalse(policy.canTapTileReset(1))
+        assertFalse(policy.canConfirmTileOperator(1, Operator.ADDITION))
+    }
+
+    @Test
+    fun learn_basics_step_two_accepts_the_pair_in_either_operand_order() {
+        val step = TutorialContent.learnBasicsSteps[1]
+
+        assertTrue(step.isComplete(stepTwoUiState(leftValue = 2, operator = Operator.ADDITION, rightValue = 3)))
+        assertTrue(step.isComplete(stepTwoUiState(leftValue = 3, operator = Operator.ADDITION, rightValue = 2)))
+        assertFalse(step.isComplete(stepTwoUiState(leftValue = 3, operator = Operator.MULTIPLICATION, rightValue = 2)))
+        assertFalse(step.isComplete(stepTwoUiState(leftValue = 2, operator = Operator.ADDITION, rightValue = 4)))
     }
 
     @Test
@@ -255,7 +286,35 @@ class TutorialContentTest {
             completePuzzle = scenario.solvedPuzzle
         )
     }
+
+    @Test
+    fun solving_tips_practice_keeps_its_guided_expression_choices() {
+        val scenario = TutorialContent.scenario(TutorialScenarioId.SOLVING_TIPS_PRACTICE)
+        val policy = TutorialContent.solvingTipsPracticeSteps[0].toInteractionPolicy(
+            scenario = scenario,
+            uiState = null
+        )
+
+        assertTrue(policy.canConfirmTileOperand(0, OperandSlot.LEFT, 0))
+        assertFalse(policy.canConfirmTileOperand(0, OperandSlot.LEFT, 1))
+        assertTrue(policy.canConfirmTileOperand(0, OperandSlot.RIGHT, 1))
+        assertFalse(policy.canConfirmTileOperand(0, OperandSlot.RIGHT, 0))
+        assertTrue(policy.canConfirmTileOperator(0, Operator.ADDITION))
+        assertFalse(policy.canConfirmTileOperator(0, Operator.MULTIPLICATION))
+    }
 }
+
+private fun stepTwoUiState(leftValue: Int, operator: Operator, rightValue: Int): GameUiState = GameUiState(
+    stripItems = emptyList(),
+    tiles = listOf(
+        TileUiState(
+            leftOperandLabel = leftValue.toString(),
+            operatorLabel = operator.symbol,
+            rightOperandLabel = rightValue.toString(),
+            resultLabel = "5"
+        )
+    )
+)
 
 private fun assertAllTilesHaveHiddenExpressions(puzzle: Puzzle) {
     assertTrue(
