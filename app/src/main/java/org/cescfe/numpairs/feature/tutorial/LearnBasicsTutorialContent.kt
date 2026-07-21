@@ -18,7 +18,6 @@ internal object LearnBasicsTutorialContent {
 
     val steps: List<TutorialStep> = listOf(
         TutorialStep(
-            order = 1,
             scenarioId = TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
             playerFacingCopyResId = R.string.tutorial_strip_introduction_copy,
             highlightedTargets = listOf(
@@ -36,7 +35,6 @@ internal object LearnBasicsTutorialContent {
             stripEntryGuidanceResId = R.string.tutorial_strip_entry_guidance
         ),
         TutorialStep(
-            order = 2,
             scenarioId = TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
             playerFacingCopyResId = R.string.tutorial_tiles_introduction_copy,
             highlightedTargets = listOf(
@@ -58,7 +56,6 @@ internal object LearnBasicsTutorialContent {
             entryPuzzle = completedIntroductionStripPuzzle
         ),
         TutorialStep(
-            order = 3,
             scenarioId = TutorialScenarioId.REPEATED_VALUE_PRACTICE,
             playerFacingCopyResId = R.string.tutorial_repeated_value_practice_copy,
             highlightedTargets = listOf(

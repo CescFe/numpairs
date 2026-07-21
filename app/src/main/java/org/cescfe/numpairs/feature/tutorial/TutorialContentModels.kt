@@ -62,7 +62,6 @@ data class TutorialIntendedPair(val firstStripEntryId: Int, val secondStripEntry
 }
 
 data class TutorialStep(
-    val order: Int,
     val scenarioId: TutorialScenarioId,
     @param:StringRes val playerFacingCopyResId: Int,
     val highlightedTargets: List<TutorialHighlightTarget>,
@@ -73,9 +72,6 @@ data class TutorialStep(
     val entryPuzzle: Puzzle? = null
 ) {
     init {
-        require(order > 0) {
-            "Tutorial step order must be positive."
-        }
         require(playerFacingCopyResId != 0) {
             "Tutorial step copy string resource must be defined."
         }
