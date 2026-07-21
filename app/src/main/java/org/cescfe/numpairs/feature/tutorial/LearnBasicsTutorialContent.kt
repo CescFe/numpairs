@@ -91,11 +91,7 @@ internal object LearnBasicsTutorialContent {
                 ),
                 tiles = listOf(hiddenTile(result = 5)) + solvedPuzzle.board.tiles.drop(1)
             ),
-            solvedPuzzle = solvedPuzzle,
-            intendedPairs = listOf(
-                TutorialIntendedPair(firstStripEntryId = 0, secondStripEntryId = 1),
-                TutorialIntendedPair(firstStripEntryId = 2, secondStripEntryId = 3)
-            )
+            solvedPuzzle = solvedPuzzle
         )
     }
 
@@ -122,10 +118,6 @@ internal object LearnBasicsTutorialContent {
                     TileDefinition(leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3),
                     TileDefinition(leftStripEntryId = 2, operator = Operator.MULTIPLICATION, rightStripEntryId = 3)
                 )
-            ),
-            intendedPairs = listOf(
-                TutorialIntendedPair(firstStripEntryId = 0, secondStripEntryId = 1),
-                TutorialIntendedPair(firstStripEntryId = 2, secondStripEntryId = 3)
             )
         )
     }

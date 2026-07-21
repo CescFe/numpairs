@@ -19,8 +19,7 @@ data class TutorialScenario(
     val id: TutorialScenarioId,
     val stripValues: List<Int>,
     val initialPuzzle: Puzzle,
-    val solvedPuzzle: Puzzle,
-    val intendedPairs: List<TutorialIntendedPair>
+    val solvedPuzzle: Puzzle
 ) {
     init {
         require(initialPuzzle.strip.entries.size == stripValues.size) {
@@ -45,20 +44,6 @@ enum class TutorialScenarioId {
     STRIP_AND_TILES_INTRODUCTION,
     REPEATED_VALUE_PRACTICE,
     SOLVING_TIPS_PRACTICE
-}
-
-data class TutorialIntendedPair(val firstStripEntryId: Int, val secondStripEntryId: Int) {
-    init {
-        require(firstStripEntryId >= 0) {
-            "First tutorial pair strip entry id must be non-negative."
-        }
-        require(secondStripEntryId >= 0) {
-            "Second tutorial pair strip entry id must be non-negative."
-        }
-        require(firstStripEntryId != secondStripEntryId) {
-            "Tutorial pairs must use two different strip entries."
-        }
-    }
 }
 
 data class TutorialStep(
