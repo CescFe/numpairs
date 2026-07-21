@@ -113,6 +113,14 @@ sealed interface TutorialRequiredAction {
         }
     }
 
+    data class CompleteTileWithNormalInteractions(val tileIndex: Int) : TutorialRequiredAction {
+        init {
+            require(tileIndex >= 0) {
+                "Tutorial tile action index must be non-negative."
+            }
+        }
+    }
+
     data class CompleteTileExpression(
         val tileIndex: Int,
         val leftStripEntryId: Int,
@@ -204,10 +212,14 @@ sealed interface TutorialStepCompletionPredicate {
 
         override fun isSatisfiedBy(uiState: GameUiState): Boolean {
             val tile = uiState.tiles.getOrNull(tileIndex) ?: return false
+            val expectedLeftValue = leftValue.toString()
+            val expectedRightValue = rightValue.toString()
+            val matchesAuthoredOrder =
+                tile.leftOperandLabel == expectedLeftValue && tile.rightOperandLabel == expectedRightValue
+            val matchesReversedOrder =
+                tile.leftOperandLabel == expectedRightValue && tile.rightOperandLabel == expectedLeftValue
 
-            return tile.leftOperandLabel == leftValue.toString() &&
-                tile.operatorLabel == operator.symbol &&
-                tile.rightOperandLabel == rightValue.toString()
+            return (matchesAuthoredOrder || matchesReversedOrder) && tile.operatorLabel == operator.symbol
         }
     }
 

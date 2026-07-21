@@ -41,12 +41,7 @@ internal object LearnBasicsTutorialContent {
                 TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0),
                 TutorialHighlightTarget.WholeTile(tileIndex = 1)
             ),
-            requiredAction = TutorialRequiredAction.CompleteTileExpression(
-                tileIndex = 0,
-                leftStripEntryId = 0,
-                operator = Operator.ADDITION,
-                rightStripEntryId = 1
-            ),
+            requiredAction = TutorialRequiredAction.CompleteTileWithNormalInteractions(tileIndex = 0),
             completionPredicate = TutorialStepCompletionPredicate.TileExpressionCompleted(
                 tileIndex = 0,
                 leftValue = 2,

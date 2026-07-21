@@ -128,6 +128,49 @@ class TutorialRouteTest {
     }
 
     @Test
+    fun stepTwoOffersNormalChoicesAndAcceptsReversedOperands() {
+        setContent(startStepIndex = 1)
+
+        openTileOperatorMenu(tileIndex = 0)
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.ADDITION), useUnmergedTree = true)
+            .assertIsEnabled()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.MULTIPLICATION), useUnmergedTree = true)
+            .assertIsEnabled()
+            .performClick()
+
+        chooseTileOperand(tileIndex = 0, isLeftOperand = true, stripEntryId = 1)
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(0), useUnmergedTree = true)
+            .assertIsEnabled()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(1), useUnmergedTree = true)
+            .assertIsEnabled()
+            .performClick()
+        chooseTileOperand(tileIndex = 0, isLeftOperand = false, stripEntryId = 0)
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(0), useUnmergedTree = true)
+            .performClick()
+
+        composeTestRule.mainClock.advanceTimeBy(TUTORIAL_AUTO_ADVANCE_TEST_WAIT_MS)
+        assertStepDisplayed(stepIndex = 1)
+        assertTileExpression(
+            tileIndex = 0,
+            operator = Operator.MULTIPLICATION,
+            leftValue = "3",
+            rightValue = "2"
+        )
+
+        openTileOperatorMenu(tileIndex = 0)
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.ADDITION), useUnmergedTree = true)
+            .performClick()
+
+        waitForStep(stepIndex = 2)
+    }
+
+    @Test
     fun stepThreeUsesNormalPuzzleInteractionsAndCompletesLearnBasicsWithoutShowingSuccess() {
         setContent()
 
@@ -247,10 +290,15 @@ class TutorialRouteTest {
             .assertIsDisplayed()
     }
 
-    private fun setContent(onStepCompleted: suspend (Int) -> Unit = {}, onTutorialCompleted: (() -> Unit)? = null) {
+    private fun setContent(
+        startStepIndex: Int = 0,
+        onStepCompleted: suspend (Int) -> Unit = {},
+        onTutorialCompleted: (() -> Unit)? = null
+    ) {
         composeTestRule.setContent {
             NumPairsTheme {
                 TutorialRoute(
+                    startStepIndex = startStepIndex,
                     onStepCompleted = onStepCompleted,
                     onTutorialCompleted = onTutorialCompleted
                 )

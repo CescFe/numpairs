@@ -256,6 +256,7 @@ private fun TutorialRequiredAction.toInteractionPolicy(
         scenario = scenario,
         highlightedStripEntryIds = highlightedStripEntryIds
     )
+    is TutorialRequiredAction.CompleteTileWithNormalInteractions -> toInteractionPolicy()
     is TutorialRequiredAction.CompleteTileExpressions -> toInteractionPolicy(
         scenario = scenario,
         highlightedStripEntryIds = highlightedStripEntryIds
@@ -266,6 +267,18 @@ private fun TutorialRequiredAction.toInteractionPolicy(
     )
     TutorialRequiredAction.CompleteScenario -> GameInteractionPolicy.AllowAll
 }
+
+private fun TutorialRequiredAction.CompleteTileWithNormalInteractions.toInteractionPolicy(): GameInteractionPolicy =
+    GameInteractionPolicy(
+        canTapStripItem = { false },
+        canConfirmStripItemEntry = { _, _ -> false },
+        canTapTileLeftOperand = { index -> index == tileIndex },
+        canTapTileRightOperand = { index -> index == tileIndex },
+        canTapTileOperator = { index -> index == tileIndex },
+        canTapTileReset = { index -> index == tileIndex },
+        canConfirmTileOperand = { index, _, _ -> index == tileIndex },
+        canConfirmTileOperator = { index, _ -> index == tileIndex }
+    )
 
 private fun TutorialRequiredAction.CompleteTileExpression.toInteractionPolicy(
     scenario: TutorialScenario,
