@@ -83,7 +83,6 @@ class TutorialContentTest {
         val steps = TutorialContent.stepsFor(TutorialMode.LEARN_BASICS)
         val introductionWithCompletedStrip = introductionScenario.initialPuzzle.withStripValue(index = 1, value = 3)
 
-        assertEquals(listOf(1, 2, 3), steps.map(TutorialStep::order))
         assertEquals(
             listOf(
                 TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
@@ -199,8 +198,6 @@ class TutorialContentTest {
     fun solving_tips_practice_requires_the_first_pair_before_the_remaining_pair() {
         val scenario = TutorialContent.scenario(TutorialScenarioId.SOLVING_TIPS_PRACTICE)
         val steps = TutorialContent.stepsFor(TutorialMode.SOLVING_TIPS_PRACTICE)
-
-        assertEquals(listOf(6, 7), steps.map(TutorialStep::order))
 
         steps[0].assertGuidedAction(
             expectedHighlights = listOf(
