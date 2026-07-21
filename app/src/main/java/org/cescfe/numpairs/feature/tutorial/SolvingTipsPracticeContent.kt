@@ -105,11 +105,7 @@ internal object SolvingTipsPracticeContent {
                     hiddenTile(result = 12)
                 )
             ),
-            solvedPuzzle = solvedPuzzle,
-            intendedPairs = listOf(
-                TutorialIntendedPair(firstStripEntryId = 0, secondStripEntryId = 1),
-                TutorialIntendedPair(firstStripEntryId = 2, secondStripEntryId = 3)
-            )
+            solvedPuzzle = solvedPuzzle
         )
     }
 }
