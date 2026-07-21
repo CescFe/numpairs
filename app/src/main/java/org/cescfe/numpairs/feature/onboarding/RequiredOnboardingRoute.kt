@@ -6,7 +6,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,7 +20,6 @@ import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.onboarding.OnboardingRepository
 import org.cescfe.numpairs.data.onboarding.OnboardingStageCheckpoint
 import org.cescfe.numpairs.data.onboarding.OnboardingState
-import org.cescfe.numpairs.feature.tutorial.TutorialContent
 import org.cescfe.numpairs.feature.tutorial.TutorialRoute
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
@@ -43,30 +41,23 @@ fun RequiredOnboardingRoute(
 
     BackHandler(enabled = true, onBack = requestSkipConfirmation)
 
-    if (startStepIndex >= TutorialContent.learnBasicsSteps.size) {
-        LaunchedEffect(onboardingRepository) {
-            onboardingRepository.markTutorialCompleted()
-        }
-        OnboardingLoadingScreen(modifier = modifier)
-    } else {
-        TutorialRoute(
-            modifier = modifier,
-            startStepIndex = startStepIndex,
-            saveProgressAcrossRecreation = false,
-            onStepCompleted = { completedStepIndex ->
-                completedStepIndex.toIntermediateCheckpointOrNull()?.let { checkpoint ->
-                    onboardingRepository.recordStageCompleted(checkpoint)
-                }
-            },
-            onTutorialCompleted = {
-                coroutineScope.launch {
-                    onboardingRepository.markTutorialCompleted()
-                }
-            },
-            onSkipTutorialRequested = requestSkipConfirmation,
-            onNavigateBack = requestSkipConfirmation
-        )
-    }
+    TutorialRoute(
+        modifier = modifier,
+        startStepIndex = startStepIndex,
+        saveProgressAcrossRecreation = false,
+        onStepCompleted = { completedStepIndex ->
+            completedStepIndex.toIntermediateCheckpointOrNull()?.let { checkpoint ->
+                onboardingRepository.recordStageCompleted(checkpoint)
+            }
+        },
+        onTutorialCompleted = {
+            coroutineScope.launch {
+                onboardingRepository.markTutorialCompleted()
+            }
+        },
+        onSkipTutorialRequested = requestSkipConfirmation,
+        onNavigateBack = requestSkipConfirmation
+    )
 
     if (isSkipConfirmationVisible) {
         SkipTutorialConfirmationDialog(
@@ -150,7 +141,6 @@ internal fun OnboardingState.nextRequiredTutorialStepIndex(): Int = when (lastCo
     OnboardingStageCheckpoint.NONE -> 0
     OnboardingStageCheckpoint.STAGE_ONE -> 1
     OnboardingStageCheckpoint.STAGE_TWO -> 2
-    OnboardingStageCheckpoint.STAGE_THREE -> 3
 }
 
 private fun Int.toIntermediateCheckpointOrNull(): OnboardingStageCheckpoint? = when (this) {

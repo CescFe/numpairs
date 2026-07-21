@@ -79,7 +79,7 @@ class AppNavigationLearningFlowTest {
     }
 
     private fun resolvedOnboardingState(outcome: FirstRunTutorialOutcome): OnboardingState = OnboardingState(
-        lastCompletedStage = OnboardingStageCheckpoint.STAGE_THREE,
+        lastCompletedStage = OnboardingStageCheckpoint.STAGE_TWO,
         firstRunTutorialOutcome = outcome
     )
 

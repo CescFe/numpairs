@@ -135,7 +135,7 @@ class DataStoreOnboardingRepositoryTest {
     @Test
     fun `clearing all application data starts a new first run`() = runBlocking {
         val fixture = createRepository()
-        fixture.repository.recordStageCompleted(OnboardingStageCheckpoint.STAGE_THREE)
+        fixture.repository.recordStageCompleted(OnboardingStageCheckpoint.STAGE_TWO)
         fixture.repository.markTutorialCompleted()
 
         fixture.dataStore.edit { preferences -> preferences.clear() }
@@ -147,13 +147,13 @@ class DataStoreOnboardingRepositoryTest {
     fun `resolved state persists across repository instances`() = runBlocking {
         val dataStoreFile = createDataStoreFile()
         val firstFixture = createRepository(dataStoreFile)
-        firstFixture.repository.recordStageCompleted(OnboardingStageCheckpoint.STAGE_THREE)
+        firstFixture.repository.recordStageCompleted(OnboardingStageCheckpoint.STAGE_TWO)
         firstFixture.repository.markTutorialCompleted()
         firstFixture.close()
 
         val restoredState = createRepository(dataStoreFile).repository.onboardingState.first()
 
-        assertEquals(OnboardingStageCheckpoint.STAGE_THREE, restoredState.lastCompletedStage)
+        assertEquals(OnboardingStageCheckpoint.STAGE_TWO, restoredState.lastCompletedStage)
         assertEquals(FirstRunTutorialOutcome.COMPLETED, restoredState.firstRunTutorialOutcome)
     }
 

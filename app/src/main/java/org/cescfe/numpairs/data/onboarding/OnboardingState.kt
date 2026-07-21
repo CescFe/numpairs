@@ -23,8 +23,7 @@ enum class FirstRunTutorialOutcome(internal val persistedValue: Int) {
 enum class OnboardingStageCheckpoint(internal val persistedValue: Int) {
     NONE(0),
     STAGE_ONE(1),
-    STAGE_TWO(2),
-    STAGE_THREE(3);
+    STAGE_TWO(2);
 
     internal companion object {
         fun fromPersistedValue(value: Int): OnboardingStageCheckpoint = entries

@@ -11,7 +11,6 @@ class RequiredOnboardingRouteTest {
         assertEquals(0, state(OnboardingStageCheckpoint.NONE).nextRequiredTutorialStepIndex())
         assertEquals(1, state(OnboardingStageCheckpoint.STAGE_ONE).nextRequiredTutorialStepIndex())
         assertEquals(2, state(OnboardingStageCheckpoint.STAGE_TWO).nextRequiredTutorialStepIndex())
-        assertEquals(3, state(OnboardingStageCheckpoint.STAGE_THREE).nextRequiredTutorialStepIndex())
     }
 
     private fun state(checkpoint: OnboardingStageCheckpoint): OnboardingState = OnboardingState(

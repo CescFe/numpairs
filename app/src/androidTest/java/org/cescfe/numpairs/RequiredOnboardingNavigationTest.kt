@@ -185,17 +185,6 @@ class RequiredOnboardingNavigationTest {
         assertEquals(FirstRunTutorialOutcome.COMPLETED, repository.onboardingState.value.firstRunTutorialOutcome)
     }
 
-    @Test
-    fun completedFinalCheckpointUnlocksWithoutRestoringObsoleteValidation() {
-        val repository = FakeOnboardingRepository(
-            incompleteOnboardingState(OnboardingStageCheckpoint.STAGE_THREE)
-        )
-        setContent(repository)
-
-        waitForMenu()
-        assertEquals(FirstRunTutorialOutcome.COMPLETED, repository.onboardingState.value.firstRunTutorialOutcome)
-    }
-
     private fun openSkipConfirmation() {
         composeTestRule
             .onNodeWithTag(TutorialScreenTestTags.SKIP_ACTION)
