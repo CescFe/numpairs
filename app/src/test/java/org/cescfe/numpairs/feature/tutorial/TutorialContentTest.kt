@@ -9,6 +9,7 @@ import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
+import org.cescfe.numpairs.feature.game.GameHighlightState
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -151,8 +152,8 @@ class TutorialContentTest {
 
         steps[5].assertGuidedAction(
             expectedHighlights = listOf(
-                TutorialHighlightTarget.HiddenStripEntries,
-                TutorialHighlightTarget.HiddenTileExpressions
+                TutorialHighlightTarget.StripEntries(indexes = listOf(2, 3)),
+                TutorialHighlightTarget.WholeTile(tileIndex = 3)
             ),
             expectedAction = TutorialRequiredAction.CompleteScenario,
             incompletePuzzle = repeatedValueScenario.initialPuzzle,
@@ -284,6 +285,45 @@ class TutorialContentTest {
         assertEquals(PuzzleCompletionState.SOLVED, alternateSolvedPuzzle.completionState)
         assertTrue(finalStep.isComplete(GameUiState.from(scenario.solvedPuzzle)))
         assertTrue(finalStep.isComplete(GameUiState.from(alternateSolvedPuzzle)))
+    }
+
+    @Test
+    fun repeated_value_practice_starts_with_a_dismissible_cue_and_unrestricted_interactions() {
+        val scenario = TutorialContent.scenario(TutorialScenarioId.REPEATED_VALUE_PRACTICE)
+        val step = TutorialContent.learnBasicsSteps.last()
+        val initialHighlightState = step.toHighlightState(
+            scenario = scenario,
+            uiState = GameUiState.from(scenario.initialPuzzle)
+        )
+        val policy = step.toInteractionPolicy(
+            scenario = scenario,
+            uiState = GameUiState.from(scenario.initialPuzzle)
+        )
+
+        assertTrue(step.dismissHighlightsAfterFirstPuzzleChange)
+        assertEquals(setOf(2, 3), initialHighlightState.stripEntryIndexes)
+        assertEquals(setOf(3), initialHighlightState.tileIndexes)
+        assertEquals(
+            GameHighlightState.None,
+            step.toHighlightState(
+                scenario = scenario,
+                uiState = GameUiState.from(scenario.initialPuzzle),
+                hasPuzzleChanged = true
+            )
+        )
+        scenario.stripValues.indices.forEach { index ->
+            assertTrue(policy.canTapStripItem(index))
+            assertTrue(policy.canConfirmStripItemEntry(index, scenario.stripValues[index]))
+        }
+        scenario.initialPuzzle.board.tiles.indices.forEach { index ->
+            assertTrue(policy.canTapTileLeftOperand(index))
+            assertTrue(policy.canTapTileRightOperand(index))
+            assertTrue(policy.canTapTileOperator(index))
+            assertTrue(policy.canTapTileReset(index))
+            assertTrue(policy.canConfirmTileOperand(index, OperandSlot.LEFT, 0))
+            assertTrue(policy.canConfirmTileOperator(index, Operator.ADDITION))
+            assertTrue(policy.canConfirmTileOperator(index, Operator.MULTIPLICATION))
+        }
     }
 
     @Test

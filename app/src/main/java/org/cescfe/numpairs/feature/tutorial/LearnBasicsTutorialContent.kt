@@ -21,11 +21,12 @@ internal object LearnBasicsTutorialContent {
             scenarioId = TutorialScenarioId.REPEATED_VALUE_PRACTICE,
             playerFacingCopyResId = R.string.tutorial_repeated_value_practice_copy,
             highlightedTargets = listOf(
-                TutorialHighlightTarget.HiddenStripEntries,
-                TutorialHighlightTarget.HiddenTileExpressions
+                TutorialHighlightTarget.StripEntries(indexes = listOf(2, 3)),
+                TutorialHighlightTarget.WholeTile(tileIndex = 3)
             ),
             requiredAction = TutorialRequiredAction.CompleteScenario,
-            completionPredicate = TutorialStepCompletionPredicate.ScenarioSolved
+            completionPredicate = TutorialStepCompletionPredicate.ScenarioSolved,
+            dismissHighlightsAfterFirstPuzzleChange = true
         )
     )
 

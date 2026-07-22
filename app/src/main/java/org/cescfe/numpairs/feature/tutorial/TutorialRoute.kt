@@ -89,6 +89,9 @@ fun TutorialRoute(
     var isCheckpointNavigationInProgress by remember(playbackKey, currentStepIndex) {
         mutableStateOf(false)
     }
+    var hasCurrentStepPuzzleChanged by remember(playbackKey, currentStepIndex) {
+        mutableStateOf(false)
+    }
     val workedExampleFrame = workedExample?.frames?.get(workedExampleFrameIndex)
     val presentedStep = workedExampleFrame?.let { frame ->
         currentStep.copy(
@@ -164,7 +167,8 @@ fun TutorialRoute(
         ),
         highlightState = presentedStep.toHighlightState(
             scenario = currentScenario,
-            uiState = latestGameUiState
+            uiState = latestGameUiState,
+            hasPuzzleChanged = hasCurrentStepPuzzleChanged
         ),
         bottomBar = {
             onSkipTutorialRequested?.let { onSkipRequested ->
@@ -204,6 +208,11 @@ fun TutorialRoute(
                 scenarioId = currentScenario.id,
                 uiState = uiState
             )
+        },
+        onPuzzleChanged = { puzzle ->
+            if (puzzle != currentEntryPuzzle) {
+                hasCurrentStepPuzzleChanged = true
+            }
         },
         onNavigateBack = onNavigateBack
     )
@@ -540,7 +549,15 @@ private fun TutorialStep.highlightedStripEntryIds(scenario: TutorialScenario): S
     }
 }
 
-internal fun TutorialStep.toHighlightState(scenario: TutorialScenario, uiState: GameUiState?): GameHighlightState {
+internal fun TutorialStep.toHighlightState(
+    scenario: TutorialScenario,
+    uiState: GameUiState?,
+    hasPuzzleChanged: Boolean = false
+): GameHighlightState {
+    if (dismissHighlightsAfterFirstPuzzleChange && hasPuzzleChanged) {
+        return GameHighlightState.None
+    }
+
     val orderedAction = requiredAction as? TutorialRequiredAction.CompleteTileExpressionsInOrder
 
     if (orderedAction != null) {

@@ -49,8 +49,9 @@ class LocalizationResourceTest {
                 "2 × 3 = 6 completa la multiplicación que falta.",
                 "2 + 3 = 5 completa el puzle.",
                 "Resolviendo ejemplo…",
-                "Resuelve el puzle. Recuerda: la lista de números puede incluir " +
-                    "el mismo número más de una vez."
+                "Ahora tú: resuelve el puzle. Toca cualquier ? para empezar. " +
+                    "Los números pueden repetirse. Consejo: las multiplicaciones suelen ser " +
+                    "un buen punto de partida."
             )
         )
         assertEquals("Saltar tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
@@ -98,8 +99,8 @@ class LocalizationResourceTest {
                 "2 × 3 = 6 completa la multiplicació que falta.",
                 "2 + 3 = 5 completa el puzle.",
                 "Resolent l’exemple…",
-                "Resol el puzle. Recorda: la llista de números pot incloure " +
-                    "el mateix número més d’una vegada."
+                "Ara tu: resol el puzle. Toca qualsevol ? per començar. Els nombres es poden repetir. " +
+                    "Consell: les multiplicacions solen ser un bon punt de partida."
             )
         )
         assertEquals("Omet el tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
@@ -147,8 +148,8 @@ class LocalizationResourceTest {
                 "2 × 3 = 6 completes the remaining multiplication.",
                 "2 + 3 = 5 completes the puzzle.",
                 "Resolving example…",
-                "Solve the puzzle. Remember: the number list can include " +
-                    "the same number more than once."
+                "Your turn: solve the puzzle. Tap any ? to begin. Numbers may repeat. " +
+                    "Tip: multiplication is often a good place to start."
             )
         )
         assertEquals("Skip tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
