@@ -7,7 +7,12 @@ import org.cescfe.numpairs.domain.puzzle.model.StripItem
 internal object LearnBasicsTutorialContent {
     private val stripAndTilesIntroductionScenario = stripAndTilesIntroductionScenario()
     private val repeatedValuePracticeScenario = repeatedValuePracticeScenario()
-    private val completedIntroductionStripPuzzle = stripAndTilesIntroductionScenario.initialPuzzle.copy(
+    private val guidedIntroductionPuzzle = stripAndTilesIntroductionScenario.initialPuzzle.copy(
+        board = stripAndTilesIntroductionScenario.initialPuzzle.board.copy(
+            tiles = listOf(hiddenTile(result = 5)) + stripAndTilesIntroductionScenario.solvedPuzzle.board.tiles.drop(1)
+        )
+    )
+    private val completedIntroductionStripPuzzle = guidedIntroductionPuzzle.copy(
         strip = stripAndTilesIntroductionScenario.initialPuzzle.strip.withUpdatedEntry(index = 1, value = 3)
     )
 
@@ -16,7 +21,7 @@ internal object LearnBasicsTutorialContent {
         repeatedValuePracticeScenario
     )
 
-    val steps: List<TutorialStep> = listOf(
+    val steps: List<TutorialStep> = explanationSteps() + listOf(
         TutorialStep(
             scenarioId = TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
             playerFacingCopyResId = R.string.tutorial_strip_introduction_copy,
@@ -33,7 +38,8 @@ internal object LearnBasicsTutorialContent {
             ),
             progressCheckpoint = TutorialProgressCheckpoint.STRIP_INTRODUCTION_COMPLETED,
             isBoardVisible = false,
-            stripEntryGuidanceResId = R.string.tutorial_strip_entry_guidance
+            stripEntryGuidanceResId = R.string.tutorial_strip_entry_guidance,
+            entryPuzzle = guidedIntroductionPuzzle
         ),
         TutorialStep(
             scenarioId = TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
@@ -64,6 +70,48 @@ internal object LearnBasicsTutorialContent {
         )
     )
 
+    private fun explanationSteps(): List<TutorialStep> = listOf(
+        manualExplanationStep(
+            copyResId = R.string.tutorial_objective_explanation_copy,
+            highlightedTargets = listOf(
+                TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1, 2, 3)),
+                TutorialHighlightTarget.WholeTile(tileIndex = 0),
+                TutorialHighlightTarget.WholeTile(tileIndex = 1),
+                TutorialHighlightTarget.WholeTile(tileIndex = 2),
+                TutorialHighlightTarget.WholeTile(tileIndex = 3)
+            )
+        ),
+        manualExplanationStep(
+            copyResId = R.string.tutorial_strip_explanation_copy,
+            highlightedTargets = listOf(
+                TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1, 2, 3))
+            )
+        ),
+        manualExplanationStep(
+            copyResId = R.string.tutorial_tile_explanation_copy,
+            highlightedTargets = listOf(
+                TutorialHighlightTarget.WholeTile(tileIndex = 0)
+            )
+        ),
+        manualExplanationStep(
+            copyResId = R.string.tutorial_pair_explanation_copy,
+            highlightedTargets = listOf(
+                TutorialHighlightTarget.StripEntries(indexes = listOf(2, 3)),
+                TutorialHighlightTarget.WholeTile(tileIndex = 2),
+                TutorialHighlightTarget.WholeTile(tileIndex = 3)
+            )
+        )
+    )
+
+    private fun manualExplanationStep(copyResId: Int, highlightedTargets: List<TutorialHighlightTarget>): TutorialStep =
+        TutorialStep(
+            scenarioId = TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
+            playerFacingCopyResId = copyResId,
+            highlightedTargets = highlightedTargets,
+            requiredAction = TutorialRequiredAction.NoInteraction,
+            completionPredicate = TutorialStepCompletionPredicate.ManualAdvance
+        )
+
     private fun stripAndTilesIntroductionScenario(): TutorialScenario {
         val stripValues = listOf(2, 3, 4, 5)
         val solvedPuzzle = solvedPuzzle(
@@ -86,7 +134,7 @@ internal object LearnBasicsTutorialContent {
                     StripItem.Known(4),
                     StripItem.Known(5)
                 ),
-                tiles = listOf(hiddenTile(result = 5)) + solvedPuzzle.board.tiles.drop(1)
+                tiles = hiddenTiles(results = listOf(5, 6, 9, 20))
             ),
             solvedPuzzle = solvedPuzzle
         )

@@ -62,7 +62,7 @@ class RequiredOnboardingNavigationTest {
 
         composeTestRule
             .onNodeWithTag(TutorialScreenTestTags.STEP_COPY)
-            .assert(hasText(string(R.string.tutorial_strip_introduction_copy)))
+            .assert(hasText(string(R.string.tutorial_objective_explanation_copy)))
         assertRequiredSkipActionDisplayed()
         assertRequiredSkipActionPositionedOutsideInstruction()
         composeTestRule
@@ -112,6 +112,7 @@ class RequiredOnboardingNavigationTest {
         val repository = FakeOnboardingRepository(incompleteOnboardingState())
         setContent(repository)
 
+        advanceThroughExplanation()
         enterStripValue(index = 1, value = "3")
         waitForTutorialCopy(R.string.tutorial_tiles_introduction_copy)
         assertEquals(OnboardingStageCheckpoint.STAGE_ONE, repository.onboardingState.value.lastCompletedStage)
@@ -233,7 +234,7 @@ class RequiredOnboardingNavigationTest {
             .assertDoesNotExist()
         composeTestRule
             .onNodeWithTag(TutorialScreenTestTags.STEP_COPY)
-            .assert(hasText(string(R.string.tutorial_strip_introduction_copy)))
+            .assert(hasText(string(R.string.tutorial_objective_explanation_copy)))
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.SCREEN)
             .assertDoesNotExist()
@@ -251,6 +252,15 @@ class RequiredOnboardingNavigationTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
             .performImeAction()
+    }
+
+    private fun advanceThroughExplanation() {
+        repeat(4) {
+            composeTestRule
+                .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
+                .performScrollTo()
+                .performClick()
+        }
     }
 
     private fun completeTile(tileIndex: Int, leftStripEntryId: Int, operator: Operator, rightStripEntryId: Int) {

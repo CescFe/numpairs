@@ -10,8 +10,8 @@ class RequiredOnboardingRouteTest {
     @Test
     fun `checkpoints resume after the last completed Tutorial step`() {
         assertEquals(0, state(OnboardingStageCheckpoint.NONE).nextRequiredTutorialStepIndex())
-        assertEquals(1, state(OnboardingStageCheckpoint.STAGE_ONE).nextRequiredTutorialStepIndex())
-        assertEquals(2, state(OnboardingStageCheckpoint.STAGE_TWO).nextRequiredTutorialStepIndex())
+        assertEquals(5, state(OnboardingStageCheckpoint.STAGE_ONE).nextRequiredTutorialStepIndex())
+        assertEquals(6, state(OnboardingStageCheckpoint.STAGE_TWO).nextRequiredTutorialStepIndex())
     }
 
     @Test
@@ -24,13 +24,13 @@ class RequiredOnboardingRouteTest {
         }
 
         assertEquals(
-            2,
+            6,
             state(OnboardingStageCheckpoint.STAGE_ONE).nextRequiredTutorialStepIndex(
                 steps = stepsWithInsertedOrientation
             )
         )
         assertEquals(
-            3,
+            7,
             state(OnboardingStageCheckpoint.STAGE_TWO).nextRequiredTutorialStepIndex(
                 steps = stepsWithInsertedOrientation
             )

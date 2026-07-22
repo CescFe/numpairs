@@ -27,6 +27,18 @@ class LocalizationResourceTest {
         )
         assertEquals("Serie", resources.getString(R.string.strip_content_description))
         assertEquals("Paso 1 de 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))
+        assertTutorialExplanationCopy(
+            resources = resources,
+            objective = "Bienvenido a NumPairs. Tu objetivo es descubrir todos los números y símbolos ocultos.",
+            strip = "Esta es la serie. Sus números están ordenados de menor a mayor, " +
+                "pueden repetirse y algunos están ocultos.",
+            tile = "Cada casilla muestra un resultado. Completa la parte superior con los dos números " +
+                "y el signo que producen ese resultado.",
+            pair = "Agrupa los números de la serie por parejas. Cada pareja completa dos casillas: " +
+                "una suma y una multiplicación.",
+            previous = "Atrás",
+            next = "Siguiente"
+        )
         assertTutorialCopy(
             resources = resources,
             stepOne = "La lista de números va de menor a mayor. " +
@@ -61,6 +73,18 @@ class LocalizationResourceTest {
         )
         assertEquals("Sèrie", resources.getString(R.string.strip_content_description))
         assertEquals("Pas 1 de 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))
+        assertTutorialExplanationCopy(
+            resources = resources,
+            objective = "Benvingut a NumPairs. L’objectiu és descobrir tots els nombres i símbols ocults.",
+            strip = "Aquesta és la sèrie. Els nombres estan ordenats de menor a major, " +
+                "es poden repetir i alguns estan ocults.",
+            tile = "Cada casella mostra un resultat. Completa la part superior amb els dos nombres " +
+                "i el signe que produeixen aquest resultat.",
+            pair = "Agrupa els nombres de la sèrie per parelles. Cada parella completa dues caselles: " +
+                "una suma i una multiplicació.",
+            previous = "Enrere",
+            next = "Següent"
+        )
         assertTutorialCopy(
             resources = resources,
             stepOne = "La llista de números va de menor a major. " +
@@ -95,6 +119,18 @@ class LocalizationResourceTest {
         )
         assertEquals("Strip", resources.getString(R.string.strip_content_description))
         assertEquals("Step 1 of 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))
+        assertTutorialExplanationCopy(
+            resources = resources,
+            objective = "Welcome to NumPairs. Your goal is to discover every hidden number and symbol.",
+            strip = "This is the number strip. Its numbers are ordered from lowest to highest, " +
+                "may repeat, and some are hidden.",
+            tile = "Each tile shows a result. Complete its top row with the two numbers and symbol " +
+                "that produce that result.",
+            pair = "Group the strip numbers into pairs. Each pair completes two tiles: " +
+                "one addition and one multiplication.",
+            previous = "Back",
+            next = "Next"
+        )
         assertTutorialCopy(
             resources = resources,
             stepOne = "The number list goes from smallest to largest. " +
@@ -123,6 +159,23 @@ class LocalizationResourceTest {
         assertEquals(stepOneGuidance, resources.getString(R.string.tutorial_strip_entry_guidance))
         assertEquals(stepTwo, resources.getString(R.string.tutorial_tiles_introduction_copy))
         assertEquals(stepThree, resources.getString(R.string.tutorial_repeated_value_practice_copy))
+    }
+
+    private fun assertTutorialExplanationCopy(
+        resources: Resources,
+        objective: String,
+        strip: String,
+        tile: String,
+        pair: String,
+        previous: String,
+        next: String
+    ) {
+        assertEquals(objective, resources.getString(R.string.tutorial_objective_explanation_copy))
+        assertEquals(strip, resources.getString(R.string.tutorial_strip_explanation_copy))
+        assertEquals(tile, resources.getString(R.string.tutorial_tile_explanation_copy))
+        assertEquals(pair, resources.getString(R.string.tutorial_pair_explanation_copy))
+        assertEquals(previous, resources.getString(R.string.tutorial_previous_step_action))
+        assertEquals(next, resources.getString(R.string.tutorial_next_step_action))
     }
 
     private fun resourcesFor(languageTag: String): Resources {

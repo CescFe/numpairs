@@ -4,12 +4,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -112,7 +115,7 @@ fun TutorialRoute(
         initialPuzzle = currentEntryPuzzle,
         modifier = modifier,
         gameSessionKey = "$TUTORIAL_GAME_SESSION_KEY:$playbackKey:${currentScenario.id}",
-        puzzleResetKey = playbackKey to currentScenario.id,
+        puzzleResetKey = playbackKey to currentEntryPuzzle,
         isSuccessOverlayEnabled = isTutorialSuccessOverlayEnabled(
             mode = mode,
             isFinalStep = currentStepIndex == steps.lastIndex,
@@ -140,6 +143,15 @@ fun TutorialRoute(
                 currentStep = currentStep,
                 currentStepNumber = currentStepIndex + 1,
                 totalSteps = steps.size,
+                canNavigateBack = currentStepIndex > 0,
+                onNavigateBack = {
+                    currentStepIndex -= 1
+                },
+                onNavigateNext = {
+                    if (currentStepIndex < steps.lastIndex) {
+                        currentStepIndex += 1
+                    }
+                },
                 modifier = Modifier.fillMaxWidth()
             )
         },
@@ -171,6 +183,9 @@ private fun TutorialInstructionSurface(
     currentStep: TutorialStep,
     currentStepNumber: Int,
     totalSteps: Int,
+    canNavigateBack: Boolean,
+    onNavigateBack: () -> Unit,
+    onNavigateNext: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -199,6 +214,51 @@ private fun TutorialInstructionSurface(
                 modifier = Modifier.testTag(TutorialScreenTestTags.STEP_COPY),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface
+            )
+            if (currentStep.completionPredicate == TutorialStepCompletionPredicate.ManualAdvance) {
+                TutorialStepNavigation(
+                    canNavigateBack = canNavigateBack,
+                    onNavigateBack = onNavigateBack,
+                    onNavigateNext = onNavigateNext
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TutorialStepNavigation(
+    canNavigateBack: Boolean,
+    onNavigateBack: () -> Unit,
+    onNavigateNext: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TextButton(
+            onClick = onNavigateBack,
+            enabled = canNavigateBack,
+            modifier = Modifier
+                .heightIn(min = 48.dp)
+                .testTag(TutorialScreenTestTags.PREVIOUS_STEP_ACTION)
+        ) {
+            Text(
+                text = stringResource(R.string.tutorial_previous_step_action),
+                style = MaterialTheme.typography.labelLarge
+            )
+        }
+        TextButton(
+            onClick = onNavigateNext,
+            modifier = Modifier
+                .heightIn(min = 48.dp)
+                .testTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
+        ) {
+            Text(
+                text = stringResource(R.string.tutorial_next_step_action),
+                style = MaterialTheme.typography.labelLarge
             )
         }
     }
@@ -242,6 +302,16 @@ private fun TutorialRequiredAction.toInteractionPolicy(
     uiState: GameUiState?,
     highlightedStripEntryIds: Set<Int>
 ): GameInteractionPolicy = when (this) {
+    TutorialRequiredAction.NoInteraction -> GameInteractionPolicy(
+        canTapStripItem = { false },
+        canConfirmStripItemEntry = { _, _ -> false },
+        canTapTileLeftOperand = { false },
+        canTapTileRightOperand = { false },
+        canTapTileOperator = { false },
+        canTapTileReset = { false },
+        canConfirmTileOperand = { _, _, _ -> false },
+        canConfirmTileOperator = { _, _ -> false }
+    )
     is TutorialRequiredAction.EnterStripValue -> GameInteractionPolicy(
         canTapStripItem = { index -> index == stripEntryIndex },
         canConfirmStripItemEntry = { index, value ->

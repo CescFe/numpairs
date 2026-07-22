@@ -66,7 +66,7 @@ class AppNavigationLearningFlowTest {
                     .assert(hasText(string(R.string.menu_tutorial_button)))
                     .performClick()
                 composeTestRule
-                    .onNodeWithText(string(R.string.tutorial_strip_introduction_copy))
+                    .onNodeWithText(string(R.string.tutorial_objective_explanation_copy))
                     .assertIsDisplayed()
 
                 pressBackUnconditionally()

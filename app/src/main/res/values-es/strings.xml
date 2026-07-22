@@ -61,6 +61,12 @@
     <!-- Tutorial screen -->
     <string name="tutorial_screen_title">Tutorial</string>
     <string name="tutorial_step_indicator">Paso %1$d de %2$d</string>
+    <string name="tutorial_objective_explanation_copy">Bienvenido a NumPairs. Tu objetivo es descubrir todos los números y símbolos ocultos.</string>
+    <string name="tutorial_strip_explanation_copy">Esta es la serie. Sus números están ordenados de menor a mayor, pueden repetirse y algunos están ocultos.</string>
+    <string name="tutorial_tile_explanation_copy">Cada casilla muestra un resultado. Completa la parte superior con los dos números y el signo que producen ese resultado.</string>
+    <string name="tutorial_pair_explanation_copy">Agrupa los números de la serie por parejas. Cada pareja completa dos casillas: una suma y una multiplicación.</string>
+    <string name="tutorial_previous_step_action">Atrás</string>
+    <string name="tutorial_next_step_action">Siguiente</string>
     <string name="tutorial_strip_introduction_copy">La lista de números va de menor a mayor. Un mismo número puede aparecer más de una vez.</string>
     <string name="tutorial_strip_entry_guidance">Introduce 3 para completar la serie del tutorial.</string>
     <string name="tutorial_tiles_introduction_copy">Cada casilla muestra un resultado. Elige los números y el símbolo que dan ese resultado. Usa los mismos dos números una vez con + y otra con ×.</string>
