@@ -11,7 +11,7 @@ class RequiredOnboardingRouteTest {
     fun `checkpoints resume after the last completed Tutorial step`() {
         assertEquals(0, state(OnboardingStageCheckpoint.NONE).nextRequiredTutorialStepIndex())
         assertEquals(
-            5,
+            10,
             state(OnboardingStageCheckpoint.EXPLANATION_COMPLETED).nextRequiredTutorialStepIndex()
         )
     }
@@ -26,7 +26,7 @@ class RequiredOnboardingRouteTest {
         }
 
         assertEquals(
-            6,
+            11,
             state(OnboardingStageCheckpoint.EXPLANATION_COMPLETED).nextRequiredTutorialStepIndex(
                 steps = stepsWithInsertedOrientation
             )

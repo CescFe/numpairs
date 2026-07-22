@@ -48,7 +48,6 @@ class LocalizationResourceTest {
                 "Quedan los resultados 5 y 6. Junto al 2, el número oculto tiene que ser 3.",
                 "2 × 3 = 6 completa la multiplicación que falta.",
                 "2 + 3 = 5 completa el puzle.",
-                "Resolviendo ejemplo…",
                 "Ahora tú: resuelve el puzle. Toca cualquier ? para empezar. " +
                     "Los números pueden repetirse. Consejo: las multiplicaciones suelen ser " +
                     "un buen punto de partida."
@@ -98,7 +97,6 @@ class LocalizationResourceTest {
                 "Queden els resultats 5 i 6. Junt amb el 2, el nombre ocult ha de ser 3.",
                 "2 × 3 = 6 completa la multiplicació que falta.",
                 "2 + 3 = 5 completa el puzle.",
-                "Resolent l’exemple…",
                 "Ara tu: resol el puzle. Toca qualsevol ? per començar. Els nombres es poden repetir. " +
                     "Consell: les multiplicacions solen ser un bon punt de partida."
             )
@@ -147,7 +145,6 @@ class LocalizationResourceTest {
                 "The remaining results are 5 and 6. Paired with 2, the hidden number must be 3.",
                 "2 × 3 = 6 completes the remaining multiplication.",
                 "2 + 3 = 5 completes the puzzle.",
-                "Resolving example…",
                 "Your turn: solve the puzzle. Tap any ? to begin. Numbers may repeat. " +
                     "Tip: multiplication is often a good place to start."
             )
@@ -167,7 +164,6 @@ class LocalizationResourceTest {
             R.string.tutorial_worked_example_reveal_three_copy,
             R.string.tutorial_worked_example_product_two_three_copy,
             R.string.tutorial_worked_example_sum_two_three_copy,
-            R.string.tutorial_worked_example_progress,
             R.string.tutorial_repeated_value_practice_copy
         )
 

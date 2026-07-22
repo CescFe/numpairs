@@ -83,25 +83,12 @@ class TutorialContentTest {
         val steps = TutorialContent.stepsFor(TutorialMode.LEARN_BASICS)
 
         assertEquals(
-            listOf(
-                TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
-                TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
-                TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
-                TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
-                TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
-                TutorialScenarioId.REPEATED_VALUE_PRACTICE
-            ),
+            List(10) { TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION } +
+                TutorialScenarioId.REPEATED_VALUE_PRACTICE,
             steps.map(TutorialStep::scenarioId)
         )
         assertEquals(
-            listOf(
-                null,
-                null,
-                null,
-                null,
-                TutorialProgressCheckpoint.WORKED_EXAMPLE_COMPLETED,
-                null
-            ),
+            List(9) { null } + TutorialProgressCheckpoint.WORKED_EXAMPLE_COMPLETED + null,
             steps.map(TutorialStep::progressCheckpoint)
         )
 
@@ -144,13 +131,19 @@ class TutorialContentTest {
             assertEquals(introductionScenario.initialPuzzle, step.entryPuzzle ?: introductionScenario.initialPuzzle)
         }
 
-        val workedExampleStep = steps[4]
-        val workedExample = workedExampleStep.requiredAction as TutorialRequiredAction.PlayWorkedExample
-        assertEquals(TutorialStepCompletionPredicate.ManualAdvance, workedExampleStep.completionPredicate)
-        assertEquals(introductionScenario.initialPuzzle, workedExampleStep.entryPuzzle)
-        assertEquals(introductionScenario.initialPuzzle, workedExample.frames.first().puzzle)
+        val workedExampleSteps = steps.subList(fromIndex = 4, toIndex = 10)
+        workedExampleSteps.forEach { step ->
+            assertEquals(TutorialRequiredAction.NoInteraction, step.requiredAction)
+            assertEquals(TutorialStepCompletionPredicate.ManualAdvance, step.completionPredicate)
+            assertTrue(step.isBoardVisible)
+        }
+        assertEquals(introductionScenario.initialPuzzle, workedExampleSteps.first().entryPuzzle)
+        assertEquals(
+            TutorialProgressCheckpoint.WORKED_EXAMPLE_COMPLETED,
+            workedExampleSteps.last().progressCheckpoint
+        )
 
-        steps[5].assertGuidedAction(
+        steps[10].assertGuidedAction(
             expectedHighlights = listOf(
                 TutorialHighlightTarget.StripEntries(indexes = listOf(2, 3)),
                 TutorialHighlightTarget.WholeTile(tileIndex = 3)
@@ -162,9 +155,8 @@ class TutorialContentTest {
     }
 
     @Test
-    fun worked_example_frames_follow_the_exact_reasoned_solution_order() {
-        val step = TutorialContent.learnBasicsSteps[4]
-        val frames = (step.requiredAction as TutorialRequiredAction.PlayWorkedExample).frames
+    fun worked_example_steps_follow_the_exact_reasoned_solution_order() {
+        val steps = TutorialContent.learnBasicsSteps.subList(fromIndex = 4, toIndex = 10)
 
         assertEquals(
             listOf(
@@ -175,7 +167,7 @@ class TutorialContentTest {
                 R.string.tutorial_worked_example_product_two_three_copy,
                 R.string.tutorial_worked_example_sum_two_three_copy
             ),
-            frames.map(TutorialWorkedExampleFrame::playerFacingCopyResId)
+            steps.map(TutorialStep::playerFacingCopyResId)
         )
         assertEquals(
             listOf(
@@ -186,15 +178,15 @@ class TutorialContentTest {
                 setOf(1, 2, 3),
                 setOf(0, 1, 2, 3)
             ),
-            frames.map { frame ->
-                frame.puzzle.board.tiles.mapIndexedNotNullTo(mutableSetOf()) { index, tile ->
+            steps.map { step ->
+                requireNotNull(step.entryPuzzle).board.tiles.mapIndexedNotNullTo(mutableSetOf()) { index, tile ->
                     index.takeIf { tile.expression.isFullyKnown }
                 }
             }
         )
-        assertEquals(StripItem.Hidden, frames[2].puzzle.strip.items[1])
-        assertEquals(StripItem.PlayerEntered(3), frames[3].puzzle.strip.items[1])
-        assertEquals(PuzzleCompletionState.SOLVED, frames.last().puzzle.completionState)
+        assertEquals(StripItem.Hidden, requireNotNull(steps[2].entryPuzzle).strip.items[1])
+        assertEquals(StripItem.PlayerEntered(3), requireNotNull(steps[3].entryPuzzle).strip.items[1])
+        assertEquals(PuzzleCompletionState.SOLVED, requireNotNull(steps.last().entryPuzzle).completionState)
         assertEquals(
             listOf(
                 listOf(0, 1, 2, 3),
@@ -204,8 +196,8 @@ class TutorialContentTest {
                 listOf(0, 1),
                 listOf(0, 1)
             ),
-            frames.map { frame ->
-                frame.highlightedTargets
+            steps.map { step ->
+                step.highlightedTargets
                     .filterIsInstance<TutorialHighlightTarget.StripEntries>()
                     .single()
                     .indexes
@@ -220,8 +212,8 @@ class TutorialContentTest {
                 listOf(1),
                 listOf(0)
             ),
-            frames.map { frame ->
-                frame.highlightedTargets
+            steps.map { step ->
+                step.highlightedTargets
                     .filterIsInstance<TutorialHighlightTarget.WholeTile>()
                     .map(TutorialHighlightTarget.WholeTile::tileIndex)
             }
@@ -232,7 +224,7 @@ class TutorialContentTest {
     fun manual_explanation_freezes_every_puzzle_interaction() {
         val scenario = TutorialContent.scenario(TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION)
 
-        TutorialContent.learnBasicsSteps.take(5).forEach { step ->
+        TutorialContent.learnBasicsSteps.take(10).forEach { step ->
             val policy = step.toInteractionPolicy(scenario = scenario, uiState = null)
 
             scenario.stripValues.indices.forEach { index ->

@@ -126,7 +126,7 @@ Use one short message and one matching focus per step:
 3. Highlight one tile and explain that its visible result is produced by two operands and one operator in the hidden expression.
 4. Highlight strip entries `4` and `5` with result tiles `9` and `20`; explain that each pair completes two tiles, one sum and one product.
 
-The final explanation step starts a deterministic worked example from the same unresolved state. Use short reasoning and focused highlights while applying these transitions in order:
+Continue with a deterministic, manually paced worked example. Its first step keeps the same unresolved state visible, then five more steps apply these transitions in order:
 
 1. `4 × 5 = 20`: the larger product is resolved first.
 2. `4 + 5 = 9`: the same pair also completes its sum.
@@ -134,9 +134,7 @@ The final explanation step starts a deterministic worked example from the same u
 4. `2 × 3 = 6`: resolve the remaining product.
 5. `2 + 3 = 5`: resolve the remaining sum.
 
-The puzzle remains non-interactive during playback. While staged playback is active, preserve the navigation footer space but replace or disable `Back` and `Next` with a clear progress state. Restore both actions after completion so the player may return and replay the example or continue. Returning to the worked-example step restarts it from the unresolved state.
-
-When the system requests reduced motion, present the same ordered reasoning and final explained state without staged delays. Reduced motion changes pacing, not content or completion meaning.
+The puzzle remains non-interactive throughout all six worked-example steps. The player controls every transition with the same accessible `Back` and `Next` actions used by the preceding explanation. Moving backward restores the previous authored snapshot, and moving forward applies the next deduction. No worked-example state changes on a timer, so every player has enough time to read the reasoning and inspect the highlighted result before continuing.
 
 ### Part 2 - Solve A Two-Pair Puzzle
 
@@ -221,7 +219,7 @@ Solving the puzzle completes Tutorial. Required first-run playback persists the 
 
 - A fresh installation starts Tutorial instead of Menu
 - A new player sees the complete puzzle while focused steps explain the objective, strip, tile anatomy, and one-sum/one-product pair rule
-- The worked example makes every deduction visible before changing the authored puzzle state
+- Each worked-example step keeps its deduction and resulting puzzle state visible until the player manually continues
 - Independent practice teaches the real interaction model through unrestricted player actions
 - `Skip tutorial` is available from Step 1 and always requires explicit confirmation
 - Confirmed skip opens Menu without final validation

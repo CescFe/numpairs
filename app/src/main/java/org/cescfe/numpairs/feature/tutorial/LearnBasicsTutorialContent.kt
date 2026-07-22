@@ -8,15 +8,13 @@ import org.cescfe.numpairs.domain.puzzle.model.StripItem
 internal object LearnBasicsTutorialContent {
     private val stripAndTilesIntroductionScenario = stripAndTilesIntroductionScenario()
     private val repeatedValuePracticeScenario = repeatedValuePracticeScenario()
-    private val workedExampleFrames = workedExampleFrames()
 
     val scenarios: List<TutorialScenario> = listOf(
         stripAndTilesIntroductionScenario,
         repeatedValuePracticeScenario
     )
 
-    val steps: List<TutorialStep> = explanationSteps() + listOf(
-        workedExampleStep(),
+    val steps: List<TutorialStep> = explanationSteps() + workedExampleSteps() + listOf(
         TutorialStep(
             scenarioId = TutorialScenarioId.REPEATED_VALUE_PRACTICE,
             playerFacingCopyResId = R.string.tutorial_repeated_value_practice_copy,
@@ -30,21 +28,7 @@ internal object LearnBasicsTutorialContent {
         )
     )
 
-    private fun workedExampleStep(): TutorialStep {
-        val initialFrame = workedExampleFrames.first()
-
-        return TutorialStep(
-            scenarioId = TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
-            playerFacingCopyResId = initialFrame.playerFacingCopyResId,
-            highlightedTargets = initialFrame.highlightedTargets,
-            requiredAction = TutorialRequiredAction.PlayWorkedExample(frames = workedExampleFrames),
-            completionPredicate = TutorialStepCompletionPredicate.ManualAdvance,
-            progressCheckpoint = TutorialProgressCheckpoint.WORKED_EXAMPLE_COMPLETED,
-            entryPuzzle = initialFrame.puzzle
-        )
-    }
-
-    private fun workedExampleFrames(): List<TutorialWorkedExampleFrame> {
+    private fun workedExampleSteps(): List<TutorialStep> {
         val scenario = stripAndTilesIntroductionScenario
         val initialPuzzle = scenario.initialPuzzle
         val productFourAndFive = initialPuzzle.withSolvedTiles(scenario = scenario, tileIndexes = intArrayOf(3))
@@ -56,9 +40,9 @@ internal object LearnBasicsTutorialContent {
         val solvedExample = productTwoAndThree.withSolvedTiles(scenario = scenario, tileIndexes = intArrayOf(0))
 
         return listOf(
-            TutorialWorkedExampleFrame(
-                playerFacingCopyResId = R.string.tutorial_worked_example_introduction_copy,
-                puzzle = initialPuzzle,
+            manualWorkedExampleStep(
+                copyResId = R.string.tutorial_worked_example_introduction_copy,
+                entryPuzzle = initialPuzzle,
                 highlightedTargets = listOf(
                     TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1, 2, 3)),
                     TutorialHighlightTarget.WholeTile(tileIndex = 0),
@@ -67,50 +51,68 @@ internal object LearnBasicsTutorialContent {
                     TutorialHighlightTarget.WholeTile(tileIndex = 3)
                 )
             ),
-            workedExampleFrame(
+            manualWorkedExampleStep(
                 copyResId = R.string.tutorial_worked_example_product_four_five_copy,
-                puzzle = productFourAndFive,
+                entryPuzzle = productFourAndFive,
                 stripEntryIndexes = listOf(2, 3),
                 tileIndexes = listOf(3)
             ),
-            workedExampleFrame(
+            manualWorkedExampleStep(
                 copyResId = R.string.tutorial_worked_example_sum_four_five_copy,
-                puzzle = pairFourAndFive,
+                entryPuzzle = pairFourAndFive,
                 stripEntryIndexes = listOf(2, 3),
                 tileIndexes = listOf(2)
             ),
-            workedExampleFrame(
+            manualWorkedExampleStep(
                 copyResId = R.string.tutorial_worked_example_reveal_three_copy,
-                puzzle = completedStrip,
+                entryPuzzle = completedStrip,
                 stripEntryIndexes = listOf(0, 1),
                 tileIndexes = listOf(0, 1)
             ),
-            workedExampleFrame(
+            manualWorkedExampleStep(
                 copyResId = R.string.tutorial_worked_example_product_two_three_copy,
-                puzzle = productTwoAndThree,
+                entryPuzzle = productTwoAndThree,
                 stripEntryIndexes = listOf(0, 1),
                 tileIndexes = listOf(1)
             ),
-            workedExampleFrame(
+            manualWorkedExampleStep(
                 copyResId = R.string.tutorial_worked_example_sum_two_three_copy,
-                puzzle = solvedExample,
+                entryPuzzle = solvedExample,
                 stripEntryIndexes = listOf(0, 1),
-                tileIndexes = listOf(0)
+                tileIndexes = listOf(0),
+                progressCheckpoint = TutorialProgressCheckpoint.WORKED_EXAMPLE_COMPLETED
             )
         )
     }
 
-    private fun workedExampleFrame(
+    private fun manualWorkedExampleStep(
         copyResId: Int,
-        puzzle: Puzzle,
-        stripEntryIndexes: List<Int>,
-        tileIndexes: List<Int>
-    ): TutorialWorkedExampleFrame = TutorialWorkedExampleFrame(
+        entryPuzzle: Puzzle,
+        highlightedTargets: List<TutorialHighlightTarget>,
+        progressCheckpoint: TutorialProgressCheckpoint? = null
+    ): TutorialStep = TutorialStep(
+        scenarioId = TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
         playerFacingCopyResId = copyResId,
-        puzzle = puzzle,
+        highlightedTargets = highlightedTargets,
+        requiredAction = TutorialRequiredAction.NoInteraction,
+        completionPredicate = TutorialStepCompletionPredicate.ManualAdvance,
+        progressCheckpoint = progressCheckpoint,
+        entryPuzzle = entryPuzzle
+    )
+
+    private fun manualWorkedExampleStep(
+        copyResId: Int,
+        entryPuzzle: Puzzle,
+        stripEntryIndexes: List<Int>,
+        tileIndexes: List<Int>,
+        progressCheckpoint: TutorialProgressCheckpoint? = null
+    ): TutorialStep = manualWorkedExampleStep(
+        copyResId = copyResId,
+        entryPuzzle = entryPuzzle,
         highlightedTargets = listOf(
             TutorialHighlightTarget.StripEntries(indexes = stripEntryIndexes)
-        ) + tileIndexes.map(TutorialHighlightTarget::WholeTile)
+        ) + tileIndexes.map(TutorialHighlightTarget::WholeTile),
+        progressCheckpoint = progressCheckpoint
     )
 
     private fun Puzzle.withSolvedTiles(scenario: TutorialScenario, tileIndexes: IntArray): Puzzle = copy(

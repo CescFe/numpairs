@@ -101,7 +101,8 @@ class RequiredOnboardingNavigationTest {
         setContent(repository)
 
         advanceThroughExplanation()
-        waitForTutorialCopy(R.string.tutorial_worked_example_sum_two_three_copy)
+        advanceThroughWorkedExample()
+        assertEquals(OnboardingStageCheckpoint.NONE, repository.onboardingState.value.lastCompletedStage)
         composeTestRule
             .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
             .performScrollTo()
@@ -252,6 +253,16 @@ class RequiredOnboardingNavigationTest {
                 .performScrollTo()
                 .performClick()
         }
+    }
+
+    private fun advanceThroughWorkedExample() {
+        repeat(5) {
+            composeTestRule
+                .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
+                .performScrollTo()
+                .performClick()
+        }
+        waitForTutorialCopy(R.string.tutorial_worked_example_sum_two_three_copy)
     }
 
     private fun completeTile(tileIndex: Int, leftStripEntryId: Int, operator: Operator, rightStripEntryId: Int) {
