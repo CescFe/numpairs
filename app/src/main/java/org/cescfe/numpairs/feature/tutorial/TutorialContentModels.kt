@@ -57,6 +57,7 @@ data class TutorialStep(
     val completionPredicate: TutorialStepCompletionPredicate,
     val progressCheckpoint: TutorialProgressCheckpoint? = null,
     val isBoardVisible: Boolean = true,
+    val dismissHighlightsAfterFirstPuzzleChange: Boolean = false,
     val entryPuzzle: Puzzle? = null
 ) {
     init {

@@ -198,6 +198,40 @@ class TutorialRouteTest {
     }
 
     @Test
+    fun independentPracticeCueAllowsAnyFirstActionThenStaysDismissed() {
+        setContent(startStepIndex = PRACTICE_STEP_INDEX)
+
+        assertRepeatedValuePracticeScenarioDisplayed()
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(0))
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(1))
+        assertHighlighted(testTag = GameScreenTestTags.stripItem(2))
+        assertHighlighted(testTag = GameScreenTestTags.stripItem(3))
+        assertUnmergedNodeNotHighlighted(testTag = GameScreenTestTags.tile(0))
+        assertHighlighted(testTag = GameScreenTestTags.tile(3), useUnmergedTree = true)
+
+        openTileOperatorMenu(tileIndex = 0)
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.ADDITION), useUnmergedTree = true)
+            .assertIsEnabled()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.MULTIPLICATION), useUnmergedTree = true)
+            .assertIsEnabled()
+            .performClick()
+        assertPracticeCueDismissed()
+
+        openTileOperatorMenu(tileIndex = 0)
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.ADDITION), useUnmergedTree = true)
+            .assertIsEnabled()
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileReset(0), useUnmergedTree = true)
+            .assertIsDisplayed()
+            .performClick()
+        assertPracticeCueDismissed()
+    }
+
+    @Test
     fun independentPracticeUsesNormalInteractionsAndCompletesLearnBasicsWithoutShowingSuccess() {
         setContent()
 
@@ -680,6 +714,13 @@ class TutorialRouteTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileRightOperand(tileIndex), useUnmergedTree = true)
             .assertHasNoClickAction()
+    }
+
+    private fun assertPracticeCueDismissed() {
+        repeat(4) { index ->
+            assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(index))
+            assertUnmergedNodeNotHighlighted(testTag = GameScreenTestTags.tile(index))
+        }
     }
 
     private fun assertNodeNotHighlighted(testTag: String, useUnmergedTree: Boolean = false) {

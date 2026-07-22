@@ -74,7 +74,7 @@
     <string name="tutorial_worked_example_product_two_three_copy">2 × 3 = 6 completa la multiplicació que falta.</string>
     <string name="tutorial_worked_example_sum_two_three_copy">2 + 3 = 5 completa el puzle.</string>
     <string name="tutorial_worked_example_progress">Resolent l’exemple…</string>
-    <string name="tutorial_repeated_value_practice_copy">Resol el puzle. Recorda: la llista de números pot incloure el mateix número més d’una vegada.</string>
+    <string name="tutorial_repeated_value_practice_copy">Ara tu: resol el puzle. Toca qualsevol ? per començar. Els nombres es poden repetir. Consell: les multiplicacions solen ser un bon punt de partida.</string>
     <string name="onboarding_skip_tutorial_action">Omet el tutorial</string>
     <string name="onboarding_skip_tutorial_title">Vols ometre el tutorial?</string>
     <string name="onboarding_skip_tutorial_message">Si és la primera vegada que jugues a NumPairs o a jocs similars, et recomanem continuar. Podràs tornar a obrir el tutorial més tard des de Com jugar.</string>
