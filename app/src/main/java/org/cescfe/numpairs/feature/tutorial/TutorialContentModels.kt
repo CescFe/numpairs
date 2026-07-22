@@ -108,6 +108,8 @@ sealed interface TutorialHighlightTarget {
 }
 
 sealed interface TutorialRequiredAction {
+    data object NoInteraction : TutorialRequiredAction
+
     data class EnterStripValue(val stripEntryIndex: Int, val value: Int) : TutorialRequiredAction {
         init {
             require(stripEntryIndex >= 0) {
@@ -176,6 +178,10 @@ sealed interface TutorialRequiredAction {
 
 sealed interface TutorialStepCompletionPredicate {
     fun isSatisfiedBy(uiState: GameUiState): Boolean
+
+    data object ManualAdvance : TutorialStepCompletionPredicate {
+        override fun isSatisfiedBy(uiState: GameUiState): Boolean = false
+    }
 
     data class StripValueEntered(val stripEntryIndex: Int, val value: Int) : TutorialStepCompletionPredicate {
         init {
