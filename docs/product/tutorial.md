@@ -12,12 +12,13 @@
   - `docs/ui-behavior.md`
   - `docs/ubiquitous-language.md`
 
-The active first-run and Learn basics sequence is defined by
+The active first-run and Learn Basics sequence is defined by
 [`prd-v6.md`](./prd/prd-v6.md). That contract supersedes the historical MVP step sequence in this
-document with a skippable three-step Tutorial that introduces the strip, introduces tiles and
-pairs, and ends with an authored repeated-value two-pair puzzle. The guidance below remains the
-historical foundation for learning by doing, authored content, restricted guided actions, and the
-separation between Tutorial, rules help, and generated play.
+document with a skippable observe-then-practice Tutorial: a manually paced explanation and
+reasoned worked example followed by an authored repeated-value two-pair puzzle. The guidance below
+remains the historical foundation for authored content and the separation between Tutorial, rules
+help, and generated play; where its active-learning or navigation decisions conflict with v6, the
+v6 PRD is authoritative.
 
 This document defines the first Tutorial MVP before implementation. It records what the authored tutorial should teach, how active learning should work, how it differs from the old prototype seed puzzle, and which tutorial ideas are intentionally deferred.
 
