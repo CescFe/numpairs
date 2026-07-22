@@ -41,14 +41,17 @@ class LocalizationResourceTest {
         )
         assertTutorialCopy(
             resources = resources,
-            stepOne = "La lista de números va de menor a mayor. " +
-                "Un mismo número puede aparecer más de una vez.",
-            stepOneGuidance = "Introduce 3 para completar la serie del tutorial.",
-            stepTwo = "Cada casilla muestra un resultado. " +
-                "Elige los números y el símbolo que dan ese resultado. " +
-                "Usa los mismos dos números una vez con + y otra con ×.",
-            stepThree = "Resuelve el puzle. Recuerda: la lista de números puede incluir " +
-                "el mismo número más de una vez."
+            expectedCopy = listOf(
+                "Presta atención: vamos a resolver este puzle por ti una sola vez.",
+                "4 × 5 = 20, así que 20 es la casilla de multiplicación de esta pareja.",
+                "La misma pareja también da 4 + 5 = 9.",
+                "Quedan los resultados 5 y 6. Junto al 2, el número oculto tiene que ser 3.",
+                "2 × 3 = 6 completa la multiplicación que falta.",
+                "2 + 3 = 5 completa el puzle.",
+                "Resolviendo ejemplo…",
+                "Resuelve el puzle. Recuerda: la lista de números puede incluir " +
+                    "el mismo número más de una vez."
+            )
         )
         assertEquals("Saltar tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
         assertEquals("Continuar tutorial", resources.getString(R.string.onboarding_continue_tutorial_button))
@@ -87,14 +90,17 @@ class LocalizationResourceTest {
         )
         assertTutorialCopy(
             resources = resources,
-            stepOne = "La llista de números va de menor a major. " +
-                "Un mateix número pot aparéixer més d’una vegada.",
-            stepOneGuidance = "Introdueix 3 per completar la sèrie del tutorial.",
-            stepTwo = "Cada casella mostra un resultat. " +
-                "Tria els números i el símbol que donen eixe resultat. " +
-                "Usa els mateixos dos números una vegada amb + i una altra amb ×.",
-            stepThree = "Resol el puzle. Recorda: la llista de números pot incloure " +
-                "el mateix número més d’una vegada."
+            expectedCopy = listOf(
+                "Para atenció: resoldrem este puzle per tu una sola vegada.",
+                "4 × 5 = 20, així que 20 és la casella de multiplicació d’esta parella.",
+                "La mateixa parella també dona 4 + 5 = 9.",
+                "Queden els resultats 5 i 6. Junt amb el 2, el nombre ocult ha de ser 3.",
+                "2 × 3 = 6 completa la multiplicació que falta.",
+                "2 + 3 = 5 completa el puzle.",
+                "Resolent l’exemple…",
+                "Resol el puzle. Recorda: la llista de números pot incloure " +
+                    "el mateix número més d’una vegada."
+            )
         )
         assertEquals("Omet el tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
         assertEquals("Continua el tutorial", resources.getString(R.string.onboarding_continue_tutorial_button))
@@ -133,13 +139,17 @@ class LocalizationResourceTest {
         )
         assertTutorialCopy(
             resources = resources,
-            stepOne = "The number list goes from smallest to largest. " +
-                "The same number can appear more than once.",
-            stepOneGuidance = "Enter 3 to complete the Tutorial strip.",
-            stepTwo = "Each tile shows a result. Choose the numbers and symbol that make it. " +
-                "Use the same two numbers once with + and once with ×.",
-            stepThree = "Solve the puzzle. Remember: the number list can include " +
-                "the same number more than once."
+            expectedCopy = listOf(
+                "Watch closely: we’ll solve this puzzle for you once.",
+                "4 × 5 = 20, so 20 is this pair’s multiplication tile.",
+                "The same pair also gives 4 + 5 = 9.",
+                "The remaining results are 5 and 6. Paired with 2, the hidden number must be 3.",
+                "2 × 3 = 6 completes the remaining multiplication.",
+                "2 + 3 = 5 completes the puzzle.",
+                "Resolving example…",
+                "Solve the puzzle. Remember: the number list can include " +
+                    "the same number more than once."
+            )
         )
         assertEquals("Skip tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
         assertEquals("Continue tutorial", resources.getString(R.string.onboarding_continue_tutorial_button))
@@ -148,17 +158,19 @@ class LocalizationResourceTest {
         assertEquals("Retry", resources.getString(R.string.onboarding_startup_retry_button))
     }
 
-    private fun assertTutorialCopy(
-        resources: Resources,
-        stepOne: String,
-        stepOneGuidance: String,
-        stepTwo: String,
-        stepThree: String
-    ) {
-        assertEquals(stepOne, resources.getString(R.string.tutorial_strip_introduction_copy))
-        assertEquals(stepOneGuidance, resources.getString(R.string.tutorial_strip_entry_guidance))
-        assertEquals(stepTwo, resources.getString(R.string.tutorial_tiles_introduction_copy))
-        assertEquals(stepThree, resources.getString(R.string.tutorial_repeated_value_practice_copy))
+    private fun assertTutorialCopy(resources: Resources, expectedCopy: List<String>) {
+        val copyResIds = listOf(
+            R.string.tutorial_worked_example_introduction_copy,
+            R.string.tutorial_worked_example_product_four_five_copy,
+            R.string.tutorial_worked_example_sum_four_five_copy,
+            R.string.tutorial_worked_example_reveal_three_copy,
+            R.string.tutorial_worked_example_product_two_three_copy,
+            R.string.tutorial_worked_example_sum_two_three_copy,
+            R.string.tutorial_worked_example_progress,
+            R.string.tutorial_repeated_value_practice_copy
+        )
+
+        assertEquals(expectedCopy, copyResIds.map(resources::getString))
     }
 
     private fun assertTutorialExplanationCopy(

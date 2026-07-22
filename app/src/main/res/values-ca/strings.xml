@@ -67,9 +67,13 @@
     <string name="tutorial_pair_explanation_copy">Agrupa els nombres de la sèrie per parelles. Cada parella completa dues caselles: una suma i una multiplicació.</string>
     <string name="tutorial_previous_step_action">Enrere</string>
     <string name="tutorial_next_step_action">Següent</string>
-    <string name="tutorial_strip_introduction_copy">La llista de números va de menor a major. Un mateix número pot aparéixer més d’una vegada.</string>
-    <string name="tutorial_strip_entry_guidance">Introdueix 3 per completar la sèrie del tutorial.</string>
-    <string name="tutorial_tiles_introduction_copy">Cada casella mostra un resultat. Tria els números i el símbol que donen eixe resultat. Usa els mateixos dos números una vegada amb + i una altra amb ×.</string>
+    <string name="tutorial_worked_example_introduction_copy">Para atenció: resoldrem este puzle per tu una sola vegada.</string>
+    <string name="tutorial_worked_example_product_four_five_copy">4 × 5 = 20, així que 20 és la casella de multiplicació d’esta parella.</string>
+    <string name="tutorial_worked_example_sum_four_five_copy">La mateixa parella també dona 4 + 5 = 9.</string>
+    <string name="tutorial_worked_example_reveal_three_copy">Queden els resultats 5 i 6. Junt amb el 2, el nombre ocult ha de ser 3.</string>
+    <string name="tutorial_worked_example_product_two_three_copy">2 × 3 = 6 completa la multiplicació que falta.</string>
+    <string name="tutorial_worked_example_sum_two_three_copy">2 + 3 = 5 completa el puzle.</string>
+    <string name="tutorial_worked_example_progress">Resolent l’exemple…</string>
     <string name="tutorial_repeated_value_practice_copy">Resol el puzle. Recorda: la llista de números pot incloure el mateix número més d’una vegada.</string>
     <string name="onboarding_skip_tutorial_action">Omet el tutorial</string>
     <string name="onboarding_skip_tutorial_title">Vols ometre el tutorial?</string>

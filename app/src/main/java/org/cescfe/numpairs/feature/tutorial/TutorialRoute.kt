@@ -19,17 +19,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.MotionDurationScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
@@ -49,6 +52,7 @@ fun TutorialRoute(
     mode: TutorialMode = TutorialMode.LEARN_BASICS,
     startStepIndex: Int = 0,
     saveProgressAcrossRecreation: Boolean = true,
+    sequentialWorkedExamplePlaybackOverride: Boolean? = null,
     onProgressCheckpointReached: suspend (TutorialProgressCheckpoint) -> Unit = {},
     onTutorialCompleted: (() -> Unit)? = null,
     onSkipTutorialRequested: (() -> Unit)? = null,
@@ -75,17 +79,30 @@ fun TutorialRoute(
         mutableIntStateOf(startStepIndex - 1)
     }
     var latestGameUiSnapshot by remember(playbackKey) { mutableStateOf<TutorialGameUiSnapshot?>(null) }
+    val coroutineScope = rememberCoroutineScope()
     val currentOnProgressCheckpointReached by rememberUpdatedState(onProgressCheckpointReached)
     val currentOnTutorialCompleted by rememberUpdatedState(onTutorialCompleted)
     val currentStep = steps[currentStepIndex]
     val currentScenario = TutorialContent.scenario(currentStep.scenarioId)
-    val currentEntryPuzzle = currentStep.entryPuzzle ?: currentScenario.initialPuzzle
+    val workedExample = currentStep.requiredAction as? TutorialRequiredAction.PlayWorkedExample
+    var workedExampleFrameIndex by remember(playbackKey, currentStepIndex) { mutableIntStateOf(0) }
+    var isCheckpointNavigationInProgress by remember(playbackKey, currentStepIndex) {
+        mutableStateOf(false)
+    }
+    val workedExampleFrame = workedExample?.frames?.get(workedExampleFrameIndex)
+    val presentedStep = workedExampleFrame?.let { frame ->
+        currentStep.copy(
+            playerFacingCopyResId = frame.playerFacingCopyResId,
+            highlightedTargets = frame.highlightedTargets,
+            entryPuzzle = frame.puzzle
+        )
+    } ?: currentStep
+    val currentEntryPuzzle = presentedStep.entryPuzzle ?: currentScenario.initialPuzzle
+    val isWorkedExamplePlaybackActive = workedExample != null &&
+        workedExampleFrameIndex < workedExample.frames.lastIndex
     val latestGameUiState = latestGameUiSnapshot
         ?.takeIf { snapshot -> snapshot.scenarioId == currentScenario.id }
         ?.uiState
-    val stripItemEntryGuidance = currentStep.stripEntryGuidanceResId?.let { guidanceResId ->
-        stringResource(guidanceResId)
-    }
 
     LaunchedEffect(currentStepIndex, latestGameUiState) {
         val uiState = latestGameUiState ?: return@LaunchedEffect
@@ -110,6 +127,23 @@ fun TutorialRoute(
         }
     }
 
+    LaunchedEffect(currentStepIndex, workedExample, sequentialWorkedExamplePlaybackOverride) {
+        val frames = workedExample?.frames ?: return@LaunchedEffect
+        workedExampleFrameIndex = 0
+        val systemAllowsSequentialPlayback = coroutineContext[MotionDurationScale]?.scaleFactor != 0f
+        val shouldPlaySequentially = sequentialWorkedExamplePlaybackOverride ?: systemAllowsSequentialPlayback
+
+        if (!shouldPlaySequentially) {
+            workedExampleFrameIndex = frames.lastIndex
+            return@LaunchedEffect
+        }
+
+        for (frameIndex in 1..frames.lastIndex) {
+            delay(TUTORIAL_WORKED_EXAMPLE_FRAME_DELAY)
+            workedExampleFrameIndex = frameIndex
+        }
+    }
+
     GameRoute(
         title = stringResource(R.string.tutorial_screen_title),
         initialPuzzle = currentEntryPuzzle,
@@ -123,13 +157,12 @@ fun TutorialRoute(
             observedScenarioId = latestGameUiSnapshot?.scenarioId,
             isRequiredPlayback = onTutorialCompleted != null
         ),
-        isBoardVisible = currentStep.isBoardVisible,
-        stripItemEntryGuidance = stripItemEntryGuidance,
-        interactionPolicy = currentStep.toInteractionPolicy(
+        isBoardVisible = presentedStep.isBoardVisible,
+        interactionPolicy = presentedStep.toInteractionPolicy(
             scenario = currentScenario,
             uiState = latestGameUiState
         ),
-        highlightState = currentStep.toHighlightState(
+        highlightState = presentedStep.toHighlightState(
             scenario = currentScenario,
             uiState = latestGameUiState
         ),
@@ -140,16 +173,27 @@ fun TutorialRoute(
         },
         contentBeforePuzzle = {
             TutorialInstructionSurface(
-                currentStep = currentStep,
+                currentStep = presentedStep,
                 currentStepNumber = currentStepIndex + 1,
                 totalSteps = steps.size,
-                canNavigateBack = currentStepIndex > 0,
+                isWorkedExamplePlaybackActive = isWorkedExamplePlaybackActive,
+                canNavigateBack = currentStepIndex > 0 && !isCheckpointNavigationInProgress,
+                canNavigateNext = !isCheckpointNavigationInProgress,
                 onNavigateBack = {
                     currentStepIndex -= 1
                 },
                 onNavigateNext = {
-                    if (currentStepIndex < steps.lastIndex) {
+                    val progressCheckpoint = currentStep.progressCheckpoint
+
+                    if (progressCheckpoint == null && currentStepIndex < steps.lastIndex) {
                         currentStepIndex += 1
+                    } else if (!isCheckpointNavigationInProgress && currentStepIndex < steps.lastIndex) {
+                        isCheckpointNavigationInProgress = true
+                        coroutineScope.launch {
+                            currentOnProgressCheckpointReached(requireNotNull(progressCheckpoint))
+                            currentStepIndex += 1
+                            isCheckpointNavigationInProgress = false
+                        }
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -183,7 +227,9 @@ private fun TutorialInstructionSurface(
     currentStep: TutorialStep,
     currentStepNumber: Int,
     totalSteps: Int,
+    isWorkedExamplePlaybackActive: Boolean,
     canNavigateBack: Boolean,
+    canNavigateNext: Boolean,
     onNavigateBack: () -> Unit,
     onNavigateNext: () -> Unit,
     modifier: Modifier = Modifier
@@ -216,11 +262,16 @@ private fun TutorialInstructionSurface(
                 color = MaterialTheme.colorScheme.onSurface
             )
             if (currentStep.completionPredicate == TutorialStepCompletionPredicate.ManualAdvance) {
-                TutorialStepNavigation(
-                    canNavigateBack = canNavigateBack,
-                    onNavigateBack = onNavigateBack,
-                    onNavigateNext = onNavigateNext
-                )
+                if (isWorkedExamplePlaybackActive) {
+                    TutorialWorkedExampleProgress()
+                } else {
+                    TutorialStepNavigation(
+                        canNavigateBack = canNavigateBack,
+                        canNavigateNext = canNavigateNext,
+                        onNavigateBack = onNavigateBack,
+                        onNavigateNext = onNavigateNext
+                    )
+                }
             }
         }
     }
@@ -229,6 +280,7 @@ private fun TutorialInstructionSurface(
 @Composable
 private fun TutorialStepNavigation(
     canNavigateBack: Boolean,
+    canNavigateNext: Boolean,
     onNavigateBack: () -> Unit,
     onNavigateNext: () -> Unit,
     modifier: Modifier = Modifier
@@ -252,6 +304,7 @@ private fun TutorialStepNavigation(
         }
         TextButton(
             onClick = onNavigateNext,
+            enabled = canNavigateNext,
             modifier = Modifier
                 .heightIn(min = 48.dp)
                 .testTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
@@ -261,6 +314,23 @@ private fun TutorialStepNavigation(
                 style = MaterialTheme.typography.labelLarge
             )
         }
+    }
+}
+
+@Composable
+private fun TutorialWorkedExampleProgress(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .testTag(TutorialScreenTestTags.WORKED_EXAMPLE_PROGRESS),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = stringResource(R.string.tutorial_worked_example_progress),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -302,33 +372,12 @@ private fun TutorialRequiredAction.toInteractionPolicy(
     uiState: GameUiState?,
     highlightedStripEntryIds: Set<Int>
 ): GameInteractionPolicy = when (this) {
-    TutorialRequiredAction.NoInteraction -> GameInteractionPolicy(
-        canTapStripItem = { false },
-        canConfirmStripItemEntry = { _, _ -> false },
-        canTapTileLeftOperand = { false },
-        canTapTileRightOperand = { false },
-        canTapTileOperator = { false },
-        canTapTileReset = { false },
-        canConfirmTileOperand = { _, _, _ -> false },
-        canConfirmTileOperator = { _, _ -> false }
-    )
-    is TutorialRequiredAction.EnterStripValue -> GameInteractionPolicy(
-        canTapStripItem = { index -> index == stripEntryIndex },
-        canConfirmStripItemEntry = { index, value ->
-            index == stripEntryIndex && value == this.value
-        },
-        canTapTileLeftOperand = { false },
-        canTapTileRightOperand = { false },
-        canTapTileOperator = { false },
-        canTapTileReset = { false },
-        canConfirmTileOperand = { _, _, _ -> false },
-        canConfirmTileOperator = { _, _ -> false }
-    )
+    TutorialRequiredAction.NoInteraction,
+    is TutorialRequiredAction.PlayWorkedExample -> noInteractionPolicy()
     is TutorialRequiredAction.CompleteTileExpression -> toInteractionPolicy(
         scenario = scenario,
         highlightedStripEntryIds = highlightedStripEntryIds
     )
-    is TutorialRequiredAction.CompleteTileWithNormalInteractions -> toInteractionPolicy()
     is TutorialRequiredAction.CompleteTileExpressions -> toInteractionPolicy(
         scenario = scenario,
         highlightedStripEntryIds = highlightedStripEntryIds
@@ -340,17 +389,16 @@ private fun TutorialRequiredAction.toInteractionPolicy(
     TutorialRequiredAction.CompleteScenario -> GameInteractionPolicy.AllowAll
 }
 
-private fun TutorialRequiredAction.CompleteTileWithNormalInteractions.toInteractionPolicy(): GameInteractionPolicy =
-    GameInteractionPolicy(
-        canTapStripItem = { false },
-        canConfirmStripItemEntry = { _, _ -> false },
-        canTapTileLeftOperand = { index -> index == tileIndex },
-        canTapTileRightOperand = { index -> index == tileIndex },
-        canTapTileOperator = { index -> index == tileIndex },
-        canTapTileReset = { index -> index == tileIndex },
-        canConfirmTileOperand = { index, _, _ -> index == tileIndex },
-        canConfirmTileOperator = { index, _ -> index == tileIndex }
-    )
+private fun noInteractionPolicy(): GameInteractionPolicy = GameInteractionPolicy(
+    canTapStripItem = { false },
+    canConfirmStripItemEntry = { _, _ -> false },
+    canTapTileLeftOperand = { false },
+    canTapTileRightOperand = { false },
+    canTapTileOperator = { false },
+    canTapTileReset = { false },
+    canConfirmTileOperand = { _, _, _ -> false },
+    canConfirmTileOperator = { _, _ -> false }
+)
 
 private fun TutorialRequiredAction.CompleteTileExpression.toInteractionPolicy(
     scenario: TutorialScenario,
@@ -563,3 +611,4 @@ private fun expressionSlotHighlights(tileIndex: Int): Set<GameTileExpressionSlot
 
 private const val TUTORIAL_GAME_SESSION_KEY = "tutorial-walkthrough"
 private val TUTORIAL_STEP_ADVANCE_DELAY = 350.milliseconds
+private val TUTORIAL_WORKED_EXAMPLE_FRAME_DELAY = 900.milliseconds

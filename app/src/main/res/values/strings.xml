@@ -67,9 +67,13 @@
     <string name="tutorial_pair_explanation_copy">Group the strip numbers into pairs. Each pair completes two tiles: one addition and one multiplication.</string>
     <string name="tutorial_previous_step_action">Back</string>
     <string name="tutorial_next_step_action">Next</string>
-    <string name="tutorial_strip_introduction_copy">The number list goes from smallest to largest. The same number can appear more than once.</string>
-    <string name="tutorial_strip_entry_guidance">Enter 3 to complete the Tutorial strip.</string>
-    <string name="tutorial_tiles_introduction_copy">Each tile shows a result. Choose the numbers and symbol that make it. Use the same two numbers once with + and once with ×.</string>
+    <string name="tutorial_worked_example_introduction_copy">Watch closely: we’ll solve this puzzle for you once.</string>
+    <string name="tutorial_worked_example_product_four_five_copy">4 × 5 = 20, so 20 is this pair’s multiplication tile.</string>
+    <string name="tutorial_worked_example_sum_four_five_copy">The same pair also gives 4 + 5 = 9.</string>
+    <string name="tutorial_worked_example_reveal_three_copy">The remaining results are 5 and 6. Paired with 2, the hidden number must be 3.</string>
+    <string name="tutorial_worked_example_product_two_three_copy">2 × 3 = 6 completes the remaining multiplication.</string>
+    <string name="tutorial_worked_example_sum_two_three_copy">2 + 3 = 5 completes the puzzle.</string>
+    <string name="tutorial_worked_example_progress">Resolving example…</string>
     <string name="tutorial_repeated_value_practice_copy">Solve the puzzle. Remember: the number list can include the same number more than once.</string>
     <string name="onboarding_skip_tutorial_action">Skip tutorial</string>
     <string name="onboarding_skip_tutorial_title">Skip the tutorial?</string>

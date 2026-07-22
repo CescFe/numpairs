@@ -80,23 +80,11 @@ class RequiredOnboardingNavigationTest {
     }
 
     @Test
-    fun interruptedFirstRunResumesAfterEachCompletedCheckpoint() {
+    fun interruptedFirstRunResumesAtIndependentPracticeAfterTheWorkedExample() {
         val repository = FakeOnboardingRepository(
-            incompleteOnboardingState(OnboardingStageCheckpoint.STAGE_ONE)
+            incompleteOnboardingState(OnboardingStageCheckpoint.EXPLANATION_COMPLETED)
         )
         setContent(repository)
-
-        composeTestRule
-            .onNodeWithTag(TutorialScreenTestTags.STEP_COPY)
-            .assert(hasText(string(R.string.tutorial_tiles_introduction_copy)))
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.stripItem(1))
-            .assertContentDescriptionEquals(
-                string(R.string.strip_item_player_entered_content_description, "3")
-            )
-        assertRequiredSkipActionDisplayed()
-
-        repository.onboardingState.value = incompleteOnboardingState(OnboardingStageCheckpoint.STAGE_TWO)
 
         composeTestRule
             .onNodeWithTag(TutorialScreenTestTags.STEP_COPY)
@@ -108,18 +96,21 @@ class RequiredOnboardingNavigationTest {
     }
 
     @Test
-    fun completedTutorialStepsPersistMonotonicResumeCheckpoints() {
+    fun completingTheWorkedExamplePersistsThePracticeResumeCheckpoint() {
         val repository = FakeOnboardingRepository(incompleteOnboardingState())
         setContent(repository)
 
         advanceThroughExplanation()
-        enterStripValue(index = 1, value = "3")
-        waitForTutorialCopy(R.string.tutorial_tiles_introduction_copy)
-        assertEquals(OnboardingStageCheckpoint.STAGE_ONE, repository.onboardingState.value.lastCompletedStage)
-
-        completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
+        waitForTutorialCopy(R.string.tutorial_worked_example_sum_two_three_copy)
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
+            .performScrollTo()
+            .performClick()
         waitForTutorialCopy(R.string.tutorial_repeated_value_practice_copy)
-        assertEquals(OnboardingStageCheckpoint.STAGE_TWO, repository.onboardingState.value.lastCompletedStage)
+        assertEquals(
+            OnboardingStageCheckpoint.EXPLANATION_COMPLETED,
+            repository.onboardingState.value.lastCompletedStage
+        )
     }
 
     @Test
@@ -169,9 +160,9 @@ class RequiredOnboardingNavigationTest {
     }
 
     @Test
-    fun completingStepThreePersistsCompletedOutcomeAndOpensMenuDirectly() {
+    fun completingIndependentPracticePersistsCompletedOutcomeAndOpensMenuDirectly() {
         val repository = FakeOnboardingRepository(
-            incompleteOnboardingState(OnboardingStageCheckpoint.STAGE_TWO)
+            incompleteOnboardingState(OnboardingStageCheckpoint.EXPLANATION_COMPLETED)
         )
         setContent(repository)
 
@@ -349,6 +340,6 @@ class RequiredOnboardingNavigationTest {
     }
 
     private companion object {
-        const val ONBOARDING_WAIT_TIMEOUT_MILLIS = 5_000L
+        const val ONBOARDING_WAIT_TIMEOUT_MILLIS = 10_000L
     }
 }

@@ -8,7 +8,6 @@ import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
-import org.cescfe.numpairs.feature.game.presentation.StripItemVisualStyle
 
 enum class TutorialMode {
     LEARN_BASICS,
@@ -16,8 +15,7 @@ enum class TutorialMode {
 }
 
 enum class TutorialProgressCheckpoint {
-    STRIP_INTRODUCTION_COMPLETED,
-    TILES_INTRODUCTION_COMPLETED
+    WORKED_EXAMPLE_COMPLETED
 }
 
 data class TutorialScenario(
@@ -59,15 +57,11 @@ data class TutorialStep(
     val completionPredicate: TutorialStepCompletionPredicate,
     val progressCheckpoint: TutorialProgressCheckpoint? = null,
     val isBoardVisible: Boolean = true,
-    @param:StringRes val stripEntryGuidanceResId: Int? = null,
     val entryPuzzle: Puzzle? = null
 ) {
     init {
         require(playerFacingCopyResId != 0) {
             "Tutorial step copy string resource must be defined."
-        }
-        require(stripEntryGuidanceResId == null || stripEntryGuidanceResId != 0) {
-            "Tutorial strip entry guidance must reference a defined string resource."
         }
     }
 
@@ -110,21 +104,10 @@ sealed interface TutorialHighlightTarget {
 sealed interface TutorialRequiredAction {
     data object NoInteraction : TutorialRequiredAction
 
-    data class EnterStripValue(val stripEntryIndex: Int, val value: Int) : TutorialRequiredAction {
+    data class PlayWorkedExample(val frames: List<TutorialWorkedExampleFrame>) : TutorialRequiredAction {
         init {
-            require(stripEntryIndex >= 0) {
-                "Tutorial strip entry action index must be non-negative."
-            }
-            require(value > 0) {
-                "Tutorial strip entry action value must be positive."
-            }
-        }
-    }
-
-    data class CompleteTileWithNormalInteractions(val tileIndex: Int) : TutorialRequiredAction {
-        init {
-            require(tileIndex >= 0) {
-                "Tutorial tile action index must be non-negative."
+            require(frames.size >= 2) {
+                "Tutorial worked example must contain an initial frame and at least one resolved frame."
             }
         }
     }
@@ -176,29 +159,23 @@ sealed interface TutorialRequiredAction {
     data object CompleteScenario : TutorialRequiredAction
 }
 
+data class TutorialWorkedExampleFrame(
+    @param:StringRes val playerFacingCopyResId: Int,
+    val puzzle: Puzzle,
+    val highlightedTargets: List<TutorialHighlightTarget>
+) {
+    init {
+        require(playerFacingCopyResId != 0) {
+            "Tutorial worked-example frame copy string resource must be defined."
+        }
+    }
+}
+
 sealed interface TutorialStepCompletionPredicate {
     fun isSatisfiedBy(uiState: GameUiState): Boolean
 
     data object ManualAdvance : TutorialStepCompletionPredicate {
         override fun isSatisfiedBy(uiState: GameUiState): Boolean = false
-    }
-
-    data class StripValueEntered(val stripEntryIndex: Int, val value: Int) : TutorialStepCompletionPredicate {
-        init {
-            require(stripEntryIndex >= 0) {
-                "Tutorial strip completion index must be non-negative."
-            }
-            require(value > 0) {
-                "Tutorial strip completion value must be positive."
-            }
-        }
-
-        override fun isSatisfiedBy(uiState: GameUiState): Boolean {
-            val stripItem = uiState.stripItems.getOrNull(stripEntryIndex) ?: return false
-
-            return stripItem.label == value.toString() &&
-                stripItem.visualStyle == StripItemVisualStyle.PLAYER_ENTERED
-        }
     }
 
     data class TileExpressionCompleted(
