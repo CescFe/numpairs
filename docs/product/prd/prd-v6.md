@@ -8,13 +8,13 @@ NumPairs is a native Android arithmetic deduction puzzle. Players complete hidde
 
 v3 introduced authored Tutorial content, guided interactions, rules help, and optional solving tips. v5 expanded replayable play to generated `4 Pairs Low` and `8 Pairs Medium` modes.
 
-Guided First Run makes Tutorial the recommended route before the normal menu on a fresh installation. Its purpose is focused: reduce the risk that a new player accidentally starts generated play without learning the interface, familiarize the player with the strip and tiles, and teach the basic pair rules. Tutorial completion is not a certification gate; a player may explicitly skip after acknowledging the recommendation.
+Guided First Run makes Tutorial the recommended route before the normal menu on a fresh installation. Its purpose is focused: reduce the risk that a new player accidentally starts generated play without understanding the interface, familiarize the player with the strip and tiles, and teach the basic pair rules. Tutorial completion is not a certification gate; a player may explicitly skip after acknowledging the recommendation.
 
 ---
 
 ## Product Goal
 
-Give first-time players a concise, action-led introduction to the strip, tiles, and sum/product pair rule before they choose a generated mode, while preserving an explicit and informed route to skip Tutorial.
+Give first-time players a concise observe-then-practice introduction to the strip, tiles, and sum/product pair rule before they choose a generated mode, while preserving an explicit and informed route to skip Tutorial.
 
 ---
 
@@ -25,7 +25,9 @@ Opening the normal menu on a fresh installation lets an inexperienced player ent
 Guided First Run should therefore:
 
 - present Tutorial before Menu by default on a fresh installation
-- teach the minimum interface and rules through real actions
+- explain the minimum interface and rules through focused puzzle states
+- demonstrate how those rules combine in one reasoned worked example
+- let the player apply the complete mental model through normal interactions
 - make the recommendation clear without making completion mandatory
 - require explicit confirmation before an incomplete Tutorial is skipped
 - keep the same Tutorial safely replayable after Menu is unlocked
@@ -44,10 +46,11 @@ Guided First Run should therefore:
 
 ## Product Principles
 
-- Teach through real player actions rather than passive explanation
+- Give each explanatory step one concise concept and one matching visual focus
+- Use one short worked example to connect the concepts before independent practice
 - Use Tutorial to introduce the product, not to certify the player
 - Recommend learning without removing informed player choice
-- Introduce the strip before adding tile complexity
+- Show the complete puzzle surface while introducing its parts progressively
 - Keep copy concise and tied to the current authored puzzle state
 - Preserve normal gameplay controls and visual language wherever possible
 - Keep basic Tutorial, static rules help, and advanced solving guidance distinct
@@ -63,7 +66,7 @@ Guided First Run should therefore:
 - Requesting skip opens a confirmation dialog instead of unlocking Menu immediately
 - The dialog recommends continuing Tutorial and offers an explicit `Skip anyway` alternative
 - Confirming skip opens Menu without a final check
-- Completing the three Tutorial steps opens Menu without a separate validation stage
+- Completing the independent Tutorial practice opens Menu without a separate validation stage
 - Closing or restarting the application cannot expose Menu while first-run Tutorial remains unresolved
 - Completed and skipped players reach Menu on later launches
 - Completed or skipped players can voluntarily replay the same Tutorial from its beginning
@@ -81,7 +84,7 @@ The fresh-install route is:
 Splash -> Tutorial -> Menu
 ```
 
-Menu is reached when the player either completes Step 3 or confirms `Skip anyway`. There is no separate final-validation route.
+Menu is reached when the player either completes the independent practice puzzle or confirms `Skip anyway`. There is no separate final-validation route.
 
 ### Skip Confirmation
 
@@ -100,53 +103,42 @@ Dismissing the dialog or selecting `Continue tutorial` preserves the current ste
 
 ## Tutorial Content
 
-Learn basics contains exactly three authored steps.
+Learn Basics has two parts: a non-interactive explanation with one worked example, followed by independent practice.
 
-### Step 1 - Introduce The Strip
+### Part 1 - Explain And Demonstrate
 
-Show the strip without board tiles:
-
-```text
-2, ?, 4, 5
-```
-
-Explain that the strip contains positive integers ordered from lowest to highest and that repeated values are allowed. Avoid describing the strip as strictly increasing.
-
-Required action:
-
-- tap the hidden strip entry
-- enter `3`
-
-While the entry editor is open, replace generic range guidance with concise Tutorial guidance asking the player to enter `3`. If the player provides invalid input, feedback must remain truthful about the actual validation problem. Tutorial copy must not imply that `3` is the only value allowed by the general ascending-order rule.
-
-### Step 2 - Introduce Tiles And Pairs
-
-Preserve the visually completed strip:
+Keep the complete authored puzzle visible in this player-facing initial state throughout the explanation:
 
 ```text
-2, 3, 4, 5
+strip: 2, ?, 4, 5
+tiles: ? ? ? = 5
+       ? ? ? = 6
+       ? ? ? = 9
+       ? ? ? = 20
 ```
 
-Reveal four tiles in this authored state:
+Every explanatory step disables strip, operand, operator, and reset interaction. The player advances or returns manually with accessible `Back` and `Next` actions below the current copy. The controls keep stable layout and touch targets; `Back` is unavailable on the first explanation without moving `Next`.
 
-```text
-? ? ? = 5
-2 × 3 = 6
-4 + 5 = 9
-4 × 5 = 20
-```
+Use one short message and one matching focus per step:
 
-Explain that a tile has two operands, one operator, and a visible result. Explain that strip entries form pairs and that each pair creates one addition result and one multiplication result.
+1. Show the whole puzzle and explain that the objective is to discover every hidden number and symbol.
+2. Highlight the strip and explain that its positive integers are ordered from lowest to highest, may repeat, and may be hidden.
+3. Highlight one tile and explain that its visible result is produced by two operands and one operator in the hidden expression.
+4. Highlight strip entries `4` and `5` with result tiles `9` and `20`; explain that each pair completes two tiles, one sum and one product.
 
-Required action:
+The final explanation step starts a deterministic worked example from the same unresolved state. Use short reasoning and focused highlights while applying these transitions in order:
 
-- use the normal operand selector to place `2` and `3` in either operand slot
-- expose both supported operations in the operator selector so the player can explore the normal choice
-- complete the unresolved tile as either `2 + 3 = 5` or `3 + 2 = 5`
+1. `4 × 5 = 20`: the larger product is resolved first.
+2. `4 + 5 = 9`: the same pair also completes its sum.
+3. Reveal strip value `3`: with `2`, it produces the remaining results `5` and `6`.
+4. `2 × 3 = 6`: resolve the remaining product.
+5. `2 + 3 = 5`: resolve the remaining sum.
 
-The resolved `2 × 3 = 6` tile acts as the complementary example for the same pair.
+The puzzle remains non-interactive during playback. While staged playback is active, preserve the navigation footer space but replace or disable `Back` and `Next` with a clear progress state. Restore both actions after completion so the player may return and replay the example or continue. Returning to the worked-example step restarts it from the unresolved state.
 
-### Step 3 - Solve A Two-Pair Puzzle
+When the system requests reduced motion, present the same ordered reasoning and final explained state without staged delays. Reduced motion changes pacing, not content or completion meaning.
+
+### Part 2 - Solve A Two-Pair Puzzle
 
 Start a clean authored two-pair puzzle with this strip:
 
@@ -168,7 +160,9 @@ Show unresolved tiles with results in this order:
 
 These results correspond to one addition and one multiplication for the `1`/`2` pair and one addition and one multiplication for the other `2`/`3` pair.
 
-Explain that the player should solve the complete puzzle and remind them that the strip may contain repeated values. Allow normal strip, operand, operator, correction, reset, and validation behavior.
+Tell the player that it is their turn, that tapping any unknown starts an interaction, and that strip values may repeat. Present multiplication as a useful starting heuristic rather than a universal rule. Initially focus the known `2` and `3` entries with result tile `6` without restricting the player's first action; remove that cue after the player commits the first puzzle change.
+
+Allow normal strip, operand, operator, correction, reset, and validation behavior from the beginning.
 
 The two strip entries that display `2` remain distinct stable entries. Because exchanging those equal-valued entries produces an equivalent player-visible solution, Tutorial completion must accept either valid stable-entry assignment as long as all shared puzzle rules are satisfied.
 
@@ -182,9 +176,10 @@ Solving the puzzle completes Tutorial. Required first-run playback persists the 
 - Distinguish unresolved, Tutorial-completed, and Tutorial-skipped outcomes
 - Treat absent local state as an unresolved first run
 - Preserve Menu access after Tutorial completion or explicit skip
-- Record the last fully completed Tutorial step as a resumable checkpoint
-- Resume at the next step after application restart
-- Restart the current step if the application closes before that step is completed
+- Record stable, meaning-based Tutorial checkpoints rather than list positions
+- Record the explanation boundary only after the worked example completes
+- Resume independent practice after a completed worked example
+- Restart the current explanation or practice boundary if the application closes before that boundary is completed
 - Do not persist partial strip or tile edits within an incomplete step
 - Keep onboarding state independent from Tutorial replay state and generated sessions
 - Treat uninstalling or clearing all application data as a new local first run
@@ -196,7 +191,7 @@ Solving the puzzle completes Tutorial. Required first-run playback persists the 
 
 - Keep `How to play` available from the unlocked normal menu
 - Start voluntary replay from Step 1 regardless of stored first-run checkpoints
-- Use the same three authored Tutorial steps for first run, Menu replay, and the in-game `Play tutorial` entry
+- Use the same two-part Learn Basics Tutorial for first run, Menu replay, and the in-game `Play tutorial` entry
 - Allow voluntary playback to return to the already-unlocked Menu or underlying generated puzzle at any time
 - Never clear, downgrade, or otherwise change a resolved first-run outcome during replay
 - Preserve Solving Tips Practice as separate advanced learning content
@@ -211,25 +206,26 @@ Solving the puzzle completes Tutorial. Required first-run playback persists the 
 - Contextual help triggered by repeated errors or inactivity
 - Solver-backed hints or next-move suggestions
 - Puzzle-specific answer reveal
-- Automatic strip entry, operand placement, or puzzle completion
+- Automatic answer reveal or completion outside the authored non-interactive worked example
 - New generated puzzle modes, sizes, or difficulty profiles
 - Changes to core NumPairs rules or operators
 - Changes to generated puzzle construction
 - Persistence of partial edits inside an incomplete Tutorial step
 - User accounts, cloud synchronization, analytics, or remote onboarding configuration
 - Scoring, timers, streaks, achievements, or progression systems
-- Advanced Tutorial animations or character-led instruction
+- Character-led instruction, narration, or decorative advanced Tutorial animation
 
 ---
 
 ## Success Criteria
 
 - A fresh installation starts Tutorial instead of Menu
-- A new player encounters the strip before tile interaction is introduced
-- Tutorial teaches strip ordering, repeated values, tile anatomy, and the one-sum/one-product pair rule through real actions
+- A new player sees the complete puzzle while focused steps explain the objective, strip, tile anatomy, and one-sum/one-product pair rule
+- The worked example makes every deduction visible before changing the authored puzzle state
+- Independent practice teaches the real interaction model through unrestricted player actions
 - `Skip tutorial` is available from Step 1 and always requires explicit confirmation
 - Confirmed skip opens Menu without final validation
-- Solving the Step 3 authored puzzle completes Tutorial and opens Menu
+- Solving the authored repeated-value practice puzzle completes Tutorial and opens Menu
 - Completion and skip outcomes persist reliably across application restarts
 - Interrupted unresolved playback resumes after completed steps
 - Completed and skipped players retain Menu access
