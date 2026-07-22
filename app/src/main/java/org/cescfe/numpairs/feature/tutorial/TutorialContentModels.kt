@@ -15,6 +15,11 @@ enum class TutorialMode {
     SOLVING_TIPS_PRACTICE
 }
 
+enum class TutorialProgressCheckpoint {
+    STRIP_INTRODUCTION_COMPLETED,
+    TILES_INTRODUCTION_COMPLETED
+}
+
 data class TutorialScenario(
     val id: TutorialScenarioId,
     val stripValues: List<Int>,
@@ -52,6 +57,7 @@ data class TutorialStep(
     val highlightedTargets: List<TutorialHighlightTarget>,
     val requiredAction: TutorialRequiredAction,
     val completionPredicate: TutorialStepCompletionPredicate,
+    val progressCheckpoint: TutorialProgressCheckpoint? = null,
     val isBoardVisible: Boolean = true,
     @param:StringRes val stripEntryGuidanceResId: Int? = null,
     val entryPuzzle: Puzzle? = null
