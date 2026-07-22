@@ -105,7 +105,7 @@ class OnboardingStartupCoordinatorTest {
     )
 
     private fun completedState(outcome: FirstRunTutorialOutcome): OnboardingState = OnboardingState(
-        lastCompletedStage = OnboardingStageCheckpoint.STAGE_TWO,
+        lastCompletedStage = OnboardingStageCheckpoint.EXPLANATION_COMPLETED,
         firstRunTutorialOutcome = outcome
     )
 

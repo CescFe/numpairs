@@ -119,60 +119,78 @@ class TutorialRouteTest {
     }
 
     @Test
-    fun stepOneShowsTutorialGuidanceAndKeepsInvalidRangeFeedbackTruthful() {
-        setContent()
+    fun workedExamplePlaysInOrderWhileNavigationAndPuzzleInteractionsAreLocked() {
+        composeTestRule.mainClock.autoAdvance = false
+        setContent(sequentialWorkedExamplePlayback = true)
         advanceThroughExplanation()
 
+        assertWorkedExampleFrame(R.string.tutorial_worked_example_introduction_copy)
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.WORKED_EXAMPLE_PROGRESS)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.PREVIOUS_STEP_ACTION)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
+            .assertDoesNotExist()
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.stripItem(1))
-            .performClick()
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_RANGE)
-            .assert(hasText(string(R.string.tutorial_strip_entry_guidance)))
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
-            .performTextInput("5")
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_RANGE)
-            .assert(hasText(string(R.string.strip_entry_invalid_range_bounded, 2, 4)))
+            .assertHasNoClickAction()
+        assertTileExpressionSlotsHaveNoClickAction(tileIndex = 3)
 
-        assertStepDisplayed(stepIndex = GUIDED_STRIP_STEP_INDEX)
+        advanceWorkedExampleFrame(R.string.tutorial_worked_example_product_four_five_copy)
+        assertTileExpression(tileIndex = 3, operator = Operator.MULTIPLICATION, leftValue = "4", rightValue = "5")
+        advanceWorkedExampleFrame(R.string.tutorial_worked_example_sum_four_five_copy)
+        assertTileExpression(tileIndex = 2, operator = Operator.ADDITION, leftValue = "4", rightValue = "5")
+        advanceWorkedExampleFrame(R.string.tutorial_worked_example_reveal_three_copy)
+        assertFocusedIntroductionStripDisplayed(expectedSecondValue = "3", isSecondValuePlayerEntered = true)
+        advanceWorkedExampleFrame(R.string.tutorial_worked_example_product_two_three_copy)
+        assertTileExpression(tileIndex = 1, operator = Operator.MULTIPLICATION)
+        advanceWorkedExampleFrame(R.string.tutorial_worked_example_sum_two_three_copy)
+        assertTileExpression(tileIndex = 0, operator = Operator.ADDITION)
+
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.WORKED_EXAMPLE_PROGRESS)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.PREVIOUS_STEP_ACTION)
+            .assertIsDisplayed()
+            .assertIsEnabled()
+            .performClick()
+        assertStepDisplayed(stepIndex = PAIR_EXPLANATION_STEP_INDEX)
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
+            .performClick()
+        assertWorkedExampleFrame(R.string.tutorial_worked_example_introduction_copy)
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.WORKED_EXAMPLE_PROGRESS)
+            .assertIsDisplayed()
     }
 
     @Test
-    fun stepOnePreservesTheEnteredStripWhenStepTwoRevealsTheAuthoredTiles() {
-        setContent()
-        advanceThroughExplanation()
+    fun reducedMotionShowsTheSolvedExampleImmediatelyAndRestoresNavigation() {
+        setContent(
+            startStepIndex = WORKED_EXAMPLE_STEP_INDEX,
+            sequentialWorkedExamplePlayback = false
+        )
+        waitForTutorialCopy(R.string.tutorial_worked_example_sum_two_three_copy)
 
-        completeFocusedStepOne()
-
-        waitForStep(stepIndex = GUIDED_TILE_STEP_INDEX)
-        assertStepDisplayed(stepIndex = GUIDED_TILE_STEP_INDEX)
         assertFocusedIntroductionStripDisplayed(expectedSecondValue = "3", isSecondValuePlayerEntered = true)
-        assertTileResult(tileIndex = 0, result = 5)
-        assertTileExpressionHidden(tileIndex = 0)
-        assertTileExpression(tileIndex = 1, operator = Operator.MULTIPLICATION, leftValue = "2", rightValue = "3")
+        assertTileExpression(tileIndex = 0, operator = Operator.ADDITION)
+        assertTileExpression(tileIndex = 1, operator = Operator.MULTIPLICATION)
         assertTileExpression(tileIndex = 2, operator = Operator.ADDITION, leftValue = "4", rightValue = "5")
         assertTileExpression(tileIndex = 3, operator = Operator.MULTIPLICATION, leftValue = "4", rightValue = "5")
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.BOARD)
-            .assertIsDisplayed()
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .onNodeWithTag(TutorialScreenTestTags.WORKED_EXAMPLE_PROGRESS)
             .assertDoesNotExist()
-    }
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
+            .assertIsDisplayed()
+            .assertIsEnabled()
+            .performClick()
 
-    @Test
-    fun completingStepTwoStartsTheCleanRepeatedValuePuzzle() {
-        setContent()
-        advanceThroughExplanation()
-
-        completeFocusedStepOne()
-        waitForStep(stepIndex = GUIDED_TILE_STEP_INDEX)
-        completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
         waitForStep(stepIndex = PRACTICE_STEP_INDEX)
-
-        assertStepDisplayed(stepIndex = PRACTICE_STEP_INDEX)
         assertRepeatedValuePracticeScenarioDisplayed()
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
@@ -180,50 +198,7 @@ class TutorialRouteTest {
     }
 
     @Test
-    fun stepTwoOffersNormalChoicesAndAcceptsReversedOperands() {
-        setContent(startStepIndex = GUIDED_TILE_STEP_INDEX)
-
-        openTileOperatorMenu(tileIndex = 0)
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.ADDITION), useUnmergedTree = true)
-            .assertIsEnabled()
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.MULTIPLICATION), useUnmergedTree = true)
-            .assertIsEnabled()
-            .performClick()
-
-        chooseTileOperand(tileIndex = 0, isLeftOperand = true, stripEntryId = 1)
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(0), useUnmergedTree = true)
-            .assertIsEnabled()
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(1), useUnmergedTree = true)
-            .assertIsEnabled()
-            .performClick()
-        chooseTileOperand(tileIndex = 0, isLeftOperand = false, stripEntryId = 0)
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(0), useUnmergedTree = true)
-            .performClick()
-
-        composeTestRule.mainClock.advanceTimeBy(TUTORIAL_AUTO_ADVANCE_TEST_WAIT_MS)
-        assertStepDisplayed(stepIndex = GUIDED_TILE_STEP_INDEX)
-        assertTileExpression(
-            tileIndex = 0,
-            operator = Operator.MULTIPLICATION,
-            leftValue = "3",
-            rightValue = "2"
-        )
-
-        openTileOperatorMenu(tileIndex = 0)
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.ADDITION), useUnmergedTree = true)
-            .performClick()
-
-        waitForStep(stepIndex = PRACTICE_STEP_INDEX)
-    }
-
-    @Test
-    fun stepThreeUsesNormalPuzzleInteractionsAndCompletesLearnBasicsWithoutShowingSuccess() {
+    fun independentPracticeUsesNormalInteractionsAndCompletesLearnBasicsWithoutShowingSuccess() {
         setContent()
 
         completeFocusedTutorial()
@@ -234,7 +209,7 @@ class TutorialRouteTest {
     }
 
     @Test
-    fun focusedTutorialReportsGuidedCompletionExactlyOnceWithoutShowingSuccess() {
+    fun focusedTutorialReportsCompletionExactlyOnceWithoutShowingSuccess() {
         val completionCount = AtomicInteger(0)
         setContent(onTutorialCompleted = { completionCount.incrementAndGet() })
 
@@ -252,55 +227,39 @@ class TutorialRouteTest {
     }
 
     @Test
-    fun uninterruptedProgressCheckpointIsReportedExactlyOnce() {
-        val stepOneCompletionCount = AtomicInteger(0)
+    fun workedExampleCheckpointIsReportedExactlyOnce() {
+        val checkpointCount = AtomicInteger(0)
         setContent(
             onProgressCheckpointReached = { progressCheckpoint ->
-                if (progressCheckpoint == TutorialProgressCheckpoint.STRIP_INTRODUCTION_COMPLETED) {
-                    stepOneCompletionCount.incrementAndGet()
+                if (progressCheckpoint == TutorialProgressCheckpoint.WORKED_EXAMPLE_COMPLETED) {
+                    checkpointCount.incrementAndGet()
                 }
             }
         )
 
         advanceThroughExplanation()
-        completeFocusedStepOne()
-        waitForStep(stepIndex = GUIDED_TILE_STEP_INDEX)
-        composeTestRule.mainClock.advanceTimeBy(TUTORIAL_AUTO_ADVANCE_TEST_WAIT_MS)
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
+            .performClick()
+        waitForStep(stepIndex = PRACTICE_STEP_INDEX)
 
-        assertEquals(1, stepOneCompletionCount.get())
+        assertEquals(1, checkpointCount.get())
     }
 
     @Test
-    fun reopeningAfterClosingOnStepTwoAllowsStepOneToAdvanceAgain() {
+    fun reopeningAfterTheWorkedExampleStartsTheTutorialFromTheBeginning() {
         val restartTutorial = setRestartableContent()
         advanceThroughExplanation()
-        completeFocusedStepOne()
-        waitForStep(stepIndex = GUIDED_TILE_STEP_INDEX)
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
+            .performClick()
+        waitForStep(stepIndex = PRACTICE_STEP_INDEX)
 
         restartTutorial()
         assertStepDisplayed(stepIndex = OBJECTIVE_EXPLANATION_STEP_INDEX)
         assertFocusedIntroductionStripDisplayed()
         advanceThroughExplanation()
-        completeFocusedStepOne()
-
-        waitForStep(stepIndex = GUIDED_TILE_STEP_INDEX)
-        assertStepDisplayed(stepIndex = GUIDED_TILE_STEP_INDEX)
-    }
-
-    @Test
-    fun reopeningAfterCompletingAllStepsAllowsStepOneToAdvanceAgain() {
-        val restartTutorial = setRestartableContent()
-        completeFocusedTutorial()
-        composeTestRule.mainClock.advanceTimeBy(TUTORIAL_AUTO_ADVANCE_TEST_WAIT_MS)
-
-        restartTutorial()
-        assertStepDisplayed(stepIndex = OBJECTIVE_EXPLANATION_STEP_INDEX)
-        assertFocusedIntroductionStripDisplayed()
-        advanceThroughExplanation()
-        completeFocusedStepOne()
-
-        waitForStep(stepIndex = GUIDED_TILE_STEP_INDEX)
-        assertStepDisplayed(stepIndex = GUIDED_TILE_STEP_INDEX)
+        assertStepIndicator(stepIndex = WORKED_EXAMPLE_STEP_INDEX)
     }
 
     @Test
@@ -348,6 +307,7 @@ class TutorialRouteTest {
 
     private fun setContent(
         startStepIndex: Int = 0,
+        sequentialWorkedExamplePlayback: Boolean = false,
         onProgressCheckpointReached: suspend (TutorialProgressCheckpoint) -> Unit = {},
         onTutorialCompleted: (() -> Unit)? = null
     ) {
@@ -355,6 +315,7 @@ class TutorialRouteTest {
             NumPairsTheme {
                 TutorialRoute(
                     startStepIndex = startStepIndex,
+                    sequentialWorkedExamplePlaybackOverride = sequentialWorkedExamplePlayback,
                     onProgressCheckpointReached = onProgressCheckpointReached,
                     onTutorialCompleted = onTutorialCompleted
                 )
@@ -383,7 +344,7 @@ class TutorialRouteTest {
         composeTestRule.setContent {
             NumPairsTheme {
                 if (isTutorialVisible.value) {
-                    TutorialRoute()
+                    TutorialRoute(sequentialWorkedExamplePlaybackOverride = false)
                 }
             }
         }
@@ -407,15 +368,11 @@ class TutorialRouteTest {
         }
     }
 
-    private fun completeFocusedStepOne() {
-        enterStripValue(index = 1, value = "3")
-    }
-
     private fun completeFocusedTutorial() {
         advanceThroughExplanation()
-        completeFocusedStepOne()
-        waitForStep(stepIndex = GUIDED_TILE_STEP_INDEX)
-        completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
+            .performClick()
         waitForStep(stepIndex = PRACTICE_STEP_INDEX)
 
         enterStripValue(index = 0, value = "1")
@@ -427,13 +384,25 @@ class TutorialRouteTest {
     }
 
     private fun advanceThroughExplanation() {
-        repeat(GUIDED_STRIP_STEP_INDEX) {
+        repeat(WORKED_EXAMPLE_STEP_INDEX) {
             composeTestRule
                 .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
                 .performScrollTo()
                 .performClick()
         }
-        assertStepDisplayed(stepIndex = GUIDED_STRIP_STEP_INDEX)
+        assertStepIndicator(stepIndex = WORKED_EXAMPLE_STEP_INDEX)
+    }
+
+    private fun advanceWorkedExampleFrame(expectedCopyResId: Int) {
+        composeTestRule.mainClock.advanceTimeBy(WORKED_EXAMPLE_FRAME_WAIT_MS)
+        assertWorkedExampleFrame(expectedCopyResId)
+    }
+
+    private fun assertWorkedExampleFrame(copyResId: Int) {
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.STEP_COPY)
+            .performScrollTo()
+            .assert(hasText(string(copyResId)))
     }
 
     private fun navigateToExplanationStep(stepIndex: Int) {
@@ -565,6 +534,16 @@ class TutorialRouteTest {
         val steps = TutorialContent.stepsFor(mode)
         val step = steps[stepIndex]
 
+        assertStepIndicator(stepIndex = stepIndex, mode = mode)
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.STEP_COPY)
+            .performScrollTo()
+            .assert(hasText(string(step.playerFacingCopyResId)))
+    }
+
+    private fun assertStepIndicator(stepIndex: Int, mode: TutorialMode = TutorialMode.LEARN_BASICS) {
+        val steps = TutorialContent.stepsFor(mode)
+
         composeTestRule
             .onNodeWithTag(TutorialScreenTestTags.STEP_INDICATOR)
             .performScrollTo()
@@ -577,10 +556,6 @@ class TutorialRouteTest {
                     )
                 )
             )
-        composeTestRule
-            .onNodeWithTag(TutorialScreenTestTags.STEP_COPY)
-            .performScrollTo()
-            .assert(hasText(string(step.playerFacingCopyResId)))
     }
 
     private fun assertNoRequiredSkipAction() {
@@ -726,6 +701,15 @@ class TutorialRouteTest {
         }
     }
 
+    private fun waitForTutorialCopy(copyResId: Int) {
+        composeTestRule.waitUntil(timeoutMillis = TUTORIAL_STEP_WAIT_TIMEOUT_MS) {
+            composeTestRule
+                .onAllNodes(hasText(string(copyResId)))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+    }
+
     private fun string(stringResId: Int, vararg formatArgs: Any): String = if (formatArgs.isEmpty()) {
         composeTestRule.activity.getString(stringResId)
     } else {
@@ -742,9 +726,9 @@ class TutorialRouteTest {
         const val OBJECTIVE_EXPLANATION_STEP_INDEX = 0
         const val STRIP_EXPLANATION_STEP_INDEX = 1
         const val PAIR_EXPLANATION_STEP_INDEX = 3
-        const val GUIDED_STRIP_STEP_INDEX = 4
-        const val GUIDED_TILE_STEP_INDEX = 5
-        const val PRACTICE_STEP_INDEX = 6
+        const val WORKED_EXAMPLE_STEP_INDEX = 4
+        const val PRACTICE_STEP_INDEX = 5
+        const val WORKED_EXAMPLE_FRAME_WAIT_MS = 1_000L
         const val TUTORIAL_AUTO_ADVANCE_TEST_WAIT_MS = 1_000L
         const val TUTORIAL_STEP_WAIT_TIMEOUT_MS = 5_000L
     }

@@ -2,19 +2,13 @@ package org.cescfe.numpairs.feature.tutorial
 
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.model.Operator
+import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 
 internal object LearnBasicsTutorialContent {
     private val stripAndTilesIntroductionScenario = stripAndTilesIntroductionScenario()
     private val repeatedValuePracticeScenario = repeatedValuePracticeScenario()
-    private val guidedIntroductionPuzzle = stripAndTilesIntroductionScenario.initialPuzzle.copy(
-        board = stripAndTilesIntroductionScenario.initialPuzzle.board.copy(
-            tiles = listOf(hiddenTile(result = 5)) + stripAndTilesIntroductionScenario.solvedPuzzle.board.tiles.drop(1)
-        )
-    )
-    private val completedIntroductionStripPuzzle = guidedIntroductionPuzzle.copy(
-        strip = stripAndTilesIntroductionScenario.initialPuzzle.strip.withUpdatedEntry(index = 1, value = 3)
-    )
+    private val workedExampleFrames = workedExampleFrames()
 
     val scenarios: List<TutorialScenario> = listOf(
         stripAndTilesIntroductionScenario,
@@ -22,42 +16,7 @@ internal object LearnBasicsTutorialContent {
     )
 
     val steps: List<TutorialStep> = explanationSteps() + listOf(
-        TutorialStep(
-            scenarioId = TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
-            playerFacingCopyResId = R.string.tutorial_strip_introduction_copy,
-            highlightedTargets = listOf(
-                TutorialHighlightTarget.StripEntries(indexes = listOf(1))
-            ),
-            requiredAction = TutorialRequiredAction.EnterStripValue(
-                stripEntryIndex = 1,
-                value = 3
-            ),
-            completionPredicate = TutorialStepCompletionPredicate.StripValueEntered(
-                stripEntryIndex = 1,
-                value = 3
-            ),
-            progressCheckpoint = TutorialProgressCheckpoint.STRIP_INTRODUCTION_COMPLETED,
-            isBoardVisible = false,
-            stripEntryGuidanceResId = R.string.tutorial_strip_entry_guidance,
-            entryPuzzle = guidedIntroductionPuzzle
-        ),
-        TutorialStep(
-            scenarioId = TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
-            playerFacingCopyResId = R.string.tutorial_tiles_introduction_copy,
-            highlightedTargets = listOf(
-                TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0),
-                TutorialHighlightTarget.WholeTile(tileIndex = 1)
-            ),
-            requiredAction = TutorialRequiredAction.CompleteTileWithNormalInteractions(tileIndex = 0),
-            completionPredicate = TutorialStepCompletionPredicate.TileExpressionCompleted(
-                tileIndex = 0,
-                leftValue = 2,
-                operator = Operator.ADDITION,
-                rightValue = 3
-            ),
-            progressCheckpoint = TutorialProgressCheckpoint.TILES_INTRODUCTION_COMPLETED,
-            entryPuzzle = completedIntroductionStripPuzzle
-        ),
+        workedExampleStep(),
         TutorialStep(
             scenarioId = TutorialScenarioId.REPEATED_VALUE_PRACTICE,
             playerFacingCopyResId = R.string.tutorial_repeated_value_practice_copy,
@@ -67,6 +26,99 @@ internal object LearnBasicsTutorialContent {
             ),
             requiredAction = TutorialRequiredAction.CompleteScenario,
             completionPredicate = TutorialStepCompletionPredicate.ScenarioSolved
+        )
+    )
+
+    private fun workedExampleStep(): TutorialStep {
+        val initialFrame = workedExampleFrames.first()
+
+        return TutorialStep(
+            scenarioId = TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION,
+            playerFacingCopyResId = initialFrame.playerFacingCopyResId,
+            highlightedTargets = initialFrame.highlightedTargets,
+            requiredAction = TutorialRequiredAction.PlayWorkedExample(frames = workedExampleFrames),
+            completionPredicate = TutorialStepCompletionPredicate.ManualAdvance,
+            progressCheckpoint = TutorialProgressCheckpoint.WORKED_EXAMPLE_COMPLETED,
+            entryPuzzle = initialFrame.puzzle
+        )
+    }
+
+    private fun workedExampleFrames(): List<TutorialWorkedExampleFrame> {
+        val scenario = stripAndTilesIntroductionScenario
+        val initialPuzzle = scenario.initialPuzzle
+        val productFourAndFive = initialPuzzle.withSolvedTiles(scenario = scenario, tileIndexes = intArrayOf(3))
+        val pairFourAndFive = productFourAndFive.withSolvedTiles(scenario = scenario, tileIndexes = intArrayOf(2))
+        val completedStrip = pairFourAndFive.copy(
+            strip = pairFourAndFive.strip.withUpdatedEntry(index = 1, value = 3)
+        )
+        val productTwoAndThree = completedStrip.withSolvedTiles(scenario = scenario, tileIndexes = intArrayOf(1))
+        val solvedExample = productTwoAndThree.withSolvedTiles(scenario = scenario, tileIndexes = intArrayOf(0))
+
+        return listOf(
+            TutorialWorkedExampleFrame(
+                playerFacingCopyResId = R.string.tutorial_worked_example_introduction_copy,
+                puzzle = initialPuzzle,
+                highlightedTargets = listOf(
+                    TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1, 2, 3)),
+                    TutorialHighlightTarget.WholeTile(tileIndex = 0),
+                    TutorialHighlightTarget.WholeTile(tileIndex = 1),
+                    TutorialHighlightTarget.WholeTile(tileIndex = 2),
+                    TutorialHighlightTarget.WholeTile(tileIndex = 3)
+                )
+            ),
+            workedExampleFrame(
+                copyResId = R.string.tutorial_worked_example_product_four_five_copy,
+                puzzle = productFourAndFive,
+                stripEntryIndexes = listOf(2, 3),
+                tileIndexes = listOf(3)
+            ),
+            workedExampleFrame(
+                copyResId = R.string.tutorial_worked_example_sum_four_five_copy,
+                puzzle = pairFourAndFive,
+                stripEntryIndexes = listOf(2, 3),
+                tileIndexes = listOf(2)
+            ),
+            workedExampleFrame(
+                copyResId = R.string.tutorial_worked_example_reveal_three_copy,
+                puzzle = completedStrip,
+                stripEntryIndexes = listOf(0, 1),
+                tileIndexes = listOf(0, 1)
+            ),
+            workedExampleFrame(
+                copyResId = R.string.tutorial_worked_example_product_two_three_copy,
+                puzzle = productTwoAndThree,
+                stripEntryIndexes = listOf(0, 1),
+                tileIndexes = listOf(1)
+            ),
+            workedExampleFrame(
+                copyResId = R.string.tutorial_worked_example_sum_two_three_copy,
+                puzzle = solvedExample,
+                stripEntryIndexes = listOf(0, 1),
+                tileIndexes = listOf(0)
+            )
+        )
+    }
+
+    private fun workedExampleFrame(
+        copyResId: Int,
+        puzzle: Puzzle,
+        stripEntryIndexes: List<Int>,
+        tileIndexes: List<Int>
+    ): TutorialWorkedExampleFrame = TutorialWorkedExampleFrame(
+        playerFacingCopyResId = copyResId,
+        puzzle = puzzle,
+        highlightedTargets = listOf(
+            TutorialHighlightTarget.StripEntries(indexes = stripEntryIndexes)
+        ) + tileIndexes.map(TutorialHighlightTarget::WholeTile)
+    )
+
+    private fun Puzzle.withSolvedTiles(scenario: TutorialScenario, tileIndexes: IntArray): Puzzle = copy(
+        board = board.copy(
+            tiles = board.tiles.toMutableList().apply {
+                tileIndexes.forEach { tileIndex ->
+                    set(tileIndex, scenario.solvedPuzzle.board.tiles[tileIndex])
+                }
+            }
         )
     )
 

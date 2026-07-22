@@ -155,13 +155,11 @@ internal fun OnboardingState.nextRequiredTutorialStepIndex(
 
 private fun OnboardingStageCheckpoint.toTutorialProgressCheckpointOrNull(): TutorialProgressCheckpoint? = when (this) {
     OnboardingStageCheckpoint.NONE -> null
-    OnboardingStageCheckpoint.STAGE_ONE -> TutorialProgressCheckpoint.STRIP_INTRODUCTION_COMPLETED
-    OnboardingStageCheckpoint.STAGE_TWO -> TutorialProgressCheckpoint.TILES_INTRODUCTION_COMPLETED
+    OnboardingStageCheckpoint.EXPLANATION_COMPLETED -> TutorialProgressCheckpoint.WORKED_EXAMPLE_COMPLETED
 }
 
 private fun TutorialProgressCheckpoint.toOnboardingStageCheckpoint(): OnboardingStageCheckpoint = when (this) {
-    TutorialProgressCheckpoint.STRIP_INTRODUCTION_COMPLETED -> OnboardingStageCheckpoint.STAGE_ONE
-    TutorialProgressCheckpoint.TILES_INTRODUCTION_COMPLETED -> OnboardingStageCheckpoint.STAGE_TWO
+    TutorialProgressCheckpoint.WORKED_EXAMPLE_COMPLETED -> OnboardingStageCheckpoint.EXPLANATION_COMPLETED
 }
 
 object RequiredOnboardingTestTags {

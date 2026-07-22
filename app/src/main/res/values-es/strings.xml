@@ -67,9 +67,13 @@
     <string name="tutorial_pair_explanation_copy">Agrupa los números de la serie por parejas. Cada pareja completa dos casillas: una suma y una multiplicación.</string>
     <string name="tutorial_previous_step_action">Atrás</string>
     <string name="tutorial_next_step_action">Siguiente</string>
-    <string name="tutorial_strip_introduction_copy">La lista de números va de menor a mayor. Un mismo número puede aparecer más de una vez.</string>
-    <string name="tutorial_strip_entry_guidance">Introduce 3 para completar la serie del tutorial.</string>
-    <string name="tutorial_tiles_introduction_copy">Cada casilla muestra un resultado. Elige los números y el símbolo que dan ese resultado. Usa los mismos dos números una vez con + y otra con ×.</string>
+    <string name="tutorial_worked_example_introduction_copy">Presta atención: vamos a resolver este puzle por ti una sola vez.</string>
+    <string name="tutorial_worked_example_product_four_five_copy">4 × 5 = 20, así que 20 es la casilla de multiplicación de esta pareja.</string>
+    <string name="tutorial_worked_example_sum_four_five_copy">La misma pareja también da 4 + 5 = 9.</string>
+    <string name="tutorial_worked_example_reveal_three_copy">Quedan los resultados 5 y 6. Junto al 2, el número oculto tiene que ser 3.</string>
+    <string name="tutorial_worked_example_product_two_three_copy">2 × 3 = 6 completa la multiplicación que falta.</string>
+    <string name="tutorial_worked_example_sum_two_three_copy">2 + 3 = 5 completa el puzle.</string>
+    <string name="tutorial_worked_example_progress">Resolviendo ejemplo…</string>
     <string name="tutorial_repeated_value_practice_copy">Resuelve el puzle. Recuerda: la lista de números puede incluir el mismo número más de una vez.</string>
     <string name="onboarding_skip_tutorial_action">Saltar tutorial</string>
     <string name="onboarding_skip_tutorial_title">¿Saltar el tutorial?</string>
