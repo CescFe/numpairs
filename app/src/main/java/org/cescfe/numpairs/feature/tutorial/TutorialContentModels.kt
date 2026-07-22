@@ -105,14 +105,6 @@ sealed interface TutorialHighlightTarget {
 sealed interface TutorialRequiredAction {
     data object NoInteraction : TutorialRequiredAction
 
-    data class PlayWorkedExample(val frames: List<TutorialWorkedExampleFrame>) : TutorialRequiredAction {
-        init {
-            require(frames.size >= 2) {
-                "Tutorial worked example must contain an initial frame and at least one resolved frame."
-            }
-        }
-    }
-
     data class CompleteTileExpression(
         val tileIndex: Int,
         val leftStripEntryId: Int,
@@ -158,18 +150,6 @@ sealed interface TutorialRequiredAction {
     }
 
     data object CompleteScenario : TutorialRequiredAction
-}
-
-data class TutorialWorkedExampleFrame(
-    @param:StringRes val playerFacingCopyResId: Int,
-    val puzzle: Puzzle,
-    val highlightedTargets: List<TutorialHighlightTarget>
-) {
-    init {
-        require(playerFacingCopyResId != 0) {
-            "Tutorial worked-example frame copy string resource must be defined."
-        }
-    }
 }
 
 sealed interface TutorialStepCompletionPredicate {

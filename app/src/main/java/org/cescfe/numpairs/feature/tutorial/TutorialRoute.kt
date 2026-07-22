@@ -25,7 +25,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.MotionDurationScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -52,7 +51,6 @@ fun TutorialRoute(
     mode: TutorialMode = TutorialMode.LEARN_BASICS,
     startStepIndex: Int = 0,
     saveProgressAcrossRecreation: Boolean = true,
-    sequentialWorkedExamplePlaybackOverride: Boolean? = null,
     onProgressCheckpointReached: suspend (TutorialProgressCheckpoint) -> Unit = {},
     onTutorialCompleted: (() -> Unit)? = null,
     onSkipTutorialRequested: (() -> Unit)? = null,
@@ -84,25 +82,13 @@ fun TutorialRoute(
     val currentOnTutorialCompleted by rememberUpdatedState(onTutorialCompleted)
     val currentStep = steps[currentStepIndex]
     val currentScenario = TutorialContent.scenario(currentStep.scenarioId)
-    val workedExample = currentStep.requiredAction as? TutorialRequiredAction.PlayWorkedExample
-    var workedExampleFrameIndex by remember(playbackKey, currentStepIndex) { mutableIntStateOf(0) }
     var isCheckpointNavigationInProgress by remember(playbackKey, currentStepIndex) {
         mutableStateOf(false)
     }
     var hasCurrentStepPuzzleChanged by remember(playbackKey, currentStepIndex) {
         mutableStateOf(false)
     }
-    val workedExampleFrame = workedExample?.frames?.get(workedExampleFrameIndex)
-    val presentedStep = workedExampleFrame?.let { frame ->
-        currentStep.copy(
-            playerFacingCopyResId = frame.playerFacingCopyResId,
-            highlightedTargets = frame.highlightedTargets,
-            entryPuzzle = frame.puzzle
-        )
-    } ?: currentStep
-    val currentEntryPuzzle = presentedStep.entryPuzzle ?: currentScenario.initialPuzzle
-    val isWorkedExamplePlaybackActive = workedExample != null &&
-        workedExampleFrameIndex < workedExample.frames.lastIndex
+    val currentEntryPuzzle = currentStep.entryPuzzle ?: currentScenario.initialPuzzle
     val latestGameUiState = latestGameUiSnapshot
         ?.takeIf { snapshot -> snapshot.scenarioId == currentScenario.id }
         ?.uiState
@@ -130,23 +116,6 @@ fun TutorialRoute(
         }
     }
 
-    LaunchedEffect(currentStepIndex, workedExample, sequentialWorkedExamplePlaybackOverride) {
-        val frames = workedExample?.frames ?: return@LaunchedEffect
-        workedExampleFrameIndex = 0
-        val systemAllowsSequentialPlayback = coroutineContext[MotionDurationScale]?.scaleFactor != 0f
-        val shouldPlaySequentially = sequentialWorkedExamplePlaybackOverride ?: systemAllowsSequentialPlayback
-
-        if (!shouldPlaySequentially) {
-            workedExampleFrameIndex = frames.lastIndex
-            return@LaunchedEffect
-        }
-
-        for (frameIndex in 1..frames.lastIndex) {
-            delay(TUTORIAL_WORKED_EXAMPLE_FRAME_DELAY)
-            workedExampleFrameIndex = frameIndex
-        }
-    }
-
     GameRoute(
         title = stringResource(R.string.tutorial_screen_title),
         initialPuzzle = currentEntryPuzzle,
@@ -160,12 +129,12 @@ fun TutorialRoute(
             observedScenarioId = latestGameUiSnapshot?.scenarioId,
             isRequiredPlayback = onTutorialCompleted != null
         ),
-        isBoardVisible = presentedStep.isBoardVisible,
-        interactionPolicy = presentedStep.toInteractionPolicy(
+        isBoardVisible = currentStep.isBoardVisible,
+        interactionPolicy = currentStep.toInteractionPolicy(
             scenario = currentScenario,
             uiState = latestGameUiState
         ),
-        highlightState = presentedStep.toHighlightState(
+        highlightState = currentStep.toHighlightState(
             scenario = currentScenario,
             uiState = latestGameUiState,
             hasPuzzleChanged = hasCurrentStepPuzzleChanged
@@ -177,10 +146,9 @@ fun TutorialRoute(
         },
         contentBeforePuzzle = {
             TutorialInstructionSurface(
-                currentStep = presentedStep,
+                currentStep = currentStep,
                 currentStepNumber = currentStepIndex + 1,
                 totalSteps = steps.size,
-                isWorkedExamplePlaybackActive = isWorkedExamplePlaybackActive,
                 canNavigateBack = currentStepIndex > 0 && !isCheckpointNavigationInProgress,
                 canNavigateNext = !isCheckpointNavigationInProgress,
                 onNavigateBack = {
@@ -236,7 +204,6 @@ private fun TutorialInstructionSurface(
     currentStep: TutorialStep,
     currentStepNumber: Int,
     totalSteps: Int,
-    isWorkedExamplePlaybackActive: Boolean,
     canNavigateBack: Boolean,
     canNavigateNext: Boolean,
     onNavigateBack: () -> Unit,
@@ -271,16 +238,12 @@ private fun TutorialInstructionSurface(
                 color = MaterialTheme.colorScheme.onSurface
             )
             if (currentStep.completionPredicate == TutorialStepCompletionPredicate.ManualAdvance) {
-                if (isWorkedExamplePlaybackActive) {
-                    TutorialWorkedExampleProgress()
-                } else {
-                    TutorialStepNavigation(
-                        canNavigateBack = canNavigateBack,
-                        canNavigateNext = canNavigateNext,
-                        onNavigateBack = onNavigateBack,
-                        onNavigateNext = onNavigateNext
-                    )
-                }
+                TutorialStepNavigation(
+                    canNavigateBack = canNavigateBack,
+                    canNavigateNext = canNavigateNext,
+                    onNavigateBack = onNavigateBack,
+                    onNavigateNext = onNavigateNext
+                )
             }
         }
     }
@@ -327,23 +290,6 @@ private fun TutorialStepNavigation(
 }
 
 @Composable
-private fun TutorialWorkedExampleProgress(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .heightIn(min = 48.dp)
-            .testTag(TutorialScreenTestTags.WORKED_EXAMPLE_PROGRESS),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = stringResource(R.string.tutorial_worked_example_progress),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
 private fun TutorialSkipBottomBar(onSkipRequested: () -> Unit, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
@@ -381,8 +327,7 @@ private fun TutorialRequiredAction.toInteractionPolicy(
     uiState: GameUiState?,
     highlightedStripEntryIds: Set<Int>
 ): GameInteractionPolicy = when (this) {
-    TutorialRequiredAction.NoInteraction,
-    is TutorialRequiredAction.PlayWorkedExample -> noInteractionPolicy()
+    TutorialRequiredAction.NoInteraction -> noInteractionPolicy()
     is TutorialRequiredAction.CompleteTileExpression -> toInteractionPolicy(
         scenario = scenario,
         highlightedStripEntryIds = highlightedStripEntryIds
@@ -628,4 +573,3 @@ private fun expressionSlotHighlights(tileIndex: Int): Set<GameTileExpressionSlot
 
 private const val TUTORIAL_GAME_SESSION_KEY = "tutorial-walkthrough"
 private val TUTORIAL_STEP_ADVANCE_DELAY = 350.milliseconds
-private val TUTORIAL_WORKED_EXAMPLE_FRAME_DELAY = 900.milliseconds

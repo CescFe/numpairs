@@ -73,7 +73,6 @@
     <string name="tutorial_worked_example_reveal_three_copy">Queden els resultats 5 i 6. Junt amb el 2, el nombre ocult ha de ser 3.</string>
     <string name="tutorial_worked_example_product_two_three_copy">2 × 3 = 6 completa la multiplicació que falta.</string>
     <string name="tutorial_worked_example_sum_two_three_copy">2 + 3 = 5 completa el puzle.</string>
-    <string name="tutorial_worked_example_progress">Resolent l’exemple…</string>
     <string name="tutorial_repeated_value_practice_copy">Ara tu: resol el puzle. Toca qualsevol ? per començar. Els nombres es poden repetir. Consell: les multiplicacions solen ser un bon punt de partida.</string>
     <string name="onboarding_skip_tutorial_action">Omet el tutorial</string>
     <string name="onboarding_skip_tutorial_title">Vols ometre el tutorial?</string>

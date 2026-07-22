@@ -7,6 +7,5 @@ object TutorialScreenTestTags {
     const val STEP_COPY = "tutorial_step_copy"
     const val PREVIOUS_STEP_ACTION = "tutorial_previous_step_action"
     const val NEXT_STEP_ACTION = "tutorial_next_step_action"
-    const val WORKED_EXAMPLE_PROGRESS = "tutorial_worked_example_progress"
     const val SKIP_ACTION = "tutorial_skip_action"
 }

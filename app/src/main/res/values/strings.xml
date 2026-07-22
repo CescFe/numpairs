@@ -73,7 +73,6 @@
     <string name="tutorial_worked_example_reveal_three_copy">The remaining results are 5 and 6. Paired with 2, the hidden number must be 3.</string>
     <string name="tutorial_worked_example_product_two_three_copy">2 × 3 = 6 completes the remaining multiplication.</string>
     <string name="tutorial_worked_example_sum_two_three_copy">2 + 3 = 5 completes the puzzle.</string>
-    <string name="tutorial_worked_example_progress">Resolving example…</string>
     <string name="tutorial_repeated_value_practice_copy">Your turn: solve the puzzle. Tap any ? to begin. Numbers may repeat. Tip: multiplication is often a good place to start.</string>
     <string name="onboarding_skip_tutorial_action">Skip tutorial</string>
     <string name="onboarding_skip_tutorial_title">Skip the tutorial?</string>
