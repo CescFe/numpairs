@@ -46,7 +46,7 @@ fun TutorialRoute(
     mode: TutorialMode = TutorialMode.LEARN_BASICS,
     startStepIndex: Int = 0,
     saveProgressAcrossRecreation: Boolean = true,
-    onStepCompleted: suspend (Int) -> Unit = {},
+    onProgressCheckpointReached: suspend (TutorialProgressCheckpoint) -> Unit = {},
     onTutorialCompleted: (() -> Unit)? = null,
     onSkipTutorialRequested: (() -> Unit)? = null,
     onNavigateBack: () -> Unit = {}
@@ -72,7 +72,7 @@ fun TutorialRoute(
         mutableIntStateOf(startStepIndex - 1)
     }
     var latestGameUiSnapshot by remember(playbackKey) { mutableStateOf<TutorialGameUiSnapshot?>(null) }
-    val currentOnStepCompleted by rememberUpdatedState(onStepCompleted)
+    val currentOnProgressCheckpointReached by rememberUpdatedState(onProgressCheckpointReached)
     val currentOnTutorialCompleted by rememberUpdatedState(onTutorialCompleted)
     val currentStep = steps[currentStepIndex]
     val currentScenario = TutorialContent.scenario(currentStep.scenarioId)
@@ -96,7 +96,9 @@ fun TutorialRoute(
 
         delay(TUTORIAL_STEP_ADVANCE_DELAY)
         lastReportedStepIndex = currentStepIndex
-        currentOnStepCompleted(currentStepIndex)
+        currentStep.progressCheckpoint?.let { checkpoint ->
+            currentOnProgressCheckpointReached(checkpoint)
+        }
         if (currentStepIndex < steps.lastIndex) {
             currentStepIndex += 1
         } else if (!hasReportedCompletion && currentOnTutorialCompleted != null) {

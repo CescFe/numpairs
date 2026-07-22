@@ -31,6 +31,7 @@ internal object LearnBasicsTutorialContent {
                 stripEntryIndex = 1,
                 value = 3
             ),
+            progressCheckpoint = TutorialProgressCheckpoint.STRIP_INTRODUCTION_COMPLETED,
             isBoardVisible = false,
             stripEntryGuidanceResId = R.string.tutorial_strip_entry_guidance
         ),
@@ -48,6 +49,7 @@ internal object LearnBasicsTutorialContent {
                 operator = Operator.ADDITION,
                 rightValue = 3
             ),
+            progressCheckpoint = TutorialProgressCheckpoint.TILES_INTRODUCTION_COMPLETED,
             entryPuzzle = completedIntroductionStripPuzzle
         ),
         TutorialStep(

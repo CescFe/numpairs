@@ -93,6 +93,14 @@ class TutorialContentTest {
             ),
             steps.map(TutorialStep::scenarioId)
         )
+        assertEquals(
+            listOf(
+                TutorialProgressCheckpoint.STRIP_INTRODUCTION_COMPLETED,
+                TutorialProgressCheckpoint.TILES_INTRODUCTION_COMPLETED,
+                null
+            ),
+            steps.map(TutorialStep::progressCheckpoint)
+        )
 
         steps[0].assertGuidedAction(
             expectedHighlights = listOf(

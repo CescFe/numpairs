@@ -200,11 +200,11 @@ class TutorialRouteTest {
     }
 
     @Test
-    fun uninterruptedStepCompletionIsReportedExactlyOnce() {
+    fun uninterruptedProgressCheckpointIsReportedExactlyOnce() {
         val stepOneCompletionCount = AtomicInteger(0)
         setContent(
-            onStepCompleted = { stepIndex ->
-                if (stepIndex == 0) {
+            onProgressCheckpointReached = { progressCheckpoint ->
+                if (progressCheckpoint == TutorialProgressCheckpoint.STRIP_INTRODUCTION_COMPLETED) {
                     stepOneCompletionCount.incrementAndGet()
                 }
             }
@@ -292,14 +292,14 @@ class TutorialRouteTest {
 
     private fun setContent(
         startStepIndex: Int = 0,
-        onStepCompleted: suspend (Int) -> Unit = {},
+        onProgressCheckpointReached: suspend (TutorialProgressCheckpoint) -> Unit = {},
         onTutorialCompleted: (() -> Unit)? = null
     ) {
         composeTestRule.setContent {
             NumPairsTheme {
                 TutorialRoute(
                     startStepIndex = startStepIndex,
-                    onStepCompleted = onStepCompleted,
+                    onProgressCheckpointReached = onProgressCheckpointReached,
                     onTutorialCompleted = onTutorialCompleted
                 )
             }

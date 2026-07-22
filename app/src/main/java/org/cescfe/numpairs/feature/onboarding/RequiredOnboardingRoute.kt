@@ -20,7 +20,10 @@ import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.onboarding.OnboardingRepository
 import org.cescfe.numpairs.data.onboarding.OnboardingStageCheckpoint
 import org.cescfe.numpairs.data.onboarding.OnboardingState
+import org.cescfe.numpairs.feature.tutorial.TutorialContent
+import org.cescfe.numpairs.feature.tutorial.TutorialProgressCheckpoint
 import org.cescfe.numpairs.feature.tutorial.TutorialRoute
+import org.cescfe.numpairs.feature.tutorial.TutorialStep
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
 @Composable
@@ -45,10 +48,8 @@ fun RequiredOnboardingRoute(
         modifier = modifier,
         startStepIndex = startStepIndex,
         saveProgressAcrossRecreation = false,
-        onStepCompleted = { completedStepIndex ->
-            completedStepIndex.toIntermediateCheckpointOrNull()?.let { checkpoint ->
-                onboardingRepository.recordStageCompleted(checkpoint)
-            }
+        onProgressCheckpointReached = { progressCheckpoint ->
+            onboardingRepository.recordStageCompleted(progressCheckpoint.toOnboardingStageCheckpoint())
         },
         onTutorialCompleted = {
             coroutineScope.launch {
@@ -137,16 +138,30 @@ private fun SkipTutorialConfirmationDialog(
     )
 }
 
-internal fun OnboardingState.nextRequiredTutorialStepIndex(): Int = when (lastCompletedStage) {
-    OnboardingStageCheckpoint.NONE -> 0
-    OnboardingStageCheckpoint.STAGE_ONE -> 1
-    OnboardingStageCheckpoint.STAGE_TWO -> 2
+internal fun OnboardingState.nextRequiredTutorialStepIndex(
+    steps: List<TutorialStep> = TutorialContent.learnBasicsSteps
+): Int {
+    val completedCheckpoint = lastCompletedStage.toTutorialProgressCheckpointOrNull() ?: return 0
+    val completedStepIndex = steps.indexOfFirst { step ->
+        step.progressCheckpoint == completedCheckpoint
+    }
+
+    require(completedStepIndex >= 0) {
+        "Persisted onboarding checkpoint must resolve to Learn Basics content."
+    }
+
+    return completedStepIndex + 1
 }
 
-private fun Int.toIntermediateCheckpointOrNull(): OnboardingStageCheckpoint? = when (this) {
-    0 -> OnboardingStageCheckpoint.STAGE_ONE
-    1 -> OnboardingStageCheckpoint.STAGE_TWO
-    else -> null
+private fun OnboardingStageCheckpoint.toTutorialProgressCheckpointOrNull(): TutorialProgressCheckpoint? = when (this) {
+    OnboardingStageCheckpoint.NONE -> null
+    OnboardingStageCheckpoint.STAGE_ONE -> TutorialProgressCheckpoint.STRIP_INTRODUCTION_COMPLETED
+    OnboardingStageCheckpoint.STAGE_TWO -> TutorialProgressCheckpoint.TILES_INTRODUCTION_COMPLETED
+}
+
+private fun TutorialProgressCheckpoint.toOnboardingStageCheckpoint(): OnboardingStageCheckpoint = when (this) {
+    TutorialProgressCheckpoint.STRIP_INTRODUCTION_COMPLETED -> OnboardingStageCheckpoint.STAGE_ONE
+    TutorialProgressCheckpoint.TILES_INTRODUCTION_COMPLETED -> OnboardingStageCheckpoint.STAGE_TWO
 }
 
 object RequiredOnboardingTestTags {
