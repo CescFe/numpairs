@@ -36,6 +36,7 @@ import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.GameHighlightState
 import org.cescfe.numpairs.feature.game.GameInteractionPolicy
+import org.cescfe.numpairs.feature.game.GameSuccessOverlayContent
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
 import org.cescfe.numpairs.feature.game.presentation.RuleConflictUiState
@@ -74,6 +75,7 @@ fun GameScreen(
     onRulesHelperActionTapped: () -> Unit = {},
     onRulesHelperPlayTutorialRequested: (() -> Unit)? = null,
     isSuccessOverlayEnabled: Boolean = true,
+    successOverlayContent: GameSuccessOverlayContent? = null,
     isBoardVisible: Boolean = true,
     stripItemEntryGuidance: String? = null,
     interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
@@ -177,6 +179,7 @@ fun GameScreen(
             SuccessOverlay(
                 onDismiss = onSuccessOverlayDismissed,
                 completionActions = completionActions,
+                content = successOverlayContent,
                 completionFeedbackId = completionFeedbackId
             )
         }

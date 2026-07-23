@@ -74,6 +74,9 @@
     <string name="tutorial_worked_example_product_two_three_copy">2 × 3 = 6 completes the remaining multiplication.</string>
     <string name="tutorial_worked_example_sum_two_three_copy">2 + 3 = 5 completes the addition and solves the puzzle.</string>
     <string name="tutorial_repeated_value_practice_copy">Your turn: solve the puzzle. Tap any ? to begin. Numbers may repeat. Tip: multiplication is often a good place to start.</string>
+    <string name="tutorial_success_overlay_message">Tutorial completed!</string>
+    <string name="tutorial_success_overlay_supporting_text">You now know the essentials for playing NumPairs</string>
+    <string name="tutorial_success_overlay_continue_button">Continue</string>
     <string name="onboarding_skip_tutorial_action">Skip tutorial</string>
     <string name="onboarding_skip_tutorial_title">Skip the tutorial?</string>
     <string name="onboarding_skip_tutorial_message">If this is your first time playing NumPairs, we recommend continuing.</string>

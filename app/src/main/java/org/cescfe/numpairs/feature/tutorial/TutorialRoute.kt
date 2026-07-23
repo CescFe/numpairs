@@ -39,6 +39,7 @@ import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.feature.game.GameHighlightState
 import org.cescfe.numpairs.feature.game.GameInteractionPolicy
 import org.cescfe.numpairs.feature.game.GameRoute
+import org.cescfe.numpairs.feature.game.GameSuccessOverlayContent
 import org.cescfe.numpairs.feature.game.GameTileExpressionSlot
 import org.cescfe.numpairs.feature.game.GameTileExpressionSlotHighlight
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
@@ -84,6 +85,7 @@ fun TutorialRoute(
     val coroutineScope = rememberCoroutineScope()
     val currentOnProgressCheckpointReached by rememberUpdatedState(onProgressCheckpointReached)
     val currentOnTutorialCompleted by rememberUpdatedState(onTutorialCompleted)
+    val currentOnNavigateBack by rememberUpdatedState(onNavigateBack)
     val currentStep = steps[currentStepIndex]
     val currentScenario = TutorialContent.scenario(currentStep.scenarioId)
     var isCheckpointNavigationInProgress by remember(playbackKey, currentStepIndex) {
@@ -127,10 +129,28 @@ fun TutorialRoute(
         }
         if (currentStepIndex < steps.lastIndex) {
             currentStepIndex += 1
-        } else if (!hasReportedCompletion && currentOnTutorialCompleted != null) {
-            hasReportedCompletion = true
-            currentOnTutorialCompleted?.invoke()
         }
+    }
+
+    val successOverlayContent = if (mode == TutorialMode.LEARN_BASICS) {
+        GameSuccessOverlayContent(
+            message = stringResource(R.string.tutorial_success_overlay_message),
+            supportingText = stringResource(R.string.tutorial_success_overlay_supporting_text),
+            primaryActionLabel = stringResource(R.string.tutorial_success_overlay_continue_button),
+            onPrimaryAction = {
+                if (!hasReportedCompletion) {
+                    hasReportedCompletion = true
+                    val completionCallback = currentOnTutorialCompleted
+                    if (completionCallback != null) {
+                        completionCallback()
+                    } else {
+                        currentOnNavigateBack()
+                    }
+                }
+            }
+        )
+    } else {
+        null
     }
 
     GameRoute(
@@ -146,6 +166,7 @@ fun TutorialRoute(
             observedScenarioId = latestGameUiSnapshot?.scenarioId,
             isRequiredPlayback = onTutorialCompleted != null
         ),
+        successOverlayContent = successOverlayContent,
         isBoardVisible = currentStep.isBoardVisible,
         interactionPolicy = currentStep.toInteractionPolicy(
             scenario = currentScenario,
@@ -229,10 +250,16 @@ internal fun isTutorialSuccessOverlayEnabled(
     currentScenarioId: TutorialScenarioId,
     observedScenarioId: TutorialScenarioId?,
     isRequiredPlayback: Boolean
-): Boolean = mode == TutorialMode.SOLVING_TIPS_PRACTICE &&
-    isFinalStep &&
-    observedScenarioId == currentScenarioId &&
-    !isRequiredPlayback
+): Boolean {
+    if (!isFinalStep || observedScenarioId != currentScenarioId) {
+        return false
+    }
+
+    return when (mode) {
+        TutorialMode.LEARN_BASICS -> true
+        TutorialMode.SOLVING_TIPS_PRACTICE -> !isRequiredPlayback
+    }
+}
 
 @Composable
 private fun TutorialInstructionSurface(
