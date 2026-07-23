@@ -30,10 +30,10 @@ class TutorialSuccessOverlayPolicyTest {
     }
 
     @Test
-    fun `learn basics never enables the success overlay`() {
+    fun `learn basics enables success for its final observed scenario`() {
         val finalScenarioId = TutorialScenarioId.REPEATED_VALUE_PRACTICE
 
-        assertFalse(
+        assertTrue(
             isTutorialSuccessOverlayEnabled(
                 mode = TutorialMode.LEARN_BASICS,
                 isFinalStep = true,
@@ -45,7 +45,22 @@ class TutorialSuccessOverlayPolicyTest {
     }
 
     @Test
-    fun `required playback never enables the success overlay`() {
+    fun `required learn basics playback enables success`() {
+        val finalScenarioId = TutorialScenarioId.REPEATED_VALUE_PRACTICE
+
+        assertTrue(
+            isTutorialSuccessOverlayEnabled(
+                mode = TutorialMode.LEARN_BASICS,
+                isFinalStep = true,
+                currentScenarioId = finalScenarioId,
+                observedScenarioId = finalScenarioId,
+                isRequiredPlayback = true
+            )
+        )
+    }
+
+    @Test
+    fun `required solving tips playback never enables success`() {
         val finalScenarioId = TutorialScenarioId.SOLVING_TIPS_PRACTICE
 
         assertFalse(

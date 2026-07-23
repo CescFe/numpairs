@@ -161,7 +161,7 @@ class RequiredOnboardingNavigationTest {
     }
 
     @Test
-    fun completingIndependentPracticePersistsCompletedOutcomeAndOpensMenuDirectly() {
+    fun continuingFromCompletedPracticePersistsCompletedOutcomeAndOpensMenu() {
         val repository = FakeOnboardingRepository(
             incompleteOnboardingState(OnboardingStageCheckpoint.EXPLANATION_COMPLETED)
         )
@@ -173,6 +173,18 @@ class RequiredOnboardingNavigationTest {
         completeTile(tileIndex = 1, leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1)
         completeTile(tileIndex = 2, leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3)
         completeTile(tileIndex = 3, leftStripEntryId = 2, operator = Operator.MULTIPLICATION, rightStripEntryId = 3)
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .assertIsDisplayed()
+        assertEquals(FirstRunTutorialOutcome.UNRESOLVED, repository.onboardingState.value.firstRunTutorialOutcome)
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.SCREEN)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_PRIMARY_ACTION)
+            .assert(hasText(string(R.string.tutorial_success_overlay_continue_button)))
+            .performClick()
 
         waitForMenu()
         assertEquals(FirstRunTutorialOutcome.COMPLETED, repository.onboardingState.value.firstRunTutorialOutcome)

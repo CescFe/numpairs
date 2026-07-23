@@ -12,6 +12,7 @@ import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performScrollTo
@@ -309,32 +310,63 @@ class TutorialRouteTest {
     }
 
     @Test
-    fun independentPracticeUsesNormalInteractionsAndCompletesLearnBasicsWithoutShowingSuccess() {
-        setContent()
+    fun independentPracticeCompletesLearnBasicsWithOneContextualSuccessAction() {
+        val navigateBackCount = AtomicInteger(0)
+        setContent(onNavigateBack = { navigateBackCount.incrementAndGet() })
 
         completeFocusedTutorial()
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE)
+            .assert(hasText(string(R.string.tutorial_success_overlay_message)))
+        composeTestRule
+            .onNodeWithText(string(R.string.tutorial_success_overlay_supporting_text))
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_PRIMARY_ACTION)
+            .assertIsDisplayed()
+            .assert(hasText(string(R.string.tutorial_success_overlay_continue_button)))
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_NEW_PUZZLE)
             .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_RETURN_TO_MENU)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .performClick()
+            .assertIsDisplayed()
+        assertEquals(0, navigateBackCount.get())
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_PRIMARY_ACTION)
+            .performClick()
+
+        assertEquals(1, navigateBackCount.get())
     }
 
     @Test
-    fun focusedTutorialReportsCompletionExactlyOnceWithoutShowingSuccess() {
+    fun focusedTutorialReportsCompletionExactlyOnceAfterContinue() {
         val completionCount = AtomicInteger(0)
         setContent(onTutorialCompleted = { completionCount.incrementAndGet() })
 
         completeFocusedTutorial()
 
-        composeTestRule.waitUntil(timeoutMillis = TUTORIAL_STEP_WAIT_TIMEOUT_MS) {
-            completionCount.get() == 1
-        }
         composeTestRule.mainClock.advanceTimeBy(TUTORIAL_AUTO_ADVANCE_TEST_WAIT_MS)
-
-        assertEquals(1, completionCount.get())
+        assertEquals(0, completionCount.get())
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
-            .assertDoesNotExist()
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_PRIMARY_ACTION)
+            .performClick()
+            .performClick()
+
+        assertEquals(1, completionCount.get())
     }
 
     @Test
@@ -408,19 +440,24 @@ class TutorialRouteTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
             .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_PRIMARY_ACTION)
+            .assertDoesNotExist()
     }
 
     private fun setContent(
         startStepIndex: Int = 0,
         onProgressCheckpointReached: suspend (TutorialProgressCheckpoint) -> Unit = {},
-        onTutorialCompleted: (() -> Unit)? = null
+        onTutorialCompleted: (() -> Unit)? = null,
+        onNavigateBack: () -> Unit = {}
     ) {
         composeTestRule.setContent {
             NumPairsTheme {
                 TutorialRoute(
                     startStepIndex = startStepIndex,
                     onProgressCheckpointReached = onProgressCheckpointReached,
-                    onTutorialCompleted = onTutorialCompleted
+                    onTutorialCompleted = onTutorialCompleted,
+                    onNavigateBack = onNavigateBack
                 )
             }
         }

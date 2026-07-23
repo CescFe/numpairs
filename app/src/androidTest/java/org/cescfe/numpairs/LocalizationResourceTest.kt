@@ -55,6 +55,12 @@ class LocalizationResourceTest {
                     "un buen punto de partida."
             )
         )
+        assertTutorialSuccessCopy(
+            resources = resources,
+            message = "¡Tutorial completado!",
+            supportingText = "Ya conoces lo esencial para jugar a NumPairs",
+            continueAction = "Continuar"
+        )
         assertEquals("Saltar tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
         assertEquals(
             "Si es la primera vez que juegas a NumPairs, te recomendamos continuar.",
@@ -110,6 +116,12 @@ class LocalizationResourceTest {
                     "Consell: les multiplicacions solen ser un bon punt de partida."
             )
         )
+        assertTutorialSuccessCopy(
+            resources = resources,
+            message = "Tutorial completat!",
+            supportingText = "Ja coneixes l’essencial per jugar a NumPairs",
+            continueAction = "Continua"
+        )
         assertEquals("Omet el tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
         assertEquals(
             "Si és la primera vegada que jugues a NumPairs, et recomanem continuar.",
@@ -164,6 +176,12 @@ class LocalizationResourceTest {
                     "Tip: multiplication is often a good place to start."
             )
         )
+        assertTutorialSuccessCopy(
+            resources = resources,
+            message = "Tutorial completed!",
+            supportingText = "You now know the essentials for playing NumPairs",
+            continueAction = "Continue"
+        )
         assertEquals("Skip tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
         assertEquals(
             "If this is your first time playing NumPairs, we recommend continuing.",
@@ -204,6 +222,17 @@ class LocalizationResourceTest {
         assertEquals(pair, resources.getString(R.string.tutorial_pair_explanation_copy))
         assertEquals(previous, resources.getString(R.string.tutorial_previous_step_action))
         assertEquals(next, resources.getString(R.string.tutorial_next_step_action))
+    }
+
+    private fun assertTutorialSuccessCopy(
+        resources: Resources,
+        message: String,
+        supportingText: String,
+        continueAction: String
+    ) {
+        assertEquals(message, resources.getString(R.string.tutorial_success_overlay_message))
+        assertEquals(supportingText, resources.getString(R.string.tutorial_success_overlay_supporting_text))
+        assertEquals(continueAction, resources.getString(R.string.tutorial_success_overlay_continue_button))
     }
 
     private fun resourcesFor(languageTag: String): Resources {

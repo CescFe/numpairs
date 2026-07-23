@@ -66,7 +66,7 @@ Guided First Run should therefore:
 - Requesting skip opens a confirmation dialog instead of unlocking Menu immediately
 - The dialog recommends continuing Tutorial and offers an explicit `Skip anyway` alternative
 - Confirming skip opens Menu without a final check
-- Completing the independent Tutorial practice opens Menu without a separate validation stage
+- Completing the independent Tutorial practice shows a completion confirmation before opening Menu
 - Closing or restarting the application cannot expose Menu while first-run Tutorial remains unresolved
 - Completed and skipped players reach Menu on later launches
 - Completed or skipped players can voluntarily replay the same Tutorial from its beginning
@@ -84,7 +84,7 @@ The fresh-install route is:
 Splash -> Tutorial -> Menu
 ```
 
-Menu is reached when the player either completes the independent practice puzzle or confirms `Skip anyway`. There is no separate final-validation route.
+Menu is reached when the player continues from the completed independent practice puzzle or confirms `Skip anyway`. There is no separate final-validation route.
 
 ### Skip Confirmation
 
@@ -166,7 +166,15 @@ Show an accessible `Back` action and no `Next` action during independent practic
 
 The two strip entries that display `2` remain distinct stable entries. Because exchanging those equal-valued entries produces an equivalent player-visible solution, Tutorial completion must accept either valid stable-entry assignment as long as all shared puzzle rules are satisfied.
 
-Solving the puzzle completes Tutorial. Required first-run playback persists the completed outcome and opens Menu; voluntary playback shows ordinary Tutorial completion without changing onboarding state.
+Solving the puzzle shows a dedicated Tutorial success overlay with:
+
+- title: `Tutorial completed!`
+- message: `You now know the essentials for playing NumPairs`
+- one primary action: `Continue`
+
+The overlay reuses the established success visual role without offering the generated-puzzle actions to play another puzzle or return to Menu. Tapping its scrim does not dismiss it.
+
+During required first-run playback, `Continue` persists the completed outcome and opens Menu. During voluntary playback, it leaves onboarding state unchanged and returns to the playback origin: Menu for `How to play`, or the unchanged in-progress `4 Pairs` puzzle for the in-game rules-helper entry.
 
 ---
 
@@ -225,7 +233,7 @@ Solving the puzzle completes Tutorial. Required first-run playback persists the 
 - Independent practice teaches the real interaction model through unrestricted player actions
 - `Skip tutorial` is available from Step 1 and always requires explicit confirmation
 - Confirmed skip opens Menu without final validation
-- Solving the authored repeated-value practice puzzle completes Tutorial and opens Menu
+- Solving the authored repeated-value practice puzzle shows the Tutorial completion overlay, and `Continue` opens Menu
 - Completion and skip outcomes persist reliably across application restarts
 - Interrupted unresolved playback resumes after completed steps
 - Completed and skipped players retain Menu access

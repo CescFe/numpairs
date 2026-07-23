@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.cescfe.numpairs.feature.game.GameCompletionActions
+import org.cescfe.numpairs.feature.game.GameSuccessOverlayContent
 import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
 import org.cescfe.numpairs.feature.game.presentation.RuleConflictUiState
 import org.cescfe.numpairs.feature.game.ui.semantics.completionFeedbackSemantics
@@ -46,8 +47,13 @@ import org.cescfe.numpairs.ui.theme.numPairsSemanticColors
 internal fun SuccessOverlay(
     onDismiss: () -> Unit,
     completionActions: GameCompletionActions? = null,
+    content: GameSuccessOverlayContent? = null,
     completionFeedbackId: Long? = null
 ) {
+    require(content == null || completionActions == null) {
+        "A success overlay cannot combine custom content with generated-puzzle completion actions."
+    }
+
     val interactionSource = remember { MutableInteractionSource() }
     val entranceProgress = remember {
         Animatable(if (completionFeedbackId == null) 1f else 0f)
@@ -77,7 +83,7 @@ internal fun SuccessOverlay(
         )
         .testTag(GameScreenTestTags.SUCCESS_OVERLAY)
         .completionFeedbackSemantics(completionFeedbackId)
-    val dismissibleOverlayModifier = if (completionActions == null) {
+    val dismissibleOverlayModifier = if (completionActions == null && content == null) {
         overlayModifier.clickable(
             interactionSource = interactionSource,
             indication = null,
@@ -91,9 +97,7 @@ internal fun SuccessOverlay(
         )
     }
 
-    BackHandler(
-        onBack = completionActions?.onReturnToMenuRequested ?: onDismiss
-    )
+    BackHandler(onBack = content?.onPrimaryAction ?: completionActions?.onReturnToMenuRequested ?: onDismiss)
 
     Box(
         modifier = dismissibleOverlayModifier,
@@ -144,37 +148,49 @@ internal fun SuccessOverlay(
                     }
                 }
                 Text(
-                    text = stringResource(R.string.success_overlay_message),
+                    text = content?.message ?: stringResource(R.string.success_overlay_message),
                     modifier = Modifier.testTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE),
                     style = MaterialTheme.typography.headlineSmall
                 )
                 Text(
-                    text = stringResource(R.string.success_overlay_supporting_text),
+                    text = content?.supportingText ?: stringResource(R.string.success_overlay_supporting_text),
                     style = MaterialTheme.typography.bodyMedium
                 )
-                completionActions?.let { actions ->
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                if (content != null) {
+                    NumPairsComponents.PrimaryCtaButton(
+                        onClick = content.onPrimaryAction,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag(GameScreenTestTags.SUCCESS_OVERLAY_PRIMARY_ACTION)
                     ) {
-                        NumPairsComponents.PrimaryCtaButton(
-                            onClick = actions.onNewPuzzleRequested,
+                        Text(text = content.primaryActionLabel)
+                    }
+                } else {
+                    completionActions?.let { actions ->
+                        Column(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag(GameScreenTestTags.SUCCESS_OVERLAY_NEW_PUZZLE)
+                                .fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(text = stringResource(R.string.success_overlay_new_puzzle_button))
-                        }
-                        OutlinedButton(
-                            onClick = actions.onReturnToMenuRequested,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .testTag(GameScreenTestTags.SUCCESS_OVERLAY_RETURN_TO_MENU),
-                            shape = NumPairsComponents.MediumShape,
-                            colors = NumPairsComponents.secondaryButtonColors(),
-                            border = NumPairsComponents.secondaryButtonBorder()
-                        ) {
-                            Text(text = stringResource(R.string.success_overlay_return_to_menu_button))
+                            NumPairsComponents.PrimaryCtaButton(
+                                onClick = actions.onNewPuzzleRequested,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag(GameScreenTestTags.SUCCESS_OVERLAY_NEW_PUZZLE)
+                            ) {
+                                Text(text = stringResource(R.string.success_overlay_new_puzzle_button))
+                            }
+                            OutlinedButton(
+                                onClick = actions.onReturnToMenuRequested,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag(GameScreenTestTags.SUCCESS_OVERLAY_RETURN_TO_MENU),
+                                shape = NumPairsComponents.MediumShape,
+                                colors = NumPairsComponents.secondaryButtonColors(),
+                                border = NumPairsComponents.secondaryButtonBorder()
+                            ) {
+                                Text(text = stringResource(R.string.success_overlay_return_to_menu_button))
+                            }
                         }
                     }
                 }

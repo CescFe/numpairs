@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -23,6 +24,7 @@ import org.cescfe.numpairs.data.onboarding.OnboardingState
 import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesRepository
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
+import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.generated.GeneratedModes
@@ -78,6 +80,32 @@ class AppNavigationLearningFlowTest {
             }
     }
 
+    @Test
+    fun continuingFromCompletedHowToPlayReturnsToMenuWithoutChangingOnboarding() {
+        val initialState = resolvedOnboardingState(FirstRunTutorialOutcome.COMPLETED)
+        val onboardingRepository = FakeOnboardingRepository(initialState = initialState)
+        setContent(
+            puzzleProvider = QueueGeneratedPuzzleProvider(samplePuzzle),
+            onboardingRepository = onboardingRepository
+        )
+
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
+            .performClick()
+        completeLearnBasicsTutorial()
+        assertTutorialSuccessOverlayDisplayed()
+        assertEquals(initialState, onboardingRepository.onboardingState.value)
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_PRIMARY_ACTION)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+        assertEquals(initialState, onboardingRepository.onboardingState.value)
+    }
+
     private fun resolvedOnboardingState(outcome: FirstRunTutorialOutcome): OnboardingState = OnboardingState(
         lastCompletedStage = OnboardingStageCheckpoint.EXPLANATION_COMPLETED,
         firstRunTutorialOutcome = outcome
@@ -98,6 +126,31 @@ class AppNavigationLearningFlowTest {
 
         openSolvingTipsPracticeFromHintAction()
         closeOverlayAndAssertCurrentFourPairsScreen()
+        assertEquals(1, puzzleProvider.requestCount)
+    }
+
+    @Test
+    fun continuingFromCompletedRulesHelperTutorialRestoresCurrentFourPairsPuzzle() {
+        val puzzleProvider = QueueGeneratedPuzzleProvider(samplePuzzle)
+        setContent(puzzleProvider = puzzleProvider)
+
+        navigateToFourPairs()
+        enterPreservedStripValue()
+        openLearnBasicsFromRulesHelper()
+        completeLearnBasicsTutorial()
+        assertTutorialSuccessOverlayDisplayed()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_PRIMARY_ACTION)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.FULL_SCREEN_OVERLAY)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+        assertPreservedStripItemPlayerEntered()
         assertEquals(1, puzzleProvider.requestCount)
     }
 
@@ -204,17 +257,84 @@ class AppNavigationLearningFlowTest {
         assertPreservedStripItemPlayerEntered()
     }
 
-    private fun enterPreservedStripValue() {
+    private fun completeLearnBasicsTutorial() {
+        repeat(TutorialContent.learnBasicsSteps.lastIndex) {
+            composeTestRule
+                .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
+                .performScrollTo()
+                .performClick()
+        }
+
+        enterStripValue(index = 0, value = "1")
+        enterStripValue(index = 1, value = "2")
+        completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
+        completeTile(tileIndex = 1, leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1)
+        completeTile(tileIndex = 2, leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3)
+        completeTile(tileIndex = 3, leftStripEntryId = 2, operator = Operator.MULTIPLICATION, rightStripEntryId = 3)
+    }
+
+    private fun assertTutorialSuccessOverlayDisplayed() {
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.stripItem(PRESERVED_STRIP_ITEM_INDEX))
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_PRIMARY_ACTION)
+            .assert(hasText(string(R.string.tutorial_success_overlay_continue_button)))
+    }
+
+    private fun enterPreservedStripValue() {
+        enterStripValue(
+            index = PRESERVED_STRIP_ITEM_INDEX,
+            value = PRESERVED_STRIP_ITEM_VALUE
+        )
+    }
+
+    private fun enterStripValue(index: Int, value: String) {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(index))
             .performScrollTo()
             .performClick()
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
-            .performTextInput(PRESERVED_STRIP_ITEM_VALUE)
+            .performTextInput(value)
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
             .performImeAction()
+    }
+
+    private fun completeTile(tileIndex: Int, leftStripEntryId: Int, operator: Operator, rightStripEntryId: Int) {
+        chooseTileOperand(tileIndex = tileIndex, isLeftOperand = true, stripEntryId = leftStripEntryId)
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(leftStripEntryId), useUnmergedTree = true)
+            .performClick()
+        chooseTileOperand(tileIndex = tileIndex, isLeftOperand = false, stripEntryId = rightStripEntryId)
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(rightStripEntryId), useUnmergedTree = true)
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(tileIndex), useUnmergedTree = true)
+            .performScrollTo()
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(operator), useUnmergedTree = true)
+            .performClick()
+    }
+
+    private fun chooseTileOperand(tileIndex: Int, isLeftOperand: Boolean, stripEntryId: Int) {
+        composeTestRule
+            .onNodeWithTag(
+                if (isLeftOperand) {
+                    GameScreenTestTags.tileLeftOperand(tileIndex)
+                } else {
+                    GameScreenTestTags.tileRightOperand(tileIndex)
+                },
+                useUnmergedTree = true
+            )
+            .performScrollTo()
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(stripEntryId), useUnmergedTree = true)
+            .assertIsEnabled()
     }
 
     private fun assertPreservedStripItemPlayerEntered() {
