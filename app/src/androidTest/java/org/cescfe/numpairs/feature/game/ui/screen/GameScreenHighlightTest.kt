@@ -12,6 +12,7 @@ class GameScreenHighlightTest : GameScreenTestHost() {
     @Test
     fun puzzleElementsAreNotHighlightedByDefault() {
         screen
+            .assertStripNotHighlighted()
             .assertStripItemNotHighlighted(index = 1)
             .scrollToBoard()
             .assertTileNotHighlighted(index = 0)
@@ -21,9 +22,10 @@ class GameScreenHighlightTest : GameScreenTestHost() {
     }
 
     @Test
-    fun rendersStaticHighlightsForStripEntriesTilesAndExpressionSlots() {
+    fun rendersStaticHighlightsForStripSurfaceEntriesTilesAndExpressionSlots() {
         showHighlightState(
             GameHighlightState(
+                isStripHighlighted = true,
                 stripEntryIndexes = setOf(1),
                 tileIndexes = setOf(0),
                 tileExpressionSlots = setOf(
@@ -44,6 +46,7 @@ class GameScreenHighlightTest : GameScreenTestHost() {
         )
 
         screen
+            .assertStripHighlighted()
             .assertStripItemHighlighted(index = 1)
             .assertStripItemNotHighlighted(index = 2)
             .scrollToBoard()

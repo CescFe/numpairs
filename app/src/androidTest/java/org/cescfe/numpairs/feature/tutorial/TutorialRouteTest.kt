@@ -8,7 +8,6 @@ import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
@@ -51,26 +50,32 @@ class TutorialRouteTest {
             .assertIsDisplayed()
         assertNoRequiredSkipAction()
         repeat(4) { index ->
-            assertHighlighted(testTag = GameScreenTestTags.stripItem(index))
-            assertHighlighted(testTag = GameScreenTestTags.tile(index), useUnmergedTree = true)
+            assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(index))
+            assertUnmergedNodeNotHighlighted(testTag = GameScreenTestTags.tile(index))
+            assertTileExpressionSlotsNotHighlighted(tileIndex = index)
             assertTileExpressionHidden(tileIndex = index)
         }
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.STRIP)
         composeTestRule
             .onNodeWithTag(TutorialScreenTestTags.PREVIOUS_STEP_ACTION)
-            .assertIsDisplayed()
-            .assertIsNotEnabled()
+            .assertDoesNotExist()
         composeTestRule
             .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
             .assertIsDisplayed()
             .assertIsEnabled()
         val minimumTouchTargetHeight = with(composeTestRule.density) { 48.dp.toPx() }
+        val instructionBounds = composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.INSTRUCTION_SURFACE)
+            .fetchSemanticsNode()
+            .boundsInRoot
+        val nextBounds = composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
+            .fetchSemanticsNode()
+            .boundsInRoot
         assertTrue(
-            composeTestRule
-                .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
-                .fetchSemanticsNode()
-                .boundsInRoot
-                .height >= minimumTouchTargetHeight
+            nextBounds.height >= minimumTouchTargetHeight
         )
+        assertTrue(nextBounds.center.x > instructionBounds.center.x)
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
             .assertDoesNotExist()
@@ -106,8 +111,38 @@ class TutorialRouteTest {
             .assertHasNoClickAction()
         assertTileExpressionSlotsHaveNoClickAction(tileIndex = 0)
 
-        navigateToExplanationStep(PAIR_EXPLANATION_STEP_INDEX)
+        navigateToExplanationStep(STRIP_EXPLANATION_STEP_INDEX)
 
+        assertHighlighted(testTag = GameScreenTestTags.STRIP)
+        repeat(4) { index ->
+            assertHighlighted(testTag = GameScreenTestTags.stripItem(index))
+            assertUnmergedNodeNotHighlighted(testTag = GameScreenTestTags.tile(index))
+            assertTileExpressionSlotsNotHighlighted(tileIndex = index)
+        }
+
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
+            .performClick()
+        assertStepDisplayed(stepIndex = TILE_EXPLANATION_STEP_INDEX)
+
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.STRIP)
+        repeat(4) { index ->
+            assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(index))
+        }
+        assertHighlighted(testTag = GameScreenTestTags.tile(0), useUnmergedTree = true)
+        assertTileExpressionSlotsHighlighted(tileIndex = 0)
+        repeat(3) { offset ->
+            val tileIndex = offset + 1
+            assertUnmergedNodeNotHighlighted(testTag = GameScreenTestTags.tile(tileIndex))
+            assertTileExpressionSlotsNotHighlighted(tileIndex = tileIndex)
+        }
+
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
+            .performClick()
+        assertStepDisplayed(stepIndex = PAIR_EXPLANATION_STEP_INDEX)
+
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.STRIP)
         assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(0))
         assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(1))
         assertHighlighted(testTag = GameScreenTestTags.stripItem(2))
@@ -137,6 +172,12 @@ class TutorialRouteTest {
             .assertHasNoClickAction()
         assertTileExpressionSlotsHaveNoClickAction(tileIndex = 3)
         repeat(4, ::assertTileExpressionHidden)
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.STRIP)
+        repeat(4) { index ->
+            assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(index))
+            assertUnmergedNodeNotHighlighted(testTag = GameScreenTestTags.tile(index))
+            assertTileExpressionSlotsNotHighlighted(tileIndex = index)
+        }
 
         advanceWorkedExampleStep(PRODUCT_FOUR_FIVE_STEP_INDEX)
         assertTileExpression(tileIndex = 3, operator = Operator.MULTIPLICATION, leftValue = "4", rightValue = "5")
@@ -144,6 +185,15 @@ class TutorialRouteTest {
         assertTileExpression(tileIndex = 2, operator = Operator.ADDITION, leftValue = "4", rightValue = "5")
         advanceWorkedExampleStep(REVEAL_THREE_STEP_INDEX)
         assertFocusedIntroductionStripDisplayed(expectedSecondValue = "3", isSecondValuePlayerEntered = true)
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.STRIP)
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(0))
+        assertHighlighted(testTag = GameScreenTestTags.stripItem(1))
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(2))
+        assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(3))
+        repeat(4) { index ->
+            assertUnmergedNodeNotHighlighted(testTag = GameScreenTestTags.tile(index))
+            assertTileExpressionSlotsNotHighlighted(tileIndex = index)
+        }
         advanceWorkedExampleStep(PRODUCT_TWO_THREE_STEP_INDEX)
         assertTileExpression(tileIndex = 1, operator = Operator.MULTIPLICATION)
         advanceWorkedExampleStep(SUM_TWO_THREE_STEP_INDEX)
@@ -198,6 +248,63 @@ class TutorialRouteTest {
             .onNodeWithTag(GameScreenTestTags.tileReset(0), useUnmergedTree = true)
             .assertIsDisplayed()
             .performClick()
+        assertPracticeCueDismissed()
+    }
+
+    @Test
+    fun independentPracticeCanReviewPreviousStepsWithoutLosingProgressOrRepeatingCheckpoint() {
+        val checkpointCount = AtomicInteger(0)
+        setContent(
+            onProgressCheckpointReached = { progressCheckpoint ->
+                if (progressCheckpoint == TutorialProgressCheckpoint.WORKED_EXAMPLE_COMPLETED) {
+                    checkpointCount.incrementAndGet()
+                }
+            }
+        )
+        advanceThroughExplanation()
+        advanceThroughWorkedExample()
+
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.PREVIOUS_STEP_ACTION)
+            .assertIsDisplayed()
+            .assertIsEnabled()
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
+            .assertDoesNotExist()
+        val minimumTouchTargetHeight = with(composeTestRule.density) { 48.dp.toPx() }
+        val instructionBounds = composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.INSTRUCTION_SURFACE)
+            .fetchSemanticsNode()
+            .boundsInRoot
+        val previousBounds = composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.PREVIOUS_STEP_ACTION)
+            .fetchSemanticsNode()
+            .boundsInRoot
+        assertTrue(previousBounds.height >= minimumTouchTargetHeight)
+        assertTrue(previousBounds.center.x < instructionBounds.center.x)
+
+        enterStripValue(index = 0, value = "1")
+        assertPracticeCueDismissed()
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.PREVIOUS_STEP_ACTION)
+            .performScrollTo()
+            .performClick()
+        assertStepDisplayed(stepIndex = SUM_TWO_THREE_STEP_INDEX)
+        assertTileExpression(tileIndex = 0, operator = Operator.ADDITION)
+
+        composeTestRule
+            .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
+            .performScrollTo()
+            .performClick()
+        waitForStep(stepIndex = PRACTICE_STEP_INDEX)
+
+        assertEquals(1, checkpointCount.get())
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(0))
+            .performScrollTo()
+            .assertContentDescriptionEquals(
+                string(R.string.strip_item_player_entered_content_description, "1")
+            )
         assertPracticeCueDismissed()
     }
 
@@ -727,6 +834,7 @@ class TutorialRouteTest {
     private companion object {
         const val OBJECTIVE_EXPLANATION_STEP_INDEX = 0
         const val STRIP_EXPLANATION_STEP_INDEX = 1
+        const val TILE_EXPLANATION_STEP_INDEX = 2
         const val PAIR_EXPLANATION_STEP_INDEX = 3
         const val WORKED_EXAMPLE_INTRODUCTION_STEP_INDEX = 4
         const val PRODUCT_FOUR_FIVE_STEP_INDEX = 5

@@ -61,6 +61,14 @@ class GameScreenRobot(
             .assertIsDisplayed()
     }
 
+    fun assertStripHighlighted(): GameScreenRobot = apply {
+        assertHighlighted(testTag = GameScreenTestTags.STRIP)
+    }
+
+    fun assertStripNotHighlighted(): GameScreenRobot = apply {
+        assertNotHighlighted(testTag = GameScreenTestTags.STRIP)
+    }
+
     fun tapStripItem(index: Int): GameScreenRobot = apply {
         interactions
             .onNodeWithTag(GameScreenTestTags.stripItem(index))

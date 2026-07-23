@@ -43,13 +43,7 @@ internal object LearnBasicsTutorialContent {
             manualWorkedExampleStep(
                 copyResId = R.string.tutorial_worked_example_introduction_copy,
                 entryPuzzle = initialPuzzle,
-                highlightedTargets = listOf(
-                    TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1, 2, 3)),
-                    TutorialHighlightTarget.WholeTile(tileIndex = 0),
-                    TutorialHighlightTarget.WholeTile(tileIndex = 1),
-                    TutorialHighlightTarget.WholeTile(tileIndex = 2),
-                    TutorialHighlightTarget.WholeTile(tileIndex = 3)
-                )
+                highlightedTargets = emptyList()
             ),
             manualWorkedExampleStep(
                 copyResId = R.string.tutorial_worked_example_product_four_five_copy,
@@ -66,8 +60,9 @@ internal object LearnBasicsTutorialContent {
             manualWorkedExampleStep(
                 copyResId = R.string.tutorial_worked_example_reveal_three_copy,
                 entryPuzzle = completedStrip,
-                stripEntryIndexes = listOf(0, 1),
-                tileIndexes = listOf(0, 1)
+                highlightedTargets = listOf(
+                    TutorialHighlightTarget.StripEntries(indexes = listOf(1))
+                )
             ),
             manualWorkedExampleStep(
                 copyResId = R.string.tutorial_worked_example_product_two_three_copy,
@@ -128,24 +123,20 @@ internal object LearnBasicsTutorialContent {
     private fun explanationSteps(): List<TutorialStep> = listOf(
         manualExplanationStep(
             copyResId = R.string.tutorial_objective_explanation_copy,
-            highlightedTargets = listOf(
-                TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1, 2, 3)),
-                TutorialHighlightTarget.WholeTile(tileIndex = 0),
-                TutorialHighlightTarget.WholeTile(tileIndex = 1),
-                TutorialHighlightTarget.WholeTile(tileIndex = 2),
-                TutorialHighlightTarget.WholeTile(tileIndex = 3)
-            )
+            highlightedTargets = emptyList()
         ),
         manualExplanationStep(
             copyResId = R.string.tutorial_strip_explanation_copy,
             highlightedTargets = listOf(
+                TutorialHighlightTarget.WholeStrip,
                 TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1, 2, 3))
             )
         ),
         manualExplanationStep(
             copyResId = R.string.tutorial_tile_explanation_copy,
             highlightedTargets = listOf(
-                TutorialHighlightTarget.WholeTile(tileIndex = 0)
+                TutorialHighlightTarget.WholeTile(tileIndex = 0),
+                TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0)
             )
         ),
         manualExplanationStep(

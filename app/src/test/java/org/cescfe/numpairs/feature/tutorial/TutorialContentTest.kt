@@ -10,6 +10,7 @@ import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.domain.puzzle.model.Tile
 import org.cescfe.numpairs.feature.game.GameHighlightState
+import org.cescfe.numpairs.feature.game.GameTileExpressionSlot
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -103,18 +104,14 @@ class TutorialContentTest {
         )
         assertEquals(
             listOf(
+                emptyList(),
                 listOf(
-                    TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1, 2, 3)),
-                    TutorialHighlightTarget.WholeTile(tileIndex = 0),
-                    TutorialHighlightTarget.WholeTile(tileIndex = 1),
-                    TutorialHighlightTarget.WholeTile(tileIndex = 2),
-                    TutorialHighlightTarget.WholeTile(tileIndex = 3)
-                ),
-                listOf(
+                    TutorialHighlightTarget.WholeStrip,
                     TutorialHighlightTarget.StripEntries(indexes = listOf(0, 1, 2, 3))
                 ),
                 listOf(
-                    TutorialHighlightTarget.WholeTile(tileIndex = 0)
+                    TutorialHighlightTarget.WholeTile(tileIndex = 0),
+                    TutorialHighlightTarget.TileExpressionSlots(tileIndex = 0)
                 ),
                 listOf(
                     TutorialHighlightTarget.StripEntries(indexes = listOf(2, 3)),
@@ -155,6 +152,36 @@ class TutorialContentTest {
     }
 
     @Test
+    fun learn_basics_maps_each_refined_focus_to_the_exact_game_highlight() {
+        val scenario = TutorialContent.scenario(TutorialScenarioId.STRIP_AND_TILES_INTRODUCTION)
+        val steps = TutorialContent.learnBasicsSteps
+
+        assertEquals(GameHighlightState.None, steps[0].toHighlightState(scenario = scenario, uiState = null))
+
+        val stripExplanation = steps[1].toHighlightState(scenario = scenario, uiState = null)
+        assertTrue(stripExplanation.isStripHighlighted)
+        assertEquals(setOf(0, 1, 2, 3), stripExplanation.stripEntryIndexes)
+        assertTrue(stripExplanation.tileIndexes.isEmpty())
+        assertTrue(stripExplanation.tileExpressionSlots.isEmpty())
+
+        val tileExplanation = steps[2].toHighlightState(scenario = scenario, uiState = null)
+        assertFalse(tileExplanation.isStripHighlighted)
+        assertTrue(tileExplanation.stripEntryIndexes.isEmpty())
+        assertEquals(setOf(0), tileExplanation.tileIndexes)
+        GameTileExpressionSlot.entries.forEach { slot ->
+            assertTrue(tileExplanation.isTileExpressionSlotHighlighted(tileIndex = 0, slot = slot))
+        }
+
+        assertEquals(GameHighlightState.None, steps[4].toHighlightState(scenario = scenario, uiState = null))
+
+        val revealedThree = steps[7].toHighlightState(scenario = scenario, uiState = null)
+        assertFalse(revealedThree.isStripHighlighted)
+        assertEquals(setOf(1), revealedThree.stripEntryIndexes)
+        assertTrue(revealedThree.tileIndexes.isEmpty())
+        assertTrue(revealedThree.tileExpressionSlots.isEmpty())
+    }
+
+    @Test
     fun worked_example_steps_follow_the_exact_reasoned_solution_order() {
         val steps = TutorialContent.learnBasicsSteps.subList(fromIndex = 4, toIndex = 10)
 
@@ -189,26 +216,27 @@ class TutorialContentTest {
         assertEquals(PuzzleCompletionState.SOLVED, requireNotNull(steps.last().entryPuzzle).completionState)
         assertEquals(
             listOf(
-                listOf(0, 1, 2, 3),
+                emptyList(),
                 listOf(2, 3),
                 listOf(2, 3),
-                listOf(0, 1),
+                listOf(1),
                 listOf(0, 1),
                 listOf(0, 1)
             ),
             steps.map { step ->
                 step.highlightedTargets
                     .filterIsInstance<TutorialHighlightTarget.StripEntries>()
-                    .single()
-                    .indexes
+                    .singleOrNull()
+                    ?.indexes
+                    .orEmpty()
             }
         )
         assertEquals(
             listOf(
-                listOf(0, 1, 2, 3),
+                emptyList(),
                 listOf(3),
                 listOf(2),
-                listOf(0, 1),
+                emptyList(),
                 listOf(1),
                 listOf(0)
             ),

@@ -1,6 +1,7 @@
 package org.cescfe.numpairs.feature.game
 
 data class GameHighlightState(
+    val isStripHighlighted: Boolean = false,
     val stripEntryIndexes: Set<Int> = emptySet(),
     val tileIndexes: Set<Int> = emptySet(),
     val tileExpressionSlots: Set<GameTileExpressionSlotHighlight> = emptySet()

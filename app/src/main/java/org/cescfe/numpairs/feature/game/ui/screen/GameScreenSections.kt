@@ -3,6 +3,7 @@ package org.cescfe.numpairs.feature.game.ui.screen
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -49,6 +50,7 @@ import org.cescfe.numpairs.feature.game.ui.components.strip.AvailableNumberInput
 import org.cescfe.numpairs.feature.game.ui.components.strip.CHIP_HORIZONTAL_CONTENT_INSET
 import org.cescfe.numpairs.feature.game.ui.components.tile.PuzzleTile
 import org.cescfe.numpairs.feature.game.ui.semantics.completionFeedbackSemantics
+import org.cescfe.numpairs.feature.game.ui.semantics.gameHighlightSemantics
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTextStyles
 import org.cescfe.numpairs.ui.theme.numPairsSemanticColors
@@ -214,10 +216,19 @@ internal fun StripSection(
         stripItems = stripItems,
         stripItemEntryInput = stripItemEntryInput
     )
+    val stripBorder = if (highlightState.isStripHighlighted) {
+        BorderStroke(
+            width = STRIP_HIGHLIGHTED_BORDER_WIDTH,
+            color = MaterialTheme.numPairsSemanticColors.tutorialHighlight
+        )
+    } else {
+        NumPairsComponents.subtleBorder()
+    }
 
     Surface(
         modifier = modifier
             .testTag(GameScreenTestTags.STRIP)
+            .gameHighlightSemantics(highlightState.isStripHighlighted)
             .semantics {
                 contentDescription = stripContentDescription
                 stripEntryFeedbackText?.let { feedbackText ->
@@ -226,7 +237,7 @@ internal fun StripSection(
             },
         color = NumPairsComponents.subtleSurfaceColor(),
         shape = NumPairsComponents.LargeShape,
-        border = NumPairsComponents.subtleBorder()
+        border = stripBorder
     ) {
         Column(
             modifier = Modifier
