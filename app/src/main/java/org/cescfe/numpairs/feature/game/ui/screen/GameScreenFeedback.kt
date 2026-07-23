@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
@@ -149,12 +150,17 @@ internal fun SuccessOverlay(
                 }
                 Text(
                     text = content?.message ?: stringResource(R.string.success_overlay_message),
-                    modifier = Modifier.testTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE),
-                    style = MaterialTheme.typography.headlineSmall
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE),
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center
                 )
                 Text(
                     text = content?.supportingText ?: stringResource(R.string.success_overlay_supporting_text),
-                    style = MaterialTheme.typography.bodyMedium
+                    modifier = Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center
                 )
                 if (content != null) {
                     NumPairsComponents.PrimaryCtaButton(
