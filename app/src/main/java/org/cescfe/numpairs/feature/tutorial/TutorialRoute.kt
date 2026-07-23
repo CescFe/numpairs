@@ -34,6 +34,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
+import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.feature.game.GameHighlightState
 import org.cescfe.numpairs.feature.game.GameInteractionPolicy
@@ -77,6 +78,9 @@ fun TutorialRoute(
         mutableIntStateOf(startStepIndex - 1)
     }
     var latestGameUiSnapshot by remember(playbackKey) { mutableStateOf<TutorialGameUiSnapshot?>(null) }
+    var latestPuzzleSnapshot by remember(playbackKey) { mutableStateOf<TutorialPuzzleSnapshot?>(null) }
+    var retainedPracticePuzzle by remember(playbackKey) { mutableStateOf<Puzzle?>(null) }
+    var wasPracticeCueDismissed by remember(playbackKey) { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val currentOnProgressCheckpointReached by rememberUpdatedState(onProgressCheckpointReached)
     val currentOnTutorialCompleted by rememberUpdatedState(onTutorialCompleted)
@@ -86,12 +90,25 @@ fun TutorialRoute(
         mutableStateOf(false)
     }
     var hasCurrentStepPuzzleChanged by remember(playbackKey, currentStepIndex) {
-        mutableStateOf(false)
+        mutableStateOf(
+            currentStep.scenarioId == TutorialScenarioId.REPEATED_VALUE_PRACTICE &&
+                wasPracticeCueDismissed
+        )
     }
-    val currentEntryPuzzle = currentStep.entryPuzzle ?: currentScenario.initialPuzzle
+    val currentEntryPuzzle = currentStep.entryPuzzle
+        ?: retainedPracticePuzzle.takeIf {
+            currentStep.scenarioId == TutorialScenarioId.REPEATED_VALUE_PRACTICE
+        }
+        ?: currentScenario.initialPuzzle
     val latestGameUiState = latestGameUiSnapshot
         ?.takeIf { snapshot -> snapshot.scenarioId == currentScenario.id }
         ?.uiState
+    val isManualAdvanceStep = currentStep.completionPredicate == TutorialStepCompletionPredicate.ManualAdvance
+    val showPreviousStepAction = currentStepIndex > 0 &&
+        (
+            isManualAdvanceStep ||
+                currentStep.scenarioId == TutorialScenarioId.REPEATED_VALUE_PRACTICE
+            )
 
     LaunchedEffect(currentStepIndex, latestGameUiState) {
         val uiState = latestGameUiState ?: return@LaunchedEffect
@@ -149,9 +166,18 @@ fun TutorialRoute(
                 currentStep = currentStep,
                 currentStepNumber = currentStepIndex + 1,
                 totalSteps = steps.size,
-                canNavigateBack = currentStepIndex > 0 && !isCheckpointNavigationInProgress,
+                showNavigateBack = showPreviousStepAction,
+                showNavigateNext = isManualAdvanceStep,
+                canNavigateBack = showPreviousStepAction && !isCheckpointNavigationInProgress,
                 canNavigateNext = !isCheckpointNavigationInProgress,
                 onNavigateBack = {
+                    if (currentStep.scenarioId == TutorialScenarioId.REPEATED_VALUE_PRACTICE) {
+                        retainedPracticePuzzle = latestPuzzleSnapshot
+                            ?.takeIf { snapshot -> snapshot.scenarioId == currentScenario.id }
+                            ?.puzzle
+                            ?: currentEntryPuzzle
+                        wasPracticeCueDismissed = hasCurrentStepPuzzleChanged
+                    }
                     currentStepIndex -= 1
                 },
                 onNavigateNext = {
@@ -159,10 +185,13 @@ fun TutorialRoute(
 
                     if (progressCheckpoint == null && currentStepIndex < steps.lastIndex) {
                         currentStepIndex += 1
+                    } else if (lastReportedStepIndex >= currentStepIndex && currentStepIndex < steps.lastIndex) {
+                        currentStepIndex += 1
                     } else if (!isCheckpointNavigationInProgress && currentStepIndex < steps.lastIndex) {
                         isCheckpointNavigationInProgress = true
                         coroutineScope.launch {
                             currentOnProgressCheckpointReached(requireNotNull(progressCheckpoint))
+                            lastReportedStepIndex = currentStepIndex
                             currentStepIndex += 1
                             isCheckpointNavigationInProgress = false
                         }
@@ -178,6 +207,10 @@ fun TutorialRoute(
             )
         },
         onPuzzleChanged = { puzzle ->
+            latestPuzzleSnapshot = TutorialPuzzleSnapshot(
+                scenarioId = currentScenario.id,
+                puzzle = puzzle
+            )
             if (puzzle != currentEntryPuzzle) {
                 hasCurrentStepPuzzleChanged = true
             }
@@ -187,6 +220,8 @@ fun TutorialRoute(
 }
 
 private data class TutorialGameUiSnapshot(val scenarioId: TutorialScenarioId, val uiState: GameUiState)
+
+private data class TutorialPuzzleSnapshot(val scenarioId: TutorialScenarioId, val puzzle: Puzzle)
 
 internal fun isTutorialSuccessOverlayEnabled(
     mode: TutorialMode,
@@ -204,6 +239,8 @@ private fun TutorialInstructionSurface(
     currentStep: TutorialStep,
     currentStepNumber: Int,
     totalSteps: Int,
+    showNavigateBack: Boolean,
+    showNavigateNext: Boolean,
     canNavigateBack: Boolean,
     canNavigateNext: Boolean,
     onNavigateBack: () -> Unit,
@@ -237,8 +274,10 @@ private fun TutorialInstructionSurface(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            if (currentStep.completionPredicate == TutorialStepCompletionPredicate.ManualAdvance) {
+            if (showNavigateBack || showNavigateNext) {
                 TutorialStepNavigation(
+                    showNavigateBack = showNavigateBack,
+                    showNavigateNext = showNavigateNext,
                     canNavigateBack = canNavigateBack,
                     canNavigateNext = canNavigateNext,
                     onNavigateBack = onNavigateBack,
@@ -251,6 +290,8 @@ private fun TutorialInstructionSurface(
 
 @Composable
 private fun TutorialStepNavigation(
+    showNavigateBack: Boolean,
+    showNavigateNext: Boolean,
     canNavigateBack: Boolean,
     canNavigateNext: Boolean,
     onNavigateBack: () -> Unit,
@@ -259,32 +300,40 @@ private fun TutorialStepNavigation(
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = when {
+            showNavigateBack && showNavigateNext -> Arrangement.SpaceBetween
+            showNavigateBack -> Arrangement.Start
+            else -> Arrangement.End
+        },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        TextButton(
-            onClick = onNavigateBack,
-            enabled = canNavigateBack,
-            modifier = Modifier
-                .heightIn(min = 48.dp)
-                .testTag(TutorialScreenTestTags.PREVIOUS_STEP_ACTION)
-        ) {
-            Text(
-                text = stringResource(R.string.tutorial_previous_step_action),
-                style = MaterialTheme.typography.labelLarge
-            )
+        if (showNavigateBack) {
+            TextButton(
+                onClick = onNavigateBack,
+                enabled = canNavigateBack,
+                modifier = Modifier
+                    .heightIn(min = 48.dp)
+                    .testTag(TutorialScreenTestTags.PREVIOUS_STEP_ACTION)
+            ) {
+                Text(
+                    text = stringResource(R.string.tutorial_previous_step_action),
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
         }
-        TextButton(
-            onClick = onNavigateNext,
-            enabled = canNavigateNext,
-            modifier = Modifier
-                .heightIn(min = 48.dp)
-                .testTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
-        ) {
-            Text(
-                text = stringResource(R.string.tutorial_next_step_action),
-                style = MaterialTheme.typography.labelLarge
-            )
+        if (showNavigateNext) {
+            TextButton(
+                onClick = onNavigateNext,
+                enabled = canNavigateNext,
+                modifier = Modifier
+                    .heightIn(min = 48.dp)
+                    .testTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
+            ) {
+                Text(
+                    text = stringResource(R.string.tutorial_next_step_action),
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
         }
     }
 }
@@ -479,6 +528,7 @@ private fun TutorialRequiredAction.CompleteTileExpression.hiddenRequiredStripEnt
 private fun TutorialStep.highlightedStripEntryIds(scenario: TutorialScenario): Set<Int> = buildSet {
     highlightedTargets.forEach { target ->
         when (target) {
+            TutorialHighlightTarget.WholeStrip -> Unit
             TutorialHighlightTarget.HiddenStripEntries -> {
                 scenario.initialPuzzle.strip.items.forEachIndexed { index, item ->
                     if (item == StripItem.Hidden) {
@@ -520,9 +570,13 @@ internal fun TutorialStep.toHighlightState(
     val stripEntryIndexes = mutableSetOf<Int>()
     val tileIndexes = mutableSetOf<Int>()
     val tileExpressionSlots = mutableSetOf<GameTileExpressionSlotHighlight>()
+    var isStripHighlighted = false
 
     highlightedTargets.forEach { target ->
         when (target) {
+            TutorialHighlightTarget.WholeStrip -> {
+                isStripHighlighted = true
+            }
             TutorialHighlightTarget.HiddenStripEntries -> {
                 scenario.initialPuzzle.strip.items.forEachIndexed { index, item ->
                     if (item == StripItem.Hidden) {
@@ -550,6 +604,7 @@ internal fun TutorialStep.toHighlightState(
     }
 
     return GameHighlightState(
+        isStripHighlighted = isStripHighlighted,
         stripEntryIndexes = stripEntryIndexes,
         tileIndexes = tileIndexes,
         tileExpressionSlots = tileExpressionSlots

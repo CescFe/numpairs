@@ -117,20 +117,20 @@ tiles: ? ? ? = 5
        ? ? ? = 20
 ```
 
-Every explanatory step disables strip, operand, operator, and reset interaction. The player advances or returns manually with accessible `Back` and `Next` actions below the current copy. The controls keep stable layout and touch targets; `Back` is unavailable on the first explanation without moving `Next`.
+Every explanatory step disables strip, operand, operator, and reset interaction. The player advances or returns manually with accessible `Back` and `Next` actions below the current copy. The controls keep stable layout and touch targets. The first explanation omits `Back` entirely while keeping `Next` in its established right-hand position.
 
 Use one short message and one matching focus per step:
 
-1. Show the whole puzzle and explain that the objective is to discover every hidden number and symbol.
-2. Highlight the strip and explain that its positive integers are ordered from lowest to highest, may repeat, and may be hidden.
-3. Highlight one tile and explain that its visible result is produced by two operands and one operator in the hidden expression.
+1. Show the whole puzzle without highlighting any element and explain that the objective is to discover every hidden number and symbol.
+2. Highlight the complete strip surface and all its entries; explain that its positive integers are ordered from lowest to highest, may repeat, and may be hidden.
+3. Highlight one whole tile and its three hidden expression slots; explain that its visible result is produced by two operands and one operator in the hidden expression.
 4. Highlight strip entries `4` and `5` with result tiles `9` and `20`; explain that each pair completes two tiles, one sum and one product.
 
-Continue with a deterministic, manually paced worked example. Its first step keeps the same unresolved state visible, then five more steps apply these transitions in order:
+Continue with a deterministic, manually paced worked example. Its first step keeps the same unresolved state visible without highlighting any element, then five more steps apply these transitions in order:
 
 1. `4 × 5 = 20`: the larger product is resolved first.
 2. `4 + 5 = 9`: the same pair also completes its sum.
-3. Reveal strip value `3`: with `2`, it produces the remaining results `5` and `6`.
+3. Reveal and exclusively highlight strip value `3`: with `2`, it produces the remaining results `5` and `6`.
 4. `2 × 3 = 6`: resolve the remaining product.
 5. `2 + 3 = 5`: resolve the remaining sum.
 
@@ -161,6 +161,8 @@ These results correspond to one addition and one multiplication for the `1`/`2` 
 Tell the player that it is their turn, that tapping any unknown starts an interaction, and that strip values may repeat. Present multiplication as a useful starting heuristic rather than a universal rule. Initially focus the known `2` and `3` entries with result tile `6` without restricting the player's first action; remove that cue after the player commits the first puzzle change.
 
 Allow normal strip, operand, operator, correction, reset, and validation behavior from the beginning.
+
+Show an accessible `Back` action and no `Next` action during independent practice. `Back` returns to the final worked-example step so the player can review any previous explanation. Returning to practice restores committed in-session puzzle progress and keeps its initial cue dismissed if the player had already changed the puzzle. Revisiting the final worked-example boundary does not record its checkpoint again.
 
 The two strip entries that display `2` remain distinct stable entries. Because exchanging those equal-valued entries produces an equivalent player-visible solution, Tutorial completion must accept either valid stable-entry assignment as long as all shared puzzle rules are satisfied.
 

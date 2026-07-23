@@ -70,6 +70,8 @@ data class TutorialStep(
 }
 
 sealed interface TutorialHighlightTarget {
+    data object WholeStrip : TutorialHighlightTarget
+
     data object HiddenStripEntries : TutorialHighlightTarget
 
     data object HiddenTileExpressions : TutorialHighlightTarget
