@@ -61,16 +61,16 @@
     <!-- Tutorial screen -->
     <string name="tutorial_screen_title">Tutorial</string>
     <string name="tutorial_step_indicator">Paso %1$d de %2$d</string>
-    <string name="tutorial_objective_explanation_copy">Bienvenido a NumPairs. Tu objetivo es descubrir todos los números, sumas y multiplicaciones ocultas.</string>
-    <string name="tutorial_strip_explanation_copy">La secuencia de la parte superior del puzle es una lista de números ordenados de menor a mayor, pueden repetirse e, inicialmente, algunos están ocultos.</string>
-    <string name="tutorial_tile_explanation_copy">Debajo tenemos las casillas. Cada una se compone de 2 partes: en su parte inferior, muestra un resultado conocido; en su parte superior contiene una suma o multiplicación cuyos elementos debes deducir.</string>
-    <string name="tutorial_pair_explanation_copy">¿Cómo deducirlos? Debes formar parejas con los números de la secuencia superior. Cada pareja debe resolver dos casillas: una suma y una multiplicación.</string>
+    <string name="tutorial_objective_explanation_copy">Bienvenido a NumPairs. Tu objetivo es descubrir todos los números y completar todas las sumas y multiplicaciones ocultas.</string>
+    <string name="tutorial_strip_explanation_copy">La secuencia de la parte superior del puzle es una lista de números ordenados de menor a mayor. Pueden repetirse y, al principio, algunos están ocultos.</string>
+    <string name="tutorial_tile_explanation_copy">Las casillas están debajo. Cada una tiene dos partes: abajo aparece un resultado conocido y arriba hay una suma o multiplicación cuyos números y signo debes deducir.</string>
+    <string name="tutorial_pair_explanation_copy">¿Cómo se deducen? Forma parejas con los números de la secuencia superior. Cada pareja completa dos casillas: una suma y una multiplicación.</string>
     <string name="tutorial_previous_step_action">Atrás</string>
     <string name="tutorial_next_step_action">Siguiente</string>
-    <string name="tutorial_worked_example_introduction_copy">Presta atención: por primera y última vez vamos a resolver este puzle por ti.</string>
+    <string name="tutorial_worked_example_introduction_copy">Presta atención: esta será la primera y última vez que resolveremos un puzle por ti.</string>
     <string name="tutorial_worked_example_product_four_five_copy">4 × 5 = 20, así que 20 es la casilla de multiplicación de esta pareja.</string>
-    <string name="tutorial_worked_example_sum_four_five_copy">La misma pareja también debe resolver la suma 4 + 5 = 9.</string>
-    <string name="tutorial_worked_example_reveal_three_copy">Quedan por resolver los resultados 5 y 6. Junto al 2, el número oculto sólo puede ser 3.</string>
+    <string name="tutorial_worked_example_sum_four_five_copy">La misma pareja también resuelve la suma: 4 + 5 = 9.</string>
+    <string name="tutorial_worked_example_reveal_three_copy">Quedan por completar las casillas con resultados 5 y 6. Junto al 2, el número oculto solo puede ser 3.</string>
     <string name="tutorial_worked_example_product_two_three_copy">2 × 3 = 6 completa la multiplicación que falta.</string>
     <string name="tutorial_worked_example_sum_two_three_copy">2 + 3 = 5 completa la suma y resuelve el puzle.</string>
     <string name="tutorial_repeated_value_practice_copy">Ahora tú: resuelve el puzle. Toca cualquier ? para empezar. Los números pueden repetirse. Consejo: las multiplicaciones suelen ser un buen punto de partida.</string>

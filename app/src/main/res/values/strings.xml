@@ -61,22 +61,22 @@
     <!-- Tutorial screen -->
     <string name="tutorial_screen_title">Tutorial</string>
     <string name="tutorial_step_indicator">Step %1$d of %2$d</string>
-    <string name="tutorial_objective_explanation_copy">Welcome to NumPairs. Your goal is to discover every hidden number, addition and multiplication.</string>
-    <string name="tutorial_strip_explanation_copy">The sequence at the top of the puzzle is a list of numbers ordered from lowest to highest, may repeat, and initially, some are hidden.</string>
-    <string name="tutorial_tile_explanation_copy">Each tile shows a result. Complete its top row with the two numbers and symbol that produce that result.</string>
-    <string name="tutorial_pair_explanation_copy">Group the strip numbers into pairs. Each pair completes two tiles: one addition and one multiplication.</string>
+    <string name="tutorial_objective_explanation_copy">Welcome to NumPairs. Your goal is to find every number and complete all the hidden additions and multiplications.</string>
+    <string name="tutorial_strip_explanation_copy">The sequence at the top of the puzzle is a list of numbers ordered from lowest to highest. Numbers may repeat, and some are hidden at first.</string>
+    <string name="tutorial_tile_explanation_copy">The tiles are below. Each has two parts: a known result at the bottom and an addition or multiplication at the top whose numbers and symbol you must work out.</string>
+    <string name="tutorial_pair_explanation_copy">How do you work them out? Pair up the numbers in the sequence above. Each pair completes two tiles: one addition and one multiplication.</string>
     <string name="tutorial_previous_step_action">Back</string>
     <string name="tutorial_next_step_action">Next</string>
-    <string name="tutorial_worked_example_introduction_copy">Watch closely: we’ll solve this puzzle for you once.</string>
+    <string name="tutorial_worked_example_introduction_copy">Watch closely: this is the first and last time we’ll solve a puzzle for you.</string>
     <string name="tutorial_worked_example_product_four_five_copy">4 × 5 = 20, so 20 is this pair’s multiplication tile.</string>
-    <string name="tutorial_worked_example_sum_four_five_copy">The same pair also gives 4 + 5 = 9.</string>
-    <string name="tutorial_worked_example_reveal_three_copy">The remaining results are 5 and 6. Paired with 2, the hidden number must be 3.</string>
+    <string name="tutorial_worked_example_sum_four_five_copy">The same pair also completes the addition: 4 + 5 = 9.</string>
+    <string name="tutorial_worked_example_reveal_three_copy">The tiles showing 5 and 6 are still incomplete. Paired with 2, the hidden number can only be 3.</string>
     <string name="tutorial_worked_example_product_two_three_copy">2 × 3 = 6 completes the remaining multiplication.</string>
-    <string name="tutorial_worked_example_sum_two_three_copy">2 + 3 = 5 completes the puzzle.</string>
+    <string name="tutorial_worked_example_sum_two_three_copy">2 + 3 = 5 completes the addition and solves the puzzle.</string>
     <string name="tutorial_repeated_value_practice_copy">Your turn: solve the puzzle. Tap any ? to begin. Numbers may repeat. Tip: multiplication is often a good place to start.</string>
     <string name="onboarding_skip_tutorial_action">Skip tutorial</string>
     <string name="onboarding_skip_tutorial_title">Skip the tutorial?</string>
-    <string name="onboarding_skip_tutorial_message">If you’re new to NumPairs or similar games, we recommend continuing. You can open the Tutorial again later from How to play.</string>
+    <string name="onboarding_skip_tutorial_message">If this is your first time playing NumPairs, we recommend continuing.</string>
     <string name="onboarding_continue_tutorial_button">Continue tutorial</string>
     <string name="onboarding_skip_anyway_button">Skip anyway</string>
     <string name="tutorial_solving_tips_step_one_copy">In low difficulty, no number appears twice and the strip never includes 1, so prime results are always sums. Complete the prime result as an addition tile.</string>

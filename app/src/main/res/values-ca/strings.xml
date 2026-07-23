@@ -61,22 +61,22 @@
     <!-- Tutorial screen -->
     <string name="tutorial_screen_title">Tutorial</string>
     <string name="tutorial_step_indicator">Pas %1$d de %2$d</string>
-    <string name="tutorial_objective_explanation_copy">Benvingut a NumPairs. L’objectiu és descobrir tots els nombres, sumes i multiplicacions ocultes.</string>
-    <string name="tutorial_strip_explanation_copy">La sequència de la part superior del puzle és una llista de nombres ordenats de menor a major, es poden repetir i, inicialment, alguns estan ocults.</string>
-    <string name="tutorial_tile_explanation_copy">Cada casella mostra un resultat. Completa la part superior amb els dos nombres i el signe que produeixen aquest resultat.</string>
-    <string name="tutorial_pair_explanation_copy">Agrupa els nombres de la sèrie per parelles. Cada parella completa dues caselles: una suma i una multiplicació.</string>
+    <string name="tutorial_objective_explanation_copy">Benvingut a NumPairs. L’objectiu és descobrir tots els nombres i completar totes les sumes i multiplicacions ocultes.</string>
+    <string name="tutorial_strip_explanation_copy">La seqüència de la part superior del puzle és una llista de nombres ordenats de menor a major. Es poden repetir i, al principi, alguns estan ocults.</string>
+    <string name="tutorial_tile_explanation_copy">Davall hi ha les caselles. Cada una té dues parts: baix apareix un resultat conegut i dalt hi ha una suma o multiplicació amb els nombres i el signe que has de deduir.</string>
+    <string name="tutorial_pair_explanation_copy">Com els pots deduir? Forma parelles amb els nombres de la seqüència superior. Cada parella completa dues caselles: una suma i una multiplicació.</string>
     <string name="tutorial_previous_step_action">Enrere</string>
     <string name="tutorial_next_step_action">Següent</string>
-    <string name="tutorial_worked_example_introduction_copy">Para atenció: resoldrem este puzle per tu una sola vegada.</string>
+    <string name="tutorial_worked_example_introduction_copy">Para atenció: esta serà la primera i última vegada que resoldrem un puzle per tu.</string>
     <string name="tutorial_worked_example_product_four_five_copy">4 × 5 = 20, així que 20 és la casella de multiplicació d’esta parella.</string>
-    <string name="tutorial_worked_example_sum_four_five_copy">La mateixa parella també dona 4 + 5 = 9.</string>
-    <string name="tutorial_worked_example_reveal_three_copy">Queden els resultats 5 i 6. Junt amb el 2, el nombre ocult ha de ser 3.</string>
+    <string name="tutorial_worked_example_sum_four_five_copy">La mateixa parella també resol la suma: 4 + 5 = 9.</string>
+    <string name="tutorial_worked_example_reveal_three_copy">Queden per completar les caselles amb els resultats 5 i 6. Junt amb el 2, el nombre ocult només pot ser 3.</string>
     <string name="tutorial_worked_example_product_two_three_copy">2 × 3 = 6 completa la multiplicació que falta.</string>
-    <string name="tutorial_worked_example_sum_two_three_copy">2 + 3 = 5 completa el puzle.</string>
+    <string name="tutorial_worked_example_sum_two_three_copy">2 + 3 = 5 completa la suma i resol el puzle.</string>
     <string name="tutorial_repeated_value_practice_copy">Ara tu: resol el puzle. Toca qualsevol ? per començar. Els nombres es poden repetir. Consell: les multiplicacions solen ser un bon punt de partida.</string>
     <string name="onboarding_skip_tutorial_action">Omet el tutorial</string>
     <string name="onboarding_skip_tutorial_title">Vols ometre el tutorial?</string>
-    <string name="onboarding_skip_tutorial_message">Si és la primera vegada que jugues a NumPairs o a jocs similars, et recomanem continuar. Podràs tornar a obrir el tutorial més tard des de Com jugar.</string>
+    <string name="onboarding_skip_tutorial_message">Si és la primera vegada que jugues a NumPairs, et recomanem continuar.</string>
     <string name="onboarding_continue_tutorial_button">Continua el tutorial</string>
     <string name="onboarding_skip_anyway_button">Omet-lo igualment</string>
     <string name="tutorial_solving_tips_step_one_copy">En dificultat baixa, cap número apareix dos vegades i la sèrie no inclou mai l’1, així que els resultats primers sempre són sumes. Completa el resultat primer com una casella de suma.</string>
