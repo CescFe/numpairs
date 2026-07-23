@@ -61,8 +61,8 @@
     <!-- Tutorial screen -->
     <string name="tutorial_screen_title">Tutorial</string>
     <string name="tutorial_step_indicator">Step %1$d of %2$d</string>
-    <string name="tutorial_objective_explanation_copy">Welcome to NumPairs. Your goal is to discover every hidden number and symbol.</string>
-    <string name="tutorial_strip_explanation_copy">This is the number strip. Its numbers are ordered from lowest to highest, may repeat, and some are hidden.</string>
+    <string name="tutorial_objective_explanation_copy">Welcome to NumPairs. Your goal is to discover every hidden number, addition and multiplication.</string>
+    <string name="tutorial_strip_explanation_copy">The sequence at the top of the puzzle is a list of numbers ordered from lowest to highest, may repeat, and initially, some are hidden.</string>
     <string name="tutorial_tile_explanation_copy">Each tile shows a result. Complete its top row with the two numbers and symbol that produce that result.</string>
     <string name="tutorial_pair_explanation_copy">Group the strip numbers into pairs. Each pair completes two tiles: one addition and one multiplication.</string>
     <string name="tutorial_previous_step_action">Back</string>

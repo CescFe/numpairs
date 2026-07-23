@@ -61,22 +61,22 @@
     <!-- Tutorial screen -->
     <string name="tutorial_screen_title">Tutorial</string>
     <string name="tutorial_step_indicator">Paso %1$d de %2$d</string>
-    <string name="tutorial_objective_explanation_copy">Bienvenido a NumPairs. Tu objetivo es descubrir todos los números y símbolos ocultos.</string>
-    <string name="tutorial_strip_explanation_copy">Esta es la serie. Sus números están ordenados de menor a mayor, pueden repetirse y algunos están ocultos.</string>
-    <string name="tutorial_tile_explanation_copy">Cada casilla muestra un resultado. Completa la parte superior con los dos números y el signo que producen ese resultado.</string>
-    <string name="tutorial_pair_explanation_copy">Agrupa los números de la serie por parejas. Cada pareja completa dos casillas: una suma y una multiplicación.</string>
+    <string name="tutorial_objective_explanation_copy">Bienvenido a NumPairs. Tu objetivo es descubrir todos los números, sumas y multiplicaciones ocultas.</string>
+    <string name="tutorial_strip_explanation_copy">La secuencia de la parte superior del puzle es una lista de números ordenados de menor a mayor, pueden repetirse e, inicialmente, algunos están ocultos.</string>
+    <string name="tutorial_tile_explanation_copy">Debajo tenemos las casillas. Cada una se compone de 2 partes: en su parte inferior, muestra un resultado conocido; en su parte superior contiene una suma o multiplicación cuyos elementos debes deducir.</string>
+    <string name="tutorial_pair_explanation_copy">¿Cómo deducirlos? Debes formar parejas con los números de la secuencia superior. Cada pareja debe resolver dos casillas: una suma y una multiplicación.</string>
     <string name="tutorial_previous_step_action">Atrás</string>
     <string name="tutorial_next_step_action">Siguiente</string>
-    <string name="tutorial_worked_example_introduction_copy">Presta atención: vamos a resolver este puzle por ti una sola vez.</string>
+    <string name="tutorial_worked_example_introduction_copy">Presta atención: por primera y última vez vamos a resolver este puzle por ti.</string>
     <string name="tutorial_worked_example_product_four_five_copy">4 × 5 = 20, así que 20 es la casilla de multiplicación de esta pareja.</string>
-    <string name="tutorial_worked_example_sum_four_five_copy">La misma pareja también da 4 + 5 = 9.</string>
-    <string name="tutorial_worked_example_reveal_three_copy">Quedan los resultados 5 y 6. Junto al 2, el número oculto tiene que ser 3.</string>
+    <string name="tutorial_worked_example_sum_four_five_copy">La misma pareja también debe resolver la suma 4 + 5 = 9.</string>
+    <string name="tutorial_worked_example_reveal_three_copy">Quedan por resolver los resultados 5 y 6. Junto al 2, el número oculto sólo puede ser 3.</string>
     <string name="tutorial_worked_example_product_two_three_copy">2 × 3 = 6 completa la multiplicación que falta.</string>
-    <string name="tutorial_worked_example_sum_two_three_copy">2 + 3 = 5 completa el puzle.</string>
+    <string name="tutorial_worked_example_sum_two_three_copy">2 + 3 = 5 completa la suma y resuelve el puzle.</string>
     <string name="tutorial_repeated_value_practice_copy">Ahora tú: resuelve el puzle. Toca cualquier ? para empezar. Los números pueden repetirse. Consejo: las multiplicaciones suelen ser un buen punto de partida.</string>
     <string name="onboarding_skip_tutorial_action">Saltar tutorial</string>
     <string name="onboarding_skip_tutorial_title">¿Saltar el tutorial?</string>
-    <string name="onboarding_skip_tutorial_message">Si es la primera vez que juegas a NumPairs o a juegos similares, te recomendamos continuar. Podrás volver a abrir el tutorial más tarde desde Cómo jugar.</string>
+    <string name="onboarding_skip_tutorial_message">Si es la primera vez que juegas a NumPairs, te recomendamos continuar.</string>
     <string name="onboarding_continue_tutorial_button">Continuar tutorial</string>
     <string name="onboarding_skip_anyway_button">Saltar igualmente</string>
     <string name="tutorial_solving_tips_step_one_copy">En dificultad baja, ningún número aparece dos veces y la serie nunca incluye el 1, así que los resultados primos siempre son sumas. Completa el resultado primo como una casilla de suma.</string>

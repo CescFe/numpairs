@@ -78,7 +78,7 @@ class LocalizationResourceTest {
         assertEquals("Pas 1 de 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))
         assertTutorialExplanationCopy(
             resources = resources,
-            objective = "Benvingut a NumPairs. L’objectiu és descobrir tots els nombres i símbols ocults.",
+            objective = "Benvingut a NumPairs. L’objectiu és descobrir tots els nombres, sumes i multiplicacions ocultes.",
             strip = "Aquesta és la sèrie. Els nombres estan ordenats de menor a major, " +
                 "es poden repetir i alguns estan ocults.",
             tile = "Cada casella mostra un resultat. Completa la part superior amb els dos nombres " +
@@ -126,7 +126,7 @@ class LocalizationResourceTest {
         assertEquals("Step 1 of 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))
         assertTutorialExplanationCopy(
             resources = resources,
-            objective = "Welcome to NumPairs. Your goal is to discover every hidden number and symbol.",
+            objective = "Welcome to NumPairs. Your goal is to discover every hidden number, addition and multiplication.",
             strip = "This is the number strip. Its numbers are ordered from lowest to highest, " +
                 "may repeat, and some are hidden.",
             tile = "Each tile shows a result. Complete its top row with the two numbers and symbol " +

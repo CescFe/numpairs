@@ -61,8 +61,8 @@
     <!-- Tutorial screen -->
     <string name="tutorial_screen_title">Tutorial</string>
     <string name="tutorial_step_indicator">Pas %1$d de %2$d</string>
-    <string name="tutorial_objective_explanation_copy">Benvingut a NumPairs. L’objectiu és descobrir tots els nombres i símbols ocults.</string>
-    <string name="tutorial_strip_explanation_copy">Aquesta és la sèrie. Els nombres estan ordenats de menor a major, es poden repetir i alguns estan ocults.</string>
+    <string name="tutorial_objective_explanation_copy">Benvingut a NumPairs. L’objectiu és descobrir tots els nombres, sumes i multiplicacions ocultes.</string>
+    <string name="tutorial_strip_explanation_copy">La sequència de la part superior del puzle és una llista de nombres ordenats de menor a major, es poden repetir i, inicialment, alguns estan ocults.</string>
     <string name="tutorial_tile_explanation_copy">Cada casella mostra un resultat. Completa la part superior amb els dos nombres i el signe que produeixen aquest resultat.</string>
     <string name="tutorial_pair_explanation_copy">Agrupa els nombres de la sèrie per parelles. Cada parella completa dues caselles: una suma i una multiplicació.</string>
     <string name="tutorial_previous_step_action">Enrere</string>
