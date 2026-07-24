@@ -132,6 +132,7 @@ fun MenuScreen(
                             expandedDifficultyMenu = null
                         },
                         onDifficultySelected = onFourPairsDifficultySelected,
+                        containerTestTag = MenuScreenTestTags.FOUR_PAIRS_SPLIT_CTA,
                         playTestTag = MenuScreenTestTags.FOUR_PAIRS_BUTTON,
                         difficultyTestTag = MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON,
                         difficultyMenuTestTag = MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_MENU
@@ -149,6 +150,7 @@ fun MenuScreen(
                             expandedDifficultyMenu = null
                         },
                         onDifficultySelected = onEightPairsDifficultySelected,
+                        containerTestTag = MenuScreenTestTags.EIGHT_PAIRS_SPLIT_CTA,
                         playTestTag = MenuScreenTestTags.EIGHT_PAIRS_BUTTON,
                         difficultyTestTag = MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_BUTTON,
                         difficultyMenuTestTag = MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_MENU
@@ -191,6 +193,7 @@ private fun GeneratedModeMenuRow(
     onToggleDifficultyMenu: () -> Unit,
     onDismissDifficultyMenu: () -> Unit,
     onDifficultySelected: (GeneratedDifficultyMenuOptionId) -> Unit,
+    containerTestTag: String,
     playTestTag: String,
     difficultyTestTag: String,
     difficultyMenuTestTag: String
@@ -215,64 +218,47 @@ private fun GeneratedModeMenuRow(
         }
     )
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(MENU_GENERATED_MODE_ACTION_SPACING)
-    ) {
-        NumPairsComponents.PrimaryCtaButton(
-            onClick = onPlay,
-            modifier = Modifier
-                .weight(1f)
-                .height(NumPairsComponents.ButtonHeight)
-                .semantics {
-                    contentDescription = playContentDescription
-                }
-                .testTag(playTestTag),
-            contentPadding = PaddingValues(
-                horizontal = MENU_GENERATED_MODE_BUTTON_HORIZONTAL_PADDING,
-                vertical = 0.dp
-            )
-        ) {
-            Text(
+    NumPairsComponents.PrimarySplitCtaButton(
+        onPrimaryClick = onPlay,
+        onSecondaryClick = onToggleDifficultyMenu,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(NumPairsComponents.ButtonHeight)
+            .testTag(containerTestTag),
+        primaryActionModifier = Modifier
+            .semantics {
+                contentDescription = playContentDescription
+            }
+            .testTag(playTestTag),
+        secondaryActionModifier = Modifier
+            .semantics {
+                contentDescription = difficultyActionContentDescription
+                stateDescription = difficultyActionStateDescription
+            }
+            .testTag(difficultyTestTag),
+        primaryContentPadding = PaddingValues(
+            horizontal = MENU_GENERATED_MODE_BUTTON_HORIZONTAL_PADDING,
+            vertical = 0.dp
+        ),
+        primaryContent = {
+            MenuButtonText(
                 text = state.challengeName,
                 overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-                style = MaterialTheme.typography.labelLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = MENU_GENERATED_MODE_BUTTON_TEXT_SIZE,
-                    lineHeight = MENU_GENERATED_MODE_BUTTON_TEXT_LINE_HEIGHT
-                )
+                maxLines = 1
             )
-        }
-        Box(
-            modifier = Modifier.size(NumPairsComponents.ButtonHeight)
-        ) {
-            Button(
-                onClick = onToggleDifficultyMenu,
-                modifier = Modifier
-                    .size(NumPairsComponents.ButtonHeight)
-                    .semantics {
-                        contentDescription = difficultyActionContentDescription
-                        stateDescription = difficultyActionStateDescription
+        },
+        secondaryContent = {
+            Icon(
+                painter = painterResource(
+                    if (expanded) {
+                        R.drawable.ic_arrow_up
+                    } else {
+                        R.drawable.ic_arrow_down
                     }
-                    .testTag(difficultyTestTag),
-                shape = NumPairsComponents.MediumShape,
-                colors = NumPairsComponents.secondaryButtonColors(),
-                border = NumPairsComponents.secondaryButtonBorder(),
-                contentPadding = PaddingValues(0.dp)
-            ) {
-                Icon(
-                    painter = painterResource(
-                        if (expanded) {
-                            R.drawable.ic_close_big
-                        } else {
-                            R.drawable.ic_menu
-                        }
-                    ),
-                    contentDescription = null,
-                    modifier = Modifier.size(MENU_GENERATED_MODE_ICON_SIZE)
-                )
-            }
+                ),
+                contentDescription = null,
+                modifier = Modifier.size(MENU_GENERATED_MODE_ICON_SIZE)
+            )
             GeneratedDifficultyMenu(
                 state = state,
                 expanded = expanded,
@@ -284,7 +270,7 @@ private fun GeneratedModeMenuRow(
                 testTag = difficultyMenuTestTag
             )
         }
-    }
+    )
 }
 
 @Composable
@@ -374,9 +360,11 @@ private fun MenuScreenTopBar() {
 }
 
 @Composable
-private fun MenuButtonText(text: String) {
+private fun MenuButtonText(text: String, overflow: TextOverflow = TextOverflow.Clip, maxLines: Int = Int.MAX_VALUE) {
     Text(
         text = text,
+        overflow = overflow,
+        maxLines = maxLines,
         style = MaterialTheme.typography.labelLarge.copy(
             fontWeight = FontWeight.Bold,
             fontSize = MENU_BUTTON_TEXT_SIZE,
@@ -448,10 +436,7 @@ private val MENU_CONTENT_MAX_WIDTH = 360.dp
 private val MENU_BRAND_MARK_SIZE = 32.dp
 private val MENU_BUTTON_TEXT_SIZE = 22.sp
 private val MENU_BUTTON_TEXT_LINE_HEIGHT = 36.sp
-private val MENU_GENERATED_MODE_BUTTON_TEXT_SIZE = 18.sp
-private val MENU_GENERATED_MODE_BUTTON_TEXT_LINE_HEIGHT = 24.sp
 private val MENU_GENERATED_MODE_BUTTON_HORIZONTAL_PADDING = 12.dp
-private val MENU_GENERATED_MODE_ACTION_SPACING = 8.dp
 private val MENU_GENERATED_MODE_ICON_SIZE = 24.dp
 private val MENU_GENERATED_DIFFICULTY_MENU_WIDTH = 200.dp
 private val MENU_GENERATED_DIFFICULTY_MENU_END_ALIGNMENT_OFFSET =

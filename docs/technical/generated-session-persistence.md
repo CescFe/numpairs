@@ -40,7 +40,7 @@ unknown, and no-longer-supported stored values resolve to that fallback without 
 The only operation that writes a remembered selection is an explicit supported option choice made
 by the player in that mode's anchored difficulty popup in the normal menu.
 
-Opening or dismissing the popup, showing a fallback, pressing a mode's primary action, resuming or
+Opening or dismissing the popup, showing a fallback, pressing a mode's play region, resuming or
 restoring a session, replacing a session, completing a puzzle, and using `Play another` do not
 write this preference. The two mode values remain independent, and neither completion nor any
 other v8 behavior stores progression, locks, completion counts, rewards, or statistics.
