@@ -8,6 +8,51 @@ import org.junit.Test
 
 class GeneratedPuzzleProfilesTest {
     @Test
+    fun three_pairs_low_profile_matches_documented_rules() {
+        val profile = GeneratedPuzzleProfiles.THREE_PAIRS_LOW
+
+        assertEquals(GeneratedPuzzleProfileId("3-pairs-low"), profile.id)
+        assertEquals(DifficultyTier.LOW, profile.difficulty)
+        assertEquals(3, profile.size.pairCount)
+        assertEquals(6, profile.size.stripEntryCount)
+        assertEquals(6, profile.size.boardTileCount)
+
+        assertEquals(2..15, profile.stripValuePolicy.valueRange)
+        assertEquals(1, profile.stripValuePolicy.maxOccurrencesPerValue)
+        assertFalse(profile.stripValuePolicy.allowsOne)
+
+        assertEquals(100, profile.resultConstraints.maxMultiplicationResult)
+        assertFalse(profile.resultConstraints.allowsDuplicateBoardResults)
+        assertNull(profile.resultConstraints.productAnchorMix)
+
+        assertEquals(2..2, profile.initialStripMaskPolicy.knownEntryCountRange)
+        assertEquals(4..4, profile.hiddenEntryCountRange)
+        assertEquals(
+            setOf(RequiredKnownStripAnchor.HIGHEST_STRIP_ENTRY),
+            profile.initialStripMaskPolicy.requiredAnchors
+        )
+        assertEquals(
+            StripKnownEntryDistributionPolicy.SpreadAcrossStripAndPairsWhenPossible,
+            profile.initialStripMaskPolicy.distributionPolicy
+        )
+        assertEquals(2, profile.initialStripMaskPolicy.maxConsecutiveHiddenEntries)
+
+        assertTrue(profile.generationPolicy.isBoardTileShufflingEnabled)
+        assertTrue(profile.varietyPolicy.highValueMaskTargets.isEmpty())
+        assertNull(profile.varietyPolicy.primeProductDecoyTarget)
+        assertNull(profile.varietyPolicy.repeatedValueGroupTarget)
+
+        val assessmentPolicy = requireNotNull(profile.difficultyAssessmentPolicy)
+        assertEquals(10_000, assessmentPolicy.executionPolicy.maxCandidateExpansions)
+        assertEquals(10, assessmentPolicy.executionPolicy.validSolutionCountLimit)
+        assertEquals(3, assessmentPolicy.minimumInitialPlausibleCandidateCount)
+        assertEquals(3, assessmentPolicy.minimumInitialForcedDeductionCount)
+        assertEquals(1, assessmentPolicy.minimumFirstForcedDeductionDepth)
+        assertEquals(0, assessmentPolicy.minimumPlausibleDecoyCount)
+        assertEquals(1, assessmentPolicy.minimumValidSolutionCount)
+    }
+
+    @Test
     fun four_pairs_low_profile_matches_documented_rules() {
         val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
 
