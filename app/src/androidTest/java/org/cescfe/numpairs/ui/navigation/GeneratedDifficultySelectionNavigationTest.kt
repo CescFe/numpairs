@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -49,15 +50,15 @@ class GeneratedDifficultySelectionNavigationTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun menu_routes_to_independent_read_only_selector_defaults() {
+    fun secondary_actions_route_to_independent_read_only_selector_defaults() {
         val fixture = setContent()
 
-        composeTestRule.onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON).performClick()
+        composeTestRule.onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON).performClick()
         composeTestRule.onNodeWithTag(optionTag(GeneratedModes.FOUR_PAIRS_LOW)).assertIsSelected()
         composeTestRule.onNodeWithTag(optionTag(GeneratedModes.FOUR_PAIRS_MEDIUM)).assertIsNotSelected()
         composeTestRule.onNodeWithTag(GeneratedDifficultySelectorTestTags.BACK_BUTTON).performClick()
 
-        composeTestRule.onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_BUTTON).performClick()
+        composeTestRule.onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_BUTTON).performClick()
         composeTestRule.onNodeWithTag(optionTag(GeneratedModes.EIGHT_PAIRS_MEDIUM)).assertIsSelected()
         composeTestRule.onNodeWithTag(optionTag(GeneratedModes.EIGHT_PAIRS_HARD)).assertIsNotSelected()
 
@@ -79,7 +80,7 @@ class GeneratedDifficultySelectionNavigationTest {
     fun explicit_four_pairs_medium_selection_persists_and_launches_that_exact_challenge() {
         val fixture = setContent()
 
-        composeTestRule.onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON).performClick()
+        composeTestRule.onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON).performClick()
         composeTestRule
             .onNodeWithTag(optionTag(GeneratedModes.FOUR_PAIRS_MEDIUM))
             .performClick()
@@ -102,7 +103,7 @@ class GeneratedDifficultySelectionNavigationTest {
         }
 
         composeTestRule.onNodeWithTag(GameScreenTestTags.BACK_BUTTON).performClick()
-        composeTestRule.onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON).performClick()
+        composeTestRule.onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON).performClick()
         composeTestRule.onNodeWithTag(optionTag(GeneratedModes.FOUR_PAIRS_MEDIUM)).assertIsSelected()
         composeTestRule.runOnIdle {
             assertEquals(1, fixture.difficultyRepository.explicitSelections.size)
@@ -113,7 +114,7 @@ class GeneratedDifficultySelectionNavigationTest {
     fun eight_pairs_hard_selection_launches_and_stores_the_hard_profile() {
         val fixture = setContent()
 
-        composeTestRule.onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_BUTTON).performClick()
+        composeTestRule.onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_BUTTON).performClick()
         composeTestRule
             .onNodeWithTag(optionTag(GeneratedModes.EIGHT_PAIRS_HARD))
             .performClick()
@@ -129,6 +130,31 @@ class GeneratedDifficultySelectionNavigationTest {
                 GeneratedModes.EIGHT_PAIRS_HARD.profile.id.value,
                 fixture.sessionRepository.session.value?.profileId
             )
+        }
+    }
+
+    @Test
+    fun menu_restores_independent_selections_and_primary_action_launches_them_directly() {
+        val difficultyRepository = FakeGeneratedDifficultySelectionRepository(
+            initialSelections = mapOf(
+                GeneratedModes.FOUR_PAIRS.id to DifficultyTier.MEDIUM,
+                GeneratedModes.EIGHT_PAIRS.id to DifficultyTier.HARD
+            )
+        )
+        val fixture = setContent(difficultyRepository = difficultyRepository)
+
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_BUTTON)
+            .assertTextEquals(challengeName(GeneratedModes.EIGHT_PAIRS_HARD))
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+            .assertTextEquals(challengeName(GeneratedModes.FOUR_PAIRS_MEDIUM))
+            .performClick()
+
+        composeTestRule.onNodeWithTag(GameScreenTestTags.SCREEN).assertIsDisplayed()
+        composeTestRule.runOnIdle {
+            assertEquals(listOf(GeneratedModes.FOUR_PAIRS_MEDIUM), fixture.generatedChallenges)
+            assertTrue(difficultyRepository.explicitSelections.isEmpty())
         }
     }
 
@@ -167,10 +193,14 @@ class GeneratedDifficultySelectionNavigationTest {
         }
     }
 
-    private fun setContent(initialSession: GeneratedSessionSnapshot? = null): NavigationFixture {
+    private fun setContent(
+        initialSession: GeneratedSessionSnapshot? = null,
+        difficultyRepository: FakeGeneratedDifficultySelectionRepository =
+            FakeGeneratedDifficultySelectionRepository()
+    ): NavigationFixture {
         val fixture = NavigationFixture(
             sessionRepository = FakeGeneratedSessionRepository(initialSession = initialSession),
-            difficultyRepository = FakeGeneratedDifficultySelectionRepository()
+            difficultyRepository = difficultyRepository
         )
         composeTestRule.setContent {
             NumPairsTheme {

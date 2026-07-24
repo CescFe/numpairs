@@ -156,6 +156,8 @@ private fun UnlockedAppNavigation(
     when (val destination = currentDestination) {
         AppDestination.Menu -> {
             MenuRoute(
+                generatedDifficultySelectionRepository = generatedDifficultySelectionRepository,
+                generatedChallengeCatalog = generatedChallengeCatalog,
                 modifier = modifier,
                 resumeChallengeName = resumableSession?.challenge?.let { challenge ->
                     challenge.localizedTitle(generatedChallengeCatalog)
@@ -176,12 +178,13 @@ private fun UnlockedAppNavigation(
                 onPersonalizationSelected = {
                     currentDestination = AppDestination.Personalization
                 },
-                onFourPairsSelected = {
+                onGeneratedChallengeSelected = onGeneratedChallengeSelected,
+                onFourPairsDifficultySelected = {
                     currentDestination = AppDestination.GeneratedDifficultySelector(
                         modeId = GeneratedModes.FOUR_PAIRS.id
                     )
                 },
-                onEightPairsSelected = {
+                onEightPairsDifficultySelected = {
                     currentDestination = AppDestination.GeneratedDifficultySelector(
                         modeId = GeneratedModes.EIGHT_PAIRS.id
                     )
