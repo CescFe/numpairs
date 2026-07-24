@@ -100,3 +100,59 @@ Current visual direction:
 - Some themes may need tuning if the error tint is too subtle or too strong
 - Color-only feedback would be insufficient on its own, so accessibility semantics should remain in place
 - Future hinting or puzzle-completion states may require a clearer distinction from simple incorrectness
+
+---
+
+## v10 Quick And Daily Entry Points
+
+### Decision
+
+- Present `Quick` as the player-facing name for the generated `3 Pairs Low` challenge.
+- Launch Quick from one full-width primary CTA without a redundant one-option difficulty selector.
+- Present Daily Challenge as one unified split primary CTA at the top of the unlocked Menu.
+- Use the Daily primary region for start, continue, or completed-today behavior.
+- Use the trailing Daily region as an always-available completion-calendar action.
+
+### Rationale
+
+- Quick communicates session length more clearly than exposing only the pair count.
+- Keeping `3 Pairs Low` in accessibility and gameplay copy preserves structural and difficulty
+  meaning.
+- A direct Quick action protects the promise of immediate short play.
+- Daily has two stable actions regardless of state: act on today or inspect history.
+- Reusing the split primary CTA role preserves Menu hierarchy and avoids an extra Daily landing
+  screen.
+
+### Potential Concerns
+
+- Additional primary actions increase Menu height on compact or text-scaled devices.
+- Daily and normal Resume may both be visible and need clearly distinct labels.
+- The Daily calendar icon needs an explicit localized action description because icon meaning
+  alone is insufficient.
+
+---
+
+## v10 Daily Completion History
+
+### Decision
+
+- Keep normal generated and Daily resumability visibly and persistently independent.
+- Show past completion dates in a local monthly calendar.
+- Keep past dates informational and non-interactive.
+- Treat past dates without completion as neutral rather than missed or failed.
+- Share only current-date Daily completion through concise text.
+
+### Rationale
+
+- Independent entry points reflect the two independent persistence slots.
+- A calendar gives Daily completion durable meaning without introducing a streak or score.
+- Non-interactive past dates keep v10 out of catch-up and backfill behavior.
+- Neutral history avoids punishing players for days before installation or voluntary breaks.
+- Text-only sharing celebrates participation without revealing puzzle content.
+
+### Potential Concerns
+
+- Device-clock changes can alter which date is considered today; v10 explicitly trusts local time.
+- Clearing application data or reinstalling resets the calendar because no account or backup owns
+  it.
+- Sharing without a score or time is intentionally ceremonial rather than competitive.
