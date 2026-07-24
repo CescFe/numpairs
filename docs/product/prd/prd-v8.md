@@ -175,22 +175,26 @@ cells are absent from selection rather than displayed as locked or unavailable c
 
 ### Mode And Difficulty Selection
 
-- Present one split action row for `4 Pairs` and one for `8 Pairs` in the normal menu.
-- The primary action identifies the current mode and difficulty and starts that challenge directly.
-- On first use, the primary actions resolve to `4 Pairs Low` and `8 Pairs Medium`.
-- On later use, each primary action resolves to the last supported difficulty selected for that
+- Present one full-width split primary CTA for `4 Pairs` and one for `8 Pairs` in the normal menu.
+- The play region identifies the current mode and difficulty and starts that challenge directly.
+- On first use, the play regions resolve to `4 Pairs Low` and `8 Pairs Medium`.
+- On later use, each play region resolves to the last supported difficulty selected for that
   mode.
-- A square secondary action beside each primary action opens that mode's anchored difficulty menu
-  without leaving the normal menu.
+- A trailing difficulty region within the same primary CTA opens that mode's anchored difficulty
+  menu without leaving the normal menu.
+- The two regions have independent touch and accessibility actions, no visual gap, and a themed
+  vertical divider. The trailing region preserves the established minimum touch target.
+- Generated challenge labels use the same typography and weight as the other normal-menu button
+  labels rather than a smaller adaptive treatment.
 - The `4 Pairs` menu shows exactly `Low` and `Medium`.
 - The `8 Pairs` menu shows exactly `Medium` and `Hard`.
 - Every shown difficulty is enabled; the menu has no locks or progression indicators.
 - The current selection is communicated without relying only on color.
-- The popup's logical end edge aligns with the secondary action's logical end edge so the popup
+- The popup's logical end edge aligns with the difficulty region's logical end edge so the popup
   expands inward and remains inside the menu content bounds.
-- Opening one difficulty menu closes any other. Its trigger changes from the menu icon to the large
-  close icon while expanded.
-- Choosing an option, tapping outside, pressing system back, or using the close action dismisses
+- Opening one difficulty menu closes any other. Its trigger changes from the supplied down arrow
+  to the supplied up arrow while expanded.
+- Choosing an option, tapping outside, pressing system back, or using the expanded trigger dismisses
   the popup without starting a puzzle.
 
 ### Remembered Selection
@@ -309,8 +313,8 @@ characterization; v8 must not invent unevidenced score thresholds before the eva
 
 ### Difficulty Selection Surface
 
-- Add reusable, state-driven Compose content for each generated mode's split menu action and
-  anchored single-choice popup.
+- Add reusable, state-driven Compose content for each generated mode's unified split primary CTA
+  and anchored single-choice popup.
 - Keep domain rules, persistence, generation, and navigation out of the content Composable.
 - Reuse established NumPairs components, tokens, typography, shapes, spacing, and semantic roles.
 - Preserve minimum touch targets, readable text scaling, and non-color selection cues.
@@ -319,9 +323,9 @@ characterization; v8 must not invent unevidenced score thresholds before the eva
 
 ### End-To-End Challenge Integration
 
-- Route each generated-mode primary menu action directly through its effective remembered
+- Route each generated-mode play region directly through its effective remembered
   challenge.
-- Persist changes from the associated secondary difficulty popup without starting generated play.
+- Persist changes from the associated trailing difficulty popup without starting generated play.
 - Generate the actively selected supported challenge.
 - Preserve selected challenge identity through loading, failure, safe replacement, restoration, and
   replay.
@@ -377,8 +381,8 @@ choice independently.
 Work:
 
 1. Add the local mode-specific selection repository and safe fallbacks.
-2. Add reusable generated-mode split actions and anchored difficulty menus.
-3. Route each primary action directly through the selected challenge.
+2. Add reusable generated-mode split primary CTAs and anchored difficulty menus.
+3. Route each play region directly through the selected challenge.
 
 ### Stage 5 - End-To-End Quality And Product Alignment
 

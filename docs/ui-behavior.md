@@ -65,29 +65,34 @@ In this document, strip items are rendered as chips.
 The unlocked normal menu renders actions in this order:
 
 1. `Resume`, only while one valid unfinished generated session is available
-2. the `4 Pairs · <difficulty>` primary action and its square difficulty action
-3. the `8 Pairs · <difficulty>` primary action and its square difficulty action
+2. the unified `4 Pairs · <difficulty>` split primary CTA
+3. the unified `8 Pairs · <difficulty>` split primary CTA
 4. `How to play`
 5. `Personalization`
 
-`Resume` and both generated-mode primary actions use the primary CTA treatment. Each mode's
-square difficulty action, `How to play`, and `Personalization` use the lower-emphasis secondary
-treatment. The localized `Resume` accessibility description identifies the saved mode and
-difficulty, for example `Resume 4 Pairs · Medium puzzle`.
+`Resume` and both generated-mode split actions use the full-width primary CTA treatment. Each
+generated-mode CTA contains an expanding play region and a trailing difficulty region with no
+visual gap. A themed vertical divider distinguishes the two touch actions. `How to play` and
+`Personalization` use the lower-emphasis secondary treatment. The localized `Resume`
+accessibility description identifies the saved mode and difficulty, for example
+`Resume 4 Pairs · Medium puzzle`.
 
 The application derives menu resumability from the one global generated-session slot. Missing, solved, unknown-mode, mode/profile-mismatched, corrupt, and unsupported snapshots do not expose `Resume`.
 
 Selecting `Resume` opens the saved mode and exact current puzzle without generation.
 
-Selecting a generated-mode primary action starts its displayed challenge immediately. The
-displayed challenge uses the mode-specific fallback on first use and the last supported
-difficulty the player selected for that mode thereafter.
+Selecting a generated-mode play region starts its displayed challenge immediately. The displayed
+challenge uses the mode-specific fallback on first use and the last supported difficulty the
+player selected for that mode thereafter. Its visible label uses the same typography and weight
+as the other normal-menu button labels. Compact or increased-font layouts may ellipsize visible
+text while preserving the full localized challenge in accessibility semantics.
 
 ### Difficulty Selector
 
-The square secondary action beside each generated-mode primary action opens an anchored
-single-choice popup without leaving the normal menu. Its icon changes from the supplied menu icon
-to the supplied large close icon while expanded. At most one mode popup is open.
+The trailing difficulty region inside each generated-mode split primary CTA opens an anchored
+single-choice popup without leaving the normal menu. It retains the established minimum touch
+target and changes from the supplied down arrow to the supplied up arrow while expanded. The play
+and difficulty regions remain distinct button semantics, and at most one mode popup is open.
 
 The popup shows only challenges present in the supported generated-challenge catalog:
 
@@ -105,23 +110,23 @@ unsupported stored value is presented using `Low` for `4 Pairs` and `Medium` for
 rewriting storage.
 
 Tapping a supported difficulty makes it the current option and immediately persists that explicit
-choice for the selected mode. It updates the associated primary action and closes the popup without
+choice for the selected mode. It updates the associated play region and closes the popup without
 starting a puzzle. Merely opening or dismissing the popup or displaying a fallback does not write a
-preference. Tapping outside, pressing system back, or activating the square close action dismisses
-the popup without changing the generated-session slot.
+preference. Tapping outside, pressing system back, or activating the expanded difficulty region
+dismisses the popup without changing the generated-session slot.
 
-The popup's logical end edge aligns with the square trigger's logical end edge and expands inward,
-so it remains inside the menu content bounds on compact and wide layouts. The alignment follows
-layout direction rather than assuming a physical right edge.
+The popup's logical end edge aligns with the trailing difficulty region's logical end edge and
+expands inward, so it remains inside the menu content bounds on compact and wide layouts. The
+alignment follows layout direction rather than assuming a physical right edge.
 
-The generated-mode primary action identifies the exact requested challenge, for example
+The generated-mode play region identifies the exact requested challenge, for example
 `4 Pairs · Medium`. Activating it starts the existing resume-or-replace routing for that challenge.
 Difficulty is fixed once play begins; generated gameplay and completion do not expose a
 change-difficulty action.
 
 ### Resume Or Replace
 
-Activating a generated-mode primary action while a resumable session exists opens the same modal
+Activating a generated-mode play region while a resumable session exists opens the same modal
 choice:
 
 - primary: `Resume`

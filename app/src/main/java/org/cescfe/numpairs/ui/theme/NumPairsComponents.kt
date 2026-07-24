@@ -2,10 +2,16 @@ package org.cescfe.numpairs.ui.theme
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -65,40 +71,7 @@ object NumPairsComponents {
         content: @Composable () -> Unit
     ) {
         val shape = MediumShape
-        val background = if (enabled) {
-            Brush.verticalGradient(
-                colors = listOf(
-                    lerp(
-                        MaterialTheme.colorScheme.primary,
-                        MaterialTheme.colorScheme.onPrimaryContainer,
-                        PRIMARY_BUTTON_TOP_TINT
-                    ),
-                    MaterialTheme.colorScheme.primary,
-                    lerp(
-                        MaterialTheme.colorScheme.primary,
-                        MaterialTheme.colorScheme.primaryContainer,
-                        PRIMARY_BUTTON_BOTTOM_SHADE
-                    )
-                )
-            )
-        } else {
-            Brush.verticalGradient(
-                colors = listOf(
-                    MaterialTheme.colorScheme.surfaceVariant,
-                    MaterialTheme.colorScheme.surfaceVariant
-                )
-            )
-        }
-        val contentColor = if (enabled) {
-            MaterialTheme.colorScheme.onPrimary
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        }
-        val borderColor = if (enabled) {
-            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = PRIMARY_BUTTON_BORDER_ALPHA)
-        } else {
-            MaterialTheme.colorScheme.outlineVariant
-        }
+        val visuals = primaryCtaVisuals(enabled)
 
         Surface(
             onClick = onClick,
@@ -109,40 +82,97 @@ object NumPairsComponents {
             enabled = enabled,
             shape = shape,
             color = Color.Transparent,
-            contentColor = contentColor,
+            contentColor = visuals.contentColor,
             border = BorderStroke(
                 width = ThinBorderWidth,
-                color = borderColor
+                color = visuals.borderColor
             ),
             shadowElevation = if (enabled) PRIMARY_BUTTON_SHADOW_ELEVATION else 0.dp
         ) {
-            Box(
-                modifier = Modifier.background(background, shape),
-                contentAlignment = Alignment.Center
+            PrimaryCtaBackground(
+                background = visuals.background,
+                shape = shape,
+                enabled = enabled
             ) {
-                if (enabled) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .matchParentSize()
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(
-                                        MaterialTheme.colorScheme.onPrimaryContainer.copy(
-                                            alpha = PRIMARY_BUTTON_INNER_HIGHLIGHT_ALPHA
-                                        ),
-                                        Color.Transparent
-                                    )
-                                ),
-                                shape
-                            )
-                    )
-                }
                 Box(
                     modifier = Modifier.padding(contentPadding),
                     contentAlignment = Alignment.Center
                 ) {
                     content()
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun PrimarySplitCtaButton(
+        onPrimaryClick: () -> Unit,
+        onSecondaryClick: () -> Unit,
+        modifier: Modifier = Modifier,
+        primaryActionModifier: Modifier = Modifier,
+        secondaryActionModifier: Modifier = Modifier,
+        enabled: Boolean = true,
+        primaryContentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+        primaryContent: @Composable BoxScope.() -> Unit,
+        secondaryContent: @Composable BoxScope.() -> Unit
+    ) {
+        val shape = MediumShape
+        val visuals = primaryCtaVisuals(enabled)
+
+        Surface(
+            modifier = modifier.defaultMinSize(
+                minWidth = ButtonDefaults.MinWidth,
+                minHeight = ButtonDefaults.MinHeight
+            ),
+            shape = shape,
+            color = Color.Transparent,
+            contentColor = visuals.contentColor,
+            border = BorderStroke(
+                width = ThinBorderWidth,
+                color = visuals.borderColor
+            ),
+            shadowElevation = if (enabled) PRIMARY_BUTTON_SHADOW_ELEVATION else 0.dp
+        ) {
+            PrimaryCtaBackground(
+                background = visuals.background,
+                shape = shape,
+                enabled = enabled,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Row(modifier = Modifier.fillMaxSize()) {
+                    Box(
+                        modifier = primaryActionModifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clickable(
+                                enabled = enabled,
+                                role = Role.Button,
+                                onClick = onPrimaryClick
+                            ).padding(primaryContentPadding),
+                        contentAlignment = Alignment.Center,
+                        content = primaryContent
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .padding(vertical = PRIMARY_SPLIT_DIVIDER_VERTICAL_INSET)
+                            .width(ThinBorderWidth)
+                            .background(
+                                visuals.contentColor.copy(alpha = PRIMARY_SPLIT_DIVIDER_ALPHA)
+                            )
+                    )
+                    Box(
+                        modifier = secondaryActionModifier
+                            .width(ButtonHeight)
+                            .fillMaxHeight()
+                            .clickable(
+                                enabled = enabled,
+                                role = Role.Button,
+                                onClick = onSecondaryClick
+                            ),
+                        contentAlignment = Alignment.Center,
+                        content = secondaryContent
+                    )
                 }
             }
         }
@@ -216,9 +246,91 @@ object NumPairsComponents {
         actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
 
+    @Composable
+    private fun primaryCtaVisuals(enabled: Boolean): PrimaryCtaVisuals {
+        val background = if (enabled) {
+            Brush.verticalGradient(
+                colors = listOf(
+                    lerp(
+                        MaterialTheme.colorScheme.primary,
+                        MaterialTheme.colorScheme.onPrimaryContainer,
+                        PRIMARY_BUTTON_TOP_TINT
+                    ),
+                    MaterialTheme.colorScheme.primary,
+                    lerp(
+                        MaterialTheme.colorScheme.primary,
+                        MaterialTheme.colorScheme.primaryContainer,
+                        PRIMARY_BUTTON_BOTTOM_SHADE
+                    )
+                )
+            )
+        } else {
+            Brush.verticalGradient(
+                colors = listOf(
+                    MaterialTheme.colorScheme.surfaceVariant,
+                    MaterialTheme.colorScheme.surfaceVariant
+                )
+            )
+        }
+        val contentColor = if (enabled) {
+            MaterialTheme.colorScheme.onPrimary
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        }
+        val borderColor = if (enabled) {
+            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = PRIMARY_BUTTON_BORDER_ALPHA)
+        } else {
+            MaterialTheme.colorScheme.outlineVariant
+        }
+
+        return PrimaryCtaVisuals(
+            background = background,
+            contentColor = contentColor,
+            borderColor = borderColor
+        )
+    }
+
+    @Composable
+    private fun PrimaryCtaBackground(
+        background: Brush,
+        shape: Shape,
+        enabled: Boolean,
+        modifier: Modifier = Modifier,
+        content: @Composable BoxScope.() -> Unit
+    ) {
+        Box(
+            modifier = modifier.background(background, shape),
+            contentAlignment = Alignment.Center
+        ) {
+            if (enabled) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .matchParentSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                                        alpha = PRIMARY_BUTTON_INNER_HIGHLIGHT_ALPHA
+                                    ),
+                                    Color.Transparent
+                                )
+                            ),
+                            shape
+                        )
+                )
+            }
+            content()
+        }
+    }
+
+    private data class PrimaryCtaVisuals(val background: Brush, val contentColor: Color, val borderColor: Color)
+
     private val PRIMARY_BUTTON_SHADOW_ELEVATION = 2.dp
+    private val PRIMARY_SPLIT_DIVIDER_VERTICAL_INSET = 12.dp
     private const val PRIMARY_BUTTON_TOP_TINT = 0.10f
     private const val PRIMARY_BUTTON_BOTTOM_SHADE = 0.10f
     private const val PRIMARY_BUTTON_BORDER_ALPHA = 0.28f
     private const val PRIMARY_BUTTON_INNER_HIGHLIGHT_ALPHA = 0.18f
+    private const val PRIMARY_SPLIT_DIVIDER_ALPHA = 0.42f
 }

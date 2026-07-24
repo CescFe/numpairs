@@ -10,10 +10,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertContentDescriptionEquals
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
@@ -21,17 +24,23 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -65,9 +74,11 @@ class MenuScreenTest {
                     fourPairsState.challengeName
                 )
             )
+            .assertHasClickAction()
             .performClick()
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON)
+            .assertHasClickAction()
             .performClick()
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.difficultyOption(fourPairsMediumId))
@@ -112,7 +123,7 @@ class MenuScreenTest {
     }
 
     @Test
-    fun selector_action_switches_between_menu_and_close_states() {
+    fun selector_action_switches_between_collapsed_and_expanded_arrow_states() {
         setContent()
         val action = composeTestRule
             .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON)
@@ -161,6 +172,14 @@ class MenuScreenTest {
     fun compact_width_and_increased_text_scale_keep_selector_inside_the_screen() {
         setContent(width = 320.dp, height = 640.dp, fontScale = 2f)
 
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_BUTTON)
+            .assertContentDescriptionEquals(
+                string(
+                    R.string.menu_play_generated_challenge_content_description,
+                    eightPairsState.challengeName
+                )
+            )
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_BUTTON)
             .performScrollTo()
@@ -236,27 +255,75 @@ class MenuScreenTest {
     }
 
     @Test
-    fun difficulty_actions_are_square_and_match_the_primary_action_height() {
+    fun generated_mode_split_ctas_match_full_width_buttons_and_keep_distinct_touch_regions() {
         setContent()
 
+        val tutorialBounds = composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.TUTORIAL_BUTTON)
+            .assertIsDisplayed()
+            .fetchSemanticsNode()
+            .boundsInRoot
+        val dividerWidth = with(composeTestRule.density) {
+            NumPairsComponents.ThinBorderWidth.toPx()
+        }
+        val minimumTouchTargetWidth = with(composeTestRule.density) {
+            48.dp.toPx()
+        }
         listOf(
-            MenuScreenTestTags.FOUR_PAIRS_BUTTON to MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON,
-            MenuScreenTestTags.EIGHT_PAIRS_BUTTON to MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_BUTTON
-        ).forEach { (playTag, difficultyTag) ->
+            Triple(
+                MenuScreenTestTags.FOUR_PAIRS_SPLIT_CTA,
+                MenuScreenTestTags.FOUR_PAIRS_BUTTON,
+                MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON
+            ),
+            Triple(
+                MenuScreenTestTags.EIGHT_PAIRS_SPLIT_CTA,
+                MenuScreenTestTags.EIGHT_PAIRS_BUTTON,
+                MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_BUTTON
+            )
+        ).forEach { (containerTag, playTag, difficultyTag) ->
+            val containerBounds = composeTestRule
+                .onNodeWithTag(containerTag)
+                .assertIsDisplayed()
+                .assertHasNoClickAction()
+                .fetchSemanticsNode()
+                .boundsInRoot
             val playBounds = composeTestRule
                 .onNodeWithTag(playTag)
                 .assertIsDisplayed()
+                .assertHasClickAction()
                 .fetchSemanticsNode()
                 .boundsInRoot
             val difficultyBounds = composeTestRule
                 .onNodeWithTag(difficultyTag)
                 .assertIsDisplayed()
+                .assertHasClickAction()
                 .fetchSemanticsNode()
                 .boundsInRoot
 
-            assertEquals(playBounds.height, difficultyBounds.height, 0.5f)
+            assertEquals(tutorialBounds.left, containerBounds.left, 0.5f)
+            assertEquals(tutorialBounds.right, containerBounds.right, 0.5f)
+            assertEquals(tutorialBounds.height, containerBounds.height, 0.5f)
+            assertEquals(containerBounds.left, playBounds.left, 0.5f)
+            assertEquals(containerBounds.right, difficultyBounds.right, 0.5f)
+            assertEquals(containerBounds.height, playBounds.height, 0.5f)
+            assertEquals(containerBounds.height, difficultyBounds.height, 0.5f)
             assertEquals(difficultyBounds.width, difficultyBounds.height, 0.5f)
-            assertTrue(playBounds.right < difficultyBounds.left)
+            assertEquals(dividerWidth, difficultyBounds.left - playBounds.right, 0.5f)
+            assertTrue(difficultyBounds.width >= minimumTouchTargetWidth)
+        }
+    }
+
+    @Test
+    fun generated_mode_labels_match_the_other_menu_button_typography() {
+        setContent()
+
+        val tutorialStyle = textStyle(string(R.string.menu_tutorial_button))
+        assertEquals(22.sp, tutorialStyle.fontSize)
+        listOf(fourPairsState.challengeName, eightPairsState.challengeName).forEach { challengeName ->
+            val challengeStyle = textStyle(challengeName)
+
+            assertEquals(tutorialStyle.fontSize, challengeStyle.fontSize)
+            assertEquals(tutorialStyle.fontWeight, challengeStyle.fontWeight)
         }
     }
 
@@ -338,6 +405,17 @@ class MenuScreenTest {
 
     private fun string(stringResId: Int, vararg formatArgs: Any): String =
         composeTestRule.activity.getString(stringResId, *formatArgs)
+
+    private fun textStyle(text: String): TextStyle {
+        val layoutResults = mutableListOf<TextLayoutResult>()
+        composeTestRule
+            .onNodeWithText(text = text, useUnmergedTree = true)
+            .performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action ->
+                action(layoutResults)
+            }
+
+        return layoutResults.single().layoutInput.style
+    }
 
     private companion object {
         val fourPairsLowId = GeneratedDifficultyMenuOptionId("four-pairs-low")
