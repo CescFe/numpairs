@@ -2,9 +2,9 @@
 
 ## Overview
 
-This document defines the current menu, generated difficulty selection, personalization,
-generated-session routing, generated-game feedback, completion, and in-puzzle interaction model
-for NumPairs.
+This document defines the current and planned v10 menu, Quick, Daily Challenge, generated
+difficulty selection, personalization, session routing, generated-game feedback, completion,
+calendar, sharing, and in-puzzle interaction model for NumPairs.
 
 It complements the game rules described in [game-rules.md](./game-rules.md) and focuses on:
 
@@ -12,11 +12,13 @@ It complements the game rules described in [game-rules.md](./game-rules.md) and 
 2. Result grid behavior
 3. Contextual editing flows
 4. Gameplay top bar helper behavior
-5. Generated difficulty selection and remembered defaults
-6. Generated-session menu, replacement, and completion behavior
-7. Persistent color personalization and generated-only feedback
+5. Quick, Daily Challenge, and generated difficulty selection
+6. Normal and Daily session routing and completion behavior
+7. Daily calendar and textual sharing
+8. Persistent color personalization and generated-only feedback
 
-This is the interaction baseline shared where applicable by Tutorial, generated `4 Pairs`, and generated `8 Pairs` gameplay.
+This is the interaction baseline shared where applicable by Tutorial, Quick, normal generated
+`4 Pairs` and `8 Pairs`, and Daily Challenge gameplay.
 
 Required-onboarding behavior is documented in
 [PRD v6](./product/prd/prd-v6.md). The reliable-session product contract is documented in
@@ -28,6 +30,10 @@ Generated difficulty selection and challenge expansion are documented in
 Personalization and generated-game feedback are documented in
 [PRD v9](./product/prd/prd-v9.md); the platform-branding boundary is recorded in
 [ADR-004](./technical/adr/adr-004-keep-v9-platform-branding-static.md).
+Quick and Daily Challenge are documented in
+[PRD v10](./product/prd/prd-v10.md). Their persistence and architecture boundaries are recorded in
+[daily-challenge-persistence.md](./technical/daily-challenge-persistence.md) and
+[ADR-006](./technical/adr/adr-006-model-daily-challenge-as-versioned-local-cadence.md).
 
 ---
 
@@ -44,6 +50,11 @@ Personalization and generated-game feedback are documented in
 - **Usage indicator**: a compact `+` or `×` marker that shows whether a visible strip entry is already used by that operator family
 - **Difficulty selector**: the anchored, mode-specific single-choice popup used to choose one
   supported generated challenge from the normal menu
+- **Daily action**: the state-aware primary region that starts, continues, or reopens completion
+  for the current local Daily Challenge
+- **Calendar action**: the trailing Daily region that opens local Daily Completion History
+- **Daily completion summary**: the content shown after completion or when reopening a completed
+  current-date Daily Challenge without reconstructing its solved puzzle
 
 In this document, strip items are rendered as chips.
 
@@ -60,24 +71,32 @@ In this document, strip items are rendered as chips.
 
 ---
 
-## Normal Menu, Difficulty Selection, And Generated Session Routing
+## Normal Menu, Quick, Daily Challenge, And Session Routing
 
 The unlocked normal menu renders actions in this order:
 
-1. `Resume`, only while one valid unfinished generated session is available
-2. the unified `4 Pairs · <difficulty>` split primary CTA
-3. the unified `8 Pairs · <difficulty>` split primary CTA
-4. `How to play`
+1. the unified state-aware Daily Challenge split primary CTA
+2. `Resume`, only while one valid unfinished normal generated session is available
+3. the direct `Quick` primary CTA
+4. the unified `4 Pairs · <difficulty>` split primary CTA
+5. the unified `8 Pairs · <difficulty>` split primary CTA
+6. `How to play`
 
-`Resume` and both generated-mode split actions use the full-width primary CTA treatment. Each
-generated-mode CTA contains an expanding play region and a trailing difficulty region with no
-visual gap. A themed vertical divider distinguishes the two touch actions. `How to play` uses the
-lower-emphasis secondary treatment. A themed settings icon action in the top-right corner of the
-Menu TopAppBar opens Personalization and exposes a localized accessibility description. The
-localized `Resume` accessibility description identifies the saved mode and difficulty, for
-example `Resume 4 Pairs · Medium puzzle`.
+Daily Challenge, `Resume`, Quick, and both generated-mode actions use the full-width primary CTA
+treatment. The Daily CTA contains an expanding state-aware region and a trailing calendar region.
+Each generated-mode CTA contains an expanding play region and a trailing difficulty region. Split
+regions have no visual gap and use a themed vertical divider.
 
-The application derives menu resumability from the one global generated-session slot. Missing, solved, unknown-mode, mode/profile-mismatched, corrupt, and unsupported snapshots do not expose `Resume`.
+`How to play` uses the lower-emphasis secondary treatment. A themed settings icon action in the
+top-right corner of the Menu TopAppBar opens Personalization and exposes a localized accessibility
+description.
+
+The localized normal `Resume` accessibility description identifies the saved mode and difficulty,
+for example `Resume 4 Pairs · Medium puzzle` or `Resume Quick · Low puzzle`.
+
+The application derives normal menu resumability only from the one normal generated-session slot.
+Missing, solved, unknown-mode, mode/profile-mismatched, corrupt, and unsupported snapshots do not
+expose normal `Resume`.
 
 Selecting `Resume` opens the saved mode and exact current puzzle without generation.
 
@@ -86,6 +105,65 @@ challenge uses the mode-specific fallback on first use and the last supported di
 player selected for that mode thereafter. Its visible label uses the same typography and weight
 as the other normal-menu button labels. Compact or increased-font layouts may ellipsize visible
 text while preserving the full localized challenge in accessibility semantics.
+
+### Daily Challenge Menu Action
+
+The Daily Challenge row uses the established unified split primary CTA geometry:
+
+- the expanding primary region starts, continues, or reopens completion for the current local
+  Daily Challenge
+- the trailing region opens the calendar
+- a themed vertical divider separates the two button semantics
+- both regions keep the established minimum interactive target
+- the trailing region uses a calendar icon whose localized action description is independent from
+  the primary state
+
+The primary label and semantics resolve from one captured current local date:
+
+- no completion and no matching resumable Daily Session: `Daily challenge`
+- no completion and one exact matching resumable Daily Session: `Continue daily`
+- any completion record for the current local date: `Daily completed`
+
+The completed label, selected semantics, and completion state description communicate completion
+without relying on color or iconography alone. Missing, prior-date, solved-without-completion,
+unsupported-recipe, recipe-mismatched, malformed, and corrupt Daily snapshots never expose
+`Continue daily`.
+
+Activating `Daily challenge`:
+
+1. captures the current local date and recipe identity
+2. opens Daily gameplay in a loading state
+3. attempts the same bounded deterministic candidate sequence for that identity
+4. publishes gameplay only after the exact Daily Session snapshot is stored
+
+Duplicate taps do not launch duplicate generation. Failure or cancellation shows a recoverable
+Daily failure state with retry and back-to-menu actions. Retry repeats the same recipe candidate
+sequence and never substitutes device randomness. A prior-date Daily snapshot remains intact until
+a current-date successor is stored, but it remains hidden from play.
+
+Activating `Continue daily` restores the exact current puzzle without generation or mutation.
+
+Activating `Daily completed` opens the current-date Daily completion summary. It does not restore
+the cleared solved session, generate another puzzle, or change completion history.
+
+The calendar region opens the calendar from every Daily state without starting, restoring,
+replacing, or completing a puzzle.
+
+Daily state does not read or write the normal generated-session slot or remembered `4 Pairs`
+difficulty. Normal generated actions do not read or write Daily state.
+
+### Quick Action
+
+Quick uses one full-width primary CTA labelled `Quick`. It has no trailing difficulty action while
+`3 Pairs Low` is its only supported challenge.
+
+Its accessibility description identifies the complete challenge as Quick, 3 Pairs, Low. The
+gameplay title and normal Resume copy use `Quick · Low`, while the stable generated mode remains
+`3 Pairs`.
+
+Activating Quick starts the explicit `3 Pairs Low` challenge through the normal generated-session
+flow. If no normal session is resumable, it starts directly. If a normal session is resumable, it
+uses the shared resume-or-replace dialog. Quick never reads, replaces, or resumes Daily state.
 
 ### Difficulty Selector
 
@@ -126,23 +204,25 @@ change-difficulty action.
 
 ### Resume Or Replace
 
-Activating a generated-mode play region while a resumable session exists opens the same modal
-choice:
+Activating Quick or a generated-mode play region while a normal generated session is resumable
+opens the same modal choice:
 
 - primary: `Resume`
-- secondary: start a new puzzle for the mode and difficulty the player selected
+- secondary: start a new puzzle for the requested challenge
 
 Same-challenge, same-mode/different-difficulty, and different-mode selections use one concise
 supporting message: `You have an unfinished <saved mode> · <saved difficulty> puzzle.` The message
 uses the larger body text treatment. The secondary label always identifies the requested
-replacement challenge as `New <selected mode> · <selected difficulty>`. The primary action's
-accessibility description identifies the saved challenge.
+replacement challenge as `New <selected mode> · <selected difficulty>` for 4 Pairs and 8 Pairs or
+`New Quick` for Quick. The primary action's accessibility description identifies the saved
+challenge.
 
 The primary action uses the shared primary CTA treatment and established button shape.
 
 The choice dialog has no visible cancel, back, close, or third action. Tapping outside or pressing system back dismisses it without navigation, generation, or session mutation. Action handling is deduplicated.
 
-Selecting `How to play`, entering guided first run, or using Tutorial never replaces or updates the generated session.
+Selecting the Daily calendar action, `How to play`, Settings, guided first run, or Tutorial never
+replaces or updates either session slot.
 
 ### Guided First Run And Tutorial Replay
 
@@ -191,9 +271,9 @@ In-app NumPairs branding follows the selected appearance palette. The system spl
 launcher stay static and Warm. The packaged monochrome icon remains available for Android
 system-themed icons, whose tint is controlled by the launcher rather than NumPairs.
 
-## Generated Completion And Replay
+## Normal Generated Completion And Replay
 
-A solved generated puzzle shows exactly:
+A solved normal Quick, 4 Pairs, or 8 Pairs puzzle shows exactly:
 
 - primary: `Play another`
 - secondary: `Back to menu`
@@ -217,11 +297,155 @@ additional completion action.
 
 ---
 
+## Daily Gameplay, Completion, And Rollover
+
+Daily gameplay reuses the generated Game screen and the `4 Pairs Low` challenge selected by its
+recipe. It does not expose a Daily difficulty selector or consult the remembered normal `4 Pairs`
+difficulty.
+
+The gameplay TopAppBar title identifies Daily and the captured local date using localized concise
+date copy. Its full accessibility description also identifies `4 Pairs · Low`. Back navigation
+returns to the normal menu without changing Daily progress.
+
+If the device-local date changes while Daily remains visible:
+
+- the visible puzzle and title keep the captured Daily Challenge identity
+- the route does not regenerate, replace, dismiss, or reset at midnight
+- accepted progress continues to persist under the captured identity
+- solving records completion for the captured date
+
+After returning to Menu on a later local date, an unfinished prior-date Daily Session no longer
+appears as `Continue daily`. Starting the new current-date Daily safely replaces it only after a
+successor is stored. The prior date cannot be opened through the calendar.
+
+### Daily Completion
+
+When a committed player action solves Daily, the existing generated completion celebration runs
+once. The atomic completion transition records the Daily Challenge identity and removes the active
+Daily Session before the completed Menu state is published.
+
+The immediate completion surface keeps the solved board visible and shows exactly:
+
+- primary: `Share result`
+- secondary: `View calendar`
+- tertiary navigation: `Back to menu`
+
+It does not show `Play another`, restart, change difficulty, solution reveal, timer, score, or
+replay.
+
+If the player later activates `Daily completed`, NumPairs opens a lightweight Daily completion
+summary for the current date. Because the solved session snapshot has been removed, the summary
+does not reconstruct or display the solved board. It identifies the date and `4 Pairs · Low` and
+shows the same Share result, View calendar, and Back to menu actions.
+
+Opening either completion surface does not add another completion record. Pressing system back
+returns to the normal menu.
+
+### Daily Calendar
+
+The Daily calendar is a dedicated local-history destination with:
+
+- back navigation
+- a localized month and year heading
+- previous-month and next-month actions
+- localized weekday headings and locale-appropriate first day of week
+- a seven-column informational date grid
+
+It opens on the month containing the captured current local date. Previous-month navigation is
+available. Next-month navigation is disabled while the current month is displayed, so future
+months cannot be browsed.
+
+Calendar date states are:
+
+- **Today**
+  - uses a visible outline or equivalent non-fill cue
+  - exposes a localized `Today` semantic description
+- **Completed**
+  - uses a check mark or equivalent stable non-color cue
+  - exposes a localized `Completed` semantic description
+- **Today and completed**
+  - exposes both states without one cue replacing the other
+- **Past without completion**
+  - remains visually neutral
+  - is described as a date, not as missed, failed, or incomplete
+- **Future**
+  - uses subdued informational treatment
+  - is unavailable
+- **Outside the displayed month**
+  - is omitted or rendered as a non-interactive empty grid position
+
+Date cells are informational and do not open gameplay, completion details, or sharing. They do not
+need to simulate interactive button semantics. Month navigation actions retain the established
+minimum touch target.
+
+Changing month, opening or closing the calendar, and reading a completion record never mutate
+Daily Session, completion history, normal generated state, onboarding, or preferences. The
+calendar has no streak, percentage, reward, best time, score, ranking, or missed-day treatment.
+
+Back navigation returns to the surface that opened the calendar: Menu for the trailing Menu action
+and the applicable Daily completion surface for `View calendar`. Calendar navigation is transient;
+process recreation does not require restoring the displayed month or caller.
+
+### Daily Textual Sharing
+
+`Share result` opens the Android Sharesheet with localized `text/plain` content containing:
+
+- `NumPairs Daily`
+- the completed local date
+- `4 Pairs · Low`
+- an explicit completed status
+
+One representative structure is:
+
+```text
+NumPairs Daily · 25 Jul 2026
+4 Pairs · Low · Completed
+```
+
+The localized date and completion text may vary by locale, but the shared result never contains
+strip values, board results, pairs, operators, tile positions, a solved-board encoding, time,
+score, action count, streak, or ranking.
+
+The Sharesheet chooser title is localized. Cancelling sharing, returning from the target
+application, or having no compatible target does not change completion, calendar, session, or
+navigation state and must not crash NumPairs. Sharesheet state is transient and is never restored
+after process death.
+
+Past calendar dates do not expose sharing in v10.
+
+### v10 Visual And Accessibility Contract
+
+- Daily reuses `NumPairsComponents.PrimarySplitCtaButton`.
+- Quick and normal Resume reuse `NumPairsComponents.PrimaryCtaButton`.
+- Daily split regions and month navigation expose distinct button semantics and localized action
+  descriptions.
+- Start, continue, completed, today, historical completion, and future-date states never rely only
+  on color.
+- Daily completion may reuse the success semantic role, but completion text and check state remain
+  authoritative.
+- Menu and completion content remain vertically scrollable when compact height or font scale
+  requires it.
+- Visible labels may adapt or wrap only within documented component bounds; accessibility
+  descriptions preserve complete challenge and state copy.
+- Calendar weekday order, first day of week, dates, month labels, and navigation respect locale
+  and layout direction.
+- Every user-facing label, state description, chooser title, and shared string comes from Android
+  resources.
+- Menu, calendar, and sharing actions do not emit assignment haptics.
+- Quick and Daily accepted assignments, newly correct tiles, and player-caused completion use the
+  existing preference- and system-aware generated feedback.
+- Restoration, completed-summary reopening, calendar display, local-date rollover, and sharing do
+  not replay haptics or completion motion.
+- Reduced or disabled system motion reaches the same usable final state immediately.
+- Cross-theme previews and focused Compose coverage protect the new states and semantic roles.
+
+---
+
 ## Generated-Game Feedback
 
-The v9 feedback contract applies only to generated `4 Pairs` and generated `8 Pairs`.
-Guided first run, voluntary `How to play`, Tutorial, authored practice, and the generic
-game surface do not opt into it.
+The generated feedback contract applies to normal Quick, generated `4 Pairs`, generated `8 Pairs`,
+and Daily Challenge. Guided first run, voluntary `How to play`, Tutorial, authored practice, and
+the generic game surface do not opt into it.
 
 After a generated-game action commits an accepted strip value, operand, or operator:
 
@@ -248,13 +472,18 @@ final state when system animation duration is disabled.
 Gameplay screens should show:
 
 - a back navigation action
-- the current generated challenge title, such as `4 Pairs · Low` or `8 Pairs · Hard`; Tutorial
-  retains its authored title
+- the current challenge title, such as `Quick · Low`, `4 Pairs · Low`, `8 Pairs · Hard`, or
+  `Daily · <localized date>`; Tutorial retains its authored title
 - an optional rules helper action
 
-The rules helper action should be available in generated `4 Pairs` for v3. It should not be shown in Tutorial because Tutorial has its own guided instructional surface. It is intentionally not part of the menu screen in the first implementation.
+The rules helper action remains available in generated `4 Pairs`. v10 also makes it available in
+Quick and Daily because both use the documented Low learning principles. It should not be shown in
+Tutorial because Tutorial has its own guided instructional surface. It is intentionally not part
+of the menu screen.
 
-Reliable sessions do not add a new-puzzle, restart, resume, or overflow action to the gameplay TopAppBar. Session choices remain in the normal menu and completion surface.
+Normal and Daily session persistence do not add a new-puzzle, restart, resume, share, calendar, or
+overflow action to the gameplay TopAppBar. Session and completion choices remain in the normal
+menu and the applicable completion surface.
 
 The existing Low-specific rules helper and solving tips may remain available in `4 Pairs Medium`
 for v8. Aligning that learning content with Medium is a separate follow-up and does not alter the
@@ -520,7 +749,11 @@ motion contracts remain stable.
 The following behaviors are intentionally left for future tickets:
 
 - Difficulty changes during an active generated puzzle
-- Difficulty locks, player progression, completion tracking, rewards, and statistics
+- Difficulty locks, player progression, normal generated completion tracking, rewards, and
+  statistics
+- Daily streaks, scores, timers, rankings, achievements, reminders, and notifications
+- Playing, sharing, or backfilling past Daily Challenge dates
+- Player-selected or rotating Daily difficulty
 - Revising Low-specific solving tips for `4 Pairs Medium`
 - Advanced validation while entering or selecting values
 - Context-aware filtering of operand slot options
