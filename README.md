@@ -8,8 +8,10 @@ Players complete hidden expressions on a board by using numbers from a strip. Th
 
 ## Current Status
 
-### Current implemented product baseline: v9
+### Current implemented product baseline: v8 + v9
 
+- 📈 [PRD v8 Difficulty Selection & Challenge Expansion](./docs/product/prd/prd-v8.md) defines
+  the current generated challenge catalog and mode-specific difficulty selection.
 - ✨ [PRD v9 Game Feel & Personalization](./docs/product/prd/prd-v9.md) defines the current color-personalization and generated-game feedback baseline.
 - 🔁 [PRD v7 Reliable Sessions & Replay Controls](./docs/product/prd/prd-v7.md) remains the foundation for the one-slot generated-session and safe-replay contract.
 - 🎓 [PRD v6 Guided First Run](./docs/product/prd/prd-v6.md) defines the focused, explicitly
@@ -19,10 +21,16 @@ NumPairs now provides five persistent color-only themes: Warm, Frost, Obsidian, 
 and Ember. Typography, shapes, spacing, elevation, layout, controls, and gameplay meanings
 remain shared across them.
 
-Generated `4 Pairs Low` and `8 Pairs Medium` play adds subtle accepted-assignment haptics,
-newly-correct tile motion, a brief completion celebration, and a successor-ready replay
-transition. This feedback is not added to Tutorial or onboarding; sound and error haptics
-are not implemented.
+Generated play supports `4 Pairs Low`, `4 Pairs Medium`, `8 Pairs Medium`, and `8 Pairs Hard`.
+Players choose a supported difficulty independently for each generated mode. Every generated
+challenge adds subtle accepted-assignment haptics, newly-correct tile motion, a brief completion
+celebration, and a successor-ready replay transition. This feedback is not added to Tutorial or
+onboarding; sound and error haptics are not implemented.
+
+### Active planned milestone: v10
+
+- 🗓️ [PRD v10 Quick Play & Daily Challenge](./docs/product/prd/prd-v10.md) defines the planned
+  generated `3 Pairs Low` Quick mode and one deterministic local Daily Challenge per calendar date.
 
 Historical milestone snapshots:
 
@@ -37,11 +45,9 @@ PRDs preserve the product requirements and planning context for each milestone. 
 generated-mode and profile behavior is also documented in
 [puzzle-generation.md](./docs/product/puzzle-generation.md).
 
-Both built-in generated profiles are implemented: `4 Pairs Low` and `8 Pairs Medium`.
-
-Generated play stores one exact resumable session shared by both modes, restores committed
-progress after process death, and keeps the current puzzle visible until a validated
-successor is stored and ready.
+All four supported generated profiles are implemented. Generated play stores one exact resumable
+session shared by every generated challenge, restores committed progress after process death, and
+keeps the current puzzle visible until a validated successor is stored and ready.
 
 ---
 
