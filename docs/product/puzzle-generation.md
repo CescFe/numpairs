@@ -14,6 +14,8 @@
   - `docs/product/prd/prd-v10.md`
   - `docs/technical/generated-session-persistence.md`
   - `docs/technical/adr/adr-005-model-sparse-generated-challenges.md`
+  - `docs/technical/adr/adr-006-model-daily-challenge-as-versioned-local-cadence.md`
+  - `docs/technical/daily-challenge-persistence.md`
   - `docs/game-rules.md`
   - `docs/ubiquitous-language.md`
 
@@ -170,6 +172,38 @@ profile, and seed metadata. Mode/profile identity resolves the exact challenge. 
 restoration reads that snapshot directly; it never regenerates historical content from the seed.
 
 Committed puzzle changes update the current snapshot through the stable session id, solved puzzles clear resumability, and stale callbacks cannot mutate a replacement. Generation, storage failure, or cancellation leaves the previous unfinished slot intact. See `docs/technical/generated-session-persistence.md` for the storage, ordering, validation, and backup contract.
+
+## Daily Recipe Generation Boundary
+
+The v10 Daily Challenge reuses the existing generated-puzzle pipeline without making the generator
+aware of dates, calendars, completion history, Android clocks, or presentation state.
+
+One immutable Daily Recipe version:
+
+- resolves the existing `4 Pairs Low` generated challenge
+- combines its recipe version and one canonical local date into Daily Challenge identity
+- maps that identity plus a zero-based candidate index to one stable signed 32-bit seed
+- supplies one positive fixed candidate limit
+- attempts candidate indexes in ascending order
+
+Each candidate is an ordinary explicit `GeneratedPuzzleGenerationRequest` for the recipe profile.
+The first generated and validated outcome becomes the exact Daily puzzle. Attempts exhausted,
+search budget exhausted, assessment work limit, and cancellation remain typed candidate outcomes.
+Daily coordination never substitutes device randomness, another difficulty, or a different
+challenge.
+
+The recipe payload format, algorithm, challenge, candidate order, and limit are compatibility
+behavior and cannot change under the same recipe version. A deterministic future-date corpus must
+protect both the seed schedule and successful bounded generation before release.
+
+The date is captured by an injected device-local date source outside the platform-independent
+generator. A local-date change never changes an already constructed generation request.
+
+Successful Daily generation persists one exact Daily Session snapshot before readiness. Daily
+restoration reads that snapshot and never regenerates historical progress from recipe seeds. Daily
+uses the separate versioned aggregate documented in
+`docs/technical/daily-challenge-persistence.md`; it does not occupy or mutate the normal generated
+session slot.
 
 ### Quick / `3 Pairs Low`
 
@@ -526,5 +560,9 @@ consistency validation or their selected profile's assessment acceptance policy.
 - `docs/product/prd/prd-v8.md` owns the difficulty-selection and challenge-expansion product contract.
 - `docs/product/prd/prd-v10.md` owns the Quick and Daily Challenge product contract.
 - `docs/technical/generated-session-persistence.md` owns the implemented session storage and coordination boundary.
+- `docs/technical/daily-challenge-persistence.md` owns the planned Daily aggregate storage and
+  coordination boundary.
 - `docs/technical/adr/adr-005-model-sparse-generated-challenges.md` owns the durable sparse challenge-catalog decision.
+- `docs/technical/adr/adr-006-model-daily-challenge-as-versioned-local-cadence.md` owns the durable
+  Daily identity, recipe, and separate aggregate decision.
 - `docs/ubiquitous-language.md` owns shared terminology.

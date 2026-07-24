@@ -6,22 +6,30 @@
 - Product contracts: `docs/product/prd/prd-v7.md` and `docs/product/prd/prd-v8.md`
 - Related generation reference: `docs/product/puzzle-generation.md`
 - Related domain decision: `docs/technical/adr/adr-005-model-sparse-generated-challenges.md`
+- Planned Daily boundary: `docs/technical/daily-challenge-persistence.md`
 
-This document owns the persistence and coordination boundary for the single resumable generated puzzle. It does not redefine puzzle rules, generation profiles, or menu copy.
+This document owns the persistence and coordination boundary for the single resumable normal
+generated puzzle. It does not own Daily Challenge persistence and does not redefine puzzle rules,
+generation profiles, or menu copy.
 
 ---
 
 ## Scope And Ownership
 
-NumPairs stores at most one generated session for the whole application. The slot may belong to
-any challenge in the supported generated-challenge catalog: `4 Pairs Low`, `4 Pairs Medium`,
-`8 Pairs Medium`, or `8 Pairs Hard` in v8. There is no independent save per mode, history,
-account sync, or manual save management.
+NumPairs stores at most one normal generated session for the whole application. The slot may
+belong to any challenge in the supported generated-challenge catalog: `4 Pairs Low`,
+`4 Pairs Medium`, `8 Pairs Medium`, or `8 Pairs Hard` in v8, plus Quick `3 Pairs Low` when v10 is
+implemented. There is no independent normal save per mode, normal generated history, account sync,
+or manual save management.
 
 `MainActivity` creates one application-scoped `GeneratedSessionRepository` from
 application-private storage and passes it only through generated-play and unlocked-navigation
 composition. Tutorial and onboarding do not receive generated-session persistence callbacks and
 cannot replace the slot.
+
+The v10 Daily Challenge owns a separate aggregate and may remain resumable at the same time. Daily
+operations never mutate this repository, and normal generated operations never mutate the Daily
+aggregate. See `docs/technical/daily-challenge-persistence.md`.
 
 The remembered difficulty selections are a separate preference aggregate, not generated-session
 state. Session creation and restoration may read a challenge choice supplied by navigation, but
@@ -150,6 +158,9 @@ The file is excluded from:
 - Android device-to-device transfer in `res/xml/data_extraction_rules.xml`
 
 This keeps the session local to the installation and avoids restoring a transient unfinished puzzle as cross-device progression.
+
+The planned Daily aggregate uses its own separately excluded
+`datastore/daily_challenge.preferences_pb` file.
 
 ---
 

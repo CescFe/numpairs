@@ -54,11 +54,13 @@ assessment policy. Android strings, player preference, lock state, navigation, a
 challenge-specific learning capabilities remain outside the profile.
 
 ## Generated Session
-A playable generated-puzzle lifecycle identified by a stable session identity.
+A normal replayable generated-puzzle lifecycle identified by a stable session identity.
 
 NumPairs owns at most one generated session slot for the application, shared by all generated
 challenges. A generated session carries the mode and profile identities that resolve its exact
 challenge, seed metadata, exact initial puzzle, and exact current puzzle.
+
+Daily Challenge uses a separate Daily Session lifecycle and does not occupy this slot.
 
 ## Resumable Generated Session
 The generated session currently stored in the application-wide slot when its current puzzle is
@@ -71,8 +73,63 @@ The versioned local representation of one generated session.
 
 The snapshot preserves stable session, mode, profile, board, tile, expression, strip-entry, and strip-item identity needed to restore the exact current puzzle. Its seed is metadata; the snapshot is not restored by regenerating from the seed.
 
+## Daily Challenge
+The one date-bound playable puzzle selected by a Daily Recipe for one device-local calendar date.
+
+A Daily Challenge selects an existing generated challenge. It is a play cadence, not a generated
+mode, difficulty tier, generated profile, or normal generated session.
+
+## Daily Challenge Identity
+The stable identity combining one canonical device-local calendar date with one Daily Recipe
+version.
+
+The canonical date uses ISO-8601 `YYYY-MM-DD`. Localized display text, the current clock value, and
+derivable profile parameters are not part of the identity.
+
+## Daily Recipe
+An immutable versioned definition that selects one generated challenge and deterministically maps
+a Daily Challenge identity plus candidate index to an ordered bounded sequence of generation
+seeds.
+
+The v10 Daily Recipe selects `4 Pairs Low`. A recipe change requires a new stable version.
+
+## Daily Session
+The playable lifecycle for one Daily Challenge identity.
+
+NumPairs owns at most one Daily Session slot, separate from the normal generated-session slot. A
+Daily Session carries a stable session identity, recipe and date identity, successful candidate
+metadata, exact initial puzzle, and exact current puzzle.
+
+## Resumable Daily Session
+The Daily Session currently stored in the Daily aggregate when its identity matches the current
+Daily Challenge, its recipe and puzzle remain supported and valid, no completion owns its date, and
+its current puzzle is not solved.
+
+An unfinished prior-date, solved, mismatched, corrupt, completed, unsupported, or missing Daily
+Session is not resumable.
+
+## Daily Session Snapshot
+The versioned local representation of one Daily Session.
+
+The snapshot preserves stable Daily Session, Daily Challenge, candidate, board, tile, expression,
+strip-entry, and strip-item identity needed to restore exact progress. Seed and candidate index are
+metadata verified against the recipe; restoration never regenerates from them.
+
+## Daily Completion
+The local fact that the puzzle for one Daily Challenge identity became solved.
+
+A completion owns its canonical date and recipe version. It contains no score, time, streak,
+reward, display text, or puzzle.
+
+## Daily Completion History
+The local collection of Daily Completion records displayed by the calendar.
+
+The history records at most one completion per local calendar date, remains independent from
+normal generated sessions and preferences, and is not synchronized across installations.
+
 ## Current Puzzle
-The latest committed domain state of the puzzle being played in a generated session.
+The latest committed domain state of the puzzle being played in a normal generated session or
+Daily Session.
 
 Current puzzle changes include committed strip values, operand assignments, operator assignments, and tile resets. Transient presentation state such as drafts, open selectors, dialogs, overlays, highlights, and scroll position is not part of the current puzzle.
 
