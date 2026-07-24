@@ -124,7 +124,7 @@ class GeneratedSessionChoiceNavigationTest {
             difficultyRepository = difficultyRepository
         )
 
-        composeTestRule.onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON).performClick()
+        composeTestRule.onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON).performClick()
         composeTestRule
             .onNodeWithTag(
                 GeneratedDifficultySelectorTestTags.option(
@@ -245,7 +245,7 @@ class GeneratedSessionChoiceNavigationTest {
             .onNodeWithTag(MenuScreenTestTags.SESSION_CHOICE_DIALOG)
             .assertDoesNotExist()
         composeTestRule
-            .onNodeWithTag(GeneratedDifficultySelectorTestTags.SCREEN)
+            .onNodeWithTag(MenuScreenTestTags.SCREEN)
             .assertIsDisplayed()
         composeTestRule.runOnIdle {
             assertTrue(recorder.generatedChallenges.isEmpty())

@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -315,7 +316,7 @@ class RequiredOnboardingNavigationTest {
     private fun waitForMenu() {
         composeTestRule.waitUntil(timeoutMillis = ONBOARDING_WAIT_TIMEOUT_MILLIS) {
             composeTestRule
-                .onAllNodes(hasText(string(R.string.menu_four_pairs_button)))
+                .onAllNodes(hasTestTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON))
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }

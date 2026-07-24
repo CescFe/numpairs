@@ -54,13 +54,23 @@ class EightPairsModeTest {
             .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithText(string(R.string.menu_four_pairs_button))
+            .onNodeWithText(
+                challengeName(R.string.four_pairs_screen_title, R.string.generated_difficulty_low)
+            )
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON)
             .assertIsDisplayed()
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_BUTTON)
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithText(string(R.string.menu_eight_pairs_button))
+            .onNodeWithText(
+                challengeName(R.string.eight_pairs_screen_title, R.string.generated_difficulty_medium)
+            )
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_BUTTON)
             .assertIsDisplayed()
     }
 
@@ -163,6 +173,12 @@ class EightPairsModeTest {
 
     private fun string(stringResId: Int, vararg formatArgs: Any): String =
         composeTestRule.activity.getString(stringResId, *formatArgs)
+
+    private fun challengeName(modeNameResource: Int, difficultyNameResource: Int): String = string(
+        R.string.generated_challenge_title,
+        string(modeNameResource),
+        string(difficultyNameResource)
+    )
 
     private fun eightPairsProviderFactory(
         puzzleProvider: RecordingGeneratedPuzzleProvider
