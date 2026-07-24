@@ -18,13 +18,11 @@ import org.cescfe.numpairs.feature.fourpairs.FourPairsRoute
 import org.cescfe.numpairs.feature.generated.GeneratedChallenge
 import org.cescfe.numpairs.feature.generated.GeneratedChallengeCatalog
 import org.cescfe.numpairs.feature.generated.GeneratedChallengeId
-import org.cescfe.numpairs.feature.generated.GeneratedModeId
 import org.cescfe.numpairs.feature.generated.GeneratedModeLaunchIntent
 import org.cescfe.numpairs.feature.generated.GeneratedModeRoute
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.feature.generated.localizedTitle
-import org.cescfe.numpairs.feature.generated.selector.GeneratedDifficultySelectorRoute
 import org.cescfe.numpairs.feature.menu.MenuRoute
 import org.cescfe.numpairs.feature.menu.ui.GeneratedSessionChoiceDialog
 import org.cescfe.numpairs.feature.onboarding.OnboardingLoadingScreen
@@ -36,7 +34,6 @@ sealed interface AppDestination {
     data object Menu : AppDestination
     data object Tutorial : AppDestination
     data object Personalization : AppDestination
-    data class GeneratedDifficultySelector(val modeId: GeneratedModeId) : AppDestination
     data class GeneratedChallenge(
         val challengeId: GeneratedChallengeId,
         val launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.newPuzzle()
@@ -178,17 +175,7 @@ private fun UnlockedAppNavigation(
                 onPersonalizationSelected = {
                     currentDestination = AppDestination.Personalization
                 },
-                onGeneratedChallengeSelected = onGeneratedChallengeSelected,
-                onFourPairsDifficultySelected = {
-                    currentDestination = AppDestination.GeneratedDifficultySelector(
-                        modeId = GeneratedModes.FOUR_PAIRS.id
-                    )
-                },
-                onEightPairsDifficultySelected = {
-                    currentDestination = AppDestination.GeneratedDifficultySelector(
-                        modeId = GeneratedModes.EIGHT_PAIRS.id
-                    )
-                }
+                onGeneratedChallengeSelected = onGeneratedChallengeSelected
             )
         }
         AppDestination.Tutorial -> TutorialRoute(
@@ -197,13 +184,6 @@ private fun UnlockedAppNavigation(
         )
         AppDestination.Personalization -> PersonalizationRoute(
             repository = personalizationPreferencesRepository,
-            onNavigateBack = navigateToMenu,
-            modifier = modifier
-        )
-        is AppDestination.GeneratedDifficultySelector -> GeneratedDifficultySelectorRoute(
-            mode = generatedChallengeCatalog.resolve(id = destination.modeId),
-            repository = generatedDifficultySelectionRepository,
-            onPlay = onGeneratedChallengeSelected,
             onNavigateBack = navigateToMenu,
             modifier = modifier
         )

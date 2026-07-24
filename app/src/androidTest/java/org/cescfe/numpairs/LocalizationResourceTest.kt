@@ -15,8 +15,14 @@ class LocalizationResourceTest {
     fun spanishDeviceLanguageUsesSpanishResources() {
         val resources = resourcesFor(languageTag = "es")
 
-        assertEquals("Jugar 4 pares", resources.getString(R.string.menu_four_pairs_button))
-        assertEquals("Jugar 8 pares", resources.getString(R.string.menu_eight_pairs_button))
+        assertEquals(
+            "Elegir dificultad para 4 pares",
+            resources.getString(R.string.menu_choose_generated_difficulty_content_description, "4 pares")
+        )
+        assertEquals(
+            "Cerrar selector de dificultad para 8 pares",
+            resources.getString(R.string.menu_close_generated_difficulty_content_description, "8 pares")
+        )
         assertEquals("Cómo jugar", resources.getString(R.string.menu_tutorial_button))
         assertEquals("Personalización", resources.getString(R.string.menu_personalization_button))
         assertEquals("8 pares", resources.getString(R.string.eight_pairs_screen_title))
@@ -76,8 +82,14 @@ class LocalizationResourceTest {
     fun catalanDeviceLanguageUsesValencianResources() {
         val resources = resourcesFor(languageTag = "ca")
 
-        assertEquals("Juga a 4 parelles", resources.getString(R.string.menu_four_pairs_button))
-        assertEquals("Juga a 8 parelles", resources.getString(R.string.menu_eight_pairs_button))
+        assertEquals(
+            "Tria la dificultat per a 4 parelles",
+            resources.getString(R.string.menu_choose_generated_difficulty_content_description, "4 parelles")
+        )
+        assertEquals(
+            "Tanca el selector de dificultat per a 8 parelles",
+            resources.getString(R.string.menu_close_generated_difficulty_content_description, "8 parelles")
+        )
         assertEquals("Com jugar", resources.getString(R.string.menu_tutorial_button))
         assertEquals("Personalització", resources.getString(R.string.menu_personalization_button))
         assertEquals("8 parelles", resources.getString(R.string.eight_pairs_screen_title))
@@ -137,8 +149,14 @@ class LocalizationResourceTest {
     fun unsupportedDeviceLanguageFallsBackToEnglishResources() {
         val resources = resourcesFor(languageTag = "de")
 
-        assertEquals("Play 4 pairs", resources.getString(R.string.menu_four_pairs_button))
-        assertEquals("Play 8 pairs", resources.getString(R.string.menu_eight_pairs_button))
+        assertEquals(
+            "Choose difficulty for 4 pairs",
+            resources.getString(R.string.menu_choose_generated_difficulty_content_description, "4 pairs")
+        )
+        assertEquals(
+            "Close difficulty selector for 8 pairs",
+            resources.getString(R.string.menu_close_generated_difficulty_content_description, "8 pairs")
+        )
         assertEquals("How to play", resources.getString(R.string.menu_tutorial_button))
         assertEquals("Personalization", resources.getString(R.string.menu_personalization_button))
         assertEquals("8 pairs", resources.getString(R.string.eight_pairs_screen_title))

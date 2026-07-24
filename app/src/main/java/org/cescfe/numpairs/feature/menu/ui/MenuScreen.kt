@@ -13,26 +13,40 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.cescfe.numpairs.R
@@ -52,9 +66,13 @@ fun MenuScreen(
     onPersonalizationSelected: () -> Unit = {},
     onFourPairsSelected: () -> Unit = {},
     onEightPairsSelected: () -> Unit = {},
-    onFourPairsDifficultySelected: () -> Unit = {},
-    onEightPairsDifficultySelected: () -> Unit = {}
+    onFourPairsDifficultySelected: (GeneratedDifficultyMenuOptionId) -> Unit = {},
+    onEightPairsDifficultySelected: (GeneratedDifficultyMenuOptionId) -> Unit = {}
 ) {
+    var expandedDifficultyMenu by rememberSaveable {
+        mutableStateOf<ExpandedDifficultyMenu?>(null)
+    }
+
     Scaffold(
         modifier = modifier
             .fillMaxSize()
@@ -104,16 +122,36 @@ fun MenuScreen(
                     GeneratedModeMenuRow(
                         state = fourPairsMode,
                         onPlay = onFourPairsSelected,
-                        onChooseDifficulty = onFourPairsDifficultySelected,
+                        expanded = expandedDifficultyMenu == ExpandedDifficultyMenu.FOUR_PAIRS,
+                        onToggleDifficultyMenu = {
+                            expandedDifficultyMenu = expandedDifficultyMenu.toggled(
+                                ExpandedDifficultyMenu.FOUR_PAIRS
+                            )
+                        },
+                        onDismissDifficultyMenu = {
+                            expandedDifficultyMenu = null
+                        },
+                        onDifficultySelected = onFourPairsDifficultySelected,
                         playTestTag = MenuScreenTestTags.FOUR_PAIRS_BUTTON,
-                        difficultyTestTag = MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON
+                        difficultyTestTag = MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON,
+                        difficultyMenuTestTag = MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_MENU
                     )
                     GeneratedModeMenuRow(
                         state = eightPairsMode,
                         onPlay = onEightPairsSelected,
-                        onChooseDifficulty = onEightPairsDifficultySelected,
+                        expanded = expandedDifficultyMenu == ExpandedDifficultyMenu.EIGHT_PAIRS,
+                        onToggleDifficultyMenu = {
+                            expandedDifficultyMenu = expandedDifficultyMenu.toggled(
+                                ExpandedDifficultyMenu.EIGHT_PAIRS
+                            )
+                        },
+                        onDismissDifficultyMenu = {
+                            expandedDifficultyMenu = null
+                        },
+                        onDifficultySelected = onEightPairsDifficultySelected,
                         playTestTag = MenuScreenTestTags.EIGHT_PAIRS_BUTTON,
-                        difficultyTestTag = MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_BUTTON
+                        difficultyTestTag = MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_BUTTON,
+                        difficultyMenuTestTag = MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_MENU
                     )
                     Button(
                         onClick = onTutorialSelected,
@@ -149,17 +187,32 @@ fun MenuScreen(
 private fun GeneratedModeMenuRow(
     state: GeneratedModeMenuUiState,
     onPlay: () -> Unit,
-    onChooseDifficulty: () -> Unit,
+    expanded: Boolean,
+    onToggleDifficultyMenu: () -> Unit,
+    onDismissDifficultyMenu: () -> Unit,
+    onDifficultySelected: (GeneratedDifficultyMenuOptionId) -> Unit,
     playTestTag: String,
-    difficultyTestTag: String
+    difficultyTestTag: String,
+    difficultyMenuTestTag: String
 ) {
     val playContentDescription = stringResource(
         R.string.menu_play_generated_challenge_content_description,
         state.challengeName
     )
-    val chooseDifficultyContentDescription = stringResource(
-        R.string.menu_choose_generated_difficulty_content_description,
+    val difficultyActionContentDescription = stringResource(
+        if (expanded) {
+            R.string.menu_close_generated_difficulty_content_description
+        } else {
+            R.string.menu_choose_generated_difficulty_content_description
+        },
         state.modeName
+    )
+    val difficultyActionStateDescription = stringResource(
+        if (expanded) {
+            R.string.menu_generated_difficulty_expanded
+        } else {
+            R.string.menu_generated_difficulty_collapsed
+        }
     )
 
     Row(
@@ -191,23 +244,111 @@ private fun GeneratedModeMenuRow(
                 )
             )
         }
-        Button(
-            onClick = onChooseDifficulty,
-            modifier = Modifier
-                .size(NumPairsComponents.ButtonHeight)
-                .semantics {
-                    contentDescription = chooseDifficultyContentDescription
-                }
-                .testTag(difficultyTestTag),
-            shape = NumPairsComponents.MediumShape,
-            colors = NumPairsComponents.secondaryButtonColors(),
-            border = NumPairsComponents.secondaryButtonBorder(),
-            contentPadding = PaddingValues(0.dp)
+        Box(
+            modifier = Modifier.size(NumPairsComponents.ButtonHeight)
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_menu),
-                contentDescription = null,
-                modifier = Modifier.size(MENU_GENERATED_MODE_ICON_SIZE)
+            Button(
+                onClick = onToggleDifficultyMenu,
+                modifier = Modifier
+                    .size(NumPairsComponents.ButtonHeight)
+                    .semantics {
+                        contentDescription = difficultyActionContentDescription
+                        stateDescription = difficultyActionStateDescription
+                    }
+                    .testTag(difficultyTestTag),
+                shape = NumPairsComponents.MediumShape,
+                colors = NumPairsComponents.secondaryButtonColors(),
+                border = NumPairsComponents.secondaryButtonBorder(),
+                contentPadding = PaddingValues(0.dp)
+            ) {
+                Icon(
+                    painter = painterResource(
+                        if (expanded) {
+                            R.drawable.ic_close_big
+                        } else {
+                            R.drawable.ic_menu
+                        }
+                    ),
+                    contentDescription = null,
+                    modifier = Modifier.size(MENU_GENERATED_MODE_ICON_SIZE)
+                )
+            }
+            GeneratedDifficultyMenu(
+                state = state,
+                expanded = expanded,
+                onDismiss = onDismissDifficultyMenu,
+                onDifficultySelected = { optionId ->
+                    onDifficultySelected(optionId)
+                    onDismissDifficultyMenu()
+                },
+                testTag = difficultyMenuTestTag
+            )
+        }
+    }
+}
+
+@Composable
+private fun GeneratedDifficultyMenu(
+    state: GeneratedModeMenuUiState,
+    expanded: Boolean,
+    onDismiss: () -> Unit,
+    onDifficultySelected: (GeneratedDifficultyMenuOptionId) -> Unit,
+    testTag: String
+) {
+    val menuContentDescription = stringResource(
+        R.string.menu_generated_difficulty_options_content_description,
+        state.modeName
+    )
+    val selectedStateDescription = stringResource(R.string.menu_generated_difficulty_selected)
+
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismiss,
+        modifier = Modifier
+            .width(MENU_GENERATED_DIFFICULTY_MENU_WIDTH)
+            .selectableGroup()
+            .semantics {
+                contentDescription = menuContentDescription
+            }
+            .testTag(testTag),
+        offset = DpOffset(
+            x = MENU_GENERATED_DIFFICULTY_MENU_END_ALIGNMENT_OFFSET,
+            y = MENU_GENERATED_DIFFICULTY_MENU_VERTICAL_OFFSET
+        ),
+        shape = NumPairsComponents.LargeShape,
+        containerColor = NumPairsComponents.raisedSurfaceColor(),
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
+        border = NumPairsComponents.subtleBorder()
+    ) {
+        state.difficultyOptions.forEach { option ->
+            val selected = option.id == state.selectedDifficultyOptionId
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = option.label,
+                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+                    )
+                },
+                onClick = {
+                    onDifficultySelected(option.id)
+                },
+                modifier = Modifier
+                    .semantics {
+                        this.selected = selected
+                        role = Role.RadioButton
+                        if (selected) {
+                            stateDescription = selectedStateDescription
+                        }
+                    }
+                    .testTag(MenuScreenTestTags.difficultyOption(option.id)),
+                trailingIcon = {
+                    RadioButton(
+                        selected = selected,
+                        onClick = null,
+                        modifier = Modifier.clearAndSetSemantics {}
+                    )
+                }
             )
         }
     }
@@ -244,17 +385,6 @@ private fun MenuButtonText(text: String) {
     )
 }
 
-data class GeneratedModeMenuUiState(val modeName: String, val challengeName: String) {
-    init {
-        require(modeName.isNotBlank()) {
-            "Generated mode Menu name must not be blank."
-        }
-        require(challengeName.isNotBlank()) {
-            "Generated challenge Menu name must not be blank."
-        }
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 private fun MenuScreenPreview(
@@ -270,7 +400,18 @@ private fun MenuScreenPreview(
                     R.string.generated_challenge_title,
                     fourPairsName,
                     stringResource(R.string.generated_difficulty_low)
-                )
+                ),
+                difficultyOptions = listOf(
+                    GeneratedDifficultyMenuOptionUiState(
+                        GeneratedDifficultyMenuOptionId("four-pairs-low"),
+                        stringResource(R.string.generated_difficulty_low)
+                    ),
+                    GeneratedDifficultyMenuOptionUiState(
+                        GeneratedDifficultyMenuOptionId("four-pairs-medium"),
+                        stringResource(R.string.generated_difficulty_medium)
+                    )
+                ),
+                selectedDifficultyOptionId = GeneratedDifficultyMenuOptionId("four-pairs-low")
             ),
             eightPairsMode = GeneratedModeMenuUiState(
                 modeName = eightPairsName,
@@ -278,10 +419,29 @@ private fun MenuScreenPreview(
                     R.string.generated_challenge_title,
                     eightPairsName,
                     stringResource(R.string.generated_difficulty_medium)
-                )
+                ),
+                difficultyOptions = listOf(
+                    GeneratedDifficultyMenuOptionUiState(
+                        GeneratedDifficultyMenuOptionId("eight-pairs-medium"),
+                        stringResource(R.string.generated_difficulty_medium)
+                    ),
+                    GeneratedDifficultyMenuOptionUiState(
+                        GeneratedDifficultyMenuOptionId("eight-pairs-hard"),
+                        stringResource(R.string.generated_difficulty_hard)
+                    )
+                ),
+                selectedDifficultyOptionId = GeneratedDifficultyMenuOptionId("eight-pairs-medium")
             )
         )
     }
+}
+
+private fun ExpandedDifficultyMenu?.toggled(requested: ExpandedDifficultyMenu): ExpandedDifficultyMenu? =
+    requested.takeUnless { current -> current == this }
+
+private enum class ExpandedDifficultyMenu {
+    FOUR_PAIRS,
+    EIGHT_PAIRS
 }
 
 private val MENU_CONTENT_MAX_WIDTH = 360.dp
@@ -293,3 +453,7 @@ private val MENU_GENERATED_MODE_BUTTON_TEXT_LINE_HEIGHT = 24.sp
 private val MENU_GENERATED_MODE_BUTTON_HORIZONTAL_PADDING = 12.dp
 private val MENU_GENERATED_MODE_ACTION_SPACING = 8.dp
 private val MENU_GENERATED_MODE_ICON_SIZE = 24.dp
+private val MENU_GENERATED_DIFFICULTY_MENU_WIDTH = 200.dp
+private val MENU_GENERATED_DIFFICULTY_MENU_END_ALIGNMENT_OFFSET =
+    NumPairsComponents.ButtonHeight - MENU_GENERATED_DIFFICULTY_MENU_WIDTH
+private val MENU_GENERATED_DIFFICULTY_MENU_VERTICAL_OFFSET = 4.dp

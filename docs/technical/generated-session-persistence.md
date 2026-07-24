@@ -37,13 +37,13 @@ only mode/difficulty pairs present in the supported challenge catalog.
 
 The effective fallback is `Low` for `4 Pairs` and `Medium` for `8 Pairs`. Missing, corrupt,
 unknown, and no-longer-supported stored values resolve to that fallback without writing it back.
-The only operation that writes a selector default is an explicit supported option choice made by
-the player in that mode's difficulty selector.
+The only operation that writes a remembered selection is an explicit supported option choice made
+by the player in that mode's anchored difficulty popup in the normal menu.
 
-Opening the selector, showing a fallback, pressing Play, resuming or restoring a session, replacing
-a session, completing a puzzle, and using `Play another` do not write this preference. The two mode
-values remain independent, and neither completion nor any other v8 behavior stores progression,
-locks, completion counts, rewards, or statistics.
+Opening or dismissing the popup, showing a fallback, pressing a mode's primary action, resuming or
+restoring a session, replacing a session, completing a puzzle, and using `Play another` do not
+write this preference. The two mode values remain independent, and neither completion nor any
+other v8 behavior stores progression, locks, completion counts, rewards, or statistics.
 
 The remembered values live in the dedicated Preferences DataStore file
 `datastore/generated_difficulty_selection.preferences_pb`. This keeps the aggregate and its
@@ -51,10 +51,10 @@ corruption recovery independent from personalization, onboarding, and the resuma
 session. The file stores one stable difficulty id under each stable generated-mode identity; it
 does not store display copy, profile parameters, completion data, or transient selector state.
 
-`MainActivity` creates one application-scoped remembered-difficulty repository. Only the
-mode-specific selector route receives its write operation. Menu resume, generated-session
-restoration, generated gameplay, and `Play another` resolve their exact stored challenge without
-receiving or mutating this preference boundary.
+`MainActivity` creates one application-scoped remembered-difficulty repository. The unlocked Menu
+route observes both effective selections and receives the write operation used by its
+mode-specific popups. Menu resume, generated-session restoration, generated gameplay, and
+`Play another` resolve their exact stored challenge without mutating this preference boundary.
 
 ---
 

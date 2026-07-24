@@ -8,19 +8,18 @@
     <string name="menu_resume_content_description">Continuar puzle de %1$s</string>
     <string name="menu_tutorial_button">Cómo jugar</string>
     <string name="menu_personalization_button">Personalización</string>
-    <string name="menu_four_pairs_button">Jugar 4 pares</string>
-    <string name="menu_eight_pairs_button">Jugar 8 pares</string>
     <string name="menu_play_generated_challenge_content_description">Jugar puzle de %1$s</string>
     <string name="menu_choose_generated_difficulty_content_description">Elegir dificultad para %1$s</string>
+    <string name="menu_close_generated_difficulty_content_description">Cerrar selector de dificultad para %1$s</string>
+    <string name="menu_generated_difficulty_options_content_description">Opciones de dificultad para %1$s</string>
+    <string name="menu_generated_difficulty_collapsed">Contraído</string>
+    <string name="menu_generated_difficulty_expanded">Expandido</string>
+    <string name="menu_generated_difficulty_selected">Seleccionada</string>
     <string name="generated_session_choice_title">Puzle sin terminar</string>
     <string name="generated_session_choice_challenge_message">Tienes un puzle de %1$s sin terminar.</string>
     <string name="generated_session_choice_new_challenge_button">Nuevo puzle de %1$s</string>
 
-    <!-- Difficulty selector -->
-    <string name="difficulty_selector_screen_title">Elige la dificultad</string>
-    <string name="difficulty_selector_supporting_text">Elige el reto que quieres jugar. Todas las opciones están disponibles.</string>
-    <string name="difficulty_selector_selected">Seleccionada</string>
-    <string name="difficulty_selector_play_button">Jugar %1$s · %2$s</string>
+    <!-- Generated difficulty -->
     <string name="generated_difficulty_low">Baja</string>
     <string name="generated_difficulty_medium">Media</string>
     <string name="generated_difficulty_hard">Alta</string>

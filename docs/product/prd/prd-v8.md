@@ -17,9 +17,9 @@ second calibrated challenge within the same size family.
 
 v8 makes generated mode and difficulty explicit, independent product concepts. `4 Pairs` and
 `8 Pairs` remain the size-based mode families; `Low`, `Medium`, and `Hard` become difficulty
-tiers. The milestone adds `4 Pairs Medium` and `8 Pairs Hard`, introduces a mode-specific
-difficulty selector, and remembers the last difficulty the player actively selected for each
-mode.
+tiers. The milestone adds `4 Pairs Medium` and `8 Pairs Hard`, introduces mode-specific
+difficulty selection in the normal menu, and remembers the last difficulty the player actively
+selected for each mode.
 
 Every supported challenge remains available from the beginning. v8 does not add player
 progression, unlocks, completion counts, rewards, or statistics.
@@ -175,14 +175,23 @@ cells are absent from selection rather than displayed as locked or unavailable c
 
 ### Mode And Difficulty Selection
 
-- Keep `4 Pairs` and `8 Pairs` as the generated-mode actions in the normal menu.
-- Selecting a generated mode opens a dedicated selector for that size family.
-- The `4 Pairs` selector shows exactly `Low` and `Medium`.
-- The `8 Pairs` selector shows exactly `Medium` and `Hard`.
-- Every shown difficulty is enabled; the selector has no locks or progression indicators.
+- Present one split action row for `4 Pairs` and one for `8 Pairs` in the normal menu.
+- The primary action identifies the current mode and difficulty and starts that challenge directly.
+- On first use, the primary actions resolve to `4 Pairs Low` and `8 Pairs Medium`.
+- On later use, each primary action resolves to the last supported difficulty selected for that
+  mode.
+- A square secondary action beside each primary action opens that mode's anchored difficulty menu
+  without leaving the normal menu.
+- The `4 Pairs` menu shows exactly `Low` and `Medium`.
+- The `8 Pairs` menu shows exactly `Medium` and `Hard`.
+- Every shown difficulty is enabled; the menu has no locks or progression indicators.
 - The current selection is communicated without relying only on color.
-- A primary action identifies the selected mode and difficulty before starting play.
-- System back and the visible back action return to the normal menu without starting a puzzle.
+- The popup's logical end edge aligns with the secondary action's logical end edge so the popup
+  expands inward and remains inside the menu content bounds.
+- Opening one difficulty menu closes any other. Its trigger changes from the menu icon to the large
+  close icon while expanded.
+- Choosing an option, tapping outside, pressing system back, or using the close action dismisses
+  the popup without starting a puzzle.
 
 ### Remembered Selection
 
@@ -190,8 +199,8 @@ cells are absent from selection rather than displayed as locked or unavailable c
 - Keep the `4 Pairs` and `8 Pairs` selections independent.
 - Use `4 Pairs Low` when no supported `4 Pairs` preference is available.
 - Use `8 Pairs Medium` when no supported `8 Pairs` preference is available.
-- Persist an option when the player actively chooses it in the selector.
-- Opening the selector, resolving a fallback, resuming, restoring, or replaying does not implicitly
+- Persist an option when the player actively chooses it in the mode's difficulty popup.
+- Opening the popup, resolving a fallback, resuming, restoring, or replaying does not implicitly
   rewrite the remembered selection.
 - Missing, corrupt, unknown, or unsupported stored values fall back safely without blocking play.
 
@@ -300,15 +309,19 @@ characterization; v8 must not invent unevidenced score thresholds before the eva
 
 ### Difficulty Selection Surface
 
-- Add reusable, state-driven Compose content for one selected generated mode.
+- Add reusable, state-driven Compose content for each generated mode's split menu action and
+  anchored single-choice popup.
 - Keep domain rules, persistence, generation, and navigation out of the content Composable.
 - Reuse established NumPairs components, tokens, typography, shapes, spacing, and semantic roles.
 - Preserve minimum touch targets, readable text scaling, and non-color selection cues.
+- Keep each popup end-aligned with its trigger across compact, wide, LTR, and RTL layouts.
 - Provide previews and focused UI or presentation coverage for both supported mode selectors.
 
 ### End-To-End Challenge Integration
 
-- Route both generated-mode menu actions through difficulty selection.
+- Route each generated-mode primary menu action directly through its effective remembered
+  challenge.
+- Persist changes from the associated secondary difficulty popup without starting generated play.
 - Generate the actively selected supported challenge.
 - Preserve selected challenge identity through loading, failure, safe replacement, restoration, and
   replay.
@@ -364,8 +377,8 @@ choice independently.
 Work:
 
 1. Add the local mode-specific selection repository and safe fallbacks.
-2. Add the reusable difficulty-selection screen.
-3. Route menu selection and Play through the selected challenge.
+2. Add reusable generated-mode split actions and anchored difficulty menus.
+3. Route each primary action directly through the selected challenge.
 
 ### Stage 5 - End-To-End Quality And Product Alignment
 

@@ -42,8 +42,8 @@ Personalization and generated-game feedback are documented in
 - **Entry dialog**: the dialog used to enter or edit a number in the strip
 - **Rules helper**: an informational dialog opened from the game top app bar to explain core game rules
 - **Usage indicator**: a compact `+` or `×` marker that shows whether a visible strip entry is already used by that operator family
-- **Difficulty selector**: the mode-specific destination used to choose one supported generated
-  challenge before starting it
+- **Difficulty selector**: the anchored, mode-specific single-choice popup used to choose one
+  supported generated challenge from the normal menu
 
 In this document, strip items are rendered as chips.
 
@@ -65,54 +65,63 @@ In this document, strip items are rendered as chips.
 The unlocked normal menu renders actions in this order:
 
 1. `Resume`, only while one valid unfinished generated session is available
-2. `Play 4 Pairs`
-3. `Play 8 Pairs`
+2. the `4 Pairs · <difficulty>` primary action and its square difficulty action
+3. the `8 Pairs · <difficulty>` primary action and its square difficulty action
 4. `How to play`
 5. `Personalization`
 
-`Resume` and both generated-mode actions use the primary CTA treatment. `How to play` and
-`Personalization` use the lower-emphasis secondary treatment. The localized `Resume`
-accessibility description identifies the saved mode and difficulty, for example
-`Resume 4 Pairs · Medium puzzle`.
+`Resume` and both generated-mode primary actions use the primary CTA treatment. Each mode's
+square difficulty action, `How to play`, and `Personalization` use the lower-emphasis secondary
+treatment. The localized `Resume` accessibility description identifies the saved mode and
+difficulty, for example `Resume 4 Pairs · Medium puzzle`.
 
 The application derives menu resumability from the one global generated-session slot. Missing, solved, unknown-mode, mode/profile-mismatched, corrupt, and unsupported snapshots do not expose `Resume`.
 
 Selecting `Resume` opens the saved mode and exact current puzzle without generation.
 
-Selecting `Play 4 Pairs` or `Play 8 Pairs` always opens that mode's dedicated difficulty
-selector. Entering the selector does not generate a puzzle, replace a session, or persist a
-difficulty.
+Selecting a generated-mode primary action starts its displayed challenge immediately. The
+displayed challenge uses the mode-specific fallback on first use and the last supported
+difficulty the player selected for that mode thereafter.
 
 ### Difficulty Selector
 
-The selector shows only challenges present in the supported generated-challenge catalog:
+The square secondary action beside each generated-mode primary action opens an anchored
+single-choice popup without leaving the normal menu. Its icon changes from the supplied menu icon
+to the supplied large close icon while expanded. At most one mode popup is open.
+
+The popup shows only challenges present in the supported generated-challenge catalog:
 
 - `4 Pairs` shows `Low` and `Medium`
 - `8 Pairs` shows `Medium` and `Hard`
 
-All shown options are enabled from the beginning. The selector has no locked option, progress
+All shown options are enabled from the beginning. The popup has no locked option, progress
 indicator, completion requirement, reward, or explanation of how to unlock content. Selection is
 communicated through label and control state rather than color alone, and every option and action
 keeps the established minimum touch target and readable text-scaling behavior.
 
-On entry, the selected option is the last supported difficulty the player explicitly chose for
+On opening, the selected option is the last supported difficulty the player explicitly chose for
 that mode. The two modes remember their choices independently. A missing, corrupt, unknown, or
 unsupported stored value is presented using `Low` for `4 Pairs` and `Medium` for `8 Pairs` without
 rewriting storage.
 
 Tapping a supported difficulty makes it the current option and immediately persists that explicit
-choice for the selected mode. Merely entering the selector, displaying a fallback, or leaving by
-system back or the visible back action does not write a preference. The back actions return to the
-normal menu without starting a puzzle or changing the generated-session slot.
+choice for the selected mode. It updates the associated primary action and closes the popup without
+starting a puzzle. Merely opening or dismissing the popup or displaying a fallback does not write a
+preference. Tapping outside, pressing system back, or activating the square close action dismisses
+the popup without changing the generated-session slot.
 
-The primary action identifies the exact requested challenge, for example
-`Play 4 Pairs · Medium`. Activating it starts the existing resume-or-replace routing for that
-challenge. Difficulty is fixed once play begins; generated gameplay and completion do not expose a
+The popup's logical end edge aligns with the square trigger's logical end edge and expands inward,
+so it remains inside the menu content bounds on compact and wide layouts. The alignment follows
+layout direction rather than assuming a physical right edge.
+
+The generated-mode primary action identifies the exact requested challenge, for example
+`4 Pairs · Medium`. Activating it starts the existing resume-or-replace routing for that challenge.
+Difficulty is fixed once play begins; generated gameplay and completion do not expose a
 change-difficulty action.
 
 ### Resume Or Replace
 
-Activating the selector's primary action while a resumable session exists opens the same modal
+Activating a generated-mode primary action while a resumable session exists opens the same modal
 choice:
 
 - primary: `Resume`
@@ -170,7 +179,8 @@ The screen also exposes one `Game haptics` preference. It defaults to enabled, p
 independently from onboarding and generated sessions, and controls only accepted-assignment
 haptics in generated games. Android's system touch-feedback setting remains authoritative.
 There are no sound, error-haptic, typography, shape, motion, or difficulty controls on the
-Personalization screen. Generated difficulty is selected only through the mode-specific selector.
+Personalization screen. Generated difficulty is selected only through the mode-specific popup in
+the normal menu.
 
 In-app NumPairs branding follows the selected appearance palette. The system splash and
 launcher stay static and Warm. The packaged monochrome icon remains available for Android
