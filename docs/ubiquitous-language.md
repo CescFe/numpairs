@@ -13,9 +13,17 @@ puzzle profile and presents its player-facing initial puzzle.
 A replayable generated-puzzle family identified by a stable generated-mode identity and puzzle
 size.
 
-`4 Pairs` and `8 Pairs` are generated modes. A mode exposes one or more explicitly supported
-generated challenges. Its identity is used for family selection, mode-specific preference, and
-generated-session identity; it does not imply one difficulty.
+`3 Pairs`, `4 Pairs`, and `8 Pairs` are generated modes in the v10 product contract. `Quick` is the
+player-facing identity for the `3 Pairs` mode. A mode exposes one or more explicitly supported
+generated challenges. Its identity is used for family selection, applicable mode-specific
+preference, and generated-session identity; it does not imply one difficulty.
+
+## Quick
+A brief replayable generated-play entry point whose stable generated mode is `3 Pairs`.
+
+Quick exposes `3 Pairs Low` as its only supported v10 generated challenge. Quick is a player-facing
+mode name, not a difficulty tier, Tutorial step, generation policy, or session type. It uses the
+normal generated-session lifecycle.
 
 ## Difficulty Tier
 The intended deductive challenge classification independent from generated puzzle size.
@@ -72,6 +80,9 @@ Current puzzle changes include committed strip values, operand assignments, oper
 A gameplay mode that teaches the core NumPairs rules through authored content and guided player practice.
 
 Tutorial is a learning surface, not generated replayable content, a rules helper, a hint system, or an answer reveal feature.
+
+Quick may be recommended after Tutorial, but its generated puzzles do not replace authored
+Tutorial content.
 
 ## Authored Tutorial Puzzle
 A handcrafted puzzle selected for teaching clarity in Tutorial mode.

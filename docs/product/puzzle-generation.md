@@ -5,11 +5,13 @@
 - Status: product reference for generated puzzle construction
 - Implemented profiles: generated `4 Pairs Low`, `4 Pairs Medium`, `8 Pairs Medium`, and
   `8 Pairs Hard`
+- Planned v10 profile: generated `3 Pairs Low`, presented as Quick
 - v8 generated challenge matrix: implemented
 - Related references:
   - `docs/product/prd/prd-v5.md`
   - `docs/product/prd/prd-v7.md`
   - `docs/product/prd/prd-v8.md`
+  - `docs/product/prd/prd-v10.md`
   - `docs/technical/generated-session-persistence.md`
   - `docs/technical/adr/adr-005-model-sparse-generated-challenges.md`
   - `docs/game-rules.md`
@@ -50,10 +52,11 @@ assessment policy, and validation expectations for one challenge. Absolute profi
 calibrated per challenge: Medium has shared product meaning, but `4 Pairs Medium` does not copy raw
 sixteen-entry counts from `8 Pairs Medium`.
 
-The supported v8 catalog is sparse:
+The implemented v8 catalog and planned v10 Quick addition form a sparse catalog:
 
 | Generated mode | Low | Medium | Hard |
 | --- | --- | --- | --- |
+| `Quick` (`3 Pairs`) | Planned in v10 | Unsupported | Unsupported |
 | `4 Pairs` | Supported | Supported | Unsupported |
 | `8 Pairs` | Unsupported | Supported | Supported |
 
@@ -123,7 +126,7 @@ Assessment returns typed assessed, unsatisfiable, cancelled, and work-limit outc
 puzzle and execution policy must produce the same metrics. Candidate expansions and cancellation
 checks are bounded independently from generation search.
 
-Every new v8 profile requires:
+Every new generated profile requires:
 
 - a completed assessment within its work policy
 - at least one valid solution equivalence class
@@ -167,6 +170,86 @@ profile, and seed metadata. Mode/profile identity resolves the exact challenge. 
 restoration reads that snapshot directly; it never regenerates historical content from the seed.
 
 Committed puzzle changes update the current snapshot through the stable session id, solved puzzles clear resumability, and stale callbacks cannot mutate a replacement. Generation, storage failure, or cancellation leaves the previous unfinished slot intact. See `docs/technical/generated-session-persistence.md` for the storage, ordering, validation, and backup contract.
+
+### Quick / `3 Pairs Low`
+
+Status: planned for v10.
+
+Player-facing identity:
+
+- generated mode name: `Quick`
+- stable generated size family: `3 Pairs`
+- supported difficulty: `Low`
+- difficulty selector: absent while Low is the only supported Quick challenge
+
+Shape:
+
+- 3 solution pairs
+- 6 strip entries
+- 6 board tiles
+
+Strip values:
+
+- range: `2..15`
+- uniqueness: values do not repeat
+- `1`: excluded
+
+Result constraints:
+
+- multiplication result limit: `100`
+- board result duplicates: not allowed
+
+Initial masking:
+
+- tile expressions: all hidden
+- known strip entries: 2
+- hidden strip entries: 4
+- required anchor: highest strip value is known
+- distribution: known entries should be spread across the strip and belong to different solution
+  pairs where possible
+- hidden run limit: no more than 2 consecutive hidden strip entries when possible
+
+Generation expectations:
+
+- deterministic generation support for tests: required
+- bounded attempts, shared search work, failure, and cancellation: required
+- board tile shuffling: enabled
+- no repeated-value, high-value-mask, or prime-product-decoy population target
+- deterministic corpus `1..500` must demonstrate reliable generation within the standard
+  `3 Pairs Low` execution envelope
+
+Assessment and characterization expectations:
+
+- assessment uses at most `10,000` candidate expansions and counts at most `10` valid solution
+  equivalence classes
+- at least 1 valid solution equivalence class must exist; uniqueness is not required
+- all 3 solution-pair facts must be derivable through opening constraint propagation without a
+  speculative commitment
+- characterization must record plausible-candidate, forced-deduction, solution-count, anchor, and
+  hidden-run metrics for corpus `1..500`
+- thresholds may be tightened only when the deterministic corpus provides evidence; Low does not
+  require decoys, branching, or an ambiguous opening
+
+Validation expectations:
+
+- the solved puzzle satisfies all `3 Pairs Low` value and result constraints
+- the initial puzzle follows the `3 Pairs Low` masking policy
+- the solved puzzle is accepted by shared NumPairs completion validation
+- assessment satisfies the documented Low acceptance policy
+
+Solving and learning implications:
+
+- excluding `1` keeps prime board results useful as addition-tile signals
+- the visible highest strip value provides one stable opening anchor
+- the smaller strip and board reduce simultaneous state without changing the rules
+- the existing Low solving principles remain applicable
+- Quick may be recommended after authored Tutorial, but generated Quick puzzles are not Tutorial
+  content
+
+These constraints target a brief first generated challenge without making Quick a one-step
+demonstration or a separate ruleset.
+
+---
 
 ### `4 Pairs Low`
 
@@ -441,6 +524,7 @@ consistency validation or their selected profile's assessment acceptance policy.
 - `docs/product/prd/prd-v5.md` owns v5 product scope.
 - `docs/product/prd/prd-v7.md` owns the reliable-session and replay-control product contract.
 - `docs/product/prd/prd-v8.md` owns the difficulty-selection and challenge-expansion product contract.
+- `docs/product/prd/prd-v10.md` owns the Quick and Daily Challenge product contract.
 - `docs/technical/generated-session-persistence.md` owns the implemented session storage and coordination boundary.
 - `docs/technical/adr/adr-005-model-sparse-generated-challenges.md` owns the durable sparse challenge-catalog decision.
 - `docs/ubiquitous-language.md` owns shared terminology.
