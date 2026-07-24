@@ -34,8 +34,7 @@ import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
-import org.cescfe.numpairs.feature.generated.selector.ui.GeneratedDifficultyOptionId
-import org.cescfe.numpairs.feature.generated.selector.ui.GeneratedDifficultySelectorTestTags
+import org.cescfe.numpairs.feature.menu.ui.GeneratedDifficultyMenuOptionId
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
@@ -50,14 +49,20 @@ class GeneratedDifficultySelectionNavigationTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun secondary_actions_route_to_independent_read_only_selector_defaults() {
+    fun menu_exposes_independent_read_only_difficulty_defaults() {
         val fixture = setContent()
 
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+            .assertTextEquals(challengeName(GeneratedModes.FOUR_PAIRS_LOW))
         composeTestRule.onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON).performClick()
         composeTestRule.onNodeWithTag(optionTag(GeneratedModes.FOUR_PAIRS_LOW)).assertIsSelected()
         composeTestRule.onNodeWithTag(optionTag(GeneratedModes.FOUR_PAIRS_MEDIUM)).assertIsNotSelected()
-        composeTestRule.onNodeWithTag(GeneratedDifficultySelectorTestTags.BACK_BUTTON).performClick()
+        composeTestRule.onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON).performClick()
 
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_BUTTON)
+            .assertTextEquals(challengeName(GeneratedModes.EIGHT_PAIRS_MEDIUM))
         composeTestRule.onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_BUTTON).performClick()
         composeTestRule.onNodeWithTag(optionTag(GeneratedModes.EIGHT_PAIRS_MEDIUM)).assertIsSelected()
         composeTestRule.onNodeWithTag(optionTag(GeneratedModes.EIGHT_PAIRS_HARD)).assertIsNotSelected()
@@ -84,8 +89,13 @@ class GeneratedDifficultySelectionNavigationTest {
         composeTestRule
             .onNodeWithTag(optionTag(GeneratedModes.FOUR_PAIRS_MEDIUM))
             .performClick()
-            .assertIsSelected()
-        composeTestRule.onNodeWithTag(GeneratedDifficultySelectorTestTags.PLAY_BUTTON).performClick()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+            .assertTextEquals(challengeName(GeneratedModes.FOUR_PAIRS_MEDIUM))
+        composeTestRule.runOnIdle {
+            assertTrue(fixture.generatedChallenges.isEmpty())
+        }
+        composeTestRule.onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON).performClick()
 
         composeTestRule.onNodeWithTag(GameScreenTestTags.SCREEN).assertIsDisplayed()
         composeTestRule.onNodeWithText(challengeName(GeneratedModes.FOUR_PAIRS_MEDIUM)).assertIsDisplayed()
@@ -118,8 +128,10 @@ class GeneratedDifficultySelectionNavigationTest {
         composeTestRule
             .onNodeWithTag(optionTag(GeneratedModes.EIGHT_PAIRS_HARD))
             .performClick()
-            .assertIsSelected()
-        composeTestRule.onNodeWithTag(GeneratedDifficultySelectorTestTags.PLAY_BUTTON).performClick()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_BUTTON)
+            .assertTextEquals(challengeName(GeneratedModes.EIGHT_PAIRS_HARD))
+            .performClick()
 
         composeTestRule.onNodeWithTag(GameScreenTestTags.SCREEN).assertIsDisplayed()
         composeTestRule.onNodeWithText(challengeName(GeneratedModes.EIGHT_PAIRS_HARD)).assertIsDisplayed()
@@ -230,8 +242,8 @@ class GeneratedDifficultySelectionNavigationTest {
         return fixture
     }
 
-    private fun optionTag(challenge: GeneratedChallenge): String = GeneratedDifficultySelectorTestTags.option(
-        GeneratedDifficultyOptionId(challenge.id.value)
+    private fun optionTag(challenge: GeneratedChallenge): String = MenuScreenTestTags.difficultyOption(
+        GeneratedDifficultyMenuOptionId(challenge.id.value)
     )
 
     private fun challengeName(challenge: GeneratedChallenge): String = string(

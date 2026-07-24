@@ -16,9 +16,6 @@ import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfiles
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
-import org.cescfe.numpairs.feature.generated.GeneratedModes
-import org.cescfe.numpairs.feature.generated.selector.ui.GeneratedDifficultyOptionId
-import org.cescfe.numpairs.feature.generated.selector.ui.GeneratedDifficultySelectorTestTags
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -161,16 +158,6 @@ class FourPairsModeTest {
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
             .assertIsDisplayed()
-            .performClick()
-        composeTestRule
-            .onNodeWithTag(
-                GeneratedDifficultySelectorTestTags.option(
-                    GeneratedDifficultyOptionId(GeneratedModes.FOUR_PAIRS_LOW.id.value)
-                )
-            )
-            .performClick()
-        composeTestRule
-            .onNodeWithTag(GeneratedDifficultySelectorTestTags.PLAY_BUTTON)
             .performClick()
 
         composeTestRule.waitUntil(timeoutMillis = PUZZLE_GENERATION_TIMEOUT_MS) {

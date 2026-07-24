@@ -8,19 +8,18 @@
     <string name="menu_resume_content_description">Resume %1$s puzzle</string>
     <string name="menu_tutorial_button">How to play</string>
     <string name="menu_personalization_button">Personalization</string>
-    <string name="menu_four_pairs_button">Play 4 pairs</string>
-    <string name="menu_eight_pairs_button">Play 8 pairs</string>
     <string name="menu_play_generated_challenge_content_description">Play %1$s puzzle</string>
     <string name="menu_choose_generated_difficulty_content_description">Choose difficulty for %1$s</string>
+    <string name="menu_close_generated_difficulty_content_description">Close difficulty selector for %1$s</string>
+    <string name="menu_generated_difficulty_options_content_description">Difficulty options for %1$s</string>
+    <string name="menu_generated_difficulty_collapsed">Collapsed</string>
+    <string name="menu_generated_difficulty_expanded">Expanded</string>
+    <string name="menu_generated_difficulty_selected">Selected</string>
     <string name="generated_session_choice_title">Unfinished puzzle</string>
     <string name="generated_session_choice_challenge_message">You have an unfinished %1$s puzzle.</string>
     <string name="generated_session_choice_new_challenge_button">New %1$s</string>
 
-    <!-- Difficulty selector -->
-    <string name="difficulty_selector_screen_title">Choose difficulty</string>
-    <string name="difficulty_selector_supporting_text">Choose the challenge you want to play. Every option is available.</string>
-    <string name="difficulty_selector_selected">Selected</string>
-    <string name="difficulty_selector_play_button">Play %1$s · %2$s</string>
+    <!-- Generated difficulty -->
     <string name="generated_difficulty_low">Low</string>
     <string name="generated_difficulty_medium">Medium</string>
     <string name="generated_difficulty_hard">Hard</string>

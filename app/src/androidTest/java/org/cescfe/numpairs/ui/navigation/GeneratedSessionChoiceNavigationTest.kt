@@ -3,7 +3,6 @@ package org.cescfe.numpairs.ui.navigation
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -35,8 +34,7 @@ import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
-import org.cescfe.numpairs.feature.generated.selector.ui.GeneratedDifficultyOptionId
-import org.cescfe.numpairs.feature.generated.selector.ui.GeneratedDifficultySelectorTestTags
+import org.cescfe.numpairs.feature.menu.ui.GeneratedDifficultyMenuOptionId
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
@@ -127,13 +125,12 @@ class GeneratedSessionChoiceNavigationTest {
         composeTestRule.onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON).performClick()
         composeTestRule
             .onNodeWithTag(
-                GeneratedDifficultySelectorTestTags.option(
-                    GeneratedDifficultyOptionId(GeneratedModes.FOUR_PAIRS_MEDIUM.id.value)
+                MenuScreenTestTags.difficultyOption(
+                    GeneratedDifficultyMenuOptionId(GeneratedModes.FOUR_PAIRS_MEDIUM.id.value)
                 )
             )
             .performClick()
-            .assertIsSelected()
-        composeTestRule.onNodeWithTag(GeneratedDifficultySelectorTestTags.PLAY_BUTTON).performClick()
+        composeTestRule.onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON).performClick()
 
         assertChoiceDialogVisible()
         composeTestRule
