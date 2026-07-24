@@ -7,7 +7,7 @@
     <string name="menu_resume_button">Continuar</string>
     <string name="menu_resume_content_description">Continuar puzle de %1$s</string>
     <string name="menu_tutorial_button">Cómo jugar</string>
-    <string name="menu_personalization_button">Personalización</string>
+    <string name="menu_settings_action_content_description">Ajustes</string>
     <string name="menu_play_generated_challenge_content_description">Jugar puzle de %1$s</string>
     <string name="menu_choose_generated_difficulty_content_description">Elegir dificultad para %1$s</string>
     <string name="menu_close_generated_difficulty_content_description">Cerrar selector de dificultad para %1$s</string>

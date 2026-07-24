@@ -24,7 +24,7 @@ class LocalizationResourceTest {
             resources.getString(R.string.menu_close_generated_difficulty_content_description, "8 pares")
         )
         assertEquals("Cómo jugar", resources.getString(R.string.menu_tutorial_button))
-        assertEquals("Personalización", resources.getString(R.string.menu_personalization_button))
+        assertEquals("Ajustes", resources.getString(R.string.menu_settings_action_content_description))
         assertEquals("8 pares", resources.getString(R.string.eight_pairs_screen_title))
         assertEquals("Alta", resources.getString(R.string.generated_difficulty_hard))
         assertEquals(
@@ -91,7 +91,7 @@ class LocalizationResourceTest {
             resources.getString(R.string.menu_close_generated_difficulty_content_description, "8 parelles")
         )
         assertEquals("Com jugar", resources.getString(R.string.menu_tutorial_button))
-        assertEquals("Personalització", resources.getString(R.string.menu_personalization_button))
+        assertEquals("Configuració", resources.getString(R.string.menu_settings_action_content_description))
         assertEquals("8 parelles", resources.getString(R.string.eight_pairs_screen_title))
         assertEquals("Alta", resources.getString(R.string.generated_difficulty_hard))
         assertEquals(
@@ -158,7 +158,7 @@ class LocalizationResourceTest {
             resources.getString(R.string.menu_close_generated_difficulty_content_description, "8 pairs")
         )
         assertEquals("How to play", resources.getString(R.string.menu_tutorial_button))
-        assertEquals("Personalization", resources.getString(R.string.menu_personalization_button))
+        assertEquals("Settings", resources.getString(R.string.menu_settings_action_content_description))
         assertEquals("8 pairs", resources.getString(R.string.eight_pairs_screen_title))
         assertEquals("Hard", resources.getString(R.string.generated_difficulty_hard))
         assertEquals(

@@ -68,14 +68,14 @@ The unlocked normal menu renders actions in this order:
 2. the unified `4 Pairs · <difficulty>` split primary CTA
 3. the unified `8 Pairs · <difficulty>` split primary CTA
 4. `How to play`
-5. `Personalization`
 
 `Resume` and both generated-mode split actions use the full-width primary CTA treatment. Each
 generated-mode CTA contains an expanding play region and a trailing difficulty region with no
-visual gap. A themed vertical divider distinguishes the two touch actions. `How to play` and
-`Personalization` use the lower-emphasis secondary treatment. The localized `Resume`
-accessibility description identifies the saved mode and difficulty, for example
-`Resume 4 Pairs · Medium puzzle`.
+visual gap. A themed vertical divider distinguishes the two touch actions. `How to play` uses the
+lower-emphasis secondary treatment. A themed settings icon action in the top-right corner of the
+Menu TopAppBar opens Personalization and exposes a localized accessibility description. The
+localized `Resume` accessibility description identifies the saved mode and difficulty, for
+example `Resume 4 Pairs · Medium puzzle`.
 
 The application derives menu resumability from the one global generated-session slot. Missing, solved, unknown-mode, mode/profile-mismatched, corrupt, and unsupported snapshots do not expose `Resume`.
 
@@ -161,8 +161,8 @@ preserving the generated puzzle underneath.
 
 ## Personalization
 
-Selecting `Personalization` opens an unlocked-menu destination without changing the current
-navigation, onboarding, or generated-session state.
+Selecting the settings action in the unlocked Menu TopAppBar opens Personalization without
+changing the current navigation, onboarding, or generated-session state.
 
 The screen presents exactly five color themes:
 

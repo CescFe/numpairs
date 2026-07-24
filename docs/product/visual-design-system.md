@@ -427,7 +427,7 @@ Expectations:
 - show `NumPairs` clearly
 - make generated modes prominent replayable actions
 - present Tutorial as a guided learning option
-- expose Personalization as a lower-emphasis unlocked-menu action
+- expose Personalization through a lower-emphasis settings icon in the Menu TopAppBar
 - make Tutorial, Personalization, and generated-mode entries feel like proper product actions
 - avoid a marketing landing-page layout
 - keep actions large enough for touch

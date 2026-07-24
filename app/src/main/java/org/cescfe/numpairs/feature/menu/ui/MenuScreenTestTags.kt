@@ -4,7 +4,7 @@ object MenuScreenTestTags {
     const val SCREEN = "menu_screen"
     const val RESUME_BUTTON = "menu_resume_button"
     const val TUTORIAL_BUTTON = "menu_tutorial_button"
-    const val PERSONALIZATION_BUTTON = "menu_personalization_button"
+    const val SETTINGS_ACTION = "menu_settings_action"
     const val FOUR_PAIRS_SPLIT_CTA = "menu_four_pairs_split_cta"
     const val EIGHT_PAIRS_SPLIT_CTA = "menu_eight_pairs_split_cta"
     const val FOUR_PAIRS_BUTTON = "menu_four_pairs_button"

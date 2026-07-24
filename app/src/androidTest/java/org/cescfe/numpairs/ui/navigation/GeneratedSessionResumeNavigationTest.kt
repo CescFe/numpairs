@@ -86,15 +86,15 @@ class GeneratedSessionResumeNavigationTest {
             .fetchSemanticsNode()
             .boundsInRoot
             .top
-        val personalizationTop = composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.PERSONALIZATION_BUTTON)
+        val settingsTop = composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.SETTINGS_ACTION)
             .fetchSemanticsNode()
             .boundsInRoot
             .top
+        assertTrue(settingsTop < resumeTop)
         assertTrue(resumeTop < fourPairsTop)
         assertTrue(fourPairsTop < eightPairsTop)
         assertTrue(eightPairsTop < tutorialTop)
-        assertTrue(tutorialTop < personalizationTop)
 
         resumeNode.performClick()
 

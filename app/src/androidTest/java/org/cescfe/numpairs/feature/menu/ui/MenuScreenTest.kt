@@ -54,6 +54,31 @@ class MenuScreenTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
+    fun settings_action_replaces_personalization_button_and_emits_action() {
+        var settingsClickCount = 0
+        setContent(
+            onPersonalizationSelected = {
+                settingsClickCount += 1
+            }
+        )
+
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.SETTINGS_ACTION)
+            .assertIsDisplayed()
+            .assertHasClickAction()
+            .assertContentDescriptionEquals(
+                string(R.string.menu_settings_action_content_description)
+            )
+            .performClick()
+        composeTestRule
+            .onNodeWithText(string(R.string.personalization_screen_title))
+            .assertDoesNotExist()
+        composeTestRule.runOnIdle {
+            assertEquals(1, settingsClickCount)
+        }
+    }
+
+    @Test
     fun generated_mode_rows_identify_the_selected_challenge_and_emit_distinct_actions() {
         var playCount = 0
         var selectedDifficulty: GeneratedDifficultyMenuOptionId? = null
@@ -359,6 +384,7 @@ class MenuScreenTest {
         height: Dp? = null,
         fontScale: Float = 1f,
         layoutDirection: LayoutDirection = LayoutDirection.Ltr,
+        onPersonalizationSelected: () -> Unit = {},
         onFourPairsSelected: () -> Unit = {},
         onFourPairsDifficultySelected: (GeneratedDifficultyMenuOptionId) -> Unit = {}
     ) {
@@ -375,12 +401,14 @@ class MenuScreenTest {
                     if (width != null && height != null) {
                         Box(modifier = Modifier.size(width = width, height = height)) {
                             MenuContent(
+                                onPersonalizationSelected = onPersonalizationSelected,
                                 onFourPairsSelected = onFourPairsSelected,
                                 onFourPairsDifficultySelected = onFourPairsDifficultySelected
                             )
                         }
                     } else {
                         MenuContent(
+                            onPersonalizationSelected = onPersonalizationSelected,
                             onFourPairsSelected = onFourPairsSelected,
                             onFourPairsDifficultySelected = onFourPairsDifficultySelected
                         )
@@ -392,12 +420,14 @@ class MenuScreenTest {
 
     @Composable
     private fun MenuContent(
+        onPersonalizationSelected: () -> Unit,
         onFourPairsSelected: () -> Unit,
         onFourPairsDifficultySelected: (GeneratedDifficultyMenuOptionId) -> Unit
     ) {
         MenuScreen(
             fourPairsMode = fourPairsState,
             eightPairsMode = eightPairsState,
+            onPersonalizationSelected = onPersonalizationSelected,
             onFourPairsSelected = onFourPairsSelected,
             onFourPairsDifficultySelected = onFourPairsDifficultySelected
         )

@@ -77,7 +77,7 @@ class PersonalizationNavigationTest {
         }
 
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.PERSONALIZATION_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.SETTINGS_ACTION)
             .assertIsDisplayed()
             .performClick()
         composeTestRule

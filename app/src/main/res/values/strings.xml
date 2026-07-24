@@ -7,7 +7,7 @@
     <string name="menu_resume_button">Resume</string>
     <string name="menu_resume_content_description">Resume %1$s puzzle</string>
     <string name="menu_tutorial_button">How to play</string>
-    <string name="menu_personalization_button">Personalization</string>
+    <string name="menu_settings_action_content_description">Settings</string>
     <string name="menu_play_generated_challenge_content_description">Play %1$s puzzle</string>
     <string name="menu_choose_generated_difficulty_content_description">Choose difficulty for %1$s</string>
     <string name="menu_close_generated_difficulty_content_description">Close difficulty selector for %1$s</string>
