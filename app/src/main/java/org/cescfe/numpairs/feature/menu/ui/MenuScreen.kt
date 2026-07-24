@@ -21,6 +21,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -78,7 +79,7 @@ fun MenuScreen(
             .fillMaxSize()
             .testTag(MenuScreenTestTags.SCREEN),
         topBar = {
-            MenuScreenTopBar()
+            MenuScreenTopBar(onSettingsSelected = onPersonalizationSelected)
         }
     ) { innerPadding ->
         Box(
@@ -166,18 +167,6 @@ fun MenuScreen(
                         border = NumPairsComponents.secondaryButtonBorder()
                     ) {
                         MenuButtonText(text = stringResource(R.string.menu_tutorial_button))
-                    }
-                    Button(
-                        onClick = onPersonalizationSelected,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(NumPairsComponents.ButtonHeight)
-                            .testTag(MenuScreenTestTags.PERSONALIZATION_BUTTON),
-                        shape = NumPairsComponents.MediumShape,
-                        colors = NumPairsComponents.secondaryButtonColors(),
-                        border = NumPairsComponents.secondaryButtonBorder()
-                    ) {
-                        MenuButtonText(text = stringResource(R.string.menu_personalization_button))
                     }
                 }
             }
@@ -342,7 +331,7 @@ private fun GeneratedDifficultyMenu(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun MenuScreenTopBar() {
+private fun MenuScreenTopBar(onSettingsSelected: () -> Unit) {
     CenterAlignedTopAppBar(
         title = {
             Row(
@@ -353,6 +342,21 @@ private fun MenuScreenTopBar() {
                 Text(
                     text = stringResource(R.string.app_name),
                     color = MaterialTheme.colorScheme.primary
+                )
+            }
+        },
+        actions = {
+            IconButton(
+                onClick = onSettingsSelected,
+                modifier = Modifier.testTag(MenuScreenTestTags.SETTINGS_ACTION),
+                colors = NumPairsComponents.iconButtonColors()
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_settings),
+                    contentDescription = stringResource(
+                        R.string.menu_settings_action_content_description
+                    ),
+                    modifier = Modifier.size(MENU_TOP_BAR_ACTION_ICON_SIZE)
                 )
             }
         }
@@ -434,6 +438,7 @@ private enum class ExpandedDifficultyMenu {
 
 private val MENU_CONTENT_MAX_WIDTH = 360.dp
 private val MENU_BRAND_MARK_SIZE = 32.dp
+private val MENU_TOP_BAR_ACTION_ICON_SIZE = 24.dp
 private val MENU_BUTTON_TEXT_SIZE = 22.sp
 private val MENU_BUTTON_TEXT_LINE_HEIGHT = 36.sp
 private val MENU_GENERATED_MODE_BUTTON_HORIZONTAL_PADDING = 12.dp
