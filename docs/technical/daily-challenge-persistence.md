@@ -2,8 +2,8 @@
 
 ## Document Status
 
-- Status: Daily identity, recipe resolution, deterministic seed schedule, and device-local date
-  boundary implemented; session persistence and completion history planned
+- Status: Daily identity, recipe resolution, deterministic generation fallback, and device-local
+  date boundary implemented; session persistence and completion history planned
 - Product contract: `docs/product/prd/prd-v10.md`
 - Architecture decision:
   `docs/technical/adr/adr-006-model-daily-challenge-as-versioned-local-cadence.md`
@@ -60,7 +60,8 @@ history.
 The platform-independent identity types, v10 recipe catalog, exact `4 Pairs Low` binding,
 four-candidate FNV-1a seed schedule, and injectable device-local date boundary are implemented.
 Current identity resolution captures one `LocalDate` before generation begins. Candidate
-generation remains outside this implemented boundary.
+generation attempts the recipe seeds in order, preserves typed failure and cancellation, and
+returns the first exact validated initial puzzle.
 
 ---
 

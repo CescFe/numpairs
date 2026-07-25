@@ -9,7 +9,8 @@
 - Implemented v10 generated presentation: Quick uses the shared Low learning route
 - Implemented v10 Menu exposure: direct Quick entry through the normal generated-session flow
 - Implemented v10 Daily foundation: versioned identity, `4 Pairs Low` recipe resolution,
-  deterministic four-candidate seed schedule, and device-local date capture
+  deterministic four-candidate seed schedule, device-local date capture, and ordered candidate
+  execution
 - v8 generated challenge matrix: implemented
 - Related references:
   - `docs/product/prd/prd-v5.md`
@@ -182,9 +183,9 @@ Committed puzzle changes update the current snapshot through the stable session 
 The v10 Daily Challenge reuses the existing generated-puzzle pipeline without making the generator
 aware of dates, calendars, completion history, Android clocks, or presentation state.
 
-Status: identity, immutable v10 recipe resolution, the FNV-1a candidate seed schedule, and
-device-local current-identity resolution are implemented. Candidate execution, persistence,
-gameplay, and presentation remain planned.
+Status: identity, immutable v10 recipe resolution, the FNV-1a candidate seed schedule,
+device-local current-identity resolution, and ordered candidate execution are implemented.
+Persistence, gameplay, and presentation remain planned.
 
 One immutable Daily Recipe version:
 
@@ -203,6 +204,10 @@ challenge.
 The recipe payload format, algorithm, challenge, candidate order, and limit are compatibility
 behavior and cannot change under the same recipe version. A deterministic future-date corpus must
 protect both the seed schedule and successful bounded generation before release.
+
+The implemented calendar-year 2027 corpus covers all 365 local dates. Every date generated and
+validated through candidate index `0`; indexes `1..3` were never required, and no date exhausted
+the four-candidate limit.
 
 The date is captured by an injected device-local date source outside the platform-independent
 generator. A local-date change never changes an already constructed generation request.

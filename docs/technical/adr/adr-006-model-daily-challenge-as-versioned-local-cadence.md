@@ -87,6 +87,10 @@ The generator remains unaware of dates and Daily semantics. It receives ordinary
 generated-puzzle requests. Daily coordination never falls back to device randomness, current
 time-of-day entropy, or a different profile.
 
+Ordered candidate execution is implemented over the existing configured generation use case.
+Non-cancellation failures remain ordered and typed, exhaustion is explicit, and cancellation is
+terminal.
+
 ### Local-Date Boundary
 
 Application composition supplies the current device-local date through an explicit clock
