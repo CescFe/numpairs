@@ -4,12 +4,53 @@ import org.cescfe.numpairs.domain.generated.assessment.GeneratedPuzzleDifficulty
 import org.cescfe.numpairs.domain.generated.assessment.GeneratedPuzzleDifficultyAssessmentPolicy
 
 object GeneratedPuzzleProfiles {
+    val THREE_PAIRS_LOW: GeneratedPuzzleProfile = threePairsLow()
     val FOUR_PAIRS_LOW: GeneratedPuzzleProfile = fourPairsLow()
     val FOUR_PAIRS_MEDIUM: GeneratedPuzzleProfile = fourPairsMedium()
     val EIGHT_PAIRS_MEDIUM: GeneratedPuzzleProfile = eightPairsMedium()
     val EIGHT_PAIRS_HARD: GeneratedPuzzleProfile = eightPairsHard()
     val ALL: List<GeneratedPuzzleProfile> =
-        listOf(FOUR_PAIRS_LOW, FOUR_PAIRS_MEDIUM, EIGHT_PAIRS_MEDIUM, EIGHT_PAIRS_HARD)
+        listOf(THREE_PAIRS_LOW, FOUR_PAIRS_LOW, FOUR_PAIRS_MEDIUM, EIGHT_PAIRS_MEDIUM, EIGHT_PAIRS_HARD)
+
+    private fun threePairsLow(): GeneratedPuzzleProfile {
+        val size = GeneratedPuzzleSize(pairCount = 3)
+
+        return GeneratedPuzzleProfile.create(
+            definition = GeneratedPuzzleProfileDefinition(
+                id = GeneratedPuzzleProfileId("3-pairs-low"),
+                difficulty = DifficultyTier.LOW,
+                size = size,
+                stripValuePolicy = StripValuePolicy(
+                    valueRange = 2..15,
+                    maxOccurrencesPerValue = 1
+                ),
+                resultConstraints = ResultConstraints(
+                    maxMultiplicationResult = 100,
+                    allowsDuplicateBoardResults = false
+                ),
+                initialStripMaskPolicy = InitialStripMaskPolicy(
+                    knownEntryCountRange = 2..2,
+                    requiredAnchors = setOf(RequiredKnownStripAnchor.HIGHEST_STRIP_ENTRY),
+                    distributionPolicy = StripKnownEntryDistributionPolicy.SpreadAcrossStripAndPairsWhenPossible,
+                    maxConsecutiveHiddenEntries = 2
+                ),
+                generationPolicy = GenerationPolicy(
+                    isBoardTileShufflingEnabled = true
+                ),
+                difficultyAssessmentPolicy = GeneratedPuzzleDifficultyAssessmentPolicy(
+                    executionPolicy = GeneratedPuzzleDifficultyAssessmentExecutionPolicy(
+                        maxCandidateExpansions = 10_000,
+                        validSolutionCountLimit = 10
+                    ),
+                    minimumInitialPlausibleCandidateCount = 3,
+                    minimumInitialForcedDeductionCount = 3,
+                    minimumFirstForcedDeductionDepth = 1,
+                    minimumPlausibleDecoyCount = 0,
+                    minimumValidSolutionCount = 1
+                )
+            )
+        ).getOrThrow()
+    }
 
     private fun fourPairsLow(): GeneratedPuzzleProfile {
         val size = GeneratedPuzzleSize(pairCount = 4)

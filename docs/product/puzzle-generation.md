@@ -3,9 +3,9 @@
 ## Document Status
 
 - Status: product reference for generated puzzle construction
-- Implemented profiles: generated `4 Pairs Low`, `4 Pairs Medium`, `8 Pairs Medium`, and
-  `8 Pairs Hard`
-- Planned v10 profile: generated `3 Pairs Low`, presented as Quick
+- Implemented profiles: generated `3 Pairs Low`, `4 Pairs Low`, `4 Pairs Medium`,
+  `8 Pairs Medium`, and `8 Pairs Hard`
+- Planned v10 mode registration: present generated `3 Pairs Low` to players as Quick
 - v8 generated challenge matrix: implemented
 - Related references:
   - `docs/product/prd/prd-v5.md`
@@ -58,7 +58,7 @@ The implemented v8 catalog and planned v10 Quick addition form a sparse catalog:
 
 | Generated mode | Low | Medium | Hard |
 | --- | --- | --- | --- |
-| `Quick` (`3 Pairs`) | Planned in v10 | Unsupported | Unsupported |
+| `Quick` (`3 Pairs`) | Profile implemented; mode registration planned | Unsupported | Unsupported |
 | `4 Pairs` | Supported | Supported | Unsupported |
 | `8 Pairs` | Unsupported | Supported | Supported |
 
@@ -207,7 +207,7 @@ session slot.
 
 ### Quick / `3 Pairs Low`
 
-Status: planned for v10.
+Status: generated profile implemented; Quick mode registration planned for v10.
 
 Player-facing identity:
 
@@ -261,6 +261,14 @@ Assessment and characterization expectations:
   speculative commitment
 - characterization must record plausible-candidate, forced-deduction, solution-count, anchor, and
   hidden-run metrics for corpus `1..500`
+- the implemented corpus completes in 1 to 6 attempts and consumes 8 to 80 generation-search
+  units per puzzle
+- assessment consumes 108 candidate expansions per puzzle, reports 3 to 5 opening plausible
+  candidates, and derives all 3 solution-pair facts at the opening
+- the bounded valid-solution count is 1 throughout the corpus without reaching the configured
+  count limit
+- the required known-strip anchor count is 1, unambiguous result anchors range from 2 to 6, and
+  the longest hidden run is 2 throughout the corpus
 - thresholds may be tightened only when the deterministic corpus provides evidence; Low does not
   require decoys, branching, or an ambiguous opening
 
