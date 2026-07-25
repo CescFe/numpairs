@@ -76,6 +76,26 @@
     <string name="daily_share_completed_status">Completado</string>
     <string name="daily_share_chooser_title">Compartir resultado Daily</string>
 
+    <!-- Juego y finalización Daily -->
+    <string name="daily_game_name">Daily</string>
+    <string name="daily_loading_message">Preparando el reto Daily de hoy…</string>
+    <string name="daily_generation_failure_message">No se ha podido crear el reto Daily de hoy. Reinténtalo con el mismo reto.</string>
+    <string name="daily_generation_cancelled_message">La preparación de Daily se ha interrumpido. Reinténtalo para continuar con el mismo reto.</string>
+    <string name="daily_invalid_puzzle_message">El reto Daily de hoy no está disponible porque su puzle no era válido.</string>
+    <string name="daily_storage_failure_message">No se ha podido guardar el progreso Daily. Reinténtalo antes de continuar.</string>
+    <string name="daily_stale_session_message">Esta sesión Daily ya no es la actual. Vuelve al menú o reintenta el guardado seguro.</string>
+    <string name="daily_invalid_progress_message">No se ha podido guardar este progreso Daily porque ya no coincide con el puzle original.</string>
+    <string name="daily_progress_failure_title">Progreso Daily sin guardar</string>
+    <string name="daily_retry_action">Reintentar</string>
+    <string name="daily_completion_screen_title">Daily completado</string>
+    <string name="daily_completion_message">¡Daily completado!</string>
+    <string name="daily_completion_supporting_text">Has completado el reto de hoy.</string>
+    <string name="daily_completion_challenge_name">4 pares · Baja</string>
+    <string name="daily_share_result_action">Compartir resultado</string>
+    <string name="daily_view_calendar_action">Ver calendario</string>
+    <string name="daily_back_to_menu_action">Volver al menú</string>
+    <string name="daily_completion_unavailable_message">Esta finalización Daily ya no está disponible.</string>
+
     <!-- Tutorial screen -->
     <string name="tutorial_screen_title">Tutorial</string>
     <string name="tutorial_step_indicator">Paso %1$d de %2$d</string>

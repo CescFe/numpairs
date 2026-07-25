@@ -76,6 +76,26 @@
     <string name="daily_share_completed_status">Completat</string>
     <string name="daily_share_chooser_title">Compartix el resultat Daily</string>
 
+    <!-- Joc i finalització Daily -->
+    <string name="daily_game_name">Daily</string>
+    <string name="daily_loading_message">Preparant el repte Daily de hui…</string>
+    <string name="daily_generation_failure_message">No s’ha pogut crear el repte Daily de hui. Torna-ho a provar amb el mateix repte.</string>
+    <string name="daily_generation_cancelled_message">La preparació de Daily s’ha interromput. Torna-ho a provar per a continuar amb el mateix repte.</string>
+    <string name="daily_invalid_puzzle_message">El repte Daily de hui no està disponible perquè el puzle no era vàlid.</string>
+    <string name="daily_storage_failure_message">No s’ha pogut guardar el progrés Daily. Torna-ho a provar abans de continuar.</string>
+    <string name="daily_stale_session_message">Esta sessió Daily ja no és l’actual. Torna al menú o reintenta el guardat segur.</string>
+    <string name="daily_invalid_progress_message">No s’ha pogut guardar este progrés Daily perquè ja no coincidix amb el puzle original.</string>
+    <string name="daily_progress_failure_title">Progrés Daily sense guardar</string>
+    <string name="daily_retry_action">Torna-ho a provar</string>
+    <string name="daily_completion_screen_title">Daily completat</string>
+    <string name="daily_completion_message">Daily completat!</string>
+    <string name="daily_completion_supporting_text">Has completat el repte de hui.</string>
+    <string name="daily_completion_challenge_name">4 parelles · Baixa</string>
+    <string name="daily_share_result_action">Compartix el resultat</string>
+    <string name="daily_view_calendar_action">Mostra el calendari</string>
+    <string name="daily_back_to_menu_action">Torna al menú</string>
+    <string name="daily_completion_unavailable_message">Esta finalització Daily ja no està disponible.</string>
+
     <!-- Tutorial screen -->
     <string name="tutorial_screen_title">Tutorial</string>
     <string name="tutorial_step_indicator">Pas %1$d de %2$d</string>

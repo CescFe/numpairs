@@ -301,6 +301,10 @@ additional completion action.
 
 ## Daily Gameplay, Completion, And Rollover
 
+Status: application composition, gameplay, recoverable failure, immediate completion,
+completed-today summary, calendar return routing, and sharing integration implemented; the
+state-aware Menu entry remains planned.
+
 Daily gameplay reuses the generated Game screen and the `4 Pairs Low` challenge selected by its
 recipe. It does not expose a Daily difficulty selector or consult the remembered normal `4 Pairs`
 difficulty.
@@ -345,8 +349,8 @@ returns to the normal menu.
 
 ### Daily Calendar
 
-Status: monthly calendar model and read-only Compose surface implemented; application navigation
-integration planned.
+Status: monthly calendar model, read-only Compose surface, application destination, and
+completion-surface return routing implemented; the trailing Menu action remains planned.
 
 The Daily calendar is a dedicated local-history destination with:
 
@@ -394,7 +398,7 @@ process recreation does not require restoring the displayed month or caller.
 ### Daily Textual Sharing
 
 Status: non-spoiling localized text formatting and the Android Sharesheet boundary implemented;
-Daily completion-surface integration planned.
+integrated with valid immediate and reopened Daily completion surfaces.
 
 `Share result` opens the Android Sharesheet with localized `text/plain` content containing:
 

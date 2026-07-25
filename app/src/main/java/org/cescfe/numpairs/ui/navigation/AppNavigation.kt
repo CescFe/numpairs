@@ -14,6 +14,11 @@ import org.cescfe.numpairs.data.onboarding.OnboardingRepository
 import org.cescfe.numpairs.data.onboarding.OnboardingState
 import org.cescfe.numpairs.data.preferences.PersonalizationPreferencesRepository
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryRepository
+import org.cescfe.numpairs.domain.daily.DailyChallengeId
+import org.cescfe.numpairs.feature.daily.DailyChallengeRoute
+import org.cescfe.numpairs.feature.daily.DailyCompletedTodayRoute
+import org.cescfe.numpairs.feature.daily.DailyFeatureDependencies
+import org.cescfe.numpairs.feature.daily.calendar.DailyCalendarRoute
 import org.cescfe.numpairs.feature.generated.GeneratedChallenge
 import org.cescfe.numpairs.feature.generated.GeneratedChallengeCatalog
 import org.cescfe.numpairs.feature.generated.GeneratedChallengeId
@@ -35,6 +40,9 @@ sealed interface AppDestination {
     data object Menu : AppDestination
     data object Tutorial : AppDestination
     data object Personalization : AppDestination
+    data class DailyChallenge(val identity: DailyChallengeId) : AppDestination
+    data class DailyCompletedToday(val identity: DailyChallengeId) : AppDestination
+    data object DailyCalendar : AppDestination
     data class GeneratedChallenge(
         val challengeId: GeneratedChallengeId,
         val launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.newPuzzle()
@@ -50,6 +58,7 @@ fun AppNavigation(
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     generatedChallengeCatalog: GeneratedChallengeCatalog,
     generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory,
+    dailyFeatureDependencies: DailyFeatureDependencies? = null,
     modifier: Modifier = Modifier,
     startDestination: AppDestination = AppDestination.Menu
 ) {
@@ -68,6 +77,7 @@ fun AppNavigation(
             topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
             generatedChallengeCatalog = generatedChallengeCatalog,
             generatedPuzzleGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory,
+            dailyFeatureDependencies = dailyFeatureDependencies,
             modifier = modifier,
             startDestination = startDestination
         )
@@ -84,6 +94,7 @@ internal fun ReadyAppNavigation(
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     generatedChallengeCatalog: GeneratedChallengeCatalog,
     generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory,
+    dailyFeatureDependencies: DailyFeatureDependencies? = null,
     modifier: Modifier = Modifier,
     startDestination: AppDestination = AppDestination.Menu
 ) {
@@ -101,6 +112,7 @@ internal fun ReadyAppNavigation(
             topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
             generatedChallengeCatalog = generatedChallengeCatalog,
             generatedPuzzleGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory,
+            dailyFeatureDependencies = dailyFeatureDependencies,
             modifier = modifier,
             startDestination = startDestination
         )
@@ -115,6 +127,7 @@ private fun UnlockedAppNavigation(
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     generatedChallengeCatalog: GeneratedChallengeCatalog,
     generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory,
+    dailyFeatureDependencies: DailyFeatureDependencies?,
     modifier: Modifier,
     startDestination: AppDestination
 ) {
@@ -188,6 +201,45 @@ private fun UnlockedAppNavigation(
             onNavigateBack = navigateToMenu,
             modifier = modifier
         )
+        is AppDestination.DailyChallenge -> {
+            val dependencies = requireNotNull(dailyFeatureDependencies) {
+                "Daily feature dependencies are required for Daily gameplay."
+            }
+            DailyChallengeRoute(
+                identity = destination.identity,
+                dailySessionRepository = dependencies.dailySessionRepository,
+                deviceLocalDateSource = dependencies.deviceLocalDateSource,
+                generatedPuzzleGenerationUseCaseFactory =
+                dependencies.generatedPuzzleGenerationUseCaseFactory,
+                isGeneratedGameHapticsEnabled =
+                personalizationPreferences?.generatedGameHapticsEnabled == true,
+                onNavigateBack = navigateToMenu,
+                modifier = modifier
+            )
+        }
+        is AppDestination.DailyCompletedToday -> {
+            val dependencies = requireNotNull(dailyFeatureDependencies) {
+                "Daily feature dependencies are required for Daily completion."
+            }
+            DailyCompletedTodayRoute(
+                identity = destination.identity,
+                dailySessionRepository = dependencies.dailySessionRepository,
+                deviceLocalDateSource = dependencies.deviceLocalDateSource,
+                onNavigateBack = navigateToMenu,
+                modifier = modifier
+            )
+        }
+        AppDestination.DailyCalendar -> {
+            val dependencies = requireNotNull(dailyFeatureDependencies) {
+                "Daily feature dependencies are required for the Daily calendar."
+            }
+            DailyCalendarRoute(
+                dailySessionRepository = dependencies.dailySessionRepository,
+                deviceLocalDateSource = dependencies.deviceLocalDateSource,
+                onNavigateBack = navigateToMenu,
+                modifier = modifier
+            )
+        }
         is AppDestination.GeneratedChallenge -> {
             val challenge = generatedChallengeCatalog.resolveChallenge(id = destination.challengeId)
             val mode = generatedChallengeCatalog.modeFor(challenge)

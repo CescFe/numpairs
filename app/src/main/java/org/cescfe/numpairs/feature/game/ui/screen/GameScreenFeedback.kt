@@ -16,12 +16,15 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -98,7 +101,12 @@ internal fun SuccessOverlay(
         )
     }
 
-    BackHandler(onBack = content?.onPrimaryAction ?: completionActions?.onReturnToMenuRequested ?: onDismiss)
+    BackHandler(
+        onBack = content?.onBackRequested
+            ?: content?.onPrimaryAction
+            ?: completionActions?.onReturnToMenuRequested
+            ?: onDismiss
+    )
 
     Box(
         modifier = dismissibleOverlayModifier,
@@ -124,6 +132,7 @@ internal fun SuccessOverlay(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
                     .padding(
                         horizontal = SUCCESS_OVERLAY_HORIZONTAL_PADDING,
                         vertical = SUCCESS_OVERLAY_VERTICAL_PADDING
@@ -170,6 +179,29 @@ internal fun SuccessOverlay(
                             .testTag(GameScreenTestTags.SUCCESS_OVERLAY_PRIMARY_ACTION)
                     ) {
                         Text(text = content.primaryActionLabel)
+                    }
+                    content.secondaryActionLabel?.let { label ->
+                        OutlinedButton(
+                            onClick = requireNotNull(content.onSecondaryAction),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag(GameScreenTestTags.SUCCESS_OVERLAY_SECONDARY_ACTION),
+                            shape = NumPairsComponents.MediumShape,
+                            colors = NumPairsComponents.secondaryButtonColors(),
+                            border = NumPairsComponents.secondaryButtonBorder()
+                        ) {
+                            Text(text = label)
+                        }
+                    }
+                    content.tertiaryActionLabel?.let { label ->
+                        TextButton(
+                            onClick = requireNotNull(content.onTertiaryAction),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag(GameScreenTestTags.SUCCESS_OVERLAY_TERTIARY_ACTION)
+                        ) {
+                            Text(text = label)
+                        }
                     }
                 } else {
                     completionActions?.let { actions ->

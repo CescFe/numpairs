@@ -29,6 +29,8 @@ fun GameRoute(
     title: String,
     initialPuzzle: Puzzle,
     modifier: Modifier = Modifier,
+    titleContentDescription: String? = null,
+    isNavigationIconVisible: Boolean = true,
     gameSessionKey: String = defaultGameSessionKey(title = title, initialPuzzle = initialPuzzle),
     puzzleResetKey: Any = initialPuzzle,
     completionActions: GameCompletionActions? = null,
@@ -116,6 +118,8 @@ fun GameRoute(
 
     GameScreen(
         title = title,
+        titleContentDescription = titleContentDescription,
+        isNavigationIconVisible = isNavigationIconVisible,
         uiState = uiState,
         modifier = modifier,
         onNavigateBack = onNavigateBack,

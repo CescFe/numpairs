@@ -76,6 +76,26 @@
     <string name="daily_share_completed_status">Completed</string>
     <string name="daily_share_chooser_title">Share Daily result</string>
 
+    <!-- Daily gameplay and completion -->
+    <string name="daily_game_name">Daily</string>
+    <string name="daily_loading_message">Preparing today’s Daily challenge…</string>
+    <string name="daily_generation_failure_message">Today’s Daily challenge could not be created. Try again with the same challenge.</string>
+    <string name="daily_generation_cancelled_message">Daily preparation was interrupted. Try again to continue with the same challenge.</string>
+    <string name="daily_invalid_puzzle_message">Today’s Daily challenge is unavailable because its puzzle was invalid.</string>
+    <string name="daily_storage_failure_message">Daily progress could not be saved. Try again before continuing.</string>
+    <string name="daily_stale_session_message">This Daily session is no longer current. Return to the menu or try the safe save again.</string>
+    <string name="daily_invalid_progress_message">This Daily progress could not be saved because it no longer matches the original puzzle.</string>
+    <string name="daily_progress_failure_title">Daily progress not saved</string>
+    <string name="daily_retry_action">Retry</string>
+    <string name="daily_completion_screen_title">Daily completed</string>
+    <string name="daily_completion_message">Daily completed!</string>
+    <string name="daily_completion_supporting_text">Today’s challenge is complete.</string>
+    <string name="daily_completion_challenge_name">4 pairs · Low</string>
+    <string name="daily_share_result_action">Share result</string>
+    <string name="daily_view_calendar_action">View calendar</string>
+    <string name="daily_back_to_menu_action">Back to menu</string>
+    <string name="daily_completion_unavailable_message">This Daily completion is no longer available.</string>
+
     <!-- Tutorial screen -->
     <string name="tutorial_screen_title">Tutorial</string>
     <string name="tutorial_step_indicator">Step %1$d of %2$d</string>

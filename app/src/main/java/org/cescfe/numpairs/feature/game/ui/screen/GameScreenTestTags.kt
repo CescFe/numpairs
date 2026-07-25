@@ -8,6 +8,8 @@ object GameScreenTestTags {
     const val SUCCESS_OVERLAY = "success_overlay"
     const val SUCCESS_OVERLAY_MESSAGE = "success_overlay_message"
     const val SUCCESS_OVERLAY_PRIMARY_ACTION = "success_overlay_primary_action"
+    const val SUCCESS_OVERLAY_SECONDARY_ACTION = "success_overlay_secondary_action"
+    const val SUCCESS_OVERLAY_TERTIARY_ACTION = "success_overlay_tertiary_action"
     const val SUCCESS_OVERLAY_NEW_PUZZLE = "success_overlay_new_puzzle"
     const val SUCCESS_OVERLAY_RETURN_TO_MENU = "success_overlay_return_to_menu"
     const val PUZZLE_OUTCOME = "puzzle_outcome"

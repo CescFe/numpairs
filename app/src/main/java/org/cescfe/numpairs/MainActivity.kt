@@ -13,6 +13,8 @@ import androidx.compose.ui.graphics.luminance
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
+import org.cescfe.numpairs.data.daily.SystemDeviceLocalDateSource
+import org.cescfe.numpairs.data.daily.session.createDailySessionRepository
 import org.cescfe.numpairs.data.generated.selection.createGeneratedDifficultySelectionRepository
 import org.cescfe.numpairs.data.generated.session.createGeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.createOnboardingRepository
@@ -20,6 +22,7 @@ import org.cescfe.numpairs.data.preferences.PersonalizationPreferences
 import org.cescfe.numpairs.data.preferences.PersonalizationPreferencesRepository
 import org.cescfe.numpairs.data.preferences.createPersonalizationPreferencesRepository
 import org.cescfe.numpairs.data.preferences.createTopAppBarActionDiscoveryRepository
+import org.cescfe.numpairs.feature.daily.DailyFeatureDependencies
 import org.cescfe.numpairs.feature.generated.ConfiguredGeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.onboarding.OnboardingStartupCoordinator
@@ -49,6 +52,11 @@ class MainActivity : ComponentActivity() {
         val generatedPuzzleGenerationUseCaseFactory = ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
             challengeCatalog = generatedChallengeCatalog
         )
+        val dailyFeatureDependencies = DailyFeatureDependencies(
+            dailySessionRepository = createDailySessionRepository(applicationContext),
+            deviceLocalDateSource = SystemDeviceLocalDateSource(),
+            generatedPuzzleGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory
+        )
         setContent {
             PersonalizationThemeProvider(personalizationPreferencesRepository) {
                 val onboardingStartupState by onboardingStartupCoordinator.state.collectAsState()
@@ -73,7 +81,8 @@ class MainActivity : ComponentActivity() {
                         personalizationPreferencesRepository = personalizationPreferencesRepository,
                         topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
                         generatedChallengeCatalog = generatedChallengeCatalog,
-                        generatedPuzzleGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory
+                        generatedPuzzleGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory,
+                        dailyFeatureDependencies = dailyFeatureDependencies
                     )
                 }
             }
