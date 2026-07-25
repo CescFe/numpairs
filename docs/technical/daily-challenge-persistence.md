@@ -2,8 +2,8 @@
 
 ## Document Status
 
-- Status: Daily identity, deterministic generation, local-date boundary, and versioned aggregate
-  codec implemented; repository persistence and completion history planned
+- Status: Daily identity, deterministic generation, local-date boundary, versioned aggregate
+  codec, and independent session persistence implemented; atomic completion history planned
 - Product contract: `docs/product/prd/prd-v10.md`
 - Architecture decision:
   `docs/technical/adr/adr-006-model-daily-challenge-as-versioned-local-cadence.md`
@@ -244,6 +244,11 @@ The file is excluded from:
 
 Reinstallation or application-data deletion resets both Daily progress and the completion
 calendar. Cache deletion does not.
+
+The dedicated Preferences DataStore, aggregate state flow, identity-guarded safe replacement,
+incomplete-progress update, explicit clear, corruption recovery, and all three backup and transfer
+exclusions are implemented. Atomic solved completion recording remains a separate delivery
+boundary.
 
 ---
 

@@ -6,17 +6,10 @@ import java.nio.ByteBuffer
 import java.time.LocalDate
 import org.cescfe.numpairs.domain.daily.DailyCandidateIndex
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
-import org.cescfe.numpairs.domain.daily.DailyRecipeContracts
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
-import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
-import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerator
-import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
-import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfile
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfiles
-import org.cescfe.numpairs.domain.generated.puzzle.GeneratedPairsPuzzle
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Expression
-import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.Strip
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.junit.Assert.assertEquals
@@ -173,7 +166,7 @@ class DailyAggregateCodecTest {
     fun snapshot_rejects_recipe_seed_shape_and_progress_mismatches() {
         val fixture = generatedDailyFixture()
         val validSnapshot = fixture.snapshot()
-        val threePairsPuzzle = generatedPuzzle(
+        val threePairsPuzzle = generatedPuzzleFixture(
             profile = GeneratedPuzzleProfiles.THREE_PAIRS_LOW,
             seed = 42
         ).initialPuzzle
@@ -290,77 +283,6 @@ class DailyAggregateCodecTest {
         }
     }
 }
-
-private data class GeneratedDailyFixture(
-    val identity: DailyChallengeId,
-    val candidateIndex: DailyCandidateIndex,
-    val seed: Int,
-    val generatedPuzzle: GeneratedPairsPuzzle
-) {
-    fun snapshot(currentPuzzle: Puzzle = generatedPuzzle.initialPuzzle): DailySessionSnapshot = DailySessionSnapshot(
-        sessionId = DailySessionId("daily-session-${identity.canonicalLocalDate}"),
-        dailyChallengeId = identity,
-        candidateIndex = candidateIndex,
-        seed = seed,
-        initialPuzzle = generatedPuzzle.initialPuzzle,
-        currentPuzzle = currentPuzzle
-    )
-
-    fun progressPuzzle(): Puzzle {
-        val solvedValuesByEntryId = generatedPuzzle.solvedPuzzle.strip.entries.associate { entry ->
-            entry.id to (entry.item as StripItem.Known).value
-        }
-        return generatedPuzzle.initialPuzzle.copy(
-            board = Board(
-                tiles = generatedPuzzle.initialPuzzle.board.tiles.mapIndexed { index, tile ->
-                    if (index == 0) generatedPuzzle.solvedPuzzle.board.tiles[index] else tile
-                }
-            ),
-            strip = Strip.fromEntries(
-                generatedPuzzle.initialPuzzle.strip.entries.map { entry ->
-                    if (entry.item == StripItem.Hidden) {
-                        entry.copy(item = StripItem.PlayerEntered(solvedValuesByEntryId.getValue(entry.id)))
-                    } else {
-                        entry
-                    }
-                }
-            )
-        )
-    }
-}
-
-private fun generatedDailyFixture(
-    date: LocalDate = LocalDate.of(2027, 4, 18),
-    candidateIndex: DailyCandidateIndex = DailyCandidateIndex(0)
-): GeneratedDailyFixture {
-    val recipe = DailyRecipeContracts.FOUR_PAIRS_LOW_V1
-    val identity = recipe.identityFor(date)
-    val seed = recipe.seedFor(identity, candidateIndex)
-    return GeneratedDailyFixture(
-        identity = identity,
-        candidateIndex = candidateIndex,
-        seed = seed,
-        generatedPuzzle = generatedPuzzle(
-            profile = recipe.profile,
-            seed = seed
-        )
-    )
-}
-
-private fun generatedPuzzle(profile: GeneratedPuzzleProfile, seed: Int): GeneratedPairsPuzzle {
-    val outcome = GeneratedPairsPuzzleGenerator(profile).generate(
-        GeneratedPuzzleGenerationRequest(profile = profile, seed = seed)
-    )
-    return (outcome as GeneratedPairsPuzzleGenerationOutcome.Generated).puzzle
-}
-
-private fun dailyChallengeId(
-    date: LocalDate,
-    recipeVersion: DailyRecipeVersion = DailyRecipeContracts.FOUR_PAIRS_LOW_V1.version
-): DailyChallengeId = DailyChallengeId(
-    localDate = date,
-    recipeVersion = recipeVersion
-)
 
 private fun rawAggregateHeader(hasSession: Boolean, followingValue: Int): ByteArray =
     ByteArrayOutputStream().use { bytes ->
