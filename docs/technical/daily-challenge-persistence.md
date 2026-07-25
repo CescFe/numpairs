@@ -3,8 +3,8 @@
 ## Document Status
 
 - Status: Daily identity, deterministic generation, local-date boundary, versioned aggregate,
-  independent session persistence, and atomic completion history implemented; feature lifecycle
-  coordination planned
+  independent session persistence, atomic completion history, and current-session lifecycle
+  coordination implemented; committed gameplay persistence coordination planned
 - Product contract: `docs/product/prd/prd-v10.md`
 - Architecture decision:
   `docs/technical/adr/adr-006-model-daily-challenge-as-versioned-local-cadence.md`
@@ -170,6 +170,10 @@ For the captured local date:
 
 A prior-date session is retained safely but is not exposed as resumable.
 
+Current-state resolution is implemented as a read-only operation over one captured local identity
+and one Daily aggregate emission. Same-date completion takes precedence over continuation,
+including a completion recorded under another recipe version.
+
 ### Create And Replace
 
 1. Capture local date and resolve the Daily Challenge identity.
@@ -185,6 +189,11 @@ cancellation, or exhaustion leaves it intact. A successful stored successor repl
 prior-date session before the new puzzle is shown.
 
 Normal generated-session state is not consulted or mutated.
+
+Safe creation and replacement are implemented in platform-independent feature state. Duplicate
+entry is deduplicated, retry retains the captured Daily identity and deterministic recipe
+sequence, and a stable injectable session id identifies a generated snapshot. Readiness is
+published only after successful repository adoption.
 
 ### Restore
 
@@ -203,6 +212,10 @@ difficulty lookup, or repository writes.
 
 Missing, stale, prior-date, solved, mismatched, corrupt, completed, or unsupported snapshots are
 not resumable. Prior-date content is not offered through the calendar.
+
+Exact restoration is implemented without generation, randomness, remembered difficulty lookup,
+or repository mutation. Generation exhaustion, cancellation, invalid output, and persistence
+failure produce recoverable typed feature states while leaving the stored predecessor unchanged.
 
 ### Progress And Completion
 
@@ -253,8 +266,8 @@ calendar. Cache deletion does not.
 
 The dedicated Preferences DataStore, aggregate state flow, identity-guarded safe replacement,
 incomplete-progress update, explicit clear, corruption recovery, and all three backup and transfer
-exclusions are implemented. Atomic solved completion recording remains a separate delivery
-boundary.
+exclusions are implemented. Atomic solved completion recording is implemented in the same
+aggregate repository.
 
 ---
 

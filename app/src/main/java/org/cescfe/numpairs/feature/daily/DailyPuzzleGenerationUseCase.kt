@@ -115,12 +115,19 @@ private fun CurrentDailyChallenge.requireFailuresMatchRecipe(attemptedFailures: 
     }
 }
 
+fun interface DailyPuzzleGenerator {
+    suspend fun generate(currentDailyChallenge: CurrentDailyChallenge): DailyPuzzleGenerationResult
+}
+
 class DailyPuzzleGenerationUseCase(
     private val currentDailyChallengeResolver: CurrentDailyChallengeResolver,
     private val generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory
-) {
-    suspend fun generate(): DailyPuzzleGenerationResult {
-        val currentDailyChallenge = currentDailyChallengeResolver.resolve()
+) : DailyPuzzleGenerator {
+    suspend fun generate(): DailyPuzzleGenerationResult = generate(
+        currentDailyChallenge = currentDailyChallengeResolver.resolve()
+    )
+
+    override suspend fun generate(currentDailyChallenge: CurrentDailyChallenge): DailyPuzzleGenerationResult {
         val recipe = currentDailyChallenge.recipe
         val challenge = recipe.challenge
         val generationUseCase = generatedPuzzleGenerationUseCaseFactory.create(challenge)
