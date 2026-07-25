@@ -10,10 +10,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.cescfe.numpairs.data.daily.session.DailySessionCompletionResult
 import org.cescfe.numpairs.data.daily.session.DailySessionId
+import org.cescfe.numpairs.data.daily.session.DailySessionProgressUpdateResult
 import org.cescfe.numpairs.data.daily.session.DailySessionReplacementResult
 import org.cescfe.numpairs.data.daily.session.DailySessionRepository
 import org.cescfe.numpairs.data.daily.session.DailySessionSnapshot
+import org.cescfe.numpairs.data.daily.session.requireValidSolvedPuzzle
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
@@ -35,6 +38,20 @@ internal sealed interface DailyPuzzlePreparationFailure {
     data object Persistence : DailyPuzzlePreparationFailure
 }
 
+internal sealed interface DailyPuzzlePersistenceFailure {
+    data object StaleSession : DailyPuzzlePersistenceFailure
+
+    data object InvalidPuzzle : DailyPuzzlePersistenceFailure
+
+    data object Persistence : DailyPuzzlePersistenceFailure
+}
+
+internal sealed interface DailyPuzzleCompletion {
+    data object Completed : DailyPuzzleCompletion
+
+    data class AlreadyCompleted(val completion: DailyChallengeId) : DailyPuzzleCompletion
+}
+
 internal sealed interface DailyPuzzleUiState {
     data object Idle : DailyPuzzleUiState
 
@@ -42,7 +59,26 @@ internal sealed interface DailyPuzzleUiState {
 
     data class Loading(val currentDailyChallenge: CurrentDailyChallenge) : DailyPuzzleUiState
 
-    data class Ready(val session: DailyGameSession) : DailyPuzzleUiState
+    data class Ready(val session: DailyGameSession, val persistenceFailure: DailyPuzzlePersistenceFailure? = null) :
+        DailyPuzzleUiState
+
+    data class Completed(val session: DailyGameSession, val completion: DailyPuzzleCompletion) : DailyPuzzleUiState {
+        init {
+            require(session.currentPuzzle.isSolved) {
+                "A completed Daily UI state requires a solved in-memory puzzle."
+            }
+            val completedIdentity = when (completion) {
+                DailyPuzzleCompletion.Completed -> session.currentDailyChallenge.identity
+                is DailyPuzzleCompletion.AlreadyCompleted -> completion.completion
+            }
+            require(
+                completedIdentity.localDate ==
+                    session.currentDailyChallenge.identity.localDate
+            ) {
+                "A completed Daily result must own the captured local date."
+            }
+        }
+    }
 
     data class CompletedToday(val currentDailyChallenge: CurrentDailyChallenge, val completion: DailyChallengeId) :
         DailyPuzzleUiState {
@@ -69,6 +105,8 @@ internal class DailyPuzzleViewModel(
     private var preparationJob: Job? = null
     private var preparationToken: Int = 0
     private var pendingSessionId: DailySessionId? = null
+    private var sessionWriteJob: Job? = null
+    private var persistenceRevision: Int = 0
 
     fun onRouteEntered() {
         if (preparationJob != null || _uiState.value != DailyPuzzleUiState.Idle) {
@@ -82,6 +120,7 @@ internal class DailyPuzzleViewModel(
         preparationJob?.cancel()
         preparationJob = null
         pendingSessionId = null
+        persistenceRevision++
         _uiState.value = DailyPuzzleUiState.Idle
     }
 
@@ -90,10 +129,53 @@ internal class DailyPuzzleViewModel(
         startGeneration(currentDailyChallenge = failedState.currentDailyChallenge)
     }
 
+    fun onCommittedPuzzleChanged(expectedSessionId: DailySessionId, puzzle: Puzzle) {
+        val state = _uiState.value as? DailyPuzzleUiState.Ready ?: return
+        val visibleSession = state.session
+        if (
+            visibleSession.id != expectedSessionId ||
+            visibleSession.currentPuzzle == puzzle ||
+            visibleSession.currentPuzzle.isSolved
+        ) {
+            return
+        }
+
+        val updatedSession = try {
+            visibleSession.withCurrentPuzzle(puzzle)
+        } catch (_: IllegalArgumentException) {
+            persistenceRevision++
+            publishPersistenceFailure(
+                expectedSessionId = expectedSessionId,
+                failure = DailyPuzzlePersistenceFailure.InvalidPuzzle
+            )
+            return
+        } catch (_: IllegalStateException) {
+            persistenceRevision++
+            publishPersistenceFailure(
+                expectedSessionId = expectedSessionId,
+                failure = DailyPuzzlePersistenceFailure.InvalidPuzzle
+            )
+            return
+        }
+
+        _uiState.value = DailyPuzzleUiState.Ready(session = updatedSession)
+        enqueuePersistence(session = updatedSession)
+    }
+
+    fun retryPersistence() {
+        val readyState = _uiState.value as? DailyPuzzleUiState.Ready ?: return
+        if (readyState.persistenceFailure == null) {
+            return
+        }
+        _uiState.value = readyState.copy(persistenceFailure = null)
+        enqueuePersistence(session = readyState.session)
+    }
+
     private fun resolveAndPrepare() {
         val token = ++preparationToken
         _uiState.value = DailyPuzzleUiState.Resolving
         val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
+            sessionWriteJob?.join()
             val availability = availabilityResolver.resolve()
             if (token != preparationToken) {
                 return@launch
@@ -239,11 +321,110 @@ internal class DailyPuzzleViewModel(
             )
         }
     }
+
+    private fun enqueuePersistence(session: DailyGameSession) {
+        val revision = ++persistenceRevision
+        val precedingWrite = sessionWriteJob
+        val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
+            precedingWrite?.join()
+            val failure = try {
+                if (session.currentPuzzle.isSolved) {
+                    persistCompletion(session = session)
+                } else {
+                    persistProgress(session = session)
+                }
+            } catch (_: IOException) {
+                DailyPuzzlePersistenceFailure.Persistence
+            }
+            if (
+                failure != null &&
+                revision == persistenceRevision
+            ) {
+                publishPersistenceFailure(
+                    expectedSessionId = session.id,
+                    failure = failure
+                )
+            }
+        }
+        sessionWriteJob = job
+        job.start()
+    }
+
+    private suspend fun persistProgress(session: DailyGameSession): DailyPuzzlePersistenceFailure? = when (
+        dailySessionRepository.updateCurrentPuzzle(
+            expectedSessionId = session.id,
+            puzzle = session.currentPuzzle
+        )
+    ) {
+        DailySessionProgressUpdateResult.Updated -> null
+        DailySessionProgressUpdateResult.StaleSession -> {
+            DailyPuzzlePersistenceFailure.StaleSession
+        }
+
+        DailySessionProgressUpdateResult.InvalidPuzzle -> {
+            DailyPuzzlePersistenceFailure.InvalidPuzzle
+        }
+    }
+
+    private suspend fun persistCompletion(session: DailyGameSession): DailyPuzzlePersistenceFailure? = when (
+        val result = dailySessionRepository.complete(
+            expectedSessionId = session.id,
+            expectedDailyChallengeId = session.currentDailyChallenge.identity,
+            solvedPuzzle = session.currentPuzzle
+        )
+    ) {
+        DailySessionCompletionResult.Completed -> {
+            publishCompletion(
+                expectedSessionId = session.id,
+                completion = DailyPuzzleCompletion.Completed
+            )
+            null
+        }
+
+        is DailySessionCompletionResult.AlreadyCompleted -> {
+            publishCompletion(
+                expectedSessionId = session.id,
+                completion = DailyPuzzleCompletion.AlreadyCompleted(
+                    completion = result.completion
+                )
+            )
+            null
+        }
+
+        DailySessionCompletionResult.StaleSession -> {
+            DailyPuzzlePersistenceFailure.StaleSession
+        }
+
+        DailySessionCompletionResult.InvalidPuzzle -> {
+            DailyPuzzlePersistenceFailure.InvalidPuzzle
+        }
+    }
+
+    private fun publishCompletion(expectedSessionId: DailySessionId, completion: DailyPuzzleCompletion) {
+        val readyState = _uiState.value as? DailyPuzzleUiState.Ready ?: return
+        if (
+            readyState.session.id == expectedSessionId &&
+            readyState.session.currentPuzzle.isSolved
+        ) {
+            _uiState.value = DailyPuzzleUiState.Completed(
+                session = readyState.session,
+                completion = completion
+            )
+        }
+    }
+
+    private fun publishPersistenceFailure(expectedSessionId: DailySessionId, failure: DailyPuzzlePersistenceFailure) {
+        val readyState = _uiState.value as? DailyPuzzleUiState.Ready ?: return
+        if (readyState.session.id == expectedSessionId) {
+            _uiState.value = readyState.copy(persistenceFailure = failure)
+        }
+    }
 }
 
 internal data class DailyGameSession(
     val currentDailyChallenge: CurrentDailyChallenge,
-    val snapshot: DailySessionSnapshot
+    val snapshot: DailySessionSnapshot,
+    val currentPuzzle: Puzzle = snapshot.currentPuzzle
 ) {
     init {
         require(snapshot.dailyChallengeId == currentDailyChallenge.identity) {
@@ -251,6 +432,11 @@ internal data class DailyGameSession(
         }
         require(snapshot.recipeContract == currentDailyChallenge.recipe.contract) {
             "Daily game session recipe must match its captured current recipe."
+        }
+        if (currentPuzzle.isSolved) {
+            snapshot.requireValidSolvedPuzzle(currentPuzzle)
+        } else {
+            snapshot.copy(currentPuzzle = currentPuzzle)
         }
     }
 
@@ -260,6 +446,12 @@ internal data class DailyGameSession(
     val initialPuzzle: Puzzle
         get() = snapshot.initialPuzzle
 
-    val currentPuzzle: Puzzle
-        get() = snapshot.currentPuzzle
+    fun withCurrentPuzzle(puzzle: Puzzle): DailyGameSession = if (puzzle.isSolved) {
+        copy(currentPuzzle = puzzle)
+    } else {
+        copy(
+            snapshot = snapshot.copy(currentPuzzle = puzzle),
+            currentPuzzle = puzzle
+        )
+    }
 }

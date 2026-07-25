@@ -4,7 +4,7 @@
 
 - Status: Daily identity, deterministic generation, local-date boundary, versioned aggregate,
   independent session persistence, atomic completion history, and current-session lifecycle
-  coordination implemented; committed gameplay persistence coordination planned
+  coordination implemented, including committed gameplay progress and completion
 - Product contract: `docs/product/prd/prd-v10.md`
 - Architecture decision:
   `docs/technical/adr/adr-006-model-daily-challenge-as-versioned-local-cadence.md`
@@ -229,6 +229,13 @@ memory for Share result, View calendar, and Back to menu.
 
 A late progress or completion callback cannot mutate a later Daily Session because the stable
 session ids differ.
+
+Gameplay coordination is implemented in the Daily lifecycle owner. It accepts only committed
+domain puzzle changes for the visible session, updates valid in-memory progress immediately, and
+serializes repository mutations in callback order. Solved progress waits for preceding writes,
+uses the atomic completion mutation, and remains available in memory after the active snapshot is
+removed. Completed, already-completed, stale-session, invalid-puzzle, and storage-failure outcomes
+remain typed for presentation mapping.
 
 ### Local-Date Rollover
 
