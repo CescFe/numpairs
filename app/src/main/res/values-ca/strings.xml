@@ -60,6 +60,17 @@
     <string name="generated_puzzle_back_to_menu_button">Torna al menú</string>
     <string name="generated_session_resume_unavailable_message">Aquest puzle sense acabar ja no està disponible.</string>
 
+    <!-- Calendari Daily -->
+    <string name="daily_calendar_screen_title">Calendari Daily</string>
+    <string name="daily_calendar_previous_month_content_description">Mostra el mes anterior</string>
+    <string name="daily_calendar_next_month_content_description">Mostra el mes següent</string>
+    <string name="daily_calendar_date_description">%1$s</string>
+    <string name="daily_calendar_today_date_description">%1$s, Hui</string>
+    <string name="daily_calendar_completed_date_description">%1$s, Completat</string>
+    <string name="daily_calendar_today_completed_date_description">%1$s, Hui, Completat</string>
+    <string name="daily_calendar_future_completed_date_description">%1$s, Completat, Data futura</string>
+    <string name="daily_calendar_future_date_description">%1$s, Data futura</string>
+
     <!-- Tutorial screen -->
     <string name="tutorial_screen_title">Tutorial</string>
     <string name="tutorial_step_indicator">Pas %1$d de %2$d</string>
