@@ -14,10 +14,10 @@ import org.cescfe.numpairs.data.onboarding.OnboardingRepository
 import org.cescfe.numpairs.data.onboarding.OnboardingState
 import org.cescfe.numpairs.data.preferences.PersonalizationPreferencesRepository
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryRepository
-import org.cescfe.numpairs.feature.fourpairs.FourPairsRoute
 import org.cescfe.numpairs.feature.generated.GeneratedChallenge
 import org.cescfe.numpairs.feature.generated.GeneratedChallengeCatalog
 import org.cescfe.numpairs.feature.generated.GeneratedChallengeId
+import org.cescfe.numpairs.feature.generated.GeneratedLearningRoute
 import org.cescfe.numpairs.feature.generated.GeneratedModeLaunchIntent
 import org.cescfe.numpairs.feature.generated.GeneratedModeRoute
 import org.cescfe.numpairs.feature.generated.GeneratedModes
@@ -196,7 +196,8 @@ private fun UnlockedAppNavigation(
             }
 
             when (mode.id) {
-                GeneratedModes.FOUR_PAIRS.id -> FourPairsRoute(
+                GeneratedModes.THREE_PAIRS.id,
+                GeneratedModes.FOUR_PAIRS.id -> GeneratedLearningRoute(
                     modifier = modifier,
                     title = challengeTitle,
                     challenge = challenge,

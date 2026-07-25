@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -17,6 +18,10 @@ import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
 import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesRepository
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
+import org.cescfe.numpairs.domain.puzzle.model.Board
+import org.cescfe.numpairs.domain.puzzle.model.Puzzle
+import org.cescfe.numpairs.domain.puzzle.model.Strip
+import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
@@ -113,6 +118,59 @@ class GeneratedSessionResumeNavigationTest {
         }
     }
 
+    @Test
+    fun quick_session_resume_uses_quick_title_and_the_shared_learning_route_without_generation() {
+        val initialPuzzle = quickPuzzle()
+        val currentPuzzle = initialPuzzle.copy(
+            strip = initialPuzzle.strip.withUpdatedEntry(index = 1, value = 3)
+        )
+        val snapshot = GeneratedSessionSnapshot(
+            sessionId = GeneratedSessionId("resume-quick"),
+            modeId = GeneratedModes.THREE_PAIRS.id.value,
+            profileId = GeneratedModes.THREE_PAIRS_LOW.profile.id.value,
+            seed = 283,
+            initialPuzzle = initialPuzzle,
+            currentPuzzle = currentPuzzle
+        )
+        val repository = FakeGeneratedSessionRepository(initialSession = snapshot)
+        val generationCounter = GenerationCounter()
+        setContent(repository = repository, generationCounter = generationCounter)
+
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.RESUME_BUTTON)
+            .assertIsDisplayed()
+            .assertContentDescriptionEquals(
+                string(
+                    R.string.menu_resume_content_description,
+                    challengeName(R.string.quick_screen_title, R.string.generated_difficulty_low)
+                )
+            )
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText(
+                challengeName(R.string.quick_screen_title, R.string.generated_difficulty_low)
+            )
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.HINT_ACTION)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(5))
+            .performScrollTo()
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.stripItem(6))
+            .assertDoesNotExist()
+        composeTestRule.runOnIdle {
+            assertEquals(0, generationCounter.count)
+            assertEquals(snapshot, repository.session.value)
+        }
+    }
+
     private fun setContent(
         repository: FakeGeneratedSessionRepository,
         generationCounter: GenerationCounter = GenerationCounter()
@@ -147,6 +205,20 @@ class GeneratedSessionResumeNavigationTest {
         R.string.generated_challenge_title,
         string(modeNameResource),
         string(difficultyNameResource)
+    )
+
+    private fun quickPuzzle(): Puzzle = Puzzle(
+        board = Board(tiles = samplePuzzle.board.tiles.take(6)),
+        strip = Strip.fromItems(
+            items = listOf(
+                StripItem.Hidden,
+                StripItem.Hidden,
+                StripItem.Known(5),
+                StripItem.Hidden,
+                StripItem.Hidden,
+                StripItem.Known(15)
+            )
+        )
     )
 
     private class GenerationCounter {

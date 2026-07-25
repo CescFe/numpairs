@@ -4,7 +4,7 @@
 
 This document defines the current NumPairs visual design system. It originated in the
 `v4 - Visual Design System & UI Refinement` milestone and is updated through
-`v9 - Game Feel & Personalization`.
+`v9 - Game Feel & Personalization`, with the v10 Quick generated-learning extension.
 
 The goal is to establish a practical design system for implementation, not a speculative brand book. It should guide reusable Compose theme decisions, shared component defaults, and visual QA for the existing product screens.
 
@@ -576,7 +576,7 @@ The implemented v9 generated-game feedback adds:
 - a short entrance for a replacement puzzle only after its successor session is safely
   stored and adopted
 
-Those motions are enabled only by generated `4 Pairs` and `8 Pairs` routes. Tutorial,
+Those motions are enabled only by generated Quick, `4 Pairs`, and `8 Pairs` routes. Tutorial,
 required onboarding, voluntary `How to play`, restored state, and recomposition do not gain
 or replay v9 feedback. Motion does not resize layout or touch targets, block actions, or
 carry meaning that is absent from the final static state.
@@ -591,6 +591,18 @@ Avoid:
 
 When Android animation duration is disabled, each treatment reaches the same usable final
 state immediately.
+
+### Generated Learning Presentation
+
+Quick and `4 Pairs` use the shared `GeneratedLearningRoute` around the generic generated-game
+presentation. It reuses the existing Rules Helper, Solving Tips, authored Tutorial overlay,
+discovery indicators, game feedback, completion actions, and design-system components without
+introducing size-specific visual roles.
+
+`8 Pairs` continues to use the generic generated route without the Low learning actions. The
+shared wrapper changes ownership only: spacing, typography, shapes, semantic colors, motion,
+touch targets, failure handling, and reduced-motion behavior remain those of the established
+generated and game surfaces.
 
 ---
 

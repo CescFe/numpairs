@@ -1,4 +1,4 @@
-package org.cescfe.numpairs.feature.fourpairs
+package org.cescfe.numpairs.feature.generated
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -8,31 +8,24 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
-import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryState
 import org.cescfe.numpairs.feature.game.ui.actions.HintAction
 import org.cescfe.numpairs.feature.game.ui.help.SolvingTipsDialog
-import org.cescfe.numpairs.feature.generated.GeneratedChallenge
-import org.cescfe.numpairs.feature.generated.GeneratedModeLaunchIntent
-import org.cescfe.numpairs.feature.generated.GeneratedModeRoute
-import org.cescfe.numpairs.feature.generated.GeneratedModes
-import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
 import org.cescfe.numpairs.feature.tutorial.TutorialMode
 import org.cescfe.numpairs.feature.tutorial.TutorialOverlayHost
 
 @Composable
-fun FourPairsRoute(
+fun GeneratedLearningRoute(
+    challenge: GeneratedChallenge,
+    title: String,
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     generatedSessionRepository: GeneratedSessionRepository,
     modifier: Modifier = Modifier,
     generationUseCase: GeneratedPuzzleGenerationUseCase,
     launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.DefaultNewPuzzle,
-    challenge: GeneratedChallenge = GeneratedModes.FOUR_PAIRS_LOW,
-    title: String? = null,
     isGeneratedGameHapticsEnabled: Boolean = true,
     tutorialOverlayMode: TutorialMode? = null,
     onTutorialOverlayClosed: () -> Unit = {},
@@ -60,7 +53,7 @@ fun FourPairsRoute(
         GeneratedModeRoute(
             challenge = challenge,
             launchIntent = launchIntent,
-            title = title ?: stringResource(R.string.four_pairs_screen_title),
+            title = title,
             generationUseCase = generationUseCase,
             generatedSessionRepository = generatedSessionRepository,
             isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,

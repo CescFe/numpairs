@@ -25,6 +25,11 @@ class LocalizationResourceTest {
         )
         assertEquals("Cómo jugar", resources.getString(R.string.menu_tutorial_button))
         assertEquals("Ajustes", resources.getString(R.string.menu_settings_action_content_description))
+        assertEquals("Quick", resources.getString(R.string.quick_screen_title))
+        assertEquals(
+            "Quick · Baja",
+            resources.getString(R.string.generated_challenge_title, "Quick", "Baja")
+        )
         assertEquals("8 pares", resources.getString(R.string.eight_pairs_screen_title))
         assertEquals("Alta", resources.getString(R.string.generated_difficulty_hard))
         assertEquals(
@@ -92,6 +97,11 @@ class LocalizationResourceTest {
         )
         assertEquals("Com jugar", resources.getString(R.string.menu_tutorial_button))
         assertEquals("Configuració", resources.getString(R.string.menu_settings_action_content_description))
+        assertEquals("Quick", resources.getString(R.string.quick_screen_title))
+        assertEquals(
+            "Quick · Baixa",
+            resources.getString(R.string.generated_challenge_title, "Quick", "Baixa")
+        )
         assertEquals("8 parelles", resources.getString(R.string.eight_pairs_screen_title))
         assertEquals("Alta", resources.getString(R.string.generated_difficulty_hard))
         assertEquals(
@@ -159,6 +169,11 @@ class LocalizationResourceTest {
         )
         assertEquals("How to play", resources.getString(R.string.menu_tutorial_button))
         assertEquals("Settings", resources.getString(R.string.menu_settings_action_content_description))
+        assertEquals("Quick", resources.getString(R.string.quick_screen_title))
+        assertEquals(
+            "Quick · Low",
+            resources.getString(R.string.generated_challenge_title, "Quick", "Low")
+        )
         assertEquals("8 pairs", resources.getString(R.string.eight_pairs_screen_title))
         assertEquals("Hard", resources.getString(R.string.generated_difficulty_hard))
         assertEquals(

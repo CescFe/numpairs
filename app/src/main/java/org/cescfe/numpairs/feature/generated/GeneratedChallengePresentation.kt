@@ -8,6 +8,7 @@ import org.cescfe.numpairs.domain.generated.profile.DifficultyTier
 
 @StringRes
 internal fun GeneratedModeConfiguration.titleResourceIdOrNull(): Int? = when (id) {
+    GeneratedModes.THREE_PAIRS.id -> R.string.quick_screen_title
     GeneratedModes.FOUR_PAIRS.id -> R.string.four_pairs_screen_title
     GeneratedModes.EIGHT_PAIRS.id -> R.string.eight_pairs_screen_title
     else -> null
