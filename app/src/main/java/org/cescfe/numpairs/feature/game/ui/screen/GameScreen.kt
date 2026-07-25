@@ -26,6 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import org.cescfe.numpairs.R
@@ -55,6 +57,8 @@ fun GameScreen(
     title: String,
     uiState: GameUiState,
     modifier: Modifier = Modifier,
+    titleContentDescription: String? = null,
+    isNavigationIconVisible: Boolean = true,
     onNavigateBack: () -> Unit = {},
     onStripItemTapped: (Int) -> Unit = {},
     onStripItemEntryInputChanged: (String) -> Unit = {},
@@ -101,6 +105,8 @@ fun GameScreen(
             topBar = {
                 GameScreenTopBar(
                     title = title,
+                    titleContentDescription = titleContentDescription,
+                    isNavigationIconVisible = isNavigationIconVisible,
                     onNavigateBack = onNavigateBack,
                     onRulesHelperClick = {
                         onRulesHelperActionTapped()
@@ -257,6 +263,8 @@ private fun TileOperandOptionUiState.restrictedBy(
 @Composable
 private fun GameScreenTopBar(
     title: String,
+    titleContentDescription: String?,
+    isNavigationIconVisible: Boolean,
     onNavigateBack: () -> Unit,
     onRulesHelperClick: () -> Unit,
     isRulesHelperEnabled: Boolean,
@@ -269,18 +277,30 @@ private fun GameScreenTopBar(
         colors = NumPairsComponents.topAppBarColors(),
         expandedHeight = GAME_TOP_BAR_HEIGHT,
         navigationIcon = {
-            IconButton(
-                onClick = onNavigateBack,
-                modifier = Modifier.testTag(GameScreenTestTags.BACK_BUTTON)
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_chevron_left),
-                    contentDescription = backButtonContentDescription
-                )
+            if (isNavigationIconVisible) {
+                IconButton(
+                    onClick = onNavigateBack,
+                    modifier = Modifier.testTag(GameScreenTestTags.BACK_BUTTON)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_chevron_left),
+                        contentDescription = backButtonContentDescription
+                    )
+                }
             }
         },
         title = {
-            Text(text = title)
+            val titleModifier = if (titleContentDescription == null) {
+                Modifier
+            } else {
+                Modifier.clearAndSetSemantics {
+                    contentDescription = titleContentDescription
+                }
+            }
+            Text(
+                text = title,
+                modifier = titleModifier
+            )
         },
         actions = {
             actions()
