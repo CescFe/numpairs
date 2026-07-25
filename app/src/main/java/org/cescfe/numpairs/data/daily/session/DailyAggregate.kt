@@ -68,6 +68,15 @@ data class DailySessionSnapshot(
     }
 }
 
+internal fun DailySessionSnapshot.requireValidSolvedPuzzle(solvedPuzzle: Puzzle) {
+    requirePuzzleMatchesRecipe(solvedPuzzle, recipeContract)
+    require(solvedPuzzle.isSolved) {
+        "Daily completion puzzle must be solved."
+    }
+    requireConsistentProgress(initialPuzzle = initialPuzzle, currentPuzzle = solvedPuzzle)
+    requireValidCurrentAssignments(solvedPuzzle)
+}
+
 data class DailyAggregate(
     val schemaVersion: Int = DAILY_AGGREGATE_SCHEMA_VERSION,
     val activeSession: DailySessionSnapshot? = null,

@@ -54,6 +54,24 @@ internal data class GeneratedDailyFixture(
             )
         )
     }
+
+    fun solvedProgressPuzzle(): Puzzle {
+        val solvedValuesByEntryId = generatedPuzzle.solvedPuzzle.strip.entries.associate { entry ->
+            entry.id to (entry.item as StripItem.Known).value
+        }
+        return Puzzle(
+            board = generatedPuzzle.solvedPuzzle.board,
+            strip = Strip.fromEntries(
+                generatedPuzzle.initialPuzzle.strip.entries.map { entry ->
+                    if (entry.item == StripItem.Hidden) {
+                        entry.copy(item = StripItem.PlayerEntered(solvedValuesByEntryId.getValue(entry.id)))
+                    } else {
+                        entry
+                    }
+                }
+            )
+        )
+    }
 }
 
 internal fun generatedDailyFixture(

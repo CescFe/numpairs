@@ -26,6 +26,16 @@ sealed interface DailySessionClearResult {
     data object StaleSession : DailySessionClearResult
 }
 
+sealed interface DailySessionCompletionResult {
+    data object Completed : DailySessionCompletionResult
+
+    data class AlreadyCompleted(val completion: DailyChallengeId) : DailySessionCompletionResult
+
+    data object StaleSession : DailySessionCompletionResult
+
+    data object InvalidPuzzle : DailySessionCompletionResult
+}
+
 interface DailySessionRepository {
     val state: Flow<DailyState>
 
@@ -34,4 +44,10 @@ interface DailySessionRepository {
     suspend fun updateCurrentPuzzle(expectedSessionId: DailySessionId, puzzle: Puzzle): DailySessionProgressUpdateResult
 
     suspend fun clearSession(expectedSessionId: DailySessionId): DailySessionClearResult
+
+    suspend fun complete(
+        expectedSessionId: DailySessionId,
+        expectedDailyChallengeId: DailyChallengeId,
+        solvedPuzzle: Puzzle
+    ): DailySessionCompletionResult
 }
