@@ -30,6 +30,7 @@ import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFac
 import org.cescfe.numpairs.feature.generated.localizedNewPuzzleName
 import org.cescfe.numpairs.feature.generated.localizedTitle
 import org.cescfe.numpairs.feature.menu.MenuRoute
+import org.cescfe.numpairs.feature.menu.ui.DailyMenuUiState
 import org.cescfe.numpairs.feature.menu.ui.GeneratedSessionChoiceDialog
 import org.cescfe.numpairs.feature.onboarding.OnboardingLoadingScreen
 import org.cescfe.numpairs.feature.onboarding.RequiredOnboardingRoute
@@ -166,9 +167,12 @@ private fun UnlockedAppNavigation(
 
     when (val destination = currentDestination) {
         AppDestination.Menu -> {
+            val dailyDependencies = dailyFeatureDependencies
             MenuRoute(
                 generatedDifficultySelectionRepository = generatedDifficultySelectionRepository,
                 generatedChallengeCatalog = generatedChallengeCatalog,
+                dailySessionRepository = dailyDependencies?.dailySessionRepository,
+                deviceLocalDateSource = dailyDependencies?.deviceLocalDateSource,
                 modifier = modifier,
                 resumeChallengeName = resumableSession?.challenge?.let { challenge ->
                     challenge.localizedTitle(generatedChallengeCatalog)
@@ -188,6 +192,21 @@ private fun UnlockedAppNavigation(
                 },
                 onPersonalizationSelected = {
                     currentDestination = AppDestination.Personalization
+                },
+                onDailySelected = { dailyState ->
+                    currentDestination = when (dailyState) {
+                        is DailyMenuUiState.StartToday,
+                        is DailyMenuUiState.ContinueToday -> AppDestination.DailyChallenge(
+                            identity = dailyState.identity
+                        )
+
+                        is DailyMenuUiState.CompletedToday -> AppDestination.DailyCompletedToday(
+                            identity = dailyState.identity
+                        )
+                    }
+                },
+                onDailyCalendarSelected = {
+                    currentDestination = AppDestination.DailyCalendar
                 },
                 onGeneratedChallengeSelected = onGeneratedChallengeSelected
             )

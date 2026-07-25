@@ -118,6 +118,9 @@ The Daily Challenge row uses the established unified split primary CTA geometry:
 - the trailing region uses a calendar icon whose localized action description is independent from
   the primary state
 
+Status: implemented in the unlocked Menu with state-aware primary navigation and an independent
+calendar region.
+
 The primary label and semantics resolve from one captured current local date:
 
 - no completion and no matching resumable Daily Session: `Daily challenge`
@@ -303,7 +306,7 @@ additional completion action.
 
 Status: application composition, gameplay, recoverable failure, immediate completion,
 completed-today summary, calendar return routing, and sharing integration implemented; the
-state-aware Menu entry remains planned.
+state-aware Menu entry is implemented.
 
 Daily gameplay reuses the generated Game screen and the `4 Pairs Low` challenge selected by its
 recipe. It does not expose a Daily difficulty selector or consult the remembered normal `4 Pairs`
@@ -350,7 +353,7 @@ returns to the normal menu.
 ### Daily Calendar
 
 Status: monthly calendar model, read-only Compose surface, application destination, and
-completion-surface return routing implemented; the trailing Menu action remains planned.
+completion-surface and trailing Menu return routing implemented.
 
 The Daily calendar is a dedicated local-history destination with:
 

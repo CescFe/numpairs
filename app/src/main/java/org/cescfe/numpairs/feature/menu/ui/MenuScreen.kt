@@ -50,8 +50,10 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.LocalDate
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.preferences.PersonalizationTheme
+import org.cescfe.numpairs.feature.daily.DailyRecipes
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.cescfe.numpairs.ui.theme.NumPairsThemePreviewParameterProvider
@@ -61,7 +63,10 @@ fun MenuScreen(
     fourPairsMode: GeneratedModeMenuUiState,
     eightPairsMode: GeneratedModeMenuUiState,
     modifier: Modifier = Modifier,
+    dailyChallenge: DailyMenuUiState? = null,
     resumeChallengeName: String? = null,
+    onDailySelected: () -> Unit = {},
+    onDailyCalendarSelected: () -> Unit = {},
     onResumeSelected: () -> Unit = {},
     onQuickSelected: () -> Unit = {},
     onTutorialSelected: () -> Unit = {},
@@ -103,6 +108,13 @@ fun MenuScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    dailyChallenge?.let { state ->
+                        DailyMenuRow(
+                            state = state,
+                            onPrimaryClick = onDailySelected,
+                            onCalendarClick = onDailyCalendarSelected
+                        )
+                    }
                     resumeChallengeName?.let { challengeName ->
                         val resumeContentDescription = stringResource(
                             R.string.menu_resume_content_description,
@@ -174,6 +186,73 @@ fun MenuScreen(
             }
         }
     }
+}
+
+@Composable
+private fun DailyMenuRow(state: DailyMenuUiState, onPrimaryClick: () -> Unit, onCalendarClick: () -> Unit) {
+    val label = stringResource(
+        when (state) {
+            is DailyMenuUiState.StartToday -> R.string.menu_daily_start_button
+            is DailyMenuUiState.ContinueToday -> R.string.menu_daily_continue_button
+            is DailyMenuUiState.CompletedToday -> R.string.menu_daily_completed_button
+        }
+    )
+    val actionContentDescription = stringResource(
+        when (state) {
+            is DailyMenuUiState.StartToday -> R.string.menu_daily_start_content_description
+            is DailyMenuUiState.ContinueToday -> R.string.menu_daily_continue_content_description
+            is DailyMenuUiState.CompletedToday -> R.string.menu_daily_completed_content_description
+        }
+    )
+    val actionStateDescription = stringResource(
+        when (state) {
+            is DailyMenuUiState.StartToday -> R.string.menu_daily_not_started_state
+            is DailyMenuUiState.ContinueToday -> R.string.menu_daily_in_progress_state
+            is DailyMenuUiState.CompletedToday -> R.string.menu_daily_completed_state
+        }
+    )
+    val calendarContentDescription = stringResource(
+        R.string.menu_daily_calendar_content_description
+    )
+
+    NumPairsComponents.PrimarySplitCtaButton(
+        onPrimaryClick = onPrimaryClick,
+        onSecondaryClick = onCalendarClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(NumPairsComponents.ButtonHeight)
+            .testTag(MenuScreenTestTags.DAILY_SPLIT_CTA),
+        primaryActionModifier = Modifier
+            .semantics {
+                contentDescription = actionContentDescription
+                stateDescription = actionStateDescription
+                selected = state is DailyMenuUiState.CompletedToday
+            }
+            .testTag(MenuScreenTestTags.DAILY_BUTTON),
+        secondaryActionModifier = Modifier
+            .semantics {
+                contentDescription = calendarContentDescription
+            }
+            .testTag(MenuScreenTestTags.DAILY_CALENDAR_BUTTON),
+        primaryContentPadding = PaddingValues(
+            horizontal = MENU_GENERATED_MODE_BUTTON_HORIZONTAL_PADDING,
+            vertical = 0.dp
+        ),
+        primaryContent = {
+            MenuButtonText(
+                text = label,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
+        },
+        secondaryContent = {
+            Icon(
+                painter = painterResource(R.drawable.ic_calendar),
+                contentDescription = null,
+                modifier = Modifier.size(MENU_GENERATED_MODE_ICON_SIZE)
+            )
+        }
+    )
 }
 
 @Composable
@@ -411,6 +490,11 @@ private fun MenuScreenPreview(
         val fourPairsName = stringResource(R.string.four_pairs_screen_title)
         val eightPairsName = stringResource(R.string.eight_pairs_screen_title)
         MenuScreen(
+            dailyChallenge = DailyMenuUiState.StartToday(
+                identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
+                    LocalDate.of(2026, 7, 25)
+                )
+            ),
             fourPairsMode = GeneratedModeMenuUiState(
                 modeName = fourPairsName,
                 challengeName = stringResource(

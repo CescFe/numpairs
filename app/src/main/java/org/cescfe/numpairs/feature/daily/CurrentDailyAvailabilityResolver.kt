@@ -3,6 +3,7 @@ package org.cescfe.numpairs.feature.daily
 import kotlinx.coroutines.flow.first
 import org.cescfe.numpairs.data.daily.session.DailySessionRepository
 import org.cescfe.numpairs.data.daily.session.DailySessionSnapshot
+import org.cescfe.numpairs.data.daily.session.DailyState
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
 
 sealed interface CurrentDailyAvailability {
@@ -43,6 +44,13 @@ class CurrentDailyAvailabilityResolver(
     suspend fun resolve(): CurrentDailyAvailability {
         val currentDailyChallenge = currentDailyChallengeResolver.resolve()
         val dailyState = dailySessionRepository.state.first()
+        return resolve(
+            currentDailyChallenge = currentDailyChallenge,
+            dailyState = dailyState
+        )
+    }
+
+    fun resolve(currentDailyChallenge: CurrentDailyChallenge, dailyState: DailyState): CurrentDailyAvailability {
         val completion = dailyState.completedChallengeIds.singleOrNull { completedIdentity ->
             completedIdentity.localDate == currentDailyChallenge.identity.localDate
         }

@@ -5,6 +5,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
@@ -39,7 +42,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import java.time.LocalDate
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.feature.daily.DailyRecipes
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
@@ -52,6 +57,135 @@ import org.junit.runner.RunWith
 class MenuScreenTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun daily_primary_state_updates_label_action_and_non_color_semantics() {
+        val identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
+            LocalDate.of(2026, 7, 25)
+        )
+        var dailyState by mutableStateOf<DailyMenuUiState>(
+            DailyMenuUiState.StartToday(identity)
+        )
+
+        composeTestRule.setContent {
+            NumPairsTheme {
+                MenuScreen(
+                    dailyChallenge = dailyState,
+                    fourPairsMode = fourPairsState,
+                    eightPairsMode = eightPairsState
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.DAILY_BUTTON)
+            .assertTextEquals(string(R.string.menu_daily_start_button))
+            .assertContentDescriptionEquals(
+                string(R.string.menu_daily_start_content_description)
+            ).assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.StateDescription,
+                    string(R.string.menu_daily_not_started_state)
+                )
+            ).assertIsNotSelected()
+
+        composeTestRule.runOnIdle {
+            dailyState = DailyMenuUiState.ContinueToday(identity)
+        }
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.DAILY_BUTTON)
+            .assertTextEquals(string(R.string.menu_daily_continue_button))
+            .assertContentDescriptionEquals(
+                string(R.string.menu_daily_continue_content_description)
+            ).assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.StateDescription,
+                    string(R.string.menu_daily_in_progress_state)
+                )
+            ).assertIsNotSelected()
+
+        composeTestRule.runOnIdle {
+            dailyState = DailyMenuUiState.CompletedToday(identity)
+        }
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.DAILY_BUTTON)
+            .assertTextEquals(string(R.string.menu_daily_completed_button))
+            .assertContentDescriptionEquals(
+                string(R.string.menu_daily_completed_content_description)
+            ).assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.StateDescription,
+                    string(R.string.menu_daily_completed_state)
+                )
+            ).assertIsSelected()
+    }
+
+    @Test
+    fun daily_split_action_is_first_full_width_and_emits_primary_and_calendar_separately() {
+        val identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
+            LocalDate.of(2026, 7, 25)
+        )
+        var primaryCount = 0
+        var calendarCount = 0
+
+        setContent(
+            dailyChallenge = DailyMenuUiState.StartToday(identity),
+            resumeChallengeName = "4 pairs · Low",
+            onDailySelected = { primaryCount += 1 },
+            onDailyCalendarSelected = { calendarCount += 1 }
+        )
+
+        val dailyContainer = composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.DAILY_SPLIT_CTA)
+            .assertIsDisplayed()
+            .assertHasNoClickAction()
+            .fetchSemanticsNode()
+            .boundsInRoot
+        val dailyPrimary = composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.DAILY_BUTTON)
+            .assertHasClickAction()
+            .fetchSemanticsNode()
+            .boundsInRoot
+        val dailyCalendar = composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.DAILY_CALENDAR_BUTTON)
+            .assertHasClickAction()
+            .assertContentDescriptionEquals(
+                string(R.string.menu_daily_calendar_content_description)
+            ).fetchSemanticsNode()
+            .boundsInRoot
+        val resumeTop = composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.RESUME_BUTTON)
+            .fetchSemanticsNode()
+            .boundsInRoot
+            .top
+        val quickBounds = composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
+            .fetchSemanticsNode()
+            .boundsInRoot
+
+        assertTrue(dailyContainer.top < resumeTop)
+        assertTrue(resumeTop < quickBounds.top)
+        assertEquals(quickBounds.left, dailyContainer.left, 0.5f)
+        assertEquals(quickBounds.right, dailyContainer.right, 0.5f)
+        assertEquals(dailyContainer.left, dailyPrimary.left, 0.5f)
+        assertEquals(dailyContainer.right, dailyCalendar.right, 0.5f)
+        assertTrue(
+            dailyCalendar.width >= with(composeTestRule.density) {
+                48.dp.toPx()
+            }
+        )
+
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.DAILY_CALENDAR_BUTTON)
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.DAILY_BUTTON)
+            .performClick()
+        composeTestRule.runOnIdle {
+            assertEquals(1, primaryCount)
+            assertEquals(1, calendarCount)
+        }
+    }
 
     @Test
     fun settings_action_replaces_personalization_button_and_emits_action() {
@@ -416,9 +550,19 @@ class MenuScreenTest {
             width = 320.dp,
             height = 360.dp,
             fontScale = 2f,
-            layoutDirection = LayoutDirection.Rtl
+            layoutDirection = LayoutDirection.Rtl,
+            dailyChallenge = DailyMenuUiState.StartToday(
+                DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
+                    LocalDate.of(2026, 7, 25)
+                )
+            )
         )
 
+        val dailyBounds = composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.DAILY_SPLIT_CTA)
+            .assertIsDisplayed()
+            .fetchSemanticsNode()
+            .boundsInRoot
         val quickBounds = composeTestRule
             .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
             .performScrollTo()
@@ -435,6 +579,8 @@ class MenuScreenTest {
         assertEquals(fourPairsBounds.left, quickBounds.left, 0.5f)
         assertEquals(fourPairsBounds.right, quickBounds.right, 0.5f)
         assertEquals(fourPairsBounds.height, quickBounds.height, 0.5f)
+        assertEquals(quickBounds.left, dailyBounds.left, 0.5f)
+        assertEquals(quickBounds.right, dailyBounds.right, 0.5f)
     }
 
     private fun assertSelectorEndAlignment(layoutDirection: LayoutDirection) {
@@ -469,6 +615,10 @@ class MenuScreenTest {
         height: Dp? = null,
         fontScale: Float = 1f,
         layoutDirection: LayoutDirection = LayoutDirection.Ltr,
+        dailyChallenge: DailyMenuUiState? = null,
+        resumeChallengeName: String? = null,
+        onDailySelected: () -> Unit = {},
+        onDailyCalendarSelected: () -> Unit = {},
         onPersonalizationSelected: () -> Unit = {},
         onQuickSelected: () -> Unit = {},
         onFourPairsSelected: () -> Unit = {},
@@ -487,6 +637,10 @@ class MenuScreenTest {
                     if (width != null && height != null) {
                         Box(modifier = Modifier.size(width = width, height = height)) {
                             MenuContent(
+                                dailyChallenge = dailyChallenge,
+                                resumeChallengeName = resumeChallengeName,
+                                onDailySelected = onDailySelected,
+                                onDailyCalendarSelected = onDailyCalendarSelected,
                                 onPersonalizationSelected = onPersonalizationSelected,
                                 onQuickSelected = onQuickSelected,
                                 onFourPairsSelected = onFourPairsSelected,
@@ -495,6 +649,10 @@ class MenuScreenTest {
                         }
                     } else {
                         MenuContent(
+                            dailyChallenge = dailyChallenge,
+                            resumeChallengeName = resumeChallengeName,
+                            onDailySelected = onDailySelected,
+                            onDailyCalendarSelected = onDailyCalendarSelected,
                             onPersonalizationSelected = onPersonalizationSelected,
                             onQuickSelected = onQuickSelected,
                             onFourPairsSelected = onFourPairsSelected,
@@ -508,14 +666,22 @@ class MenuScreenTest {
 
     @Composable
     private fun MenuContent(
+        dailyChallenge: DailyMenuUiState?,
+        resumeChallengeName: String?,
+        onDailySelected: () -> Unit,
+        onDailyCalendarSelected: () -> Unit,
         onPersonalizationSelected: () -> Unit,
         onQuickSelected: () -> Unit,
         onFourPairsSelected: () -> Unit,
         onFourPairsDifficultySelected: (GeneratedDifficultyMenuOptionId) -> Unit
     ) {
         MenuScreen(
+            dailyChallenge = dailyChallenge,
+            resumeChallengeName = resumeChallengeName,
             fourPairsMode = fourPairsState,
             eightPairsMode = eightPairsState,
+            onDailySelected = onDailySelected,
+            onDailyCalendarSelected = onDailyCalendarSelected,
             onPersonalizationSelected = onPersonalizationSelected,
             onQuickSelected = onQuickSelected,
             onFourPairsSelected = onFourPairsSelected,

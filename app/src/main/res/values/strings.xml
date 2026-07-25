@@ -7,6 +7,16 @@
     <string name="menu_resume_button">Resume</string>
     <string name="menu_resume_content_description">Resume %1$s puzzle</string>
     <string name="menu_play_quick_content_description">Play %1$s puzzle, %2$s, %3$s difficulty</string>
+    <string name="menu_daily_start_button">Daily challenge</string>
+    <string name="menu_daily_continue_button">Continue daily</string>
+    <string name="menu_daily_completed_button">Daily completed</string>
+    <string name="menu_daily_start_content_description">Start today’s Daily challenge, 4 pairs, Low difficulty</string>
+    <string name="menu_daily_continue_content_description">Continue today’s Daily challenge, 4 pairs, Low difficulty</string>
+    <string name="menu_daily_completed_content_description">Open today’s completed Daily challenge, 4 pairs, Low difficulty</string>
+    <string name="menu_daily_calendar_content_description">View Daily completion calendar</string>
+    <string name="menu_daily_not_started_state">Not started today</string>
+    <string name="menu_daily_in_progress_state">In progress today</string>
+    <string name="menu_daily_completed_state">Completed today</string>
     <string name="menu_tutorial_button">How to play</string>
     <string name="menu_settings_action_content_description">Settings</string>
     <string name="menu_play_generated_challenge_content_description">Play %1$s puzzle</string>

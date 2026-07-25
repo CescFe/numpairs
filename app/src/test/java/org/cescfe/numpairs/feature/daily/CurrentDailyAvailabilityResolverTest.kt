@@ -112,6 +112,41 @@ class CurrentDailyAvailabilityResolverTest {
         assertSame(retainedSnapshot, restored.snapshot)
         assertEquals(0, repository.mutationCount)
     }
+
+    @Test
+    fun supplied_state_is_resolved_against_one_captured_identity_after_the_clock_changes() {
+        var currentDate = LocalDate.of(2027, 4, 18)
+        val repository = FakeDailySessionRepository(
+            initialState = DailyState(
+                activeSession = null,
+                completedChallengeIds = emptyList()
+            )
+        )
+        val currentResolver = CurrentDailyChallengeResolver(
+            localDateSource = DeviceLocalDateSource { currentDate }
+        )
+        val resolver = CurrentDailyAvailabilityResolver(
+            currentDailyChallengeResolver = currentResolver,
+            dailySessionRepository = repository
+        )
+        val capturedChallenge = currentResolver.resolve()
+
+        currentDate = currentDate.plusDays(1)
+        val availability = resolver.resolve(
+            currentDailyChallenge = capturedChallenge,
+            dailyState = DailyState(
+                activeSession = null,
+                completedChallengeIds = listOf(capturedChallenge.identity)
+            )
+        )
+
+        assertTrue(availability is CurrentDailyAvailability.CompletedToday)
+        assertEquals(
+            LocalDate.of(2027, 4, 18),
+            availability.currentDailyChallenge.identity.localDate
+        )
+        assertEquals(0, repository.mutationCount)
+    }
 }
 
 private fun resolver(date: LocalDate, repository: DailySessionRepository): CurrentDailyAvailabilityResolver =
