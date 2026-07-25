@@ -2,8 +2,8 @@
 
 ## Document Status
 
-- Status: Daily identity, recipe resolution, deterministic generation fallback, and device-local
-  date boundary implemented; session persistence and completion history planned
+- Status: Daily identity, deterministic generation, local-date boundary, and versioned aggregate
+  codec implemented; repository persistence and completion history planned
 - Product contract: `docs/product/prd/prd-v10.md`
 - Architecture decision:
   `docs/technical/adr/adr-006-model-daily-challenge-as-versioned-local-cadence.md`
@@ -109,6 +109,11 @@ Malformed active-session data must not fabricate a resumable puzzle or completio
 implementation should preserve independently valid completion records where the selected encoding
 can isolate a malformed optional session; otherwise aggregate corruption recovers to an empty
 local Daily state.
+
+The schema-1 aggregate, recipe-aware snapshot validation, canonical identity-only completion
+collection, and deterministic length-delimited codec are implemented. The optional session
+payload is isolated so invalid session bytes can be discarded without losing independently valid
+completion identities.
 
 ---
 

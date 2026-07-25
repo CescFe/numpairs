@@ -2,6 +2,8 @@ package org.cescfe.numpairs.feature.daily
 
 import java.time.LocalDate
 import org.cescfe.numpairs.domain.daily.DailyCandidateIndex
+import org.cescfe.numpairs.domain.daily.DailyRecipeContract
+import org.cescfe.numpairs.domain.daily.DailyRecipeContracts
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
 import org.cescfe.numpairs.domain.daily.Fnv1a32DailyCandidateSeedSchedule
 import org.cescfe.numpairs.domain.generated.profile.DifficultyTier
@@ -19,6 +21,7 @@ class DailyRecipeTest {
         val recipe = DailyRecipes.catalog.resolve(DailyRecipeVersion("daily-4-pairs-low-v1"))
 
         assertSame(DailyRecipes.FOUR_PAIRS_LOW_V1, recipe)
+        assertSame(DailyRecipeContracts.FOUR_PAIRS_LOW_V1, recipe.contract)
         assertSame(GeneratedModes.FOUR_PAIRS_LOW, recipe.challenge)
         assertEquals(GeneratedModes.FOUR_PAIRS.id, recipe.challenge.modeId)
         assertEquals(DifficultyTier.LOW, recipe.challenge.difficulty)
@@ -58,18 +61,24 @@ class DailyRecipeTest {
     fun recipe_and_catalog_reject_invalid_candidate_and_challenge_configuration() {
         assertThrows(IllegalArgumentException::class.java) {
             DailyRecipe(
-                version = DailyRecipeVersion("daily-empty"),
-                challenge = GeneratedModes.FOUR_PAIRS_LOW,
-                candidateIndices = emptyList(),
-                seedSchedule = Fnv1a32DailyCandidateSeedSchedule
+                contract = DailyRecipeContract(
+                    version = DailyRecipeVersion("daily-empty"),
+                    profile = GeneratedModes.FOUR_PAIRS_LOW.profile,
+                    candidateIndices = emptyList(),
+                    seedSchedule = Fnv1a32DailyCandidateSeedSchedule
+                ),
+                challenge = GeneratedModes.FOUR_PAIRS_LOW
             )
         }
         assertThrows(IllegalArgumentException::class.java) {
             DailyRecipe(
-                version = DailyRecipeVersion("daily-non-contiguous"),
-                challenge = GeneratedModes.FOUR_PAIRS_LOW,
-                candidateIndices = listOf(DailyCandidateIndex(0), DailyCandidateIndex(2)),
-                seedSchedule = Fnv1a32DailyCandidateSeedSchedule
+                contract = DailyRecipeContract(
+                    version = DailyRecipeVersion("daily-non-contiguous"),
+                    profile = GeneratedModes.FOUR_PAIRS_LOW.profile,
+                    candidateIndices = listOf(DailyCandidateIndex(0), DailyCandidateIndex(2)),
+                    seedSchedule = Fnv1a32DailyCandidateSeedSchedule
+                ),
+                challenge = GeneratedModes.FOUR_PAIRS_LOW
             )
         }
         assertThrows(IllegalArgumentException::class.java) {
