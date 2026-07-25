@@ -26,6 +26,7 @@ class GeneratedChallengeCatalogTest {
             listOf(DifficultyTier.LOW, DifficultyTier.MEDIUM, DifficultyTier.HARD),
             DifficultyTier.entries
         )
+        assertEquals(DifficultyTier.LOW, GeneratedPuzzleProfiles.THREE_PAIRS_LOW.difficulty)
         assertEquals(DifficultyTier.LOW, GeneratedPuzzleProfiles.FOUR_PAIRS_LOW.difficulty)
         assertEquals(DifficultyTier.MEDIUM, GeneratedPuzzleProfiles.FOUR_PAIRS_MEDIUM.difficulty)
         assertEquals(DifficultyTier.MEDIUM, GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM.difficulty)
@@ -33,21 +34,49 @@ class GeneratedChallengeCatalogTest {
     }
 
     @Test
-    fun configured_catalog_registers_low_and_medium_for_four_pairs() {
+    fun configured_catalog_registers_only_the_supported_sparse_challenges() {
+        assertEquals("three-pairs", GeneratedModes.THREE_PAIRS.id.value)
         assertEquals("four-pairs", GeneratedModes.FOUR_PAIRS.id.value)
         assertEquals("eight-pairs", GeneratedModes.EIGHT_PAIRS.id.value)
+        assertEquals("three-pairs-low", GeneratedModes.THREE_PAIRS_LOW.id.value)
+        assertEquals("3-pairs-low", GeneratedModes.THREE_PAIRS_LOW.profile.id.value)
         assertEquals("4-pairs-low", GeneratedModes.FOUR_PAIRS_LOW.profile.id.value)
         assertEquals("4-pairs-medium", GeneratedModes.FOUR_PAIRS_MEDIUM.profile.id.value)
         assertEquals("8-pairs-medium", GeneratedModes.EIGHT_PAIRS_MEDIUM.profile.id.value)
         assertEquals("8-pairs-hard", GeneratedModes.EIGHT_PAIRS_HARD.profile.id.value)
         assertEquals(
             listOf(
+                GeneratedModes.THREE_PAIRS_LOW,
                 GeneratedModes.FOUR_PAIRS_LOW,
                 GeneratedModes.FOUR_PAIRS_MEDIUM,
                 GeneratedModes.EIGHT_PAIRS_MEDIUM,
                 GeneratedModes.EIGHT_PAIRS_HARD
             ),
             GeneratedModes.catalog.allChallenges
+        )
+        assertEquals(
+            listOf(GeneratedModes.THREE_PAIRS, GeneratedModes.FOUR_PAIRS, GeneratedModes.EIGHT_PAIRS),
+            GeneratedModes.catalog.all
+        )
+        assertEquals(listOf(GeneratedModes.THREE_PAIRS_LOW), GeneratedModes.THREE_PAIRS.challenges)
+        assertEquals(3, GeneratedModes.THREE_PAIRS.size.pairCount)
+        assertSame(
+            GeneratedModes.THREE_PAIRS_LOW,
+            GeneratedModes.catalog.resolveChallenge(
+                modeId = GeneratedModes.THREE_PAIRS.id,
+                difficulty = DifficultyTier.LOW
+            )
+        )
+        assertSame(
+            GeneratedModes.THREE_PAIRS_LOW,
+            GeneratedModes.catalog.resolveChallenge(
+                modeId = GeneratedModes.THREE_PAIRS.id,
+                profileId = GeneratedPuzzleProfiles.THREE_PAIRS_LOW.id
+            )
+        )
+        assertSame(
+            GeneratedModes.THREE_PAIRS_LOW,
+            GeneratedModes.catalog.resolveChallenge(GeneratedChallengeId("three-pairs-low"))
         )
         assertSame(
             GeneratedModes.FOUR_PAIRS_MEDIUM,
@@ -204,6 +233,24 @@ class GeneratedChallengeCatalogTest {
     fun unsupported_mode_difficulty_profile_and_challenge_resolutions_are_rejected() {
         assertThrows(IllegalArgumentException::class.java) {
             GeneratedModes.catalog.resolveChallenge(GeneratedChallengeId("unknown"))
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            GeneratedModes.catalog.resolveChallenge(
+                modeId = GeneratedModes.THREE_PAIRS.id,
+                difficulty = DifficultyTier.MEDIUM
+            )
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            GeneratedModes.catalog.resolveChallenge(
+                modeId = GeneratedModes.THREE_PAIRS.id,
+                difficulty = DifficultyTier.HARD
+            )
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            GeneratedModes.catalog.resolveChallenge(
+                modeId = GeneratedModes.THREE_PAIRS.id,
+                profileId = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW.id
+            )
         }
         assertThrows(IllegalArgumentException::class.java) {
             GeneratedModes.catalog.resolveChallenge(

@@ -22,8 +22,8 @@ class DataStoreGeneratedDifficultySelectionRepository(
 ) : GeneratedDifficultySelectionRepository {
     init {
         val configuredModeIds = catalog.all.map { mode -> mode.id }.toSet()
-        require(fallbackDifficultyByMode.keys == configuredModeIds) {
-            "Every configured generated mode must have exactly one difficulty fallback."
+        require(fallbackDifficultyByMode.keys.all(configuredModeIds::contains)) {
+            "Every difficulty fallback must belong to a configured generated mode."
         }
         fallbackDifficultyByMode.forEach { (modeId, difficulty) ->
             require(catalog.supports(modeId = modeId, difficulty = difficulty)) {
@@ -53,6 +53,9 @@ class DataStoreGeneratedDifficultySelectionRepository(
     }
 
     override suspend fun selectDifficulty(modeId: GeneratedModeId, difficulty: DifficultyTier) {
+        require(modeId in fallbackDifficultyByMode) {
+            "Generated mode ${modeId.value} does not support remembered difficulty selection."
+        }
         require(catalog.supports(modeId = modeId, difficulty = difficulty)) {
             "Difficulty ${difficulty.name} is not supported for generated mode ${modeId.value}."
         }

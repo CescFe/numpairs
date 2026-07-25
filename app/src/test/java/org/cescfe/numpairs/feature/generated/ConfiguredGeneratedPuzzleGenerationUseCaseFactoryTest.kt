@@ -29,6 +29,23 @@ import org.junit.Test
 
 class ConfiguredGeneratedPuzzleGenerationUseCaseFactoryTest {
     @Test
+    fun quick_challenge_generates_through_its_immutable_profile_context() = runBlocking {
+        val challenge = GeneratedModes.THREE_PAIRS_LOW
+        val factory = ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
+            generationDispatcher = Dispatchers.Unconfined
+        )
+        val context = factory.contextFor(challenge)
+
+        val result = factory.create(challenge).generate(
+            GeneratedPuzzleGenerationRequest(profile = challenge.profile, seed = 2026)
+        ) as GeneratedPuzzleGenerationResult.Generated
+
+        assertSame(challenge.profile, context.profile)
+        assertEquals(challenge.profile.size.stripEntryCount, result.initialPuzzle.strip.entries.size)
+        assertEquals(challenge.profile.size.boardTileCount, result.initialPuzzle.board.tiles.size)
+    }
+
+    @Test
     fun every_registered_challenge_uses_its_profile_and_a_shared_context() = runBlocking {
         val factory = ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
             generationDispatcher = Dispatchers.Unconfined

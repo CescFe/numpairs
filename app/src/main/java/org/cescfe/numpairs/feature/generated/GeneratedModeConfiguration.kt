@@ -133,9 +133,16 @@ class GeneratedChallengeCatalog(configurations: Collection<GeneratedModeConfigur
 }
 
 object GeneratedModes {
+    private val threePairsId = GeneratedModeId("three-pairs")
     private val fourPairsId = GeneratedModeId("four-pairs")
     private val eightPairsId = GeneratedModeId("eight-pairs")
 
+    val THREE_PAIRS_LOW: GeneratedChallenge = GeneratedChallenge(
+        id = GeneratedChallengeId("three-pairs-low"),
+        modeId = threePairsId,
+        difficulty = DifficultyTier.LOW,
+        profile = GeneratedPuzzleProfiles.THREE_PAIRS_LOW
+    )
     val FOUR_PAIRS_LOW: GeneratedChallenge = GeneratedChallenge(
         id = GeneratedChallengeId("four-pairs-low"),
         modeId = fourPairsId,
@@ -160,6 +167,11 @@ object GeneratedModes {
         difficulty = DifficultyTier.HARD,
         profile = GeneratedPuzzleProfiles.EIGHT_PAIRS_HARD
     )
+    val THREE_PAIRS: GeneratedModeConfiguration = GeneratedModeConfiguration(
+        id = threePairsId,
+        size = GeneratedPuzzleProfiles.THREE_PAIRS_LOW.size,
+        challenges = listOf(THREE_PAIRS_LOW)
+    )
     val FOUR_PAIRS: GeneratedModeConfiguration = GeneratedModeConfiguration(
         id = fourPairsId,
         size = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW.size,
@@ -171,6 +183,6 @@ object GeneratedModes {
         challenges = listOf(EIGHT_PAIRS_MEDIUM, EIGHT_PAIRS_HARD)
     )
     val catalog: GeneratedChallengeCatalog = GeneratedChallengeCatalog(
-        configurations = listOf(FOUR_PAIRS, EIGHT_PAIRS)
+        configurations = listOf(THREE_PAIRS, FOUR_PAIRS, EIGHT_PAIRS)
     )
 }
