@@ -13,7 +13,7 @@ puzzle profile and presents its player-facing initial puzzle.
 A replayable generated-puzzle family identified by a stable generated-mode identity and puzzle
 size.
 
-`3 Pairs`, `4 Pairs`, and `8 Pairs` are generated modes in the v10 product contract. `Quick` is the
+`3 Pairs`, `4 Pairs`, and `8 Pairs` are the implemented generated modes. `Quick` is the
 player-facing identity for the `3 Pairs` mode. A mode exposes one or more explicitly supported
 generated challenges. Its identity is used for family selection, applicable mode-specific
 preference, and generated-session identity; it does not imply one difficulty.

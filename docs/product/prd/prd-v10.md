@@ -1,7 +1,13 @@
 # PRD - NumPairs 🗓️ v10 Quick Play & Daily Challenge
 
-> Planned product contract for the `v10 - Quick Play & Daily Challenge` milestone.
+> Delivered product contract for the `v10 - Quick Play & Daily Challenge` milestone.
 > The implemented v8 difficulty-selection and v9 game-feel product is the baseline entering v10.
+> Delivery status: all six stages are implemented and validated; the GitHub milestone remains
+> open for manual closure.
+
+The **Current Baseline At Start Of v10** and **Delivery Stages** sections preserve the historical
+planning baseline and dependency order used to deliver the milestone. Later implementation-status
+statements and current references describe the shipped repository result.
 
 ## Product Summary
 
@@ -9,18 +15,18 @@ NumPairs is a native Android arithmetic deduction puzzle. Players complete hidde
 expressions using numbers from an ordered strip. Each solution pair contributes one addition tile
 and one multiplication tile.
 
-Generated play currently offers:
+Generated play now offers:
 
+- `Quick` (`3 Pairs Low`)
 - `4 Pairs Low`
 - `4 Pairs Medium`
 - `8 Pairs Medium`
 - `8 Pairs Hard`
 
-Players can choose a supported difficulty for each generated mode, resume one exact normal
-generated session, and replay the same challenge after completion. The current product does not
-offer a generated challenge shorter than four pairs or a date-bound reason to return.
+Players can launch Quick directly, choose a supported difficulty for 4 Pairs and 8 Pairs, resume
+one exact normal generated session, and replay the same challenge after completion.
 
-v10 adds two complementary ways to play:
+v10 delivered two complementary ways to play:
 
 - `Quick`, a replayable generated `3 Pairs Low` mode for brief, approachable sessions
 - `Daily Challenge`, one deterministic `4 Pairs Low` puzzle for each device-local calendar date
@@ -364,8 +370,8 @@ Sharing has no effect on session, completion, calendar, onboarding, or preferenc
 - Document menu, rollover, calendar, completion, sharing, localization, and accessibility behavior.
 - Align generation, persistence, game-rule, UI, and current-product references.
 
-No production or test-code implementation for v10 begins until the planned product, domain,
-generation, persistence, and UI documentation is delivered.
+At delivery start, no production or test-code implementation for v10 began until the planned
+product, domain, generation, persistence, and UI documentation was delivered.
 
 ### Quick Profile And Generated Integration
 

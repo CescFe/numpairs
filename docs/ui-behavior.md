@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document defines the current and planned v10 menu, Quick, Daily Challenge, generated
+This document defines the current v10 menu, Quick, Daily Challenge, generated
 difficulty selection, personalization, session routing, generated-game feedback, completion,
 calendar, sharing, and in-puzzle interaction model for NumPairs.
 

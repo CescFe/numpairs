@@ -8,9 +8,9 @@
 - Implemented v10 challenge registration: generated `3 Pairs Low` is the only Quick challenge
 - Implemented v10 generated presentation: Quick uses the shared Low learning route
 - Implemented v10 Menu exposure: direct Quick entry through the normal generated-session flow
-- Implemented v10 Daily foundation: versioned identity, `4 Pairs Low` recipe resolution,
-  deterministic four-candidate seed schedule, device-local date capture, and ordered candidate
-  execution
+- Implemented v10 Daily Challenge: versioned identity, `4 Pairs Low` recipe resolution,
+  deterministic four-candidate seed schedule, device-local date capture, ordered candidate
+  execution, independent persistence, gameplay, calendar, completion, and sharing
 - v8 generated challenge matrix: implemented
 - Related references:
   - `docs/product/prd/prd-v5.md`
@@ -184,8 +184,8 @@ The v10 Daily Challenge reuses the existing generated-puzzle pipeline without ma
 aware of dates, calendars, completion history, Android clocks, or presentation state.
 
 Status: identity, immutable v10 recipe resolution, the FNV-1a candidate seed schedule,
-device-local current-identity resolution, and ordered candidate execution are implemented.
-Persistence, gameplay, and presentation remain planned.
+device-local current-identity resolution, ordered candidate execution, persistence, gameplay,
+completion history, calendar, and sharing are implemented.
 
 One immutable Daily Recipe version:
 
@@ -202,12 +202,10 @@ Daily coordination never substitutes device randomness, another difficulty, or a
 challenge.
 
 The recipe payload format, algorithm, challenge, candidate order, and limit are compatibility
-behavior and cannot change under the same recipe version. A deterministic future-date corpus must
-protect both the seed schedule and successful bounded generation before release.
-
-The implemented calendar-year 2027 corpus covers all 365 local dates. Every date generated and
-validated through candidate index `0`; indexes `1..3` were never required, and no date exhausted
-the four-candidate limit.
+behavior and cannot change under the same recipe version. The implemented deterministic
+calendar-year 2027 corpus protects both the seed schedule and successful bounded generation
+across all 365 local dates. Every date generated and validated through candidate index `0`;
+indexes `1..3` were never required, and no date exhausted the four-candidate limit.
 
 The date is captured by an injected device-local date source outside the platform-independent
 generator. A local-date change never changes an already constructed generation request.
@@ -582,7 +580,7 @@ consistency validation or their selected profile's assessment acceptance policy.
 - `docs/product/prd/prd-v8.md` owns the difficulty-selection and challenge-expansion product contract.
 - `docs/product/prd/prd-v10.md` owns the Quick and Daily Challenge product contract.
 - `docs/technical/generated-session-persistence.md` owns the implemented session storage and coordination boundary.
-- `docs/technical/daily-challenge-persistence.md` owns the planned Daily aggregate storage and
+- `docs/technical/daily-challenge-persistence.md` owns the implemented Daily aggregate storage and
   coordination boundary.
 - `docs/technical/adr/adr-005-model-sparse-generated-challenges.md` owns the durable sparse challenge-catalog decision.
 - `docs/technical/adr/adr-006-model-daily-challenge-as-versioned-local-cadence.md` owns the durable
