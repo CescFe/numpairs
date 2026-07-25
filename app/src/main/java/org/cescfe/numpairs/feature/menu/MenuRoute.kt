@@ -30,6 +30,7 @@ fun MenuRoute(
     onPersonalizationSelected: () -> Unit = {},
     onGeneratedChallengeSelected: (GeneratedChallenge) -> Unit = {}
 ) {
+    val quickChallenge = generatedChallengeCatalog.resolveChallenge(GeneratedModes.THREE_PAIRS_LOW.id)
     val fourPairsMode = generatedChallengeCatalog.resolve(GeneratedModes.FOUR_PAIRS.id)
     val eightPairsMode = generatedChallengeCatalog.resolve(GeneratedModes.EIGHT_PAIRS.id)
     val fourPairsChallenge = fourPairsMode.selectedChallenge(
@@ -57,6 +58,9 @@ fun MenuRoute(
     MenuScreen(
         modifier = modifier,
         resumeChallengeName = resumeChallengeName,
+        onQuickSelected = {
+            onGeneratedChallengeSelected(quickChallenge)
+        },
         fourPairsMode = fourPairsMode.menuUiState(
             selectedChallenge = fourPairsChallenge,
             catalog = generatedChallengeCatalog

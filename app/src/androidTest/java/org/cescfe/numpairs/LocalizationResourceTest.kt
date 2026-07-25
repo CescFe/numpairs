@@ -30,6 +30,10 @@ class LocalizationResourceTest {
             "Quick · Baja",
             resources.getString(R.string.generated_challenge_title, "Quick", "Baja")
         )
+        assertEquals(
+            "Jugar puzle Quick, 3 pares, dificultad Baja",
+            resources.getString(R.string.menu_play_quick_content_description, "Quick", "3 pares", "Baja")
+        )
         assertEquals("8 pares", resources.getString(R.string.eight_pairs_screen_title))
         assertEquals("Alta", resources.getString(R.string.generated_difficulty_hard))
         assertEquals(
@@ -102,6 +106,15 @@ class LocalizationResourceTest {
             "Quick · Baixa",
             resources.getString(R.string.generated_challenge_title, "Quick", "Baixa")
         )
+        assertEquals(
+            "Juga al puzle Quick, 3 parelles, dificultat Baixa",
+            resources.getString(
+                R.string.menu_play_quick_content_description,
+                "Quick",
+                "3 parelles",
+                "Baixa"
+            )
+        )
         assertEquals("8 parelles", resources.getString(R.string.eight_pairs_screen_title))
         assertEquals("Alta", resources.getString(R.string.generated_difficulty_hard))
         assertEquals(
@@ -173,6 +186,10 @@ class LocalizationResourceTest {
         assertEquals(
             "Quick · Low",
             resources.getString(R.string.generated_challenge_title, "Quick", "Low")
+        )
+        assertEquals(
+            "Play Quick puzzle, 3 pairs, Low difficulty",
+            resources.getString(R.string.menu_play_quick_content_description, "Quick", "3 pairs", "Low")
         )
         assertEquals("8 pairs", resources.getString(R.string.eight_pairs_screen_title))
         assertEquals("Hard", resources.getString(R.string.generated_difficulty_hard))

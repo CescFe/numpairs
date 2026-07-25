@@ -63,6 +63,7 @@ fun MenuScreen(
     modifier: Modifier = Modifier,
     resumeChallengeName: String? = null,
     onResumeSelected: () -> Unit = {},
+    onQuickSelected: () -> Unit = {},
     onTutorialSelected: () -> Unit = {},
     onPersonalizationSelected: () -> Unit = {},
     onFourPairsSelected: () -> Unit = {},
@@ -120,6 +121,7 @@ fun MenuScreen(
                             MenuButtonText(text = stringResource(R.string.menu_resume_button))
                         }
                     }
+                    QuickMenuButton(onClick = onQuickSelected)
                     GeneratedModeMenuRow(
                         state = fourPairsMode,
                         onPlay = onFourPairsSelected,
@@ -171,6 +173,29 @@ fun MenuScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun QuickMenuButton(onClick: () -> Unit) {
+    val contentDescription = stringResource(
+        R.string.menu_play_quick_content_description,
+        stringResource(R.string.quick_screen_title),
+        stringResource(R.string.three_pairs_accessibility_name),
+        stringResource(R.string.generated_difficulty_low)
+    )
+
+    NumPairsComponents.PrimaryCtaButton(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(NumPairsComponents.ButtonHeight)
+            .semantics {
+                this.contentDescription = contentDescription
+            }
+            .testTag(MenuScreenTestTags.QUICK_BUTTON)
+    ) {
+        MenuButtonText(text = stringResource(R.string.quick_screen_title))
     }
 }
 

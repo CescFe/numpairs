@@ -154,6 +154,8 @@ difficulty. Normal generated actions do not read or write Daily state.
 
 ### Quick Action
 
+Status: implemented.
+
 Quick uses one full-width primary CTA labelled `Quick`. It has no trailing difficulty action while
 `3 Pairs Low` is its only supported challenge.
 

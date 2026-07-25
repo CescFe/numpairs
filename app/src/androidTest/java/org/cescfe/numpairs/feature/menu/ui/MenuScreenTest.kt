@@ -79,6 +79,52 @@ class MenuScreenTest {
     }
 
     @Test
+    fun quick_is_one_accessible_primary_action_without_a_difficulty_selector() {
+        var quickClickCount = 0
+        setContent(
+            onQuickSelected = {
+                quickClickCount += 1
+            }
+        )
+
+        val quickNode = composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
+            .assertIsDisplayed()
+            .assertTextEquals(string(R.string.quick_screen_title))
+            .assertContentDescriptionEquals(
+                string(
+                    R.string.menu_play_quick_content_description,
+                    string(R.string.quick_screen_title),
+                    string(R.string.three_pairs_accessibility_name),
+                    string(R.string.generated_difficulty_low)
+                )
+            )
+            .assertHasClickAction()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_BUTTON)
+            .assertIsDisplayed()
+
+        val quickTop = quickNode.fetchSemanticsNode().boundsInRoot.top
+        val fourPairsTop = composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+            .fetchSemanticsNode()
+            .boundsInRoot
+            .top
+        assertTrue(quickTop < fourPairsTop)
+
+        quickNode.performClick()
+        composeTestRule.runOnIdle {
+            assertEquals(1, quickClickCount)
+        }
+    }
+
+    @Test
     fun generated_mode_rows_identify_the_selected_challenge_and_emit_distinct_actions() {
         var playCount = 0
         var selectedDifficulty: GeneratedDifficultyMenuOptionId? = null
@@ -288,6 +334,14 @@ class MenuScreenTest {
             .assertIsDisplayed()
             .fetchSemanticsNode()
             .boundsInRoot
+        val quickBounds = composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
+            .assertIsDisplayed()
+            .fetchSemanticsNode()
+            .boundsInRoot
+        assertEquals(tutorialBounds.left, quickBounds.left, 0.5f)
+        assertEquals(tutorialBounds.right, quickBounds.right, 0.5f)
+        assertEquals(tutorialBounds.height, quickBounds.height, 0.5f)
         val dividerWidth = with(composeTestRule.density) {
             NumPairsComponents.ThinBorderWidth.toPx()
         }
@@ -344,12 +398,43 @@ class MenuScreenTest {
 
         val tutorialStyle = textStyle(string(R.string.menu_tutorial_button))
         assertEquals(22.sp, tutorialStyle.fontSize)
-        listOf(fourPairsState.challengeName, eightPairsState.challengeName).forEach { challengeName ->
-            val challengeStyle = textStyle(challengeName)
+        listOf(
+            string(R.string.quick_screen_title),
+            fourPairsState.challengeName,
+            eightPairsState.challengeName
+        ).forEach { actionName ->
+            val challengeStyle = textStyle(actionName)
 
             assertEquals(tutorialStyle.fontSize, challengeStyle.fontSize)
             assertEquals(tutorialStyle.fontWeight, challengeStyle.fontWeight)
         }
+    }
+
+    @Test
+    fun compact_height_large_text_and_rtl_keep_quick_scrollable_and_full_width() {
+        setContent(
+            width = 320.dp,
+            height = 360.dp,
+            fontScale = 2f,
+            layoutDirection = LayoutDirection.Rtl
+        )
+
+        val quickBounds = composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
+            .performScrollTo()
+            .assertIsDisplayed()
+            .fetchSemanticsNode()
+            .boundsInRoot
+        val fourPairsBounds = composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_SPLIT_CTA)
+            .performScrollTo()
+            .assertIsDisplayed()
+            .fetchSemanticsNode()
+            .boundsInRoot
+
+        assertEquals(fourPairsBounds.left, quickBounds.left, 0.5f)
+        assertEquals(fourPairsBounds.right, quickBounds.right, 0.5f)
+        assertEquals(fourPairsBounds.height, quickBounds.height, 0.5f)
     }
 
     private fun assertSelectorEndAlignment(layoutDirection: LayoutDirection) {
@@ -385,6 +470,7 @@ class MenuScreenTest {
         fontScale: Float = 1f,
         layoutDirection: LayoutDirection = LayoutDirection.Ltr,
         onPersonalizationSelected: () -> Unit = {},
+        onQuickSelected: () -> Unit = {},
         onFourPairsSelected: () -> Unit = {},
         onFourPairsDifficultySelected: (GeneratedDifficultyMenuOptionId) -> Unit = {}
     ) {
@@ -402,6 +488,7 @@ class MenuScreenTest {
                         Box(modifier = Modifier.size(width = width, height = height)) {
                             MenuContent(
                                 onPersonalizationSelected = onPersonalizationSelected,
+                                onQuickSelected = onQuickSelected,
                                 onFourPairsSelected = onFourPairsSelected,
                                 onFourPairsDifficultySelected = onFourPairsDifficultySelected
                             )
@@ -409,6 +496,7 @@ class MenuScreenTest {
                     } else {
                         MenuContent(
                             onPersonalizationSelected = onPersonalizationSelected,
+                            onQuickSelected = onQuickSelected,
                             onFourPairsSelected = onFourPairsSelected,
                             onFourPairsDifficultySelected = onFourPairsDifficultySelected
                         )
@@ -421,6 +509,7 @@ class MenuScreenTest {
     @Composable
     private fun MenuContent(
         onPersonalizationSelected: () -> Unit,
+        onQuickSelected: () -> Unit,
         onFourPairsSelected: () -> Unit,
         onFourPairsDifficultySelected: (GeneratedDifficultyMenuOptionId) -> Unit
     ) {
@@ -428,6 +517,7 @@ class MenuScreenTest {
             fourPairsMode = fourPairsState,
             eightPairsMode = eightPairsState,
             onPersonalizationSelected = onPersonalizationSelected,
+            onQuickSelected = onQuickSelected,
             onFourPairsSelected = onFourPairsSelected,
             onFourPairsDifficultySelected = onFourPairsDifficultySelected
         )

@@ -22,6 +22,7 @@ import org.cescfe.numpairs.feature.generated.GeneratedModeLaunchIntent
 import org.cescfe.numpairs.feature.generated.GeneratedModeRoute
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
+import org.cescfe.numpairs.feature.generated.localizedNewPuzzleName
 import org.cescfe.numpairs.feature.generated.localizedTitle
 import org.cescfe.numpairs.feature.menu.MenuRoute
 import org.cescfe.numpairs.feature.menu.ui.GeneratedSessionChoiceDialog
@@ -232,7 +233,7 @@ private fun UnlockedAppNavigation(
         }
         GeneratedSessionChoiceDialog(
             savedChallengeName = resumableSession.challenge.localizedTitle(generatedChallengeCatalog),
-            selectedChallengeName = selectedChallenge.localizedTitle(generatedChallengeCatalog),
+            selectedChallengeName = selectedChallenge.localizedNewPuzzleName(generatedChallengeCatalog),
             onResume = {
                 actionGuard.handle {
                     pendingGeneratedChallengeChoice = null

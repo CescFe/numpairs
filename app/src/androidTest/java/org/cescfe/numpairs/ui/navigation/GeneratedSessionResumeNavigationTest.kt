@@ -76,6 +76,11 @@ class GeneratedSessionResumeNavigationTest {
                 )
             )
         val resumeTop = resumeNode.fetchSemanticsNode().boundsInRoot.top
+        val quickTop = composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
+            .fetchSemanticsNode()
+            .boundsInRoot
+            .top
         val fourPairsTop = composeTestRule
             .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
             .fetchSemanticsNode()
@@ -97,7 +102,8 @@ class GeneratedSessionResumeNavigationTest {
             .boundsInRoot
             .top
         assertTrue(settingsTop < resumeTop)
-        assertTrue(resumeTop < fourPairsTop)
+        assertTrue(resumeTop < quickTop)
+        assertTrue(quickTop < fourPairsTop)
         assertTrue(fourPairsTop < eightPairsTop)
         assertTrue(eightPairsTop < tutorialTop)
 
