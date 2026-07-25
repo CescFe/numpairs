@@ -7,6 +7,16 @@
     <string name="menu_resume_button">Continuar</string>
     <string name="menu_resume_content_description">Continuar puzle de %1$s</string>
     <string name="menu_play_quick_content_description">Jugar puzle %1$s, %2$s, dificultad %3$s</string>
+    <string name="menu_daily_start_button">Reto Daily</string>
+    <string name="menu_daily_continue_button">Continuar Daily</string>
+    <string name="menu_daily_completed_button">Daily completado</string>
+    <string name="menu_daily_start_content_description">Empezar el reto Daily de hoy, 4 pares, dificultad Baja</string>
+    <string name="menu_daily_continue_content_description">Continuar el reto Daily de hoy, 4 pares, dificultad Baja</string>
+    <string name="menu_daily_completed_content_description">Abrir el reto Daily completado de hoy, 4 pares, dificultad Baja</string>
+    <string name="menu_daily_calendar_content_description">Ver calendario de finalizaciones Daily</string>
+    <string name="menu_daily_not_started_state">No empezado hoy</string>
+    <string name="menu_daily_in_progress_state">En curso hoy</string>
+    <string name="menu_daily_completed_state">Completado hoy</string>
     <string name="menu_tutorial_button">Cómo jugar</string>
     <string name="menu_settings_action_content_description">Ajustes</string>
     <string name="menu_play_generated_challenge_content_description">Jugar puzle de %1$s</string>

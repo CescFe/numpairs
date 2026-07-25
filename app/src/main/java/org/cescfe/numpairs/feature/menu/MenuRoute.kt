@@ -8,12 +8,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import java.io.IOException
 import kotlinx.coroutines.launch
+import org.cescfe.numpairs.data.daily.session.DailySessionRepository
 import org.cescfe.numpairs.data.generated.selection.GeneratedDifficultySelectionRepository
+import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
+import org.cescfe.numpairs.feature.daily.CurrentDailyAvailability
+import org.cescfe.numpairs.feature.daily.CurrentDailyAvailabilityResolver
+import org.cescfe.numpairs.feature.daily.CurrentDailyChallengeResolver
 import org.cescfe.numpairs.feature.generated.GeneratedChallenge
 import org.cescfe.numpairs.feature.generated.GeneratedChallengeCatalog
 import org.cescfe.numpairs.feature.generated.GeneratedModeConfiguration
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.generated.localizedTitle
+import org.cescfe.numpairs.feature.menu.ui.DailyMenuUiState
 import org.cescfe.numpairs.feature.menu.ui.GeneratedDifficultyMenuOptionId
 import org.cescfe.numpairs.feature.menu.ui.GeneratedDifficultyMenuOptionUiState
 import org.cescfe.numpairs.feature.menu.ui.GeneratedModeMenuUiState
@@ -23,13 +29,30 @@ import org.cescfe.numpairs.feature.menu.ui.MenuScreen
 fun MenuRoute(
     generatedDifficultySelectionRepository: GeneratedDifficultySelectionRepository,
     generatedChallengeCatalog: GeneratedChallengeCatalog,
+    dailySessionRepository: DailySessionRepository? = null,
+    deviceLocalDateSource: DeviceLocalDateSource? = null,
     modifier: Modifier = Modifier,
     resumeChallengeName: String? = null,
     onResumeSelected: () -> Unit = {},
     onTutorialSelected: () -> Unit = {},
     onPersonalizationSelected: () -> Unit = {},
+    onDailySelected: (DailyMenuUiState) -> Unit = {},
+    onDailyCalendarSelected: () -> Unit = {},
     onGeneratedChallengeSelected: (GeneratedChallenge) -> Unit = {}
 ) {
+    require((dailySessionRepository == null) == (deviceLocalDateSource == null)) {
+        "Daily Menu composition requires both the repository and local-date source."
+    }
+    val dailyMenuState = dailySessionRepository?.let { repository ->
+        requireNotNull(deviceLocalDateSource)
+        currentDailyMenuState(
+            dailySessionRepository = repository,
+            deviceLocalDateSource = deviceLocalDateSource
+        )
+    }
+    if (dailySessionRepository != null && dailyMenuState == null) {
+        return
+    }
     val quickChallenge = generatedChallengeCatalog.resolveChallenge(GeneratedModes.THREE_PAIRS_LOW.id)
     val fourPairsMode = generatedChallengeCatalog.resolve(GeneratedModes.FOUR_PAIRS.id)
     val eightPairsMode = generatedChallengeCatalog.resolve(GeneratedModes.EIGHT_PAIRS.id)
@@ -40,6 +63,9 @@ fun MenuRoute(
         repository = generatedDifficultySelectionRepository
     ) ?: return
     val coroutineScope = rememberCoroutineScope()
+    val dailyActionGuard = remember(dailyMenuState) {
+        DailyMenuActionGuard()
+    }
     val selectDifficulty: (GeneratedModeConfiguration, GeneratedDifficultyMenuOptionId) -> Unit =
         { mode, optionId ->
             val challenge = mode.challengeFor(optionId)
@@ -57,7 +83,16 @@ fun MenuRoute(
 
     MenuScreen(
         modifier = modifier,
+        dailyChallenge = dailyMenuState,
         resumeChallengeName = resumeChallengeName,
+        onDailySelected = {
+            dailyMenuState?.let { currentState ->
+                dailyActionGuard.handle {
+                    onDailySelected(currentState)
+                }
+            }
+        },
+        onDailyCalendarSelected = onDailyCalendarSelected,
         onQuickSelected = {
             onGeneratedChallengeSelected(quickChallenge)
         },
@@ -84,6 +119,56 @@ fun MenuRoute(
         onEightPairsDifficultySelected = { optionId ->
             selectDifficulty(eightPairsMode, optionId)
         }
+    )
+}
+
+@Composable
+private fun currentDailyMenuState(
+    dailySessionRepository: DailySessionRepository,
+    deviceLocalDateSource: DeviceLocalDateSource
+): DailyMenuUiState? {
+    val currentDailyChallengeResolver = remember(deviceLocalDateSource) {
+        CurrentDailyChallengeResolver(localDateSource = deviceLocalDateSource)
+    }
+    val availabilityResolver = remember(
+        currentDailyChallengeResolver,
+        dailySessionRepository
+    ) {
+        CurrentDailyAvailabilityResolver(
+            currentDailyChallengeResolver = currentDailyChallengeResolver,
+            dailySessionRepository = dailySessionRepository
+        )
+    }
+    val capturedCurrentDailyChallenge = remember(currentDailyChallengeResolver) {
+        currentDailyChallengeResolver.resolve()
+    }
+    val dailyState by dailySessionRepository.state.collectAsState(initial = null)
+
+    return remember(
+        availabilityResolver,
+        capturedCurrentDailyChallenge,
+        dailyState
+    ) {
+        dailyState?.let { currentState ->
+            availabilityResolver.resolve(
+                currentDailyChallenge = capturedCurrentDailyChallenge,
+                dailyState = currentState
+            ).toMenuUiState()
+        }
+    }
+}
+
+private fun CurrentDailyAvailability.toMenuUiState(): DailyMenuUiState = when (this) {
+    is CurrentDailyAvailability.StartToday -> DailyMenuUiState.StartToday(
+        identity = currentDailyChallenge.identity
+    )
+
+    is CurrentDailyAvailability.ContinueToday -> DailyMenuUiState.ContinueToday(
+        identity = currentDailyChallenge.identity
+    )
+
+    is CurrentDailyAvailability.CompletedToday -> DailyMenuUiState.CompletedToday(
+        identity = completion
     )
 }
 

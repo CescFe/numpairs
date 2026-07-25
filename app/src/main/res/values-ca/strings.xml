@@ -7,6 +7,16 @@
     <string name="menu_resume_button">Continua</string>
     <string name="menu_resume_content_description">Continua el puzle de %1$s</string>
     <string name="menu_play_quick_content_description">Juga al puzle %1$s, %2$s, dificultat %3$s</string>
+    <string name="menu_daily_start_button">Repte Daily</string>
+    <string name="menu_daily_continue_button">Continua Daily</string>
+    <string name="menu_daily_completed_button">Daily completat</string>
+    <string name="menu_daily_start_content_description">Comença el repte Daily de hui, 4 parelles, dificultat Baixa</string>
+    <string name="menu_daily_continue_content_description">Continua el repte Daily de hui, 4 parelles, dificultat Baixa</string>
+    <string name="menu_daily_completed_content_description">Obri el repte Daily completat de hui, 4 parelles, dificultat Baixa</string>
+    <string name="menu_daily_calendar_content_description">Mostra el calendari de finalitzacions Daily</string>
+    <string name="menu_daily_not_started_state">No començat hui</string>
+    <string name="menu_daily_in_progress_state">En curs hui</string>
+    <string name="menu_daily_completed_state">Completat hui</string>
     <string name="menu_tutorial_button">Com jugar</string>
     <string name="menu_settings_action_content_description">Configuració</string>
     <string name="menu_play_generated_challenge_content_description">Juga al puzle de %1$s</string>

@@ -2,6 +2,9 @@ package org.cescfe.numpairs.feature.menu.ui
 
 object MenuScreenTestTags {
     const val SCREEN = "menu_screen"
+    const val DAILY_SPLIT_CTA = "menu_daily_split_cta"
+    const val DAILY_BUTTON = "menu_daily_button"
+    const val DAILY_CALENDAR_BUTTON = "menu_daily_calendar_button"
     const val RESUME_BUTTON = "menu_resume_button"
     const val QUICK_BUTTON = "menu_quick_button"
     const val QUICK_DIFFICULTY_BUTTON = "menu_quick_difficulty_button"
