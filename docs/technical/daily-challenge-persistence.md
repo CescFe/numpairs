@@ -2,8 +2,8 @@
 
 ## Document Status
 
-- Status: Daily identity, recipe resolution, and deterministic seed schedule implemented; local
-  date access, session persistence, and completion history planned
+- Status: Daily identity, recipe resolution, deterministic seed schedule, and device-local date
+  boundary implemented; session persistence and completion history planned
 - Product contract: `docs/product/prd/prd-v10.md`
 - Architecture decision:
   `docs/technical/adr/adr-006-model-daily-challenge-as-versioned-local-cadence.md`
@@ -57,9 +57,10 @@ The recipe resolver accepts only configured recipe versions. An unknown recipe m
 snapshot unsupported, but a completion record keeps its canonical completed date for calendar
 history.
 
-The platform-independent identity types, v10 recipe catalog, exact `4 Pairs Low` binding, and
-four-candidate FNV-1a seed schedule are implemented. Current device-local date capture and
-candidate generation remain outside this implemented boundary.
+The platform-independent identity types, v10 recipe catalog, exact `4 Pairs Low` binding,
+four-candidate FNV-1a seed schedule, and injectable device-local date boundary are implemented.
+Current identity resolution captures one `LocalDate` before generation begins. Candidate
+generation remains outside this implemented boundary.
 
 ---
 

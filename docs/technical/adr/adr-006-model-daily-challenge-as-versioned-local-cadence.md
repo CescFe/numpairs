@@ -99,6 +99,10 @@ Daily identity and does not expose an unfinished prior-date session for backfill
 The clock and time zone are trusted local inputs. Manual changes may make a matching stored
 session or completion visible again; v10 does not add anti-cheat state.
 
+The injectable device-local date source and current-Daily resolver are implemented. The source
+reads the current instant in the current default device time zone, and each resolution captures
+one `LocalDate` before constructing immutable Daily identity.
+
 ### Daily Aggregate
 
 NumPairs owns one application-private Daily aggregate containing:
