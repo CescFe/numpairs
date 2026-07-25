@@ -288,6 +288,64 @@ class DailyPuzzleViewModelTest {
     }
 
     @Test
+    fun route_exit_cancels_pending_successor_storage_before_rollover_reentry() {
+        var date = LocalDate.of(2027, 4, 18)
+        val staleSnapshot = generatedDailyFixture(date = date.minusDays(1)).snapshot()
+        val firstSuccessor = generatedDailyFixture(date = date)
+        val secondSuccessor = generatedDailyFixture(date = date.plusDays(1))
+        val storageGate = CompletableDeferred<Unit>()
+        val repository = RecordingDailySessionRepository(
+            initialState = DailyState(staleSnapshot, emptyList()),
+            nextReplaceGate = storageGate
+        )
+        val generator = RecordingDailyPuzzleGenerator(
+            generatedResult(
+                date = firstSuccessor.identity.localDate,
+                initialPuzzle = firstSuccessor.generatedPuzzle.initialPuzzle
+            ),
+            generatedResult(
+                date = secondSuccessor.identity.localDate,
+                initialPuzzle = secondSuccessor.generatedPuzzle.initialPuzzle
+            )
+        )
+        val viewModel = viewModel(
+            dateSource = DeviceLocalDateSource { date },
+            repository = repository,
+            generator = generator,
+            idSource = QueueDailySessionIdSource(
+                "cancelled-successor",
+                "rollover-successor"
+            )
+        )
+
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.runCurrent()
+
+        assertTrue(viewModel.uiState.value is DailyPuzzleUiState.Loading)
+        assertEquals(firstSuccessor.identity, repository.replaceAttempts.single().dailyChallengeId)
+        assertSame(staleSnapshot, repository.currentState.activeSession)
+
+        viewModel.onRouteExited()
+        date = date.plusDays(1)
+        storageGate.complete(Unit)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value is DailyPuzzleUiState.Idle)
+        assertSame(staleSnapshot, repository.currentState.activeSession)
+
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val ready = viewModel.uiState.value as DailyPuzzleUiState.Ready
+        assertEquals(secondSuccessor.identity, ready.session.currentDailyChallenge.identity)
+        assertEquals(
+            listOf(firstSuccessor.identity, secondSuccessor.identity),
+            repository.replaceAttempts.map(DailySessionSnapshot::dailyChallengeId)
+        )
+        assertEquals(ready.session.snapshot, repository.currentState.activeSession)
+    }
+
+    @Test
     fun committed_progress_updates_memory_immediately_and_persists_in_callback_order() {
         val fixture = generatedDailyFixture()
         val firstWriteGate = CompletableDeferred<Unit>()

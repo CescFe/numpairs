@@ -5,7 +5,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
@@ -21,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.runBlocking
 import org.cescfe.numpairs.data.daily.session.DailySessionClearResult
 import org.cescfe.numpairs.data.daily.session.DailySessionCompletionResult
 import org.cescfe.numpairs.data.daily.session.DailySessionId
@@ -34,9 +38,11 @@ import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
 import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesRepository
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
+import org.cescfe.numpairs.data.preferences.PersonalizationPreferences
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
+import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.daily.calendar.DailyCalendarScreenTestTags
 import org.cescfe.numpairs.feature.daily.share.DailyCompletionShareLaunchResult
@@ -70,20 +76,23 @@ class DailyCompletionSurfaceTest {
             )
         )
         var sharedText: String? = null
+        val hapticFeedback = RecordingHapticFeedback()
         val shareLauncher = DailyCompletionShareLauncher { payload ->
             sharedText = payload.text.value
             DailyCompletionShareLaunchResult.Launched
         }
 
         composeTestRule.setContent {
-            NumPairsTheme {
-                DailyCompletedTodayRoute(
-                    identity = identity,
-                    dailySessionRepository = repository,
-                    deviceLocalDateSource = DeviceLocalDateSource { identity.localDate },
-                    shareLauncher = shareLauncher,
-                    onNavigateBack = {}
-                )
+            CompositionLocalProvider(LocalHapticFeedback provides hapticFeedback) {
+                NumPairsTheme {
+                    DailyCompletedTodayRoute(
+                        identity = identity,
+                        dailySessionRepository = repository,
+                        deviceLocalDateSource = DeviceLocalDateSource { identity.localDate },
+                        shareLauncher = shareLauncher,
+                        onNavigateBack = {}
+                    )
+                }
             }
         }
 
@@ -112,6 +121,7 @@ class DailyCompletionSurfaceTest {
             .assertIsDisplayed()
         composeTestRule.runOnIdle {
             assertEquals(0, repository.mutationCount)
+            assertEquals(emptyList<HapticFeedbackType>(), hapticFeedback.requestedTypes)
         }
     }
 
@@ -156,6 +166,72 @@ class DailyCompletionSurfaceTest {
             assertEquals(1, repository.mutationCount)
             assertEquals(identity, repository.lastReplacement?.dailyChallengeId)
         }
+    }
+
+    @Test
+    fun daily_gameplay_requests_assignment_haptics_only_while_the_preference_is_enabled() {
+        val identity = identity()
+        val repository = RecordingDailyRepository(
+            DailyState(
+                activeSession = generatedSnapshot(identity),
+                completedChallengeIds = emptyList()
+            )
+        )
+        val preferencesRepository = FakePersonalizationPreferencesRepository(
+            initialPreferences = PersonalizationPreferences(
+                generatedGameHapticsEnabled = false
+            )
+        )
+        val hapticFeedback = RecordingHapticFeedback()
+        val generationFactory = ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
+            challengeCatalog = GeneratedModes.catalog
+        )
+
+        composeTestRule.setContent {
+            CompositionLocalProvider(LocalHapticFeedback provides hapticFeedback) {
+                NumPairsTheme {
+                    AppNavigation(
+                        onboardingRepository = FakeOnboardingRepository(),
+                        generatedSessionRepository = FakeGeneratedSessionRepository(),
+                        generatedDifficultySelectionRepository =
+                        FakeGeneratedDifficultySelectionRepository(),
+                        personalizationPreferencesRepository = preferencesRepository,
+                        topAppBarActionDiscoveryRepository =
+                        FakeTopAppBarActionDiscoveryRepository(),
+                        generatedChallengeCatalog = GeneratedModes.catalog,
+                        generatedPuzzleGenerationUseCaseFactory = generationFactory,
+                        dailyFeatureDependencies = DailyFeatureDependencies(
+                            dailySessionRepository = repository,
+                            deviceLocalDateSource = DeviceLocalDateSource {
+                                identity.localDate
+                            },
+                            generatedPuzzleGenerationUseCaseFactory = generationFactory
+                        ),
+                        startDestination = AppDestination.DailyChallenge(identity)
+                    )
+                }
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+        assignFirstTileOperator(Operator.ADDITION)
+        assertEquals(emptyList<HapticFeedbackType>(), hapticFeedback.requestedTypes)
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+
+        runBlocking {
+            preferencesRepository.setGeneratedGameHapticsEnabled(true)
+        }
+        composeTestRule.waitForIdle()
+        assignFirstTileOperator(Operator.MULTIPLICATION)
+
+        assertEquals(
+            listOf(HapticFeedbackType.Confirm),
+            hapticFeedback.requestedTypes
+        )
     }
 
     @Test
@@ -307,9 +383,57 @@ class DailyCompletionSurfaceTest {
             .assertIsDisplayed()
     }
 
+    private fun assignFirstTileOperator(operator: Operator) {
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.BOARD)
+            .performScrollTo()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(
+                GameScreenTestTags.tileOperatorOption(operator),
+                useUnmergedTree = true
+            ).performClick()
+        composeTestRule.waitForIdle()
+    }
+
+    private fun generatedSnapshot(identity: DailyChallengeId): DailySessionSnapshot {
+        val result = runBlocking {
+            DailyPuzzleGenerationUseCase(
+                currentDailyChallengeResolver = CurrentDailyChallengeResolver(
+                    localDateSource = DeviceLocalDateSource {
+                        identity.localDate
+                    }
+                ),
+                generatedPuzzleGenerationUseCaseFactory =
+                ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
+                    challengeCatalog = GeneratedModes.catalog
+                )
+            ).generate()
+        } as DailyPuzzleGenerationResult.Generated
+
+        return DailySessionSnapshot(
+            sessionId = DailySessionId("daily-feedback"),
+            dailyChallengeId = result.identity,
+            candidateIndex = result.candidateIndex,
+            seed = result.seed,
+            initialPuzzle = result.initialPuzzle,
+            currentPuzzle = result.initialPuzzle
+        )
+    }
+
     private fun identity(): DailyChallengeId = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
         LocalDate.of(2026, 7, 25)
     )
+
+    private class RecordingHapticFeedback : HapticFeedback {
+        val requestedTypes = mutableListOf<HapticFeedbackType>()
+
+        override fun performHapticFeedback(hapticFeedbackType: HapticFeedbackType) {
+            requestedTypes += hapticFeedbackType
+        }
+    }
 }
 
 private class RecordingDailyRepository(initialState: DailyState) : DailySessionRepository {
