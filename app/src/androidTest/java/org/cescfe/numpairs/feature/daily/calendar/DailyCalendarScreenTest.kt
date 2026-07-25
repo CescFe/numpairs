@@ -43,6 +43,7 @@ import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -225,6 +226,72 @@ class DailyCalendarScreenTest {
                     DateTimeFormatter.ofPattern("LLLL yyyy", Locale.forLanguageTag("ar"))
                 )
             )
+        composeTestRule
+            .onNodeWithTag(DailyCalendarScreenTestTags.PREVIOUS_MONTH_BUTTON)
+            .assertContentDescriptionEquals(
+                string(R.string.daily_calendar_previous_month_content_description)
+            )
+        composeTestRule
+            .onNodeWithTag(DailyCalendarScreenTestTags.NEXT_MONTH_BUTTON)
+            .assertContentDescriptionEquals(
+                string(R.string.daily_calendar_next_month_content_description)
+            )
+    }
+
+    @Test
+    fun wide_layout_caps_calendar_content_and_preserves_navigation_touch_targets() {
+        val currentDate = LocalDate.of(2026, 7, 25)
+        composeTestRule.setContent {
+            NumPairsTheme {
+                Box(modifier = Modifier.size(width = 1_000.dp, height = 800.dp)) {
+                    DailyCalendarScreen(
+                        calendarMonth = DailyCalendarMonth.create(
+                            capturedCurrentDate = currentDate,
+                            displayedMonth = YearMonth.of(2026, 6),
+                            locale = Locale.US
+                        ),
+                        locale = Locale.US,
+                        onPreviousMonth = {},
+                        onNextMonth = {},
+                        onNavigateBack = {}
+                    )
+                }
+            }
+        }
+
+        val navigationBounds = listOf(
+            DailyCalendarScreenTestTags.BACK_BUTTON,
+            DailyCalendarScreenTestTags.PREVIOUS_MONTH_BUTTON,
+            DailyCalendarScreenTestTags.NEXT_MONTH_BUTTON
+        ).associateWith { tag ->
+            composeTestRule
+                .onNodeWithTag(tag)
+                .assertIsDisplayed()
+                .fetchSemanticsNode()
+                .boundsInRoot
+        }
+        val minimumTouchTarget = with(composeTestRule.density) {
+            48.dp.toPx()
+        }
+        navigationBounds.values.forEach { bounds ->
+            assertTrue(bounds.width >= minimumTouchTarget)
+            assertTrue(bounds.height >= minimumTouchTarget)
+        }
+
+        val previousBounds = navigationBounds.getValue(
+            DailyCalendarScreenTestTags.PREVIOUS_MONTH_BUTTON
+        )
+        val nextBounds = navigationBounds.getValue(
+            DailyCalendarScreenTestTags.NEXT_MONTH_BUTTON
+        )
+        val expectedContentWidth = with(composeTestRule.density) {
+            480.dp.toPx()
+        }
+        assertEquals(
+            expectedContentWidth,
+            nextBounds.right - previousBounds.left,
+            0.5f
+        )
     }
 
     private fun setScreen(
