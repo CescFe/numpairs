@@ -2,8 +2,10 @@
 
 ## Document Status
 
-- Status: implemented v7 session persistence and v8 remembered-difficulty preference boundaries
-- Product contracts: `docs/product/prd/prd-v7.md` and `docs/product/prd/prd-v8.md`
+- Status: implemented normal generated-session persistence, remembered selectors, and v10 Quick
+  challenge identity
+- Product contracts: `docs/product/prd/prd-v7.md`, `docs/product/prd/prd-v8.md`, and
+  `docs/product/prd/prd-v10.md`
 - Related generation reference: `docs/product/puzzle-generation.md`
 - Related domain decision: `docs/technical/adr/adr-005-model-sparse-generated-challenges.md`
 - Planned Daily boundary: `docs/technical/daily-challenge-persistence.md`
@@ -17,10 +19,9 @@ generation profiles, or menu copy.
 ## Scope And Ownership
 
 NumPairs stores at most one normal generated session for the whole application. The slot may
-belong to any challenge in the supported generated-challenge catalog: `4 Pairs Low`,
-`4 Pairs Medium`, `8 Pairs Medium`, or `8 Pairs Hard` in v8, plus Quick `3 Pairs Low` when v10 is
-implemented. There is no independent normal save per mode, normal generated history, account sync,
-or manual save management.
+belong to any challenge in the supported generated-challenge catalog: Quick `3 Pairs Low`,
+`4 Pairs Low`, `4 Pairs Medium`, `8 Pairs Medium`, or `8 Pairs Hard`. There is no independent
+normal save per mode, normal generated history, account sync, or manual save management.
 
 `MainActivity` creates one application-scoped `GeneratedSessionRepository` from
 application-private storage and passes it only through generated-play and unlocked-navigation
@@ -39,14 +40,17 @@ the generated-session repository never owns or mutates selector defaults.
 
 ## Remembered Difficulty Selection
 
-The application keeps one stable difficulty id for each generated mode in local preference
-storage. The preference boundary exposes an observable effective selection per mode and accepts
-only mode/difficulty pairs present in the supported challenge catalog.
+The application keeps one stable difficulty id for each generated mode that exposes a difficulty
+selector in local preference storage. The preference boundary exposes an observable effective
+selection only for configured selector modes and accepts only configured mode/difficulty pairs
+present in the supported challenge catalog.
 
-The effective fallback is `Low` for `4 Pairs` and `Medium` for `8 Pairs`. Missing, corrupt,
-unknown, and no-longer-supported stored values resolve to that fallback without writing it back.
-The only operation that writes a remembered selection is an explicit supported option choice made
-by the player in that mode's anchored difficulty popup in the normal menu.
+The effective fallback is `Low` for `4 Pairs` and `Medium` for `8 Pairs`. Quick exposes only Low,
+has no selector fallback or remembered preference, and rejects preference writes. Missing,
+corrupt, unknown, and no-longer-supported stored values resolve to the selector mode's fallback
+without writing it back. The only operation that writes a remembered selection is an explicit
+supported option choice made by the player in that mode's anchored difficulty popup in the normal
+menu.
 
 Opening or dismissing the popup, showing a fallback, pressing a mode's play region, resuming or
 restoring a session, replacing a session, completing a puzzle, and using `Play another` do not
@@ -56,8 +60,9 @@ other v8 behavior stores progression, locks, completion counts, rewards, or stat
 The remembered values live in the dedicated Preferences DataStore file
 `datastore/generated_difficulty_selection.preferences_pb`. This keeps the aggregate and its
 corruption recovery independent from personalization, onboarding, and the resumable generated
-session. The file stores one stable difficulty id under each stable generated-mode identity; it
-does not store display copy, profile parameters, completion data, or transient selector state.
+session. The file stores one stable difficulty id under each selector-enabled generated-mode
+identity; it does not store a Quick value, display copy, profile parameters, completion data, or
+transient selector state.
 
 `MainActivity` creates one application-scoped remembered-difficulty repository. The unlocked Menu
 route observes both effective selections and receives the write operation used by its
@@ -80,11 +85,12 @@ Schema version `1` continues to store:
 The seed is diagnostic and generation metadata. Restoration never reruns the generator because a
 generator or profile implementation may change after the session was created.
 
-The stored mode/profile pair resolves one exact supported `GeneratedChallenge`; v8 does not assume
-that a mode has only one profile. The existing `4 Pairs Low` and `8 Pairs Medium` ids retain their
-meaning, so valid schema-1 snapshots for those challenges remain compatible. An unknown mode,
-unknown profile, unsupported pair, or profile whose declared mode differs from the stored mode is
-invalid session data and is exposed as an empty slot.
+The stored mode/profile pair resolves one exact supported `GeneratedChallenge`; restoration does
+not assume that a mode has only one profile. Quick uses `three-pairs` with `3-pairs-low`; the
+existing `4 Pairs Low` and `8 Pairs Medium` ids retain their meaning, so valid schema-1 snapshots
+for those challenges remain compatible. An unknown mode, unknown profile, unsupported pair, or
+profile whose declared mode differs from the stored mode is invalid session data and is exposed
+as an empty slot.
 
 The initial and current puzzles preserve:
 

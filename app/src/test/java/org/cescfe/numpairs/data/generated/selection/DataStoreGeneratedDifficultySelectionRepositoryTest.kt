@@ -43,6 +43,7 @@ class DataStoreGeneratedDifficultySelectionRepositoryTest {
     fun fresh_preferences_expose_mode_specific_fallbacks_without_persisting_them() = runBlocking {
         val fixture = createRepository()
 
+        assertNull(fixture.repository.selectedDifficulty(GeneratedModes.THREE_PAIRS.id).first())
         assertEquals(
             DifficultyTier.LOW,
             fixture.repository.selectedDifficulty(GeneratedModes.FOUR_PAIRS.id).first()
@@ -52,6 +53,25 @@ class DataStoreGeneratedDifficultySelectionRepositoryTest {
             fixture.repository.selectedDifficulty(GeneratedModes.EIGHT_PAIRS.id).first()
         )
         assertTrue(fixture.dataStore.data.first().asMap().isEmpty())
+    }
+
+    @Test
+    fun quick_has_no_remembered_difficulty_selection_or_writable_preference() {
+        val fixture = createRepository()
+
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking {
+                fixture.repository.selectDifficulty(
+                    GeneratedModes.THREE_PAIRS.id,
+                    DifficultyTier.LOW
+                )
+            }
+        }
+
+        runBlocking {
+            assertNull(fixture.repository.selectedDifficulty(GeneratedModes.THREE_PAIRS.id).first())
+            assertTrue(fixture.dataStore.data.first().asMap().isEmpty())
+        }
     }
 
     @Test

@@ -5,7 +5,8 @@
 - Status: product reference for generated puzzle construction
 - Implemented profiles: generated `3 Pairs Low`, `4 Pairs Low`, `4 Pairs Medium`,
   `8 Pairs Medium`, and `8 Pairs Hard`
-- Planned v10 mode registration: present generated `3 Pairs Low` to players as Quick
+- Implemented v10 challenge registration: generated `3 Pairs Low` is the only Quick challenge
+- Planned v10 presentation: expose Quick through generated play and the Menu
 - v8 generated challenge matrix: implemented
 - Related references:
   - `docs/product/prd/prd-v5.md`
@@ -54,11 +55,11 @@ assessment policy, and validation expectations for one challenge. Absolute profi
 calibrated per challenge: Medium has shared product meaning, but `4 Pairs Medium` does not copy raw
 sixteen-entry counts from `8 Pairs Medium`.
 
-The implemented v8 catalog and planned v10 Quick addition form a sparse catalog:
+The implemented generated-challenge catalog is sparse:
 
 | Generated mode | Low | Medium | Hard |
 | --- | --- | --- | --- |
-| `Quick` (`3 Pairs`) | Profile implemented; mode registration planned | Unsupported | Unsupported |
+| `Quick` (`3 Pairs`) | Supported | Unsupported | Unsupported |
 | `4 Pairs` | Supported | Supported | Unsupported |
 | `8 Pairs` | Unsupported | Supported | Supported |
 
@@ -207,7 +208,7 @@ session slot.
 
 ### Quick / `3 Pairs Low`
 
-Status: generated profile implemented; Quick mode registration planned for v10.
+Status: generated profile and challenge registration implemented; Quick presentation planned.
 
 Player-facing identity:
 
