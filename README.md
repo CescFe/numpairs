@@ -8,8 +8,10 @@ Players complete hidden expressions on a board by using numbers from a strip. Th
 
 ## Current Status
 
-### Current implemented product baseline: v8 + v9
+### Current implemented product baseline: v10
 
+- 🗓️ [PRD v10 Quick Play & Daily Challenge](./docs/product/prd/prd-v10.md) defines the
+  implemented Quick mode and deterministic local Daily Challenge.
 - 📈 [PRD v8 Difficulty Selection & Challenge Expansion](./docs/product/prd/prd-v8.md) defines
   the current generated challenge catalog and mode-specific difficulty selection.
 - ✨ [PRD v9 Game Feel & Personalization](./docs/product/prd/prd-v9.md) defines the current color-personalization and generated-game feedback baseline.
@@ -21,16 +23,23 @@ NumPairs now provides five persistent color-only themes: Warm, Frost, Obsidian, 
 and Ember. Typography, shapes, spacing, elevation, layout, controls, and gameplay meanings
 remain shared across them.
 
-Generated play supports `4 Pairs Low`, `4 Pairs Medium`, `8 Pairs Medium`, and `8 Pairs Hard`.
-Players choose a supported difficulty independently for each generated mode. Every generated
+Generated play supports Quick as `3 Pairs Low`, plus `4 Pairs Low`, `4 Pairs Medium`,
+`8 Pairs Medium`, and `8 Pairs Hard`. Players choose a supported difficulty independently for the
+4 Pairs and 8 Pairs modes, while Quick launches its only challenge directly. Every generated
 challenge adds subtle accepted-assignment haptics, newly-correct tile motion, a brief completion
 celebration, and a successor-ready replay transition. This feedback is not added to Tutorial or
 onboarding; sound and error haptics are not implemented.
 
-### Active planned milestone: v10
+Daily Challenge selects one deterministic `4 Pairs Low` puzzle for each device-local calendar
+date. Its exact progress and local completion history use a separate versioned aggregate, so one
+normal generated session and one Daily Session may remain resumable at the same time. The
+state-aware Menu action, monthly completion calendar, and non-spoiling textual share result work
+without accounts or a server.
 
-- 🗓️ [PRD v10 Quick Play & Daily Challenge](./docs/product/prd/prd-v10.md) defines the planned
-  generated `3 Pairs Low` Quick mode and one deterministic local Daily Challenge per calendar date.
+### Active milestone: v10
+
+- Implementation and milestone validation are complete.
+- The GitHub milestone intentionally remains open for manual closure.
 
 Historical milestone snapshots:
 
@@ -45,9 +54,10 @@ PRDs preserve the product requirements and planning context for each milestone. 
 generated-mode and profile behavior is also documented in
 [puzzle-generation.md](./docs/product/puzzle-generation.md).
 
-All four supported generated profiles are implemented. Generated play stores one exact resumable
-session shared by every generated challenge, restores committed progress after process death, and
-keeps the current puzzle visible until a validated successor is stored and ready.
+All five supported generated profiles are implemented. Normal generated play stores one exact
+resumable session shared by every generated challenge, restores committed progress after process
+death, and keeps the current puzzle visible until a validated successor is stored and ready.
+Daily progress and completion history remain independently persisted in their own aggregate.
 
 ---
 
@@ -97,8 +107,9 @@ docs/
 Core responsibilities:
 
 - `domain`: puzzle model, rules, validation, assignments, and generated puzzle logic.
-- `feature`: Menu, Tutorial, generated modes, and reusable Game screen behavior.
-- `data`: seed puzzle, persistence-backed preferences, and the versioned generated-session snapshot.
+- `feature`: Menu, Tutorial, Quick, Daily Challenge, generated modes, and reusable Game behavior.
+- `data`: seed puzzle, persistence-backed preferences, generated-session snapshot, and Daily
+  aggregate.
 - `ui`: app navigation, theme, and shared visual defaults.
 
 ---
@@ -111,7 +122,9 @@ Core responsibilities:
 - Puzzle generation: [puzzle-generation.md](./docs/product/puzzle-generation.md)
 - Current UI behavior: [ui-behavior.md](./docs/ui-behavior.md)
 - Generated-session persistence: [generated-session-persistence.md](./docs/technical/generated-session-persistence.md)
+- Daily Challenge persistence: [daily-challenge-persistence.md](./docs/technical/daily-challenge-persistence.md)
 - Platform branding decision: [ADR-004](./docs/technical/adr/adr-004-keep-v9-platform-branding-static.md)
+- Daily cadence decision: [ADR-006](./docs/technical/adr/adr-006-model-daily-challenge-as-versioned-local-cadence.md)
 - UX decisions: `docs/product/ux-decisions.md`
 - Architectural Decision Records: `docs/technical/adr/`
 - Delivery workflow: [delivery-workflow.md](./docs/technical/delivery-workflow.md)

@@ -295,6 +295,7 @@ The non-device test suite must protect:
 - DataStore recreation and corruption recovery
 - trusted local-date rollover and clock-back behavior
 
-Instrumented sources should protect the application-composition, Menu, Daily continuation,
-completion, calendar, and process-recreation boundaries where rendering or Android lifecycle
-matters. Local delivery compiles instrumented sources without starting an emulator.
+Instrumented sources protect application composition, Menu, Daily continuation, completion,
+calendar, sharing, feedback preferences, compact and wide layouts, and bidirectional semantics
+where rendering or Android lifecycle matters. Local delivery compiles instrumented sources
+without starting an emulator.

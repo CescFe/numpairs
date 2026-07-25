@@ -44,7 +44,7 @@ Current implemented generated modes use:
 - `4 Pairs Low` and `4 Pairs Medium`: 4 solution pairs and 8 board tiles
 - `8 Pairs Medium` and `8 Pairs Hard`: 8 solution pairs and 16 board tiles
 
-The planned v10 Quick mode uses:
+The implemented v10 Quick mode uses:
 
 - `3 Pairs Low`: 3 solution pairs and 6 board tiles
 

@@ -4,7 +4,7 @@
 
 This document defines the current NumPairs visual design system. It originated in the
 `v4 - Visual Design System & UI Refinement` milestone and is updated through
-`v9 - Game Feel & Personalization`, with the v10 Quick generated-learning extension.
+`v10 - Quick Play & Daily Challenge`.
 
 The goal is to establish a practical design system for implementation, not a speculative brand book. It should guide reusable Compose theme decisions, shared component defaults, and visual QA for the existing product screens.
 
@@ -609,6 +609,20 @@ typography, shape, gradient, border, elevation, and spacing used by normal Resum
 one-option trailing selector; the existing `4 Pairs` and `8 Pairs` split CTAs retain their
 independent action geometry.
 
+### Daily Challenge Surfaces
+
+The unlocked Menu presents Daily Challenge first through the shared `PrimarySplitCtaButton`.
+Its expanding primary region communicates start, continue, or completed-today state through
+localized label, content description, and state description. Its trailing calendar region remains
+an independent minimum-touch-target action. Both regions retain logical ordering in LTR and RTL.
+
+Daily gameplay reuses the generic Game surface, generated assignment haptics preference,
+correct-tile motion, and completion celebration. The completion summary uses the shared primary
+CTA and semantic success roles; its secondary and tertiary actions use established NumPairs
+shapes, colors, typography, and spacing. The read-only calendar caps its content width, uses
+logical navigation chevrons, and combines text, border, check mark, enabled state, and content
+descriptions so today, completion, and future dates never depend on color alone.
+
 ---
 
 ## Accessibility Requirements
@@ -810,4 +824,4 @@ contract, [ADR-004](../technical/adr/adr-004-keep-v9-platform-branding-static.md
 generated-only feedback implementation. Shape normalization and screenshot/golden testing
 remain possible future work.
 
-No unresolved historical item changes the current v9 behavior documented above.
+No unresolved historical item changes the current visual behavior documented above.

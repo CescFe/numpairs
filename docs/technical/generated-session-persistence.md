@@ -8,7 +8,7 @@
   `docs/product/prd/prd-v10.md`
 - Related generation reference: `docs/product/puzzle-generation.md`
 - Related domain decision: `docs/technical/adr/adr-005-model-sparse-generated-challenges.md`
-- Planned Daily boundary: `docs/technical/daily-challenge-persistence.md`
+- Implemented Daily boundary: `docs/technical/daily-challenge-persistence.md`
 
 This document owns the persistence and coordination boundary for the single resumable normal
 generated puzzle. It does not own Daily Challenge persistence and does not redefine puzzle rules,
@@ -165,7 +165,7 @@ The file is excluded from:
 
 This keeps the session local to the installation and avoids restoring a transient unfinished puzzle as cross-device progression.
 
-The planned Daily aggregate uses its own separately excluded
+The implemented Daily aggregate uses its own separately excluded
 `datastore/daily_challenge.preferences_pb` file.
 
 ---
@@ -181,5 +181,7 @@ The non-device test suite protects:
 - ordered committed progress and solved clearing
 - stale callback rejection
 - replacement success, failure, cancellation, and duplicate-request handling
+- simultaneous Quick and Daily restoration across repository recreation without cross-slot
+  replacement, clearing, or completion side effects
 
 Instrumented sources compile the menu, dialog, resume, completion, and committed-change navigation regressions. Repository work does not require starting an emulator during delivery validation.
