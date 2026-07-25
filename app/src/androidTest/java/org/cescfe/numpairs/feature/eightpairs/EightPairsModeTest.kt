@@ -89,6 +89,12 @@ class EightPairsModeTest {
                 )
             )
             .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.RULES_HELPER_ACTION)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.HINT_ACTION)
+            .assertDoesNotExist()
         assertEquals(1, puzzleProvider.requestCount)
     }
 

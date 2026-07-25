@@ -16,6 +16,8 @@ import org.cescfe.numpairs.data.preferences.TopAppBarActionDiscoveryState
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
+import org.cescfe.numpairs.feature.generated.GeneratedLearningRoute
+import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
@@ -36,7 +38,9 @@ class FourPairsActionDiscoveryTest {
 
         composeTestRule.setContent {
             NumPairsTheme {
-                FourPairsRoute(
+                GeneratedLearningRoute(
+                    challenge = GeneratedModes.FOUR_PAIRS_LOW,
+                    title = "4 Pairs · Low",
                     generationUseCase = generatedPuzzleUseCase(puzzle = samplePuzzle),
                     generatedSessionRepository = FakeGeneratedSessionRepository(),
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository
@@ -70,7 +74,9 @@ class FourPairsActionDiscoveryTest {
 
         composeTestRule.setContent {
             NumPairsTheme {
-                FourPairsRoute(
+                GeneratedLearningRoute(
+                    challenge = GeneratedModes.FOUR_PAIRS_LOW,
+                    title = "4 Pairs · Low",
                     generationUseCase = generatedPuzzleUseCase(puzzle = samplePuzzle),
                     generatedSessionRepository = FakeGeneratedSessionRepository(),
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository
