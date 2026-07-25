@@ -79,6 +79,10 @@ Candidate indexes `0..3` are attempted in ascending order.
 The payload format, hash algorithm, constants, selected challenge, and four-candidate limit cannot
 change without a new recipe version.
 
+This identity, immutable v10 recipe binding, configured-version resolver, and four-candidate seed
+schedule are implemented. Current device-local date capture and candidate generation are separate
+delivery boundaries.
+
 The generator remains unaware of dates and Daily semantics. It receives ordinary explicit
 generated-puzzle requests. Daily coordination never falls back to device randomness, current
 time-of-day entropy, or a different profile.

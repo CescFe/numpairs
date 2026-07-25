@@ -8,6 +8,8 @@
 - Implemented v10 challenge registration: generated `3 Pairs Low` is the only Quick challenge
 - Implemented v10 generated presentation: Quick uses the shared Low learning route
 - Implemented v10 Menu exposure: direct Quick entry through the normal generated-session flow
+- Implemented v10 Daily foundation: versioned identity, `4 Pairs Low` recipe resolution, and
+  deterministic four-candidate seed schedule
 - v8 generated challenge matrix: implemented
 - Related references:
   - `docs/product/prd/prd-v5.md`
@@ -179,6 +181,10 @@ Committed puzzle changes update the current snapshot through the stable session 
 
 The v10 Daily Challenge reuses the existing generated-puzzle pipeline without making the generator
 aware of dates, calendars, completion history, Android clocks, or presentation state.
+
+Status: identity, immutable v10 recipe resolution, and the FNV-1a candidate seed schedule are
+implemented. Device-local date capture, candidate execution, persistence, gameplay, and
+presentation remain planned.
 
 One immutable Daily Recipe version:
 
