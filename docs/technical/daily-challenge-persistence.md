@@ -2,8 +2,9 @@
 
 ## Document Status
 
-- Status: Daily identity, deterministic generation, local-date boundary, versioned aggregate
-  codec, and independent session persistence implemented; atomic completion history planned
+- Status: Daily identity, deterministic generation, local-date boundary, versioned aggregate,
+  independent session persistence, and atomic completion history implemented; feature lifecycle
+  coordination planned
 - Product contract: `docs/product/prd/prd-v10.md`
 - Architecture decision:
   `docs/technical/adr/adr-006-model-daily-challenge-as-versioned-local-cadence.md`
@@ -144,6 +145,11 @@ stale screen cannot update or complete a successor.
 The operation is idempotent for already completed Daily identity and returns a typed outcome that
 distinguishes completed, already completed, stale session, and invalid puzzle. It never clears a
 session before the completion record is durable.
+
+The identity-guarded completion transition is implemented. It validates solved committed puzzle
+state, records one canonical identity, and removes the owning active session in the same
+Preferences DataStore edit. Exact repeats and same-date recipe collisions return the existing
+completion without adding history.
 
 Daily gameplay forwards only committed domain puzzle changes. Draft text, open selectors,
 dialogs, overlays, highlights, calendar month, scroll position, Sharesheet state, animations, and

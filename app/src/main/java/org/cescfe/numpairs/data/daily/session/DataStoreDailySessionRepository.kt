@@ -9,6 +9,7 @@ import java.io.IOException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
 class DataStoreDailySessionRepository(
@@ -87,6 +88,53 @@ class DataStoreDailySessionRepository(
                 )
                 result = DailySessionClearResult.Cleared
             }
+        }
+        return requireNotNull(result)
+    }
+
+    override suspend fun complete(
+        expectedSessionId: DailySessionId,
+        expectedDailyChallengeId: DailyChallengeId,
+        solvedPuzzle: Puzzle
+    ): DailySessionCompletionResult {
+        var result: DailySessionCompletionResult? = null
+        dataStore.edit { preferences ->
+            val aggregate = preferences.currentAggregate()
+            val existingCompletion = aggregate.completedChallengeIds.singleOrNull { completedIdentity ->
+                completedIdentity.localDate == expectedDailyChallengeId.localDate
+            }
+            if (existingCompletion != null) {
+                result = DailySessionCompletionResult.AlreadyCompleted(existingCompletion)
+                return@edit
+            }
+
+            val activeSession = aggregate.activeSession
+            if (
+                activeSession?.sessionId != expectedSessionId ||
+                activeSession.dailyChallengeId != expectedDailyChallengeId
+            ) {
+                result = DailySessionCompletionResult.StaleSession
+                return@edit
+            }
+            try {
+                activeSession.requireValidSolvedPuzzle(solvedPuzzle)
+            } catch (_: IllegalArgumentException) {
+                result = DailySessionCompletionResult.InvalidPuzzle
+                return@edit
+            } catch (_: IllegalStateException) {
+                result = DailySessionCompletionResult.InvalidPuzzle
+                return@edit
+            }
+
+            val completedChallengeIds = (aggregate.completedChallengeIds + expectedDailyChallengeId)
+                .sortedWith(DAILY_CHALLENGE_ID_COMPARATOR)
+            preferences[PreferenceKeys.AGGREGATE] = codec.encode(
+                aggregate.copy(
+                    activeSession = null,
+                    completedChallengeIds = completedChallengeIds
+                )
+            )
+            result = DailySessionCompletionResult.Completed
         }
         return requireNotNull(result)
     }
