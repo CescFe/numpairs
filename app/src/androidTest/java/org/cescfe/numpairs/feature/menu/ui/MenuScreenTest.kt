@@ -169,6 +169,9 @@ class MenuScreenTest {
         assertEquals(quickBounds.right, dailyContainer.right, 0.5f)
         assertEquals(dailyContainer.left, dailyPrimary.left, 0.5f)
         assertEquals(dailyContainer.right, dailyCalendar.right, 0.5f)
+        assertEquals(dailyContainer.height, dailyPrimary.height, 0.5f)
+        assertEquals(dailyContainer.height, dailyCalendar.height, 0.5f)
+        assertTrue(dailyPrimary.right <= dailyCalendar.left)
         assertTrue(
             dailyCalendar.width >= with(composeTestRule.density) {
                 48.dp.toPx()
@@ -185,6 +188,39 @@ class MenuScreenTest {
             assertEquals(1, primaryCount)
             assertEquals(1, calendarCount)
         }
+    }
+
+    @Test
+    fun daily_split_actions_follow_logical_order_in_rtl() {
+        setContent(
+            width = 320.dp,
+            height = 640.dp,
+            fontScale = 2f,
+            layoutDirection = LayoutDirection.Rtl,
+            dailyChallenge = DailyMenuUiState.ContinueToday(
+                DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
+                    LocalDate.of(2026, 7, 25)
+                )
+            )
+        )
+
+        val dailyPrimary = composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.DAILY_BUTTON)
+            .assertIsDisplayed()
+            .fetchSemanticsNode()
+            .boundsInRoot
+        val dailyCalendar = composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.DAILY_CALENDAR_BUTTON)
+            .assertIsDisplayed()
+            .fetchSemanticsNode()
+            .boundsInRoot
+
+        assertTrue(dailyCalendar.right <= dailyPrimary.left)
+        assertTrue(
+            dailyCalendar.width >= with(composeTestRule.density) {
+                48.dp.toPx()
+            }
+        )
     }
 
     @Test
@@ -581,6 +617,46 @@ class MenuScreenTest {
         assertEquals(fourPairsBounds.height, quickBounds.height, 0.5f)
         assertEquals(quickBounds.left, dailyBounds.left, 0.5f)
         assertEquals(quickBounds.right, dailyBounds.right, 0.5f)
+    }
+
+    @Test
+    fun wide_layout_caps_and_aligns_every_v10_menu_action() {
+        setContent(
+            width = 1_000.dp,
+            height = 800.dp,
+            dailyChallenge = DailyMenuUiState.StartToday(
+                DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
+                    LocalDate.of(2026, 7, 25)
+                )
+            ),
+            resumeChallengeName = "Quick · Low"
+        )
+
+        val actionTags = listOf(
+            MenuScreenTestTags.DAILY_SPLIT_CTA,
+            MenuScreenTestTags.RESUME_BUTTON,
+            MenuScreenTestTags.QUICK_BUTTON,
+            MenuScreenTestTags.FOUR_PAIRS_SPLIT_CTA,
+            MenuScreenTestTags.EIGHT_PAIRS_SPLIT_CTA,
+            MenuScreenTestTags.TUTORIAL_BUTTON
+        )
+        val actionBounds = actionTags.map { tag ->
+            composeTestRule
+                .onNodeWithTag(tag)
+                .assertIsDisplayed()
+                .fetchSemanticsNode()
+                .boundsInRoot
+        }
+        val expectedWidth = with(composeTestRule.density) {
+            360.dp.toPx()
+        }
+        val firstBounds = actionBounds.first()
+
+        actionBounds.forEach { bounds ->
+            assertEquals(expectedWidth, bounds.width, 0.5f)
+            assertEquals(firstBounds.left, bounds.left, 0.5f)
+            assertEquals(firstBounds.right, bounds.right, 0.5f)
+        }
     }
 
     private fun assertSelectorEndAlignment(layoutDirection: LayoutDirection) {

@@ -57,6 +57,7 @@ import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -332,6 +333,51 @@ class DailyCompletionSurfaceTest {
             assertEquals(1, shareCount)
             assertEquals(1, calendarCount)
             assertEquals(1, backCount)
+        }
+    }
+
+    @Test
+    fun wide_completion_summary_caps_and_aligns_all_actions() {
+        composeTestRule.setContent {
+            NumPairsTheme {
+                Box(modifier = Modifier.size(width = 1_000.dp, height = 800.dp)) {
+                    DailyCompletionScreen(
+                        presentation = DailyChallengeTitle(
+                            visibleText = "Daily · Jul 25, 2026",
+                            accessibilityText = "Daily · Jul 25, 2026, 4 pairs · Low"
+                        ),
+                        onShareResult = {},
+                        onViewCalendar = {},
+                        onNavigateBack = {}
+                    )
+                }
+            }
+        }
+
+        val actionBounds = listOf(
+            DailyScreenTestTags.SHARE_RESULT,
+            DailyScreenTestTags.VIEW_CALENDAR,
+            DailyScreenTestTags.BACK_TO_MENU
+        ).map { tag ->
+            composeTestRule
+                .onNodeWithTag(tag)
+                .assertIsDisplayed()
+                .fetchSemanticsNode()
+                .boundsInRoot
+        }
+        val maximumActionWidth = with(composeTestRule.density) {
+            432.dp.toPx()
+        }
+        val minimumTouchTarget = with(composeTestRule.density) {
+            48.dp.toPx()
+        }
+        val firstBounds = actionBounds.first()
+
+        actionBounds.forEach { bounds ->
+            assertTrue(bounds.width <= maximumActionWidth)
+            assertTrue(bounds.height >= minimumTouchTarget)
+            assertEquals(firstBounds.left, bounds.left, 0.5f)
+            assertEquals(firstBounds.right, bounds.right, 0.5f)
         }
     }
 
