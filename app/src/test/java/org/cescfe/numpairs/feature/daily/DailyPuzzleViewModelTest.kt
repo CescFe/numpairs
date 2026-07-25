@@ -17,12 +17,15 @@ import org.cescfe.numpairs.data.daily.session.DailySessionReplacementResult
 import org.cescfe.numpairs.data.daily.session.DailySessionRepository
 import org.cescfe.numpairs.data.daily.session.DailySessionSnapshot
 import org.cescfe.numpairs.data.daily.session.DailyState
+import org.cescfe.numpairs.data.daily.session.GeneratedDailyFixture
 import org.cescfe.numpairs.data.daily.session.generatedDailyFixture
+import org.cescfe.numpairs.data.daily.session.requireValidSolvedPuzzle
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationFailureReason
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
+import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -283,6 +286,290 @@ class DailyPuzzleViewModelTest {
         assertEquals(date, ready.session.currentDailyChallenge.identity.localDate)
         assertEquals(2, generator.requestCount)
     }
+
+    @Test
+    fun committed_progress_updates_memory_immediately_and_persists_in_callback_order() {
+        val fixture = generatedDailyFixture()
+        val firstWriteGate = CompletableDeferred<Unit>()
+        val repository = RecordingDailySessionRepository(
+            initialState = DailyState(fixture.snapshot(), emptyList()),
+            firstUpdateGate = firstWriteGate
+        )
+        val viewModel = viewModel(
+            date = fixture.identity.localDate,
+            repository = repository,
+            generator = RecordingDailyPuzzleGenerator()
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val sessionId = (viewModel.uiState.value as DailyPuzzleUiState.Ready).session.id
+        val firstProgress = fixture.progressPuzzle()
+        val latestProgress = fixture.laterProgressPuzzle()
+
+        viewModel.onCommittedPuzzleChanged(sessionId, firstProgress)
+        dispatcher.scheduler.runCurrent()
+        viewModel.onCommittedPuzzleChanged(sessionId, latestProgress)
+        viewModel.onCommittedPuzzleChanged(sessionId, latestProgress)
+        dispatcher.scheduler.runCurrent()
+
+        val visible = (viewModel.uiState.value as DailyPuzzleUiState.Ready).session
+        assertEquals(latestProgress, visible.currentPuzzle)
+        assertEquals(fixture.generatedPuzzle.initialPuzzle, repository.currentState.activeSession?.currentPuzzle)
+        assertEquals(listOf(firstProgress), repository.updateAttempts.map { attempt -> attempt.puzzle })
+
+        firstWriteGate.complete(Unit)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(
+            listOf(firstProgress, latestProgress),
+            repository.updateAttempts.map { attempt -> attempt.puzzle }
+        )
+        assertEquals(latestProgress, repository.currentState.activeSession?.currentPuzzle)
+    }
+
+    @Test
+    fun solved_commit_waits_for_prior_progress_and_remains_visible_after_atomic_completion() {
+        val fixture = generatedDailyFixture()
+        val progressWriteGate = CompletableDeferred<Unit>()
+        val repository = RecordingDailySessionRepository(
+            initialState = DailyState(fixture.snapshot(), emptyList()),
+            firstUpdateGate = progressWriteGate
+        )
+        val viewModel = viewModel(
+            date = fixture.identity.localDate,
+            repository = repository,
+            generator = RecordingDailyPuzzleGenerator()
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val sessionId = (viewModel.uiState.value as DailyPuzzleUiState.Ready).session.id
+        val progress = fixture.progressPuzzle()
+        val solved = fixture.solvedProgressPuzzle()
+
+        viewModel.onCommittedPuzzleChanged(sessionId, progress)
+        dispatcher.scheduler.runCurrent()
+        viewModel.onCommittedPuzzleChanged(sessionId, solved)
+        dispatcher.scheduler.runCurrent()
+
+        val solving = viewModel.uiState.value as DailyPuzzleUiState.Ready
+        assertEquals(solved, solving.session.currentPuzzle)
+        assertTrue(repository.completionAttempts.isEmpty())
+        assertEquals(fixture.snapshot().dailyChallengeId, solving.session.currentDailyChallenge.identity)
+
+        progressWriteGate.complete(Unit)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val completed = viewModel.uiState.value as DailyPuzzleUiState.Completed
+        assertEquals(DailyPuzzleCompletion.Completed, completed.completion)
+        assertEquals(solved, completed.session.currentPuzzle)
+        assertEquals(fixture.identity, repository.currentState.completedChallengeIds.single())
+        assertSame(null, repository.currentState.activeSession)
+        assertEquals(sessionId, repository.completionAttempts.single().sessionId)
+        assertEquals(fixture.identity, repository.completionAttempts.single().identity)
+    }
+
+    @Test
+    fun already_completed_response_keeps_the_solved_session_and_exposes_the_existing_identity() {
+        val fixture = generatedDailyFixture()
+        val repository = RecordingDailySessionRepository(
+            initialState = DailyState(fixture.snapshot(), emptyList()),
+            completionResults = ArrayDeque(
+                listOf(DailySessionCompletionResult.AlreadyCompleted(fixture.identity))
+            )
+        )
+        val viewModel = viewModel(
+            date = fixture.identity.localDate,
+            repository = repository,
+            generator = RecordingDailyPuzzleGenerator()
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val sessionId = (viewModel.uiState.value as DailyPuzzleUiState.Ready).session.id
+
+        viewModel.onCommittedPuzzleChanged(sessionId, fixture.solvedProgressPuzzle())
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val completed = viewModel.uiState.value as DailyPuzzleUiState.Completed
+        assertEquals(
+            DailyPuzzleCompletion.AlreadyCompleted(fixture.identity),
+            completed.completion
+        )
+        assertTrue(completed.session.currentPuzzle.isSolved)
+    }
+
+    @Test
+    fun stale_invalid_and_storage_failures_remain_typed_and_recoverable() {
+        val fixture = generatedDailyFixture()
+        val repository = RecordingDailySessionRepository(
+            initialState = DailyState(fixture.snapshot(), emptyList()),
+            updateResults = ArrayDeque(
+                listOf(DailySessionProgressUpdateResult.StaleSession)
+            ),
+            completionResults = ArrayDeque(
+                listOf(DailySessionCompletionResult.InvalidPuzzle)
+            ),
+            completionFailures = ArrayDeque(listOf(IOException("storage unavailable")))
+        )
+        val viewModel = viewModel(
+            date = fixture.identity.localDate,
+            repository = repository,
+            generator = RecordingDailyPuzzleGenerator()
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val sessionId = (viewModel.uiState.value as DailyPuzzleUiState.Ready).session.id
+
+        viewModel.onCommittedPuzzleChanged(sessionId, fixture.progressPuzzle())
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(
+            DailyPuzzlePersistenceFailure.StaleSession,
+            (viewModel.uiState.value as DailyPuzzleUiState.Ready).persistenceFailure
+        )
+
+        viewModel.onCommittedPuzzleChanged(sessionId, fixture.solvedProgressPuzzle())
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(
+            DailyPuzzlePersistenceFailure.Persistence,
+            (viewModel.uiState.value as DailyPuzzleUiState.Ready).persistenceFailure
+        )
+
+        viewModel.retryPersistence()
+        dispatcher.scheduler.advanceUntilIdle()
+        assertEquals(
+            DailyPuzzlePersistenceFailure.InvalidPuzzle,
+            (viewModel.uiState.value as DailyPuzzleUiState.Ready).persistenceFailure
+        )
+    }
+
+    @Test
+    fun invalid_or_stale_callbacks_cannot_mutate_the_active_daily_session() {
+        val fixture = generatedDailyFixture()
+        val repository = RecordingDailySessionRepository(
+            initialState = DailyState(fixture.snapshot(), emptyList())
+        )
+        val viewModel = viewModel(
+            date = fixture.identity.localDate,
+            repository = repository,
+            generator = RecordingDailyPuzzleGenerator()
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val ready = viewModel.uiState.value as DailyPuzzleUiState.Ready
+
+        viewModel.onCommittedPuzzleChanged(
+            expectedSessionId = DailySessionId("stale-callback"),
+            puzzle = fixture.progressPuzzle()
+        )
+        viewModel.onCommittedPuzzleChanged(
+            expectedSessionId = ready.session.id,
+            puzzle = org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
+        )
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val unchanged = viewModel.uiState.value as DailyPuzzleUiState.Ready
+        assertEquals(fixture.generatedPuzzle.initialPuzzle, unchanged.session.currentPuzzle)
+        assertEquals(DailyPuzzlePersistenceFailure.InvalidPuzzle, unchanged.persistenceFailure)
+        assertTrue(repository.updateAttempts.isEmpty())
+        assertTrue(repository.completionAttempts.isEmpty())
+    }
+
+    @Test
+    fun late_progress_and_completion_cannot_mutate_or_complete_a_replacement_session() {
+        val fixture = generatedDailyFixture()
+        val originalSnapshot = fixture.snapshot(sessionId = "original")
+        val replacementSnapshot = fixture.snapshot(sessionId = "replacement")
+        val repository = RecordingDailySessionRepository(
+            initialState = DailyState(originalSnapshot, emptyList())
+        )
+        val viewModel = viewModel(
+            date = fixture.identity.localDate,
+            repository = repository,
+            generator = RecordingDailyPuzzleGenerator()
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        repository.simulateExternalReplacement(replacementSnapshot)
+
+        viewModel.onCommittedPuzzleChanged(
+            expectedSessionId = originalSnapshot.sessionId,
+            puzzle = fixture.progressPuzzle()
+        )
+        viewModel.onCommittedPuzzleChanged(
+            expectedSessionId = originalSnapshot.sessionId,
+            puzzle = fixture.solvedProgressPuzzle()
+        )
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(replacementSnapshot, repository.currentState.activeSession)
+        assertTrue(repository.currentState.completedChallengeIds.isEmpty())
+        assertEquals(
+            DailyPuzzlePersistenceFailure.StaleSession,
+            (viewModel.uiState.value as DailyPuzzleUiState.Ready).persistenceFailure
+        )
+        assertEquals(1, repository.updateAttempts.size)
+        assertEquals(1, repository.completionAttempts.size)
+    }
+
+    @Test
+    fun persisted_progress_is_restored_exactly_after_feature_recreation() {
+        val fixture = generatedDailyFixture()
+        val repository = RecordingDailySessionRepository(
+            initialState = DailyState(fixture.snapshot(), emptyList())
+        )
+        val firstOwner = viewModel(
+            date = fixture.identity.localDate,
+            repository = repository,
+            generator = RecordingDailyPuzzleGenerator()
+        )
+        firstOwner.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val sessionId = (firstOwner.uiState.value as DailyPuzzleUiState.Ready).session.id
+        val progress = fixture.progressPuzzle()
+        firstOwner.onCommittedPuzzleChanged(sessionId, progress)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val recreatedOwner = viewModel(
+            date = fixture.identity.localDate,
+            repository = repository,
+            generator = RecordingDailyPuzzleGenerator()
+        )
+        recreatedOwner.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val restored = recreatedOwner.uiState.value as DailyPuzzleUiState.Ready
+        assertEquals(progress, restored.session.currentPuzzle)
+        assertTrue(repository.replaceAttempts.isEmpty())
+    }
+
+    @Test
+    fun a_session_opened_before_midnight_completes_its_captured_daily_identity() {
+        var currentDate = LocalDate.of(2027, 4, 18)
+        val fixture = generatedDailyFixture(date = currentDate)
+        val repository = RecordingDailySessionRepository(
+            initialState = DailyState(fixture.snapshot(), emptyList())
+        )
+        val viewModel = viewModel(
+            dateSource = DeviceLocalDateSource { currentDate },
+            repository = repository,
+            generator = RecordingDailyPuzzleGenerator()
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val session = (viewModel.uiState.value as DailyPuzzleUiState.Ready).session
+        currentDate = currentDate.plusDays(1)
+
+        viewModel.onCommittedPuzzleChanged(session.id, fixture.solvedProgressPuzzle())
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(fixture.identity, repository.completionAttempts.single().identity)
+        assertEquals(
+            fixture.identity,
+            (viewModel.uiState.value as DailyPuzzleUiState.Completed)
+                .session
+                .currentDailyChallenge
+                .identity
+        )
+    }
 }
 
 private fun viewModel(
@@ -327,6 +614,17 @@ private fun generatedResult(date: LocalDate, initialPuzzle: Puzzle): DailyPuzzle
         candidateIndex = candidateIndex,
         seed = current.recipe.seedFor(current.identity, candidateIndex),
         initialPuzzle = initialPuzzle
+    )
+}
+
+private fun GeneratedDailyFixture.laterProgressPuzzle(): Puzzle {
+    val firstProgress = progressPuzzle()
+    return firstProgress.copy(
+        board = Board(
+            tiles = firstProgress.board.tiles.mapIndexed { index, tile ->
+                if (index == 1) generatedPuzzle.solvedPuzzle.board.tiles[index] else tile
+            }
+        )
     )
 }
 
@@ -412,15 +710,26 @@ private class RecordingDailyPuzzleGenerator(vararg outcomes: Any) : DailyPuzzleG
 private class RecordingDailySessionRepository(
     initialState: DailyState,
     var nextReplaceGate: CompletableDeferred<Unit>? = null,
-    private val replaceFailures: ArrayDeque<IOException> = ArrayDeque()
+    private val replaceFailures: ArrayDeque<IOException> = ArrayDeque(),
+    firstUpdateGate: CompletableDeferred<Unit>? = null,
+    private val updateResults: ArrayDeque<DailySessionProgressUpdateResult> = ArrayDeque(),
+    private val completionResults: ArrayDeque<DailySessionCompletionResult> = ArrayDeque(),
+    private val completionFailures: ArrayDeque<IOException> = ArrayDeque()
 ) : DailySessionRepository {
     private val mutableState = MutableStateFlow(initialState)
+    private var pendingUpdateGate = firstUpdateGate
     override val state = mutableState
 
     val currentState: DailyState
         get() = mutableState.value
 
     val replaceAttempts = mutableListOf<DailySessionSnapshot>()
+    val updateAttempts = mutableListOf<ProgressAttempt>()
+    val completionAttempts = mutableListOf<CompletionAttempt>()
+
+    fun simulateExternalReplacement(snapshot: DailySessionSnapshot) {
+        mutableState.value = mutableState.value.copy(activeSession = snapshot)
+    }
 
     override suspend fun replaceSession(snapshot: DailySessionSnapshot): DailySessionReplacementResult {
         replaceAttempts += snapshot
@@ -444,7 +753,32 @@ private class RecordingDailySessionRepository(
     override suspend fun updateCurrentPuzzle(
         expectedSessionId: DailySessionId,
         puzzle: Puzzle
-    ): DailySessionProgressUpdateResult = DailySessionProgressUpdateResult.StaleSession
+    ): DailySessionProgressUpdateResult {
+        updateAttempts += ProgressAttempt(
+            sessionId = expectedSessionId,
+            puzzle = puzzle
+        )
+        pendingUpdateGate?.also { gate ->
+            pendingUpdateGate = null
+            gate.await()
+        }
+        if (updateResults.isNotEmpty()) {
+            return updateResults.removeFirst()
+        }
+        val activeSession = mutableState.value.activeSession
+        if (activeSession?.sessionId != expectedSessionId) {
+            return DailySessionProgressUpdateResult.StaleSession
+        }
+        val updatedSession = try {
+            activeSession.copy(currentPuzzle = puzzle)
+        } catch (_: IllegalArgumentException) {
+            return DailySessionProgressUpdateResult.InvalidPuzzle
+        } catch (_: IllegalStateException) {
+            return DailySessionProgressUpdateResult.InvalidPuzzle
+        }
+        mutableState.value = mutableState.value.copy(activeSession = updatedSession)
+        return DailySessionProgressUpdateResult.Updated
+    }
 
     override suspend fun clearSession(expectedSessionId: DailySessionId): DailySessionClearResult =
         DailySessionClearResult.StaleSession
@@ -453,5 +787,50 @@ private class RecordingDailySessionRepository(
         expectedSessionId: DailySessionId,
         expectedDailyChallengeId: DailyChallengeId,
         solvedPuzzle: Puzzle
-    ): DailySessionCompletionResult = DailySessionCompletionResult.StaleSession
+    ): DailySessionCompletionResult {
+        completionAttempts += CompletionAttempt(
+            sessionId = expectedSessionId,
+            identity = expectedDailyChallengeId,
+            solvedPuzzle = solvedPuzzle
+        )
+        if (completionFailures.isNotEmpty()) {
+            throw completionFailures.removeFirst()
+        }
+        if (completionResults.isNotEmpty()) {
+            return completionResults.removeFirst()
+        }
+        val completion = mutableState.value.completedChallengeIds.singleOrNull { identity ->
+            identity.localDate == expectedDailyChallengeId.localDate
+        }
+        if (completion != null) {
+            return DailySessionCompletionResult.AlreadyCompleted(completion)
+        }
+        val activeSession = mutableState.value.activeSession
+        if (
+            activeSession?.sessionId != expectedSessionId ||
+            activeSession.dailyChallengeId != expectedDailyChallengeId
+        ) {
+            return DailySessionCompletionResult.StaleSession
+        }
+        try {
+            activeSession.requireValidSolvedPuzzle(solvedPuzzle)
+        } catch (_: IllegalArgumentException) {
+            return DailySessionCompletionResult.InvalidPuzzle
+        } catch (_: IllegalStateException) {
+            return DailySessionCompletionResult.InvalidPuzzle
+        }
+        mutableState.value = DailyState(
+            activeSession = null,
+            completedChallengeIds = mutableState.value.completedChallengeIds + expectedDailyChallengeId
+        )
+        return DailySessionCompletionResult.Completed
+    }
 }
+
+private data class ProgressAttempt(val sessionId: DailySessionId, val puzzle: Puzzle)
+
+private data class CompletionAttempt(
+    val sessionId: DailySessionId,
+    val identity: DailyChallengeId,
+    val solvedPuzzle: Puzzle
+)
