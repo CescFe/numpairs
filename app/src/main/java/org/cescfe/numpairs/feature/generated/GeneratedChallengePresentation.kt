@@ -34,3 +34,11 @@ internal fun GeneratedChallenge.localizedTitle(catalog: GeneratedChallengeCatalo
     catalog.modeFor(this).localizedTitle(),
     difficulty.localizedTitle()
 )
+
+@Composable
+internal fun GeneratedChallenge.localizedNewPuzzleName(catalog: GeneratedChallengeCatalog): String =
+    if (modeId == GeneratedModes.THREE_PAIRS.id) {
+        catalog.modeFor(this).localizedTitle()
+    } else {
+        localizedTitle(catalog)
+    }

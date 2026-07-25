@@ -7,7 +7,7 @@
   `8 Pairs Medium`, and `8 Pairs Hard`
 - Implemented v10 challenge registration: generated `3 Pairs Low` is the only Quick challenge
 - Implemented v10 generated presentation: Quick uses the shared Low learning route
-- Planned v10 Menu exposure: add the direct Quick entry point
+- Implemented v10 Menu exposure: direct Quick entry through the normal generated-session flow
 - v8 generated challenge matrix: implemented
 - Related references:
   - `docs/product/prd/prd-v5.md`
@@ -209,8 +209,8 @@ session slot.
 
 ### Quick / `3 Pairs Low`
 
-Status: generated profile, challenge registration, and shared learning presentation implemented;
-direct Menu exposure planned.
+Status: generated profile, challenge registration, shared learning presentation, and direct Menu
+exposure implemented.
 
 Player-facing identity:
 

@@ -67,6 +67,39 @@ class GeneratedSessionChoiceNavigationTest {
     }
 
     @Test
+    fun quick_starts_its_only_challenge_directly_without_writing_difficulty() {
+        val repository = FakeGeneratedSessionRepository()
+        val difficultyRepository = FakeGeneratedDifficultySelectionRepository()
+        val recorder = setContent(
+            repository = repository,
+            difficultyRepository = difficultyRepository
+        )
+
+        composeTestRule.navigateToSelectedGeneratedChallenge(MenuScreenTestTags.QUICK_BUTTON)
+
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.SESSION_CHOICE_DIALOG)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(
+                challengeName(R.string.quick_screen_title, R.string.generated_difficulty_low)
+            )
+            .assertIsDisplayed()
+        composeTestRule.runOnIdle {
+            assertEquals(listOf(GeneratedModes.THREE_PAIRS_LOW), recorder.generatedChallenges)
+            assertEquals(GeneratedModes.THREE_PAIRS.id.value, repository.session.value?.modeId)
+            assertEquals(
+                GeneratedModes.THREE_PAIRS_LOW.profile.id.value,
+                repository.session.value?.profileId
+            )
+            assertTrue(difficultyRepository.explicitSelections.isEmpty())
+        }
+    }
+
+    @Test
     fun same_mode_choice_keeps_resume_primary_and_opens_the_stored_session() {
         val snapshot = resumableFourPairsSnapshot()
         val repository = FakeGeneratedSessionRepository(initialSession = snapshot)
@@ -203,6 +236,49 @@ class GeneratedSessionChoiceNavigationTest {
     }
 
     @Test
+    fun quick_uses_the_shared_choice_dialog_and_a_new_quick_replacement_action() {
+        val snapshot = resumableFourPairsSnapshot()
+        val repository = FakeGeneratedSessionRepository(initialSession = snapshot)
+        val difficultyRepository = FakeGeneratedDifficultySelectionRepository()
+        val recorder = setContent(
+            repository = repository,
+            difficultyRepository = difficultyRepository
+        )
+
+        composeTestRule.navigateToSelectedGeneratedChallenge(MenuScreenTestTags.QUICK_BUTTON)
+
+        assertChoiceDialogVisible()
+        composeTestRule
+            .onNodeWithText(
+                string(
+                    R.string.generated_session_choice_challenge_message,
+                    challengeName(R.string.four_pairs_screen_title, R.string.generated_difficulty_low)
+                )
+            )
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(
+                string(
+                    R.string.generated_session_choice_new_challenge_button,
+                    string(R.string.quick_screen_title)
+                )
+            )
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.SESSION_CHOICE_NEW_PUZZLE_BUTTON)
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SCREEN)
+            .assertIsDisplayed()
+        composeTestRule.runOnIdle {
+            assertEquals(listOf(GeneratedModes.THREE_PAIRS_LOW), recorder.generatedChallenges)
+            assertEquals(GeneratedModes.THREE_PAIRS.id.value, repository.session.value?.modeId)
+            assertTrue(difficultyRepository.explicitSelections.isEmpty())
+        }
+    }
+
+    @Test
     fun system_back_and_outside_tap_dismiss_without_side_effects() {
         val snapshot = resumableFourPairsSnapshot()
         val repository = FakeGeneratedSessionRepository(initialSession = snapshot)
@@ -281,10 +357,25 @@ class GeneratedSessionChoiceNavigationTest {
     }
 
     private fun initialPuzzleFor(challenge: GeneratedChallenge): Puzzle = when (challenge.modeId) {
+        GeneratedModes.THREE_PAIRS.id -> quickPuzzle()
         GeneratedModes.FOUR_PAIRS.id -> samplePuzzle
         GeneratedModes.EIGHT_PAIRS.id -> eightPairsPuzzle()
         else -> error("Unsupported test mode ${challenge.modeId.value}.")
     }
+
+    private fun quickPuzzle(): Puzzle = Puzzle(
+        board = Board(tiles = samplePuzzle.board.tiles.take(6)),
+        strip = Strip.fromItems(
+            items = listOf(
+                StripItem.Hidden,
+                StripItem.Hidden,
+                StripItem.Known(5),
+                StripItem.Hidden,
+                StripItem.Hidden,
+                StripItem.Known(15)
+            )
+        )
+    )
 
     private fun eightPairsPuzzle(): Puzzle = Puzzle(
         board = Board(

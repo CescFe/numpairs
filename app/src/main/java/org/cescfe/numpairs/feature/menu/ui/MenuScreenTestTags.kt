@@ -3,6 +3,8 @@ package org.cescfe.numpairs.feature.menu.ui
 object MenuScreenTestTags {
     const val SCREEN = "menu_screen"
     const val RESUME_BUTTON = "menu_resume_button"
+    const val QUICK_BUTTON = "menu_quick_button"
+    const val QUICK_DIFFICULTY_BUTTON = "menu_quick_difficulty_button"
     const val TUTORIAL_BUTTON = "menu_tutorial_button"
     const val SETTINGS_ACTION = "menu_settings_action"
     const val FOUR_PAIRS_SPLIT_CTA = "menu_four_pairs_split_cta"

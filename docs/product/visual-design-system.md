@@ -604,6 +604,11 @@ shared wrapper changes ownership only: spacing, typography, shapes, semantic col
 touch targets, failure handling, and reduced-motion behavior remain those of the established
 generated and game surfaces.
 
+The unlocked Menu presents Quick with the same full-width `PrimaryCtaButton`, button height,
+typography, shape, gradient, border, elevation, and spacing used by normal Resume. It adds no
+one-option trailing selector; the existing `4 Pairs` and `8 Pairs` split CTAs retain their
+independent action geometry.
+
 ---
 
 ## Accessibility Requirements
