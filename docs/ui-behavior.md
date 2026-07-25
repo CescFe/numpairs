@@ -393,6 +393,9 @@ process recreation does not require restoring the displayed month or caller.
 
 ### Daily Textual Sharing
 
+Status: non-spoiling localized text formatting and the Android Sharesheet boundary implemented;
+Daily completion-surface integration planned.
+
 `Share result` opens the Android Sharesheet with localized `text/plain` content containing:
 
 - `NumPairs Daily`

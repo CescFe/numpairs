@@ -71,6 +71,11 @@
     <string name="daily_calendar_future_completed_date_description">%1$s, Completed, Future date</string>
     <string name="daily_calendar_future_date_description">%1$s, Future date</string>
 
+    <!-- Daily sharing -->
+    <string name="daily_share_name">NumPairs Daily</string>
+    <string name="daily_share_completed_status">Completed</string>
+    <string name="daily_share_chooser_title">Share Daily result</string>
+
     <!-- Tutorial screen -->
     <string name="tutorial_screen_title">Tutorial</string>
     <string name="tutorial_step_indicator">Step %1$d of %2$d</string>
