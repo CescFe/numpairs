@@ -345,6 +345,9 @@ returns to the normal menu.
 
 ### Daily Calendar
 
+Status: monthly calendar model and read-only Compose surface implemented; application navigation
+integration planned.
+
 The Daily calendar is a dedicated local-history destination with:
 
 - back navigation

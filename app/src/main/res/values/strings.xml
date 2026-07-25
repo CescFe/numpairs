@@ -60,6 +60,17 @@
     <string name="generated_puzzle_back_to_menu_button">Back to menu</string>
     <string name="generated_session_resume_unavailable_message">This unfinished puzzle is no longer available.</string>
 
+    <!-- Daily calendar -->
+    <string name="daily_calendar_screen_title">Daily calendar</string>
+    <string name="daily_calendar_previous_month_content_description">Show previous month</string>
+    <string name="daily_calendar_next_month_content_description">Show next month</string>
+    <string name="daily_calendar_date_description">%1$s</string>
+    <string name="daily_calendar_today_date_description">%1$s, Today</string>
+    <string name="daily_calendar_completed_date_description">%1$s, Completed</string>
+    <string name="daily_calendar_today_completed_date_description">%1$s, Today, Completed</string>
+    <string name="daily_calendar_future_completed_date_description">%1$s, Completed, Future date</string>
+    <string name="daily_calendar_future_date_description">%1$s, Future date</string>
+
     <!-- Tutorial screen -->
     <string name="tutorial_screen_title">Tutorial</string>
     <string name="tutorial_step_indicator">Step %1$d of %2$d</string>
