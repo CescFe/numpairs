@@ -3,11 +3,10 @@
 ## Document Status
 
 - Status: product reference for generated puzzle construction
-- Implemented v10 profiles: generated `3 Pairs Low`, `4 Pairs Low`, `4 Pairs Medium`,
-  `8 Pairs Medium`, and `8 Pairs Hard`
-- v11 target profile: calibrated generated `3 Pairs Medium`
-- v11 play-option contract: Quick selects matching 3 Pairs and 4 Pairs challenges with a 35/65
-  split; Classic resolves the matching 8 Pairs challenge
+- Implemented profiles: generated `3 Pairs Low`, `3 Pairs Medium`, `4 Pairs Low`,
+  `4 Pairs Medium`, `8 Pairs Medium`, and `8 Pairs Hard`
+- Implemented v11 play-option contract: Quick selects matching 3 Pairs and 4 Pairs challenges
+  with a 35/65 split; Classic resolves the matching 8 Pairs challenge
 - Implemented v10 Daily Challenge: versioned identity, `4 Pairs Low` recipe resolution,
   deterministic four-candidate seed schedule, device-local date capture, ordered candidate
   execution, independent persistence, gameplay, calendar, completion, and sharing
@@ -309,7 +308,7 @@ demonstration or a separate ruleset.
 
 ### `3 Pairs Medium`
 
-Status: v11 target profile.
+Status: implemented in v11.
 
 v11 Quick Medium selects this exact challenge for 35% of confirmed new-puzzle requests.
 

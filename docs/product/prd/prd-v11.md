@@ -1,12 +1,14 @@
 # PRD - NumPairs 🎮 v11 Simplified Play Modes
 
 > Product contract for the `v11 - Simplified Play Modes` milestone.
-> The delivered v10 Quick Play and Daily Challenge product is the implementation baseline.
+> Status: delivered.
+> The v10 Quick Play and Daily Challenge product was the implementation baseline.
 
 ## Product Summary
 
-NumPairs generated play currently exposes implementation-shaped choices: Quick, 4 Pairs, and
-8 Pairs. v11 replaces those three normal-play entries with two player-facing play options:
+Before v11, NumPairs generated play exposed implementation-shaped choices: Quick, 4 Pairs, and
+8 Pairs. v11 replaces those three normal-play entries with two delivered player-facing play
+options:
 
 - `Quick`, for shorter generated puzzles using either 3 or 4 solution pairs
 - `Classic`, for the original full board using 8 solution pairs

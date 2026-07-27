@@ -7,29 +7,49 @@ import org.cescfe.numpairs.domain.puzzle.model.Expression
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.game.presentation.support.solvedPuzzleWithKnownStripAndAssignments
+import org.cescfe.numpairs.feature.generated.GeneratedChallenge
 import org.cescfe.numpairs.feature.generated.GeneratedModes
+import org.cescfe.numpairs.feature.generated.GeneratedPlayChallengeSelector
+import org.cescfe.numpairs.feature.generated.GeneratedPlayOptionConfiguration
+import org.cescfe.numpairs.feature.generated.GeneratedPlayOptions
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
 class ResumableGeneratedSessionTest {
     @Test
-    fun `valid unfinished snapshot resolves its exact configured challenge`() {
+    fun `every legacy size snapshot resolves its exact challenge and current play option without migration`() {
         listOf(
-            snapshot() to GeneratedModes.FOUR_PAIRS_LOW,
-            snapshot(
-                modeId = GeneratedModes.THREE_PAIRS.id.value,
-                profileId = GeneratedModes.THREE_PAIRS_LOW.profile.id.value
-            ) to GeneratedModes.THREE_PAIRS_LOW
-        ).forEach { (snapshot, expectedChallenge) ->
-            assertEquals(
-                ResumableGeneratedSession(
-                    sessionId = snapshot.sessionId,
-                    challenge = expectedChallenge
-                ),
-                snapshot.toResumableGeneratedSessionOrNull(GeneratedModes.catalog)
-            )
+            GeneratedModes.THREE_PAIRS_LOW to GeneratedPlayOptions.QUICK,
+            GeneratedModes.THREE_PAIRS_MEDIUM to GeneratedPlayOptions.QUICK,
+            GeneratedModes.FOUR_PAIRS_LOW to GeneratedPlayOptions.QUICK,
+            GeneratedModes.FOUR_PAIRS_MEDIUM to GeneratedPlayOptions.QUICK,
+            GeneratedModes.EIGHT_PAIRS_MEDIUM to GeneratedPlayOptions.CLASSIC,
+            GeneratedModes.EIGHT_PAIRS_HARD to GeneratedPlayOptions.CLASSIC
+        ).forEach { (expectedChallenge, expectedOption) ->
+            assertSnapshotCompatibility(expectedChallenge, expectedOption)
         }
+    }
+
+    private fun assertSnapshotCompatibility(
+        expectedChallenge: GeneratedChallenge,
+        expectedOption: GeneratedPlayOptionConfiguration
+    ) {
+        val snapshot = snapshot(
+            modeId = expectedChallenge.modeId.value,
+            profileId = expectedChallenge.profile.id.value
+        )
+        assertEquals(
+            ResumableGeneratedSession(
+                sessionId = snapshot.sessionId,
+                challenge = expectedChallenge
+            ),
+            snapshot.toResumableGeneratedSessionOrNull(GeneratedModes.catalog)
+        )
+        assertEquals(
+            expectedOption,
+            GeneratedPlayChallengeSelector().optionFor(expectedChallenge)
+        )
     }
 
     @Test

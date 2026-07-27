@@ -4,7 +4,7 @@
 
 - Status: implemented normal generated-session persistence with v11 play-option compatibility
 - Product contracts: `docs/product/prd/prd-v7.md`, `docs/product/prd/prd-v8.md`, and
-  `docs/product/prd/prd-v10.md`; active contract: `docs/product/prd/prd-v11.md`
+  `docs/product/prd/prd-v10.md`; current contract: `docs/product/prd/prd-v11.md`
 - Related generation reference: `docs/product/puzzle-generation.md`
 - Related domain decision: `docs/technical/adr/adr-005-model-sparse-generated-challenges.md`
 - Related play-option decision:

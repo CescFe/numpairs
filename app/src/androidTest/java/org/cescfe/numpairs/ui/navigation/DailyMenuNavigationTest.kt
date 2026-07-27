@@ -37,13 +37,16 @@ import org.cescfe.numpairs.feature.daily.DailyScreenTestTags
 import org.cescfe.numpairs.feature.daily.calendar.DailyCalendarScreenTestTags
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.generated.ConfiguredGeneratedPuzzleGenerationUseCaseFactory
+import org.cescfe.numpairs.feature.generated.GeneratedChallenge
 import org.cescfe.numpairs.feature.generated.GeneratedModes
+import org.cescfe.numpairs.feature.generated.GeneratedPlayChallengeSelector
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -169,7 +172,7 @@ class DailyMenuNavigationTest {
             )
         )
         val generationCounter = GenerationCounter()
-        setContent(
+        val difficultyRepository = setContent(
             repository = repository,
             dateSource = dateSource,
             generationCounter = generationCounter
@@ -182,6 +185,8 @@ class DailyMenuNavigationTest {
             .assertIsDisplayed()
         composeTestRule.runOnIdle {
             assertEquals(1, generationCounter.count)
+            assertEquals(listOf(GeneratedModes.FOUR_PAIRS_LOW), generationCounter.createdChallenges)
+            assertTrue(difficultyRepository.explicitSelections.isEmpty())
             assertEquals(0, repository.mutationCount)
         }
     }
@@ -190,8 +195,10 @@ class DailyMenuNavigationTest {
         repository: MutableDailyRepository,
         dateSource: MutableDateSource,
         generationCounter: GenerationCounter
-    ) {
-        val generationFactory = GeneratedPuzzleGenerationUseCaseFactory {
+    ): FakeGeneratedDifficultySelectionRepository {
+        val difficultyRepository = FakeGeneratedDifficultySelectionRepository()
+        val generationFactory = GeneratedPuzzleGenerationUseCaseFactory { challenge ->
+            generationCounter.createdChallenges += challenge
             GeneratedPuzzleGenerationUseCase { request ->
                 generationCounter.count += 1
                 GeneratedPuzzleGenerationResult.Generated(
@@ -205,13 +212,18 @@ class DailyMenuNavigationTest {
                 AppNavigation(
                     onboardingRepository = FakeOnboardingRepository(),
                     generatedSessionRepository = FakeGeneratedSessionRepository(),
-                    generatedDifficultySelectionRepository =
-                    FakeGeneratedDifficultySelectionRepository(),
+                    generatedDifficultySelectionRepository = difficultyRepository,
                     personalizationPreferencesRepository =
                     FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository =
                     FakeTopAppBarActionDiscoveryRepository(),
                     generatedChallengeCatalog = GeneratedModes.catalog,
+                    generatedPlayChallengeSelector = GeneratedPlayChallengeSelector(
+                        challengeCatalog = GeneratedModes.catalog,
+                        quickBucketSource = {
+                            error("Daily navigation must not consume Quick selection randomness.")
+                        }
+                    ),
                     generatedPuzzleGenerationUseCaseFactory = generationFactory,
                     dailyFeatureDependencies = DailyFeatureDependencies(
                         dailySessionRepository = repository,
@@ -221,6 +233,7 @@ class DailyMenuNavigationTest {
                 )
             }
         }
+        return difficultyRepository
     }
 
     private fun generatedSnapshot(date: LocalDate): DailySessionSnapshot {
@@ -292,4 +305,5 @@ private class MutableDailyRepository(initialState: DailyState) : DailySessionRep
 
 private class GenerationCounter {
     var count: Int = 0
+    val createdChallenges = mutableListOf<GeneratedChallenge>()
 }
