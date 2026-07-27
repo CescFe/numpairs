@@ -66,22 +66,24 @@ class CorrectTileMotionTest {
         game.scrollToBoard()
             .tapTileOperator(index = 0)
             .tapOperatorOption(Operator.ADDITION)
-        assertTileFeedback(tileIndex = 0, feedbackId = 1L)
+        assertFirstTileFeedback(feedbackId = 1L)
         assertNoTileFeedback(tileIndex = 1)
 
         composeTestRule.runOnIdle {
             recompositionMarker += 1
         }
         composeTestRule.waitForIdle()
-        assertTileFeedback(tileIndex = 0, feedbackId = 1L)
+        assertFirstTileFeedback(feedbackId = 1L)
 
         game.tapTileReset(index = 0)
         assertNoTileFeedback(tileIndex = 0)
-        game.tapTileLeftOperand(index = 0)
-            .tapOperandOption(entryId = 0)
-            .tapOperatorOption(Operator.ADDITION)
-            .tapOperandOption(entryId = 1)
-        assertTileFeedback(tileIndex = 0, feedbackId = 2L)
+        game.completeTile(
+            tileIndex = 0,
+            leftStripEntryId = 0,
+            operator = Operator.ADDITION,
+            rightStripEntryId = 1
+        )
+        assertFirstTileFeedback(feedbackId = 2L)
 
         composeTestRule.runOnIdle {
             puzzleResetKey += 1
@@ -137,7 +139,7 @@ class CorrectTileMotionTest {
             .tapTileOperator(index = 0)
             .tapOperatorOption(Operator.ADDITION)
 
-        assertTileFeedback(tileIndex = 0, feedbackId = 1L)
+        assertFirstTileFeedback(feedbackId = 1L)
     }
 
     @Test
@@ -165,9 +167,9 @@ class CorrectTileMotionTest {
         interactions = composeTestRule
     )
 
-    private fun assertTileFeedback(tileIndex: Int, feedbackId: Long) {
+    private fun assertFirstTileFeedback(feedbackId: Long) {
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tile(tileIndex), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tile(0), useUnmergedTree = true)
             .assert(SemanticsMatcher.expectValue(CorrectTileFeedbackIdKey, feedbackId))
     }
 

@@ -111,6 +111,30 @@ class GameScreenRobot(
             .performClick()
     }
 
+    fun completeTile(
+        tileIndex: Int,
+        leftStripEntryId: Int,
+        operator: Operator,
+        rightStripEntryId: Int
+    ): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.tile(tileIndex), useUnmergedTree = true)
+            .performScrollTo()
+        tapTileLeftOperand(index = tileIndex)
+        interactions
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(leftStripEntryId), useUnmergedTree = true)
+            .assertIsEnabled()
+            .performClick()
+        interactions
+            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(operator), useUnmergedTree = true)
+            .assertIsEnabled()
+            .performClick()
+        interactions
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(rightStripEntryId), useUnmergedTree = true)
+            .assertIsEnabled()
+            .performClick()
+    }
+
     fun tapSuccessOverlay(): GameScreenRobot = apply {
         interactions
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)

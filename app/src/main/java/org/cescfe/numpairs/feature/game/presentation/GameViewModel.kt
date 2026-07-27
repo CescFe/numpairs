@@ -417,11 +417,9 @@ private fun GamePresentationState.advanceAfterOperatorSelection(
         return dismissTileOperatorSelection()
     }
 
-    val remainingOperandSlot = when {
-        expression.leftOperand is Expression.Operand.Known &&
-            expression.rightOperand == Expression.Operand.Hidden -> OperandSlot.RIGHT
-        expression.leftOperand == Expression.Operand.Hidden &&
-            expression.rightOperand is Expression.Operand.Known -> OperandSlot.LEFT
+    val remainingOperandSlot = when (expression.leftOperand) {
+        is Expression.Operand.Known if expression.rightOperand == Expression.Operand.Hidden -> OperandSlot.RIGHT
+        Expression.Operand.Hidden if expression.rightOperand is Expression.Operand.Known -> OperandSlot.LEFT
         else -> return dismissTileOperatorSelection()
     }
 
