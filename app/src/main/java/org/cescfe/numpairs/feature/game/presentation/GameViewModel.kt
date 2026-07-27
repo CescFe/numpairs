@@ -344,6 +344,7 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
                     value = selectedValue,
                     stripEntryId = stripEntryId
                 )
+
                 OperandSlot.RIGHT -> currentTile.withRightOperand(
                     value = selectedValue,
                     stripEntryId = stripEntryId
@@ -399,10 +400,12 @@ private fun GamePresentationState.advanceAfterOperandSelection(
 
     return when {
         expression.isFullyHidden -> showTileOperatorSelection(tileIndex = target.tileIndex)
+
         expression.hasOnlyKnownOperator -> showTileOperandSelection(
             tileIndex = target.tileIndex,
             slot = target.slot.opposite()
         )
+
         else -> dismissTileOperandSelection()
     }
 }

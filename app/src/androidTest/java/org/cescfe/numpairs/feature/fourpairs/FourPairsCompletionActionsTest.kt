@@ -286,6 +286,7 @@ class FourPairsCompletionActionsTest {
 
             when {
                 hiddenContentDescription in contentDescriptions -> hiddenEntryIds += index
+
                 contentDescriptions.any { description ->
                     description.startsWith(knownContentDescriptionPrefix)
                 } -> knownEntryIds += index

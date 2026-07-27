@@ -214,9 +214,9 @@ class DailyMenuNavigationTest {
                     generatedSessionRepository = FakeGeneratedSessionRepository(),
                     generatedDifficultySelectionRepository = difficultyRepository,
                     personalizationPreferencesRepository =
-                    FakePersonalizationPreferencesRepository(),
+                        FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository =
-                    FakeTopAppBarActionDiscoveryRepository(),
+                        FakeTopAppBarActionDiscoveryRepository(),
                     generatedChallengeCatalog = GeneratedModes.catalog,
                     generatedPlayChallengeSelector = GeneratedPlayChallengeSelector(
                         challengeCatalog = GeneratedModes.catalog,
@@ -245,9 +245,9 @@ class DailyMenuNavigationTest {
             DailyPuzzleGenerationUseCase(
                 currentDailyChallengeResolver = currentResolver,
                 generatedPuzzleGenerationUseCaseFactory =
-                ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
-                    challengeCatalog = GeneratedModes.catalog
-                )
+                    ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
+                        challengeCatalog = GeneratedModes.catalog
+                    )
             ).generate()
         } as DailyPuzzleGenerationResult.Generated
         return DailySessionSnapshot(

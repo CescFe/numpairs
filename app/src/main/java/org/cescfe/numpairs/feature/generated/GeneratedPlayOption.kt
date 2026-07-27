@@ -98,6 +98,7 @@ class GeneratedPlayChallengeSelector(
 
         return when (option.id) {
             GeneratedPlayOptions.QUICK.id -> selectQuick(difficulty)
+
             GeneratedPlayOptions.CLASSIC.id -> challengeCatalog.resolveChallenge(
                 modeId = GeneratedModes.EIGHT_PAIRS.id,
                 difficulty = difficulty
@@ -117,6 +118,7 @@ class GeneratedPlayChallengeSelector(
             GeneratedModes.FOUR_PAIRS.id -> GeneratedPlayOptions.QUICK
 
             GeneratedModes.EIGHT_PAIRS.id -> GeneratedPlayOptions.CLASSIC
+
             else -> error("No generated play option owns challenge ${challenge.id.value}.")
         }
     }

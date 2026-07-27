@@ -14,6 +14,7 @@ sealed interface GeneratedPuzzleProfileCreation {
 
 fun GeneratedPuzzleProfileCreation.getOrThrow(): GeneratedPuzzleProfile = when (this) {
     is GeneratedPuzzleProfileCreation.Created -> profile
+
     is GeneratedPuzzleProfileCreation.Rejected -> {
         val ruleIds = violations.joinToString { violation -> violation.ruleId.code }
         throw IllegalArgumentException("Generated puzzle profile is invalid: $ruleIds.")

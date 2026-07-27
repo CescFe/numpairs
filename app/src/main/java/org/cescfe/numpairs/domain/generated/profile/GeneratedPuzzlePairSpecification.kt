@@ -169,6 +169,7 @@ internal class GeneratedPuzzlePairSpecification(
                 )
             ) {
                 is GeneratedPuzzleProfileBoundedEvaluation.LimitExceeded -> return selection
+
                 is GeneratedPuzzleProfileBoundedEvaluation.Completed -> if (selection.value) {
                     return selection
                 }
@@ -222,10 +223,14 @@ internal fun ProductAnchorMix.isAnchor(product: Int): Boolean = product > produc
 
 internal fun PrimeProductDecoyPairPattern.matches(pair: GeneratedPuzzlePairValues): Boolean = when (this) {
     PrimeProductDecoyPairPattern.ONE_AND_PRIME ->
-        pair.firstValue == 1 &&
-            pair.secondValue.isPrime() ||
-            pair.secondValue == 1 &&
-            pair.firstValue.isPrime()
+        (
+            pair.firstValue == 1 &&
+                pair.secondValue.isPrime()
+            ) ||
+            (
+                pair.secondValue == 1 &&
+                    pair.firstValue.isPrime()
+                )
 }
 
 private fun Int.isPrime(): Boolean {

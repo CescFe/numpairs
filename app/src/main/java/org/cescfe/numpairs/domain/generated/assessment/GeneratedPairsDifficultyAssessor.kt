@@ -111,15 +111,15 @@ class GeneratedPairsDifficultyAssessor {
                                 executionPolicy.validSolutionCountLimit
                             ),
                             isValidSolutionCountLimitReached =
-                            search.canonicalSolutionCount > executionPolicy.validSolutionCountLimit,
+                                search.canonicalSolutionCount > executionPolicy.validSolutionCountLimit,
                             structuralObservations = GeneratedPuzzleStructuralObservations(
                                 knownEntryCount = knownEntryCount,
                                 longestHiddenRun = longestHiddenRun,
                                 knownStripAnchorCount = initialPuzzle.knownStripAnchorCount(profile = profile),
                                 unambiguousResultAnchorCount =
-                                initialPuzzle.unambiguousResultAnchorCount(candidates = candidates),
+                                    initialPuzzle.unambiguousResultAnchorCount(candidates = candidates),
                                 repeatedValueGroupCountRange =
-                                search.minimumRepeatedValueGroupCount..search.maximumRepeatedValueGroupCount,
+                                    search.minimumRepeatedValueGroupCount..search.maximumRepeatedValueGroupCount,
                                 plausibleDecoyCount = candidates.count { candidate ->
                                     candidate.fact !in search.solutionFacts
                                 }

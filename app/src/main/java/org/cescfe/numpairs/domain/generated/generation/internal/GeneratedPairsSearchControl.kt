@@ -25,6 +25,7 @@ internal class GeneratedPairsSearchControl(
         }
 
         GeneratedPairsSearchControlResult.BudgetExhausted -> GeneratedPairsSearchControlResult.BudgetExhausted
+
         GeneratedPairsSearchControlResult.Cancelled -> GeneratedPairsSearchControlResult.Cancelled
     }
 }

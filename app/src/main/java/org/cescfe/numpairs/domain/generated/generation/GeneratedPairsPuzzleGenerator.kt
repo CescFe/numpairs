@@ -61,6 +61,7 @@ class GeneratedPairsPuzzleGenerator(private val context: GeneratedPuzzleGenerati
         while (attemptsUsed < request.executionPolicy.maxAttempts) {
             when (val controlResult = searchControl.check()) {
                 is GeneratedPairsSearchControlResult.Continue -> Unit
+
                 else -> return failure(
                     request = request,
                     attemptsUsed = attemptsUsed,
@@ -78,6 +79,7 @@ class GeneratedPairsPuzzleGenerator(private val context: GeneratedPuzzleGenerati
                 )
             ) {
                 is GeneratedPairsSearchOutcome.Found -> outcome.value
+
                 GeneratedPairsSearchOutcome.NoCandidate -> {
                     rejections +=
                         GeneratedPairsPuzzleCandidateRejection.ValuePairSelectionFailed(attempt = attemptsUsed)
@@ -101,6 +103,7 @@ class GeneratedPairsPuzzleGenerator(private val context: GeneratedPuzzleGenerati
                 )
             ) {
                 is GeneratedPairsSearchOutcome.Found -> outcome.value
+
                 GeneratedPairsSearchOutcome.NoCandidate -> {
                     rejections +=
                         GeneratedPairsPuzzleCandidateRejection.StripMaskSelectionFailed(attempt = attemptsUsed)
@@ -179,6 +182,7 @@ class GeneratedPairsPuzzleGenerator(private val context: GeneratedPuzzleGenerati
                 puzzle = creation.puzzle,
                 cancellation = cancellation
             )
+
             is GeneratedPairsPuzzleCreation.Rejected -> GeneratedPuzzleBuildOutcome.Rejected(creation.violations)
         }
     }
@@ -208,8 +212,10 @@ class GeneratedPairsPuzzleGenerator(private val context: GeneratedPuzzleGenerati
 
             is GeneratedPuzzleDifficultyAssessmentOutcome.Unsatisfiable ->
                 GeneratedPuzzleBuildOutcome.DifficultyUnavailable(outcome = outcome)
+
             is GeneratedPuzzleDifficultyAssessmentOutcome.WorkLimitReached ->
                 GeneratedPuzzleBuildOutcome.AssessmentWorkLimitReached
+
             is GeneratedPuzzleDifficultyAssessmentOutcome.Cancelled -> GeneratedPuzzleBuildOutcome.Cancelled
         }
     }
@@ -288,15 +294,19 @@ private fun GeneratedPairsSearchControlResult.failureReason(): GeneratedPairsPuz
     when (this) {
         GeneratedPairsSearchControlResult.Continue ->
             error("A continuing search control result cannot terminate generation.")
+
         GeneratedPairsSearchControlResult.BudgetExhausted ->
             GeneratedPairsPuzzleGenerationFailureReason.SearchBudgetExhausted
+
         GeneratedPairsSearchControlResult.Cancelled ->
             GeneratedPairsPuzzleGenerationFailureReason.Cancelled
     }
 
 private fun GeneratedPairsSearchOutcome<*>.failureReason(): GeneratedPairsPuzzleGenerationFailureReason = when (this) {
     GeneratedPairsSearchOutcome.BudgetExhausted -> GeneratedPairsPuzzleGenerationFailureReason.SearchBudgetExhausted
+
     GeneratedPairsSearchOutcome.Cancelled -> GeneratedPairsPuzzleGenerationFailureReason.Cancelled
+
     is GeneratedPairsSearchOutcome.Found,
     GeneratedPairsSearchOutcome.NoCandidate -> error("A non-terminal search outcome cannot terminate generation.")
 }

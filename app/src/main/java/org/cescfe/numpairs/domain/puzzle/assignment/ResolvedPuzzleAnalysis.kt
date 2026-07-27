@@ -134,6 +134,7 @@ internal fun Puzzle.analyzeResolvedPuzzle(): ResolvedPuzzleAnalysis {
 
 private fun Expression.Operand.toReference(): OperandReference? = when (this) {
     Expression.Operand.Hidden -> null
+
     is Expression.Operand.Known -> OperandReference(
         stripEntryId = stripEntryId?.let(::StripEntryId),
         value = value

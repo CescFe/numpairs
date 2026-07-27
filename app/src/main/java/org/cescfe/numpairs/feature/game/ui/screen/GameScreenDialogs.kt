@@ -225,6 +225,7 @@ private fun operandSelectorUsageHintColors(
     OperandSelectorUsageHintVisualState.AVAILABLE -> operandUsageIndicatorColors(
         OperandUsageIndicatorState.AVAILABLE
     )
+
     OperandSelectorUsageHintVisualState.USED_WITH_PAIRING_AVAILABLE -> operandSelectorPartialUsageHintColors()
 
     OperandSelectorUsageHintVisualState.USED_EXHAUSTED -> operandUsageIndicatorColors(
@@ -275,6 +276,7 @@ private fun operandOptionColors(enabled: Boolean): OperandOptionColors = if (ena
 private fun TileOperandOptionUiState.usageHintVisualStateFor(operator: Operator): OperandSelectorUsageHintVisualState =
     when {
         ruleConflictsFor(operator).isNotEmpty() -> OperandSelectorUsageHintVisualState.RULE_CONFLICT
+
         else -> when (operator) {
             Operator.Addition -> when {
                 !additionUsed -> OperandSelectorUsageHintVisualState.AVAILABLE

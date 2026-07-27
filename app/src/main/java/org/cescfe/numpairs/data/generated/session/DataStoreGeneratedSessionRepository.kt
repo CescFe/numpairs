@@ -74,6 +74,7 @@ class DataStoreGeneratedSessionRepository(
 
 private fun GeneratedSessionSnapshotDecodingResult.decodedSnapshotOrNull(): GeneratedSessionSnapshot? = when (this) {
     is GeneratedSessionSnapshotDecodingResult.Decoded -> snapshot
+
     is GeneratedSessionSnapshotDecodingResult.UnsupportedVersion,
     GeneratedSessionSnapshotDecodingResult.InvalidData -> null
 }

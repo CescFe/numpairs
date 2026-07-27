@@ -17,6 +17,7 @@ internal class GeneratedPairsValuePairSelector(
     fun selectValuePairs(variationPlan: GeneratedPairsVariationPlan): List<GeneratedPairsValuePair>? =
         when (val outcome = selectValuePairsWithControl(variationPlan = variationPlan, searchControl = null)) {
             is GeneratedPairsSearchOutcome.Found -> outcome.value
+
             GeneratedPairsSearchOutcome.NoCandidate,
             GeneratedPairsSearchOutcome.BudgetExhausted,
             GeneratedPairsSearchOutcome.Cancelled -> null
@@ -195,8 +196,10 @@ internal class GeneratedPairsValuePairSelector(
                 )
             ) {
                 is GeneratedPairsSearchOutcome.Found -> return outcome
+
                 GeneratedPairsSearchOutcome.BudgetExhausted,
                 GeneratedPairsSearchOutcome.Cancelled -> return outcome
+
                 GeneratedPairsSearchOutcome.NoCandidate -> Unit
             }
         }

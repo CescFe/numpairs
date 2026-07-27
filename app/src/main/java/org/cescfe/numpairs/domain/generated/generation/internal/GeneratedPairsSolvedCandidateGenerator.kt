@@ -33,7 +33,9 @@ internal class GeneratedPairsSolvedCandidateGenerator(private val valuePairSelec
         }
 
         GeneratedPairsSearchOutcome.NoCandidate -> GeneratedPairsSearchOutcome.NoCandidate
+
         GeneratedPairsSearchOutcome.BudgetExhausted -> GeneratedPairsSearchOutcome.BudgetExhausted
+
         GeneratedPairsSearchOutcome.Cancelled -> GeneratedPairsSearchOutcome.Cancelled
     }
 }

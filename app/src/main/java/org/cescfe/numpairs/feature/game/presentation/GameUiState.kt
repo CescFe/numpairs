@@ -180,7 +180,9 @@ private val Expression.Operand.label: String
 internal val PuzzleCompletionState.outcomeUiState: PuzzleOutcomeUiState?
     get() = when (this) {
         PuzzleCompletionState.INCOMPLETE -> null
+
         PuzzleCompletionState.SOLVED -> PuzzleOutcomeUiState.Solved
+
         PuzzleCompletionState.INCORRECT_TILES,
         PuzzleCompletionState.MISSING_STRIP_ENTRY_IDENTITIES,
         PuzzleCompletionState.MISMATCHED_SUM_PRODUCT_PAIRINGS,

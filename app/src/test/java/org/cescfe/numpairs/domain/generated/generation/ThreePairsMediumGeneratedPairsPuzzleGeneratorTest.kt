@@ -145,7 +145,7 @@ class ThreePairsMediumGeneratedPairsPuzzleGeneratorTest {
                 boundedValidSolutionCount = assessed.report.boundedValidSolutionCount,
                 knownStripAnchorCount = assessed.report.structuralObservations.knownStripAnchorCount,
                 unambiguousResultAnchorCount =
-                assessed.report.structuralObservations.unambiguousResultAnchorCount,
+                    assessed.report.structuralObservations.unambiguousResultAnchorCount,
                 longestHiddenRun = assessed.report.structuralObservations.longestHiddenRun
             )
         }
@@ -251,35 +251,35 @@ private fun List<MediumCorpusObservation>.characterization(): MediumCorpusCharac
     MediumCorpusCharacterization(
         attemptsUsed = minOf(MediumCorpusObservation::attemptsUsed)..maxOf(MediumCorpusObservation::attemptsUsed),
         searchWorkConsumed =
-        minOf(MediumCorpusObservation::searchWorkConsumed)..maxOf(MediumCorpusObservation::searchWorkConsumed),
+            minOf(MediumCorpusObservation::searchWorkConsumed)..maxOf(MediumCorpusObservation::searchWorkConsumed),
         assessmentWorkConsumed =
-        minOf(MediumCorpusObservation::assessmentWorkConsumed)..maxOf(
-            MediumCorpusObservation::assessmentWorkConsumed
-        ),
+            minOf(MediumCorpusObservation::assessmentWorkConsumed)..maxOf(
+                MediumCorpusObservation::assessmentWorkConsumed
+            ),
         initialPlausibleCandidateCount =
-        minOf(MediumCorpusObservation::initialPlausibleCandidateCount)..maxOf(
-            MediumCorpusObservation::initialPlausibleCandidateCount
-        ),
+            minOf(MediumCorpusObservation::initialPlausibleCandidateCount)..maxOf(
+                MediumCorpusObservation::initialPlausibleCandidateCount
+            ),
         initialForcedDeductionCount =
-        minOf(MediumCorpusObservation::initialForcedDeductionCount)..maxOf(
-            MediumCorpusObservation::initialForcedDeductionCount
-        ),
+            minOf(MediumCorpusObservation::initialForcedDeductionCount)..maxOf(
+                MediumCorpusObservation::initialForcedDeductionCount
+            ),
         forcedDeductionCount =
-        minOf(MediumCorpusObservation::forcedDeductionCount)..maxOf(MediumCorpusObservation::forcedDeductionCount),
+            minOf(MediumCorpusObservation::forcedDeductionCount)..maxOf(MediumCorpusObservation::forcedDeductionCount),
         plausibleDecoyCount =
-        minOf(MediumCorpusObservation::plausibleDecoyCount)..maxOf(MediumCorpusObservation::plausibleDecoyCount),
+            minOf(MediumCorpusObservation::plausibleDecoyCount)..maxOf(MediumCorpusObservation::plausibleDecoyCount),
         boundedValidSolutionCount =
-        minOf(MediumCorpusObservation::boundedValidSolutionCount)..maxOf(
-            MediumCorpusObservation::boundedValidSolutionCount
-        ),
+            minOf(MediumCorpusObservation::boundedValidSolutionCount)..maxOf(
+                MediumCorpusObservation::boundedValidSolutionCount
+            ),
         knownStripAnchorCount =
-        minOf(MediumCorpusObservation::knownStripAnchorCount)..maxOf(
-            MediumCorpusObservation::knownStripAnchorCount
-        ),
+            minOf(MediumCorpusObservation::knownStripAnchorCount)..maxOf(
+                MediumCorpusObservation::knownStripAnchorCount
+            ),
         unambiguousResultAnchorCount =
-        minOf(MediumCorpusObservation::unambiguousResultAnchorCount)..maxOf(
-            MediumCorpusObservation::unambiguousResultAnchorCount
-        ),
+            minOf(MediumCorpusObservation::unambiguousResultAnchorCount)..maxOf(
+                MediumCorpusObservation::unambiguousResultAnchorCount
+            ),
         longestHiddenRun =
-        minOf(MediumCorpusObservation::longestHiddenRun)..maxOf(MediumCorpusObservation::longestHiddenRun)
+            minOf(MediumCorpusObservation::longestHiddenRun)..maxOf(MediumCorpusObservation::longestHiddenRun)
     )

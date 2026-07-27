@@ -308,7 +308,7 @@ private fun fourPairsProfile(id: String, difficulty: DifficultyTier): GeneratedP
                 knownEntryCountRange = 3..3,
                 requiredAnchors = setOf(RequiredKnownStripAnchor.HIGHEST_STRIP_ENTRY),
                 distributionPolicy =
-                StripKnownEntryDistributionPolicy.SpreadAcrossStripAndPairsWhenPossible,
+                    StripKnownEntryDistributionPolicy.SpreadAcrossStripAndPairsWhenPossible,
                 maxConsecutiveHiddenEntries = 2
             ),
             generationPolicy = GenerationPolicy(isBoardTileShufflingEnabled = true)

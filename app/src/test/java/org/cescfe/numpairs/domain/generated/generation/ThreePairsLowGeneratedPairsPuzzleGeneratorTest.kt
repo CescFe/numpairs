@@ -88,7 +88,7 @@ class ThreePairsLowGeneratedPairsPuzzleGeneratorTest {
                 boundedValidSolutionCount = assessed.report.boundedValidSolutionCount,
                 knownStripAnchorCount = assessed.report.structuralObservations.knownStripAnchorCount,
                 unambiguousResultAnchorCount =
-                assessed.report.structuralObservations.unambiguousResultAnchorCount,
+                    assessed.report.structuralObservations.unambiguousResultAnchorCount,
                 longestHiddenRun = assessed.report.structuralObservations.longestHiddenRun
             )
         }
@@ -167,22 +167,22 @@ private data class CorpusCharacterization(
 private fun List<CorpusObservation>.characterization(): CorpusCharacterization = CorpusCharacterization(
     attemptsUsed = minOf(CorpusObservation::attemptsUsed)..maxOf(CorpusObservation::attemptsUsed),
     searchWorkConsumed =
-    minOf(CorpusObservation::searchWorkConsumed)..maxOf(CorpusObservation::searchWorkConsumed),
+        minOf(CorpusObservation::searchWorkConsumed)..maxOf(CorpusObservation::searchWorkConsumed),
     assessmentWorkConsumed =
-    minOf(CorpusObservation::assessmentWorkConsumed)..maxOf(CorpusObservation::assessmentWorkConsumed),
+        minOf(CorpusObservation::assessmentWorkConsumed)..maxOf(CorpusObservation::assessmentWorkConsumed),
     initialPlausibleCandidateCount =
-    minOf(
-        CorpusObservation::initialPlausibleCandidateCount
-    )..maxOf(CorpusObservation::initialPlausibleCandidateCount),
+        minOf(
+            CorpusObservation::initialPlausibleCandidateCount
+        )..maxOf(CorpusObservation::initialPlausibleCandidateCount),
     initialForcedDeductionCount =
-    minOf(CorpusObservation::initialForcedDeductionCount)..maxOf(CorpusObservation::initialForcedDeductionCount),
+        minOf(CorpusObservation::initialForcedDeductionCount)..maxOf(CorpusObservation::initialForcedDeductionCount),
     forcedDeductionCount =
-    minOf(CorpusObservation::forcedDeductionCount)..maxOf(CorpusObservation::forcedDeductionCount),
+        minOf(CorpusObservation::forcedDeductionCount)..maxOf(CorpusObservation::forcedDeductionCount),
     boundedValidSolutionCount =
-    minOf(CorpusObservation::boundedValidSolutionCount)..maxOf(CorpusObservation::boundedValidSolutionCount),
+        minOf(CorpusObservation::boundedValidSolutionCount)..maxOf(CorpusObservation::boundedValidSolutionCount),
     knownStripAnchorCount =
-    minOf(CorpusObservation::knownStripAnchorCount)..maxOf(CorpusObservation::knownStripAnchorCount),
+        minOf(CorpusObservation::knownStripAnchorCount)..maxOf(CorpusObservation::knownStripAnchorCount),
     unambiguousResultAnchorCount =
-    minOf(CorpusObservation::unambiguousResultAnchorCount)..maxOf(CorpusObservation::unambiguousResultAnchorCount),
+        minOf(CorpusObservation::unambiguousResultAnchorCount)..maxOf(CorpusObservation::unambiguousResultAnchorCount),
     longestHiddenRun = minOf(CorpusObservation::longestHiddenRun)..maxOf(CorpusObservation::longestHiddenRun)
 )

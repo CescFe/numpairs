@@ -154,7 +154,7 @@ class GeneratedPuzzleProfileTest {
                     initialStripMaskPolicy = validMaskPolicy().copy(
                         knownEntryCountRange = 3..3,
                         distributionPolicy =
-                        StripKnownEntryDistributionPolicy.SpreadAcrossStripAndPairsWhenPossible
+                            StripKnownEntryDistributionPolicy.SpreadAcrossStripAndPairsWhenPossible
                     )
                 ),
                 expectedRuleId = GeneratedPuzzleProfileRuleId.SPREAD_DISTRIBUTION_CAPACITY

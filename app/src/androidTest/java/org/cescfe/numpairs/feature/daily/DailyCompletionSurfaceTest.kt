@@ -145,9 +145,9 @@ class DailyCompletionSurfaceTest {
                         identity.localDate.plusDays(1)
                     },
                     generatedPuzzleGenerationUseCaseFactory =
-                    ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
-                        challengeCatalog = GeneratedModes.catalog
-                    ),
+                        ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
+                            challengeCatalog = GeneratedModes.catalog
+                        ),
                     isGeneratedGameHapticsEnabled = false,
                     onNavigateBack = {}
                 )
@@ -195,10 +195,10 @@ class DailyCompletionSurfaceTest {
                         onboardingRepository = FakeOnboardingRepository(),
                         generatedSessionRepository = FakeGeneratedSessionRepository(),
                         generatedDifficultySelectionRepository =
-                        FakeGeneratedDifficultySelectionRepository(),
+                            FakeGeneratedDifficultySelectionRepository(),
                         personalizationPreferencesRepository = preferencesRepository,
                         topAppBarActionDiscoveryRepository =
-                        FakeTopAppBarActionDiscoveryRepository(),
+                            FakeTopAppBarActionDiscoveryRepository(),
                         generatedChallengeCatalog = GeneratedModes.catalog,
                         generatedPuzzleGenerationUseCaseFactory = generationFactory,
                         dailyFeatureDependencies = DailyFeatureDependencies(
@@ -254,11 +254,11 @@ class DailyCompletionSurfaceTest {
                     onboardingRepository = FakeOnboardingRepository(),
                     generatedSessionRepository = FakeGeneratedSessionRepository(),
                     generatedDifficultySelectionRepository =
-                    FakeGeneratedDifficultySelectionRepository(),
+                        FakeGeneratedDifficultySelectionRepository(),
                     personalizationPreferencesRepository =
-                    FakePersonalizationPreferencesRepository(),
+                        FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository =
-                    FakeTopAppBarActionDiscoveryRepository(),
+                        FakeTopAppBarActionDiscoveryRepository(),
                     generatedChallengeCatalog = GeneratedModes.catalog,
                     generatedPuzzleGenerationUseCaseFactory = generationFactory,
                     dailyFeatureDependencies = DailyFeatureDependencies(
@@ -453,9 +453,9 @@ class DailyCompletionSurfaceTest {
                     }
                 ),
                 generatedPuzzleGenerationUseCaseFactory =
-                ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
-                    challengeCatalog = GeneratedModes.catalog
-                )
+                    ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
+                        challengeCatalog = GeneratedModes.catalog
+                    )
             ).generate()
         } as DailyPuzzleGenerationResult.Generated
 
