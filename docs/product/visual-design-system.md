@@ -4,7 +4,7 @@
 
 This document defines the current NumPairs visual design system. It originated in the
 `v4 - Visual Design System & UI Refinement` milestone and is updated through
-`v10 - Quick Play & Daily Challenge`.
+`v11 - Simplified Play Modes`.
 
 The goal is to establish a practical design system for implementation, not a speculative brand book. It should guide reusable Compose theme decisions, shared component defaults, and visual QA for the existing product screens.
 
@@ -576,10 +576,10 @@ The implemented v9 generated-game feedback adds:
 - a short entrance for a replacement puzzle only after its successor session is safely
   stored and adopted
 
-Those motions are enabled only by generated Quick, `4 Pairs`, and `8 Pairs` routes. Tutorial,
-required onboarding, voluntary `How to play`, restored state, and recomposition do not gain
-or replay v9 feedback. Motion does not resize layout or touch targets, block actions, or
-carry meaning that is absent from the final static state.
+Those motions are enabled only by normal Quick and Classic routes and Daily gameplay. Tutorial,
+required onboarding, voluntary `How to play`, restored state, and recomposition do not gain or
+replay v9 feedback. Motion does not resize layout or touch targets, block actions, or carry meaning
+that is absent from the final static state.
 
 Avoid:
 
@@ -594,20 +594,21 @@ state immediately.
 
 ### Generated Learning Presentation
 
-Quick and `4 Pairs` use the shared `GeneratedLearningRoute` around the generic generated-game
-presentation. It reuses the existing Rules Helper, Solving Tips, authored Tutorial overlay,
-discovery indicators, game feedback, completion actions, and design-system components without
-introducing size-specific visual roles.
+Quick uses the shared `GeneratedLearningRoute` around the generic generated-game presentation for
+its resolved 3 Pairs and 4 Pairs challenges. It reuses the existing Rules Helper, Solving Tips,
+authored Tutorial overlay, discovery indicators, game feedback, completion actions, and
+design-system components without introducing size-specific visual roles.
 
-`8 Pairs` continues to use the generic generated route without the Low learning actions. The
+Classic continues to use the generic generated route for its 8 Pairs challenges without the
+learning actions. The
 shared wrapper changes ownership only: spacing, typography, shapes, semantic colors, motion,
 touch targets, failure handling, and reduced-motion behavior remain those of the established
 generated and game surfaces.
 
-The unlocked Menu presents Quick with the same full-width `PrimaryCtaButton`, button height,
-typography, shape, gradient, border, elevation, and spacing used by normal Resume. It adds no
-one-option trailing selector; the existing `4 Pairs` and `8 Pairs` split CTAs retain their
-independent action geometry.
+The unlocked Menu presents Quick and Classic through the shared `PrimarySplitCtaButton`. Both
+retain the established expanding play region, trailing difficulty region, button height,
+typography, shape, gradient, border, elevation, divider, spacing, minimum touch targets, and
+logical LTR/RTL ordering.
 
 ### Daily Challenge Surfaces
 

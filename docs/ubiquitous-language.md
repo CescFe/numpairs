@@ -13,17 +13,33 @@ puzzle profile and presents its player-facing initial puzzle.
 A replayable generated-puzzle family identified by a stable generated-mode identity and puzzle
 size.
 
-`3 Pairs`, `4 Pairs`, and `8 Pairs` are the implemented generated modes. `Quick` is the
-player-facing identity for the `3 Pairs` mode. A mode exposes one or more explicitly supported
-generated challenges. Its identity is used for family selection, applicable mode-specific
-preference, and generated-session identity; it does not imply one difficulty.
+`3 Pairs`, `4 Pairs`, and `8 Pairs` are the implemented generated modes. A mode exposes one or
+more explicitly supported generated challenges. Its identity is used for exact challenge
+resolution and generated-session identity; it does not imply one difficulty or one player-facing
+Menu option.
+
+## Generated Play Option
+A player-facing normal-play choice that exposes supported difficulties and resolves each confirmed
+new-puzzle request to one exact Generated Challenge.
+
+`Quick` and `Classic` are the supported generated play options. A play option owns player-facing
+grouping, challenge-selection policy, and its remembered difficulty. It does not own one puzzle
+size, generation profile, exact session state, or Daily cadence.
 
 ## Quick
-A brief replayable generated-play entry point whose stable generated mode is `3 Pairs`.
+A shorter replayable Generated Play Option that selects either a 3 Pairs or 4 Pairs challenge at
+the requested Low or Medium difficulty.
 
-Quick exposes `3 Pairs Low` as its only supported v10 generated challenge. Quick is a player-facing
-mode name, not a difficulty tier, Tutorial step, generation policy, or session type. It uses the
-normal generated-session lifecycle.
+Every confirmed new Quick puzzle independently selects 3 Pairs with 35% probability and 4 Pairs
+with 65% probability. Quick is not a difficulty tier, generated mode, Tutorial step, generation
+profile, or session type. It uses the normal generated-session lifecycle.
+
+## Classic
+The replayable Generated Play Option for the original full board containing 8 solution pairs,
+16 strip entries, and 16 board tiles.
+
+Classic exposes Medium and Hard. Each difficulty resolves the matching exact 8 Pairs challenge
+without weighted size selection.
 
 ## Difficulty Tier
 The intended deductive challenge classification independent from generated puzzle size.
@@ -45,6 +61,9 @@ Generated challenges are registered explicitly. Unsupported size and difficulty 
 absent rather than synthesized. Challenge identity owns application profile selection,
 generation, retained presentation state, navigation, and exact session resolution.
 
+A Generated Play Option may select among multiple generated challenges. Once selected, the exact
+challenge remains authoritative for generation, retry, persistence, resume, and gameplay.
+
 ## Generated Puzzle Profile
 The validated, immutable generation and difficulty-assessment configuration for one generated
 challenge.
@@ -61,6 +80,9 @@ challenges. A generated session carries the mode and profile identities that res
 challenge, seed metadata, exact initial puzzle, and exact current puzzle.
 
 Daily Challenge uses a separate Daily Session lifecycle and does not occupy this slot.
+
+Generated Play Option identity is derivable from the exact configured challenge and is not stored
+redundantly in the session snapshot.
 
 ## Resumable Generated Session
 The generated session currently stored in the application-wide slot when its current puzzle is
@@ -91,7 +113,8 @@ An immutable versioned definition that selects one generated challenge and deter
 a Daily Challenge identity plus candidate index to an ordered bounded sequence of generation
 seeds.
 
-The v10 Daily Recipe selects `4 Pairs Low`. A recipe change requires a new stable version.
+The v10 Daily Recipe selects exact `4 Pairs Low`. It does not use Quick weighting or remembered
+Generated Play Option difficulty. A recipe change requires a new stable version.
 
 ## Daily Session
 The playable lifecycle for one Daily Challenge identity.

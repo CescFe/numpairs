@@ -132,6 +132,37 @@ Current visual direction:
 
 ---
 
+## v11 Quick And Classic Generated Play
+
+### Decision
+
+- Replace the direct Quick, 4 Pairs, and 8 Pairs normal-play actions with Quick and Classic split
+  primary CTAs.
+- Let Quick expose Low and Medium and select the matching 3 Pairs challenge 35% of the time and
+  4 Pairs challenge 65% of the time.
+- Let Classic expose Medium and Hard over the original 8 Pairs board.
+- Keep pair counts as structural and accessibility information rather than separate Menu modes.
+- Resolve a random Quick size only after the player confirms a new puzzle.
+
+### Rationale
+
+- Two intent-based choices reduce Menu complexity.
+- Quick communicates a shorter session relative to the original full-board Classic experience.
+- Difficulty remains explicit while puzzle-size variety happens automatically.
+- Delayed selection prevents dismissed replacement dialogs from creating meaningless random
+  choices.
+- Keeping exact size identities internal preserves reliable Resume and profile calibration.
+
+### Potential Concerns
+
+- Quick no longer promises one exact board size, so copy must not imply that it always contains
+  3 Pairs.
+- Independent weighted selections can produce visible runs of one size; v11 intentionally adds no
+  streak smoothing.
+- Medium solving tips must not claim Low-only profile constraints.
+
+---
+
 ## v10 Daily Completion History
 
 ### Decision

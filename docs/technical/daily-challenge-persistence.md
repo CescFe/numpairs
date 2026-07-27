@@ -25,7 +25,7 @@ NumPairs stores one application-private Daily aggregate containing:
 - local Daily Completion records
 
 The aggregate is independent from the one normal generated-session slot. An unfinished Daily
-Session and an unfinished normal Quick, 4 Pairs, or 8 Pairs session may coexist. Operations on one
+Session and an unfinished normal Quick or Classic session may coexist. Operations on one
 repository never read, replace, update, clear, or complete the other.
 
 `MainActivity` creates one application-scoped Daily repository and one application-scoped

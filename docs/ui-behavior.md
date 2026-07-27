@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document defines the current v10 menu, Quick, Daily Challenge, generated
+This document defines the v11 menu, Quick, Classic, Daily Challenge, generated
 difficulty selection, personalization, session routing, generated-game feedback, completion,
 calendar, sharing, and in-puzzle interaction model for NumPairs.
 
@@ -12,13 +12,13 @@ It complements the game rules described in [game-rules.md](./game-rules.md) and 
 2. Result grid behavior
 3. Contextual editing flows
 4. Gameplay top bar helper behavior
-5. Quick, Daily Challenge, and generated difficulty selection
+5. Quick, Classic, Daily Challenge, and generated difficulty selection
 6. Normal and Daily session routing and completion behavior
 7. Daily calendar and textual sharing
 8. Persistent color personalization and generated-only feedback
 
-This is the interaction baseline shared where applicable by Tutorial, Quick, normal generated
-`4 Pairs` and `8 Pairs`, and Daily Challenge gameplay.
+This is the interaction baseline shared where applicable by Tutorial, Quick, Classic, and Daily
+Challenge gameplay.
 
 Required-onboarding behavior is documented in
 [PRD v6](./product/prd/prd-v6.md). The reliable-session product contract is documented in
@@ -34,6 +34,9 @@ Quick and Daily Challenge are documented in
 [PRD v10](./product/prd/prd-v10.md). Their persistence and architecture boundaries are recorded in
 [daily-challenge-persistence.md](./technical/daily-challenge-persistence.md) and
 [ADR-006](./technical/adr/adr-006-model-daily-challenge-as-versioned-local-cadence.md).
+The v11 Quick and Classic taxonomy is documented in
+[PRD v11](./product/prd/prd-v11.md) and
+[ADR-007](./technical/adr/adr-007-separate-play-options-from-generated-modes.md).
 
 ---
 
@@ -48,8 +51,10 @@ Quick and Daily Challenge are documented in
 - **Entry dialog**: the dialog used to enter or edit a number in the strip
 - **Rules helper**: an informational dialog opened from the game top app bar to explain core game rules
 - **Usage indicator**: a compact `+` or `×` marker that shows whether a visible strip entry is already used by that operator family
-- **Difficulty selector**: the anchored, mode-specific single-choice popup used to choose one
-  supported generated challenge from the normal menu
+- **Generated Play Option**: the player-facing Quick or Classic normal-play choice that resolves a
+  confirmed new-puzzle request to one exact generated challenge
+- **Difficulty selector**: the anchored, option-specific single-choice popup used to choose one
+  supported difficulty from the normal menu
 - **Daily action**: the state-aware primary region that starts, continues, or reopens completion
   for the current local Daily Challenge
 - **Calendar action**: the trailing Daily region that opens local Daily Completion History
@@ -71,20 +76,19 @@ In this document, strip items are rendered as chips.
 
 ---
 
-## Normal Menu, Quick, Daily Challenge, And Session Routing
+## Normal Menu, Quick, Classic, Daily Challenge, And Session Routing
 
 The unlocked normal menu renders actions in this order:
 
 1. the unified state-aware Daily Challenge split primary CTA
 2. `Resume`, only while one valid unfinished normal generated session is available
-3. the direct `Quick` primary CTA
-4. the unified `4 Pairs · <difficulty>` split primary CTA
-5. the unified `8 Pairs · <difficulty>` split primary CTA
-6. `How to play`
+3. the unified `Quick · <difficulty>` split primary CTA
+4. the unified `Classic · <difficulty>` split primary CTA
+5. `How to play`
 
-Daily Challenge, `Resume`, Quick, and both generated-mode actions use the full-width primary CTA
+Daily Challenge, `Resume`, Quick, and Classic use the full-width primary CTA
 treatment. The Daily CTA contains an expanding state-aware region and a trailing calendar region.
-Each generated-mode CTA contains an expanding play region and a trailing difficulty region. Split
+Each Generated Play Option CTA contains an expanding play region and a trailing difficulty region. Split
 regions have no visual gap and use a themed vertical divider.
 
 `How to play` uses the lower-emphasis secondary treatment. A themed settings icon action in the
@@ -92,7 +96,8 @@ top-right corner of the Menu TopAppBar opens Personalization and exposes a local
 description.
 
 The localized normal `Resume` accessibility description identifies the saved mode and difficulty,
-for example `Resume 4 Pairs · Medium puzzle` or `Resume Quick · Low puzzle`.
+for example `Resume Quick · Medium puzzle` or `Resume Classic · Hard puzzle`. Once an exact
+challenge exists, accessibility may additionally identify its structural pair count.
 
 The application derives normal menu resumability only from the one normal generated-session slot.
 Missing, solved, unknown-mode, mode/profile-mismatched, corrupt, and unsupported snapshots do not
@@ -100,11 +105,11 @@ expose normal `Resume`.
 
 Selecting `Resume` opens the saved mode and exact current puzzle without generation.
 
-Selecting a generated-mode play region starts its displayed challenge immediately. The displayed
-challenge uses the mode-specific fallback on first use and the last supported difficulty the
-player selected for that mode thereafter. Its visible label uses the same typography and weight
-as the other normal-menu button labels. Compact or increased-font layouts may ellipsize visible
-text while preserving the full localized challenge in accessibility semantics.
+Selecting a Generated Play Option region requests its displayed difficulty. Quick resolves its
+exact size only after the new puzzle is confirmed; Classic resolves the matching 8 Pairs
+challenge directly. The displayed difficulty uses the option fallback on first use and the last
+supported difficulty selected for that option thereafter. Compact or increased-font layouts may
+ellipsize visible text while preserving the full localized request in accessibility semantics.
 
 ### Daily Challenge Menu Action
 
@@ -152,35 +157,36 @@ the cleared solved session, generate another puzzle, or change completion histor
 The calendar region opens the calendar from every Daily state without starting, restoring,
 replacing, or completing a puzzle.
 
-Daily state does not read or write the normal generated-session slot or remembered `4 Pairs`
+Daily state does not read or write the normal generated-session slot or remembered Quick
 difficulty. Normal generated actions do not read or write Daily state.
 
-### Quick Action
+### Quick And Classic Actions
 
-Status: implemented.
+Quick and Classic use the established full-width split primary CTA. The play and difficulty
+regions remain separate button semantics with no visual gap and a themed divider.
 
-Quick uses one full-width primary CTA labelled `Quick`. It has no trailing difficulty action while
-`3 Pairs Low` is its only supported challenge.
+Quick exposes Low and Medium. Every confirmed new Quick puzzle independently selects the matching
+3 Pairs challenge with 35% probability or 4 Pairs challenge with 65% probability. Its Menu
+semantics identify the requested option and difficulty without claiming a pair count before
+selection.
 
-Its accessibility description identifies the complete challenge as Quick, 3 Pairs, Low. The
-gameplay title and normal Resume copy use `Quick · Low`, while the stable generated mode remains
-`3 Pairs`.
+Classic exposes Medium and Hard. It resolves the matching 8 Pairs challenge, representing the
+original 16-number, 16-result board.
 
-Activating Quick starts the explicit `3 Pairs Low` challenge through the normal generated-session
-flow. If no normal session is resumable, it starts directly. If a normal session is resumable, it
-uses the shared resume-or-replace dialog. Quick never reads, replaces, or resumes Daily state.
+The gameplay title and normal Resume copy use `Quick · <difficulty>` or
+`Classic · <difficulty>`. Quick and Classic never read, replace, or resume Daily state.
 
 ### Difficulty Selector
 
-The trailing difficulty region inside each generated-mode split primary CTA opens an anchored
+The trailing difficulty region inside each Generated Play Option split primary CTA opens an anchored
 single-choice popup without leaving the normal menu. It retains the established minimum touch
 target and changes from the supplied down arrow to the supplied up arrow while expanded. The play
 and difficulty regions remain distinct button semantics, and at most one mode popup is open.
 
-The popup shows only challenges present in the supported generated-challenge catalog:
+The popup shows only difficulties supported by the option's explicit challenge-selection policy:
 
-- `4 Pairs` shows `Low` and `Medium`
-- `8 Pairs` shows `Medium` and `Hard`
+- `Quick` shows `Low` and `Medium`
+- `Classic` shows `Medium` and `Hard`
 
 All shown options are enabled from the beginning. The popup has no locked option, progress
 indicator, completion requirement, reward, or explanation of how to unlock content. Selection is
@@ -188,12 +194,13 @@ communicated through label and control state rather than color alone, and every 
 keeps the established minimum touch target and readable text-scaling behavior.
 
 On opening, the selected option is the last supported difficulty the player explicitly chose for
-that mode. The two modes remember their choices independently. A missing, corrupt, unknown, or
-unsupported stored value is presented using `Low` for `4 Pairs` and `Medium` for `8 Pairs` without
-rewriting storage.
+that Generated Play Option. Quick and Classic remember their choices independently. A missing,
+corrupt, unknown, or unsupported stored value is presented using `Low` for Quick and `Medium` for
+Classic without rewriting storage. Existing supported 4 Pairs and 8 Pairs values migrate to Quick
+and Classic respectively.
 
 Tapping a supported difficulty makes it the current option and immediately persists that explicit
-choice for the selected mode. It updates the associated play region and closes the popup without
+choice for the selected Generated Play Option. It updates the associated play region and closes the popup without
 starting a puzzle. Merely opening or dismissing the popup or displaying a fallback does not write a
 preference. Tapping outside, pressing system back, or activating the expanded difficulty region
 dismisses the popup without changing the generated-session slot.
@@ -202,25 +209,26 @@ The popup's logical end edge aligns with the trailing difficulty region's logica
 expands inward, so it remains inside the menu content bounds on compact and wide layouts. The
 alignment follows layout direction rather than assuming a physical right edge.
 
-The generated-mode play region identifies the exact requested challenge, for example
-`4 Pairs · Medium`. Activating it starts the existing resume-or-replace routing for that challenge.
-Difficulty is fixed once play begins; generated gameplay and completion do not expose a
-change-difficulty action.
+The play region identifies the requested option and difficulty, for example `Quick · Medium`.
+Activating it starts the existing resume-or-replace routing for that request. Difficulty is fixed
+once play begins; generated gameplay and completion do not expose a change-difficulty action.
 
 ### Resume Or Replace
 
-Activating Quick or a generated-mode play region while a normal generated session is resumable
+Activating Quick or Classic while a normal generated session is resumable
 opens the same modal choice:
 
 - primary: `Resume`
-- secondary: start a new puzzle for the requested challenge
+- secondary: start a new puzzle for the requested option and difficulty
 
-Same-challenge, same-mode/different-difficulty, and different-mode selections use one concise
+Same-challenge, same-option/different-difficulty, and different-option selections use one concise
 supporting message: `You have an unfinished <saved mode> · <saved difficulty> puzzle.` The message
 uses the larger body text treatment. The secondary label always identifies the requested
-replacement challenge as `New <selected mode> · <selected difficulty>` for 4 Pairs and 8 Pairs or
-`New Quick` for Quick. The primary action's accessibility description identifies the saved
-challenge.
+replacement as `New <selected option> · <selected difficulty>`. The primary action's
+accessibility description identifies the saved challenge.
+
+Quick selects its exact 3 Pairs or 4 Pairs challenge only after the secondary action is confirmed.
+Dismissal does not select a size or mutate either session slot.
 
 The primary action uses the shared primary CTA treatment and established button shape.
 
@@ -269,7 +277,7 @@ The screen also exposes one `Game haptics` preference. It defaults to enabled, p
 independently from onboarding and generated sessions, and controls only accepted-assignment
 haptics in generated games. Android's system touch-feedback setting remains authoritative.
 There are no sound, error-haptic, typography, shape, motion, or difficulty controls on the
-Personalization screen. Generated difficulty is selected only through the mode-specific popup in
+Personalization screen. Generated difficulty is selected only through the option-specific popup in
 the normal menu.
 
 In-app NumPairs branding follows the selected appearance palette. The system splash and
@@ -278,7 +286,7 @@ system-themed icons, whose tint is controlled by the launcher rather than NumPai
 
 ## Normal Generated Completion And Replay
 
-A solved normal Quick, 4 Pairs, or 8 Pairs puzzle shows exactly:
+A solved normal Quick or Classic puzzle shows exactly:
 
 - primary: `Play another`
 - secondary: `Back to menu`
@@ -288,11 +296,12 @@ and the completion surface enters once. Recomposition, restoration, preview stat
 already-solved initial puzzle do not replay the celebration. Completion actions remain
 usable throughout the final visual state.
 
-`Play another` runs the existing bounded generation and safe-replacement pipeline for the exact
-mode and difficulty of the completed session. It does not consult or rewrite either remembered
-selector default. The solved puzzle remains visible while its successor is generating, validating,
-or being
-stored. Failure or cancellation keeps the completion surface available. Only after a
+`Play another` runs the existing bounded generation and safe-replacement pipeline at the exact
+difficulty of the completed session. Quick performs a fresh 35/65 size selection; Classic keeps
+the exact 8 Pairs challenge. Replay does not consult or rewrite either remembered selector
+default. The solved puzzle remains visible while its successor is generating, validating, or
+being stored. Failure or cancellation keeps the completion surface available. Retry keeps the
+selected successor challenge. Only after a
 successor is safely stored and adopted does a brief entrance transition introduce it; the
 transition is transient and is not persisted.
 
@@ -309,7 +318,7 @@ completed-today summary, calendar return routing, and sharing integration implem
 state-aware Menu entry is implemented.
 
 Daily gameplay reuses the generated Game screen and the `4 Pairs Low` challenge selected by its
-recipe. It does not expose a Daily difficulty selector or consult the remembered normal `4 Pairs`
+recipe. It does not expose a Daily difficulty selector or consult the remembered normal Quick
 difficulty.
 
 The gameplay TopAppBar title identifies Daily and the captured local date using localized concise
@@ -428,10 +437,11 @@ after process death.
 
 Past calendar dates do not expose sharing in v10.
 
-### v10 Visual And Accessibility Contract
+### Generated And Daily Visual And Accessibility Contract
 
 - Daily reuses `NumPairsComponents.PrimarySplitCtaButton`.
-- Quick and normal Resume reuse `NumPairsComponents.PrimaryCtaButton`.
+- Quick and Classic reuse `NumPairsComponents.PrimarySplitCtaButton`; normal Resume reuses
+  `NumPairsComponents.PrimaryCtaButton`.
 - Daily split regions and month navigation expose distinct button semantics and localized action
   descriptions.
 - Start, continue, completed, today, historical completion, and future-date states never rely only
@@ -458,9 +468,9 @@ Past calendar dates do not expose sharing in v10.
 
 ## Generated-Game Feedback
 
-The generated feedback contract applies to normal Quick, generated `4 Pairs`, generated `8 Pairs`,
-and Daily Challenge. Guided first run, voluntary `How to play`, Tutorial, authored practice, and
-the generic game surface do not opt into it.
+The generated feedback contract applies to normal Quick, Classic, and Daily Challenge. Guided
+first run, voluntary `How to play`, Tutorial, authored practice, and the generic game surface do
+not opt into it.
 
 After a generated-game action commits an accepted strip value, operand, or operator:
 
@@ -487,22 +497,21 @@ final state when system animation duration is disabled.
 Gameplay screens should show:
 
 - a back navigation action
-- the current challenge title, such as `Quick · Low`, `4 Pairs · Low`, `8 Pairs · Hard`, or
+- the current challenge title, such as `Quick · Low`, `Quick · Medium`, `Classic · Hard`, or
   `Daily · <localized date>`; Tutorial retains its authored title
 - an optional rules helper action
 
-The rules helper action remains available in generated `4 Pairs`. v10 also makes it available in
-Quick and Daily because both use the documented Low learning principles. It should not be shown in
-Tutorial because Tutorial has its own guided instructional surface. It is intentionally not part
-of the menu screen.
+The rules helper action remains available in Quick and Daily and is intentionally not part of the
+menu screen. It should not be shown in Tutorial because Tutorial has its own guided instructional
+surface.
 
 Normal and Daily session persistence do not add a new-puzzle, restart, resume, share, calendar, or
 overflow action to the gameplay TopAppBar. Session and completion choices remain in the normal
 menu and the applicable completion surface.
 
-The existing Low-specific rules helper and solving tips may remain available in `4 Pairs Medium`
-for v8. Aligning that learning content with Medium is a separate follow-up and does not alter the
-challenge identity or generated puzzle rules.
+The existing Low-oriented solving tips may remain available in Quick Medium. Aligning that
+learning content more closely with Medium is a separate follow-up and does not alter challenge
+identity or generated puzzle rules.
 
 ### Rules Helper Behavior
 
@@ -769,7 +778,7 @@ The following behaviors are intentionally left for future tickets:
 - Daily streaks, scores, timers, rankings, achievements, reminders, and notifications
 - Playing, sharing, or backfilling past Daily Challenge dates
 - Player-selected or rotating Daily difficulty
-- Revising Low-specific solving tips for `4 Pairs Medium`
+- Revising Low-oriented solving tips specifically for Quick Medium
 - Advanced validation while entering or selecting values
 - Context-aware filtering of operand slot options
 - Automatic prevention of invalid operator or operand choices

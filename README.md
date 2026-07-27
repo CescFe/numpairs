@@ -8,10 +8,12 @@ Players complete hidden expressions on a board by using numbers from a strip. Th
 
 ## Current Status
 
-### Current implemented product baseline: v10
+### Current implemented product baseline: v10; active product contract: v11
 
+- 🎮 [PRD v11 Simplified Play Modes](./docs/product/prd/prd-v11.md) defines the active delivery
+  contract for player-facing Quick and Classic generated play.
 - 🗓️ [PRD v10 Quick Play & Daily Challenge](./docs/product/prd/prd-v10.md) defines the
-  implemented Quick mode and deterministic local Daily Challenge.
+  implemented 3 Pairs Quick baseline and deterministic local Daily Challenge.
 - 📈 [PRD v8 Difficulty Selection & Challenge Expansion](./docs/product/prd/prd-v8.md) defines
   the current generated challenge catalog and mode-specific difficulty selection.
 - ✨ [PRD v9 Game Feel & Personalization](./docs/product/prd/prd-v9.md) defines the current color-personalization and generated-game feedback baseline.
@@ -23,12 +25,12 @@ NumPairs now provides five persistent color-only themes: Warm, Frost, Obsidian, 
 and Ember. Typography, shapes, spacing, elevation, layout, controls, and gameplay meanings
 remain shared across them.
 
-Generated play supports Quick as `3 Pairs Low`, plus `4 Pairs Low`, `4 Pairs Medium`,
-`8 Pairs Medium`, and `8 Pairs Hard`. Players choose a supported difficulty independently for the
-4 Pairs and 8 Pairs modes, while Quick launches its only challenge directly. Every generated
-challenge adds subtle accepted-assignment haptics, newly-correct tile motion, a brief completion
-celebration, and a successor-ready replay transition. This feedback is not added to Tutorial or
-onboarding; sound and error haptics are not implemented.
+v11 groups normal generated play into Quick and Classic while preserving the stable internal
+3 Pairs, 4 Pairs, and 8 Pairs challenge identities. Quick will expose Low and Medium and select
+the matching 3 Pairs challenge 35% of the time and 4 Pairs challenge 65% of the time. Classic will
+expose the original full-board `8 Pairs Medium` and `8 Pairs Hard` challenges. Generated feedback
+continues using subtle accepted-assignment haptics, newly-correct tile motion, a brief completion
+celebration, and a successor-ready replay transition.
 
 Daily Challenge selects one deterministic `4 Pairs Low` puzzle for each device-local calendar
 date. Its exact progress and local completion history use a separate versioned aggregate, so one
@@ -36,10 +38,10 @@ normal generated session and one Daily Session may remain resumable at the same 
 state-aware Menu action, monthly completion calendar, and non-spoiling textual share result work
 without accounts or a server.
 
-### Active milestone: v10
+### Active milestone: v11
 
-- Implementation and milestone validation are complete.
-- The GitHub milestone intentionally remains open for manual closure.
+- The documentation-first product and architecture contract is defined.
+- Implementation follows dependency-ordered atomic issues and Pull Requests.
 
 Historical milestone snapshots:
 
@@ -54,7 +56,8 @@ PRDs preserve the product requirements and planning context for each milestone. 
 generated-mode and profile behavior is also documented in
 [puzzle-generation.md](./docs/product/puzzle-generation.md).
 
-All five supported generated profiles are implemented. Normal generated play stores one exact
+The v10 baseline contains five implemented generated profiles; v11 adds a calibrated
+`3 Pairs Medium` profile. Normal generated play stores one exact
 resumable session shared by every generated challenge, restores committed progress after process
 death, and keeps the current puzzle visible until a validated successor is stored and ready.
 Daily progress and completion history remain independently persisted in their own aggregate.
@@ -107,7 +110,8 @@ docs/
 Core responsibilities:
 
 - `domain`: puzzle model, rules, validation, assignments, and generated puzzle logic.
-- `feature`: Menu, Tutorial, Quick, Daily Challenge, generated modes, and reusable Game behavior.
+- `feature`: Menu, Tutorial, Quick, Classic, Daily Challenge, generated modes, and reusable Game
+  behavior.
 - `data`: seed puzzle, persistence-backed preferences, generated-session snapshot, and Daily
   aggregate.
 - `ui`: app navigation, theme, and shared visual defaults.
@@ -125,6 +129,7 @@ Core responsibilities:
 - Daily Challenge persistence: [daily-challenge-persistence.md](./docs/technical/daily-challenge-persistence.md)
 - Platform branding decision: [ADR-004](./docs/technical/adr/adr-004-keep-v9-platform-branding-static.md)
 - Daily cadence decision: [ADR-006](./docs/technical/adr/adr-006-model-daily-challenge-as-versioned-local-cadence.md)
+- Generated play-option decision: [ADR-007](./docs/technical/adr/adr-007-separate-play-options-from-generated-modes.md)
 - UX decisions: `docs/product/ux-decisions.md`
 - Architectural Decision Records: `docs/technical/adr/`
 - Delivery workflow: [delivery-workflow.md](./docs/technical/delivery-workflow.md)
