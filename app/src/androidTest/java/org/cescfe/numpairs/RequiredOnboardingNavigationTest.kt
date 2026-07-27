@@ -37,6 +37,7 @@ import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.feature.onboarding.ONBOARDING_LOADING_SCREEN_TEST_TAG
 import org.cescfe.numpairs.feature.onboarding.RequiredOnboardingTestTags
 import org.cescfe.numpairs.feature.tutorial.ui.TutorialScreenTestTags
+import org.cescfe.numpairs.testing.fourPairsQuickSelector
 import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
@@ -316,7 +317,7 @@ class RequiredOnboardingNavigationTest {
     private fun waitForMenu() {
         composeTestRule.waitUntil(timeoutMillis = ONBOARDING_WAIT_TIMEOUT_MILLIS) {
             composeTestRule
-                .onAllNodes(hasTestTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON))
+                .onAllNodes(hasTestTag(MenuScreenTestTags.QUICK_BUTTON))
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
@@ -343,6 +344,7 @@ class RequiredOnboardingNavigationTest {
                     generatedDifficultySelectionRepository = FakeGeneratedDifficultySelectionRepository(),
                     personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
+                    generatedPlayChallengeSelector = fourPairsQuickSelector(),
                     generatedChallengeCatalog = GeneratedModes.catalog,
                     generatedPuzzleGenerationUseCaseFactory = generatedPuzzleFactory()
                 )

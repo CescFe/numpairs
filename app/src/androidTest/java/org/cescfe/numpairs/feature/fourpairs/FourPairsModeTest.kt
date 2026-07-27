@@ -156,7 +156,7 @@ class FourPairsModeTest {
 
     private fun navigateToFourPairs() {
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
             .assertIsDisplayed()
             .performClick()
 
@@ -213,7 +213,7 @@ class FourPairsModeTest {
 
     private fun fourPairsScreenTitle(): String = string(
         R.string.generated_challenge_title,
-        string(R.string.four_pairs_screen_title),
+        string(R.string.quick_screen_title),
         string(R.string.generated_difficulty_low)
     )
 

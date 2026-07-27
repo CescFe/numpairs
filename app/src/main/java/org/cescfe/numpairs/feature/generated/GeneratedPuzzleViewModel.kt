@@ -45,8 +45,11 @@ internal sealed interface GeneratedPuzzleGenerationUiState {
 
     data class Restoring(val expectedSessionId: GeneratedSessionId) : GeneratedPuzzleGenerationUiState
 
-    data class Loading(val request: GeneratedPuzzleGenerationRequest, val previousSession: GeneratedModeGameSession?) :
-        GeneratedPuzzleGenerationUiState
+    data class Loading(
+        val definition: GeneratedPuzzleGenerationDefinition,
+        val request: GeneratedPuzzleGenerationRequest,
+        val previousSession: GeneratedModeGameSession?
+    ) : GeneratedPuzzleGenerationUiState
 
     data class Ready(
         val session: GeneratedModeGameSession,
@@ -60,6 +63,7 @@ internal sealed interface GeneratedPuzzleGenerationUiState {
     }
 
     data class Failed(
+        val definition: GeneratedPuzzleGenerationDefinition,
         val request: GeneratedPuzzleGenerationRequest,
         val failure: GeneratedPuzzlePreparationFailure,
         val previousSession: GeneratedModeGameSession?
@@ -75,6 +79,10 @@ internal class GeneratedPuzzleViewModel(
     private val seedSource: GeneratedPuzzleSeedSource = ThreadLocalGeneratedPuzzleSeedSource,
     private val sessionIdSource: GeneratedSessionIdSource = UuidGeneratedSessionIdSource
 ) : ViewModel() {
+    private val initialDefinition = GeneratedPuzzleGenerationDefinition(
+        challenge = challenge,
+        generationUseCase = generationUseCase
+    )
     private val _uiState = MutableStateFlow<GeneratedPuzzleGenerationUiState>(GeneratedPuzzleGenerationUiState.Idle)
     val uiState: StateFlow<GeneratedPuzzleGenerationUiState> = _uiState.asStateFlow()
 
@@ -92,7 +100,8 @@ internal class GeneratedPuzzleViewModel(
 
             when (launchIntent) {
                 is GeneratedModeLaunchIntent.NewPuzzle -> startGeneration(
-                    request = nextRequest(),
+                    definition = initialDefinition,
+                    request = nextRequest(initialDefinition.challenge),
                     previousSession = (_uiState.value as? GeneratedPuzzleGenerationUiState.Ready)?.session
                 )
 
@@ -107,11 +116,13 @@ internal class GeneratedPuzzleViewModel(
 
         when (val state = _uiState.value) {
             GeneratedPuzzleGenerationUiState.Idle -> startGeneration(
-                request = nextRequest(),
+                definition = initialDefinition,
+                request = nextRequest(initialDefinition.challenge),
                 previousSession = null
             )
 
             is GeneratedPuzzleGenerationUiState.Loading -> startGeneration(
+                definition = state.definition,
                 request = state.request,
                 previousSession = state.previousSession
             )
@@ -137,15 +148,24 @@ internal class GeneratedPuzzleViewModel(
     fun retry() {
         val state = _uiState.value as? GeneratedPuzzleGenerationUiState.Failed ?: return
         startGeneration(
-            request = nextRequest(),
+            definition = state.definition,
+            request = nextRequest(state.definition.challenge),
             previousSession = state.previousSession
         )
     }
 
     fun onNewPuzzleRequested() {
+        onNewPuzzleRequested {
+            initialDefinition
+        }
+    }
+
+    fun onNewPuzzleRequested(definitionProvider: () -> GeneratedPuzzleGenerationDefinition) {
         val state = _uiState.value as? GeneratedPuzzleGenerationUiState.Ready ?: return
+        val definition = definitionProvider()
         startGeneration(
-            request = nextRequest(),
+            definition = definition,
+            request = nextRequest(definition.challenge),
             previousSession = state.session
         )
     }
@@ -254,18 +274,26 @@ internal class GeneratedPuzzleViewModel(
         job.start()
     }
 
-    private fun startGeneration(request: GeneratedPuzzleGenerationRequest, previousSession: GeneratedModeGameSession?) {
+    private fun startGeneration(
+        definition: GeneratedPuzzleGenerationDefinition,
+        request: GeneratedPuzzleGenerationRequest,
+        previousSession: GeneratedModeGameSession?
+    ) {
+        require(definition.challenge.profile.id == request.profileId) {
+            "Generated puzzle definition must match its request profile."
+        }
         if (generationJob != null) {
             return
         }
 
         val token = ++generationToken
         _uiState.value = GeneratedPuzzleGenerationUiState.Loading(
+            definition = definition,
             request = request,
             previousSession = previousSession
         )
         val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
-            val outcome = generationUseCase.generate(request = request)
+            val outcome = definition.generationUseCase.generate(request = request)
             if (token != generationToken) {
                 return@launch
             }
@@ -273,6 +301,7 @@ internal class GeneratedPuzzleViewModel(
             val nextState = when (outcome) {
                 is GeneratedPuzzleGenerationResult.Generated -> {
                     prepareGeneratedSession(
+                        definition = definition,
                         outcome = outcome,
                         previousSession = previousSession
                     )
@@ -280,6 +309,7 @@ internal class GeneratedPuzzleViewModel(
 
                 is GeneratedPuzzleGenerationResult.Failed -> {
                     GeneratedPuzzleGenerationUiState.Failed(
+                        definition = definition,
                         request = outcome.request,
                         failure = GeneratedPuzzlePreparationFailure.Generation(outcome),
                         previousSession = previousSession
@@ -298,13 +328,14 @@ internal class GeneratedPuzzleViewModel(
     }
 
     private suspend fun prepareGeneratedSession(
+        definition: GeneratedPuzzleGenerationDefinition,
         outcome: GeneratedPuzzleGenerationResult.Generated,
         previousSession: GeneratedModeGameSession?
     ): GeneratedPuzzleGenerationUiState {
         val sessionId = sessionIdSource.nextId()
         val snapshot = GeneratedSessionSnapshot(
             sessionId = sessionId,
-            modeId = challenge.modeId.value,
+            modeId = definition.challenge.modeId.value,
             profileId = outcome.request.profileId.value,
             seed = outcome.request.seed,
             initialPuzzle = outcome.initialPuzzle,
@@ -328,6 +359,7 @@ internal class GeneratedPuzzleViewModel(
             )
         } catch (_: IOException) {
             GeneratedPuzzleGenerationUiState.Failed(
+                definition = definition,
                 request = outcome.request,
                 failure = GeneratedPuzzlePreparationFailure.Persistence,
                 previousSession = previousSession
@@ -335,11 +367,17 @@ internal class GeneratedPuzzleViewModel(
         }
     }
 
-    private fun nextRequest(): GeneratedPuzzleGenerationRequest = GeneratedPuzzleGenerationRequest(
-        profile = challenge.profile,
-        seed = seedSource.nextSeed()
-    )
+    private fun nextRequest(challenge: GeneratedChallenge): GeneratedPuzzleGenerationRequest =
+        GeneratedPuzzleGenerationRequest(
+            profile = challenge.profile,
+            seed = seedSource.nextSeed()
+        )
 }
+
+internal data class GeneratedPuzzleGenerationDefinition(
+    val challenge: GeneratedChallenge,
+    val generationUseCase: GeneratedPuzzleGenerationUseCase
+)
 
 internal data class GeneratedPuzzleReplacementTransition(
     val predecessorSessionId: GeneratedSessionId,

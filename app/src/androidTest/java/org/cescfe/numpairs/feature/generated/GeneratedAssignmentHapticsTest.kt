@@ -24,6 +24,7 @@ import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.feature.game.GameRoute
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
+import org.cescfe.numpairs.testing.fourPairsQuickSelector
 import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.navigation.navigateToSelectedGeneratedChallenge
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
@@ -45,7 +46,7 @@ class GeneratedAssignmentHapticsTest {
             hapticFeedback = hapticFeedback,
             preferencesRepository = preferencesRepository
         )
-        navigateToGeneratedMode(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+        navigateToGeneratedMode(MenuScreenTestTags.QUICK_BUTTON)
 
         assignFirstTileOperator(Operator.ADDITION)
         assertEquals(listOf(HapticFeedbackType.Confirm), hapticFeedback.requestedTypes)
@@ -76,7 +77,7 @@ class GeneratedAssignmentHapticsTest {
     fun eightPairsUsesTheSameGeneratedAssignmentHaptic() {
         val hapticFeedback = RecordingHapticFeedback()
         setAppContent(hapticFeedback = hapticFeedback)
-        navigateToGeneratedMode(MenuScreenTestTags.EIGHT_PAIRS_BUTTON)
+        navigateToGeneratedMode(MenuScreenTestTags.CLASSIC_BUTTON)
 
         assignFirstTileOperator(Operator.ADDITION)
 
@@ -118,6 +119,7 @@ class GeneratedAssignmentHapticsTest {
                         generatedDifficultySelectionRepository = FakeGeneratedDifficultySelectionRepository(),
                         personalizationPreferencesRepository = preferencesRepository,
                         topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
+                        generatedPlayChallengeSelector = fourPairsQuickSelector(),
                         generatedChallengeCatalog = GeneratedModes.catalog,
                         generatedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory {
                             GeneratedPuzzleGenerationUseCase { request ->

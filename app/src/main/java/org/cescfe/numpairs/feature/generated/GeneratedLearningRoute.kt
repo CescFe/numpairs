@@ -29,6 +29,8 @@ fun GeneratedLearningRoute(
     isGeneratedGameHapticsEnabled: Boolean = true,
     tutorialOverlayMode: TutorialMode? = null,
     onTutorialOverlayClosed: () -> Unit = {},
+    newPuzzleChallengeProvider: (() -> GeneratedChallenge)? = null,
+    replacementGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory? = null,
     onNavigateBack: () -> Unit = {}
 ) {
     val actionDiscoveryState: TopAppBarActionDiscoveryState? by topAppBarActionDiscoveryRepository.discoveryState
@@ -82,6 +84,8 @@ fun GeneratedLearningRoute(
                     }
                 )
             },
+            newPuzzleChallengeProvider = newPuzzleChallengeProvider,
+            replacementGenerationUseCaseFactory = replacementGenerationUseCaseFactory,
             onNavigateBack = onNavigateBack
         )
         if (isSolvingTipsDialogVisible) {

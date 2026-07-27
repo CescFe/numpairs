@@ -110,6 +110,110 @@ class GeneratedPuzzleViewModelTest {
     }
 
     @Test
+    fun quick_replay_adopts_one_fresh_exact_challenge_while_the_previous_session_remains_visible() {
+        val replacementPuzzle = CompletableDeferred<Puzzle>()
+        val replacementRequests = mutableListOf<GeneratedPuzzleGenerationRequest>()
+        val repository = RecordingGeneratedSessionRepository()
+        val viewModel = GeneratedPuzzleViewModel(
+            challenge = GeneratedModes.FOUR_PAIRS_LOW,
+            generationUseCase = generatedPuzzleUseCase(),
+            generatedSessionRepository = repository,
+            seedSource = QueueGeneratedPuzzleSeedSource(79, 83),
+            sessionIdSource = QueueGeneratedSessionIdSource("quick-four", "quick-three")
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val previousSession = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).session
+        var replacementSelections = 0
+
+        val replacementDefinition = {
+            replacementSelections += 1
+            GeneratedPuzzleGenerationDefinition(
+                challenge = GeneratedModes.THREE_PAIRS_LOW,
+                generationUseCase = GeneratedPuzzleGenerationUseCase { request ->
+                    replacementRequests += request
+                    GeneratedPuzzleGenerationResult.Generated(
+                        request = request,
+                        initialPuzzle = replacementPuzzle.await()
+                    )
+                }
+            )
+        }
+        viewModel.onNewPuzzleRequested(replacementDefinition)
+        viewModel.onNewPuzzleRequested(replacementDefinition)
+        dispatcher.scheduler.runCurrent()
+
+        val loading = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Loading
+        assertEquals(1, replacementSelections)
+        assertEquals(previousSession, loading.previousSession)
+        assertEquals(previousSession.snapshot, repository.session.value)
+
+        replacementPuzzle.complete(samplePuzzle)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val ready = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready
+        assertEquals(listOf(83), replacementRequests.map(GeneratedPuzzleGenerationRequest::seed))
+        assertEquals(GeneratedModes.THREE_PAIRS.id.value, ready.session.snapshot.modeId)
+        assertEquals(GeneratedModes.THREE_PAIRS_LOW.profile.id.value, ready.session.snapshot.profileId)
+        assertEquals(GeneratedSessionId("quick-three"), ready.session.id)
+        assertEquals(ready.session.snapshot, repository.session.value)
+    }
+
+    @Test
+    fun retry_reuses_the_exact_weighted_quick_challenge_without_selecting_again() {
+        var replacementSelections = 0
+        var replacementAttempts = 0
+        val repository = RecordingGeneratedSessionRepository()
+        val viewModel = GeneratedPuzzleViewModel(
+            challenge = GeneratedModes.FOUR_PAIRS_MEDIUM,
+            generationUseCase = generatedPuzzleUseCase(),
+            generatedSessionRepository = repository,
+            seedSource = QueueGeneratedPuzzleSeedSource(89, 97, 101),
+            sessionIdSource = QueueGeneratedSessionIdSource("quick-initial", "quick-retry")
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onNewPuzzleRequested {
+            replacementSelections += 1
+            GeneratedPuzzleGenerationDefinition(
+                challenge = GeneratedModes.THREE_PAIRS_MEDIUM,
+                generationUseCase = GeneratedPuzzleGenerationUseCase { request ->
+                    replacementAttempts += 1
+                    if (replacementAttempts == 1) {
+                        GeneratedPuzzleGenerationResult.Failed(
+                            GeneratedPairsPuzzleGenerationOutcome.Failed(
+                                request = request,
+                                attemptsUsed = 1,
+                                searchWorkConsumed = 12,
+                                reason = GeneratedPairsPuzzleGenerationFailureReason.AttemptsExhausted,
+                                candidateRejections = emptyList()
+                            )
+                        )
+                    } else {
+                        GeneratedPuzzleGenerationResult.Generated(
+                            request = request,
+                            initialPuzzle = samplePuzzle
+                        )
+                    }
+                }
+            )
+        }
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val failed = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Failed
+        assertEquals(GeneratedModes.THREE_PAIRS_MEDIUM, failed.definition.challenge)
+        viewModel.retry()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val ready = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready
+        assertEquals(1, replacementSelections)
+        assertEquals(2, replacementAttempts)
+        assertEquals(GeneratedModes.THREE_PAIRS.id.value, ready.session.snapshot.modeId)
+        assertEquals(GeneratedModes.THREE_PAIRS_MEDIUM.profile.id.value, ready.session.snapshot.profileId)
+    }
+
+    @Test
     fun replay_is_deduplicated_and_a_failure_keeps_the_completed_session_until_retry_succeeds() {
         val firstPuzzle = CompletableDeferred(samplePuzzle)
         val replayFailure = CompletableDeferred(true)

@@ -72,7 +72,7 @@ class GeneratedSessionResumeNavigationTest {
             .assertContentDescriptionEquals(
                 string(
                     R.string.menu_resume_content_description,
-                    challengeName(R.string.four_pairs_screen_title, R.string.generated_difficulty_low)
+                    challengeName(R.string.quick_screen_title, R.string.generated_difficulty_low)
                 )
             )
         val resumeTop = resumeNode.fetchSemanticsNode().boundsInRoot.top
@@ -81,13 +81,8 @@ class GeneratedSessionResumeNavigationTest {
             .fetchSemanticsNode()
             .boundsInRoot
             .top
-        val fourPairsTop = composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
-            .fetchSemanticsNode()
-            .boundsInRoot
-            .top
-        val eightPairsTop = composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_BUTTON)
+        val classicTop = composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.CLASSIC_BUTTON)
             .fetchSemanticsNode()
             .boundsInRoot
             .top
@@ -103,9 +98,8 @@ class GeneratedSessionResumeNavigationTest {
             .top
         assertTrue(settingsTop < resumeTop)
         assertTrue(resumeTop < quickTop)
-        assertTrue(quickTop < fourPairsTop)
-        assertTrue(fourPairsTop < eightPairsTop)
-        assertTrue(eightPairsTop < tutorialTop)
+        assertTrue(quickTop < classicTop)
+        assertTrue(classicTop < tutorialTop)
 
         resumeNode.performClick()
 

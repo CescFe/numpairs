@@ -6,7 +6,6 @@
     <!-- Menu screen -->
     <string name="menu_resume_button">Continua</string>
     <string name="menu_resume_content_description">Continua el puzle de %1$s</string>
-    <string name="menu_play_quick_content_description">Juga al puzle %1$s, %2$s, dificultat %3$s</string>
     <string name="menu_daily_start_button">Repte Daily</string>
     <string name="menu_daily_continue_button">Continua Daily</string>
     <string name="menu_daily_completed_button">Daily completat</string>
@@ -55,9 +54,9 @@
 
     <!-- Generated mode screens -->
     <string name="quick_screen_title">Quick</string>
+    <string name="classic_screen_title">Clàssic</string>
     <string name="three_pairs_accessibility_name">3 parelles</string>
     <string name="four_pairs_screen_title">4 parelles</string>
-    <string name="eight_pairs_screen_title">8 parelles</string>
 
     <!-- Generated puzzle creation -->
     <string name="generated_puzzle_loading_message">Creant puzle…</string>
