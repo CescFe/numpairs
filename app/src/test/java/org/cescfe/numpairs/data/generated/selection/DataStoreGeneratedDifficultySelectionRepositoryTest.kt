@@ -17,8 +17,9 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.cescfe.numpairs.domain.generated.profile.DifficultyTier
-import org.cescfe.numpairs.feature.generated.GeneratedModeId
 import org.cescfe.numpairs.feature.generated.GeneratedModes
+import org.cescfe.numpairs.feature.generated.GeneratedPlayOptionId
+import org.cescfe.numpairs.feature.generated.GeneratedPlayOptions
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -40,51 +41,56 @@ class DataStoreGeneratedDifficultySelectionRepositoryTest {
     }
 
     @Test
-    fun fresh_preferences_expose_mode_specific_fallbacks_without_persisting_them() = runBlocking {
+    fun fresh_preferences_expose_option_fallbacks_without_persisting_them() = runBlocking {
         val fixture = createRepository()
 
-        assertNull(fixture.repository.selectedDifficulty(GeneratedModes.THREE_PAIRS.id).first())
         assertEquals(
             DifficultyTier.LOW,
-            fixture.repository.selectedDifficulty(GeneratedModes.FOUR_PAIRS.id).first()
+            fixture.repository.selectedDifficulty(GeneratedPlayOptions.QUICK.id).first()
         )
         assertEquals(
             DifficultyTier.MEDIUM,
-            fixture.repository.selectedDifficulty(GeneratedModes.EIGHT_PAIRS.id).first()
+            fixture.repository.selectedDifficulty(GeneratedPlayOptions.CLASSIC.id).first()
         )
         assertTrue(fixture.dataStore.data.first().asMap().isEmpty())
     }
 
     @Test
-    fun quick_has_no_remembered_difficulty_selection_or_writable_preference() {
+    fun legacy_mode_preferences_supply_initial_quick_and_classic_selections_without_rewriting() = runBlocking {
         val fixture = createRepository()
-
-        assertThrows(IllegalArgumentException::class.java) {
-            runBlocking {
-                fixture.repository.selectDifficulty(
-                    GeneratedModes.THREE_PAIRS.id,
-                    DifficultyTier.LOW
-                )
-            }
+        val legacyQuickKey = legacyDifficultyPreferenceKey(GeneratedModes.FOUR_PAIRS.id)
+        val legacyClassicKey = legacyDifficultyPreferenceKey(GeneratedModes.EIGHT_PAIRS.id)
+        fixture.dataStore.edit { preferences ->
+            preferences[legacyQuickKey] = "medium"
+            preferences[legacyClassicKey] = "hard"
         }
 
-        runBlocking {
-            assertNull(fixture.repository.selectedDifficulty(GeneratedModes.THREE_PAIRS.id).first())
-            assertTrue(fixture.dataStore.data.first().asMap().isEmpty())
-        }
+        assertEquals(
+            DifficultyTier.MEDIUM,
+            fixture.repository.selectedDifficulty(GeneratedPlayOptions.QUICK.id).first()
+        )
+        assertEquals(
+            DifficultyTier.HARD,
+            fixture.repository.selectedDifficulty(GeneratedPlayOptions.CLASSIC.id).first()
+        )
+        val storedPreferences = fixture.dataStore.data.first()
+        assertEquals("medium", storedPreferences[legacyQuickKey])
+        assertEquals("hard", storedPreferences[legacyClassicKey])
+        assertNull(storedPreferences[difficultyPreferenceKey(GeneratedPlayOptions.QUICK.id)])
+        assertNull(storedPreferences[difficultyPreferenceKey(GeneratedPlayOptions.CLASSIC.id)])
     }
 
     @Test
-    fun explicit_supported_selections_persist_independently_across_recreation() = runBlocking {
+    fun explicit_option_selections_persist_independently_across_recreation() = runBlocking {
         val dataStoreFile = createDataStoreFile()
         val firstFixture = createRepository(dataStoreFile)
 
         firstFixture.repository.selectDifficulty(
-            modeId = GeneratedModes.FOUR_PAIRS.id,
+            optionId = GeneratedPlayOptions.QUICK.id,
             difficulty = DifficultyTier.MEDIUM
         )
         firstFixture.repository.selectDifficulty(
-            modeId = GeneratedModes.EIGHT_PAIRS.id,
+            optionId = GeneratedPlayOptions.CLASSIC.id,
             difficulty = DifficultyTier.HARD
         )
         firstFixture.close()
@@ -93,74 +99,69 @@ class DataStoreGeneratedDifficultySelectionRepositoryTest {
 
         assertEquals(
             DifficultyTier.MEDIUM,
-            secondFixture.repository.selectedDifficulty(GeneratedModes.FOUR_PAIRS.id).first()
+            secondFixture.repository.selectedDifficulty(GeneratedPlayOptions.QUICK.id).first()
         )
         assertEquals(
             DifficultyTier.HARD,
-            secondFixture.repository.selectedDifficulty(GeneratedModes.EIGHT_PAIRS.id).first()
+            secondFixture.repository.selectedDifficulty(GeneratedPlayOptions.CLASSIC.id).first()
         )
     }
 
     @Test
-    fun changing_one_mode_does_not_overwrite_the_other_mode() = runBlocking {
+    fun explicit_option_value_takes_precedence_over_legacy_mode_value() = runBlocking {
         val fixture = createRepository()
-        fixture.repository.selectDifficulty(GeneratedModes.FOUR_PAIRS.id, DifficultyTier.MEDIUM)
-
-        assertEquals(
-            DifficultyTier.MEDIUM,
-            fixture.repository.selectedDifficulty(GeneratedModes.FOUR_PAIRS.id).first()
-        )
-        assertEquals(
-            DifficultyTier.MEDIUM,
-            fixture.repository.selectedDifficulty(GeneratedModes.EIGHT_PAIRS.id).first()
-        )
-
-        fixture.repository.selectDifficulty(GeneratedModes.EIGHT_PAIRS.id, DifficultyTier.HARD)
-
-        assertEquals(
-            DifficultyTier.MEDIUM,
-            fixture.repository.selectedDifficulty(GeneratedModes.FOUR_PAIRS.id).first()
-        )
-        assertEquals(
-            DifficultyTier.HARD,
-            fixture.repository.selectedDifficulty(GeneratedModes.EIGHT_PAIRS.id).first()
-        )
-    }
-
-    @Test
-    fun unknown_future_and_unsupported_values_fall_back_without_rewriting_storage() = runBlocking {
-        val fixture = createRepository()
-        val fourPairsKey = difficultyPreferenceKey(GeneratedModes.FOUR_PAIRS.id)
-        val eightPairsKey = difficultyPreferenceKey(GeneratedModes.EIGHT_PAIRS.id)
         fixture.dataStore.edit { preferences ->
-            preferences[fourPairsKey] = "hard"
-            preferences[eightPairsKey] = "future-difficulty"
+            preferences[legacyDifficultyPreferenceKey(GeneratedModes.FOUR_PAIRS.id)] = "medium"
+        }
+        fixture.repository.selectDifficulty(GeneratedPlayOptions.QUICK.id, DifficultyTier.LOW)
+
+        assertEquals(
+            DifficultyTier.LOW,
+            fixture.repository.selectedDifficulty(GeneratedPlayOptions.QUICK.id).first()
+        )
+        assertEquals(
+            "medium",
+            fixture.dataStore.data.first()[legacyDifficultyPreferenceKey(GeneratedModes.FOUR_PAIRS.id)]
+        )
+    }
+
+    @Test
+    fun invalid_new_and_legacy_values_fall_back_without_rewriting_storage() = runBlocking {
+        val fixture = createRepository()
+        val quickKey = difficultyPreferenceKey(GeneratedPlayOptions.QUICK.id)
+        val classicLegacyKey = legacyDifficultyPreferenceKey(GeneratedModes.EIGHT_PAIRS.id)
+        fixture.dataStore.edit { preferences ->
+            preferences[quickKey] = "hard"
+            preferences[legacyDifficultyPreferenceKey(GeneratedModes.FOUR_PAIRS.id)] = "medium"
+            preferences[classicLegacyKey] = "future-difficulty"
         }
 
         assertEquals(
             DifficultyTier.LOW,
-            fixture.repository.selectedDifficulty(GeneratedModes.FOUR_PAIRS.id).first()
+            fixture.repository.selectedDifficulty(GeneratedPlayOptions.QUICK.id).first()
         )
         assertEquals(
             DifficultyTier.MEDIUM,
-            fixture.repository.selectedDifficulty(GeneratedModes.EIGHT_PAIRS.id).first()
+            fixture.repository.selectedDifficulty(GeneratedPlayOptions.CLASSIC.id).first()
         )
         val storedPreferences = fixture.dataStore.data.first()
-        assertEquals("hard", storedPreferences[fourPairsKey])
-        assertEquals("future-difficulty", storedPreferences[eightPairsKey])
+        assertEquals("hard", storedPreferences[quickKey])
+        assertEquals("future-difficulty", storedPreferences[classicLegacyKey])
     }
 
     @Test
-    fun unknown_mode_is_ignored_and_exposes_no_invented_fallback() = runBlocking {
+    fun unknown_option_is_ignored_and_exposes_no_invented_fallback() = runBlocking {
         val fixture = createRepository()
-        val unknownMode = GeneratedModeId("future-mode")
-        val unknownModeKey = stringPreferencesKey("generated_selected_difficulty_${unknownMode.value}")
+        val unknownOption = GeneratedPlayOptionId("future-option")
+        val unknownOptionKey = stringPreferencesKey(
+            "generated_selected_difficulty_${unknownOption.value}"
+        )
         fixture.dataStore.edit { preferences ->
-            preferences[unknownModeKey] = "hard"
+            preferences[unknownOptionKey] = "hard"
         }
 
-        assertNull(fixture.repository.selectedDifficulty(unknownMode).first())
-        assertEquals("hard", fixture.dataStore.data.first()[unknownModeKey])
+        assertNull(fixture.repository.selectedDifficulty(unknownOption).first())
+        assertEquals("hard", fixture.dataStore.data.first()[unknownOptionKey])
     }
 
     @Test
@@ -169,12 +170,15 @@ class DataStoreGeneratedDifficultySelectionRepositoryTest {
 
         assertThrows(IllegalArgumentException::class.java) {
             runBlocking {
-                fixture.repository.selectDifficulty(GeneratedModes.FOUR_PAIRS.id, DifficultyTier.HARD)
+                fixture.repository.selectDifficulty(GeneratedPlayOptions.QUICK.id, DifficultyTier.HARD)
             }
         }
         assertThrows(IllegalArgumentException::class.java) {
             runBlocking {
-                fixture.repository.selectDifficulty(GeneratedModeId("future-mode"), DifficultyTier.LOW)
+                fixture.repository.selectDifficulty(
+                    GeneratedPlayOptionId("future-option"),
+                    DifficultyTier.LOW
+                )
             }
         }
 
@@ -184,7 +188,7 @@ class DataStoreGeneratedDifficultySelectionRepositoryTest {
     }
 
     @Test
-    fun corrupt_preferences_file_recovers_to_safe_fallbacks() = runBlocking {
+    fun corrupt_preferences_file_recovers_to_safe_option_fallbacks() = runBlocking {
         val dataStoreFile = createDataStoreFile().apply {
             parentFile?.mkdirs()
             writeBytes(byteArrayOf(1, 2, 3, 4))
@@ -193,11 +197,11 @@ class DataStoreGeneratedDifficultySelectionRepositoryTest {
 
         assertEquals(
             DifficultyTier.LOW,
-            fixture.repository.selectedDifficulty(GeneratedModes.FOUR_PAIRS.id).first()
+            fixture.repository.selectedDifficulty(GeneratedPlayOptions.QUICK.id).first()
         )
         assertEquals(
             DifficultyTier.MEDIUM,
-            fixture.repository.selectedDifficulty(GeneratedModes.EIGHT_PAIRS.id).first()
+            fixture.repository.selectedDifficulty(GeneratedPlayOptions.CLASSIC.id).first()
         )
     }
 
@@ -216,9 +220,14 @@ class DataStoreGeneratedDifficultySelectionRepositoryTest {
             repository = DataStoreGeneratedDifficultySelectionRepository(
                 dataStore = dataStore,
                 catalog = GeneratedModes.catalog,
-                fallbackDifficultyByMode = mapOf(
-                    GeneratedModes.FOUR_PAIRS.id to DifficultyTier.LOW,
-                    GeneratedModes.EIGHT_PAIRS.id to DifficultyTier.MEDIUM
+                playOptions = GeneratedPlayOptions.ALL,
+                fallbackDifficultyByOption = mapOf(
+                    GeneratedPlayOptions.QUICK.id to DifficultyTier.LOW,
+                    GeneratedPlayOptions.CLASSIC.id to DifficultyTier.MEDIUM
+                ),
+                legacyModeByOption = mapOf(
+                    GeneratedPlayOptions.QUICK.id to GeneratedModes.FOUR_PAIRS.id,
+                    GeneratedPlayOptions.CLASSIC.id to GeneratedModes.EIGHT_PAIRS.id
                 )
             ),
             dataStore = dataStore,
