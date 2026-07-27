@@ -143,6 +143,12 @@ object GeneratedModes {
         difficulty = DifficultyTier.LOW,
         profile = GeneratedPuzzleProfiles.THREE_PAIRS_LOW
     )
+    val THREE_PAIRS_MEDIUM: GeneratedChallenge = GeneratedChallenge(
+        id = GeneratedChallengeId("three-pairs-medium"),
+        modeId = threePairsId,
+        difficulty = DifficultyTier.MEDIUM,
+        profile = GeneratedPuzzleProfiles.THREE_PAIRS_MEDIUM
+    )
     val FOUR_PAIRS_LOW: GeneratedChallenge = GeneratedChallenge(
         id = GeneratedChallengeId("four-pairs-low"),
         modeId = fourPairsId,
@@ -170,7 +176,7 @@ object GeneratedModes {
     val THREE_PAIRS: GeneratedModeConfiguration = GeneratedModeConfiguration(
         id = threePairsId,
         size = GeneratedPuzzleProfiles.THREE_PAIRS_LOW.size,
-        challenges = listOf(THREE_PAIRS_LOW)
+        challenges = listOf(THREE_PAIRS_LOW, THREE_PAIRS_MEDIUM)
     )
     val FOUR_PAIRS: GeneratedModeConfiguration = GeneratedModeConfiguration(
         id = fourPairsId,
