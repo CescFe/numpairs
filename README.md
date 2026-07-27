@@ -8,14 +8,14 @@ Players complete hidden expressions on a board by using numbers from a strip. Th
 
 ## Current Status
 
-### Current implemented product baseline: v10; active product contract: v11
+### Current implemented product baseline: v11
 
-- 🎮 [PRD v11 Simplified Play Modes](./docs/product/prd/prd-v11.md) defines the active delivery
-  contract for player-facing Quick and Classic generated play.
+- 🎮 [PRD v11 Simplified Play Modes](./docs/product/prd/prd-v11.md) defines the delivered
+  player-facing Quick and Classic generated-play contract.
 - 🗓️ [PRD v10 Quick Play & Daily Challenge](./docs/product/prd/prd-v10.md) defines the
-  implemented 3 Pairs Quick baseline and deterministic local Daily Challenge.
+  deterministic local Daily Challenge retained by v11.
 - 📈 [PRD v8 Difficulty Selection & Challenge Expansion](./docs/product/prd/prd-v8.md) defines
-  the current generated challenge catalog and mode-specific difficulty selection.
+  the size-based generated challenge catalog that v11 keeps as its internal foundation.
 - ✨ [PRD v9 Game Feel & Personalization](./docs/product/prd/prd-v9.md) defines the current color-personalization and generated-game feedback baseline.
 - 🔁 [PRD v7 Reliable Sessions & Replay Controls](./docs/product/prd/prd-v7.md) remains the foundation for the one-slot generated-session and safe-replay contract.
 - 🎓 [PRD v6 Guided First Run](./docs/product/prd/prd-v6.md) defines the focused, explicitly
@@ -26,9 +26,9 @@ and Ember. Typography, shapes, spacing, elevation, layout, controls, and gamepla
 remain shared across them.
 
 v11 groups normal generated play into Quick and Classic while preserving the stable internal
-3 Pairs, 4 Pairs, and 8 Pairs challenge identities. Quick will expose Low and Medium and select
-the matching 3 Pairs challenge 35% of the time and 4 Pairs challenge 65% of the time. Classic will
-expose the original full-board `8 Pairs Medium` and `8 Pairs Hard` challenges. Generated feedback
+3 Pairs, 4 Pairs, and 8 Pairs challenge identities. Quick exposes Low and Medium and selects
+the matching 3 Pairs challenge 35% of the time and 4 Pairs challenge 65% of the time. Classic
+exposes the original full-board `8 Pairs Medium` and `8 Pairs Hard` challenges. Generated feedback
 continues using subtle accepted-assignment haptics, newly-correct tile motion, a brief completion
 celebration, and a successor-ready replay transition.
 
@@ -38,10 +38,11 @@ normal generated session and one Daily Session may remain resumable at the same 
 state-aware Menu action, monthly completion calendar, and non-spoiling textual share result work
 without accounts or a server.
 
-### Active milestone: v11
+### Delivered milestone: v11
 
-- The documentation-first product and architecture contract is defined.
-- Implementation follows dependency-ordered atomic issues and Pull Requests.
+- The documentation-first product and architecture contract is implemented.
+- Quick and Classic are delivered through dependency-ordered atomic issues and Pull Requests.
+- Daily Challenge retains its deterministic v10 recipe and independent persistence boundary.
 
 Historical milestone snapshots:
 
@@ -56,7 +57,7 @@ PRDs preserve the product requirements and planning context for each milestone. 
 generated-mode and profile behavior is also documented in
 [puzzle-generation.md](./docs/product/puzzle-generation.md).
 
-The v10 baseline contains five implemented generated profiles; v11 adds a calibrated
+The generated catalog contains six implemented profiles, including the v11
 `3 Pairs Medium` profile. Normal generated play stores one exact
 resumable session shared by every generated challenge, restores committed progress after process
 death, and keeps the current puzzle visible until a validated successor is stored and ready.

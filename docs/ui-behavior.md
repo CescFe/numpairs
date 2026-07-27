@@ -1,5 +1,7 @@
 # NumPairs UI Behavior
 
+> Status: implemented interaction baseline through v11.
+
 ## Overview
 
 This document defines the v11 menu, Quick, Classic, Daily Challenge, generated

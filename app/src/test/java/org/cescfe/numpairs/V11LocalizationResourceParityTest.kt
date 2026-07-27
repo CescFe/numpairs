@@ -8,20 +8,20 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.w3c.dom.Element
 
-class V10LocalizationResourceParityTest {
+class V11LocalizationResourceParityTest {
     @Test
-    fun v10_strings_are_complete_and_format_compatible_in_every_supported_locale() {
+    fun current_quick_classic_and_daily_strings_are_complete_and_format_compatible_in_every_locale() {
         val resourcesDirectory = resourcesDirectory()
         val defaultStrings = readStrings(
             File(resourcesDirectory, "values/strings.xml")
-        ).filterKeys(::isV10String)
+        ).filterKeys(::isCurrentPlayString)
         val supportedLocales = listOf("values-es", "values-ca")
 
         assertTrue(defaultStrings.isNotEmpty())
         supportedLocales.forEach { localeDirectory ->
             val localizedStrings = readStrings(
                 File(resourcesDirectory, "$localeDirectory/strings.xml")
-            ).filterKeys(::isV10String)
+            ).filterKeys(::isCurrentPlayString)
 
             assertEquals(defaultStrings.keys, localizedStrings.keys)
             defaultStrings.forEach { (name, defaultValue) ->
@@ -58,11 +58,17 @@ class V10LocalizationResourceParityTest {
     ).firstOrNull(File::isDirectory)
         ?: error("Android resources directory was not found from ${File(".").absolutePath}.")
 
-    private fun isV10String(name: String): Boolean = name.startsWith("daily_") ||
+    private fun isCurrentPlayString(name: String): Boolean = name.startsWith("daily_") ||
         name.startsWith("menu_daily_") ||
         name.startsWith("quick_") ||
+        name.startsWith("classic_") ||
         name.startsWith("three_pairs_") ||
-        name == "menu_play_quick_content_description"
+        name.startsWith("generated_difficulty_") ||
+        name.startsWith("generated_challenge_") ||
+        name.startsWith("menu_generated_difficulty_") ||
+        name == "menu_play_generated_challenge_content_description" ||
+        name == "menu_choose_generated_difficulty_content_description" ||
+        name == "menu_close_generated_difficulty_content_description"
 
     private fun formatArguments(value: String): List<String> =
         FORMAT_ARGUMENT.findAll(value).map { match -> match.value }.toList()

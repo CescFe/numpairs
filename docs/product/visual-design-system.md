@@ -1,5 +1,7 @@
 # NumPairs Visual Design System
 
+> Status: implemented through `v11 - Simplified Play Modes`.
+
 ## Purpose
 
 This document defines the current NumPairs visual design system. It originated in the
