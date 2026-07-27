@@ -25,6 +25,15 @@ data class GeneratedPlayOptionConfiguration(val id: GeneratedPlayOptionId, val d
     fun supports(difficulty: DifficultyTier): Boolean = difficulty in difficulties
 }
 
+data class GeneratedPlayRequest(val optionId: GeneratedPlayOptionId, val difficulty: DifficultyTier) {
+    init {
+        val option = GeneratedPlayOptions.resolve(optionId)
+        require(option.supports(difficulty)) {
+            "Difficulty ${difficulty.name} is not supported for generated play option ${option.id.value}."
+        }
+    }
+}
+
 object GeneratedPlayOptions {
     val QUICK: GeneratedPlayOptionConfiguration = GeneratedPlayOptionConfiguration(
         id = GeneratedPlayOptionId("quick"),

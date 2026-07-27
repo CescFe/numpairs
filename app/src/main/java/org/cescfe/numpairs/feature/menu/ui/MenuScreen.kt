@@ -60,21 +60,20 @@ import org.cescfe.numpairs.ui.theme.NumPairsThemePreviewParameterProvider
 
 @Composable
 fun MenuScreen(
-    fourPairsMode: GeneratedModeMenuUiState,
-    eightPairsMode: GeneratedModeMenuUiState,
+    quickOption: GeneratedPlayOptionMenuUiState,
+    classicOption: GeneratedPlayOptionMenuUiState,
     modifier: Modifier = Modifier,
     dailyChallenge: DailyMenuUiState? = null,
     resumeChallengeName: String? = null,
     onDailySelected: () -> Unit = {},
     onDailyCalendarSelected: () -> Unit = {},
     onResumeSelected: () -> Unit = {},
-    onQuickSelected: () -> Unit = {},
     onTutorialSelected: () -> Unit = {},
     onPersonalizationSelected: () -> Unit = {},
-    onFourPairsSelected: () -> Unit = {},
-    onEightPairsSelected: () -> Unit = {},
-    onFourPairsDifficultySelected: (GeneratedDifficultyMenuOptionId) -> Unit = {},
-    onEightPairsDifficultySelected: (GeneratedDifficultyMenuOptionId) -> Unit = {}
+    onQuickSelected: () -> Unit = {},
+    onClassicSelected: () -> Unit = {},
+    onQuickDifficultySelected: (GeneratedDifficultyMenuOptionId) -> Unit = {},
+    onClassicDifficultySelected: (GeneratedDifficultyMenuOptionId) -> Unit = {}
 ) {
     var expandedDifficultyMenu by rememberSaveable {
         mutableStateOf<ExpandedDifficultyMenu?>(null)
@@ -133,42 +132,41 @@ fun MenuScreen(
                             MenuButtonText(text = stringResource(R.string.menu_resume_button))
                         }
                     }
-                    QuickMenuButton(onClick = onQuickSelected)
-                    GeneratedModeMenuRow(
-                        state = fourPairsMode,
-                        onPlay = onFourPairsSelected,
-                        expanded = expandedDifficultyMenu == ExpandedDifficultyMenu.FOUR_PAIRS,
+                    GeneratedPlayOptionMenuRow(
+                        state = quickOption,
+                        onPlay = onQuickSelected,
+                        expanded = expandedDifficultyMenu == ExpandedDifficultyMenu.QUICK,
                         onToggleDifficultyMenu = {
                             expandedDifficultyMenu = expandedDifficultyMenu.toggled(
-                                ExpandedDifficultyMenu.FOUR_PAIRS
+                                ExpandedDifficultyMenu.QUICK
                             )
                         },
                         onDismissDifficultyMenu = {
                             expandedDifficultyMenu = null
                         },
-                        onDifficultySelected = onFourPairsDifficultySelected,
-                        containerTestTag = MenuScreenTestTags.FOUR_PAIRS_SPLIT_CTA,
-                        playTestTag = MenuScreenTestTags.FOUR_PAIRS_BUTTON,
-                        difficultyTestTag = MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON,
-                        difficultyMenuTestTag = MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_MENU
+                        onDifficultySelected = onQuickDifficultySelected,
+                        containerTestTag = MenuScreenTestTags.QUICK_SPLIT_CTA,
+                        playTestTag = MenuScreenTestTags.QUICK_BUTTON,
+                        difficultyTestTag = MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON,
+                        difficultyMenuTestTag = MenuScreenTestTags.QUICK_DIFFICULTY_MENU
                     )
-                    GeneratedModeMenuRow(
-                        state = eightPairsMode,
-                        onPlay = onEightPairsSelected,
-                        expanded = expandedDifficultyMenu == ExpandedDifficultyMenu.EIGHT_PAIRS,
+                    GeneratedPlayOptionMenuRow(
+                        state = classicOption,
+                        onPlay = onClassicSelected,
+                        expanded = expandedDifficultyMenu == ExpandedDifficultyMenu.CLASSIC,
                         onToggleDifficultyMenu = {
                             expandedDifficultyMenu = expandedDifficultyMenu.toggled(
-                                ExpandedDifficultyMenu.EIGHT_PAIRS
+                                ExpandedDifficultyMenu.CLASSIC
                             )
                         },
                         onDismissDifficultyMenu = {
                             expandedDifficultyMenu = null
                         },
-                        onDifficultySelected = onEightPairsDifficultySelected,
-                        containerTestTag = MenuScreenTestTags.EIGHT_PAIRS_SPLIT_CTA,
-                        playTestTag = MenuScreenTestTags.EIGHT_PAIRS_BUTTON,
-                        difficultyTestTag = MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_BUTTON,
-                        difficultyMenuTestTag = MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_MENU
+                        onDifficultySelected = onClassicDifficultySelected,
+                        containerTestTag = MenuScreenTestTags.CLASSIC_SPLIT_CTA,
+                        playTestTag = MenuScreenTestTags.CLASSIC_BUTTON,
+                        difficultyTestTag = MenuScreenTestTags.CLASSIC_DIFFICULTY_BUTTON,
+                        difficultyMenuTestTag = MenuScreenTestTags.CLASSIC_DIFFICULTY_MENU
                     )
                     Button(
                         onClick = onTutorialSelected,
@@ -235,7 +233,7 @@ private fun DailyMenuRow(state: DailyMenuUiState, onPrimaryClick: () -> Unit, on
             }
             .testTag(MenuScreenTestTags.DAILY_CALENDAR_BUTTON),
         primaryContentPadding = PaddingValues(
-            horizontal = MENU_GENERATED_MODE_BUTTON_HORIZONTAL_PADDING,
+            horizontal = MENU_PLAY_OPTION_BUTTON_HORIZONTAL_PADDING,
             vertical = 0.dp
         ),
         primaryContent = {
@@ -249,38 +247,15 @@ private fun DailyMenuRow(state: DailyMenuUiState, onPrimaryClick: () -> Unit, on
             Icon(
                 painter = painterResource(R.drawable.ic_calendar),
                 contentDescription = null,
-                modifier = Modifier.size(MENU_GENERATED_MODE_ICON_SIZE)
+                modifier = Modifier.size(MENU_PLAY_OPTION_ICON_SIZE)
             )
         }
     )
 }
 
 @Composable
-private fun QuickMenuButton(onClick: () -> Unit) {
-    val contentDescription = stringResource(
-        R.string.menu_play_quick_content_description,
-        stringResource(R.string.quick_screen_title),
-        stringResource(R.string.three_pairs_accessibility_name),
-        stringResource(R.string.generated_difficulty_low)
-    )
-
-    NumPairsComponents.PrimaryCtaButton(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(NumPairsComponents.ButtonHeight)
-            .semantics {
-                this.contentDescription = contentDescription
-            }
-            .testTag(MenuScreenTestTags.QUICK_BUTTON)
-    ) {
-        MenuButtonText(text = stringResource(R.string.quick_screen_title))
-    }
-}
-
-@Composable
-private fun GeneratedModeMenuRow(
-    state: GeneratedModeMenuUiState,
+private fun GeneratedPlayOptionMenuRow(
+    state: GeneratedPlayOptionMenuUiState,
     onPlay: () -> Unit,
     expanded: Boolean,
     onToggleDifficultyMenu: () -> Unit,
@@ -293,7 +268,7 @@ private fun GeneratedModeMenuRow(
 ) {
     val playContentDescription = stringResource(
         R.string.menu_play_generated_challenge_content_description,
-        state.challengeName
+        state.selectionName
     )
     val difficultyActionContentDescription = stringResource(
         if (expanded) {
@@ -301,7 +276,7 @@ private fun GeneratedModeMenuRow(
         } else {
             R.string.menu_choose_generated_difficulty_content_description
         },
-        state.modeName
+        state.optionName
     )
     val difficultyActionStateDescription = stringResource(
         if (expanded) {
@@ -330,12 +305,12 @@ private fun GeneratedModeMenuRow(
             }
             .testTag(difficultyTestTag),
         primaryContentPadding = PaddingValues(
-            horizontal = MENU_GENERATED_MODE_BUTTON_HORIZONTAL_PADDING,
+            horizontal = MENU_PLAY_OPTION_BUTTON_HORIZONTAL_PADDING,
             vertical = 0.dp
         ),
         primaryContent = {
             MenuButtonText(
-                text = state.challengeName,
+                text = state.selectionName,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1
             )
@@ -350,7 +325,7 @@ private fun GeneratedModeMenuRow(
                     }
                 ),
                 contentDescription = null,
-                modifier = Modifier.size(MENU_GENERATED_MODE_ICON_SIZE)
+                modifier = Modifier.size(MENU_PLAY_OPTION_ICON_SIZE)
             )
             GeneratedDifficultyMenu(
                 state = state,
@@ -368,7 +343,7 @@ private fun GeneratedModeMenuRow(
 
 @Composable
 private fun GeneratedDifficultyMenu(
-    state: GeneratedModeMenuUiState,
+    state: GeneratedPlayOptionMenuUiState,
     expanded: Boolean,
     onDismiss: () -> Unit,
     onDifficultySelected: (GeneratedDifficultyMenuOptionId) -> Unit,
@@ -376,7 +351,7 @@ private fun GeneratedDifficultyMenu(
 ) {
     val menuContentDescription = stringResource(
         R.string.menu_generated_difficulty_options_content_description,
-        state.modeName
+        state.optionName
     )
     val selectedStateDescription = stringResource(R.string.menu_generated_difficulty_selected)
 
@@ -487,51 +462,51 @@ private fun MenuScreenPreview(
     @PreviewParameter(NumPairsThemePreviewParameterProvider::class) theme: PersonalizationTheme
 ) {
     NumPairsTheme(theme = theme) {
-        val fourPairsName = stringResource(R.string.four_pairs_screen_title)
-        val eightPairsName = stringResource(R.string.eight_pairs_screen_title)
+        val quickName = stringResource(R.string.quick_screen_title)
+        val classicName = stringResource(R.string.classic_screen_title)
         MenuScreen(
             dailyChallenge = DailyMenuUiState.StartToday(
                 identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
                     LocalDate.of(2026, 7, 25)
                 )
             ),
-            fourPairsMode = GeneratedModeMenuUiState(
-                modeName = fourPairsName,
-                challengeName = stringResource(
+            quickOption = GeneratedPlayOptionMenuUiState(
+                optionName = quickName,
+                selectionName = stringResource(
                     R.string.generated_challenge_title,
-                    fourPairsName,
+                    quickName,
                     stringResource(R.string.generated_difficulty_low)
                 ),
                 difficultyOptions = listOf(
                     GeneratedDifficultyMenuOptionUiState(
-                        GeneratedDifficultyMenuOptionId("four-pairs-low"),
+                        GeneratedDifficultyMenuOptionId("low"),
                         stringResource(R.string.generated_difficulty_low)
                     ),
                     GeneratedDifficultyMenuOptionUiState(
-                        GeneratedDifficultyMenuOptionId("four-pairs-medium"),
+                        GeneratedDifficultyMenuOptionId("medium"),
                         stringResource(R.string.generated_difficulty_medium)
                     )
                 ),
-                selectedDifficultyOptionId = GeneratedDifficultyMenuOptionId("four-pairs-low")
+                selectedDifficultyOptionId = GeneratedDifficultyMenuOptionId("low")
             ),
-            eightPairsMode = GeneratedModeMenuUiState(
-                modeName = eightPairsName,
-                challengeName = stringResource(
+            classicOption = GeneratedPlayOptionMenuUiState(
+                optionName = classicName,
+                selectionName = stringResource(
                     R.string.generated_challenge_title,
-                    eightPairsName,
+                    classicName,
                     stringResource(R.string.generated_difficulty_medium)
                 ),
                 difficultyOptions = listOf(
                     GeneratedDifficultyMenuOptionUiState(
-                        GeneratedDifficultyMenuOptionId("eight-pairs-medium"),
+                        GeneratedDifficultyMenuOptionId("medium"),
                         stringResource(R.string.generated_difficulty_medium)
                     ),
                     GeneratedDifficultyMenuOptionUiState(
-                        GeneratedDifficultyMenuOptionId("eight-pairs-hard"),
+                        GeneratedDifficultyMenuOptionId("hard"),
                         stringResource(R.string.generated_difficulty_hard)
                     )
                 ),
-                selectedDifficultyOptionId = GeneratedDifficultyMenuOptionId("eight-pairs-medium")
+                selectedDifficultyOptionId = GeneratedDifficultyMenuOptionId("medium")
             )
         )
     }
@@ -541,8 +516,8 @@ private fun ExpandedDifficultyMenu?.toggled(requested: ExpandedDifficultyMenu): 
     requested.takeUnless { current -> current == this }
 
 private enum class ExpandedDifficultyMenu {
-    FOUR_PAIRS,
-    EIGHT_PAIRS
+    QUICK,
+    CLASSIC
 }
 
 private val MENU_CONTENT_MAX_WIDTH = 360.dp
@@ -550,8 +525,8 @@ private val MENU_BRAND_MARK_SIZE = 32.dp
 private val MENU_TOP_BAR_ACTION_ICON_SIZE = 24.dp
 private val MENU_BUTTON_TEXT_SIZE = 22.sp
 private val MENU_BUTTON_TEXT_LINE_HEIGHT = 36.sp
-private val MENU_GENERATED_MODE_BUTTON_HORIZONTAL_PADDING = 12.dp
-private val MENU_GENERATED_MODE_ICON_SIZE = 24.dp
+private val MENU_PLAY_OPTION_BUTTON_HORIZONTAL_PADDING = 12.dp
+private val MENU_PLAY_OPTION_ICON_SIZE = 24.dp
 private val MENU_GENERATED_DIFFICULTY_MENU_WIDTH = 200.dp
 private val MENU_GENERATED_DIFFICULTY_MENU_END_ALIGNMENT_OFFSET =
     NumPairsComponents.ButtonHeight - MENU_GENERATED_DIFFICULTY_MENU_WIDTH

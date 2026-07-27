@@ -36,6 +36,7 @@ import org.cescfe.numpairs.feature.game.ui.screen.GameScreenRobot
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.game.ui.semantics.CompletionFeedbackIdKey
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
+import org.cescfe.numpairs.testing.fourPairsQuickSelector
 import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.navigation.navigateToSelectedGeneratedChallenge
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
@@ -113,14 +114,14 @@ class GeneratedCompletionCelebrationTest {
     @Test
     fun fourPairsOptsInToCompletionCelebration() {
         assertGeneratedModeOptsInToCompletionCelebration(
-            menuButtonTag = MenuScreenTestTags.FOUR_PAIRS_BUTTON
+            menuButtonTag = MenuScreenTestTags.QUICK_BUTTON
         )
     }
 
     @Test
     fun eightPairsOptsInToCompletionCelebration() {
         assertGeneratedModeOptsInToCompletionCelebration(
-            menuButtonTag = MenuScreenTestTags.EIGHT_PAIRS_BUTTON
+            menuButtonTag = MenuScreenTestTags.CLASSIC_BUTTON
         )
     }
 
@@ -137,6 +138,7 @@ class GeneratedCompletionCelebrationTest {
                         )
                     ),
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
+                    generatedPlayChallengeSelector = fourPairsQuickSelector(),
                     generatedChallengeCatalog = GeneratedModes.catalog,
                     generatedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory {
                         GeneratedPuzzleGenerationUseCase { request ->

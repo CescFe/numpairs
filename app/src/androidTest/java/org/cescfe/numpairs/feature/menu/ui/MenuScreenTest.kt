@@ -71,8 +71,8 @@ class MenuScreenTest {
             NumPairsTheme {
                 MenuScreen(
                     dailyChallenge = dailyState,
-                    fourPairsMode = fourPairsState,
-                    eightPairsMode = eightPairsState
+                    quickOption = quickState,
+                    classicOption = classicState
                 )
             }
         }
@@ -130,7 +130,7 @@ class MenuScreenTest {
 
         setContent(
             dailyChallenge = DailyMenuUiState.StartToday(identity),
-            resumeChallengeName = "4 pairs · Low",
+            resumeChallengeName = "Quick · Low",
             onDailySelected = { primaryCount += 1 },
             onDailyCalendarSelected = { calendarCount += 1 }
         )
@@ -249,7 +249,7 @@ class MenuScreenTest {
     }
 
     @Test
-    fun quick_is_one_accessible_primary_action_without_a_difficulty_selector() {
+    fun quick_is_an_accessible_split_action_with_low_and_medium_difficulties() {
         var quickClickCount = 0
         setContent(
             onQuickSelected = {
@@ -260,33 +260,28 @@ class MenuScreenTest {
         val quickNode = composeTestRule
             .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
             .assertIsDisplayed()
-            .assertTextEquals(string(R.string.quick_screen_title))
+            .assertTextEquals(quickState.selectionName)
             .assertContentDescriptionEquals(
                 string(
-                    R.string.menu_play_quick_content_description,
-                    string(R.string.quick_screen_title),
-                    string(R.string.three_pairs_accessibility_name),
-                    string(R.string.generated_difficulty_low)
+                    R.string.menu_play_generated_challenge_content_description,
+                    quickState.selectionName
                 )
             )
             .assertHasClickAction()
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON)
-            .assertDoesNotExist()
-        composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON)
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.CLASSIC_DIFFICULTY_BUTTON)
             .assertIsDisplayed()
 
         val quickTop = quickNode.fetchSemanticsNode().boundsInRoot.top
-        val fourPairsTop = composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+        val classicTop = composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.CLASSIC_BUTTON)
             .fetchSemanticsNode()
             .boundsInRoot
             .top
-        assertTrue(quickTop < fourPairsTop)
+        assertTrue(quickTop < classicTop)
 
         quickNode.performClick()
         composeTestRule.runOnIdle {
@@ -295,42 +290,42 @@ class MenuScreenTest {
     }
 
     @Test
-    fun generated_mode_rows_identify_the_selected_challenge_and_emit_distinct_actions() {
+    fun play_option_rows_identify_the_selected_difficulty_and_emit_distinct_actions() {
         var playCount = 0
         var selectedDifficulty: GeneratedDifficultyMenuOptionId? = null
         setContent(
-            onFourPairsSelected = { playCount += 1 },
-            onFourPairsDifficultySelected = { optionId ->
+            onQuickSelected = { playCount += 1 },
+            onQuickDifficultySelected = { optionId ->
                 selectedDifficulty = optionId
             }
         )
 
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
             .assertIsDisplayed()
-            .assertTextEquals(fourPairsState.challengeName)
+            .assertTextEquals(quickState.selectionName)
             .assertContentDescriptionEquals(
                 string(
                     R.string.menu_play_generated_challenge_content_description,
-                    fourPairsState.challengeName
+                    quickState.selectionName
                 )
             )
             .assertHasClickAction()
             .performClick()
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON)
             .assertHasClickAction()
             .performClick()
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.difficultyOption(fourPairsMediumId))
+            .onNodeWithTag(MenuScreenTestTags.difficultyOption(quickMediumId))
             .performClick()
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_MENU)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_MENU)
             .assertDoesNotExist()
 
         composeTestRule.runOnIdle {
             assertEquals(1, playCount)
-            assertEquals(fourPairsMediumId, selectedDifficulty)
+            assertEquals(quickMediumId, selectedDifficulty)
         }
     }
 
@@ -339,10 +334,10 @@ class MenuScreenTest {
         setContent()
 
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON)
             .performClick()
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.difficultyOption(fourPairsLowId))
+            .onNodeWithTag(MenuScreenTestTags.difficultyOption(quickLowId))
             .assertIsSelected()
             .assert(
                 SemanticsMatcher.expectValue(
@@ -356,10 +351,10 @@ class MenuScreenTest {
                 )
             )
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.difficultyOption(fourPairsMediumId))
+            .onNodeWithTag(MenuScreenTestTags.difficultyOption(quickMediumId))
             .assertIsNotSelected()
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.difficultyOption(eightPairsHardId))
+            .onNodeWithTag(MenuScreenTestTags.difficultyOption(classicHardId))
             .assertDoesNotExist()
     }
 
@@ -367,11 +362,11 @@ class MenuScreenTest {
     fun selector_action_switches_between_collapsed_and_expanded_arrow_states() {
         setContent()
         val action = composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON)
             .assertContentDescriptionEquals(
                 string(
                     R.string.menu_choose_generated_difficulty_content_description,
-                    fourPairsState.modeName
+                    quickState.optionName
                 )
             ).assert(
                 SemanticsMatcher.expectValue(
@@ -386,7 +381,7 @@ class MenuScreenTest {
             .assertContentDescriptionEquals(
                 string(
                     R.string.menu_close_generated_difficulty_content_description,
-                    fourPairsState.modeName
+                    quickState.optionName
                 )
             ).assert(
                 SemanticsMatcher.expectValue(
@@ -395,7 +390,7 @@ class MenuScreenTest {
                 )
             ).performClick()
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_MENU)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_MENU)
             .assertDoesNotExist()
     }
 
@@ -414,15 +409,15 @@ class MenuScreenTest {
         setContent(width = 320.dp, height = 640.dp, fontScale = 2f)
 
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.CLASSIC_BUTTON)
             .assertContentDescriptionEquals(
                 string(
                     R.string.menu_play_generated_challenge_content_description,
-                    eightPairsState.challengeName
+                    classicState.selectionName
                 )
             )
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.CLASSIC_DIFFICULTY_BUTTON)
             .performScrollTo()
             .performClick()
 
@@ -431,7 +426,7 @@ class MenuScreenTest {
             .fetchSemanticsNode()
             .boundsInRoot
         val menuBounds = composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_MENU)
+            .onNodeWithTag(MenuScreenTestTags.CLASSIC_DIFFICULTY_MENU)
             .assertIsDisplayed()
             .fetchSemanticsNode()
             .boundsInRoot
@@ -439,7 +434,7 @@ class MenuScreenTest {
         assertTrue(menuBounds.left >= screenBounds.left)
         assertTrue(menuBounds.right <= screenBounds.right)
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.difficultyOption(eightPairsHardId))
+            .onNodeWithTag(MenuScreenTestTags.difficultyOption(classicHardId))
             .assertIsDisplayed()
     }
 
@@ -447,13 +442,13 @@ class MenuScreenTest {
     fun outside_tap_and_system_back_dismiss_without_selecting() {
         var selectionCount = 0
         setContent(
-            onFourPairsDifficultySelected = {
+            onQuickDifficultySelected = {
                 selectionCount += 1
             }
         )
 
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON)
             .performClick()
         composeTestRule
             .onRoot()
@@ -461,15 +456,15 @@ class MenuScreenTest {
                 click(Offset(1f, 1f))
             }
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_MENU)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_MENU)
             .assertDoesNotExist()
 
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON)
             .performClick()
         pressBackUnconditionally()
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_MENU)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_MENU)
             .assertDoesNotExist()
         composeTestRule.runOnIdle {
             assertEquals(0, selectionCount)
@@ -481,22 +476,22 @@ class MenuScreenTest {
         setContent()
 
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON)
             .performClick()
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.CLASSIC_DIFFICULTY_BUTTON)
             .performClick()
 
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_MENU)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_MENU)
             .assertDoesNotExist()
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_MENU)
+            .onNodeWithTag(MenuScreenTestTags.CLASSIC_DIFFICULTY_MENU)
             .assertIsDisplayed()
     }
 
     @Test
-    fun generated_mode_split_ctas_match_full_width_buttons_and_keep_distinct_touch_regions() {
+    fun play_option_split_ctas_match_full_width_buttons_and_keep_distinct_touch_regions() {
         setContent()
 
         val tutorialBounds = composeTestRule
@@ -520,14 +515,14 @@ class MenuScreenTest {
         }
         listOf(
             Triple(
-                MenuScreenTestTags.FOUR_PAIRS_SPLIT_CTA,
-                MenuScreenTestTags.FOUR_PAIRS_BUTTON,
-                MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON
+                MenuScreenTestTags.QUICK_SPLIT_CTA,
+                MenuScreenTestTags.QUICK_BUTTON,
+                MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON
             ),
             Triple(
-                MenuScreenTestTags.EIGHT_PAIRS_SPLIT_CTA,
-                MenuScreenTestTags.EIGHT_PAIRS_BUTTON,
-                MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_BUTTON
+                MenuScreenTestTags.CLASSIC_SPLIT_CTA,
+                MenuScreenTestTags.CLASSIC_BUTTON,
+                MenuScreenTestTags.CLASSIC_DIFFICULTY_BUTTON
             )
         ).forEach { (containerTag, playTag, difficultyTag) ->
             val containerBounds = composeTestRule
@@ -563,15 +558,14 @@ class MenuScreenTest {
     }
 
     @Test
-    fun generated_mode_labels_match_the_other_menu_button_typography() {
+    fun play_option_labels_match_the_other_menu_button_typography() {
         setContent()
 
         val tutorialStyle = textStyle(string(R.string.menu_tutorial_button))
         assertEquals(22.sp, tutorialStyle.fontSize)
         listOf(
-            string(R.string.quick_screen_title),
-            fourPairsState.challengeName,
-            eightPairsState.challengeName
+            quickState.selectionName,
+            classicState.selectionName
         ).forEach { actionName ->
             val challengeStyle = textStyle(actionName)
 
@@ -600,27 +594,18 @@ class MenuScreenTest {
             .fetchSemanticsNode()
             .boundsInRoot
         val quickBounds = composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
-            .performScrollTo()
-            .assertIsDisplayed()
-            .fetchSemanticsNode()
-            .boundsInRoot
-        val fourPairsBounds = composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_SPLIT_CTA)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_SPLIT_CTA)
             .performScrollTo()
             .assertIsDisplayed()
             .fetchSemanticsNode()
             .boundsInRoot
 
-        assertEquals(fourPairsBounds.left, quickBounds.left, 0.5f)
-        assertEquals(fourPairsBounds.right, quickBounds.right, 0.5f)
-        assertEquals(fourPairsBounds.height, quickBounds.height, 0.5f)
         assertEquals(quickBounds.left, dailyBounds.left, 0.5f)
         assertEquals(quickBounds.right, dailyBounds.right, 0.5f)
     }
 
     @Test
-    fun wide_layout_caps_and_aligns_every_v10_menu_action() {
+    fun wide_layout_caps_and_aligns_every_menu_action() {
         setContent(
             width = 1_000.dp,
             height = 800.dp,
@@ -635,9 +620,8 @@ class MenuScreenTest {
         val actionTags = listOf(
             MenuScreenTestTags.DAILY_SPLIT_CTA,
             MenuScreenTestTags.RESUME_BUTTON,
-            MenuScreenTestTags.QUICK_BUTTON,
-            MenuScreenTestTags.FOUR_PAIRS_SPLIT_CTA,
-            MenuScreenTestTags.EIGHT_PAIRS_SPLIT_CTA,
+            MenuScreenTestTags.QUICK_SPLIT_CTA,
+            MenuScreenTestTags.CLASSIC_SPLIT_CTA,
             MenuScreenTestTags.TUTORIAL_BUTTON
         )
         val actionBounds = actionTags.map { tag ->
@@ -667,14 +651,14 @@ class MenuScreenTest {
         )
 
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON)
             .performClick()
         val triggerBounds = composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON)
             .fetchSemanticsNode()
             .boundsInRoot
         val menuBounds = composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_MENU)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_MENU)
             .assertIsDisplayed()
             .fetchSemanticsNode()
             .boundsInRoot
@@ -697,8 +681,7 @@ class MenuScreenTest {
         onDailyCalendarSelected: () -> Unit = {},
         onPersonalizationSelected: () -> Unit = {},
         onQuickSelected: () -> Unit = {},
-        onFourPairsSelected: () -> Unit = {},
-        onFourPairsDifficultySelected: (GeneratedDifficultyMenuOptionId) -> Unit = {}
+        onQuickDifficultySelected: (GeneratedDifficultyMenuOptionId) -> Unit = {}
     ) {
         composeTestRule.setContent {
             val currentDensity = LocalDensity.current
@@ -719,8 +702,7 @@ class MenuScreenTest {
                                 onDailyCalendarSelected = onDailyCalendarSelected,
                                 onPersonalizationSelected = onPersonalizationSelected,
                                 onQuickSelected = onQuickSelected,
-                                onFourPairsSelected = onFourPairsSelected,
-                                onFourPairsDifficultySelected = onFourPairsDifficultySelected
+                                onQuickDifficultySelected = onQuickDifficultySelected
                             )
                         }
                     } else {
@@ -731,8 +713,7 @@ class MenuScreenTest {
                             onDailyCalendarSelected = onDailyCalendarSelected,
                             onPersonalizationSelected = onPersonalizationSelected,
                             onQuickSelected = onQuickSelected,
-                            onFourPairsSelected = onFourPairsSelected,
-                            onFourPairsDifficultySelected = onFourPairsDifficultySelected
+                            onQuickDifficultySelected = onQuickDifficultySelected
                         )
                     }
                 }
@@ -748,20 +729,18 @@ class MenuScreenTest {
         onDailyCalendarSelected: () -> Unit,
         onPersonalizationSelected: () -> Unit,
         onQuickSelected: () -> Unit,
-        onFourPairsSelected: () -> Unit,
-        onFourPairsDifficultySelected: (GeneratedDifficultyMenuOptionId) -> Unit
+        onQuickDifficultySelected: (GeneratedDifficultyMenuOptionId) -> Unit
     ) {
         MenuScreen(
             dailyChallenge = dailyChallenge,
             resumeChallengeName = resumeChallengeName,
-            fourPairsMode = fourPairsState,
-            eightPairsMode = eightPairsState,
+            quickOption = quickState,
+            classicOption = classicState,
             onDailySelected = onDailySelected,
             onDailyCalendarSelected = onDailyCalendarSelected,
             onPersonalizationSelected = onPersonalizationSelected,
             onQuickSelected = onQuickSelected,
-            onFourPairsSelected = onFourPairsSelected,
-            onFourPairsDifficultySelected = onFourPairsDifficultySelected
+            onQuickDifficultySelected = onQuickDifficultySelected
         )
     }
 
@@ -780,28 +759,28 @@ class MenuScreenTest {
     }
 
     private companion object {
-        val fourPairsLowId = GeneratedDifficultyMenuOptionId("four-pairs-low")
-        val fourPairsMediumId = GeneratedDifficultyMenuOptionId("four-pairs-medium")
-        val eightPairsMediumId = GeneratedDifficultyMenuOptionId("eight-pairs-medium")
-        val eightPairsHardId = GeneratedDifficultyMenuOptionId("eight-pairs-hard")
+        val quickLowId = GeneratedDifficultyMenuOptionId("low")
+        val quickMediumId = GeneratedDifficultyMenuOptionId("medium")
+        val classicMediumId = GeneratedDifficultyMenuOptionId("medium")
+        val classicHardId = GeneratedDifficultyMenuOptionId("hard")
 
-        val fourPairsState = GeneratedModeMenuUiState(
-            modeName = "4 pairs",
-            challengeName = "4 pairs · Low",
+        val quickState = GeneratedPlayOptionMenuUiState(
+            optionName = "Quick",
+            selectionName = "Quick · Low",
             difficultyOptions = listOf(
-                GeneratedDifficultyMenuOptionUiState(fourPairsLowId, "Low"),
-                GeneratedDifficultyMenuOptionUiState(fourPairsMediumId, "Medium")
+                GeneratedDifficultyMenuOptionUiState(quickLowId, "Low"),
+                GeneratedDifficultyMenuOptionUiState(quickMediumId, "Medium")
             ),
-            selectedDifficultyOptionId = fourPairsLowId
+            selectedDifficultyOptionId = quickLowId
         )
-        val eightPairsState = GeneratedModeMenuUiState(
-            modeName = "8 pairs",
-            challengeName = "8 pairs · Medium",
+        val classicState = GeneratedPlayOptionMenuUiState(
+            optionName = "Classic",
+            selectionName = "Classic · Medium",
             difficultyOptions = listOf(
-                GeneratedDifficultyMenuOptionUiState(eightPairsMediumId, "Medium"),
-                GeneratedDifficultyMenuOptionUiState(eightPairsHardId, "Hard")
+                GeneratedDifficultyMenuOptionUiState(classicMediumId, "Medium"),
+                GeneratedDifficultyMenuOptionUiState(classicHardId, "Hard")
             ),
-            selectedDifficultyOptionId = eightPairsMediumId
+            selectedDifficultyOptionId = classicMediumId
         )
     }
 }

@@ -11,26 +11,23 @@ import kotlinx.coroutines.launch
 import org.cescfe.numpairs.data.daily.session.DailySessionRepository
 import org.cescfe.numpairs.data.generated.selection.GeneratedDifficultySelectionRepository
 import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
+import org.cescfe.numpairs.domain.generated.profile.DifficultyTier
 import org.cescfe.numpairs.feature.daily.CurrentDailyAvailability
 import org.cescfe.numpairs.feature.daily.CurrentDailyAvailabilityResolver
 import org.cescfe.numpairs.feature.daily.CurrentDailyChallengeResolver
-import org.cescfe.numpairs.feature.generated.GeneratedChallenge
-import org.cescfe.numpairs.feature.generated.GeneratedChallengeCatalog
-import org.cescfe.numpairs.feature.generated.GeneratedModeConfiguration
-import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.generated.GeneratedPlayOptionConfiguration
 import org.cescfe.numpairs.feature.generated.GeneratedPlayOptions
+import org.cescfe.numpairs.feature.generated.GeneratedPlayRequest
 import org.cescfe.numpairs.feature.generated.localizedTitle
 import org.cescfe.numpairs.feature.menu.ui.DailyMenuUiState
 import org.cescfe.numpairs.feature.menu.ui.GeneratedDifficultyMenuOptionId
 import org.cescfe.numpairs.feature.menu.ui.GeneratedDifficultyMenuOptionUiState
-import org.cescfe.numpairs.feature.menu.ui.GeneratedModeMenuUiState
+import org.cescfe.numpairs.feature.menu.ui.GeneratedPlayOptionMenuUiState
 import org.cescfe.numpairs.feature.menu.ui.MenuScreen
 
 @Composable
 fun MenuRoute(
     generatedDifficultySelectionRepository: GeneratedDifficultySelectionRepository,
-    generatedChallengeCatalog: GeneratedChallengeCatalog,
     dailySessionRepository: DailySessionRepository? = null,
     deviceLocalDateSource: DeviceLocalDateSource? = null,
     modifier: Modifier = Modifier,
@@ -40,7 +37,7 @@ fun MenuRoute(
     onPersonalizationSelected: () -> Unit = {},
     onDailySelected: (DailyMenuUiState) -> Unit = {},
     onDailyCalendarSelected: () -> Unit = {},
-    onGeneratedChallengeSelected: (GeneratedChallenge) -> Unit = {}
+    onGeneratedPlayRequested: (GeneratedPlayRequest) -> Unit = {}
 ) {
     require((dailySessionRepository == null) == (deviceLocalDateSource == null)) {
         "Daily Menu composition requires both the repository and local-date source."
@@ -55,30 +52,24 @@ fun MenuRoute(
     if (dailySessionRepository != null && dailyMenuState == null) {
         return
     }
-    val quickChallenge = generatedChallengeCatalog.resolveChallenge(GeneratedModes.THREE_PAIRS_LOW.id)
-    val fourPairsMode = generatedChallengeCatalog.resolve(GeneratedModes.FOUR_PAIRS.id)
-    val eightPairsMode = generatedChallengeCatalog.resolve(GeneratedModes.EIGHT_PAIRS.id)
-    val fourPairsChallenge = fourPairsMode.selectedChallenge(
-        repository = generatedDifficultySelectionRepository,
-        playOption = GeneratedPlayOptions.QUICK
+    val quickDifficulty = GeneratedPlayOptions.QUICK.selectedDifficulty(
+        repository = generatedDifficultySelectionRepository
     ) ?: return
-    val eightPairsChallenge = eightPairsMode.selectedChallenge(
-        repository = generatedDifficultySelectionRepository,
-        playOption = GeneratedPlayOptions.CLASSIC
+    val classicDifficulty = GeneratedPlayOptions.CLASSIC.selectedDifficulty(
+        repository = generatedDifficultySelectionRepository
     ) ?: return
     val coroutineScope = rememberCoroutineScope()
     val dailyActionGuard = remember(dailyMenuState) {
         DailyMenuActionGuard()
     }
-    val selectDifficulty:
-        (GeneratedModeConfiguration, GeneratedPlayOptionConfiguration, GeneratedDifficultyMenuOptionId) -> Unit =
-        { mode, playOption, optionId ->
-            val challenge = mode.challengeFor(optionId)
+    val selectDifficulty: (GeneratedPlayOptionConfiguration, GeneratedDifficultyMenuOptionId) -> Unit =
+        { playOption, optionId ->
+            val difficulty = playOption.difficultyFor(optionId)
             coroutineScope.launch {
                 try {
                     generatedDifficultySelectionRepository.selectDifficulty(
                         optionId = playOption.id,
-                        difficulty = challenge.difficulty
+                        difficulty = difficulty
                     )
                 } catch (_: IOException) {
                     // Keep the last observable selection when local preference storage is unavailable.
@@ -98,31 +89,32 @@ fun MenuRoute(
             }
         },
         onDailyCalendarSelected = onDailyCalendarSelected,
-        onQuickSelected = {
-            onGeneratedChallengeSelected(quickChallenge)
-        },
-        fourPairsMode = fourPairsMode.menuUiState(
-            selectedChallenge = fourPairsChallenge,
-            catalog = generatedChallengeCatalog
-        ),
-        eightPairsMode = eightPairsMode.menuUiState(
-            selectedChallenge = eightPairsChallenge,
-            catalog = generatedChallengeCatalog
-        ),
+        quickOption = GeneratedPlayOptions.QUICK.menuUiState(selectedDifficulty = quickDifficulty),
+        classicOption = GeneratedPlayOptions.CLASSIC.menuUiState(selectedDifficulty = classicDifficulty),
         onResumeSelected = onResumeSelected,
         onTutorialSelected = onTutorialSelected,
         onPersonalizationSelected = onPersonalizationSelected,
-        onFourPairsSelected = {
-            onGeneratedChallengeSelected(fourPairsChallenge)
+        onQuickSelected = {
+            onGeneratedPlayRequested(
+                GeneratedPlayRequest(
+                    optionId = GeneratedPlayOptions.QUICK.id,
+                    difficulty = quickDifficulty
+                )
+            )
         },
-        onEightPairsSelected = {
-            onGeneratedChallengeSelected(eightPairsChallenge)
+        onClassicSelected = {
+            onGeneratedPlayRequested(
+                GeneratedPlayRequest(
+                    optionId = GeneratedPlayOptions.CLASSIC.id,
+                    difficulty = classicDifficulty
+                )
+            )
         },
-        onFourPairsDifficultySelected = { optionId ->
-            selectDifficulty(fourPairsMode, GeneratedPlayOptions.QUICK, optionId)
+        onQuickDifficultySelected = { optionId ->
+            selectDifficulty(GeneratedPlayOptions.QUICK, optionId)
         },
-        onEightPairsDifficultySelected = { optionId ->
-            selectDifficulty(eightPairsMode, GeneratedPlayOptions.CLASSIC, optionId)
+        onClassicDifficultySelected = { optionId ->
+            selectDifficulty(GeneratedPlayOptions.CLASSIC, optionId)
         }
     )
 }
@@ -178,40 +170,41 @@ private fun CurrentDailyAvailability.toMenuUiState(): DailyMenuUiState = when (t
 }
 
 @Composable
-private fun GeneratedModeConfiguration.selectedChallenge(
-    repository: GeneratedDifficultySelectionRepository,
-    playOption: GeneratedPlayOptionConfiguration
-): GeneratedChallenge? {
-    val selectedDifficultyFlow = remember(repository, playOption.id) {
-        repository.selectedDifficulty(optionId = playOption.id)
+private fun GeneratedPlayOptionConfiguration.selectedDifficulty(
+    repository: GeneratedDifficultySelectionRepository
+): DifficultyTier? {
+    val selectedDifficultyFlow = remember(repository, id) {
+        repository.selectedDifficulty(optionId = id)
     }
     val selectedDifficulty by selectedDifficultyFlow.collectAsState(initial = null)
-
-    return selectedDifficulty?.let { difficulty ->
-        challenges.singleOrNull { challenge -> challenge.difficulty == difficulty }
-    }
+    return selectedDifficulty?.takeIf(::supports)
 }
 
 @Composable
-private fun GeneratedModeConfiguration.menuUiState(
-    selectedChallenge: GeneratedChallenge,
-    catalog: GeneratedChallengeCatalog
-): GeneratedModeMenuUiState = GeneratedModeMenuUiState(
-    modeName = localizedTitle(),
-    challengeName = selectedChallenge.localizedTitle(catalog),
-    difficultyOptions = challenges.map { challenge ->
+private fun GeneratedPlayOptionConfiguration.menuUiState(
+    selectedDifficulty: DifficultyTier
+): GeneratedPlayOptionMenuUiState = GeneratedPlayOptionMenuUiState(
+    optionName = localizedTitle(),
+    selectionName = GeneratedPlayRequest(id, selectedDifficulty).localizedTitle(),
+    difficultyOptions = difficulties.map { difficulty ->
         GeneratedDifficultyMenuOptionUiState(
-            id = challenge.menuOptionId,
-            label = challenge.difficulty.localizedTitle()
+            id = difficulty.menuOptionId,
+            label = difficulty.localizedTitle()
         )
     },
-    selectedDifficultyOptionId = selectedChallenge.menuOptionId
+    selectedDifficultyOptionId = selectedDifficulty.menuOptionId
 )
 
-private fun GeneratedModeConfiguration.challengeFor(optionId: GeneratedDifficultyMenuOptionId): GeneratedChallenge =
-    challenges.single { challenge ->
-        challenge.id.value == optionId.value
+private fun GeneratedPlayOptionConfiguration.difficultyFor(optionId: GeneratedDifficultyMenuOptionId): DifficultyTier =
+    difficulties.single { difficulty ->
+        difficulty.menuOptionId == optionId
     }
 
-private val GeneratedChallenge.menuOptionId: GeneratedDifficultyMenuOptionId
-    get() = GeneratedDifficultyMenuOptionId(id.value)
+private val DifficultyTier.menuOptionId: GeneratedDifficultyMenuOptionId
+    get() = GeneratedDifficultyMenuOptionId(
+        when (this) {
+            DifficultyTier.LOW -> "low"
+            DifficultyTier.MEDIUM -> "medium"
+            DifficultyTier.HARD -> "hard"
+        }
+    )

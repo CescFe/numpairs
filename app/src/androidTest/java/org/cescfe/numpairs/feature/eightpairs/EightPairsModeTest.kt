@@ -51,26 +51,26 @@ class EightPairsModeTest {
             .onNodeWithText(string(R.string.menu_tutorial_button))
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
             .assertIsDisplayed()
         composeTestRule
             .onNodeWithText(
-                challengeName(R.string.four_pairs_screen_title, R.string.generated_difficulty_low)
+                challengeName(R.string.quick_screen_title, R.string.generated_difficulty_low)
             )
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON)
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.CLASSIC_BUTTON)
             .assertIsDisplayed()
         composeTestRule
             .onNodeWithText(
-                challengeName(R.string.eight_pairs_screen_title, R.string.generated_difficulty_medium)
+                challengeName(R.string.classic_screen_title, R.string.generated_difficulty_medium)
             )
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.CLASSIC_DIFFICULTY_BUTTON)
             .assertIsDisplayed()
     }
 
@@ -84,7 +84,7 @@ class EightPairsModeTest {
             .onNodeWithText(
                 string(
                     R.string.generated_challenge_title,
-                    string(R.string.eight_pairs_screen_title),
+                    string(R.string.classic_screen_title),
                     string(R.string.generated_difficulty_medium)
                 )
             )
@@ -152,7 +152,7 @@ class EightPairsModeTest {
     }
 
     private fun navigateToEightPairs() {
-        composeTestRule.navigateToSelectedGeneratedChallenge(MenuScreenTestTags.EIGHT_PAIRS_BUTTON)
+        composeTestRule.navigateToSelectedGeneratedChallenge(MenuScreenTestTags.CLASSIC_BUTTON)
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SCREEN)

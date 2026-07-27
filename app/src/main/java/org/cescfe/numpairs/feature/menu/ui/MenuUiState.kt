@@ -17,24 +17,24 @@ data class GeneratedDifficultyMenuOptionUiState(val id: GeneratedDifficultyMenuO
     }
 }
 
-data class GeneratedModeMenuUiState(
-    val modeName: String,
-    val challengeName: String,
+data class GeneratedPlayOptionMenuUiState(
+    val optionName: String,
+    val selectionName: String,
     val difficultyOptions: List<GeneratedDifficultyMenuOptionUiState>,
     val selectedDifficultyOptionId: GeneratedDifficultyMenuOptionId
 ) {
     init {
-        require(modeName.isNotBlank()) {
-            "Generated mode Menu name must not be blank."
+        require(optionName.isNotBlank()) {
+            "Generated play option Menu name must not be blank."
         }
-        require(challengeName.isNotBlank()) {
-            "Generated challenge Menu name must not be blank."
+        require(selectionName.isNotBlank()) {
+            "Generated play option selection name must not be blank."
         }
         require(difficultyOptions.isNotEmpty()) {
-            "Generated mode Menu must expose at least one difficulty option."
+            "Generated play option Menu must expose at least one difficulty."
         }
         require(difficultyOptions.map { option -> option.id }.distinct().size == difficultyOptions.size) {
-            "Generated mode Menu difficulty option ids must be unique."
+            "Generated play option Menu difficulty ids must be unique."
         }
         require(difficultyOptions.any { option -> option.id == selectedDifficultyOptionId }) {
             "Selected generated difficulty must be present in the Menu options."

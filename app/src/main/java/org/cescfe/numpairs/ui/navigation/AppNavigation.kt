@@ -26,8 +26,10 @@ import org.cescfe.numpairs.feature.generated.GeneratedLearningRoute
 import org.cescfe.numpairs.feature.generated.GeneratedModeLaunchIntent
 import org.cescfe.numpairs.feature.generated.GeneratedModeRoute
 import org.cescfe.numpairs.feature.generated.GeneratedModes
+import org.cescfe.numpairs.feature.generated.GeneratedPlayChallengeSelector
+import org.cescfe.numpairs.feature.generated.GeneratedPlayOptions
+import org.cescfe.numpairs.feature.generated.GeneratedPlayRequest
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
-import org.cescfe.numpairs.feature.generated.localizedNewPuzzleName
 import org.cescfe.numpairs.feature.generated.localizedTitle
 import org.cescfe.numpairs.feature.menu.MenuRoute
 import org.cescfe.numpairs.feature.menu.ui.DailyMenuUiState
@@ -59,6 +61,8 @@ fun AppNavigation(
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     generatedChallengeCatalog: GeneratedChallengeCatalog,
     generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory,
+    generatedPlayChallengeSelector: GeneratedPlayChallengeSelector =
+        GeneratedPlayChallengeSelector(generatedChallengeCatalog),
     dailyFeatureDependencies: DailyFeatureDependencies? = null,
     modifier: Modifier = Modifier,
     startDestination: AppDestination = AppDestination.Menu
@@ -78,6 +82,7 @@ fun AppNavigation(
             topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
             generatedChallengeCatalog = generatedChallengeCatalog,
             generatedPuzzleGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory,
+            generatedPlayChallengeSelector = generatedPlayChallengeSelector,
             dailyFeatureDependencies = dailyFeatureDependencies,
             modifier = modifier,
             startDestination = startDestination
@@ -95,6 +100,8 @@ internal fun ReadyAppNavigation(
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     generatedChallengeCatalog: GeneratedChallengeCatalog,
     generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory,
+    generatedPlayChallengeSelector: GeneratedPlayChallengeSelector =
+        GeneratedPlayChallengeSelector(generatedChallengeCatalog),
     dailyFeatureDependencies: DailyFeatureDependencies? = null,
     modifier: Modifier = Modifier,
     startDestination: AppDestination = AppDestination.Menu
@@ -113,6 +120,7 @@ internal fun ReadyAppNavigation(
             topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
             generatedChallengeCatalog = generatedChallengeCatalog,
             generatedPuzzleGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory,
+            generatedPlayChallengeSelector = generatedPlayChallengeSelector,
             dailyFeatureDependencies = dailyFeatureDependencies,
             modifier = modifier,
             startDestination = startDestination
@@ -128,6 +136,7 @@ private fun UnlockedAppNavigation(
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     generatedChallengeCatalog: GeneratedChallengeCatalog,
     generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory,
+    generatedPlayChallengeSelector: GeneratedPlayChallengeSelector,
     dailyFeatureDependencies: DailyFeatureDependencies?,
     modifier: Modifier,
     startDestination: AppDestination
@@ -137,27 +146,31 @@ private fun UnlockedAppNavigation(
     val resumableSession = generatedSessionSnapshot.toResumableGeneratedSessionOrNull(
         challengeCatalog = generatedChallengeCatalog
     )
-    var pendingGeneratedChallengeChoice by remember {
-        mutableStateOf<GeneratedChallenge?>(null)
+    var pendingGeneratedPlayRequest by remember {
+        mutableStateOf<GeneratedPlayRequest?>(null)
     }
     var currentDestination by remember(startDestination) {
         mutableStateOf(startDestination)
     }
     val navigateToMenu: () -> Unit = {
-        pendingGeneratedChallengeChoice = null
+        pendingGeneratedPlayRequest = null
         currentDestination = AppDestination.Menu
     }
-    val navigateToNewGeneratedPuzzle: (GeneratedChallenge) -> Unit = { challenge ->
+    val navigateToNewGeneratedPuzzle: (GeneratedPlayRequest) -> Unit = { request ->
+        val challenge = generatedPlayChallengeSelector.select(
+            optionId = request.optionId,
+            difficulty = request.difficulty
+        )
         currentDestination = AppDestination.GeneratedChallenge(
             challengeId = challenge.id,
             launchIntent = GeneratedModeLaunchIntent.newPuzzle()
         )
     }
-    val onGeneratedChallengeSelected: (GeneratedChallenge) -> Unit = { selectedChallenge ->
+    val onGeneratedPlayRequested: (GeneratedPlayRequest) -> Unit = { request ->
         if (resumableSession == null) {
-            navigateToNewGeneratedPuzzle(selectedChallenge)
+            navigateToNewGeneratedPuzzle(request)
         } else {
-            pendingGeneratedChallengeChoice = selectedChallenge
+            pendingGeneratedPlayRequest = request
         }
     }
 
@@ -170,7 +183,6 @@ private fun UnlockedAppNavigation(
             val dailyDependencies = dailyFeatureDependencies
             MenuRoute(
                 generatedDifficultySelectionRepository = generatedDifficultySelectionRepository,
-                generatedChallengeCatalog = generatedChallengeCatalog,
                 dailySessionRepository = dailyDependencies?.dailySessionRepository,
                 deviceLocalDateSource = dailyDependencies?.deviceLocalDateSource,
                 modifier = modifier,
@@ -208,7 +220,7 @@ private fun UnlockedAppNavigation(
                 onDailyCalendarSelected = {
                     currentDestination = AppDestination.DailyCalendar
                 },
-                onGeneratedChallengeSelected = onGeneratedChallengeSelected
+                onGeneratedPlayRequested = onGeneratedPlayRequested
             )
         }
         AppDestination.Tutorial -> TutorialRoute(
@@ -279,6 +291,13 @@ private fun UnlockedAppNavigation(
                     topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
                     isGeneratedGameHapticsEnabled =
                     personalizationPreferences?.generatedGameHapticsEnabled == true,
+                    newPuzzleChallengeProvider = {
+                        generatedPlayChallengeSelector.select(
+                            optionId = GeneratedPlayOptions.QUICK.id,
+                            difficulty = challenge.difficulty
+                        )
+                    },
+                    replacementGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory,
                     onNavigateBack = navigateToMenu
                 )
 
@@ -297,17 +316,21 @@ private fun UnlockedAppNavigation(
         }
     }
 
-    val selectedChallenge = pendingGeneratedChallengeChoice
-    if (selectedChallenge != null && resumableSession != null) {
-        val actionGuard = remember(selectedChallenge.id, resumableSession.sessionId) {
+    val selectedRequest = pendingGeneratedPlayRequest
+    if (selectedRequest != null && resumableSession != null) {
+        val actionGuard = remember(
+            selectedRequest.optionId,
+            selectedRequest.difficulty,
+            resumableSession.sessionId
+        ) {
             GeneratedSessionChoiceActionGuard()
         }
         GeneratedSessionChoiceDialog(
             savedChallengeName = resumableSession.challenge.localizedTitle(generatedChallengeCatalog),
-            selectedChallengeName = selectedChallenge.localizedNewPuzzleName(generatedChallengeCatalog),
+            selectedChallengeName = selectedRequest.localizedTitle(),
             onResume = {
                 actionGuard.handle {
-                    pendingGeneratedChallengeChoice = null
+                    pendingGeneratedPlayRequest = null
                     currentDestination = AppDestination.GeneratedChallenge(
                         challengeId = resumableSession.challenge.id,
                         launchIntent = GeneratedModeLaunchIntent.ResumeSession(
@@ -318,13 +341,13 @@ private fun UnlockedAppNavigation(
             },
             onNewPuzzle = {
                 actionGuard.handle {
-                    pendingGeneratedChallengeChoice = null
-                    navigateToNewGeneratedPuzzle(selectedChallenge)
+                    pendingGeneratedPlayRequest = null
+                    navigateToNewGeneratedPuzzle(selectedRequest)
                 }
             },
             onDismiss = {
                 if (!actionGuard.isHandled) {
-                    pendingGeneratedChallengeChoice = null
+                    pendingGeneratedPlayRequest = null
                 }
             }
         )

@@ -29,6 +29,7 @@ import org.cescfe.numpairs.feature.game.ui.screen.GameScreenRobot
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.game.ui.semantics.CorrectTileFeedbackIdKey
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
+import org.cescfe.numpairs.testing.fourPairsQuickSelector
 import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.navigation.navigateToSelectedGeneratedChallenge
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
@@ -94,14 +95,14 @@ class CorrectTileMotionTest {
     @Test
     fun fourPairsRouteEnablesCorrectTileMotion() {
         assertGeneratedRouteEnablesCorrectTileMotion(
-            menuButtonTag = MenuScreenTestTags.FOUR_PAIRS_BUTTON
+            menuButtonTag = MenuScreenTestTags.QUICK_BUTTON
         )
     }
 
     @Test
     fun eightPairsRouteEnablesCorrectTileMotion() {
         assertGeneratedRouteEnablesCorrectTileMotion(
-            menuButtonTag = MenuScreenTestTags.EIGHT_PAIRS_BUTTON
+            menuButtonTag = MenuScreenTestTags.CLASSIC_BUTTON
         )
     }
 
@@ -118,6 +119,7 @@ class CorrectTileMotionTest {
                         )
                     ),
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
+                    generatedPlayChallengeSelector = fourPairsQuickSelector(),
                     generatedChallengeCatalog = GeneratedModes.catalog,
                     generatedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory {
                         GeneratedPuzzleGenerationUseCase { request ->

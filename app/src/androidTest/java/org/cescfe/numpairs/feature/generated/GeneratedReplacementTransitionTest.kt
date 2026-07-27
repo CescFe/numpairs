@@ -32,6 +32,7 @@ import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenRobot
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
+import org.cescfe.numpairs.testing.fourPairsQuickSelector
 import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.navigation.navigateToSelectedGeneratedChallenge
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
@@ -50,7 +51,7 @@ class GeneratedReplacementTransitionTest {
     fun fourPairsKeepsCompletionUntilTheAdoptedSuccessorTransitionsOnce() {
         assertSafeReplacementTransition(
             challenge = GeneratedModes.FOUR_PAIRS_LOW,
-            menuButtonTag = MenuScreenTestTags.FOUR_PAIRS_BUTTON
+            menuButtonTag = MenuScreenTestTags.QUICK_BUTTON
         )
     }
 
@@ -58,7 +59,7 @@ class GeneratedReplacementTransitionTest {
     fun eightPairsKeepsCompletionUntilTheAdoptedSuccessorTransitionsOnce() {
         assertSafeReplacementTransition(
             challenge = GeneratedModes.EIGHT_PAIRS_MEDIUM,
-            menuButtonTag = MenuScreenTestTags.EIGHT_PAIRS_BUTTON
+            menuButtonTag = MenuScreenTestTags.CLASSIC_BUTTON
         )
     }
 
@@ -92,6 +93,7 @@ class GeneratedReplacementTransitionTest {
                             )
                         ),
                         topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
+                        generatedPlayChallengeSelector = fourPairsQuickSelector(),
                         generatedChallengeCatalog = GeneratedModes.catalog,
                         generatedPuzzleGenerationUseCaseFactory = useCaseFactory
                     )

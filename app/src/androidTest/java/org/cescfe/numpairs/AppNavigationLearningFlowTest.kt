@@ -35,6 +35,7 @@ import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.feature.tutorial.TutorialContent
 import org.cescfe.numpairs.feature.tutorial.TutorialMode
 import org.cescfe.numpairs.feature.tutorial.ui.TutorialScreenTestTags
+import org.cescfe.numpairs.testing.fourPairsQuickSelector
 import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.navigation.navigateToSelectedGeneratedChallenge
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
@@ -168,6 +169,7 @@ class AppNavigationLearningFlowTest {
                     generatedDifficultySelectionRepository = FakeGeneratedDifficultySelectionRepository(),
                     personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository = actionDiscoveryRepository,
+                    generatedPlayChallengeSelector = fourPairsQuickSelector(),
                     generatedChallengeCatalog = GeneratedModes.catalog,
                     generatedPuzzleGenerationUseCaseFactory = fourPairsProviderFactory(puzzleProvider = puzzleProvider)
                 )
@@ -180,7 +182,7 @@ class AppNavigationLearningFlowTest {
     }
 
     private fun navigateToFourPairs() {
-        composeTestRule.navigateToSelectedGeneratedChallenge(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+        composeTestRule.navigateToSelectedGeneratedChallenge(MenuScreenTestTags.QUICK_BUTTON)
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SCREEN)

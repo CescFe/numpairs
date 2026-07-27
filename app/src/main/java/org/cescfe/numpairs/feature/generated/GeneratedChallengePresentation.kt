@@ -8,9 +8,10 @@ import org.cescfe.numpairs.domain.generated.profile.DifficultyTier
 
 @StringRes
 internal fun GeneratedModeConfiguration.titleResourceIdOrNull(): Int? = when (id) {
-    GeneratedModes.THREE_PAIRS.id -> R.string.quick_screen_title
-    GeneratedModes.FOUR_PAIRS.id -> R.string.four_pairs_screen_title
-    GeneratedModes.EIGHT_PAIRS.id -> R.string.eight_pairs_screen_title
+    GeneratedModes.THREE_PAIRS.id,
+    GeneratedModes.FOUR_PAIRS.id -> R.string.quick_screen_title
+
+    GeneratedModes.EIGHT_PAIRS.id -> R.string.classic_screen_title
     else -> null
 }
 
@@ -28,6 +29,16 @@ internal fun DifficultyTier.localizedTitle(): String = stringResource(
     }
 )
 
+@StringRes
+internal fun GeneratedPlayOptionConfiguration.titleResourceId(): Int = when (id) {
+    GeneratedPlayOptions.QUICK.id -> R.string.quick_screen_title
+    GeneratedPlayOptions.CLASSIC.id -> R.string.classic_screen_title
+    else -> error("No title is configured for generated play option ${id.value}.")
+}
+
+@Composable
+internal fun GeneratedPlayOptionConfiguration.localizedTitle(): String = stringResource(titleResourceId())
+
 @Composable
 internal fun GeneratedChallenge.localizedTitle(catalog: GeneratedChallengeCatalog): String = stringResource(
     R.string.generated_challenge_title,
@@ -36,9 +47,8 @@ internal fun GeneratedChallenge.localizedTitle(catalog: GeneratedChallengeCatalo
 )
 
 @Composable
-internal fun GeneratedChallenge.localizedNewPuzzleName(catalog: GeneratedChallengeCatalog): String =
-    if (modeId == GeneratedModes.THREE_PAIRS.id) {
-        catalog.modeFor(this).localizedTitle()
-    } else {
-        localizedTitle(catalog)
-    }
+internal fun GeneratedPlayRequest.localizedTitle(): String = stringResource(
+    R.string.generated_challenge_title,
+    GeneratedPlayOptions.resolve(optionId).localizedTitle(),
+    difficulty.localizedTitle()
+)

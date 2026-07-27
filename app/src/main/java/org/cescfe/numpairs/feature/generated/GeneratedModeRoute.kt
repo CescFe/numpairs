@@ -59,8 +59,13 @@ fun GeneratedModeRoute(
     onRulesHelperActionTapped: () -> Unit = {},
     onRulesHelperPlayTutorialRequested: (() -> Unit)? = null,
     topBarActions: @Composable RowScope.() -> Unit = {},
+    newPuzzleChallengeProvider: (() -> GeneratedChallenge)? = null,
+    replacementGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory? = null,
     onNavigateBack: () -> Unit = {}
 ) {
+    require((newPuzzleChallengeProvider == null) == (replacementGenerationUseCaseFactory == null)) {
+        "A replacement challenge provider and generation factory must be supplied together."
+    }
     val viewModel = rememberGeneratedPuzzleViewModel(
         challenge = challenge,
         generationUseCase = generationUseCase,
@@ -86,7 +91,20 @@ fun GeneratedModeRoute(
             onRulesHelperPlayTutorialRequested = onRulesHelperPlayTutorialRequested,
             topBarActions = topBarActions,
             isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,
-            onNewPuzzleRequested = viewModel::onNewPuzzleRequested,
+            onNewPuzzleRequested = {
+                if (newPuzzleChallengeProvider == null) {
+                    viewModel.onNewPuzzleRequested()
+                } else {
+                    viewModel.onNewPuzzleRequested {
+                        val replacementChallenge = newPuzzleChallengeProvider()
+                        GeneratedPuzzleGenerationDefinition(
+                            challenge = replacementChallenge,
+                            generationUseCase = requireNotNull(replacementGenerationUseCaseFactory)
+                                .create(replacementChallenge)
+                        )
+                    }
+                }
+            },
             onPuzzleChanged = viewModel::onPuzzleChanged,
             onReplacementTransitionConsumed = viewModel::onReplacementTransitionConsumed,
             onRetry = viewModel::retry,

@@ -16,12 +16,12 @@ class LocalizationResourceTest {
         val resources = resourcesFor(languageTag = "es")
 
         assertEquals(
-            "Elegir dificultad para 4 pares",
-            resources.getString(R.string.menu_choose_generated_difficulty_content_description, "4 pares")
+            "Elegir dificultad para Quick",
+            resources.getString(R.string.menu_choose_generated_difficulty_content_description, "Quick")
         )
         assertEquals(
-            "Cerrar selector de dificultad para 8 pares",
-            resources.getString(R.string.menu_close_generated_difficulty_content_description, "8 pares")
+            "Cerrar selector de dificultad para Clásico",
+            resources.getString(R.string.menu_close_generated_difficulty_content_description, "Clásico")
         )
         assertEquals("Cómo jugar", resources.getString(R.string.menu_tutorial_button))
         assertEquals("Ajustes", resources.getString(R.string.menu_settings_action_content_description))
@@ -31,14 +31,14 @@ class LocalizationResourceTest {
             resources.getString(R.string.generated_challenge_title, "Quick", "Baja")
         )
         assertEquals(
-            "Jugar puzle Quick, 3 pares, dificultad Baja",
-            resources.getString(R.string.menu_play_quick_content_description, "Quick", "3 pares", "Baja")
+            "Jugar puzle de Quick · Baja",
+            resources.getString(R.string.menu_play_generated_challenge_content_description, "Quick · Baja")
         )
-        assertEquals("8 pares", resources.getString(R.string.eight_pairs_screen_title))
+        assertEquals("Clásico", resources.getString(R.string.classic_screen_title))
         assertEquals("Alta", resources.getString(R.string.generated_difficulty_hard))
         assertEquals(
-            "8 pares · Alta",
-            resources.getString(R.string.generated_challenge_title, "8 pares", "Alta")
+            "Clásico · Alta",
+            resources.getString(R.string.generated_challenge_title, "Clásico", "Alta")
         )
         assertEquals("Serie", resources.getString(R.string.strip_content_description))
         assertEquals("Paso 1 de 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))
@@ -92,12 +92,12 @@ class LocalizationResourceTest {
         val resources = resourcesFor(languageTag = "ca")
 
         assertEquals(
-            "Tria la dificultat per a 4 parelles",
-            resources.getString(R.string.menu_choose_generated_difficulty_content_description, "4 parelles")
+            "Tria la dificultat per a Quick",
+            resources.getString(R.string.menu_choose_generated_difficulty_content_description, "Quick")
         )
         assertEquals(
-            "Tanca el selector de dificultat per a 8 parelles",
-            resources.getString(R.string.menu_close_generated_difficulty_content_description, "8 parelles")
+            "Tanca el selector de dificultat per a Clàssic",
+            resources.getString(R.string.menu_close_generated_difficulty_content_description, "Clàssic")
         )
         assertEquals("Com jugar", resources.getString(R.string.menu_tutorial_button))
         assertEquals("Configuració", resources.getString(R.string.menu_settings_action_content_description))
@@ -107,19 +107,14 @@ class LocalizationResourceTest {
             resources.getString(R.string.generated_challenge_title, "Quick", "Baixa")
         )
         assertEquals(
-            "Juga al puzle Quick, 3 parelles, dificultat Baixa",
-            resources.getString(
-                R.string.menu_play_quick_content_description,
-                "Quick",
-                "3 parelles",
-                "Baixa"
-            )
+            "Juga al puzle de Quick · Baixa",
+            resources.getString(R.string.menu_play_generated_challenge_content_description, "Quick · Baixa")
         )
-        assertEquals("8 parelles", resources.getString(R.string.eight_pairs_screen_title))
+        assertEquals("Clàssic", resources.getString(R.string.classic_screen_title))
         assertEquals("Alta", resources.getString(R.string.generated_difficulty_hard))
         assertEquals(
-            "8 parelles · Alta",
-            resources.getString(R.string.generated_challenge_title, "8 parelles", "Alta")
+            "Clàssic · Alta",
+            resources.getString(R.string.generated_challenge_title, "Clàssic", "Alta")
         )
         assertEquals("Sèrie", resources.getString(R.string.strip_content_description))
         assertEquals("Pas 1 de 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))
@@ -173,12 +168,12 @@ class LocalizationResourceTest {
         val resources = resourcesFor(languageTag = "de")
 
         assertEquals(
-            "Choose difficulty for 4 pairs",
-            resources.getString(R.string.menu_choose_generated_difficulty_content_description, "4 pairs")
+            "Choose difficulty for Quick",
+            resources.getString(R.string.menu_choose_generated_difficulty_content_description, "Quick")
         )
         assertEquals(
-            "Close difficulty selector for 8 pairs",
-            resources.getString(R.string.menu_close_generated_difficulty_content_description, "8 pairs")
+            "Close difficulty selector for Classic",
+            resources.getString(R.string.menu_close_generated_difficulty_content_description, "Classic")
         )
         assertEquals("How to play", resources.getString(R.string.menu_tutorial_button))
         assertEquals("Settings", resources.getString(R.string.menu_settings_action_content_description))
@@ -188,14 +183,14 @@ class LocalizationResourceTest {
             resources.getString(R.string.generated_challenge_title, "Quick", "Low")
         )
         assertEquals(
-            "Play Quick puzzle, 3 pairs, Low difficulty",
-            resources.getString(R.string.menu_play_quick_content_description, "Quick", "3 pairs", "Low")
+            "Play Quick · Low puzzle",
+            resources.getString(R.string.menu_play_generated_challenge_content_description, "Quick · Low")
         )
-        assertEquals("8 pairs", resources.getString(R.string.eight_pairs_screen_title))
+        assertEquals("Classic", resources.getString(R.string.classic_screen_title))
         assertEquals("Hard", resources.getString(R.string.generated_difficulty_hard))
         assertEquals(
-            "8 pairs · Hard",
-            resources.getString(R.string.generated_challenge_title, "8 pairs", "Hard")
+            "Classic · Hard",
+            resources.getString(R.string.generated_challenge_title, "Classic", "Hard")
         )
         assertEquals("Strip", resources.getString(R.string.strip_content_description))
         assertEquals("Step 1 of 2", resources.getString(R.string.tutorial_step_indicator, 1, 2))

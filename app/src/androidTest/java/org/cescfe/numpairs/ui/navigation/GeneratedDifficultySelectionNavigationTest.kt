@@ -31,6 +31,7 @@ import org.cescfe.numpairs.domain.puzzle.model.Tile
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.generated.GeneratedChallenge
 import org.cescfe.numpairs.feature.generated.GeneratedModes
+import org.cescfe.numpairs.feature.generated.GeneratedPlayChallengeSelector
 import org.cescfe.numpairs.feature.generated.GeneratedPlayOptions
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
@@ -54,17 +55,17 @@ class GeneratedDifficultySelectionNavigationTest {
         val fixture = setContent()
 
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
             .assertTextEquals(challengeName(GeneratedModes.FOUR_PAIRS_LOW))
-        composeTestRule.onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON).performClick()
+        composeTestRule.onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON).performClick()
         composeTestRule.onNodeWithTag(optionTag(GeneratedModes.FOUR_PAIRS_LOW)).assertIsSelected()
         composeTestRule.onNodeWithTag(optionTag(GeneratedModes.FOUR_PAIRS_MEDIUM)).assertIsNotSelected()
-        composeTestRule.onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON).performClick()
+        composeTestRule.onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON).performClick()
 
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.CLASSIC_BUTTON)
             .assertTextEquals(challengeName(GeneratedModes.EIGHT_PAIRS_MEDIUM))
-        composeTestRule.onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_BUTTON).performClick()
+        composeTestRule.onNodeWithTag(MenuScreenTestTags.CLASSIC_DIFFICULTY_BUTTON).performClick()
         composeTestRule.onNodeWithTag(optionTag(GeneratedModes.EIGHT_PAIRS_MEDIUM)).assertIsSelected()
         composeTestRule.onNodeWithTag(optionTag(GeneratedModes.EIGHT_PAIRS_HARD)).assertIsNotSelected()
 
@@ -83,20 +84,20 @@ class GeneratedDifficultySelectionNavigationTest {
     }
 
     @Test
-    fun explicit_four_pairs_medium_selection_persists_and_launches_that_exact_challenge() {
+    fun explicit_quick_medium_selection_persists_and_launches_the_weighted_challenge() {
         val fixture = setContent()
 
-        composeTestRule.onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON).performClick()
+        composeTestRule.onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON).performClick()
         composeTestRule
             .onNodeWithTag(optionTag(GeneratedModes.FOUR_PAIRS_MEDIUM))
             .performClick()
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
             .assertTextEquals(challengeName(GeneratedModes.FOUR_PAIRS_MEDIUM))
         composeTestRule.runOnIdle {
             assertTrue(fixture.generatedChallenges.isEmpty())
         }
-        composeTestRule.onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON).performClick()
+        composeTestRule.onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON).performClick()
 
         composeTestRule.onNodeWithTag(GameScreenTestTags.SCREEN).assertIsDisplayed()
         composeTestRule.onNodeWithText(challengeName(GeneratedModes.FOUR_PAIRS_MEDIUM)).assertIsDisplayed()
@@ -114,7 +115,7 @@ class GeneratedDifficultySelectionNavigationTest {
         }
 
         composeTestRule.onNodeWithTag(GameScreenTestTags.BACK_BUTTON).performClick()
-        composeTestRule.onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_DIFFICULTY_BUTTON).performClick()
+        composeTestRule.onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON).performClick()
         composeTestRule.onNodeWithTag(optionTag(GeneratedModes.FOUR_PAIRS_MEDIUM)).assertIsSelected()
         composeTestRule.runOnIdle {
             assertEquals(1, fixture.difficultyRepository.explicitSelections.size)
@@ -122,15 +123,15 @@ class GeneratedDifficultySelectionNavigationTest {
     }
 
     @Test
-    fun eight_pairs_hard_selection_launches_and_stores_the_hard_profile() {
+    fun classic_hard_selection_launches_and_stores_the_hard_profile() {
         val fixture = setContent()
 
-        composeTestRule.onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_DIFFICULTY_BUTTON).performClick()
+        composeTestRule.onNodeWithTag(MenuScreenTestTags.CLASSIC_DIFFICULTY_BUTTON).performClick()
         composeTestRule
             .onNodeWithTag(optionTag(GeneratedModes.EIGHT_PAIRS_HARD))
             .performClick()
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.CLASSIC_BUTTON)
             .assertTextEquals(challengeName(GeneratedModes.EIGHT_PAIRS_HARD))
             .performClick()
 
@@ -157,10 +158,10 @@ class GeneratedDifficultySelectionNavigationTest {
         val fixture = setContent(difficultyRepository = difficultyRepository)
 
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.EIGHT_PAIRS_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.CLASSIC_BUTTON)
             .assertTextEquals(challengeName(GeneratedModes.EIGHT_PAIRS_HARD))
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.FOUR_PAIRS_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
             .assertTextEquals(challengeName(GeneratedModes.FOUR_PAIRS_MEDIUM))
             .performClick()
 
@@ -224,6 +225,10 @@ class GeneratedDifficultySelectionNavigationTest {
                     personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
                     generatedChallengeCatalog = GeneratedModes.catalog,
+                    generatedPlayChallengeSelector = GeneratedPlayChallengeSelector(
+                        challengeCatalog = GeneratedModes.catalog,
+                        quickBucketSource = { 99 }
+                    ),
                     generatedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory { challenge ->
                         GeneratedPuzzleGenerationUseCase { request ->
                             fixture.generatedChallenges += challenge
@@ -244,16 +249,22 @@ class GeneratedDifficultySelectionNavigationTest {
     }
 
     private fun optionTag(challenge: GeneratedChallenge): String = MenuScreenTestTags.difficultyOption(
-        GeneratedDifficultyMenuOptionId(challenge.id.value)
+        GeneratedDifficultyMenuOptionId(
+            when (challenge.difficulty) {
+                DifficultyTier.LOW -> "low"
+                DifficultyTier.MEDIUM -> "medium"
+                DifficultyTier.HARD -> "hard"
+            }
+        )
     )
 
     private fun challengeName(challenge: GeneratedChallenge): String = string(
         R.string.generated_challenge_title,
         string(
-            if (challenge.modeId == GeneratedModes.FOUR_PAIRS.id) {
-                R.string.four_pairs_screen_title
+            if (challenge.modeId == GeneratedModes.EIGHT_PAIRS.id) {
+                R.string.classic_screen_title
             } else {
-                R.string.eight_pairs_screen_title
+                R.string.quick_screen_title
             }
         ),
         string(
