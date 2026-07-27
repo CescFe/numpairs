@@ -21,7 +21,14 @@ class GeneratedPuzzleProfileContractTest {
     @Test
     fun every_registered_profile_satisfies_the_shared_generation_contract() {
         assertEquals(
-            listOf("3-pairs-low", "4-pairs-low", "4-pairs-medium", "8-pairs-medium", "8-pairs-hard"),
+            listOf(
+                "3-pairs-low",
+                "3-pairs-medium",
+                "4-pairs-low",
+                "4-pairs-medium",
+                "8-pairs-medium",
+                "8-pairs-hard"
+            ),
             GeneratedPuzzleProfiles.ALL.map { profile -> profile.id.value }
         )
 

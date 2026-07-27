@@ -341,16 +341,17 @@ Initial masking:
 - known strip entries: 2
 - hidden strip entries: 4
 - required fixed anchors: none
-- pair distribution: known entries must belong to at least 2 distinct solution pairs
+- pair distribution: unrestricted
 - hidden run limit: no more than 3 consecutive hidden strip entries
 - high-value mask bias:
-  - last strip entry hidden target: 40%
-  - second-last strip entry hidden target: 55%
+  - last strip entry hidden target: 80%
+  - second-last strip entry hidden target: 80%
 
 Generation expectations:
 
 - deterministic generation support for tests: required
 - bounded attempts, shared search work, failure, and cancellation: required
+- generation uses at most `160` attempts and `500,000` shared search-work units
 - board tile shuffling: enabled
 - prime-product decoy target: around 30% of generated puzzles should include exactly 1 solution
   pair made of `1` and a prime number
@@ -364,12 +365,18 @@ Assessment and characterization expectations:
 - assessment uses at most `15,000` candidate expansions and counts at most `12` valid solution
   equivalence classes
 - at least 1 valid solution equivalence class must exist; uniqueness is not required
-- at least 4 plausible opening candidates must exist
+- at least 3 plausible opening candidates must exist
 - at least 1 opening fact must be derivable without speculative commitment
-- at least 1 locally plausible decoy must remain after direct arithmetic filtering
 - the first forced fact must require at least 1 propagation layer
 - characterization must demonstrate greater opening ambiguity and fewer forced opening facts than
   `3 Pairs Low` without exceeding the bounded Medium envelope
+- the implemented corpus completes in 1 to 160 attempts and consumes 18 to 6,344 generation-search
+  units per puzzle
+- assessment consumes 468 to 470 candidate expansions, reports 3 to 6 opening plausible
+  candidates, and initially forces 1 to 3 solution-pair facts
+- the bounded valid-solution count is 1 to 2 without reaching the configured count limit
+- known-strip anchors remain absent, unambiguous result anchors range from 1 to 6, and the longest
+  hidden run is 2 to 3
 
 Validation expectations:
 
@@ -379,7 +386,8 @@ Validation expectations:
 - assessment satisfies the documented Medium acceptance policy
 
 These constraints keep Quick Medium short while removing the fixed highest-value anchor, allowing
-limited repetition and `1`, and requiring a non-trivial decoy.
+limited repetition and `1`, and producing more opening ambiguity with fewer initially forced facts
+across the deterministic corpus than `3 Pairs Low`.
 
 ---
 

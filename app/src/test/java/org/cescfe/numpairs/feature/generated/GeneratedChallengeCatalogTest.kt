@@ -27,6 +27,7 @@ class GeneratedChallengeCatalogTest {
             DifficultyTier.entries
         )
         assertEquals(DifficultyTier.LOW, GeneratedPuzzleProfiles.THREE_PAIRS_LOW.difficulty)
+        assertEquals(DifficultyTier.MEDIUM, GeneratedPuzzleProfiles.THREE_PAIRS_MEDIUM.difficulty)
         assertEquals(DifficultyTier.LOW, GeneratedPuzzleProfiles.FOUR_PAIRS_LOW.difficulty)
         assertEquals(DifficultyTier.MEDIUM, GeneratedPuzzleProfiles.FOUR_PAIRS_MEDIUM.difficulty)
         assertEquals(DifficultyTier.MEDIUM, GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM.difficulty)
@@ -40,6 +41,8 @@ class GeneratedChallengeCatalogTest {
         assertEquals("eight-pairs", GeneratedModes.EIGHT_PAIRS.id.value)
         assertEquals("three-pairs-low", GeneratedModes.THREE_PAIRS_LOW.id.value)
         assertEquals("3-pairs-low", GeneratedModes.THREE_PAIRS_LOW.profile.id.value)
+        assertEquals("three-pairs-medium", GeneratedModes.THREE_PAIRS_MEDIUM.id.value)
+        assertEquals("3-pairs-medium", GeneratedModes.THREE_PAIRS_MEDIUM.profile.id.value)
         assertEquals("4-pairs-low", GeneratedModes.FOUR_PAIRS_LOW.profile.id.value)
         assertEquals("4-pairs-medium", GeneratedModes.FOUR_PAIRS_MEDIUM.profile.id.value)
         assertEquals("8-pairs-medium", GeneratedModes.EIGHT_PAIRS_MEDIUM.profile.id.value)
@@ -47,6 +50,7 @@ class GeneratedChallengeCatalogTest {
         assertEquals(
             listOf(
                 GeneratedModes.THREE_PAIRS_LOW,
+                GeneratedModes.THREE_PAIRS_MEDIUM,
                 GeneratedModes.FOUR_PAIRS_LOW,
                 GeneratedModes.FOUR_PAIRS_MEDIUM,
                 GeneratedModes.EIGHT_PAIRS_MEDIUM,
@@ -58,13 +62,23 @@ class GeneratedChallengeCatalogTest {
             listOf(GeneratedModes.THREE_PAIRS, GeneratedModes.FOUR_PAIRS, GeneratedModes.EIGHT_PAIRS),
             GeneratedModes.catalog.all
         )
-        assertEquals(listOf(GeneratedModes.THREE_PAIRS_LOW), GeneratedModes.THREE_PAIRS.challenges)
+        assertEquals(
+            listOf(GeneratedModes.THREE_PAIRS_LOW, GeneratedModes.THREE_PAIRS_MEDIUM),
+            GeneratedModes.THREE_PAIRS.challenges
+        )
         assertEquals(3, GeneratedModes.THREE_PAIRS.size.pairCount)
         assertSame(
             GeneratedModes.THREE_PAIRS_LOW,
             GeneratedModes.catalog.resolveChallenge(
                 modeId = GeneratedModes.THREE_PAIRS.id,
                 difficulty = DifficultyTier.LOW
+            )
+        )
+        assertSame(
+            GeneratedModes.THREE_PAIRS_MEDIUM,
+            GeneratedModes.catalog.resolveChallenge(
+                modeId = GeneratedModes.THREE_PAIRS.id,
+                difficulty = DifficultyTier.MEDIUM
             )
         )
         assertSame(
@@ -233,12 +247,6 @@ class GeneratedChallengeCatalogTest {
     fun unsupported_mode_difficulty_profile_and_challenge_resolutions_are_rejected() {
         assertThrows(IllegalArgumentException::class.java) {
             GeneratedModes.catalog.resolveChallenge(GeneratedChallengeId("unknown"))
-        }
-        assertThrows(IllegalArgumentException::class.java) {
-            GeneratedModes.catalog.resolveChallenge(
-                modeId = GeneratedModes.THREE_PAIRS.id,
-                difficulty = DifficultyTier.MEDIUM
-            )
         }
         assertThrows(IllegalArgumentException::class.java) {
             GeneratedModes.catalog.resolveChallenge(

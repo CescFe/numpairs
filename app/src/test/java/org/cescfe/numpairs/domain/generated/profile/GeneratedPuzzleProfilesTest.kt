@@ -53,6 +53,68 @@ class GeneratedPuzzleProfilesTest {
     }
 
     @Test
+    fun three_pairs_medium_profile_matches_documented_rules() {
+        val profile = GeneratedPuzzleProfiles.THREE_PAIRS_MEDIUM
+
+        assertEquals(GeneratedPuzzleProfileId("3-pairs-medium"), profile.id)
+        assertEquals(DifficultyTier.MEDIUM, profile.difficulty)
+        assertEquals(3, profile.size.pairCount)
+        assertEquals(6, profile.size.stripEntryCount)
+        assertEquals(6, profile.size.boardTileCount)
+
+        assertEquals(1..30, profile.stripValuePolicy.valueRange)
+        assertEquals(2, profile.stripValuePolicy.maxOccurrencesPerValue)
+        assertEquals(1, profile.stripValuePolicy.maxRepeatedValueGroupCount)
+        assertTrue(profile.stripValuePolicy.allowsOne)
+
+        assertEquals(225, profile.resultConstraints.maxMultiplicationResult)
+        assertFalse(profile.resultConstraints.allowsDuplicateBoardResults)
+        val anchorMix = requireNotNull(profile.resultConstraints.productAnchorMix)
+        assertEquals(60, anchorMix.productResultGreaterThan)
+        assertEquals(1..1, anchorMix.countRange)
+
+        assertEquals(2..2, profile.initialStripMaskPolicy.knownEntryCountRange)
+        assertEquals(4..4, profile.hiddenEntryCountRange)
+        assertTrue(profile.initialStripMaskPolicy.requiredAnchors.isEmpty())
+        assertEquals(
+            StripKnownEntryDistributionPolicy.Unrestricted,
+            profile.initialStripMaskPolicy.distributionPolicy
+        )
+        assertEquals(3, profile.initialStripMaskPolicy.maxConsecutiveHiddenEntries)
+
+        assertEquals(
+            listOf(
+                HighValueMaskTarget(1, ProbabilityPercent(80)),
+                HighValueMaskTarget(2, ProbabilityPercent(80))
+            ),
+            profile.varietyPolicy.highValueMaskTargets
+        )
+        val decoyTarget = requireNotNull(profile.varietyPolicy.primeProductDecoyTarget)
+        assertEquals(ProbabilityPercent(30), decoyTarget.targetPuzzlePercent)
+        assertEquals(1, decoyTarget.targetPairCount)
+        assertEquals(PrimeProductDecoyPairPattern.ONE_AND_PRIME, decoyTarget.pairPattern)
+        assertEquals(
+            RepeatedValueGroupTarget(
+                targetPuzzlePercent = ProbabilityPercent(35),
+                targetGroupCount = 1
+            ),
+            profile.varietyPolicy.repeatedValueGroupTarget
+        )
+
+        assertTrue(profile.generationPolicy.isBoardTileShufflingEnabled)
+        assertEquals(160, profile.generationPolicy.maxAttempts)
+        assertEquals(500_000, profile.generationPolicy.maxSearchWork)
+        val assessmentPolicy = requireNotNull(profile.difficultyAssessmentPolicy)
+        assertEquals(15_000, assessmentPolicy.executionPolicy.maxCandidateExpansions)
+        assertEquals(12, assessmentPolicy.executionPolicy.validSolutionCountLimit)
+        assertEquals(3, assessmentPolicy.minimumInitialPlausibleCandidateCount)
+        assertEquals(1, assessmentPolicy.minimumInitialForcedDeductionCount)
+        assertEquals(1, assessmentPolicy.minimumFirstForcedDeductionDepth)
+        assertEquals(0, assessmentPolicy.minimumPlausibleDecoyCount)
+        assertEquals(1, assessmentPolicy.minimumValidSolutionCount)
+    }
+
+    @Test
     fun four_pairs_low_profile_matches_documented_rules() {
         val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
 

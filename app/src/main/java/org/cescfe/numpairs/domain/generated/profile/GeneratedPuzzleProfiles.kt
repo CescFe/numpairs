@@ -5,12 +5,20 @@ import org.cescfe.numpairs.domain.generated.assessment.GeneratedPuzzleDifficulty
 
 object GeneratedPuzzleProfiles {
     val THREE_PAIRS_LOW: GeneratedPuzzleProfile = threePairsLow()
+    val THREE_PAIRS_MEDIUM: GeneratedPuzzleProfile = threePairsMedium()
     val FOUR_PAIRS_LOW: GeneratedPuzzleProfile = fourPairsLow()
     val FOUR_PAIRS_MEDIUM: GeneratedPuzzleProfile = fourPairsMedium()
     val EIGHT_PAIRS_MEDIUM: GeneratedPuzzleProfile = eightPairsMedium()
     val EIGHT_PAIRS_HARD: GeneratedPuzzleProfile = eightPairsHard()
     val ALL: List<GeneratedPuzzleProfile> =
-        listOf(THREE_PAIRS_LOW, FOUR_PAIRS_LOW, FOUR_PAIRS_MEDIUM, EIGHT_PAIRS_MEDIUM, EIGHT_PAIRS_HARD)
+        listOf(
+            THREE_PAIRS_LOW,
+            THREE_PAIRS_MEDIUM,
+            FOUR_PAIRS_LOW,
+            FOUR_PAIRS_MEDIUM,
+            EIGHT_PAIRS_MEDIUM,
+            EIGHT_PAIRS_HARD
+        )
 
     private fun threePairsLow(): GeneratedPuzzleProfile {
         val size = GeneratedPuzzleSize(pairCount = 3)
@@ -44,6 +52,74 @@ object GeneratedPuzzleProfiles {
                     ),
                     minimumInitialPlausibleCandidateCount = 3,
                     minimumInitialForcedDeductionCount = 3,
+                    minimumFirstForcedDeductionDepth = 1,
+                    minimumPlausibleDecoyCount = 0,
+                    minimumValidSolutionCount = 1
+                )
+            )
+        ).getOrThrow()
+    }
+
+    private fun threePairsMedium(): GeneratedPuzzleProfile {
+        val size = GeneratedPuzzleSize(pairCount = 3)
+
+        return GeneratedPuzzleProfile.create(
+            definition = GeneratedPuzzleProfileDefinition(
+                id = GeneratedPuzzleProfileId("3-pairs-medium"),
+                difficulty = DifficultyTier.MEDIUM,
+                size = size,
+                stripValuePolicy = StripValuePolicy(
+                    valueRange = 1..30,
+                    maxOccurrencesPerValue = 2,
+                    maxRepeatedValueGroupCount = 1
+                ),
+                resultConstraints = ResultConstraints(
+                    maxMultiplicationResult = 225,
+                    allowsDuplicateBoardResults = false,
+                    productAnchorMix = ProductAnchorMix(
+                        productResultGreaterThan = 60,
+                        countRange = 1..1
+                    )
+                ),
+                initialStripMaskPolicy = InitialStripMaskPolicy(
+                    knownEntryCountRange = 2..2,
+                    requiredAnchors = emptySet(),
+                    distributionPolicy = StripKnownEntryDistributionPolicy.Unrestricted,
+                    maxConsecutiveHiddenEntries = 3
+                ),
+                generationPolicy = GenerationPolicy(
+                    isBoardTileShufflingEnabled = true,
+                    maxAttempts = 160,
+                    maxSearchWork = 500_000
+                ),
+                varietyPolicy = GeneratedPuzzleVarietyPolicy(
+                    highValueMaskTargets = listOf(
+                        HighValueMaskTarget(
+                            rankFromHighest = 1,
+                            targetHiddenProbability = ProbabilityPercent(80)
+                        ),
+                        HighValueMaskTarget(
+                            rankFromHighest = 2,
+                            targetHiddenProbability = ProbabilityPercent(80)
+                        )
+                    ),
+                    primeProductDecoyTarget = PrimeProductDecoyTarget(
+                        targetPuzzlePercent = ProbabilityPercent(30),
+                        targetPairCount = 1,
+                        pairPattern = PrimeProductDecoyPairPattern.ONE_AND_PRIME
+                    ),
+                    repeatedValueGroupTarget = RepeatedValueGroupTarget(
+                        targetPuzzlePercent = ProbabilityPercent(35),
+                        targetGroupCount = 1
+                    )
+                ),
+                difficultyAssessmentPolicy = GeneratedPuzzleDifficultyAssessmentPolicy(
+                    executionPolicy = GeneratedPuzzleDifficultyAssessmentExecutionPolicy(
+                        maxCandidateExpansions = 15_000,
+                        validSolutionCountLimit = 12
+                    ),
+                    minimumInitialPlausibleCandidateCount = 3,
+                    minimumInitialForcedDeductionCount = 1,
                     minimumFirstForcedDeductionDepth = 1,
                     minimumPlausibleDecoyCount = 0,
                     minimumValidSolutionCount = 1
