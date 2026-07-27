@@ -100,6 +100,8 @@ class FourPairsModeTest {
             )
             .performClick()
 
+        pressBack()
+
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.STRIP)
             .performScrollTo()

@@ -91,6 +91,34 @@ class GameViewModelOperatorAndTileStateTest {
     }
 
     @Test
+    fun confirming_the_last_operator_completes_the_tile_without_opening_another_dialog() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
+        viewModel.onTileRightOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 4)
+        viewModel.onTileOperatorTapped(index = 0)
+        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.ADDITION)
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals(
+            TileUiState(
+                "6",
+                "+",
+                "25",
+                "223",
+                visualState = TileVisualState.INCORRECT,
+                canReset = true
+            ),
+            uiState.tiles.first()
+        )
+        assertNull(uiState.tileOperandSelectionDialog)
+        assertNull(uiState.tileOperatorSelectionDialog)
+    }
+
+    @Test
     fun completing_a_tile_with_an_incorrect_expression_marks_it_invalid_without_crashing() {
         val viewModel = GameViewModel()
 

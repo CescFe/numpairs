@@ -309,16 +309,11 @@ class AppNavigationLearningFlowTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperandOption(leftStripEntryId), useUnmergedTree = true)
             .performClick()
-        chooseTileOperand(tileIndex = tileIndex, isLeftOperand = false, stripEntryId = rightStripEntryId)
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(rightStripEntryId), useUnmergedTree = true)
-            .performClick()
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperator(tileIndex), useUnmergedTree = true)
-            .performScrollTo()
-            .performClick()
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperatorOption(operator), useUnmergedTree = true)
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperandOption(rightStripEntryId), useUnmergedTree = true)
             .performClick()
     }
 

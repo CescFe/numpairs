@@ -10,7 +10,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class GameScreenOperandSelectorTest : GameScreenTestHost() {
     @Test
-    fun selectingAnOperandFromAHiddenSlotUpdatesTheTileAndClosesTheSheet() {
+    fun selectingTheFirstOperandOnAnEmptyTileUpdatesTheTileAndOpensTheOperatorSelector() {
         screen
             .scrollToBoard()
             .tapTileLeftOperand(0)
@@ -25,6 +25,45 @@ class GameScreenOperandSelectorTest : GameScreenTestHost() {
                 "6"
             )
             .assertOperandSelectorHidden()
+            .assertOperatorSelectorDisplayed()
+    }
+
+    @Test
+    fun selectingTheOperatorAfterTheFirstOperandOpensTheRemainingOperandSelector() {
+        screen
+            .scrollToBoard()
+            .tapTileLeftOperand(0)
+            .tapOperandOption(entryId = 2)
+            .tapOperatorOption(Operator.ADDITION)
+            .assertOperatorSelectorHidden()
+            .assertOperandSelectorDisplayed()
+            .tapOperandOption(entryId = 4)
+            .assertRightOperandDescription(
+                0,
+                R.string.tile_right_operand_content_description,
+                "25"
+            )
+            .assertOperandSelectorHidden()
+            .assertOperatorSelectorHidden()
+    }
+
+    @Test
+    fun selectingTheFirstOperandWhenTheOperatorIsKnownOpensTheOtherOperandSelector() {
+        screen
+            .scrollToBoard()
+            .tapTileOperator(0)
+            .tapOperatorOption(Operator.ADDITION)
+            .tapTileRightOperand(0)
+            .tapOperandOption(entryId = 2)
+            .assertOperandSelectorDisplayed()
+            .tapOperandOption(entryId = 4)
+            .assertLeftOperandDescription(
+                0,
+                R.string.tile_left_operand_content_description,
+                "25"
+            )
+            .assertOperandSelectorHidden()
+            .assertOperatorSelectorHidden()
     }
 
     @Test
@@ -81,6 +120,7 @@ class GameScreenOperandSelectorTest : GameScreenTestHost() {
             .pressBack()
             .tapTileOperator(0)
             .tapOperatorOption(Operator.ADDITION)
+            .pressBack()
             .tapTileLeftOperand(1)
             .assertOperandUsageHintState(
                 entryId = 2,
@@ -210,10 +250,12 @@ class GameScreenOperandSelectorTest : GameScreenTestHost() {
             .tapTileLeftOperand(tileIndex)
             .tapOperandOption(entryId = 2)
 
-        if (operator != null) {
+        if (operator == null) {
+            screen.pressBack()
+        } else {
             screen
-                .tapTileOperator(tileIndex)
                 .tapOperatorOption(operator)
+                .pressBack()
         }
     }
 }

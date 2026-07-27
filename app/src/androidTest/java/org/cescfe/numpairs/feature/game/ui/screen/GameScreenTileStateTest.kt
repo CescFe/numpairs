@@ -16,6 +16,7 @@ class GameScreenTileStateTest : GameScreenTestHost() {
             .tapTileLeftOperand(0)
             .tapOperandOption(entryId = 2)
             .assertResetVisible(tileIndex = 0)
+            .pressBack()
             .tapTileReset(0)
             .assertLeftOperandDescription(
                 0,
@@ -55,9 +56,7 @@ class GameScreenTileStateTest : GameScreenTestHost() {
             .scrollToBoard()
             .tapTileLeftOperand(0)
             .tapOperandOption(entryId = 1)
-            .tapTileOperator(0)
             .tapOperatorOption(Operator.MULTIPLICATION)
-            .tapTileRightOperand(0)
             .tapOperandOption(entryId = 7)
     }
 }

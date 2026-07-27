@@ -79,9 +79,7 @@ class CorrectTileMotionTest {
         assertNoTileFeedback(tileIndex = 0)
         game.tapTileLeftOperand(index = 0)
             .tapOperandOption(entryId = 0)
-            .tapTileOperator(index = 0)
             .tapOperatorOption(Operator.ADDITION)
-            .tapTileRightOperand(index = 0)
             .tapOperandOption(entryId = 1)
         assertTileFeedback(tileIndex = 0, feedbackId = 2L)
 
