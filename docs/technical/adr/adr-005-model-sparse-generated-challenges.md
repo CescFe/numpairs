@@ -115,11 +115,11 @@ identity and avoid persisting derivable size or difficulty values redundantly.
 
 ## Later Application
 
-The v10 product contract applies this decision to Quick. Quick is the player-facing name for a new
-`3 Pairs` generated mode whose only configured challenge is `3 Pairs Low`. The catalog therefore
-adds one size family and one explicit challenge without manufacturing `3 Pairs Medium` or
-`3 Pairs Hard`.
+The v10 product contract applied this decision by presenting the new `3 Pairs Low` challenge as
+Quick. At that milestone the 3 Pairs mode exposed one explicit challenge without manufacturing
+unsupported Medium or Hard combinations.
 
-Quick does not require a remembered difficulty preference while it exposes one challenge, but it
-uses the same mode, profile, challenge, generation, and normal generated-session identities as the
-other generated modes.
+The v11 product contract adds one calibrated `3 Pairs Medium` challenge. It also moves Quick from
+a presentation alias for 3 Pairs to a Generated Play Option that can select exact 3 Pairs and
+4 Pairs challenges. The size-based mode and sparse catalog decision in this ADR remains unchanged;
+the player-facing selection boundary is recorded separately in ADR-007.

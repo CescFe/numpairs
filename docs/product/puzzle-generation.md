@@ -3,11 +3,11 @@
 ## Document Status
 
 - Status: product reference for generated puzzle construction
-- Implemented profiles: generated `3 Pairs Low`, `4 Pairs Low`, `4 Pairs Medium`,
+- Implemented v10 profiles: generated `3 Pairs Low`, `4 Pairs Low`, `4 Pairs Medium`,
   `8 Pairs Medium`, and `8 Pairs Hard`
-- Implemented v10 challenge registration: generated `3 Pairs Low` is the only Quick challenge
-- Implemented v10 generated presentation: Quick uses the shared Low learning route
-- Implemented v10 Menu exposure: direct Quick entry through the normal generated-session flow
+- v11 target profile: calibrated generated `3 Pairs Medium`
+- v11 play-option contract: Quick selects matching 3 Pairs and 4 Pairs challenges with a 35/65
+  split; Classic resolves the matching 8 Pairs challenge
 - Implemented v10 Daily Challenge: versioned identity, `4 Pairs Low` recipe resolution,
   deterministic four-candidate seed schedule, device-local date capture, ordered candidate
   execution, independent persistence, gameplay, calendar, completion, and sharing
@@ -17,9 +17,11 @@
   - `docs/product/prd/prd-v7.md`
   - `docs/product/prd/prd-v8.md`
   - `docs/product/prd/prd-v10.md`
+  - `docs/product/prd/prd-v11.md`
   - `docs/technical/generated-session-persistence.md`
   - `docs/technical/adr/adr-005-model-sparse-generated-challenges.md`
   - `docs/technical/adr/adr-006-model-daily-challenge-as-versioned-local-cadence.md`
+  - `docs/technical/adr/adr-007-separate-play-options-from-generated-modes.md`
   - `docs/technical/daily-challenge-persistence.md`
   - `docs/game-rules.md`
   - `docs/ubiquitous-language.md`
@@ -59,17 +61,21 @@ assessment policy, and validation expectations for one challenge. Absolute profi
 calibrated per challenge: Medium has shared product meaning, but `4 Pairs Medium` does not copy raw
 sixteen-entry counts from `8 Pairs Medium`.
 
-The implemented generated-challenge catalog is sparse:
+The v11 generated-challenge catalog is sparse:
 
 | Generated mode | Low | Medium | Hard |
 | --- | --- | --- | --- |
-| `Quick` (`3 Pairs`) | Supported | Unsupported | Unsupported |
+| `3 Pairs` | Supported | Supported | Unsupported |
 | `4 Pairs` | Supported | Supported | Unsupported |
 | `8 Pairs` | Unsupported | Supported | Supported |
 
 Unsupported combinations are absent rather than synthesized. The durable configuration decision
 is recorded in
 [ADR-005](../technical/adr/adr-005-model-sparse-generated-challenges.md).
+
+Quick and Classic are player-facing Generated Play Options over this exact catalog, not generated
+modes. Their selection boundary is recorded in
+[ADR-007](../technical/adr/adr-007-separate-play-options-from-generated-modes.md).
 
 Profile definitions are not usable directly. They must be created through the generated-profile factory, which derives board, strip, and hidden-entry counts from puzzle size and returns either a validated profile or a non-empty set of typed compatibility violations.
 
@@ -216,17 +222,13 @@ uses the separate versioned aggregate documented in
 `docs/technical/daily-challenge-persistence.md`; it does not occupy or mutate the normal generated
 session slot.
 
-### Quick / `3 Pairs Low`
+### `3 Pairs Low`
 
 Status: generated profile, challenge registration, shared learning presentation, and direct Menu
 exposure implemented.
 
-Player-facing identity:
-
-- generated mode name: `Quick`
-- stable generated size family: `3 Pairs`
-- supported difficulty: `Low`
-- difficulty selector: absent while Low is the only supported Quick challenge
+v11 Quick Low selects this exact challenge for 35% of confirmed new-puzzle requests. The stable
+generated size family remains `3 Pairs`.
 
 Shape:
 
@@ -302,6 +304,82 @@ Solving and learning implications:
 
 These constraints target a brief first generated challenge without making Quick a one-step
 demonstration or a separate ruleset.
+
+---
+
+### `3 Pairs Medium`
+
+Status: v11 target profile.
+
+v11 Quick Medium selects this exact challenge for 35% of confirmed new-puzzle requests.
+
+Shape:
+
+- 3 solution pairs
+- 6 strip entries
+- 6 board tiles
+
+Strip values:
+
+- range: `1..30`
+- occurrence limit: no value may appear more than twice
+- repeated-value groups: at most 1 distinct value may repeat
+- repeated-value population target: around 35% of generated puzzles should contain exactly 1
+  repeated-value group
+- `1`: allowed
+
+Result constraints:
+
+- multiplication result limit: `225`
+- board result duplicates: not allowed
+- product anchor mix: exactly 1 multiplication result should be greater than `60`, the maximum
+  sum of two allowed strip values
+
+Initial masking:
+
+- tile expressions: all hidden
+- known strip entries: 2
+- hidden strip entries: 4
+- required fixed anchors: none
+- pair distribution: known entries must belong to at least 2 distinct solution pairs
+- hidden run limit: no more than 3 consecutive hidden strip entries
+- high-value mask bias:
+  - last strip entry hidden target: 40%
+  - second-last strip entry hidden target: 55%
+
+Generation expectations:
+
+- deterministic generation support for tests: required
+- bounded attempts, shared search work, failure, and cancellation: required
+- board tile shuffling: enabled
+- prime-product decoy target: around 30% of generated puzzles should include exactly 1 solution
+  pair made of `1` and a prime number
+- shared population-variety semantics apply to repetition, high-value masking, and prime-product
+  decoys
+- deterministic corpus `1..500` must demonstrate reliable generation within the documented
+  `3 Pairs Medium` execution envelope
+
+Assessment and characterization expectations:
+
+- assessment uses at most `15,000` candidate expansions and counts at most `12` valid solution
+  equivalence classes
+- at least 1 valid solution equivalence class must exist; uniqueness is not required
+- at least 4 plausible opening candidates must exist
+- at least 1 opening fact must be derivable without speculative commitment
+- at least 1 locally plausible decoy must remain after direct arithmetic filtering
+- the first forced fact must require at least 1 propagation layer
+- characterization must demonstrate greater opening ambiguity and fewer forced opening facts than
+  `3 Pairs Low` without exceeding the bounded Medium envelope
+
+Validation expectations:
+
+- the solved puzzle satisfies all `3 Pairs Medium` value and result constraints
+- the initial puzzle follows the documented masking policy
+- the solved puzzle is accepted by shared NumPairs completion validation
+- assessment satisfies the documented Medium acceptance policy
+
+These constraints keep Quick Medium short while removing the fixed highest-value anchor, allowing
+limited repetition and `1`, and requiring a non-trivial decoy.
 
 ---
 
@@ -579,10 +657,13 @@ consistency validation or their selected profile's assessment acceptance policy.
 - `docs/product/prd/prd-v7.md` owns the reliable-session and replay-control product contract.
 - `docs/product/prd/prd-v8.md` owns the difficulty-selection and challenge-expansion product contract.
 - `docs/product/prd/prd-v10.md` owns the Quick and Daily Challenge product contract.
+- `docs/product/prd/prd-v11.md` owns the Quick and Classic play-option contract.
 - `docs/technical/generated-session-persistence.md` owns the implemented session storage and coordination boundary.
 - `docs/technical/daily-challenge-persistence.md` owns the implemented Daily aggregate storage and
   coordination boundary.
 - `docs/technical/adr/adr-005-model-sparse-generated-challenges.md` owns the durable sparse challenge-catalog decision.
 - `docs/technical/adr/adr-006-model-daily-challenge-as-versioned-local-cadence.md` owns the durable
   Daily identity, recipe, and separate aggregate decision.
+- `docs/technical/adr/adr-007-separate-play-options-from-generated-modes.md` owns player-facing
+  grouping and weighted challenge selection.
 - `docs/ubiquitous-language.md` owns shared terminology.

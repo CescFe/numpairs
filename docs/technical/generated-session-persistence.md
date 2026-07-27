@@ -2,12 +2,13 @@
 
 ## Document Status
 
-- Status: implemented normal generated-session persistence, remembered selectors, and v10 Quick
-  challenge identity
+- Status: implemented normal generated-session persistence with v11 play-option compatibility
 - Product contracts: `docs/product/prd/prd-v7.md`, `docs/product/prd/prd-v8.md`, and
-  `docs/product/prd/prd-v10.md`
+  `docs/product/prd/prd-v10.md`; active contract: `docs/product/prd/prd-v11.md`
 - Related generation reference: `docs/product/puzzle-generation.md`
 - Related domain decision: `docs/technical/adr/adr-005-model-sparse-generated-challenges.md`
+- Related play-option decision:
+  `docs/technical/adr/adr-007-separate-play-options-from-generated-modes.md`
 - Implemented Daily boundary: `docs/technical/daily-challenge-persistence.md`
 
 This document owns the persistence and coordination boundary for the single resumable normal
@@ -19,9 +20,11 @@ generation profiles, or menu copy.
 ## Scope And Ownership
 
 NumPairs stores at most one normal generated session for the whole application. The slot may
-belong to any challenge in the supported generated-challenge catalog: Quick `3 Pairs Low`,
-`4 Pairs Low`, `4 Pairs Medium`, `8 Pairs Medium`, or `8 Pairs Hard`. There is no independent
-normal save per mode, normal generated history, account sync, or manual save management.
+belong to any challenge in the supported generated-challenge catalog: `3 Pairs Low`,
+`3 Pairs Medium`, `4 Pairs Low`, `4 Pairs Medium`, `8 Pairs Medium`, or `8 Pairs Hard`. Quick and
+Classic group these exact challenges for player-facing selection; they do not create independent
+save slots. There is no independent normal save per option or mode, normal generated history,
+account sync, or manual save management.
 
 `MainActivity` creates one application-scoped `GeneratedSessionRepository` from
 application-private storage and passes it only through generated-play and unlocked-navigation
@@ -40,34 +43,30 @@ the generated-session repository never owns or mutates selector defaults.
 
 ## Remembered Difficulty Selection
 
-The application keeps one stable difficulty id for each generated mode that exposes a difficulty
-selector in local preference storage. The preference boundary exposes an observable effective
-selection only for configured selector modes and accepts only configured mode/difficulty pairs
-present in the supported challenge catalog.
+The application keeps one stable difficulty id for each Generated Play Option in local preference
+storage:
 
-The effective fallback is `Low` for `4 Pairs` and `Medium` for `8 Pairs`. Quick exposes only Low,
-has no selector fallback or remembered preference, and rejects preference writes. Missing,
-corrupt, unknown, and no-longer-supported stored values resolve to the selector mode's fallback
+- Quick supports Low and Medium and falls back to Low.
+- Classic supports Medium and Hard and falls back to Medium.
+
+Missing, corrupt, unknown, and no-longer-supported stored values resolve to the option fallback
 without writing it back. The only operation that writes a remembered selection is an explicit
-supported option choice made by the player in that mode's anchored difficulty popup in the normal
-menu.
+supported option choice made by the player in that option's anchored difficulty popup.
 
-Opening or dismissing the popup, showing a fallback, pressing a mode's play region, resuming or
-restoring a session, replacing a session, completing a puzzle, and using `Play another` do not
-write this preference. The two mode values remain independent, and neither completion nor any
-other v8 behavior stores progression, locks, completion counts, rewards, or statistics.
+Existing supported mode-keyed values supply the initial v11 option selection:
 
-The remembered values live in the dedicated Preferences DataStore file
-`datastore/generated_difficulty_selection.preferences_pb`. This keeps the aggregate and its
-corruption recovery independent from personalization, onboarding, and the resumable generated
-session. The file stores one stable difficulty id under each selector-enabled generated-mode
-identity; it does not store a Quick value, display copy, profile parameters, completion data, or
-transient selector state.
+- the stored 4 Pairs value migrates to Quick
+- the stored 8 Pairs value migrates to Classic
 
-`MainActivity` creates one application-scoped remembered-difficulty repository. The unlocked Menu
-route observes both effective selections and receives the write operation used by its
-mode-specific popups. Menu resume, generated-session restoration, generated gameplay, and
-`Play another` resolve their exact stored challenge without mutating this preference boundary.
+Migration preserves a supported explicit player choice and remains independent from generated and
+Daily session state. Opening or dismissing the popup, showing a fallback, pressing an option's play
+region, resolving a weighted challenge, resuming, retrying, replacing, completing, or using
+`Play another` does not write the preference.
+
+The remembered values continue living in the dedicated Preferences DataStore file
+`datastore/generated_difficulty_selection.preferences_pb`. It stores stable play-option and
+difficulty identities; it does not store a selected puzzle size, weighted bucket, display copy,
+profile parameters, completion data, or transient selector state.
 
 ---
 
@@ -86,11 +85,11 @@ The seed is diagnostic and generation metadata. Restoration never reruns the gen
 generator or profile implementation may change after the session was created.
 
 The stored mode/profile pair resolves one exact supported `GeneratedChallenge`; restoration does
-not assume that a mode has only one profile. Quick uses `three-pairs` with `3-pairs-low`; the
-existing `4 Pairs Low` and `8 Pairs Medium` ids retain their meaning, so valid schema-1 snapshots
-for those challenges remain compatible. An unknown mode, unknown profile, unsupported pair, or
-profile whose declared mode differs from the stored mode is invalid session data and is exposed
-as an empty slot.
+not assume that a mode has only one profile. Existing 3 Pairs and 4 Pairs snapshots present as
+Quick, while existing 8 Pairs snapshots present as Classic. Their stable ids retain their meaning,
+so valid schema-1 snapshots remain compatible without adding a play-option field. An unknown
+mode, unknown profile, unsupported pair, or profile whose declared mode differs from the stored
+mode is invalid session data and is exposed as an empty slot.
 
 The initial and current puzzles preserve:
 

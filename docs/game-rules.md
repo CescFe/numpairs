@@ -39,16 +39,21 @@ Each solution pair contributes exactly two tiles:
 - one addition tile
 - one multiplication tile
 
-Current implemented generated modes use:
+Supported generated challenges use:
 
+- `3 Pairs Low` and `3 Pairs Medium`: 3 solution pairs and 6 board tiles
 - `4 Pairs Low` and `4 Pairs Medium`: 4 solution pairs and 8 board tiles
 - `8 Pairs Medium` and `8 Pairs Hard`: 8 solution pairs and 16 board tiles
 
-The implemented v10 Quick mode uses:
+The player-facing generated play options are:
 
-- `3 Pairs Low`: 3 solution pairs and 6 board tiles
+- `Quick Low` and `Quick Medium`: 35% of new puzzles use the matching 3 Pairs challenge and
+  65% use the matching 4 Pairs challenge
+- `Classic Medium` and `Classic Hard`: use the matching 8 Pairs challenge
 
-Quick changes puzzle duration and size, not the pairing, operator, usage, or completion rules.
+Quick and Classic change puzzle duration, size selection, and difficulty profile, not the pairing,
+operator, usage, or completion rules. Daily Challenge continues using exact `4 Pairs Low` through
+its deterministic recipe.
 
 Each tile has two rows:
 
