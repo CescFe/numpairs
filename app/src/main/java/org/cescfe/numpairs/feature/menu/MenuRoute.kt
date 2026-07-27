@@ -18,6 +18,8 @@ import org.cescfe.numpairs.feature.generated.GeneratedChallenge
 import org.cescfe.numpairs.feature.generated.GeneratedChallengeCatalog
 import org.cescfe.numpairs.feature.generated.GeneratedModeConfiguration
 import org.cescfe.numpairs.feature.generated.GeneratedModes
+import org.cescfe.numpairs.feature.generated.GeneratedPlayOptionConfiguration
+import org.cescfe.numpairs.feature.generated.GeneratedPlayOptions
 import org.cescfe.numpairs.feature.generated.localizedTitle
 import org.cescfe.numpairs.feature.menu.ui.DailyMenuUiState
 import org.cescfe.numpairs.feature.menu.ui.GeneratedDifficultyMenuOptionId
@@ -57,22 +59,25 @@ fun MenuRoute(
     val fourPairsMode = generatedChallengeCatalog.resolve(GeneratedModes.FOUR_PAIRS.id)
     val eightPairsMode = generatedChallengeCatalog.resolve(GeneratedModes.EIGHT_PAIRS.id)
     val fourPairsChallenge = fourPairsMode.selectedChallenge(
-        repository = generatedDifficultySelectionRepository
+        repository = generatedDifficultySelectionRepository,
+        playOption = GeneratedPlayOptions.QUICK
     ) ?: return
     val eightPairsChallenge = eightPairsMode.selectedChallenge(
-        repository = generatedDifficultySelectionRepository
+        repository = generatedDifficultySelectionRepository,
+        playOption = GeneratedPlayOptions.CLASSIC
     ) ?: return
     val coroutineScope = rememberCoroutineScope()
     val dailyActionGuard = remember(dailyMenuState) {
         DailyMenuActionGuard()
     }
-    val selectDifficulty: (GeneratedModeConfiguration, GeneratedDifficultyMenuOptionId) -> Unit =
-        { mode, optionId ->
+    val selectDifficulty:
+        (GeneratedModeConfiguration, GeneratedPlayOptionConfiguration, GeneratedDifficultyMenuOptionId) -> Unit =
+        { mode, playOption, optionId ->
             val challenge = mode.challengeFor(optionId)
             coroutineScope.launch {
                 try {
                     generatedDifficultySelectionRepository.selectDifficulty(
-                        modeId = mode.id,
+                        optionId = playOption.id,
                         difficulty = challenge.difficulty
                     )
                 } catch (_: IOException) {
@@ -114,10 +119,10 @@ fun MenuRoute(
             onGeneratedChallengeSelected(eightPairsChallenge)
         },
         onFourPairsDifficultySelected = { optionId ->
-            selectDifficulty(fourPairsMode, optionId)
+            selectDifficulty(fourPairsMode, GeneratedPlayOptions.QUICK, optionId)
         },
         onEightPairsDifficultySelected = { optionId ->
-            selectDifficulty(eightPairsMode, optionId)
+            selectDifficulty(eightPairsMode, GeneratedPlayOptions.CLASSIC, optionId)
         }
     )
 }
@@ -174,10 +179,11 @@ private fun CurrentDailyAvailability.toMenuUiState(): DailyMenuUiState = when (t
 
 @Composable
 private fun GeneratedModeConfiguration.selectedChallenge(
-    repository: GeneratedDifficultySelectionRepository
+    repository: GeneratedDifficultySelectionRepository,
+    playOption: GeneratedPlayOptionConfiguration
 ): GeneratedChallenge? {
-    val selectedDifficultyFlow = remember(repository, id) {
-        repository.selectedDifficulty(modeId = id)
+    val selectedDifficultyFlow = remember(repository, playOption.id) {
+        repository.selectedDifficulty(optionId = playOption.id)
     }
     val selectedDifficulty by selectedDifficultyFlow.collectAsState(initial = null)
 

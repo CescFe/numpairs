@@ -5,6 +5,7 @@ import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStore
 import org.cescfe.numpairs.feature.generated.GeneratedModes
+import org.cescfe.numpairs.feature.generated.GeneratedPlayOptions
 
 fun createGeneratedDifficultySelectionRepository(context: Context): GeneratedDifficultySelectionRepository {
     val applicationContext = context.applicationContext
@@ -12,9 +13,14 @@ fun createGeneratedDifficultySelectionRepository(context: Context): GeneratedDif
     return DataStoreGeneratedDifficultySelectionRepository(
         dataStore = applicationContext.generatedDifficultySelectionDataStore,
         catalog = GeneratedModes.catalog,
-        fallbackDifficultyByMode = mapOf(
-            GeneratedModes.FOUR_PAIRS.id to GeneratedModes.FOUR_PAIRS_LOW.difficulty,
-            GeneratedModes.EIGHT_PAIRS.id to GeneratedModes.EIGHT_PAIRS_MEDIUM.difficulty
+        playOptions = GeneratedPlayOptions.ALL,
+        fallbackDifficultyByOption = mapOf(
+            GeneratedPlayOptions.QUICK.id to GeneratedModes.FOUR_PAIRS_LOW.difficulty,
+            GeneratedPlayOptions.CLASSIC.id to GeneratedModes.EIGHT_PAIRS_MEDIUM.difficulty
+        ),
+        legacyModeByOption = mapOf(
+            GeneratedPlayOptions.QUICK.id to GeneratedModes.FOUR_PAIRS.id,
+            GeneratedPlayOptions.CLASSIC.id to GeneratedModes.EIGHT_PAIRS.id
         )
     )
 }

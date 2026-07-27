@@ -31,6 +31,7 @@ import org.cescfe.numpairs.domain.puzzle.model.Tile
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.generated.GeneratedChallenge
 import org.cescfe.numpairs.feature.generated.GeneratedModes
+import org.cescfe.numpairs.feature.generated.GeneratedPlayOptions
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
@@ -72,11 +73,11 @@ class GeneratedDifficultySelectionNavigationTest {
             assertTrue(fixture.generatedChallenges.isEmpty())
             assertEquals(
                 DifficultyTier.LOW,
-                fixture.difficultyRepository.currentDifficulty(GeneratedModes.FOUR_PAIRS.id)
+                fixture.difficultyRepository.currentDifficulty(GeneratedPlayOptions.QUICK.id)
             )
             assertEquals(
                 DifficultyTier.MEDIUM,
-                fixture.difficultyRepository.currentDifficulty(GeneratedModes.EIGHT_PAIRS.id)
+                fixture.difficultyRepository.currentDifficulty(GeneratedPlayOptions.CLASSIC.id)
             )
         }
     }
@@ -107,7 +108,7 @@ class GeneratedDifficultySelectionNavigationTest {
                 fixture.sessionRepository.session.value?.profileId
             )
             assertEquals(
-                listOf(GeneratedModes.FOUR_PAIRS.id to DifficultyTier.MEDIUM),
+                listOf(GeneratedPlayOptions.QUICK.id to DifficultyTier.MEDIUM),
                 fixture.difficultyRepository.explicitSelections
             )
         }
@@ -149,8 +150,8 @@ class GeneratedDifficultySelectionNavigationTest {
     fun menu_restores_independent_selections_and_primary_action_launches_them_directly() {
         val difficultyRepository = FakeGeneratedDifficultySelectionRepository(
             initialSelections = mapOf(
-                GeneratedModes.FOUR_PAIRS.id to DifficultyTier.MEDIUM,
-                GeneratedModes.EIGHT_PAIRS.id to DifficultyTier.HARD
+                GeneratedPlayOptions.QUICK.id to DifficultyTier.MEDIUM,
+                GeneratedPlayOptions.CLASSIC.id to DifficultyTier.HARD
             )
         )
         val fixture = setContent(difficultyRepository = difficultyRepository)
@@ -199,7 +200,7 @@ class GeneratedDifficultySelectionNavigationTest {
             assertTrue(fixture.difficultyRepository.explicitSelections.isEmpty())
             assertEquals(
                 DifficultyTier.MEDIUM,
-                fixture.difficultyRepository.currentDifficulty(GeneratedModes.EIGHT_PAIRS.id)
+                fixture.difficultyRepository.currentDifficulty(GeneratedPlayOptions.CLASSIC.id)
             )
             assertEquals(snapshot, fixture.sessionRepository.session.value)
         }
