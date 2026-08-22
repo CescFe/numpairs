@@ -144,19 +144,23 @@
     <string name="tile_right_operand_content_description">Right operand, value %1$s</string>
     <string name="tile_operator_hidden_content_description">Hidden operator</string>
     <string name="tile_operator_content_description">Operator, %1$s</string>
+    <string name="tile_expression_active_input_state">Current input</string>
     <string name="strip_entry_valid_range_bounded">Valid range: %1$d to %2$d</string>
     <string name="strip_entry_valid_range_unbounded">Valid range: %1$d or greater</string>
     <string name="strip_entry_invalid_range_bounded">Invalid number. Valid range: %1$d to %2$d</string>
     <string name="strip_entry_invalid_range_unbounded">Invalid number. Valid range: %1$d or greater</string>
 
     <!-- Game screen: tile selection dialogs -->
-    <string name="tile_operand_dialog_title">Choose operand</string>
+    <string name="tile_operand_dialog_left_title">Now choose the left operand</string>
+    <string name="tile_operand_dialog_right_title">Now choose the right operand</string>
+    <string name="tile_operand_dialog_left_expression_preview">[%1$s] %2$s %3$s = %4$s</string>
+    <string name="tile_operand_dialog_right_expression_preview">%1$s %2$s [%3$s] = %4$s</string>
     <string name="tile_operand_usage_addition_hint">Addition usage hint</string>
     <string name="tile_operand_usage_multiplication_hint">Multiplication usage hint</string>
     <string name="tile_operand_usage_state_available">Available</string>
     <string name="tile_operand_usage_state_used">Used</string>
     <string name="tile_operand_usage_state_rule_conflict">Rule conflict</string>
-    <string name="tile_operator_dialog_title">Choose operator</string>
+    <string name="tile_operator_dialog_title">Now choose the operator</string>
     <string name="tile_operator_option_addition">Addition (+)</string>
     <string name="tile_operator_option_multiplication">Multiplication (×)</string>
     <string name="tile_state_incorrect">Incorrect tile</string>

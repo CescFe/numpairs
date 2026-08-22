@@ -16,6 +16,9 @@ var SemanticsPropertyReceiver.operandSelectorUsageHintVisualState by OperandSele
 val StripEntryInputInvalidKey = SemanticsPropertyKey<Boolean>("StripEntryInputInvalid")
 var SemanticsPropertyReceiver.stripEntryInputInvalid by StripEntryInputInvalidKey
 
+val TileInputActiveKey = SemanticsPropertyKey<Boolean>("TileInputActive")
+var SemanticsPropertyReceiver.tileInputActive by TileInputActiveKey
+
 val CorrectTileFeedbackIdKey = SemanticsPropertyKey<Long>("CorrectTileFeedbackId")
 var SemanticsPropertyReceiver.correctTileFeedbackId by CorrectTileFeedbackIdKey
 

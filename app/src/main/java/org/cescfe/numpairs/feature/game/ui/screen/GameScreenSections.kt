@@ -34,6 +34,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.StripEntryRange
 import org.cescfe.numpairs.feature.game.GameHighlightState
@@ -42,6 +43,7 @@ import org.cescfe.numpairs.feature.game.GameTileExpressionSlot
 import org.cescfe.numpairs.feature.game.presentation.StripItemEntryInputUiState
 import org.cescfe.numpairs.feature.game.presentation.StripItemUiState
 import org.cescfe.numpairs.feature.game.presentation.StripItemVisualStyle
+import org.cescfe.numpairs.feature.game.presentation.TileOperandSelectionDialogUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState
 import org.cescfe.numpairs.feature.game.presentation.TileUiState
 import org.cescfe.numpairs.feature.game.ui.components.strip.AvailableNumberChip
@@ -64,6 +66,7 @@ internal fun BoardSection(
     onTileOperatorTapped: (Int) -> Unit,
     onTileResetTapped: (Int) -> Unit,
     tileOperatorSelectionDialog: TileOperatorSelectionDialogUiState?,
+    tileOperandSelectionDialog: TileOperandSelectionDialogUiState?,
     onTileOperatorSelectionDismissed: () -> Unit,
     onTileOperatorSelectionConfirmed: (Operator) -> Unit,
     interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
@@ -129,6 +132,8 @@ internal fun BoardSection(
                             val tile = indexedTile.value
                             val tileOperatorSelectionUiState = tileOperatorSelectionDialog
                                 ?.takeIf { dialogUiState -> dialogUiState.tileIndex == tileIndex }
+                            val tileOperandSelectionUiState = tileOperandSelectionDialog
+                                ?.takeIf { dialogUiState -> dialogUiState.tileIndex == tileIndex }
 
                             PuzzleTile(
                                 tile = tile,
@@ -142,6 +147,7 @@ internal fun BoardSection(
                                     tileIndex = tileIndex,
                                     slot = GameTileExpressionSlot.LEFT_OPERAND
                                 ),
+                                isLeftOperandInputActive = tileOperandSelectionUiState?.slot == OperandSlot.LEFT,
                                 leftOperandModifier = Modifier.testTag(GameScreenTestTags.tileLeftOperand(tileIndex)),
                                 leftOperandContentDescription = tileLeftOperandContentDescription(tile),
                                 onLeftOperandClick = if (interactionPolicy.canTapTileLeftOperand(tileIndex)) {
@@ -153,6 +159,7 @@ internal fun BoardSection(
                                     tileIndex = tileIndex,
                                     slot = GameTileExpressionSlot.OPERATOR
                                 ),
+                                isOperatorInputActive = tileOperatorSelectionUiState != null,
                                 operatorModifier = Modifier.testTag(GameScreenTestTags.tileOperator(tileIndex)),
                                 operatorContentDescription = tileOperatorContentDescription(tile),
                                 onOperatorClick = if (interactionPolicy.canTapTileOperator(tileIndex)) {
@@ -173,6 +180,7 @@ internal fun BoardSection(
                                     tileIndex = tileIndex,
                                     slot = GameTileExpressionSlot.RIGHT_OPERAND
                                 ),
+                                isRightOperandInputActive = tileOperandSelectionUiState?.slot == OperandSlot.RIGHT,
                                 rightOperandModifier = Modifier.testTag(GameScreenTestTags.tileRightOperand(tileIndex)),
                                 rightOperandContentDescription = tileRightOperandContentDescription(tile),
                                 onRightOperandClick = if (interactionPolicy.canTapTileRightOperand(tileIndex)) {

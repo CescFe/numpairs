@@ -144,19 +144,23 @@
     <string name="tile_right_operand_content_description">Operand dret, valor %1$s</string>
     <string name="tile_operator_hidden_content_description">Operador ocult</string>
     <string name="tile_operator_content_description">Operador, %1$s</string>
+    <string name="tile_expression_active_input_state">Entrada actual</string>
     <string name="strip_entry_valid_range_bounded">Rang vàlid: de %1$d a %2$d</string>
     <string name="strip_entry_valid_range_unbounded">Rang vàlid: %1$d o més</string>
     <string name="strip_entry_invalid_range_bounded">Número no vàlid. Rang vàlid: de %1$d a %2$d</string>
     <string name="strip_entry_invalid_range_unbounded">Número no vàlid. Rang vàlid: %1$d o més</string>
 
     <!-- Game screen: tile selection dialogs -->
-    <string name="tile_operand_dialog_title">Tria operand</string>
+    <string name="tile_operand_dialog_left_title">Ara tria l’operand esquerre</string>
+    <string name="tile_operand_dialog_right_title">Ara tria l’operand dret</string>
+    <string name="tile_operand_dialog_left_expression_preview">[%1$s] %2$s %3$s = %4$s</string>
+    <string name="tile_operand_dialog_right_expression_preview">%1$s %2$s [%3$s] = %4$s</string>
     <string name="tile_operand_usage_addition_hint">Pista d’ús en suma</string>
     <string name="tile_operand_usage_multiplication_hint">Pista d’ús en multiplicació</string>
     <string name="tile_operand_usage_state_available">Disponible</string>
     <string name="tile_operand_usage_state_used">Usat</string>
     <string name="tile_operand_usage_state_rule_conflict">Conflicte de regla</string>
-    <string name="tile_operator_dialog_title">Tria operador</string>
+    <string name="tile_operator_dialog_title">Ara tria l’operador</string>
     <string name="tile_operator_option_addition">Suma (+)</string>
     <string name="tile_operator_option_multiplication">Multiplicació (×)</string>
     <string name="tile_state_incorrect">Casella incorrecta</string>

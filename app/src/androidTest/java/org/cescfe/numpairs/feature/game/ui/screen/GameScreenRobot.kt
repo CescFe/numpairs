@@ -29,6 +29,7 @@ import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.feature.game.ui.semantics.GameHighlightedKey
 import org.cescfe.numpairs.feature.game.ui.semantics.OperandSelectorUsageHintVisualStateKey
 import org.cescfe.numpairs.feature.game.ui.semantics.StripEntryInputInvalidKey
+import org.cescfe.numpairs.feature.game.ui.semantics.TileInputActiveKey
 
 class GameScreenRobot(
     private val activity: ComponentActivity,
@@ -302,6 +303,24 @@ class GameScreenRobot(
             .assertDoesNotExist()
     }
 
+    fun assertOperandSelectorTitle(@StringRes stringResId: Int): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERAND_SELECTOR_TITLE, useUnmergedTree = true)
+            .assert(hasText(string(stringResId)))
+    }
+
+    fun assertOperandSelectorExpression(@StringRes stringResId: Int, vararg formatArgs: Any): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERAND_SELECTOR_EXPRESSION, useUnmergedTree = true)
+            .assert(hasText(string(stringResId, *formatArgs)))
+    }
+
+    fun assertOperatorSelectorTitle(): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR_TITLE, useUnmergedTree = true)
+            .assert(hasText(string(R.string.tile_operator_dialog_title)))
+    }
+
     fun assertOperandOptionDisplayed(entryId: Int): GameScreenRobot = apply {
         interactions
             .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId), useUnmergedTree = true)
@@ -494,6 +513,30 @@ class GameScreenRobot(
         )
     }
 
+    fun assertLeftOperandInputActive(tileIndex: Int): GameScreenRobot = apply {
+        assertTileInputActive(testTag = GameScreenTestTags.tileLeftOperand(tileIndex))
+    }
+
+    fun assertLeftOperandInputInactive(tileIndex: Int): GameScreenRobot = apply {
+        assertTileInputInactive(testTag = GameScreenTestTags.tileLeftOperand(tileIndex))
+    }
+
+    fun assertOperatorInputActive(tileIndex: Int): GameScreenRobot = apply {
+        assertTileInputActive(testTag = GameScreenTestTags.tileOperator(tileIndex))
+    }
+
+    fun assertOperatorInputInactive(tileIndex: Int): GameScreenRobot = apply {
+        assertTileInputInactive(testTag = GameScreenTestTags.tileOperator(tileIndex))
+    }
+
+    fun assertRightOperandInputActive(tileIndex: Int): GameScreenRobot = apply {
+        assertTileInputActive(testTag = GameScreenTestTags.tileRightOperand(tileIndex))
+    }
+
+    fun assertRightOperandInputInactive(tileIndex: Int): GameScreenRobot = apply {
+        assertTileInputInactive(testTag = GameScreenTestTags.tileRightOperand(tileIndex))
+    }
+
     fun assertPuzzleOutcomeVisible(): GameScreenRobot = apply {
         interactions
             .onNodeWithTag(GameScreenTestTags.PUZZLE_OUTCOME)
@@ -626,6 +669,18 @@ class GameScreenRobot(
                     true
                 )
             )
+    }
+
+    private fun assertTileInputActive(testTag: String) {
+        interactions
+            .onNodeWithTag(testTag, useUnmergedTree = true)
+            .assert(SemanticsMatcher.expectValue(TileInputActiveKey, true))
+    }
+
+    private fun assertTileInputInactive(testTag: String) {
+        interactions
+            .onNodeWithTag(testTag, useUnmergedTree = true)
+            .assert(SemanticsMatcher.keyNotDefined(TileInputActiveKey))
     }
 
     private fun assertNotHighlighted(testTag: String, useUnmergedTree: Boolean = false) {

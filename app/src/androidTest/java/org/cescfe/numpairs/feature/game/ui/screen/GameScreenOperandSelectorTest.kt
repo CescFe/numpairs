@@ -14,6 +14,7 @@ class GameScreenOperandSelectorTest : GameScreenTestHost() {
         screen
             .scrollToBoard()
             .tapTileLeftOperand(0)
+            .assertLeftOperandInputActive(tileIndex = 0)
             .assertOperandSelectorDisplayed()
             .assertOperandOptionDisplayed(entryId = 2)
             .assertOperandOptionDisplayed(entryId = 4)
@@ -24,8 +25,11 @@ class GameScreenOperandSelectorTest : GameScreenTestHost() {
                 R.string.tile_left_operand_content_description,
                 "6"
             )
+            .assertLeftOperandInputInactive(tileIndex = 0)
+            .assertOperatorInputActive(tileIndex = 0)
             .assertOperandSelectorHidden()
             .assertOperatorSelectorDisplayed()
+            .assertOperatorSelectorTitle()
     }
 
     @Test
@@ -37,12 +41,23 @@ class GameScreenOperandSelectorTest : GameScreenTestHost() {
             .tapOperatorOption(Operator.ADDITION)
             .assertOperatorSelectorHidden()
             .assertOperandSelectorDisplayed()
+            .assertOperatorInputInactive(tileIndex = 0)
+            .assertRightOperandInputActive(tileIndex = 0)
+            .assertOperandSelectorTitle(R.string.tile_operand_dialog_right_title)
+            .assertOperandSelectorExpression(
+                R.string.tile_operand_dialog_right_expression_preview,
+                "6",
+                "+",
+                "?",
+                "223"
+            )
             .tapOperandOption(entryId = 4)
             .assertRightOperandDescription(
                 0,
                 R.string.tile_right_operand_content_description,
                 "25"
             )
+            .assertRightOperandInputInactive(tileIndex = 0)
             .assertOperandSelectorHidden()
             .assertOperatorSelectorHidden()
     }
@@ -54,14 +69,26 @@ class GameScreenOperandSelectorTest : GameScreenTestHost() {
             .tapTileOperator(0)
             .tapOperatorOption(Operator.ADDITION)
             .tapTileRightOperand(0)
+            .assertRightOperandInputActive(tileIndex = 0)
             .tapOperandOption(entryId = 2)
             .assertOperandSelectorDisplayed()
+            .assertRightOperandInputInactive(tileIndex = 0)
+            .assertLeftOperandInputActive(tileIndex = 0)
+            .assertOperandSelectorTitle(R.string.tile_operand_dialog_left_title)
+            .assertOperandSelectorExpression(
+                R.string.tile_operand_dialog_left_expression_preview,
+                "?",
+                "+",
+                "6",
+                "223"
+            )
             .tapOperandOption(entryId = 4)
             .assertLeftOperandDescription(
                 0,
                 R.string.tile_left_operand_content_description,
                 "25"
             )
+            .assertLeftOperandInputInactive(tileIndex = 0)
             .assertOperandSelectorHidden()
             .assertOperatorSelectorHidden()
     }
