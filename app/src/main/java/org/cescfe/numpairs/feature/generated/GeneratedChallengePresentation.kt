@@ -12,6 +12,7 @@ internal fun GeneratedModeConfiguration.titleResourceIdOrNull(): Int? = when (id
     GeneratedModes.FOUR_PAIRS.id -> R.string.quick_screen_title
 
     GeneratedModes.EIGHT_PAIRS.id -> R.string.classic_screen_title
+
     else -> null
 }
 

@@ -34,14 +34,17 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.feature.game.presentation.TileOperandOptionUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperandSelectionDialogUiState
 import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState
+import org.cescfe.numpairs.feature.game.presentation.TileUiState
 import org.cescfe.numpairs.feature.game.ui.indicators.OperandUsageIndicatorColors
 import org.cescfe.numpairs.feature.game.ui.indicators.OperandUsageIndicatorState
 import org.cescfe.numpairs.feature.game.ui.indicators.operandUsageIndicatorColors
@@ -57,16 +60,24 @@ import org.cescfe.numpairs.ui.theme.numPairsSemanticColors
 @Composable
 internal fun TileOperandSelectionSheet(
     dialogUiState: TileOperandSelectionDialogUiState,
+    tile: TileUiState,
     onDismiss: () -> Unit,
     onConfirm: (Int) -> Unit
 ) {
-    val operandSheetContentDescription = stringResource(R.string.tile_operand_dialog_title)
+    val operandSheetTitle = stringResource(dialogUiState.slot.dialogTitleResId)
+    val expressionPreview = stringResource(
+        dialogUiState.slot.expressionPreviewResId,
+        tile.leftOperandLabel,
+        tile.operatorLabel,
+        tile.rightOperandLabel,
+        tile.resultLabel
+    )
 
     ModalBottomSheet(
         modifier = Modifier
             .testTag(GameScreenTestTags.TILE_OPERAND_SELECTOR)
             .semantics {
-                contentDescription = operandSheetContentDescription
+                contentDescription = operandSheetTitle
             },
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(topStart = NumPairsComponents.LargeRadius, topEnd = NumPairsComponents.LargeRadius),
@@ -74,13 +85,29 @@ internal fun TileOperandSelectionSheet(
         contentColor = MaterialTheme.colorScheme.onSurface
     ) {
         Text(
-            text = operandSheetContentDescription,
+            text = operandSheetTitle,
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(
-                start = TILE_OPERAND_SHEET_PADDING,
-                end = TILE_OPERAND_SHEET_PADDING,
-                bottom = 12.dp
-            )
+            modifier = Modifier
+                .testTag(GameScreenTestTags.TILE_OPERAND_SELECTOR_TITLE)
+                .padding(
+                    start = TILE_OPERAND_SHEET_PADDING,
+                    end = TILE_OPERAND_SHEET_PADDING,
+                    bottom = 8.dp
+                )
+        )
+        Text(
+            text = expressionPreview,
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(GameScreenTestTags.TILE_OPERAND_SELECTOR_EXPRESSION)
+                .padding(
+                    start = TILE_OPERAND_SHEET_PADDING,
+                    end = TILE_OPERAND_SHEET_PADDING,
+                    bottom = 16.dp
+                ),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = NumPairsTextStyles.TileExpression,
+            textAlign = TextAlign.Center
         )
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = TILE_OPERAND_SHEET_OPTION_MIN_WIDTH),
@@ -225,6 +252,7 @@ private fun operandSelectorUsageHintColors(
     OperandSelectorUsageHintVisualState.AVAILABLE -> operandUsageIndicatorColors(
         OperandUsageIndicatorState.AVAILABLE
     )
+
     OperandSelectorUsageHintVisualState.USED_WITH_PAIRING_AVAILABLE -> operandSelectorPartialUsageHintColors()
 
     OperandSelectorUsageHintVisualState.USED_EXHAUSTED -> operandUsageIndicatorColors(
@@ -275,6 +303,7 @@ private fun operandOptionColors(enabled: Boolean): OperandOptionColors = if (ena
 private fun TileOperandOptionUiState.usageHintVisualStateFor(operator: Operator): OperandSelectorUsageHintVisualState =
     when {
         ruleConflictsFor(operator).isNotEmpty() -> OperandSelectorUsageHintVisualState.RULE_CONFLICT
+
         else -> when (operator) {
             Operator.Addition -> when {
                 !additionUsed -> OperandSelectorUsageHintVisualState.AVAILABLE
@@ -399,6 +428,18 @@ internal fun TileOperatorSelectionMenu(
         }
     }
 }
+
+private val OperandSlot.dialogTitleResId: Int
+    @StringRes get() = when (this) {
+        OperandSlot.LEFT -> R.string.tile_operand_dialog_left_title
+        OperandSlot.RIGHT -> R.string.tile_operand_dialog_right_title
+    }
+
+private val OperandSlot.expressionPreviewResId: Int
+    @StringRes get() = when (this) {
+        OperandSlot.LEFT -> R.string.tile_operand_dialog_left_expression_preview
+        OperandSlot.RIGHT -> R.string.tile_operand_dialog_right_expression_preview
+    }
 
 @Composable
 private fun Operator.selectionLabel(): String = when (this) {

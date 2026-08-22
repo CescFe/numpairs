@@ -22,6 +22,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import java.util.concurrent.atomic.AtomicInteger
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.model.Operator
+import org.cescfe.numpairs.feature.game.ui.screen.GameScreenRobot
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.game.ui.semantics.GameHighlightedKey
 import org.cescfe.numpairs.feature.tutorial.ui.TutorialScreenTestTags
@@ -36,6 +37,13 @@ import org.junit.runner.RunWith
 class TutorialRouteTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+
+    private val gameRobot by lazy {
+        GameScreenRobot(
+            activity = composeTestRule.activity,
+            interactions = composeTestRule
+        )
+    }
 
     @Test
     fun learnBasicsTutorialOpensOnStepOne() {
@@ -112,7 +120,7 @@ class TutorialRouteTest {
             .assertHasNoClickAction()
         assertTileExpressionSlotsHaveNoClickAction(tileIndex = 0)
 
-        navigateToExplanationStep(STRIP_EXPLANATION_STEP_INDEX)
+        navigateToStripExplanationStep()
 
         assertHighlighted(testTag = GameScreenTestTags.STRIP)
         repeat(4) { index ->
@@ -230,7 +238,7 @@ class TutorialRouteTest {
         assertUnmergedNodeNotHighlighted(testTag = GameScreenTestTags.tile(0))
         assertHighlighted(testTag = GameScreenTestTags.tile(3), useUnmergedTree = true)
 
-        openTileOperatorMenu(tileIndex = 0)
+        openFirstTileOperatorMenu()
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.ADDITION), useUnmergedTree = true)
             .assertIsEnabled()
@@ -240,7 +248,7 @@ class TutorialRouteTest {
             .performClick()
         assertPracticeCueDismissed()
 
-        openTileOperatorMenu(tileIndex = 0)
+        openFirstTileOperatorMenu()
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperatorOption(Operator.ADDITION), useUnmergedTree = true)
             .assertIsEnabled()
@@ -414,13 +422,23 @@ class TutorialRouteTest {
         assertTileExpressionSlotsNotHighlighted(tileIndex = 1)
 
         enterStripValue(index = 1, value = "3")
-        completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
+        gameRobot.completeTile(
+            tileIndex = 0,
+            leftStripEntryId = 0,
+            operator = Operator.ADDITION,
+            rightStripEntryId = 1
+        )
         assertStepDisplayed(stepIndex = 0, mode = TutorialMode.SOLVING_TIPS_PRACTICE)
         assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(1))
         assertTileExpressionSlotsNotHighlighted(tileIndex = 0)
         assertTileExpressionSlotsHighlighted(tileIndex = 1)
 
-        completeTile(tileIndex = 1, leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1)
+        gameRobot.completeTile(
+            tileIndex = 1,
+            leftStripEntryId = 0,
+            operator = Operator.MULTIPLICATION,
+            rightStripEntryId = 1
+        )
         waitForStep(stepIndex = 1, mode = TutorialMode.SOLVING_TIPS_PRACTICE)
         assertStepDisplayed(stepIndex = 1, mode = TutorialMode.SOLVING_TIPS_PRACTICE)
         assertNodeNotHighlighted(testTag = GameScreenTestTags.stripItem(0))
@@ -434,8 +452,18 @@ class TutorialRouteTest {
         assertTileExpressionSlotsHighlighted(tileIndex = 3)
 
         enterStripValue(index = 2, value = "4")
-        completeTile(tileIndex = 2, leftStripEntryId = 2, operator = Operator.MULTIPLICATION, rightStripEntryId = 3)
-        completeTile(tileIndex = 3, leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3)
+        gameRobot.completeTile(
+            tileIndex = 2,
+            leftStripEntryId = 2,
+            operator = Operator.MULTIPLICATION,
+            rightStripEntryId = 3
+        )
+        gameRobot.completeTile(
+            tileIndex = 3,
+            leftStripEntryId = 2,
+            operator = Operator.ADDITION,
+            rightStripEntryId = 3
+        )
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
@@ -514,10 +542,30 @@ class TutorialRouteTest {
 
         enterStripValue(index = 0, value = "1")
         enterStripValue(index = 1, value = "2")
-        completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
-        completeTile(tileIndex = 1, leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1)
-        completeTile(tileIndex = 2, leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3)
-        completeTile(tileIndex = 3, leftStripEntryId = 2, operator = Operator.MULTIPLICATION, rightStripEntryId = 3)
+        gameRobot.completeTile(
+            tileIndex = 0,
+            leftStripEntryId = 0,
+            operator = Operator.ADDITION,
+            rightStripEntryId = 1
+        )
+        gameRobot.completeTile(
+            tileIndex = 1,
+            leftStripEntryId = 0,
+            operator = Operator.MULTIPLICATION,
+            rightStripEntryId = 1
+        )
+        gameRobot.completeTile(
+            tileIndex = 2,
+            leftStripEntryId = 2,
+            operator = Operator.ADDITION,
+            rightStripEntryId = 3
+        )
+        gameRobot.completeTile(
+            tileIndex = 3,
+            leftStripEntryId = 2,
+            operator = Operator.MULTIPLICATION,
+            rightStripEntryId = 3
+        )
     }
 
     private fun advanceThroughExplanation() {
@@ -553,16 +601,14 @@ class TutorialRouteTest {
         waitForStep(stepIndex = PRACTICE_STEP_INDEX)
     }
 
-    private fun navigateToExplanationStep(stepIndex: Int) {
-        require(stepIndex in OBJECTIVE_EXPLANATION_STEP_INDEX..PAIR_EXPLANATION_STEP_INDEX)
-
-        repeat(stepIndex) {
+    private fun navigateToStripExplanationStep() {
+        repeat(STRIP_EXPLANATION_STEP_INDEX) {
             composeTestRule
                 .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
                 .performScrollTo()
                 .performClick()
         }
-        assertStepDisplayed(stepIndex = stepIndex)
+        assertStepDisplayed(stepIndex = STRIP_EXPLANATION_STEP_INDEX)
     }
 
     private fun enterStripValue(index: Int, value: String) {
@@ -586,54 +632,12 @@ class TutorialRouteTest {
             )
     }
 
-    private fun completeTile(tileIndex: Int, leftStripEntryId: Int, operator: Operator, rightStripEntryId: Int) {
-        chooseTileOperand(
-            tileIndex = tileIndex,
-            isLeftOperand = true,
-            stripEntryId = leftStripEntryId
-        )
+    private fun openFirstTileOperatorMenu() {
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(leftStripEntryId), useUnmergedTree = true)
-            .performClick()
-        chooseTileOperand(
-            tileIndex = tileIndex,
-            isLeftOperand = false,
-            stripEntryId = rightStripEntryId
-        )
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(rightStripEntryId), useUnmergedTree = true)
-            .performClick()
-        openTileOperatorMenu(tileIndex = tileIndex)
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(operator), useUnmergedTree = true)
-            .performClick()
-    }
-
-    private fun chooseTileOperand(tileIndex: Int, isLeftOperand: Boolean, stripEntryId: Int) {
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tile(tileIndex), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tile(0), useUnmergedTree = true)
             .performScrollTo()
         composeTestRule
-            .onNodeWithTag(
-                if (isLeftOperand) {
-                    GameScreenTestTags.tileLeftOperand(tileIndex)
-                } else {
-                    GameScreenTestTags.tileRightOperand(tileIndex)
-                },
-                useUnmergedTree = true
-            )
-            .performClick()
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(stripEntryId), useUnmergedTree = true)
-            .assertIsEnabled()
-    }
-
-    private fun openTileOperatorMenu(tileIndex: Int) {
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tile(tileIndex), useUnmergedTree = true)
-            .performScrollTo()
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperator(tileIndex), useUnmergedTree = true)
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
             .performClick()
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR, useUnmergedTree = true)

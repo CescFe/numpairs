@@ -231,6 +231,7 @@ private fun DailyCalendarDateCell(calendarDate: DailyCalendarDate, locale: Local
         )
 
         calendarDate.isCompleted -> NumPairsComponents.successBorder()
+
         else -> BorderStroke(
             width = NumPairsComponents.ThinBorderWidth,
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = NEUTRAL_CELL_BORDER_ALPHA)

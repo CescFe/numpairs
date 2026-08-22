@@ -75,8 +75,10 @@ class GeneratedPuzzleProfileContractTest {
         initialPuzzle.strip.entries.forEach { entry ->
             when (val item = entry.item) {
                 StripItem.Hidden -> Unit
+
                 is StripItem.Known ->
                     assertEquals(context, solvedEntriesById.getValue(StripEntryId(entry.id)), item.value)
+
                 is StripItem.PlayerEntered -> fail("$context must not start with player-entered strip values.")
             }
         }
@@ -178,8 +180,10 @@ class GeneratedPuzzleProfileContractTest {
             when (distributionPolicy) {
                 StripKnownEntryDistributionPolicy.SpreadAcrossStripAndPairsWhenPossible ->
                     assertEquals(context, knownEntryIds.size, knownSolutionPairCount)
+
                 is StripKnownEntryDistributionPolicy.AtLeastDistinctSolutionPairs ->
                     assertTrue(context, knownSolutionPairCount >= distributionPolicy.minimumPairCount)
+
                 StripKnownEntryDistributionPolicy.Unrestricted -> error("Handled before pair-distribution analysis.")
             }
         }

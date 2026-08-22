@@ -115,6 +115,7 @@ fun GeneratedModeRoute(
 
     when (val state = uiState) {
         GeneratedPuzzleGenerationUiState.Idle -> Unit
+
         is GeneratedPuzzleGenerationUiState.Restoring,
         is GeneratedPuzzleGenerationUiState.Loading -> {
             GeneratedPuzzleInitialLoadingScreen(modifier = modifier)
@@ -129,6 +130,7 @@ fun GeneratedModeRoute(
         }
 
         is GeneratedPuzzleGenerationUiState.Ready -> Unit
+
         is GeneratedPuzzleGenerationUiState.ResumeUnavailable -> {
             GeneratedSessionResumeUnavailableScreen(
                 modifier = modifier,
@@ -232,6 +234,7 @@ private fun GeneratedPuzzleGameBoundary(
         overlay = {
             when (state) {
                 is GeneratedPuzzleGenerationUiState.Loading -> GeneratedPuzzleLoadingOverlay()
+
                 is GeneratedPuzzleGenerationUiState.Failed -> GeneratedPuzzleFailureDialog(
                     onRetry = onRetry,
                     onNavigateBack = onNavigateBack
@@ -297,8 +300,11 @@ private fun GeneratedPuzzleGameContent(
 
 private fun GeneratedPuzzleGenerationUiState.visibleSession(): GeneratedModeGameSession? = when (this) {
     is GeneratedPuzzleGenerationUiState.Ready -> session
+
     is GeneratedPuzzleGenerationUiState.Loading -> previousSession
+
     is GeneratedPuzzleGenerationUiState.Failed -> previousSession
+
     GeneratedPuzzleGenerationUiState.Idle,
     is GeneratedPuzzleGenerationUiState.Restoring,
     is GeneratedPuzzleGenerationUiState.ResumeUnavailable -> null

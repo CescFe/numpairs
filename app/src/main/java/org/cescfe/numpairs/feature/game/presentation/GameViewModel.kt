@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.puzzle.assignment.operandSelectionChoicesFor
 import org.cescfe.numpairs.domain.puzzle.model.Board
+import org.cescfe.numpairs.domain.puzzle.model.Expression
 import org.cescfe.numpairs.domain.puzzle.model.OperandSlot
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
@@ -174,6 +175,7 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
 
     fun onTileOperandSelectionConfirmed(stripEntryId: Int): TileAssignmentCommit? {
         val target = (presentationState.modal as? GameModalState.TileOperandSelection)?.target ?: return null
+        val previousTile = puzzle.board.tiles.getOrNull(target.tileIndex) ?: return null
         val updatedPuzzle = puzzle.withSelectedOperand(
             target = target,
             stripEntryId = stripEntryId
@@ -183,12 +185,16 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
             tileIndex = target.tileIndex,
             updatedPuzzle = updatedPuzzle
         ) {
-            dismissTileOperandSelection()
+            advanceAfterOperandSelection(
+                target = target,
+                previousTile = previousTile
+            )
         }
     }
 
     fun onTileOperatorSelectionConfirmed(operator: Operator): TileAssignmentCommit? {
         val tileIndex = (presentationState.modal as? GameModalState.TileOperatorSelection)?.tileIndex ?: return null
+        val previousTile = puzzle.board.tiles.getOrNull(tileIndex) ?: return null
         val updatedPuzzle = puzzle.withSelectedOperator(
             tileIndex = tileIndex,
             operator = operator
@@ -198,7 +204,10 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
             tileIndex = tileIndex,
             updatedPuzzle = updatedPuzzle
         ) {
-            dismissTileOperatorSelection()
+            advanceAfterOperatorSelection(
+                tileIndex = tileIndex,
+                previousTile = previousTile
+            )
         }
     }
 
@@ -335,6 +344,7 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
                     value = selectedValue,
                     stripEntryId = stripEntryId
                 )
+
                 OperandSlot.RIGHT -> currentTile.withRightOperand(
                     value = selectedValue,
                     stripEntryId = stripEntryId
@@ -376,4 +386,68 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
             )
         )
     }
+}
+
+private fun GamePresentationState.advanceAfterOperandSelection(
+    target: TileOperandSelectionTarget,
+    previousTile: Tile
+): GamePresentationState {
+    val expression = previousTile.expression
+
+    if (!expression.isHidden(target.slot)) {
+        return dismissTileOperandSelection()
+    }
+
+    return when {
+        expression.isFullyHidden -> showTileOperatorSelection(tileIndex = target.tileIndex)
+
+        expression.hasOnlyKnownOperator -> showTileOperandSelection(
+            tileIndex = target.tileIndex,
+            slot = target.slot.opposite()
+        )
+
+        else -> dismissTileOperandSelection()
+    }
+}
+
+private fun GamePresentationState.advanceAfterOperatorSelection(
+    tileIndex: Int,
+    previousTile: Tile
+): GamePresentationState {
+    val expression = previousTile.expression
+
+    if (expression.operator != Operator.Hidden) {
+        return dismissTileOperatorSelection()
+    }
+
+    val remainingOperandSlot = when (expression.leftOperand) {
+        is Expression.Operand.Known if expression.rightOperand == Expression.Operand.Hidden -> OperandSlot.RIGHT
+        Expression.Operand.Hidden if expression.rightOperand is Expression.Operand.Known -> OperandSlot.LEFT
+        else -> return dismissTileOperatorSelection()
+    }
+
+    return showTileOperandSelection(
+        tileIndex = tileIndex,
+        slot = remainingOperandSlot
+    )
+}
+
+private val Expression.isFullyHidden: Boolean
+    get() = leftOperand == Expression.Operand.Hidden &&
+        operator == Operator.Hidden &&
+        rightOperand == Expression.Operand.Hidden
+
+private val Expression.hasOnlyKnownOperator: Boolean
+    get() = leftOperand == Expression.Operand.Hidden &&
+        operator != Operator.Hidden &&
+        rightOperand == Expression.Operand.Hidden
+
+private fun Expression.isHidden(slot: OperandSlot): Boolean = when (slot) {
+    OperandSlot.LEFT -> leftOperand == Expression.Operand.Hidden
+    OperandSlot.RIGHT -> rightOperand == Expression.Operand.Hidden
+}
+
+private fun OperandSlot.opposite(): OperandSlot = when (this) {
+    OperandSlot.LEFT -> OperandSlot.RIGHT
+    OperandSlot.RIGHT -> OperandSlot.LEFT
 }

@@ -92,6 +92,12 @@ fun GameScreen(
 ) {
     var isRulesHelperVisible by rememberSaveable { mutableStateOf(false) }
     val localRuleConflict = uiState.localRuleConflict()
+    val tileOperatorSelectionDialog = uiState.tileOperatorSelectionDialog.restrictedBy(
+        interactionPolicy = interactionPolicy
+    )
+    val tileOperandSelectionDialog = uiState.tileOperandSelectionDialog?.restrictedBy(
+        interactionPolicy = interactionPolicy
+    )
 
     Box(
         modifier = modifier
@@ -162,9 +168,8 @@ fun GameScreen(
                         onTileRightOperandTapped = onTileRightOperandTapped,
                         onTileOperatorTapped = onTileOperatorTapped,
                         onTileResetTapped = onTileResetTapped,
-                        tileOperatorSelectionDialog = uiState.tileOperatorSelectionDialog.restrictedBy(
-                            interactionPolicy = interactionPolicy
-                        ),
+                        tileOperatorSelectionDialog = tileOperatorSelectionDialog,
+                        tileOperandSelectionDialog = tileOperandSelectionDialog,
                         onTileOperatorSelectionDismissed = onTileOperatorSelectionDismissed,
                         onTileOperatorSelectionConfirmed = onTileOperatorSelectionConfirmed,
                         interactionPolicy = interactionPolicy,
@@ -191,9 +196,12 @@ fun GameScreen(
         }
     }
 
-    uiState.tileOperandSelectionDialog?.let { dialogUiState ->
+    tileOperandSelectionDialog?.let { dialogUiState ->
+        val tile = uiState.tiles.getOrNull(dialogUiState.tileIndex) ?: return@let
+
         TileOperandSelectionSheet(
-            dialogUiState = dialogUiState.restrictedBy(interactionPolicy = interactionPolicy),
+            dialogUiState = dialogUiState,
+            tile = tile,
             onDismiss = onTileOperandSelectionDismissed,
             onConfirm = onTileOperandSelectionConfirmed
         )

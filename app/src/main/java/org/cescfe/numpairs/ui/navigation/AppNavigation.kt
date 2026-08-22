@@ -223,15 +223,18 @@ private fun UnlockedAppNavigation(
                 onGeneratedPlayRequested = onGeneratedPlayRequested
             )
         }
+
         AppDestination.Tutorial -> TutorialRoute(
             modifier = modifier,
             onNavigateBack = navigateToMenu
         )
+
         AppDestination.Personalization -> PersonalizationRoute(
             repository = personalizationPreferencesRepository,
             onNavigateBack = navigateToMenu,
             modifier = modifier
         )
+
         is AppDestination.DailyChallenge -> {
             val dependencies = requireNotNull(dailyFeatureDependencies) {
                 "Daily feature dependencies are required for Daily gameplay."
@@ -241,13 +244,14 @@ private fun UnlockedAppNavigation(
                 dailySessionRepository = dependencies.dailySessionRepository,
                 deviceLocalDateSource = dependencies.deviceLocalDateSource,
                 generatedPuzzleGenerationUseCaseFactory =
-                dependencies.generatedPuzzleGenerationUseCaseFactory,
+                    dependencies.generatedPuzzleGenerationUseCaseFactory,
                 isGeneratedGameHapticsEnabled =
-                personalizationPreferences?.generatedGameHapticsEnabled == true,
+                    personalizationPreferences?.generatedGameHapticsEnabled == true,
                 onNavigateBack = navigateToMenu,
                 modifier = modifier
             )
         }
+
         is AppDestination.DailyCompletedToday -> {
             val dependencies = requireNotNull(dailyFeatureDependencies) {
                 "Daily feature dependencies are required for Daily completion."
@@ -260,6 +264,7 @@ private fun UnlockedAppNavigation(
                 modifier = modifier
             )
         }
+
         AppDestination.DailyCalendar -> {
             val dependencies = requireNotNull(dailyFeatureDependencies) {
                 "Daily feature dependencies are required for the Daily calendar."
@@ -271,6 +276,7 @@ private fun UnlockedAppNavigation(
                 modifier = modifier
             )
         }
+
         is AppDestination.GeneratedChallenge -> {
             val challenge = generatedChallengeCatalog.resolveChallenge(id = destination.challengeId)
             val mode = generatedChallengeCatalog.modeFor(challenge)
@@ -290,7 +296,7 @@ private fun UnlockedAppNavigation(
                     generatedSessionRepository = generatedSessionRepository,
                     topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
                     isGeneratedGameHapticsEnabled =
-                    personalizationPreferences?.generatedGameHapticsEnabled == true,
+                        personalizationPreferences?.generatedGameHapticsEnabled == true,
                     newPuzzleChallengeProvider = {
                         generatedPlayChallengeSelector.select(
                             optionId = GeneratedPlayOptions.QUICK.id,
@@ -308,7 +314,7 @@ private fun UnlockedAppNavigation(
                     generationUseCase = generationUseCase,
                     generatedSessionRepository = generatedSessionRepository,
                     isGeneratedGameHapticsEnabled =
-                    personalizationPreferences?.generatedGameHapticsEnabled == true,
+                        personalizationPreferences?.generatedGameHapticsEnabled == true,
                     modifier = modifier,
                     onNavigateBack = navigateToMenu
                 )

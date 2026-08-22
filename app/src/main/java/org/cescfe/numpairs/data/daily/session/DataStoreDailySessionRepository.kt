@@ -156,6 +156,7 @@ private fun DailyAggregate.toDailyState(): DailyState = DailyState(
 
 private fun DailyAggregateDecodingResult.decodedAggregateOrEmpty(): DailyAggregate = when (this) {
     is DailyAggregateDecodingResult.Decoded -> aggregate
+
     is DailyAggregateDecodingResult.UnsupportedVersion,
     DailyAggregateDecodingResult.InvalidData -> DailyAggregate()
 }

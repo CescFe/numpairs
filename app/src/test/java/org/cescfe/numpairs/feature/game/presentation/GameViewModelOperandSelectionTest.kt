@@ -81,7 +81,7 @@ class GameViewModelOperandSelectionTest {
     }
 
     @Test
-    fun confirming_the_selection_dialog_completes_the_hidden_left_tile_operand() {
+    fun confirming_the_first_operand_on_an_empty_tile_opens_the_operator_selection_dialog() {
         val viewModel = GameViewModel()
 
         viewModel.onTileLeftOperandTapped(index = 0)
@@ -91,6 +91,60 @@ class GameViewModelOperandSelectionTest {
 
         assertEquals(TileUiState("6", "?", "?", "223", canReset = true), uiState.tiles.first())
         assertNull(uiState.tileOperandSelectionDialog)
+        assertEquals(0, uiState.tileOperatorSelectionDialog?.tileIndex)
+    }
+
+    @Test
+    fun confirming_an_operator_after_the_first_operand_opens_the_remaining_operand_dialog() {
+        OperandSlot.entries.forEach { firstSlot ->
+            val viewModel = GameViewModel()
+
+            viewModel.tapOperand(tileIndex = 0, slot = firstSlot)
+            viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
+            viewModel.onTileOperatorSelectionConfirmed(operator = Operator.ADDITION)
+
+            assertSelectionDialogTargetForFirstTile(
+                viewModel = viewModel,
+                slot = firstSlot.opposite()
+            )
+            assertNull(viewModel.uiState.value.tileOperatorSelectionDialog)
+        }
+    }
+
+    @Test
+    fun confirming_the_first_operand_after_the_operator_opens_the_other_operand_dialog() {
+        OperandSlot.entries.forEach { firstSlot ->
+            val viewModel = GameViewModel()
+
+            viewModel.onTileOperatorTapped(index = 0)
+            viewModel.onTileOperatorSelectionConfirmed(operator = Operator.ADDITION)
+            viewModel.tapOperand(tileIndex = 0, slot = firstSlot)
+            viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
+
+            assertSelectionDialogTargetForFirstTile(
+                viewModel = viewModel,
+                slot = firstSlot.opposite()
+            )
+        }
+    }
+
+    @Test
+    fun confirming_the_last_operand_completes_the_tile_without_opening_another_dialog() {
+        val viewModel = GameViewModel()
+
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
+        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.ADDITION)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 4)
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals(
+            TileUiState("6", "+", "25", "223", visualState = TileVisualState.INCORRECT, canReset = true),
+            uiState.tiles.first()
+        )
+        assertNull(uiState.tileOperandSelectionDialog)
+        assertNull(uiState.tileOperatorSelectionDialog)
     }
 
     @Test
@@ -198,4 +252,16 @@ private fun assignEntryTwoToLeftOperand(index: Int, operator: Operator, viewMode
     viewModel.onTileOperandSelectionConfirmed(stripEntryId = 2)
     viewModel.onTileOperatorTapped(index = index)
     viewModel.onTileOperatorSelectionConfirmed(operator = operator)
+}
+
+private fun GameViewModel.tapOperand(tileIndex: Int, slot: OperandSlot) {
+    when (slot) {
+        OperandSlot.LEFT -> onTileLeftOperandTapped(index = tileIndex)
+        OperandSlot.RIGHT -> onTileRightOperandTapped(index = tileIndex)
+    }
+}
+
+private fun OperandSlot.opposite(): OperandSlot = when (this) {
+    OperandSlot.LEFT -> OperandSlot.RIGHT
+    OperandSlot.RIGHT -> OperandSlot.LEFT
 }

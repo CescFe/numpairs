@@ -4,7 +4,6 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
@@ -28,6 +27,7 @@ import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesReposi
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.puzzle.model.Operator
+import org.cescfe.numpairs.feature.game.ui.screen.GameScreenRobot
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
@@ -50,6 +50,13 @@ import org.junit.runner.RunWith
 class RequiredOnboardingNavigationTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+
+    private val gameRobot by lazy {
+        GameScreenRobot(
+            activity = composeTestRule.activity,
+            interactions = composeTestRule
+        )
+    }
 
     @Test
     fun unresolvedFreshStateOpensTutorialBeforeMenu() {
@@ -171,10 +178,30 @@ class RequiredOnboardingNavigationTest {
 
         enterStripValue(index = 0, value = "1")
         enterStripValue(index = 1, value = "2")
-        completeTile(tileIndex = 0, leftStripEntryId = 0, operator = Operator.ADDITION, rightStripEntryId = 1)
-        completeTile(tileIndex = 1, leftStripEntryId = 0, operator = Operator.MULTIPLICATION, rightStripEntryId = 1)
-        completeTile(tileIndex = 2, leftStripEntryId = 2, operator = Operator.ADDITION, rightStripEntryId = 3)
-        completeTile(tileIndex = 3, leftStripEntryId = 2, operator = Operator.MULTIPLICATION, rightStripEntryId = 3)
+        gameRobot.completeTile(
+            tileIndex = 0,
+            leftStripEntryId = 0,
+            operator = Operator.ADDITION,
+            rightStripEntryId = 1
+        )
+        gameRobot.completeTile(
+            tileIndex = 1,
+            leftStripEntryId = 0,
+            operator = Operator.MULTIPLICATION,
+            rightStripEntryId = 1
+        )
+        gameRobot.completeTile(
+            tileIndex = 2,
+            leftStripEntryId = 2,
+            operator = Operator.ADDITION,
+            rightStripEntryId = 3
+        )
+        gameRobot.completeTile(
+            tileIndex = 3,
+            leftStripEntryId = 2,
+            operator = Operator.MULTIPLICATION,
+            rightStripEntryId = 3
+        )
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
@@ -277,41 +304,6 @@ class RequiredOnboardingNavigationTest {
                 .performClick()
         }
         waitForTutorialCopy(R.string.tutorial_worked_example_sum_two_three_copy)
-    }
-
-    private fun completeTile(tileIndex: Int, leftStripEntryId: Int, operator: Operator, rightStripEntryId: Int) {
-        chooseTileOperand(tileIndex = tileIndex, isLeftOperand = true, stripEntryId = leftStripEntryId)
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(leftStripEntryId), useUnmergedTree = true)
-            .performClick()
-        chooseTileOperand(tileIndex = tileIndex, isLeftOperand = false, stripEntryId = rightStripEntryId)
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(rightStripEntryId), useUnmergedTree = true)
-            .performClick()
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperator(tileIndex), useUnmergedTree = true)
-            .performScrollTo()
-            .performClick()
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperatorOption(operator), useUnmergedTree = true)
-            .performClick()
-    }
-
-    private fun chooseTileOperand(tileIndex: Int, isLeftOperand: Boolean, stripEntryId: Int) {
-        composeTestRule
-            .onNodeWithTag(
-                if (isLeftOperand) {
-                    GameScreenTestTags.tileLeftOperand(tileIndex)
-                } else {
-                    GameScreenTestTags.tileRightOperand(tileIndex)
-                },
-                useUnmergedTree = true
-            )
-            .performScrollTo()
-            .performClick()
-        composeTestRule
-            .onNodeWithTag(GameScreenTestTags.tileOperandOption(stripEntryId), useUnmergedTree = true)
-            .assertIsEnabled()
     }
 
     private fun waitForMenu() {

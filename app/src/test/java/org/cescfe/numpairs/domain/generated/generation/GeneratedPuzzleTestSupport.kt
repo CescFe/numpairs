@@ -17,6 +17,7 @@ fun generatedPuzzle(
     )
 ) {
     is GeneratedPairsPuzzleGenerationOutcome.Generated -> outcome.puzzle
+
     is GeneratedPairsPuzzleGenerationOutcome.Failed -> error(
         "Expected generated puzzle for ${profile.id.value}, seed $seed, but generation failed: ${outcome.reason}."
     )

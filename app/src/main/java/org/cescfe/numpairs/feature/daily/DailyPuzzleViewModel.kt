@@ -357,6 +357,7 @@ internal class DailyPuzzleViewModel(
         )
     ) {
         DailySessionProgressUpdateResult.Updated -> null
+
         DailySessionProgressUpdateResult.StaleSession -> {
             DailyPuzzlePersistenceFailure.StaleSession
         }

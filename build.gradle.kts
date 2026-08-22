@@ -8,7 +8,7 @@ plugins {
 spotless {
     kotlin {
         target("app/src/**/*.kt")
-        ktlint(libs.versions.ktlint.get())
+        ktlint()
             .editorConfigOverride(
                 mapOf(
                     "ktlint_code_style" to "android_studio",
@@ -19,7 +19,7 @@ spotless {
     }
     kotlinGradle {
         target("*.gradle.kts", "app/*.gradle.kts")
-        ktlint(libs.versions.ktlint.get())
+        ktlint()
             .editorConfigOverride(
                 mapOf(
                     "ktlint_code_style" to "android_studio",

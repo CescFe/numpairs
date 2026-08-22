@@ -28,6 +28,7 @@ private fun DataOutputStream.writeTile(tile: Tile) {
 private fun DataOutputStream.writeOperand(operand: Expression.Operand) {
     when (operand) {
         Expression.Operand.Hidden -> writeByte(OPERAND_HIDDEN)
+
         is Expression.Operand.Known -> {
             writeByte(OPERAND_KNOWN)
             writeInt(operand.value)
@@ -50,6 +51,7 @@ private fun DataOutputStream.writeStripEntry(entry: StripEntry) {
     writeInt(entry.id)
     when (val item = entry.item) {
         StripItem.Hidden -> writeByte(STRIP_ITEM_HIDDEN)
+
         is StripItem.Known -> {
             writeByte(STRIP_ITEM_KNOWN)
             writeInt(item.value)
@@ -93,6 +95,7 @@ private fun DataInputStream.readTile(): Tile = Tile(
 
 private fun DataInputStream.readOperand(): Expression.Operand = when (readUnsignedByte()) {
     OPERAND_HIDDEN -> Expression.Operand.Hidden
+
     OPERAND_KNOWN -> {
         val value = readInt()
         val stripEntryId = if (readBoolean()) {

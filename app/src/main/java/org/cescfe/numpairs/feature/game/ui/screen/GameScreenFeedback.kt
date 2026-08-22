@@ -302,6 +302,7 @@ internal fun PuzzleOutcomeBanner(puzzleOutcome: PuzzleOutcomeUiState.Invalid, mo
 private fun RuleConflictUiState.localRuleConflictMessage(): String = when (this) {
     RuleConflictUiState.DUPLICATE_OPERATOR_USAGE ->
         stringResource(R.string.local_rule_conflict_duplicate_operator_usage_message)
+
     RuleConflictUiState.MISMATCHED_PAIRING ->
         stringResource(R.string.local_rule_conflict_mismatched_pairing_message)
 }
@@ -309,12 +310,16 @@ private fun RuleConflictUiState.localRuleConflictMessage(): String = when (this)
 @Composable
 internal fun PuzzleOutcomeUiState.Invalid.message(): String = when (completionState) {
     PuzzleCompletionState.INCORRECT_TILES -> stringResource(R.string.puzzle_outcome_invalid_tiles_message)
+
     PuzzleCompletionState.MISSING_STRIP_ENTRY_IDENTITIES ->
         stringResource(R.string.puzzle_outcome_missing_identities_message)
+
     PuzzleCompletionState.MISMATCHED_SUM_PRODUCT_PAIRINGS ->
         stringResource(R.string.puzzle_outcome_mismatched_pairings_message)
+
     PuzzleCompletionState.INVALID_STRIP_ENTRY_USAGE ->
         stringResource(R.string.puzzle_outcome_invalid_usage_message)
+
     PuzzleCompletionState.INCOMPLETE,
     PuzzleCompletionState.SOLVED -> error("Invalid outcome must represent a completed unsolved puzzle.")
 }

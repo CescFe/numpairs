@@ -207,8 +207,11 @@ internal class GeneratedPuzzleViewModel(
         val state = _uiState.value
         val visibleSession = when (state) {
             is GeneratedPuzzleGenerationUiState.Ready -> state.session
+
             is GeneratedPuzzleGenerationUiState.Loading -> state.previousSession
+
             is GeneratedPuzzleGenerationUiState.Failed -> state.previousSession
+
             GeneratedPuzzleGenerationUiState.Idle,
             is GeneratedPuzzleGenerationUiState.Restoring,
             is GeneratedPuzzleGenerationUiState.ResumeUnavailable -> null
@@ -225,8 +228,11 @@ internal class GeneratedPuzzleViewModel(
         )
         _uiState.value = when (state) {
             is GeneratedPuzzleGenerationUiState.Ready -> state.copy(session = updatedSession)
+
             is GeneratedPuzzleGenerationUiState.Loading -> state.copy(previousSession = updatedSession)
+
             is GeneratedPuzzleGenerationUiState.Failed -> state.copy(previousSession = updatedSession)
+
             GeneratedPuzzleGenerationUiState.Idle,
             is GeneratedPuzzleGenerationUiState.Restoring,
             is GeneratedPuzzleGenerationUiState.ResumeUnavailable -> state

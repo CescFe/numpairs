@@ -75,6 +75,7 @@ fun Puzzle.resolvedTileAssignments(): List<IndexedResolvedTileAssignment> = boar
 private val Expression.Operand.resolvedOperandAssignment: ResolvedOperandAssignment?
     get() = when (this) {
         Expression.Operand.Hidden -> null
+
         is Expression.Operand.Known -> stripEntryId?.let { resolvedStripEntryId ->
             ResolvedOperandAssignment(
                 stripEntryId = StripEntryId(resolvedStripEntryId),

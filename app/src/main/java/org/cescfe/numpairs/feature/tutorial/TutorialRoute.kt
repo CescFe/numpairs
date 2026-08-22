@@ -404,18 +404,22 @@ private fun TutorialRequiredAction.toInteractionPolicy(
     highlightedStripEntryIds: Set<Int>
 ): GameInteractionPolicy = when (this) {
     TutorialRequiredAction.NoInteraction -> noInteractionPolicy()
+
     is TutorialRequiredAction.CompleteTileExpression -> toInteractionPolicy(
         scenario = scenario,
         highlightedStripEntryIds = highlightedStripEntryIds
     )
+
     is TutorialRequiredAction.CompleteTileExpressions -> toInteractionPolicy(
         scenario = scenario,
         highlightedStripEntryIds = highlightedStripEntryIds
     )
+
     is TutorialRequiredAction.CompleteTileExpressionsInOrder -> toInteractionPolicy(
         scenario = scenario,
         uiState = uiState
     )
+
     TutorialRequiredAction.CompleteScenario -> GameInteractionPolicy.AllowAll
 }
 
@@ -556,6 +560,7 @@ private fun TutorialStep.highlightedStripEntryIds(scenario: TutorialScenario): S
     highlightedTargets.forEach { target ->
         when (target) {
             TutorialHighlightTarget.WholeStrip -> Unit
+
             TutorialHighlightTarget.HiddenStripEntries -> {
                 scenario.initialPuzzle.strip.items.forEachIndexed { index, item ->
                     if (item == StripItem.Hidden) {
@@ -563,7 +568,9 @@ private fun TutorialStep.highlightedStripEntryIds(scenario: TutorialScenario): S
                     }
                 }
             }
+
             is TutorialHighlightTarget.StripEntries -> addAll(target.indexes)
+
             TutorialHighlightTarget.HiddenTileExpressions,
             is TutorialHighlightTarget.TileExpressionSlots,
             is TutorialHighlightTarget.WholeTile -> Unit
@@ -604,6 +611,7 @@ internal fun TutorialStep.toHighlightState(
             TutorialHighlightTarget.WholeStrip -> {
                 isStripHighlighted = true
             }
+
             TutorialHighlightTarget.HiddenStripEntries -> {
                 scenario.initialPuzzle.strip.items.forEachIndexed { index, item ->
                     if (item == StripItem.Hidden) {
@@ -611,6 +619,7 @@ internal fun TutorialStep.toHighlightState(
                     }
                 }
             }
+
             TutorialHighlightTarget.HiddenTileExpressions -> {
                 scenario.initialPuzzle.board.tiles.forEachIndexed { tileIndex, tile ->
                     if (!tile.expression.isFullyKnown) {
@@ -618,12 +627,15 @@ internal fun TutorialStep.toHighlightState(
                     }
                 }
             }
+
             is TutorialHighlightTarget.StripEntries -> {
                 stripEntryIndexes += target.indexes
             }
+
             is TutorialHighlightTarget.TileExpressionSlots -> {
                 tileExpressionSlots += expressionSlotHighlights(target.tileIndex)
             }
+
             is TutorialHighlightTarget.WholeTile -> {
                 tileIndexes += target.tileIndex
             }

@@ -26,6 +26,7 @@ internal class GeneratedStripMaskSelector(
         )
     ) {
         is GeneratedPairsSearchOutcome.Found -> outcome.value
+
         GeneratedPairsSearchOutcome.NoCandidate,
         GeneratedPairsSearchOutcome.BudgetExhausted,
         GeneratedPairsSearchOutcome.Cancelled -> null
@@ -63,7 +64,9 @@ internal class GeneratedStripMaskSelector(
             }
 
             GeneratedPairsSearchOutcome.BudgetExhausted -> return GeneratedPairsSearchOutcome.BudgetExhausted
+
             GeneratedPairsSearchOutcome.Cancelled -> return GeneratedPairsSearchOutcome.Cancelled
+
             GeneratedPairsSearchOutcome.NoCandidate -> Unit
         }
 
@@ -82,7 +85,9 @@ internal class GeneratedStripMaskSelector(
             )
 
             GeneratedPairsSearchOutcome.NoCandidate -> GeneratedPairsSearchOutcome.NoCandidate
+
             GeneratedPairsSearchOutcome.BudgetExhausted -> GeneratedPairsSearchOutcome.BudgetExhausted
+
             GeneratedPairsSearchOutcome.Cancelled -> GeneratedPairsSearchOutcome.Cancelled
         }
     }
@@ -104,8 +109,10 @@ internal class GeneratedStripMaskSelector(
                 )
             ) {
                 is GeneratedPairsSearchOutcome.Found -> return selection
+
                 GeneratedPairsSearchOutcome.BudgetExhausted,
                 GeneratedPairsSearchOutcome.Cancelled -> return selection
+
                 GeneratedPairsSearchOutcome.NoCandidate -> Unit
             }
         }

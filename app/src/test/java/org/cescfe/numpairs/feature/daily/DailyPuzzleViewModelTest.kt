@@ -755,6 +755,7 @@ private class RecordingDailyPuzzleGenerator(vararg outcomes: Any) : DailyPuzzleG
         requestCount += 1
         return when (val outcome = remainingOutcomes.removeFirst()) {
             is DailyPuzzleGenerationResult -> outcome
+
             is CompletableDeferred<*> -> {
                 @Suppress("UNCHECKED_CAST")
                 (outcome as CompletableDeferred<DailyPuzzleGenerationResult>).await()

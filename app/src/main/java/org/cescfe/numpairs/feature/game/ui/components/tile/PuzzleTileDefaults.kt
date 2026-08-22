@@ -29,6 +29,9 @@ internal val HIGHLIGHTED_TILE_EXPRESSION_SLOT_CORNER_RADIUS = 8.dp
 internal const val CORRECT_TILE_FEEDBACK_SCALE = 1.04f
 internal const val CORRECT_TILE_FEEDBACK_SCALE_UP_DURATION_MILLIS = 90
 internal const val CORRECT_TILE_FEEDBACK_SCALE_DOWN_DURATION_MILLIS = 130
+internal const val TILE_INPUT_CONFIRMATION_SCALE = 1.12f
+internal const val TILE_INPUT_CONFIRMATION_SCALE_UP_DURATION_MILLIS = 90
+internal const val TILE_INPUT_CONFIRMATION_SCALE_DOWN_DURATION_MILLIS = 130
 
 @Composable
 internal fun tileStatePalette(visualState: TileVisualState): TileStatePalette {

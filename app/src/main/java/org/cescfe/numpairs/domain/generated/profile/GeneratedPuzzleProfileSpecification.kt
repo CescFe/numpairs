@@ -36,6 +36,7 @@ internal object GeneratedPuzzleProfileSpecification {
         evaluations.forEach { evaluate ->
             when (val evaluation = evaluate(context)) {
                 is GeneratedPuzzleProfileBoundedEvaluation.Completed -> violations += evaluation.value
+
                 is GeneratedPuzzleProfileBoundedEvaluation.LimitExceeded -> {
                     violations += evaluation.violation
                     return violations
@@ -235,8 +236,10 @@ private object GeneratedPuzzleProfileStructuralEvaluator {
         definition.varietyPolicy.repeatedValueGroupTarget?.let { target ->
             val maximumConfiguredGroupCount = definition.stripValuePolicy.maxRepeatedValueGroupCount
             if (definition.stripValuePolicy.maxOccurrencesPerValue < 2 ||
-                maximumConfiguredGroupCount != null &&
-                target.targetGroupCount > maximumConfiguredGroupCount ||
+                (
+                    maximumConfiguredGroupCount != null &&
+                        target.targetGroupCount > maximumConfiguredGroupCount
+                    ) ||
                 target.targetGroupCount > definition.size.stripEntryCount / 2
             ) {
                 add(
@@ -258,6 +261,7 @@ private object GeneratedPuzzlePairSelectionFeasibilityEvaluator {
         val maximumPairCount = context.maximumStructurallySelectablePairCount(pairs = context.eligiblePairs)
     ) {
         is GeneratedPuzzleProfileBoundedEvaluation.LimitExceeded -> maximumPairCount
+
         is GeneratedPuzzleProfileBoundedEvaluation.Completed -> {
             val violations = if (maximumPairCount.value < context.definition.size.pairCount) {
                 listOf(
@@ -407,6 +411,7 @@ private object GeneratedPuzzleProductAnchorEvaluator {
                 )
             ) {
                 is GeneratedPuzzleProfileBoundedEvaluation.LimitExceeded -> return selection
+
                 is GeneratedPuzzleProfileBoundedEvaluation.Completed -> if (!selection.value) {
                     violations += GeneratedPuzzleProfileViolation.ProductAnchorSelectionInfeasible(
                         requiredPairCount = context.definition.size.pairCount,
@@ -433,6 +438,7 @@ private object GeneratedPuzzleVarietyTargetEvaluator {
         val decoyPairs = context.eligiblePairs.filter { pair -> target.pairPattern.matches(pair = pair) }
         return when (val maximum = context.maximumStructurallySelectablePairCount(pairs = decoyPairs)) {
             is GeneratedPuzzleProfileBoundedEvaluation.LimitExceeded -> maximum
+
             is GeneratedPuzzleProfileBoundedEvaluation.Completed -> {
                 val violations = if (maximum.value < target.targetPairCount) {
                     listOf(
@@ -474,6 +480,7 @@ private fun GeneratedPuzzleProfileFeasibilityContext.maximumStructurallySelectab
             )
         ) {
             is GeneratedPuzzleProfileBoundedEvaluation.LimitExceeded -> return selection
+
             is GeneratedPuzzleProfileBoundedEvaluation.Completed -> if (selection.value) {
                 return GeneratedPuzzleProfileBoundedEvaluation.Completed(value = candidateCount)
             }

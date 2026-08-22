@@ -188,6 +188,7 @@ private fun requireValidCurrentAssignments(currentPuzzle: Puzzle) {
         listOf(tile.expression.leftOperand, tile.expression.rightOperand).forEach { operand ->
             when (operand) {
                 Expression.Operand.Hidden -> Unit
+
                 is Expression.Operand.Known -> require(
                     operand.stripEntryId != null &&
                         visibleValuesByEntryId[operand.stripEntryId] == operand.value

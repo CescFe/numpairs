@@ -69,10 +69,12 @@ class MainActivity : ComponentActivity() {
                 }
                 when (val state = onboardingStartupState) {
                     OnboardingStartupState.Loading -> Unit
+
                     is OnboardingStartupState.Failure -> OnboardingStartupFailureScreen(
                         isRetrying = state.isRetrying,
                         onRetry = onboardingStartupCoordinator::retry
                     )
+
                     is OnboardingStartupState.Ready -> ReadyAppNavigation(
                         onboardingState = state.onboardingState,
                         onboardingRepository = onboardingRepository,

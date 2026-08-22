@@ -266,6 +266,7 @@ class GameRouteTest {
                         initialPuzzle = samplePuzzle,
                         gameSessionKey = "tutorial"
                     )
+
                     GameRouteMode.FOUR_PAIRS -> GameRoute(
                         title = "4 pairs",
                         initialPuzzle = fourPairsPuzzle,
