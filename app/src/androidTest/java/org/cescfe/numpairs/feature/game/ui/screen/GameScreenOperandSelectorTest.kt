@@ -29,7 +29,6 @@ class GameScreenOperandSelectorTest : GameScreenTestHost() {
             .assertOperatorInputActive(tileIndex = 0)
             .assertOperandSelectorHidden()
             .assertOperatorSelectorDisplayed()
-            .assertOperatorSelectorTitle()
     }
 
     @Test

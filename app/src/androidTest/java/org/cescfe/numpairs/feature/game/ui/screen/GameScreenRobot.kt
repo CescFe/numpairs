@@ -315,12 +315,6 @@ class GameScreenRobot(
             .assert(hasText(string(stringResId, *formatArgs)))
     }
 
-    fun assertOperatorSelectorTitle(): GameScreenRobot = apply {
-        interactions
-            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR_TITLE, useUnmergedTree = true)
-            .assert(hasText(string(R.string.tile_operator_dialog_title)))
-    }
-
     fun assertOperandOptionDisplayed(entryId: Int): GameScreenRobot = apply {
         interactions
             .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId), useUnmergedTree = true)

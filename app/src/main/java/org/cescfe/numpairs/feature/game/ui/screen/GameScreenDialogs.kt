@@ -4,7 +4,6 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
@@ -373,66 +372,57 @@ internal fun TileOperatorSelectionMenu(
         shadowElevation = 0.dp,
         border = NumPairsComponents.subtleBorder()
     ) {
-        Column(
-            modifier = Modifier.padding(TILE_OPERATOR_MENU_PADDING),
-            verticalArrangement = Arrangement.spacedBy(TILE_OPERATOR_MENU_OPTION_SPACING)
+        Row(
+            modifier = Modifier
+                .padding(TILE_OPERATOR_MENU_PADDING)
+                .selectableGroup(),
+            horizontalArrangement = Arrangement.spacedBy(TILE_OPERATOR_MENU_OPTION_SPACING)
         ) {
-            Text(
-                text = operatorMenuContentDescription,
-                modifier = Modifier.testTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR_TITLE),
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.labelLarge
-            )
-            Row(
-                modifier = Modifier.selectableGroup(),
-                horizontalArrangement = Arrangement.spacedBy(TILE_OPERATOR_MENU_OPTION_SPACING)
-            ) {
-                dialogUiState.availableOperators.forEach { operator ->
-                    val isSelected = dialogUiState.initialOperator == operator
-                    val operatorSelectionLabel = operator.selectionLabel()
+            dialogUiState.availableOperators.forEach { operator ->
+                val isSelected = dialogUiState.initialOperator == operator
+                val operatorSelectionLabel = operator.selectionLabel()
 
-                    Surface(
-                        onClick = { onConfirm(operator) },
-                        modifier = Modifier
-                            .defaultMinSize(minWidth = 0.dp)
-                            .testTag(GameScreenTestTags.tileOperatorOption(operator))
-                            .semantics {
-                                contentDescription = operatorSelectionLabel
-                                selected = isSelected
-                            },
-                        shape = RoundedCornerShape(TILE_OPERATOR_MENU_CORNER_RADIUS),
-                        color = if (isSelected) {
-                            MaterialTheme.numPairsSemanticColors.selectionContainer
-                        } else {
-                            NumPairsComponents.subtleSurfaceColor()
+                Surface(
+                    onClick = { onConfirm(operator) },
+                    modifier = Modifier
+                        .defaultMinSize(minWidth = 0.dp)
+                        .testTag(GameScreenTestTags.tileOperatorOption(operator))
+                        .semantics {
+                            contentDescription = operatorSelectionLabel
+                            selected = isSelected
                         },
-                        contentColor = if (isSelected) {
-                            MaterialTheme.numPairsSemanticColors.onSelectionContainer
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                        border = if (isSelected) {
-                            BorderStroke(
-                                width = NumPairsComponents.StrongBorderWidth,
-                                color = MaterialTheme.numPairsSemanticColors.selection
-                            )
-                        } else {
-                            NumPairsComponents.subtleBorder()
-                        }
-                    ) {
-                        Text(
-                            text = operator.symbol,
-                            modifier = Modifier.padding(
-                                horizontal = TILE_OPERATOR_MENU_OPTION_HORIZONTAL_PADDING,
-                                vertical = TILE_OPERATOR_MENU_OPTION_VERTICAL_PADDING
-                            ),
-                            style = if (isSelected) {
-                                NumPairsTextStyles.OperatorOptionSelected
-                            } else {
-                                NumPairsTextStyles.OperatorOption
-                            }
+                    shape = RoundedCornerShape(TILE_OPERATOR_MENU_CORNER_RADIUS),
+                    color = if (isSelected) {
+                        MaterialTheme.numPairsSemanticColors.selectionContainer
+                    } else {
+                        NumPairsComponents.subtleSurfaceColor()
+                    },
+                    contentColor = if (isSelected) {
+                        MaterialTheme.numPairsSemanticColors.onSelectionContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                    border = if (isSelected) {
+                        BorderStroke(
+                            width = NumPairsComponents.StrongBorderWidth,
+                            color = MaterialTheme.numPairsSemanticColors.selection
                         )
+                    } else {
+                        NumPairsComponents.subtleBorder()
                     }
+                ) {
+                    Text(
+                        text = operator.symbol,
+                        modifier = Modifier.padding(
+                            horizontal = TILE_OPERATOR_MENU_OPTION_HORIZONTAL_PADDING,
+                            vertical = TILE_OPERATOR_MENU_OPTION_VERTICAL_PADDING
+                        ),
+                        style = if (isSelected) {
+                            NumPairsTextStyles.OperatorOptionSelected
+                        } else {
+                            NumPairsTextStyles.OperatorOption
+                        }
+                    )
                 }
             }
         }
