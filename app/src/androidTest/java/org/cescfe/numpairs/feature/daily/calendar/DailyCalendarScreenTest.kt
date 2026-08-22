@@ -39,7 +39,6 @@ import org.cescfe.numpairs.data.daily.session.DailySessionSnapshot
 import org.cescfe.numpairs.data.daily.session.DailyState
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
-import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
@@ -156,7 +155,7 @@ class DailyCalendarScreenTest {
             NumPairsTheme {
                 DailyCalendarRoute(
                     dailySessionRepository = repository,
-                    deviceLocalDateSource = DeviceLocalDateSource {
+                    deviceLocalDateSource = {
                         dateReadCount += 1
                         currentDate
                     },
@@ -259,7 +258,7 @@ class DailyCalendarScreenTest {
             }
         }
 
-        val navigationBounds = listOf(
+        val navigationNodes = listOf(
             DailyCalendarScreenTestTags.BACK_BUTTON,
             DailyCalendarScreenTestTags.PREVIOUS_MONTH_BUTTON,
             DailyCalendarScreenTestTags.NEXT_MONTH_BUTTON
@@ -268,22 +267,21 @@ class DailyCalendarScreenTest {
                 .onNodeWithTag(tag)
                 .assertIsDisplayed()
                 .fetchSemanticsNode()
-                .boundsInRoot
         }
         val minimumTouchTarget = with(composeTestRule.density) {
             48.dp.toPx()
         }
-        navigationBounds.values.forEach { bounds ->
-            assertTrue(bounds.width >= minimumTouchTarget)
-            assertTrue(bounds.height >= minimumTouchTarget)
+        navigationNodes.values.forEach { node ->
+            assertTrue(node.touchBoundsInRoot.width >= minimumTouchTarget)
+            assertTrue(node.touchBoundsInRoot.height >= minimumTouchTarget)
         }
 
-        val previousBounds = navigationBounds.getValue(
+        val previousBounds = navigationNodes.getValue(
             DailyCalendarScreenTestTags.PREVIOUS_MONTH_BUTTON
-        )
-        val nextBounds = navigationBounds.getValue(
+        ).boundsInRoot
+        val nextBounds = navigationNodes.getValue(
             DailyCalendarScreenTestTags.NEXT_MONTH_BUTTON
-        )
+        ).boundsInRoot
         val expectedContentWidth = with(composeTestRule.density) {
             480.dp.toPx()
         }

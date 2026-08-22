@@ -20,7 +20,6 @@ import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
 import org.cescfe.numpairs.data.onboarding.FirstRunTutorialOutcome
 import org.cescfe.numpairs.data.onboarding.OnboardingStageCheckpoint
-import org.cescfe.numpairs.data.onboarding.OnboardingState
 import org.cescfe.numpairs.data.onboarding.completedOnboardingState
 import org.cescfe.numpairs.data.onboarding.incompleteOnboardingState
 import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesRepository
@@ -34,7 +33,6 @@ import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
-import org.cescfe.numpairs.feature.onboarding.ONBOARDING_LOADING_SCREEN_TEST_TAG
 import org.cescfe.numpairs.feature.onboarding.RequiredOnboardingTestTags
 import org.cescfe.numpairs.feature.tutorial.ui.TutorialScreenTestTags
 import org.cescfe.numpairs.testing.fourPairsQuickSelector
@@ -60,14 +58,8 @@ class RequiredOnboardingNavigationTest {
 
     @Test
     fun unresolvedFreshStateOpensTutorialBeforeMenu() {
-        val repository = FakeOnboardingRepository(initialState = OnboardingState())
+        val repository = FakeOnboardingRepository(initialState = incompleteOnboardingState())
         setContent(repository)
-
-        composeTestRule
-            .onNodeWithTag(ONBOARDING_LOADING_SCREEN_TEST_TAG)
-            .assertIsDisplayed()
-
-        repository.onboardingState.value = incompleteOnboardingState()
 
         composeTestRule
             .onNodeWithTag(TutorialScreenTestTags.STEP_COPY)

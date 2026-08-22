@@ -159,6 +159,7 @@ class FourPairsModeTest {
     private fun navigateToFourPairs() {
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
+            .performScrollTo()
             .assertIsDisplayed()
             .performClick()
 

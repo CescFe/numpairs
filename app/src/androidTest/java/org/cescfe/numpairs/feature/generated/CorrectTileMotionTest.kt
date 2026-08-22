@@ -197,11 +197,11 @@ private fun oneOperatorAwayPuzzle(): Puzzle = Puzzle(
                     operator = Operator.Hidden,
                     rightOperand = Expression.Operand.Hidden
                 ),
-                result = 7
+                result = 2
             )
         )
     ),
     strip = Strip.fromItems(
-        items = listOf(1, 2, 3, 4).map(StripItem::Known)
+        items = listOf(1, 2).map(StripItem::Known)
     )
 )

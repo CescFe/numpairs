@@ -28,7 +28,6 @@ import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
@@ -159,7 +158,7 @@ class MenuScreenTest {
             .boundsInRoot
             .top
         val quickBounds = composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_SPLIT_CTA)
             .fetchSemanticsNode()
             .boundsInRoot
 
@@ -424,12 +423,12 @@ class MenuScreenTest {
         val screenBounds = composeTestRule
             .onNodeWithTag(MenuScreenTestTags.SCREEN)
             .fetchSemanticsNode()
-            .boundsInRoot
+            .boundsInWindow
         val menuBounds = composeTestRule
             .onNodeWithTag(MenuScreenTestTags.CLASSIC_DIFFICULTY_MENU)
             .assertIsDisplayed()
             .fetchSemanticsNode()
-            .boundsInRoot
+            .boundsInWindow
 
         assertTrue(menuBounds.left >= screenBounds.left)
         assertTrue(menuBounds.right <= screenBounds.right)
@@ -451,7 +450,7 @@ class MenuScreenTest {
             .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON)
             .performClick()
         composeTestRule
-            .onRoot()
+            .onNodeWithTag(MenuScreenTestTags.SCREEN)
             .performTouchInput {
                 click(Offset(1f, 1f))
             }
@@ -500,7 +499,7 @@ class MenuScreenTest {
             .fetchSemanticsNode()
             .boundsInRoot
         val quickBounds = composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_SPLIT_CTA)
             .assertIsDisplayed()
             .fetchSemanticsNode()
             .boundsInRoot
@@ -656,12 +655,12 @@ class MenuScreenTest {
         val triggerBounds = composeTestRule
             .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON)
             .fetchSemanticsNode()
-            .boundsInRoot
+            .boundsInWindow
         val menuBounds = composeTestRule
             .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_MENU)
             .assertIsDisplayed()
             .fetchSemanticsNode()
-            .boundsInRoot
+            .boundsInWindow
 
         if (layoutDirection == LayoutDirection.Ltr) {
             assertEquals(triggerBounds.right, menuBounds.right, 1f)

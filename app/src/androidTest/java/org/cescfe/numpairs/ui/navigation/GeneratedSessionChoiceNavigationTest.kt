@@ -297,7 +297,6 @@ class GeneratedSessionChoiceNavigationTest {
         assertChoiceDialogVisible()
         pressBackUnconditionally()
         assertDismissedWithoutSideEffects(snapshot, repository, recorder)
-        pressBackUnconditionally()
 
         composeTestRule.navigateToSelectedGeneratedChallenge(MenuScreenTestTags.QUICK_BUTTON)
         assertChoiceDialogVisible()

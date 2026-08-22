@@ -128,6 +128,7 @@ class GeneratedReplacementTransitionTest {
         composeTestRule.runOnIdle {
             successor.complete(oneOperatorAwayFromSolvedReplacementPuzzle())
         }
+        composeTestRule.mainClock.advanceTimeByFrame()
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodesWithTag(GENERATED_PUZZLE_CONTENT_TAG)

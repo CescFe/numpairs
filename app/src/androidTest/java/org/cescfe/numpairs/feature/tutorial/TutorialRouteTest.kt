@@ -328,7 +328,10 @@ class TutorialRouteTest {
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE)
+            .onNodeWithTag(
+                GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE,
+                useUnmergedTree = true
+            )
             .assert(hasText(string(R.string.tutorial_success_overlay_message)))
         composeTestRule
             .onNodeWithText(string(R.string.tutorial_success_overlay_supporting_text))
