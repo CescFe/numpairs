@@ -11,7 +11,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isPopup
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -280,7 +279,8 @@ class AppNavigationLearningFlowTest {
         enterStripValue(index = 1, value = "2", interactions = interactions)
         val tutorialGame = GameScreenRobot(
             activity = composeTestRule.activity,
-            interactions = interactions
+            interactions = interactions,
+            popupInteractions = composeTestRule
         )
         tutorialGame.completeTile(
             tileIndex = 0,
@@ -345,16 +345,12 @@ class AppNavigationLearningFlowTest {
         val tutorialOverlayAncestor = hasAnyAncestor(
             hasTestTag(TutorialScreenTestTags.FULL_SCREEN_OVERLAY)
         )
-        val tutorialOverlayOrPopup = tutorialOverlayAncestor
-            .or(isPopup())
-            .or(hasAnyAncestor(isPopup()))
-
         return object : SemanticsNodeInteractionsProvider {
             override fun onNode(
                 matcher: SemanticsMatcher,
                 useUnmergedTree: Boolean
             ): SemanticsNodeInteraction = composeTestRule.onNode(
-                matcher.and(tutorialOverlayOrPopup),
+                matcher.and(tutorialOverlayAncestor),
                 useUnmergedTree
             )
 
@@ -362,7 +358,7 @@ class AppNavigationLearningFlowTest {
                 matcher: SemanticsMatcher,
                 useUnmergedTree: Boolean
             ): SemanticsNodeInteractionCollection = composeTestRule.onAllNodes(
-                matcher.and(tutorialOverlayOrPopup),
+                matcher.and(tutorialOverlayAncestor),
                 useUnmergedTree
             )
         }

@@ -1,14 +1,11 @@
 package org.cescfe.numpairs.ui.navigation
 
 import androidx.activity.ComponentActivity
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTouchInput
 import androidx.test.espresso.Espresso.pressBackUnconditionally
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
@@ -36,6 +33,7 @@ import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.feature.menu.ui.GeneratedDifficultyMenuOptionId
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
+import org.cescfe.numpairs.testing.performGlobalTapNearTopLeft
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -300,10 +298,8 @@ class GeneratedSessionChoiceNavigationTest {
         composeTestRule.navigateToSelectedGeneratedChallenge(MenuScreenTestTags.QUICK_BUTTON)
         assertChoiceDialogVisible()
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.SESSION_CHOICE_DIALOG)
-            .performTouchInput {
-                click(Offset(-1f, -1f))
-            }
+            .onNodeWithTag(MenuScreenTestTags.SCREEN)
+            .performGlobalTapNearTopLeft()
         assertDismissedWithoutSideEffects(snapshot, repository, recorder)
     }
 

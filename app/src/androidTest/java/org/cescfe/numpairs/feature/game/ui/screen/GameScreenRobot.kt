@@ -33,7 +33,8 @@ import org.cescfe.numpairs.feature.game.ui.semantics.TileInputActiveKey
 
 class GameScreenRobot(
     private val activity: ComponentActivity,
-    private val interactions: SemanticsNodeInteractionsProvider
+    private val interactions: SemanticsNodeInteractionsProvider,
+    private val popupInteractions: SemanticsNodeInteractionsProvider = interactions
 ) {
     fun assertTitleDisplayed(): GameScreenRobot = assertTitleDisplayed(string(R.string.tutorial_screen_title))
 
@@ -101,13 +102,13 @@ class GameScreenRobot(
     }
 
     fun tapOperandOption(entryId: Int): GameScreenRobot = apply {
-        interactions
+        popupInteractions
             .onNodeWithTag(GameScreenTestTags.tileOperandOption(entryId), useUnmergedTree = true)
             .performClick()
     }
 
     fun tapOperatorOption(operator: Operator): GameScreenRobot = apply {
-        interactions
+        popupInteractions
             .onNodeWithTag(GameScreenTestTags.tileOperatorOption(operator), useUnmergedTree = true)
             .performClick()
     }
@@ -122,15 +123,15 @@ class GameScreenRobot(
             .onNodeWithTag(GameScreenTestTags.tile(tileIndex), useUnmergedTree = true)
             .performScrollTo()
         tapTileLeftOperand(index = tileIndex)
-        interactions
+        popupInteractions
             .onNodeWithTag(GameScreenTestTags.tileOperandOption(leftStripEntryId), useUnmergedTree = true)
             .assertIsEnabled()
             .performClick()
-        interactions
+        popupInteractions
             .onNodeWithTag(GameScreenTestTags.tileOperatorOption(operator), useUnmergedTree = true)
             .assertIsEnabled()
             .performClick()
-        interactions
+        popupInteractions
             .onNodeWithTag(GameScreenTestTags.tileOperandOption(rightStripEntryId), useUnmergedTree = true)
             .assertIsEnabled()
             .performClick()

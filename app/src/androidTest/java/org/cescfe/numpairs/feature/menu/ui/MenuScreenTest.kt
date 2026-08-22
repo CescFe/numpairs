@@ -9,7 +9,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.SemanticsNode
@@ -25,14 +24,12 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
-import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Density
@@ -45,6 +42,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import java.time.LocalDate
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.feature.daily.DailyRecipes
+import org.cescfe.numpairs.testing.performGlobalTapNearTopLeft
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
@@ -449,10 +447,8 @@ class MenuScreenTest {
             .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON)
             .performClick()
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_MENU)
-            .performTouchInput {
-                click(Offset(-1f, -1f))
-            }
+            .onNodeWithTag(MenuScreenTestTags.SCREEN)
+            .performGlobalTapNearTopLeft()
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_MENU)
             .assertDoesNotExist()
