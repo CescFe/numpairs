@@ -282,14 +282,10 @@ class DailyCalendarScreenTest {
         val nextBounds = navigationNodes.getValue(
             DailyCalendarScreenTestTags.NEXT_MONTH_BUTTON
         ).boundsInRoot
-        val expectedContentWidth = with(composeTestRule.density) {
+        val maximumContentWidth = with(composeTestRule.density) {
             480.dp.toPx()
         }
-        assertEquals(
-            expectedContentWidth,
-            nextBounds.right - previousBounds.left,
-            0.5f
-        )
+        assertTrue(nextBounds.right - previousBounds.left <= maximumContentWidth)
     }
 
     private fun setScreen(

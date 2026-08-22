@@ -157,6 +157,12 @@ class FourPairsModeTest {
     }
 
     private fun navigateToFourPairs() {
+        composeTestRule.waitUntil(timeoutMillis = PUZZLE_GENERATION_TIMEOUT_MS) {
+            composeTestRule
+                .onAllNodesWithTag(MenuScreenTestTags.QUICK_BUTTON)
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
             .performScrollTo()

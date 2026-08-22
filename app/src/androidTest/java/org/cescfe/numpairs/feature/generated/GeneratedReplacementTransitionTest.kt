@@ -137,6 +137,13 @@ class GeneratedReplacementTransitionTest {
                 ?.config
                 ?.contains(GeneratedReplacementTransitionKey) == true
         }
+        composeTestRule.mainClock.advanceTimeByFrame()
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule
+                .onAllNodesWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+                .fetchSemanticsNodes()
+                .isEmpty()
+        }
 
         composeTestRule
             .onNodeWithTag(GENERATED_PUZZLE_LOADING_TAG)

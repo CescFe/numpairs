@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -420,18 +421,16 @@ class MenuScreenTest {
             .performScrollTo()
             .performClick()
 
-        val screenBounds = composeTestRule
+        val screenNode = composeTestRule
             .onNodeWithTag(MenuScreenTestTags.SCREEN)
             .fetchSemanticsNode()
-            .boundsInWindow
-        val menuBounds = composeTestRule
+        val menuNode = composeTestRule
             .onNodeWithTag(MenuScreenTestTags.CLASSIC_DIFFICULTY_MENU)
             .assertIsDisplayed()
             .fetchSemanticsNode()
-            .boundsInWindow
 
-        assertTrue(menuBounds.left >= screenBounds.left)
-        assertTrue(menuBounds.right <= screenBounds.right)
+        assertTrue(menuNode.leftOnScreen >= screenNode.leftOnScreen)
+        assertTrue(menuNode.rightOnScreen <= screenNode.rightOnScreen)
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.difficultyOption(classicHardId))
             .assertIsDisplayed()
@@ -450,9 +449,9 @@ class MenuScreenTest {
             .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON)
             .performClick()
         composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.SCREEN)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_MENU)
             .performTouchInput {
-                click(Offset(1f, 1f))
+                click(Offset(-1f, -1f))
             }
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_MENU)
@@ -652,20 +651,18 @@ class MenuScreenTest {
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON)
             .performClick()
-        val triggerBounds = composeTestRule
+        val triggerNode = composeTestRule
             .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON)
             .fetchSemanticsNode()
-            .boundsInWindow
-        val menuBounds = composeTestRule
+        val menuNode = composeTestRule
             .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_MENU)
             .assertIsDisplayed()
             .fetchSemanticsNode()
-            .boundsInWindow
 
         if (layoutDirection == LayoutDirection.Ltr) {
-            assertEquals(triggerBounds.right, menuBounds.right, 1f)
+            assertEquals(triggerNode.rightOnScreen, menuNode.rightOnScreen, 1f)
         } else {
-            assertEquals(triggerBounds.left, menuBounds.left, 1f)
+            assertEquals(triggerNode.leftOnScreen, menuNode.leftOnScreen, 1f)
         }
     }
 
@@ -783,3 +780,9 @@ class MenuScreenTest {
         )
     }
 }
+
+private val SemanticsNode.leftOnScreen: Float
+    get() = positionOnScreen.x
+
+private val SemanticsNode.rightOnScreen: Float
+    get() = positionOnScreen.x + size.width.toFloat()
