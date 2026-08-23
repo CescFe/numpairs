@@ -1,6 +1,45 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+}
+
+val appVersionPropertiesFile = rootProject.layout.projectDirectory.file("version.properties")
+check(appVersionPropertiesFile.asFile.isFile) {
+    "Missing app version contract at ${appVersionPropertiesFile.asFile.path}. " +
+        "Add VERSION_NAME and VERSION_CODE."
+}
+
+val appVersionProperties = Properties().apply {
+    providers.fileContents(appVersionPropertiesFile).asText.get().reader().use { reader ->
+        load(reader)
+    }
+}
+val appVersionName = checkNotNull(
+    appVersionProperties.getProperty("VERSION_NAME")?.trim()?.takeIf { value -> value.isNotEmpty() }
+) {
+    "Missing VERSION_NAME in ${appVersionPropertiesFile.asFile.path}. " +
+        "Set it to strict numeric SemVer such as 1.0.0."
+}
+check(Regex("^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$").matches(appVersionName)) {
+    "Invalid VERSION_NAME '$appVersionName' in ${appVersionPropertiesFile.asFile.path}. " +
+        "Expected strict numeric SemVer in MAJOR.MINOR.PATCH form, such as 1.0.0."
+}
+
+val rawAppVersionCode = checkNotNull(
+    appVersionProperties.getProperty("VERSION_CODE")?.trim()?.takeIf { value -> value.isNotEmpty() }
+) {
+    "Missing VERSION_CODE in ${appVersionPropertiesFile.asFile.path}. Set it to a positive integer."
+}
+val appVersionCode = rawAppVersionCode.toIntOrNull()
+    ?: error(
+        "Invalid VERSION_CODE '$rawAppVersionCode' in ${appVersionPropertiesFile.asFile.path}. " +
+            "Expected a positive 32-bit integer."
+    )
+check(appVersionCode > 0) {
+    "Invalid VERSION_CODE '$rawAppVersionCode' in ${appVersionPropertiesFile.asFile.path}. " +
+        "Expected a positive integer greater than zero."
 }
 
 android {
@@ -13,8 +52,8 @@ android {
         applicationId = "org.cescfe.numpairs"
         minSdk = 26
         targetSdk = 37
-        versionCode = 2
-        versionName = "1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
