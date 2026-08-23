@@ -93,10 +93,11 @@ NumPairs targets Google Play only for v12 and uses Play App Signing:
 - The upload key and its passwords remain outside the repository and GitHub Release assets.
 - The upload keystore has a protected backup independent from the development machine.
 
-Local Gradle properties provide the upload-keystore path, store password, key alias, and key
-password. Supplying all four values produces a signed release bundle. Supplying none permits CI
-to compile an unsigned release bundle. Supplying only part of the configuration fails clearly
-instead of silently producing an unexpected artifact.
+The manual release phase uses Android Studio's supported workflow to generate the dedicated
+upload key and create a signed release bundle. The keystore and its credentials remain outside
+the repository, while CI uses Gradle's default unsigned release-bundle path for compilation
+validation. Non-interactive signing and secret injection are introduced only with protected
+release automation after the manual workflow has been proven.
 
 ## CI Guardrails
 
@@ -175,7 +176,7 @@ permissions.
 
 1. Document the v12 contract and align the repository entry point.
 2. Centralize and validate the Android app version identity.
-3. Make local upload signing reproducible and secret-safe.
+3. Document IDE-managed manual upload signing and secret-safe key custody.
 4. Add version, tag, and release-bundle CI guardrails.
 5. Document and prepare the manual Google Play release procedure.
 6. Configure the Play application, integrity, listing, and policy declarations.
@@ -202,7 +203,8 @@ permissions.
 - App release, product milestone, persisted schema, and Daily recipe versions are explicitly
   independent.
 - The repository provides one valid app-version source of truth beginning with `1.0.0 (3)`.
-- Local release builds are reproducibly signed without committing or publishing credentials.
+- Manual release builds are signed through a documented supported IDE workflow without committing
+  or publishing credentials.
 - CI rejects invalid, non-monotonic, or tag-inconsistent release identity.
 - One exact signed AAB reaches Internal, required Closed testing, and Production without rebuild.
 - `1.0.0 (3)` is traceable from Google Play to one source commit, immutable tag, and GitHub Release.

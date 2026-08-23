@@ -129,6 +129,7 @@ Core responsibilities:
 - Platform branding decision: [ADR-004](./docs/technical/adr/adr-004-keep-v9-platform-branding-static.md)
 - Daily cadence decision: [ADR-006](./docs/technical/adr/adr-006-model-daily-challenge-as-versioned-local-cadence.md)
 - Generated play-option decision: [ADR-007](./docs/technical/adr/adr-007-separate-play-options-from-generated-modes.md)
+- Local upload signing: [release-signing.md](./docs/technical/release-signing.md)
 - UX decisions: `docs/product/ux-decisions.md`
 - Architectural Decision Records: `docs/technical/adr/`
 - Delivery workflow: [delivery-workflow.md](./docs/technical/delivery-workflow.md)
