@@ -265,9 +265,7 @@ class AppNavigationLearningFlowTest {
         assertPreservedStripItemPlayerEntered()
     }
 
-    private fun completeLearnBasicsTutorial(
-        interactions: SemanticsNodeInteractionsProvider = composeTestRule
-    ) {
+    private fun completeLearnBasicsTutorial(interactions: SemanticsNodeInteractionsProvider = composeTestRule) {
         repeat(TutorialContent.learnBasicsSteps.lastIndex) {
             interactions
                 .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
@@ -346,13 +344,11 @@ class AppNavigationLearningFlowTest {
             hasTestTag(TutorialScreenTestTags.FULL_SCREEN_OVERLAY)
         )
         return object : SemanticsNodeInteractionsProvider {
-            override fun onNode(
-                matcher: SemanticsMatcher,
-                useUnmergedTree: Boolean
-            ): SemanticsNodeInteraction = composeTestRule.onNode(
-                matcher.and(tutorialOverlayAncestor),
-                useUnmergedTree
-            )
+            override fun onNode(matcher: SemanticsMatcher, useUnmergedTree: Boolean): SemanticsNodeInteraction =
+                composeTestRule.onNode(
+                    matcher.and(tutorialOverlayAncestor),
+                    useUnmergedTree
+                )
 
             override fun onAllNodes(
                 matcher: SemanticsMatcher,

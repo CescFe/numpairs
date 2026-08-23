@@ -28,12 +28,7 @@ internal fun SemanticsNodeInteraction.performGlobalTapNearTopLeft() {
     )
 }
 
-private fun Instrumentation.sendTouchEvent(
-    downTime: Long,
-    eventTime: Long,
-    action: Int,
-    positionOnScreen: Offset
-) {
+private fun Instrumentation.sendTouchEvent(downTime: Long, eventTime: Long, action: Int, positionOnScreen: Offset) {
     val event = touchEvent(
         downTime = downTime,
         eventTime = eventTime,
@@ -47,18 +42,14 @@ private fun Instrumentation.sendTouchEvent(
     }
 }
 
-private fun touchEvent(
-    downTime: Long,
-    eventTime: Long,
-    action: Int,
-    positionOnScreen: Offset
-): MotionEvent = MotionEvent.obtain(
-    downTime,
-    eventTime,
-    action,
-    positionOnScreen.x,
-    positionOnScreen.y,
-    0
-).apply {
-    source = InputDevice.SOURCE_TOUCHSCREEN
-}
+private fun touchEvent(downTime: Long, eventTime: Long, action: Int, positionOnScreen: Offset): MotionEvent =
+    MotionEvent.obtain(
+        downTime,
+        eventTime,
+        action,
+        positionOnScreen.x,
+        positionOnScreen.y,
+        0
+    ).apply {
+        source = InputDevice.SOURCE_TOUCHSCREEN
+    }
