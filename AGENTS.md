@@ -23,6 +23,14 @@ Follow the selected template and replace its prompts with task-specific content.
 ## Non-Negotiable Safeguards
 
 - Keep each implementation limited to one atomic issue, one branch, and one Pull Request.
+- For multi-issue delivery, keep a lightweight coordinating context and execute each atomic issue
+  in a fresh isolated context that does not inherit earlier issue implementation transcripts.
+- After each merge, record the concise issue outcome and compact the coordinating context before
+  starting the next issue.
+- Observe required checks through one terminal watcher and continue waiting on that same terminal
+  session; do not repeatedly query GitHub check status at short intervals.
+- Keep tool calls and their output bounded: group safe related operations, use targeted reads, and
+  suppress repetitive progress output without weakening required validation.
 - Preserve unrelated and user-authored work already present in the worktree.
 - Verify the associated issue's acceptance criteria and mark only fulfilled criteria complete before merge.
 - Treat a user request to complete an issue, delivery batch, or milestone end to end as merge authorization for every in-scope Pull Request; no per-PR confirmation is required.
