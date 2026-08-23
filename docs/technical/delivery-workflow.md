@@ -52,6 +52,32 @@ For milestone delivery:
 
 Do not combine unrelated product behavior, refactors, or documentation in one issue merely to reduce the number of Pull Requests.
 
+## Delivery Context Isolation
+
+For a delivery batch with multiple atomic issues, keep two distinct context roles:
+
+- a lightweight coordinating context that owns milestone scope, dependency order, work references,
+  issue and Pull Request state, and cross-issue decisions
+- one fresh isolated execution context for each atomic issue that owns only that issue's
+  implementation cycle
+
+Start each isolated issue context only after its dependencies are merged and local `main` is
+current. Provide the issue URL or number, assigned work reference, applicable delivery inputs,
+dependency decisions, and the repository instructions and sources required for that issue. Do not
+fork or copy the accumulated coordinator conversation or any prior issue's implementation
+transcript into the new context. Repository required-reading rules still apply inside every issue
+context.
+
+When an issue cycle ends, return only a concise delivery summary to the coordinator: issue and work
+reference, branch and Pull Request, merge result, validation evidence, and any decision or blocker
+that can affect later issues. After every merge, update the coordinator with that summary and
+compact the coordinating context before starting the next issue. Use the active Codex surface's
+fresh-context and compaction mechanisms; if either is unavailable, report that limitation before
+starting multi-issue implementation instead of silently reusing the accumulated transcript.
+
+Context isolation does not relax sequential integration. Do not run dependent issue implementation
+in parallel or start it from an unmerged branch.
+
 ## Work References And Branches
 
 Work references are sequential numbers independent from GitHub issue numbers.
@@ -158,12 +184,45 @@ For each authorized issue:
 7. Commit using the required convention.
 8. Push the branch.
 9. Open and configure the Pull Request.
-10. Wait for required GitHub checks when a merge is part of the requested cycle.
+10. Start one terminal watcher for required GitHub checks when a merge is part of the requested cycle.
 11. Review the associated issue's acceptance criteria and mark only fulfilled criteria complete.
 12. If checks pass, every required criterion is fulfilled, and the delivery scope authorizes merging, squash and merge with the required title without requesting per-Pull-Request confirmation.
 13. Update local `main` before starting the next issue.
+14. Return the concise issue summary to the coordinating context and compact it before starting the
+    next issue.
 
 Do not start dependent implementation from an unmerged branch when the requested workflow requires sequential integration into `main`.
+
+### Required Check Watching
+
+Start `gh pr checks <pr> --watch --interval 30` once. If the command continues in the background,
+wait on that same terminal session using the longest practical wait interval supported by the
+surface. Keep repetitive watcher progress out of the model context and retrieve only the final
+bounded summary or the failure details needed for diagnosis.
+
+Do not repeatedly invoke `gh pr checks`, query individual run status, or poll the watcher terminal
+at short intervals. A watcher failure or interruption may be followed by one bounded status query
+to diagnose the terminal state before deciding whether to resume the same watcher or address a
+failed check.
+
+### Tool And Output Efficiency
+
+- Group independent read-only discovery into one parallel tool round trip when it remains easy to
+  attribute results and failures.
+- Group related sequential operations into one tool call when ordering, approval scope, and failure
+  attribution remain clear. Keep destructive or materially different actions separate.
+- Prefer targeted `rg` searches and bounded file ranges. Read required canonical documents in full,
+  but do not dump unrelated files, complete directories, or already-seen content into the context.
+- Set output bounds proportional to the expected result. Suppress repetitive progress from Gradle,
+  GitHub watchers, and other long-running commands; surface the final summary and relevant failure
+  excerpt instead.
+- Start a long-running command once and continue through its existing terminal session. Do not
+  restart it merely to obtain progress.
+- Pass the relevant Android validation tasks to one Gradle invocation in the documented order when
+  feasible. Split or rerun tasks only when required to diagnose a failure or preserve correctness.
+
+These efficiency rules do not remove, skip, or weaken any required inspection, validation,
+acceptance-criteria review, approval, or merge safeguard.
 
 For Compose UI changes, the diff review must include a design-system consistency pass:
 
