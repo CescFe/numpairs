@@ -8,18 +8,11 @@ Players complete hidden expressions on a board by using numbers from a strip. Th
 
 ## Current Status
 
-### Current implemented product baseline: v11
+### Current implemented product baseline: v12
 
-- 🎮 [PRD v11 Simplified Play Modes](./docs/product/prd/prd-v11.md) defines the delivered
-  player-facing Quick and Classic generated-play contract.
-- 🗓️ [PRD v10 Quick Play & Daily Challenge](./docs/product/prd/prd-v10.md) defines the
-  deterministic local Daily Challenge retained by v11.
-- 📈 [PRD v8 Difficulty Selection & Challenge Expansion](./docs/product/prd/prd-v8.md) defines
-  the size-based generated challenge catalog that v11 keeps as its internal foundation.
-- ✨ [PRD v9 Game Feel & Personalization](./docs/product/prd/prd-v9.md) defines the current color-personalization and generated-game feedback baseline.
-- 🔁 [PRD v7 Reliable Sessions & Replay Controls](./docs/product/prd/prd-v7.md) remains the foundation for the one-slot generated-session and safe-replay contract.
-- 🎓 [PRD v6 Guided First Run](./docs/product/prd/prd-v6.md) defines the focused, explicitly
-  skippable first-run Tutorial shown before the normal menu.
+- 📦 [PRD v12 App Versioning & Google Play Delivery](./docs/product/prd/prd-v12.md) defines the
+  app-release identity and staged Google Play delivery contract independently from product and
+  persisted-data versions.
 
 NumPairs now provides five persistent color-only themes: Warm, Frost, Obsidian, Terminal,
 and Ember. Typography, shapes, spacing, elevation, layout, controls, and gameplay meanings
@@ -52,6 +45,11 @@ Historical milestone snapshots:
 - 🎓 [PRD v3 Guided Play & Rules Onboarding](./docs/product/prd/prd-v3.md)
 - 🎨 [PRD v4 Visual Design System & UI Refinement](./docs/product/prd/prd-v4.md)
 - 🧠 [PRD v5 Bigger Challenges with 8 Pairs](./docs/product/prd/prd-v5.md)
+- 🎓 [PRD v6 Guided First Run](./docs/product/prd/prd-v6.md)
+- 🔁 [PRD v7 Reliable Sessions & Replay Controls](./docs/product/prd/prd-v7.md)
+- 📈 [PRD v8 Difficulty Selection & Challenge Expansion](./docs/product/prd/prd-v8.md)
+- ✨ [PRD v9 Game Feel & Personalization](./docs/product/prd/prd-v9.md)
+- 🗓️ [PRD v10 Quick Play & Daily Challenge](./docs/product/prd/prd-v10.md)
 
 PRDs preserve the product requirements and planning context for each milestone. Current
 generated-mode and profile behavior is also documented in
