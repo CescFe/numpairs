@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.feature.fourpairs
 
+import androidx.activity.ComponentActivity
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
@@ -11,13 +12,23 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.cescfe.numpairs.MainActivity
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.data.generated.selection.FakeGeneratedDifficultySelectionRepository
+import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
+import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
+import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesRepository
+import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfiles
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
+import org.cescfe.numpairs.feature.generated.ConfiguredGeneratedPuzzleGenerationUseCaseFactory
+import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
+import org.cescfe.numpairs.testing.fourPairsQuickSelector
+import org.cescfe.numpairs.ui.navigation.AppNavigation
+import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,9 +36,33 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class FourPairsModeTest {
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<MainActivity>()
+    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private val profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
+
+    @Before
+    fun setContent() {
+        composeTestRule.setContent {
+            NumPairsTheme {
+                AppNavigation(
+                    onboardingRepository = FakeOnboardingRepository(),
+                    generatedSessionRepository = FakeGeneratedSessionRepository(),
+                    generatedDifficultySelectionRepository =
+                        FakeGeneratedDifficultySelectionRepository(),
+                    personalizationPreferencesRepository =
+                        FakePersonalizationPreferencesRepository(),
+                    topAppBarActionDiscoveryRepository =
+                        FakeTopAppBarActionDiscoveryRepository(),
+                    generatedPlayChallengeSelector = fourPairsQuickSelector(),
+                    generatedChallengeCatalog = GeneratedModes.catalog,
+                    generatedPuzzleGenerationUseCaseFactory =
+                        ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
+                            challengeCatalog = GeneratedModes.catalog
+                        )
+                )
+            }
+        }
+    }
 
     @Test
     fun selectingFourPairsFromMenuShowsGeneratedPlayablePuzzleContent() {
@@ -159,6 +194,7 @@ class FourPairsModeTest {
     private fun navigateToFourPairs() {
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
+            .performScrollTo()
             .assertIsDisplayed()
             .performClick()
 

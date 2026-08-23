@@ -255,12 +255,13 @@ private fun DailyCalendarDateCell(calendarDate: DailyCalendarDate, locale: Local
             .alpha(if (calendarDate.isFuture) FUTURE_DATE_ALPHA else 1f)
             .background(color = background, shape = CircleShape)
             .border(border = border, shape = CircleShape)
+            .testTag(DailyCalendarScreenTestTags.date(calendarDate.date))
             .clearAndSetSemantics {
                 contentDescription = description
                 if (calendarDate.isFuture) {
                     disabled()
                 }
-            }.testTag(DailyCalendarScreenTestTags.date(calendarDate.date)),
+            },
         contentAlignment = Alignment.Center
     ) {
         Column(

@@ -1,9 +1,15 @@
 package org.cescfe.numpairs
 
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.SemanticsNodeInteractionCollection
+import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -48,13 +54,6 @@ import org.junit.runner.RunWith
 class AppNavigationLearningFlowTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
-
-    private val gameRobot by lazy {
-        GameScreenRobot(
-            activity = composeTestRule.activity,
-            interactions = composeTestRule
-        )
-    }
 
     @Test
     fun howToPlayReplaysFromStepOneAndBackPreservesEveryResolvedOutcome() {
@@ -145,7 +144,7 @@ class AppNavigationLearningFlowTest {
         navigateToFourPairs()
         enterPreservedStripValue()
         openLearnBasicsFromRulesHelper()
-        completeLearnBasicsTutorial()
+        completeLearnBasicsTutorial(interactions = tutorialOverlayInteractions())
         assertTutorialSuccessOverlayDisplayed()
 
         composeTestRule
@@ -266,35 +265,40 @@ class AppNavigationLearningFlowTest {
         assertPreservedStripItemPlayerEntered()
     }
 
-    private fun completeLearnBasicsTutorial() {
+    private fun completeLearnBasicsTutorial(interactions: SemanticsNodeInteractionsProvider = composeTestRule) {
         repeat(TutorialContent.learnBasicsSteps.lastIndex) {
-            composeTestRule
+            interactions
                 .onNodeWithTag(TutorialScreenTestTags.NEXT_STEP_ACTION)
                 .performScrollTo()
                 .performClick()
         }
 
-        enterStripValue(index = 0, value = "1")
-        enterStripValue(index = 1, value = "2")
-        gameRobot.completeTile(
+        enterStripValue(index = 0, value = "1", interactions = interactions)
+        enterStripValue(index = 1, value = "2", interactions = interactions)
+        val tutorialGame = GameScreenRobot(
+            activity = composeTestRule.activity,
+            interactions = interactions,
+            popupInteractions = composeTestRule
+        )
+        tutorialGame.completeTile(
             tileIndex = 0,
             leftStripEntryId = 0,
             operator = Operator.ADDITION,
             rightStripEntryId = 1
         )
-        gameRobot.completeTile(
+        tutorialGame.completeTile(
             tileIndex = 1,
             leftStripEntryId = 0,
             operator = Operator.MULTIPLICATION,
             rightStripEntryId = 1
         )
-        gameRobot.completeTile(
+        tutorialGame.completeTile(
             tileIndex = 2,
             leftStripEntryId = 2,
             operator = Operator.ADDITION,
             rightStripEntryId = 3
         )
-        gameRobot.completeTile(
+        tutorialGame.completeTile(
             tileIndex = 3,
             leftStripEntryId = 2,
             operator = Operator.MULTIPLICATION,
@@ -318,17 +322,42 @@ class AppNavigationLearningFlowTest {
         )
     }
 
-    private fun enterStripValue(index: Int, value: String) {
-        composeTestRule
+    private fun enterStripValue(
+        index: Int,
+        value: String,
+        interactions: SemanticsNodeInteractionsProvider = composeTestRule
+    ) {
+        interactions
             .onNodeWithTag(GameScreenTestTags.stripItem(index))
             .performScrollTo()
             .performClick()
-        composeTestRule
+        interactions
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
             .performTextInput(value)
-        composeTestRule
+        interactions
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
             .performImeAction()
+    }
+
+    private fun tutorialOverlayInteractions(): SemanticsNodeInteractionsProvider {
+        val tutorialOverlayAncestor = hasAnyAncestor(
+            hasTestTag(TutorialScreenTestTags.FULL_SCREEN_OVERLAY)
+        )
+        return object : SemanticsNodeInteractionsProvider {
+            override fun onNode(matcher: SemanticsMatcher, useUnmergedTree: Boolean): SemanticsNodeInteraction =
+                composeTestRule.onNode(
+                    matcher.and(tutorialOverlayAncestor),
+                    useUnmergedTree
+                )
+
+            override fun onAllNodes(
+                matcher: SemanticsMatcher,
+                useUnmergedTree: Boolean
+            ): SemanticsNodeInteractionCollection = composeTestRule.onAllNodes(
+                matcher.and(tutorialOverlayAncestor),
+                useUnmergedTree
+            )
+        }
     }
 
     private fun assertPreservedStripItemPlayerEntered() {

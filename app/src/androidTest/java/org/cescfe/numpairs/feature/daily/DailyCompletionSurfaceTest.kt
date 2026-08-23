@@ -41,7 +41,6 @@ import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryReposito
 import org.cescfe.numpairs.data.preferences.PersonalizationPreferences
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
-import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.daily.calendar.DailyCalendarScreenTestTags
@@ -89,7 +88,7 @@ class DailyCompletionSurfaceTest {
                     DailyCompletedTodayRoute(
                         identity = identity,
                         dailySessionRepository = repository,
-                        deviceLocalDateSource = DeviceLocalDateSource { identity.localDate },
+                        deviceLocalDateSource = { identity.localDate },
                         shareLauncher = shareLauncher,
                         onNavigateBack = {}
                     )
@@ -141,7 +140,7 @@ class DailyCompletionSurfaceTest {
                 DailyChallengeRoute(
                     identity = identity,
                     dailySessionRepository = repository,
-                    deviceLocalDateSource = DeviceLocalDateSource {
+                    deviceLocalDateSource = {
                         identity.localDate.plusDays(1)
                     },
                     generatedPuzzleGenerationUseCaseFactory =
@@ -203,7 +202,7 @@ class DailyCompletionSurfaceTest {
                         generatedPuzzleGenerationUseCaseFactory = generationFactory,
                         dailyFeatureDependencies = DailyFeatureDependencies(
                             dailySessionRepository = repository,
-                            deviceLocalDateSource = DeviceLocalDateSource {
+                            deviceLocalDateSource = {
                                 identity.localDate
                             },
                             generatedPuzzleGenerationUseCaseFactory = generationFactory
@@ -263,7 +262,7 @@ class DailyCompletionSurfaceTest {
                     generatedPuzzleGenerationUseCaseFactory = generationFactory,
                     dailyFeatureDependencies = DailyFeatureDependencies(
                         dailySessionRepository = repository,
-                        deviceLocalDateSource = DeviceLocalDateSource { identity.localDate },
+                        deviceLocalDateSource = { identity.localDate },
                         generatedPuzzleGenerationUseCaseFactory = generationFactory
                     ),
                     startDestination = AppDestination.DailyCompletedToday(identity)
@@ -354,7 +353,7 @@ class DailyCompletionSurfaceTest {
             }
         }
 
-        val actionBounds = listOf(
+        val actionNodes = listOf(
             DailyScreenTestTags.SHARE_RESULT,
             DailyScreenTestTags.VIEW_CALENDAR,
             DailyScreenTestTags.BACK_TO_MENU
@@ -363,7 +362,6 @@ class DailyCompletionSurfaceTest {
                 .onNodeWithTag(tag)
                 .assertIsDisplayed()
                 .fetchSemanticsNode()
-                .boundsInRoot
         }
         val maximumActionWidth = with(composeTestRule.density) {
             432.dp.toPx()
@@ -371,11 +369,12 @@ class DailyCompletionSurfaceTest {
         val minimumTouchTarget = with(composeTestRule.density) {
             48.dp.toPx()
         }
-        val firstBounds = actionBounds.first()
+        val firstBounds = actionNodes.first().boundsInRoot
 
-        actionBounds.forEach { bounds ->
+        actionNodes.forEach { node ->
+            val bounds = node.boundsInRoot
             assertTrue(bounds.width <= maximumActionWidth)
-            assertTrue(bounds.height >= minimumTouchTarget)
+            assertTrue(node.touchBoundsInRoot.height >= minimumTouchTarget)
             assertEquals(firstBounds.left, bounds.left, 0.5f)
             assertEquals(firstBounds.right, bounds.right, 0.5f)
         }
@@ -448,7 +447,7 @@ class DailyCompletionSurfaceTest {
         val result = runBlocking {
             DailyPuzzleGenerationUseCase(
                 currentDailyChallengeResolver = CurrentDailyChallengeResolver(
-                    localDateSource = DeviceLocalDateSource {
+                    localDateSource = {
                         identity.localDate
                     }
                 ),

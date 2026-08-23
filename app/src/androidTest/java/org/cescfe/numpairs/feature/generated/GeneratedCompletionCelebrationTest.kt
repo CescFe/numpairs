@@ -45,6 +45,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+private const val FIRST_COMPLETION_FEEDBACK_ID = 1L
+
 @RunWith(AndroidJUnit4::class)
 class GeneratedCompletionCelebrationTest {
     @get:Rule
@@ -67,6 +69,7 @@ class GeneratedCompletionCelebrationTest {
                             title = "4 pairs",
                             initialPuzzle = initialPuzzle,
                             gameSessionKey = "completion-celebration",
+                            puzzleResetKey = "completion-celebration",
                             completionActions = GameCompletionActions(
                                 onNewPuzzleRequested = { newPuzzleRequests += 1 },
                                 onReturnToMenuRequested = { returnToMenuRequests += 1 }
@@ -84,7 +87,7 @@ class GeneratedCompletionCelebrationTest {
             .tapTileOperator(index = 1)
             .tapOperatorOption(Operator.MULTIPLICATION)
 
-        assertCompletionFeedback(feedbackId = 1L)
+        assertCompletionFeedback()
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_NEW_PUZZLE)
             .assertIsDisplayed()
@@ -101,7 +104,7 @@ class GeneratedCompletionCelebrationTest {
             recompositionMarker += 1
         }
         composeTestRule.waitForIdle()
-        assertCompletionFeedback(feedbackId = 1L)
+        assertCompletionFeedback()
 
         composeTestRule.runOnIdle {
             routeCompositionKey += 1
@@ -158,7 +161,7 @@ class GeneratedCompletionCelebrationTest {
             .tapTileOperator(index = 1)
             .tapOperatorOption(Operator.MULTIPLICATION)
 
-        assertCompletionFeedback(feedbackId = 1L)
+        assertCompletionFeedback()
     }
 
     @Test
@@ -202,14 +205,24 @@ class GeneratedCompletionCelebrationTest {
         interactions = composeTestRule
     )
 
-    private fun assertCompletionFeedback(feedbackId: Long) {
+    private fun assertCompletionFeedback() {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.BOARD)
-            .assert(SemanticsMatcher.expectValue(CompletionFeedbackIdKey, feedbackId))
+            .assert(
+                SemanticsMatcher.expectValue(
+                    CompletionFeedbackIdKey,
+                    FIRST_COMPLETION_FEEDBACK_ID
+                )
+            )
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
             .assertIsDisplayed()
-            .assert(SemanticsMatcher.expectValue(CompletionFeedbackIdKey, feedbackId))
+            .assert(
+                SemanticsMatcher.expectValue(
+                    CompletionFeedbackIdKey,
+                    FIRST_COMPLETION_FEEDBACK_ID
+                )
+            )
     }
 
     private fun assertCompletedUiWithoutFeedback() {

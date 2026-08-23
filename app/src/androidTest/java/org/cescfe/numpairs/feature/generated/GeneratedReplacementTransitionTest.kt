@@ -128,6 +128,7 @@ class GeneratedReplacementTransitionTest {
         composeTestRule.runOnIdle {
             successor.complete(oneOperatorAwayFromSolvedReplacementPuzzle())
         }
+        composeTestRule.mainClock.advanceTimeByFrame()
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodesWithTag(GENERATED_PUZZLE_CONTENT_TAG)
@@ -135,6 +136,13 @@ class GeneratedReplacementTransitionTest {
                 .singleOrNull()
                 ?.config
                 ?.contains(GeneratedReplacementTransitionKey) == true
+        }
+        composeTestRule.mainClock.advanceTimeByFrame()
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule
+                .onAllNodesWithTag(GameScreenTestTags.SUCCESS_OVERLAY)
+                .fetchSemanticsNodes()
+                .isEmpty()
         }
 
         composeTestRule

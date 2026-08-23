@@ -9,11 +9,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
@@ -24,15 +24,12 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
-import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Density
@@ -45,6 +42,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import java.time.LocalDate
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.feature.daily.DailyRecipes
+import org.cescfe.numpairs.testing.performGlobalTapNearTopLeft
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
@@ -159,7 +157,7 @@ class MenuScreenTest {
             .boundsInRoot
             .top
         val quickBounds = composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_SPLIT_CTA)
             .fetchSemanticsNode()
             .boundsInRoot
 
@@ -421,18 +419,16 @@ class MenuScreenTest {
             .performScrollTo()
             .performClick()
 
-        val screenBounds = composeTestRule
+        val screenNode = composeTestRule
             .onNodeWithTag(MenuScreenTestTags.SCREEN)
             .fetchSemanticsNode()
-            .boundsInRoot
-        val menuBounds = composeTestRule
+        val menuNode = composeTestRule
             .onNodeWithTag(MenuScreenTestTags.CLASSIC_DIFFICULTY_MENU)
             .assertIsDisplayed()
             .fetchSemanticsNode()
-            .boundsInRoot
 
-        assertTrue(menuBounds.left >= screenBounds.left)
-        assertTrue(menuBounds.right <= screenBounds.right)
+        assertTrue(menuNode.leftOnScreen >= screenNode.leftOnScreen)
+        assertTrue(menuNode.rightOnScreen <= screenNode.rightOnScreen)
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.difficultyOption(classicHardId))
             .assertIsDisplayed()
@@ -451,10 +447,8 @@ class MenuScreenTest {
             .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON)
             .performClick()
         composeTestRule
-            .onRoot()
-            .performTouchInput {
-                click(Offset(1f, 1f))
-            }
+            .onNodeWithTag(MenuScreenTestTags.SCREEN)
+            .performGlobalTapNearTopLeft()
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_MENU)
             .assertDoesNotExist()
@@ -500,7 +494,7 @@ class MenuScreenTest {
             .fetchSemanticsNode()
             .boundsInRoot
         val quickBounds = composeTestRule
-            .onNodeWithTag(MenuScreenTestTags.QUICK_BUTTON)
+            .onNodeWithTag(MenuScreenTestTags.QUICK_SPLIT_CTA)
             .assertIsDisplayed()
             .fetchSemanticsNode()
             .boundsInRoot
@@ -653,20 +647,18 @@ class MenuScreenTest {
         composeTestRule
             .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON)
             .performClick()
-        val triggerBounds = composeTestRule
+        val triggerNode = composeTestRule
             .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_BUTTON)
             .fetchSemanticsNode()
-            .boundsInRoot
-        val menuBounds = composeTestRule
+        val menuNode = composeTestRule
             .onNodeWithTag(MenuScreenTestTags.QUICK_DIFFICULTY_MENU)
             .assertIsDisplayed()
             .fetchSemanticsNode()
-            .boundsInRoot
 
         if (layoutDirection == LayoutDirection.Ltr) {
-            assertEquals(triggerBounds.right, menuBounds.right, 1f)
+            assertEquals(triggerNode.rightOnScreen, menuNode.rightOnScreen, 1f)
         } else {
-            assertEquals(triggerBounds.left, menuBounds.left, 1f)
+            assertEquals(triggerNode.leftOnScreen, menuNode.leftOnScreen, 1f)
         }
     }
 
@@ -784,3 +776,9 @@ class MenuScreenTest {
         )
     }
 }
+
+private val SemanticsNode.leftOnScreen: Float
+    get() = positionOnScreen.x
+
+private val SemanticsNode.rightOnScreen: Float
+    get() = positionOnScreen.x + size.width.toFloat()
