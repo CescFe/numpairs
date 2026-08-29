@@ -71,4 +71,10 @@ object GameScreenTestTags {
         Operator.Multiplication -> "tile_operator_option_multiplication"
         Operator.Hidden -> error("Hidden operator is not a selectable option.")
     }
+
+    fun tileOperatorOptionSymbol(operator: Operator): String = when (operator) {
+        Operator.Addition -> "tile_operator_option_symbol_addition"
+        Operator.Multiplication -> "tile_operator_option_symbol_multiplication"
+        Operator.Hidden -> error("Hidden operator is not a selectable option.")
+    }
 }

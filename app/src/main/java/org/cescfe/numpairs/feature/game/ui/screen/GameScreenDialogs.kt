@@ -151,10 +151,10 @@ private fun OperandSelectionOption(operand: TileOperandOptionUiState, onConfirm:
                 enabled = operand.isSelectable,
                 modifier = Modifier
                     .widthIn(
-                        min = TILE_OPERAND_SHEET_OPTION_CARD_MIN_WIDTH,
-                        max = TILE_OPERAND_SHEET_OPTION_CARD_MAX_WIDTH
+                        min = TILE_SELECTION_SHEET_OPTION_CARD_MIN_WIDTH,
+                        max = TILE_SELECTION_SHEET_OPTION_CARD_MAX_WIDTH
                     )
-                    .defaultMinSize(minHeight = TILE_OPERAND_SHEET_OPTION_MIN_HEIGHT)
+                    .defaultMinSize(minHeight = TILE_SELECTION_SHEET_OPTION_MIN_HEIGHT)
                     .testTag(GameScreenTestTags.tileOperandOption(operand.stripEntryId))
                     .semantics {
                         contentDescription = operandSelectionLabel
@@ -408,7 +408,10 @@ internal fun TileOperatorSelectionSheet(
                     bottom = TILE_OPERATOR_SHEET_PADDING
                 )
                 .selectableGroup(),
-            horizontalArrangement = Arrangement.spacedBy(TILE_OPERATOR_SHEET_OPTION_SPACING)
+            horizontalArrangement = Arrangement.spacedBy(
+                space = TILE_OPERATOR_SHEET_OPTION_SPACING,
+                alignment = Alignment.CenterHorizontally
+            )
         ) {
             dialogUiState.availableOperators.forEach { operator ->
                 val isSelected = dialogUiState.initialOperator == operator
@@ -417,8 +420,11 @@ internal fun TileOperatorSelectionSheet(
                 Surface(
                     onClick = { onConfirm(operator) },
                     modifier = Modifier
-                        .weight(1f)
-                        .defaultMinSize(minHeight = TILE_OPERATOR_SHEET_OPTION_MIN_HEIGHT)
+                        .widthIn(
+                            min = TILE_SELECTION_SHEET_OPTION_CARD_MIN_WIDTH,
+                            max = TILE_SELECTION_SHEET_OPTION_CARD_MAX_WIDTH
+                        )
+                        .defaultMinSize(minHeight = TILE_SELECTION_SHEET_OPTION_MIN_HEIGHT)
                         .testTag(GameScreenTestTags.tileOperatorOption(operator))
                         .semantics {
                             contentDescription = operatorSelectionLabel
@@ -444,21 +450,20 @@ internal fun TileOperatorSelectionSheet(
                         NumPairsComponents.subtleBorder()
                     }
                 ) {
-                    Text(
-                        text = operator.symbol,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                horizontal = TILE_OPERATOR_SHEET_OPTION_HORIZONTAL_PADDING,
-                                vertical = TILE_OPERATOR_SHEET_OPTION_VERTICAL_PADDING
-                            ),
-                        style = if (isSelected) {
-                            NumPairsTextStyles.OperatorOptionSelected
-                        } else {
-                            NumPairsTextStyles.OperatorOption
-                        },
-                        textAlign = TextAlign.Center
-                    )
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = operator.symbol,
+                            modifier = Modifier.testTag(GameScreenTestTags.tileOperatorOptionSymbol(operator)),
+                            style = if (isSelected) {
+                                NumPairsTextStyles.OperatorOptionSelected
+                            } else {
+                                NumPairsTextStyles.OperatorOption
+                            }
+                        )
+                    }
                 }
             }
         }
