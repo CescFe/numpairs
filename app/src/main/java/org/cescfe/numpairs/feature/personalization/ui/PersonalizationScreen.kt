@@ -24,26 +24,34 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.preferences.PersonalizationPreferences
 import org.cescfe.numpairs.data.preferences.PersonalizationTheme
+import org.cescfe.numpairs.feature.personalization.PrivacyPolicyLaunchResult
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.cescfe.numpairs.ui.theme.NumPairsThemePreviewColors
@@ -57,15 +65,25 @@ fun PersonalizationScreen(
     preferences: PersonalizationPreferences,
     onThemeSelected: (PersonalizationTheme) -> Unit,
     onGeneratedGameHapticsEnabledChanged: (Boolean) -> Unit,
+    onPrivacyPolicySelected: () -> PrivacyPolicyLaunchResult,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+    val privacyPolicyUnavailableMessage = stringResource(
+        R.string.personalization_privacy_policy_unavailable
+    )
+
     Scaffold(
         modifier = modifier
             .fillMaxSize()
             .testTag(PersonalizationScreenTestTags.SCREEN),
         containerColor = MaterialTheme.colorScheme.background,
         contentColor = MaterialTheme.colorScheme.onBackground,
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         topBar = {
             TopAppBar(
                 colors = NumPairsComponents.topAppBarColors(),
@@ -134,7 +152,76 @@ fun PersonalizationScreen(
                     enabled = preferences.generatedGameHapticsEnabled,
                     onEnabledChanged = onGeneratedGameHapticsEnabledChanged
                 )
+                Text(
+                    text = stringResource(R.string.personalization_legal_section_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                PrivacyPolicyAction(
+                    onClick = {
+                        when (onPrivacyPolicySelected()) {
+                            PrivacyPolicyLaunchResult.Launched -> Unit
+
+                            PrivacyPolicyLaunchResult.Unavailable -> coroutineScope.launch {
+                                snackbarHostState.showSnackbar(privacyPolicyUnavailableMessage)
+                            }
+                        }
+                    }
+                )
             }
+        }
+    }
+}
+
+@Composable
+private fun PrivacyPolicyAction(onClick: () -> Unit) {
+    val actionContentDescription = stringResource(
+        R.string.personalization_privacy_policy_content_description
+    )
+
+    Surface(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = PRIVACY_POLICY_ACTION_MIN_HEIGHT)
+            .semantics(mergeDescendants = true) {
+                contentDescription = actionContentDescription
+                role = Role.Button
+            }
+            .testTag(PersonalizationScreenTestTags.PRIVACY_POLICY_ACTION),
+        shape = NumPairsComponents.MediumShape,
+        color = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        border = NumPairsComponents.subtleBorder()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.personalization_privacy_policy_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = stringResource(R.string.personalization_privacy_policy_supporting_text),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Icon(
+                painter = painterResource(R.drawable.ic_open_in_new),
+                contentDescription = null,
+                modifier = Modifier.size(PRIVACY_POLICY_ACTION_ICON_SIZE),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -325,6 +412,7 @@ private fun PersonalizationScreenPreview(
             preferences = PersonalizationPreferences(selectedTheme = theme),
             onThemeSelected = {},
             onGeneratedGameHapticsEnabledChanged = {},
+            onPrivacyPolicySelected = { PrivacyPolicyLaunchResult.Launched },
             onNavigateBack = {}
         )
     }
@@ -336,6 +424,7 @@ object PersonalizationScreenTestTags {
     const val BRAND_MARK = "personalization_brand_mark"
     const val THEME_PREVIEW = "personalization_theme_preview"
     const val HAPTICS_TOGGLE = "personalization_haptics_toggle"
+    const val PRIVACY_POLICY_ACTION = "personalization_privacy_policy_action"
 
     fun themeOption(theme: PersonalizationTheme): String = "personalization_theme_${theme.name.lowercase()}"
 }
@@ -345,3 +434,5 @@ private val PERSONALIZATION_BRAND_MARK_SIZE = 72.dp
 private val THEME_OPTION_MIN_HEIGHT = 72.dp
 private val THEME_PREVIEW_SWATCH_SIZE = 22.dp
 private val HAPTICS_OPTION_MIN_HEIGHT = 80.dp
+private val PRIVACY_POLICY_ACTION_MIN_HEIGHT = 80.dp
+private val PRIVACY_POLICY_ACTION_ICON_SIZE = 24.dp

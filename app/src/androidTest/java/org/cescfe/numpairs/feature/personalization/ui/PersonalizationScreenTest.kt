@@ -1,6 +1,12 @@
 package org.cescfe.numpairs.feature.personalization.ui
 
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertContentDescriptionEquals
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsOn
@@ -8,11 +14,14 @@ import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.preferences.PersonalizationPreferences
 import org.cescfe.numpairs.data.preferences.PersonalizationTheme
+import org.cescfe.numpairs.feature.personalization.PrivacyPolicyLaunchResult
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -76,6 +85,65 @@ class PersonalizationScreenTest {
     }
 
     @Test
+    fun privacyPolicyActionIsAccessibleAndEmitsTheExternalRequest() {
+        var activationCount = 0
+        setContent(
+            onPrivacyPolicySelected = {
+                activationCount += 1
+                PrivacyPolicyLaunchResult.Launched
+            }
+        )
+
+        composeTestRule
+            .onNodeWithTag(PersonalizationScreenTestTags.PRIVACY_POLICY_ACTION)
+            .performScrollTo()
+            .assertIsDisplayed()
+            .assertHasClickAction()
+            .assertContentDescriptionEquals(
+                composeTestRule.activity.getString(
+                    R.string.personalization_privacy_policy_content_description
+                )
+            ).assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.Role,
+                    Role.Button
+                )
+            ).performClick()
+
+        composeTestRule.runOnIdle {
+            assertEquals(1, activationCount)
+        }
+    }
+
+    @Test
+    fun unavailablePrivacyPolicyHandlerShowsFeedbackAndKeepsSettingsUsable() {
+        var hapticsEnabled: Boolean? = null
+        setContent(
+            onHapticsChanged = { enabled -> hapticsEnabled = enabled },
+            onPrivacyPolicySelected = { PrivacyPolicyLaunchResult.Unavailable }
+        )
+
+        composeTestRule
+            .onNodeWithTag(PersonalizationScreenTestTags.PRIVACY_POLICY_ACTION)
+            .performScrollTo()
+            .performClick()
+        composeTestRule
+            .onNodeWithText(
+                composeTestRule.activity.getString(
+                    R.string.personalization_privacy_policy_unavailable
+                )
+            ).assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(PersonalizationScreenTestTags.HAPTICS_TOGGLE)
+            .performScrollTo()
+            .performClick()
+
+        composeTestRule.runOnIdle {
+            assertEquals(false, hapticsEnabled)
+        }
+    }
+
+    @Test
     fun interactivePreferencesMeetMinimumTouchTarget() {
         setContent()
         val minimumTouchTargetPx = 48 * composeTestRule.activity.resources.displayMetrics.density
@@ -99,12 +167,24 @@ class PersonalizationScreenTest {
             .boundsInRoot
         assertTrue(hapticsBounds.height >= minimumTouchTargetPx)
         assertTrue(hapticsBounds.width >= minimumTouchTargetPx)
+
+        val privacyPolicyBounds = composeTestRule
+            .onNodeWithTag(PersonalizationScreenTestTags.PRIVACY_POLICY_ACTION)
+            .performScrollTo()
+            .assertIsDisplayed()
+            .fetchSemanticsNode()
+            .boundsInRoot
+        assertTrue(privacyPolicyBounds.height >= minimumTouchTargetPx)
+        assertTrue(privacyPolicyBounds.width >= minimumTouchTargetPx)
     }
 
     private fun setContent(
         preferences: PersonalizationPreferences = PersonalizationPreferences(),
         onThemeSelected: (PersonalizationTheme) -> Unit = {},
-        onHapticsChanged: (Boolean) -> Unit = {}
+        onHapticsChanged: (Boolean) -> Unit = {},
+        onPrivacyPolicySelected: () -> PrivacyPolicyLaunchResult = {
+            PrivacyPolicyLaunchResult.Launched
+        }
     ) {
         composeTestRule.setContent {
             NumPairsTheme {
@@ -112,6 +192,7 @@ class PersonalizationScreenTest {
                     preferences = preferences,
                     onThemeSelected = onThemeSelected,
                     onGeneratedGameHapticsEnabledChanged = onHapticsChanged,
+                    onPrivacyPolicySelected = onPrivacyPolicySelected,
                     onNavigateBack = {}
                 )
             }

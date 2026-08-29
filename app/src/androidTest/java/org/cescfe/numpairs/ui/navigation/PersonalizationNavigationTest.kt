@@ -83,6 +83,10 @@ class PersonalizationNavigationTest {
         composeTestRule
             .onNodeWithTag(PersonalizationScreenTestTags.SCREEN)
             .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(PersonalizationScreenTestTags.PRIVACY_POLICY_ACTION)
+            .performScrollTo()
+            .assertIsDisplayed()
         PersonalizationTheme.entries.forEach { theme ->
             composeTestRule
                 .onNodeWithTag(PersonalizationScreenTestTags.themeOption(theme))
