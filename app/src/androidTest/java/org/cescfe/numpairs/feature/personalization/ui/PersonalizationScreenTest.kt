@@ -21,7 +21,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.preferences.PersonalizationPreferences
 import org.cescfe.numpairs.data.preferences.PersonalizationTheme
-import org.cescfe.numpairs.feature.personalization.PrivacyPolicyLaunchResult
+import org.cescfe.numpairs.feature.personalization.ExternalUriLaunchResult
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -85,12 +85,43 @@ class PersonalizationScreenTest {
     }
 
     @Test
+    fun openSourceActionIsAccessibleAndEmitsTheExternalRequest() {
+        var activationCount = 0
+        setContent(
+            onOpenSourceRepositorySelected = {
+                activationCount += 1
+                ExternalUriLaunchResult.Launched
+            }
+        )
+
+        composeTestRule
+            .onNodeWithTag(PersonalizationScreenTestTags.OPEN_SOURCE_ACTION)
+            .performScrollTo()
+            .assertIsDisplayed()
+            .assertHasClickAction()
+            .assertContentDescriptionEquals(
+                composeTestRule.activity.getString(
+                    R.string.personalization_open_source_content_description
+                )
+            ).assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.Role,
+                    Role.Button
+                )
+            ).performClick()
+
+        composeTestRule.runOnIdle {
+            assertEquals(1, activationCount)
+        }
+    }
+
+    @Test
     fun privacyPolicyActionIsAccessibleAndEmitsTheExternalRequest() {
         var activationCount = 0
         setContent(
             onPrivacyPolicySelected = {
                 activationCount += 1
-                PrivacyPolicyLaunchResult.Launched
+                ExternalUriLaunchResult.Launched
             }
         )
 
@@ -116,11 +147,39 @@ class PersonalizationScreenTest {
     }
 
     @Test
+    fun unavailableOpenSourceHandlerShowsFeedbackAndKeepsSettingsUsable() {
+        var hapticsEnabled: Boolean? = null
+        setContent(
+            onHapticsChanged = { enabled -> hapticsEnabled = enabled },
+            onOpenSourceRepositorySelected = { ExternalUriLaunchResult.Unavailable }
+        )
+
+        composeTestRule
+            .onNodeWithTag(PersonalizationScreenTestTags.OPEN_SOURCE_ACTION)
+            .performScrollTo()
+            .performClick()
+        composeTestRule
+            .onNodeWithText(
+                composeTestRule.activity.getString(
+                    R.string.personalization_open_source_unavailable
+                )
+            ).assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(PersonalizationScreenTestTags.HAPTICS_TOGGLE)
+            .performScrollTo()
+            .performClick()
+
+        composeTestRule.runOnIdle {
+            assertEquals(false, hapticsEnabled)
+        }
+    }
+
+    @Test
     fun unavailablePrivacyPolicyHandlerShowsFeedbackAndKeepsSettingsUsable() {
         var hapticsEnabled: Boolean? = null
         setContent(
             onHapticsChanged = { enabled -> hapticsEnabled = enabled },
-            onPrivacyPolicySelected = { PrivacyPolicyLaunchResult.Unavailable }
+            onPrivacyPolicySelected = { ExternalUriLaunchResult.Unavailable }
         )
 
         composeTestRule
@@ -168,6 +227,15 @@ class PersonalizationScreenTest {
         assertTrue(hapticsBounds.height >= minimumTouchTargetPx)
         assertTrue(hapticsBounds.width >= minimumTouchTargetPx)
 
+        val openSourceBounds = composeTestRule
+            .onNodeWithTag(PersonalizationScreenTestTags.OPEN_SOURCE_ACTION)
+            .performScrollTo()
+            .assertIsDisplayed()
+            .fetchSemanticsNode()
+            .boundsInRoot
+        assertTrue(openSourceBounds.height >= minimumTouchTargetPx)
+        assertTrue(openSourceBounds.width >= minimumTouchTargetPx)
+
         val privacyPolicyBounds = composeTestRule
             .onNodeWithTag(PersonalizationScreenTestTags.PRIVACY_POLICY_ACTION)
             .performScrollTo()
@@ -182,8 +250,11 @@ class PersonalizationScreenTest {
         preferences: PersonalizationPreferences = PersonalizationPreferences(),
         onThemeSelected: (PersonalizationTheme) -> Unit = {},
         onHapticsChanged: (Boolean) -> Unit = {},
-        onPrivacyPolicySelected: () -> PrivacyPolicyLaunchResult = {
-            PrivacyPolicyLaunchResult.Launched
+        onOpenSourceRepositorySelected: () -> ExternalUriLaunchResult = {
+            ExternalUriLaunchResult.Launched
+        },
+        onPrivacyPolicySelected: () -> ExternalUriLaunchResult = {
+            ExternalUriLaunchResult.Launched
         }
     ) {
         composeTestRule.setContent {
@@ -192,6 +263,7 @@ class PersonalizationScreenTest {
                     preferences = preferences,
                     onThemeSelected = onThemeSelected,
                     onGeneratedGameHapticsEnabledChanged = onHapticsChanged,
+                    onOpenSourceRepositorySelected = onOpenSourceRepositorySelected,
                     onPrivacyPolicySelected = onPrivacyPolicySelected,
                     onNavigateBack = {}
                 )
