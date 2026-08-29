@@ -36,7 +36,7 @@
     <string name="generated_challenge_title">%1$s · %2$s</string>
 
     <!-- Personalization screen -->
-    <string name="personalization_screen_title">Personalización</string>
+    <string name="personalization_screen_title">Ajustes</string>
     <string name="personalization_brand_content_description">Logotipo de NumPairs</string>
     <string name="personalization_theme_section_title">Tema de color</string>
     <string name="personalization_theme_supporting_text">Los temas solo cambian los colores. Los significados y controles del juego siguen iguales.</string>
@@ -51,6 +51,11 @@
     <string name="personalization_haptics_supporting_text">Confirmación suave para las asignaciones válidas en partidas generadas.</string>
     <string name="personalization_haptics_enabled">Activada</string>
     <string name="personalization_haptics_disabled">Desactivada</string>
+    <string name="personalization_legal_section_title">Información legal</string>
+    <string name="personalization_privacy_policy_title">Política de privacidad</string>
+    <string name="personalization_privacy_policy_supporting_text">Se abrirá en tu navegador</string>
+    <string name="personalization_privacy_policy_content_description">Abrir la política de privacidad en el navegador</string>
+    <string name="personalization_privacy_policy_unavailable">No hay ningún navegador disponible para abrir la política de privacidad.</string>
 
     <!-- Generated mode screens -->
     <string name="quick_screen_title">Quick</string>
