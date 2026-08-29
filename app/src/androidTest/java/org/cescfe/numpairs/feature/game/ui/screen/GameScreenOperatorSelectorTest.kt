@@ -14,6 +14,13 @@ class GameScreenOperatorSelectorTest : GameScreenTestHost() {
             .scrollToBoard()
             .tapTileOperator(0)
             .assertOperatorSelectorDisplayed()
+            .assertOperatorSelectorTitle(R.string.tile_operator_dialog_title)
+            .assertOperatorSelectorExpression(
+                R.string.tile_operator_dialog_expression_preview,
+                "?",
+                "?",
+                "223"
+            )
             .assertOperatorOptionDisplayed(Operator.ADDITION)
             .assertOperatorOptionDisplayed(Operator.MULTIPLICATION)
             .tapOperatorOption(Operator.ADDITION)

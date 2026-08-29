@@ -170,8 +170,6 @@ fun GameScreen(
                         onTileResetTapped = onTileResetTapped,
                         tileOperatorSelectionDialog = tileOperatorSelectionDialog,
                         tileOperandSelectionDialog = tileOperandSelectionDialog,
-                        onTileOperatorSelectionDismissed = onTileOperatorSelectionDismissed,
-                        onTileOperatorSelectionConfirmed = onTileOperatorSelectionConfirmed,
                         interactionPolicy = interactionPolicy,
                         highlightState = highlightState,
                         correctTileFeedbackIdsByIndex = correctTileFeedbackIdsByIndex,
@@ -196,6 +194,16 @@ fun GameScreen(
         }
     }
 
+    tileOperatorSelectionDialog?.let { dialogUiState ->
+        val tile = uiState.tiles.getOrNull(dialogUiState.tileIndex) ?: return@let
+
+        TileOperatorSelectionSheet(
+            dialogUiState = dialogUiState,
+            tile = tile,
+            onDismiss = onTileOperatorSelectionDismissed,
+            onConfirm = onTileOperatorSelectionConfirmed
+        )
+    }
     tileOperandSelectionDialog?.let { dialogUiState ->
         val tile = uiState.tiles.getOrNull(dialogUiState.tileIndex) ?: return@let
 

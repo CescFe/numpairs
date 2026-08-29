@@ -25,6 +25,8 @@ object GameScreenTestTags {
     const val TILE_OPERAND_SELECTOR_TITLE = "tile_operand_selector_title"
     const val TILE_OPERAND_SELECTOR_EXPRESSION = "tile_operand_selector_expression"
     const val TILE_OPERATOR_SELECTOR = "tile_operator_selector"
+    const val TILE_OPERATOR_SELECTOR_TITLE = "tile_operator_selector_title"
+    const val TILE_OPERATOR_SELECTOR_EXPRESSION = "tile_operator_selector_expression"
     const val HINT_ACTION = "hint_action"
     const val HINT_ACTION_DISCOVERY_DOT = "hint_action_discovery_dot"
     const val RULES_HELPER_ACTION = "rules_helper_action"
