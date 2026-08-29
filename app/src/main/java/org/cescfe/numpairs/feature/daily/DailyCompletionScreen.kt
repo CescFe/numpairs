@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -100,7 +101,12 @@ internal fun DailyCompletionScreen(
                             .fillMaxWidth()
                             .testTag(DailyScreenTestTags.SHARE_RESULT)
                     ) {
-                        Text(text = stringResource(R.string.daily_share_result_action))
+                        Text(
+                            text = stringResource(R.string.daily_share_result_action),
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
                     }
                     OutlinedButton(
                         onClick = onViewCalendar,
