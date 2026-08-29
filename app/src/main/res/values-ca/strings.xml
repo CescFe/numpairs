@@ -171,6 +171,7 @@
     <string name="tile_operand_usage_state_used">Usat</string>
     <string name="tile_operand_usage_state_rule_conflict">Conflicte de regla</string>
     <string name="tile_operator_dialog_title">Ara tria l’operador</string>
+    <string name="tile_operator_dialog_expression_preview">%1$s [?] %2$s = %3$s</string>
     <string name="tile_operator_option_addition">Suma (+)</string>
     <string name="tile_operator_option_multiplication">Multiplicació (×)</string>
     <string name="tile_state_incorrect">Casella incorrecta</string>

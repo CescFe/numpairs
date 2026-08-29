@@ -6,7 +6,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -57,7 +56,6 @@ fun PuzzleTile(
     isOperatorInputActive: Boolean = false,
     operatorContentDescription: String? = null,
     onOperatorClick: (() -> Unit)? = null,
-    operatorOverlay: @Composable BoxScope.() -> Unit = {},
     rightOperandModifier: Modifier = Modifier,
     isRightOperandHighlighted: Boolean = false,
     isRightOperandInputActive: Boolean = false,
@@ -143,7 +141,6 @@ fun PuzzleTile(
                     isOperatorInputActive = isOperatorInputActive,
                     operatorContentDescription = operatorContentDescription,
                     onOperatorClick = onOperatorClick,
-                    operatorOverlay = operatorOverlay,
                     rightOperandModifier = rightOperandModifier,
                     isRightOperandHighlighted = isRightOperandHighlighted,
                     isRightOperandInputActive = isRightOperandInputActive,

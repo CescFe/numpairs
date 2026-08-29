@@ -304,6 +304,18 @@ class GameScreenRobot(
             .assertDoesNotExist()
     }
 
+    fun assertOperatorSelectorTitle(@StringRes stringResId: Int): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR_TITLE, useUnmergedTree = true)
+            .assert(hasText(string(stringResId)))
+    }
+
+    fun assertOperatorSelectorExpression(@StringRes stringResId: Int, vararg formatArgs: Any): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR_EXPRESSION, useUnmergedTree = true)
+            .assert(hasText(string(stringResId, *formatArgs)))
+    }
+
     fun assertOperandSelectorTitle(@StringRes stringResId: Int): GameScreenRobot = apply {
         interactions
             .onNodeWithTag(GameScreenTestTags.TILE_OPERAND_SELECTOR_TITLE, useUnmergedTree = true)
