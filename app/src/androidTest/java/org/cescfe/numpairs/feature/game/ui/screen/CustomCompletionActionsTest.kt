@@ -6,11 +6,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -69,6 +74,32 @@ class CustomCompletionActionsTest {
             assertEquals(1, secondaryCount)
             assertEquals(1, tertiaryCount)
         }
+    }
+
+    @Test
+    fun custom_completion_primary_action_uses_bold_button_typography() {
+        composeTestRule.setContent {
+            NumPairsTheme {
+                SuccessOverlay(
+                    onDismiss = {},
+                    content = GameSuccessOverlayContent(
+                        message = "Daily completed!",
+                        supportingText = "Today’s challenge is complete.",
+                        primaryActionLabel = "Share result",
+                        onPrimaryAction = {}
+                    )
+                )
+            }
+        }
+
+        val layoutResults = mutableListOf<TextLayoutResult>()
+        composeTestRule
+            .onNodeWithText("Share result", useUnmergedTree = true)
+            .performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action ->
+                action(layoutResults)
+            }
+
+        assertEquals(FontWeight.Bold, layoutResults.single().layoutInput.style.fontWeight)
     }
 
     @Test
