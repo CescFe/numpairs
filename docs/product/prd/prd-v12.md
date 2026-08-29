@@ -17,9 +17,11 @@ name, a monotonically increasing Google Play version code, one repository source
 reproducible local upload signing, CI guardrails, a documented manual release path, and a later
 transition to protected release automation.
 
-The first Google Play candidate is `1.0.0 (3)`. Product milestone labels, persisted aggregate
-schemas, and Daily recipe versions remain independent and are not derived from that release
-identity.
+The active Google Play candidate takes its release identity from the repository source of truth
+at release-preparation time. Its release name reflects the intended SemVer outcome, and its
+version code is greater than every code previously uploaded for the package. Product milestone
+labels, persisted aggregate schemas, and Daily recipe versions remain independent and are not
+derived from that release identity.
 
 ## Product Goal
 
@@ -71,10 +73,14 @@ The repository owns one explicit source of truth for `versionName` and `versionC
 application module consumes those values for every build variant and fails configuration when a
 value is missing, malformed, or outside its supported range.
 
-The source of truth starts at:
+The source of truth defines the active release candidate without prescribing one fixed identity
+for the milestone. At release-preparation time:
 
-- `versionName`: `1.0.0`
-- `versionCode`: `3`
+- `versionName` is selected according to the intended SemVer release outcome
+- `versionCode` is selected above every code previously uploaded for `org.cescfe.numpairs`
+
+The committed pair and exact source revision identify the candidate. Release evidence records
+that identity and the resulting artifact as it progresses through Google Play.
 
 Release changes are reviewed through a dedicated Pull Request. CI compares changed values with
 the target branch, rejects a non-increasing version code or decreasing SemVer name, and checks
@@ -180,7 +186,7 @@ permissions.
 4. Add version, tag, and release-bundle CI guardrails.
 5. Document and prepare the manual Google Play release procedure.
 6. Configure the Play application, integrity, listing, and policy declarations.
-7. Deliver and validate `1.0.0 (3)` through Internal and required Closed testing.
+7. Deliver and validate one exact selected candidate through Internal and required Closed testing.
 8. Obtain Production access and publish the first traced Production release.
 9. Provision protected, least-privilege release automation.
 10. Automate Internal upload and separately approved Production promotion.
@@ -202,11 +208,12 @@ permissions.
 
 - App release, product milestone, persisted schema, and Daily recipe versions are explicitly
   independent.
-- The repository provides one valid app-version source of truth beginning with `1.0.0 (3)`.
+- The repository provides one valid source of truth for the active app-release candidate.
 - Manual release builds are signed through a documented supported IDE workflow without committing
   or publishing credentials.
 - CI rejects invalid, non-monotonic, or tag-inconsistent release identity.
 - One exact signed AAB reaches Internal, required Closed testing, and Production without rebuild.
-- `1.0.0 (3)` is traceable from Google Play to one source commit, immutable tag, and GitHub Release.
+- The selected Production identity is traceable from Google Play to one source commit, the exact
+  promoted artifact, an immutable tag, and a GitHub Release.
 - Internal upload and Production promotion use separate least-privilege and approval boundaries.
 - Existing v11 gameplay and all persisted-data contracts remain unchanged.
