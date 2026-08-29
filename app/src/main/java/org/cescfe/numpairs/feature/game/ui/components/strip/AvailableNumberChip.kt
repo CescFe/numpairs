@@ -205,7 +205,7 @@ fun AvailableNumberInputChip(
                 ),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
+                    keyboardType = KeyboardType.NumberPassword,
                     imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(
