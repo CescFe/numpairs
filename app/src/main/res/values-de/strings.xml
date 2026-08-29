@@ -1,0 +1,227 @@
+<resources>
+    <!-- App and navigation -->
+    <string name="app_name">NumPairs</string>
+    <string name="back_button_content_description">Zurück</string>
+
+    <!-- Menu screen -->
+    <string name="menu_resume_button">Fortsetzen</string>
+    <string name="menu_resume_content_description">%1$s-Puzzle fortsetzen</string>
+    <string name="menu_daily_start_button">Tages-Challenge</string>
+    <string name="menu_daily_continue_button">Tages-Challenge fortsetzen</string>
+    <string name="menu_daily_completed_button">Tages-Challenge abgeschlossen</string>
+    <string name="menu_daily_start_content_description">Heutige Tages-Challenge starten, 4 Paare, leicht</string>
+    <string name="menu_daily_continue_content_description">Heutige Tages-Challenge fortsetzen, 4 Paare, leicht</string>
+    <string name="menu_daily_completed_content_description">Heutige abgeschlossene Tages-Challenge öffnen, 4 Paare, leicht</string>
+    <string name="menu_daily_calendar_content_description">Kalender der abgeschlossenen Tages-Challenges anzeigen</string>
+    <string name="menu_daily_not_started_state">Heute noch nicht begonnen</string>
+    <string name="menu_daily_in_progress_state">Heute in Bearbeitung</string>
+    <string name="menu_daily_completed_state">Heute abgeschlossen</string>
+    <string name="menu_tutorial_button">Spielanleitung</string>
+    <string name="menu_settings_action_content_description">Einstellungen</string>
+    <string name="menu_play_generated_challenge_content_description">%1$s-Puzzle spielen</string>
+    <string name="menu_choose_generated_difficulty_content_description">Schwierigkeitsgrad für %1$s auswählen</string>
+    <string name="menu_close_generated_difficulty_content_description">Schwierigkeitsauswahl für %1$s schließen</string>
+    <string name="menu_generated_difficulty_options_content_description">Schwierigkeitsoptionen für %1$s</string>
+    <string name="menu_generated_difficulty_collapsed">Eingeklappt</string>
+    <string name="menu_generated_difficulty_expanded">Ausgeklappt</string>
+    <string name="menu_generated_difficulty_selected">Ausgewählt</string>
+    <string name="generated_session_choice_title">Unfertiges Puzzle</string>
+    <string name="generated_session_choice_challenge_message">Du hast ein unfertiges %1$s-Puzzle.</string>
+    <string name="generated_session_choice_new_challenge_button">Neues %1$s</string>
+
+    <!-- Generated difficulty -->
+    <string name="generated_difficulty_low">Leicht</string>
+    <string name="generated_difficulty_medium">Mittel</string>
+    <string name="generated_difficulty_hard">Schwer</string>
+    <string name="generated_challenge_title">%1$s · %2$s</string>
+
+    <!-- Personalization screen -->
+    <string name="personalization_screen_title">Einstellungen</string>
+    <string name="personalization_brand_content_description">NumPairs-Logo</string>
+    <string name="personalization_theme_section_title">Farbschema</string>
+    <string name="personalization_theme_supporting_text">Farbschemata ändern nur die Farben. Spielregeln und Steuerung bleiben gleich.</string>
+    <string name="personalization_theme_selected">Ausgewählt</string>
+    <string name="personalization_theme_warm">Warm</string>
+    <string name="personalization_theme_frost">Frost</string>
+    <string name="personalization_theme_obsidian">Obsidian</string>
+    <string name="personalization_theme_terminal">Terminal</string>
+    <string name="personalization_theme_ember">Glut</string>
+    <string name="personalization_feedback_section_title">Spiel-Feedback</string>
+    <string name="personalization_haptics_title">Haptisches Feedback</string>
+    <string name="personalization_haptics_supporting_text">Sanfte Bestätigung bei gültigen Eingaben in generierten Spielen.</string>
+    <string name="personalization_haptics_enabled">Aktiviert</string>
+    <string name="personalization_haptics_disabled">Deaktiviert</string>
+    <string name="personalization_about_section_title">Über NumPairs</string>
+    <string name="personalization_open_source_title">Open Source</string>
+    <string name="personalization_open_source_supporting_text">Quellcode auf GitHub ansehen · MIT-Lizenz</string>
+    <string name="personalization_open_source_content_description">NumPairs-Quellcode auf GitHub öffnen</string>
+    <string name="personalization_open_source_unavailable">Es ist kein Browser verfügbar, um den NumPairs-Quellcode zu öffnen.</string>
+    <string name="personalization_legal_section_title">Rechtliche Informationen</string>
+    <string name="personalization_privacy_policy_title">Datenschutzerklärung</string>
+    <string name="personalization_privacy_policy_supporting_text">Wird im Browser geöffnet</string>
+    <string name="personalization_privacy_policy_content_description">Datenschutzerklärung im Browser öffnen</string>
+    <string name="personalization_privacy_policy_unavailable">Es ist kein Browser verfügbar, um die Datenschutzerklärung zu öffnen.</string>
+
+    <!-- Generated mode screens -->
+    <string name="quick_screen_title">Schnell</string>
+    <string name="classic_screen_title">Klassisch</string>
+    <string name="three_pairs_accessibility_name">3 Paare</string>
+    <string name="four_pairs_screen_title">4 Paare</string>
+
+    <!-- Generated puzzle creation -->
+    <string name="generated_puzzle_loading_message">Puzzle wird erstellt…</string>
+    <string name="generated_puzzle_failure_title">Puzzle nicht verfügbar</string>
+    <string name="generated_puzzle_failure_message">Das Puzzle konnte nicht erstellt werden. Bitte versuche es erneut.</string>
+    <string name="generated_puzzle_retry_button">Erneut versuchen</string>
+    <string name="onboarding_startup_failure_title">NumPairs kann nicht geöffnet werden</string>
+    <string name="onboarding_startup_failure_message">Dein lokaler Fortschritt konnte nicht geladen werden. Bitte versuche es erneut.</string>
+    <string name="onboarding_startup_retry_button">Erneut versuchen</string>
+    <string name="generated_puzzle_back_to_menu_button">Zurück zum Menü</string>
+    <string name="generated_session_resume_unavailable_message">Dieses unfertige Puzzle ist nicht mehr verfügbar.</string>
+
+    <!-- Daily calendar -->
+    <string name="daily_calendar_screen_title">Tageskalender</string>
+    <string name="daily_calendar_previous_month_content_description">Vorherigen Monat anzeigen</string>
+    <string name="daily_calendar_next_month_content_description">Nächsten Monat anzeigen</string>
+    <string name="daily_calendar_date_description">%1$s</string>
+    <string name="daily_calendar_today_date_description">%1$s, heute</string>
+    <string name="daily_calendar_completed_date_description">%1$s, abgeschlossen</string>
+    <string name="daily_calendar_today_completed_date_description">%1$s, heute, abgeschlossen</string>
+    <string name="daily_calendar_future_completed_date_description">%1$s, abgeschlossen, zukünftiges Datum</string>
+    <string name="daily_calendar_future_date_description">%1$s, zukünftiges Datum</string>
+
+    <!-- Daily sharing -->
+    <string name="daily_share_name">NumPairs Daily</string>
+    <string name="daily_share_completed_status">Abgeschlossen</string>
+    <string name="daily_share_chooser_title">Tagesergebnis teilen</string>
+
+    <!-- Daily gameplay and completion -->
+    <string name="daily_game_name">Daily</string>
+    <string name="daily_loading_message">Heutige Tages-Challenge wird vorbereitet…</string>
+    <string name="daily_generation_failure_message">Die heutige Tages-Challenge konnte nicht erstellt werden. Versuche es erneut mit derselben Challenge.</string>
+    <string name="daily_generation_cancelled_message">Die Vorbereitung der Tages-Challenge wurde unterbrochen. Versuche es erneut, um mit derselben Challenge fortzufahren.</string>
+    <string name="daily_invalid_puzzle_message">Die heutige Tages-Challenge ist nicht verfügbar, da das Puzzle ungültig war.</string>
+    <string name="daily_storage_failure_message">Der Fortschritt der Tages-Challenge konnte nicht gespeichert werden. Versuche es erneut, bevor du fortfährst.</string>
+    <string name="daily_stale_session_message">Diese Tages-Challenge ist nicht mehr aktuell. Kehre zum Menü zurück oder versuche erneut, sicher zu speichern.</string>
+    <string name="daily_invalid_progress_message">Dieser Fortschritt konnte nicht gespeichert werden, da er nicht mehr zum ursprünglichen Puzzle passt.</string>
+    <string name="daily_progress_failure_title">Fortschritt nicht gespeichert</string>
+    <string name="daily_retry_action">Erneut versuchen</string>
+    <string name="daily_completion_screen_title">Tages-Challenge abgeschlossen</string>
+    <string name="daily_completion_message">Tages-Challenge abgeschlossen!</string>
+    <string name="daily_completion_supporting_text">Die heutige Challenge ist abgeschlossen.</string>
+    <string name="daily_completion_challenge_name">4 Paare · Leicht</string>
+    <string name="daily_share_result_action">Ergebnis teilen</string>
+    <string name="daily_view_calendar_action">Kalender anzeigen</string>
+    <string name="daily_back_to_menu_action">Zurück zum Menü</string>
+    <string name="daily_completion_unavailable_message">Dieser Abschluss der Tages-Challenge ist nicht mehr verfügbar.</string>
+
+    <!-- Tutorial screen -->
+    <string name="tutorial_screen_title">Tutorial</string>
+    <string name="tutorial_step_indicator">Schritt %1$d von %2$d</string>
+    <string name="tutorial_objective_explanation_copy">Willkommen bei NumPairs. Dein Ziel ist es, alle Zahlen zu finden und alle versteckten Additionen und Multiplikationen zu vervollständigen.</string>
+    <string name="tutorial_strip_explanation_copy">Die Zahlenreihe oben im Puzzle enthält Zahlen, die von der kleinsten bis zur größten geordnet sind. Zahlen können mehrfach vorkommen und einige sind zunächst verborgen.</string>
+    <string name="tutorial_tile_explanation_copy">Darunter befinden sich die Kacheln. Jede besteht aus zwei Teilen: unten steht ein bekanntes Ergebnis und oben eine Addition oder Multiplikation, deren Zahlen und Rechenzeichen du herausfinden musst.</string>
+    <string name="tutorial_pair_explanation_copy">Wie findest du sie heraus? Bilde Paare aus den Zahlen der oberen Reihe. Jedes Paar vervollständigt zwei Kacheln: eine Addition und eine Multiplikation.</string>
+    <string name="tutorial_previous_step_action">Zurück</string>
+    <string name="tutorial_next_step_action">Weiter</string>
+    <string name="tutorial_worked_example_introduction_copy">Pass gut auf: Das ist das erste und letzte Mal, dass wir ein Puzzle für dich lösen.</string>
+    <string name="tutorial_worked_example_product_four_five_copy">4 × 5 = 20, also ist 20 die Multiplikationskachel dieses Paars.</string>
+    <string name="tutorial_worked_example_sum_four_five_copy">Dasselbe Paar vervollständigt auch die Addition: 4 + 5 = 9.</string>
+    <string name="tutorial_worked_example_reveal_three_copy">Die Kacheln mit den Ergebnissen 5 und 6 sind noch unvollständig. Zusammen mit 2 kann die versteckte Zahl nur 3 sein.</string>
+    <string name="tutorial_worked_example_product_two_three_copy">2 × 3 = 6 vervollständigt die verbleibende Multiplikation.</string>
+    <string name="tutorial_worked_example_sum_two_three_copy">2 + 3 = 5 vervollständigt die Addition und löst das Puzzle.</string>
+    <string name="tutorial_repeated_value_practice_copy">Jetzt bist du dran: Löse das Puzzle. Tippe auf ein beliebiges ?, um zu beginnen. Zahlen können mehrfach vorkommen. Tipp: Multiplikationen sind oft ein guter Ausgangspunkt.</string>
+    <string name="tutorial_success_overlay_message">Tutorial abgeschlossen!</string>
+    <string name="tutorial_success_overlay_supporting_text">Du kennst jetzt die Grundlagen von NumPairs.</string>
+    <string name="tutorial_success_overlay_continue_button">Weiter</string>
+    <string name="onboarding_skip_tutorial_action">Tutorial überspringen</string>
+    <string name="onboarding_skip_tutorial_title">Tutorial überspringen?</string>
+    <string name="onboarding_skip_tutorial_message">Wenn du NumPairs zum ersten Mal spielst, empfehlen wir dir, das Tutorial fortzusetzen.</string>
+    <string name="onboarding_continue_tutorial_button">Tutorial fortsetzen</string>
+    <string name="onboarding_skip_anyway_button">Trotzdem überspringen</string>
+    <string name="tutorial_solving_tips_step_one_copy">Auf leichtem Schwierigkeitsgrad kommt keine Zahl zweimal vor und die Zahlenreihe enthält nie eine 1. Daher sind Primzahlergebnisse immer Summen. Vervollständige ein Primzahlergebnis als Additionskachel.</string>
+    <string name="tutorial_solving_tips_step_two_copy">Multiplikationskacheln können nur Faktoren ihres Ergebnisses verwenden. Finde zwei Werte aus der Zahlenreihe, deren Produkt dem Ergebnis entspricht, und verwende anschließend dasselbe Paar für die zugehörige Summe.</string>
+
+    <!-- Game screen: board and strip -->
+    <string name="board_content_description">Spielfeld</string>
+    <string name="strip_content_description">Zahlenreihe</string>
+    <string name="strip_item_hidden_content_description">Verborgener Eintrag der Zahlenreihe</string>
+    <string name="strip_item_known_content_description">Bekannter Eintrag der Zahlenreihe, Wert %1$s</string>
+    <string name="strip_item_player_entered_content_description">Vom Spieler eingegebener Eintrag der Zahlenreihe, Wert %1$s</string>
+    <string name="tile_left_operand_hidden_content_description">Verborgener linker Operand</string>
+    <string name="tile_left_operand_content_description">Linker Operand, Wert %1$s</string>
+    <string name="tile_right_operand_hidden_content_description">Verborgener rechter Operand</string>
+    <string name="tile_right_operand_content_description">Rechter Operand, Wert %1$s</string>
+    <string name="tile_operator_hidden_content_description">Verborgenes Rechenzeichen</string>
+    <string name="tile_operator_content_description">Rechenzeichen, %1$s</string>
+    <string name="tile_expression_active_input_state">Aktuelle Eingabe</string>
+    <string name="strip_entry_valid_range_bounded">Gültiger Bereich: %1$d bis %2$d</string>
+    <string name="strip_entry_valid_range_unbounded">Gültiger Bereich: %1$d oder größer</string>
+    <string name="strip_entry_invalid_range_bounded">Ungültige Zahl. Gültiger Bereich: %1$d bis %2$d</string>
+    <string name="strip_entry_invalid_range_unbounded">Ungültige Zahl. Gültiger Bereich: %1$d oder größer</string>
+
+    <!-- Game screen: tile selection dialogs -->
+    <string name="tile_operand_dialog_left_title">Wähle jetzt den linken Operanden</string>
+    <string name="tile_operand_dialog_right_title">Wähle jetzt den rechten Operanden</string>
+    <string name="tile_operand_dialog_left_expression_preview">[%1$s] %2$s %3$s = %4$s</string>
+    <string name="tile_operand_dialog_right_expression_preview">%1$s %2$s [%3$s] = %4$s</string>
+    <string name="tile_operand_usage_addition_hint">Hinweis zur Verwendung in Additionen</string>
+    <string name="tile_operand_usage_multiplication_hint">Hinweis zur Verwendung in Multiplikationen</string>
+    <string name="tile_operand_usage_state_available">Verfügbar</string>
+    <string name="tile_operand_usage_state_used">Verwendet</string>
+    <string name="tile_operand_usage_state_rule_conflict">Regelkonflikt</string>
+    <string name="tile_operator_dialog_title">Wähle jetzt das Rechenzeichen</string>
+    <string name="tile_operator_dialog_expression_preview">%1$s [?] %2$s = %3$s</string>
+    <string name="tile_operator_option_addition">Addition (+)</string>
+    <string name="tile_operator_option_multiplication">Multiplikation (×)</string>
+    <string name="tile_state_incorrect">Falsche Kachel</string>
+    <string name="tile_state_mismatched_pairing">Kachel mit falscher Paarbildung</string>
+    <string name="tile_state_live_rule_conflict">Kachel mit Regelkonflikt</string>
+    <string name="tile_reset_content_description">Kachel zurücksetzen</string>
+
+    <!-- Game screen: feedback and overlays -->
+    <string name="success_overlay_message">Puzzle abgeschlossen!</string>
+    <string name="success_overlay_badge_text">OK</string>
+    <string name="success_overlay_supporting_text">Alle Paare stimmen überein.</string>
+    <string name="success_overlay_new_puzzle_button">Weiteres Puzzle spielen</string>
+    <string name="success_overlay_return_to_menu_button">Zurück zum Menü</string>
+    <string name="hint_action_content_description">Tipps zum Üben öffnen</string>
+    <string name="rules_helper_action_content_description">Spielregeln anzeigen</string>
+    <string name="rules_helper_title">Spielanleitung</string>
+    <string name="rules_helper_close_content_description">Spielregeln schließen</string>
+    <string name="rules_helper_play_tutorial_button">Tutorial spielen</string>
+    <string name="rules_helper_objective_title">Ziel</string>
+    <string name="rules_helper_objective_complete">Finde alle unbekannten Elemente.</string>
+    <string name="rules_helper_elements_title">Bildschirmelemente</string>
+    <string name="rules_helper_elements_strip">Zahlenreihe: verfügbare Zahlen zum Lösen des Puzzles.</string>
+    <string name="rules_helper_elements_grid">Raster: Kacheln mit einem sichtbaren Ergebnis und einem unbekannten Ausdruck.</string>
+    <string name="rules_helper_strip_title">Vervollständige die Zahlenreihe</string>
+    <string name="rules_helper_strip_hidden">Finde die verborgenen Werte und vervollständige die aufsteigende Liste positiver ganzer Zahlen.</string>
+    <string name="rules_helper_grid_title">Vervollständige das Raster</string>
+    <string name="rules_helper_grid_expression">Fülle jede Kachel mit zwei Operanden und einem Rechenzeichen.</string>
+    <string name="rules_helper_grid_pair_usage">Bilde Paare aus den Zahlen der Zahlenreihe. Jedes Paar muss eine Summe und ein Produkt ergeben, die zu zwei Ergebnissen im Raster passen.</string>
+
+    <!-- Game screen: solving tips -->
+    <string name="solving_tips_title">Lösungstipps</string>
+    <string name="solving_tips_close_content_description">Lösungstipps schließen</string>
+    <string name="solving_tips_practice_button">Tipps üben</string>
+    <string name="solving_tips_strip_title">Nutze die Zahlenreihe</string>
+    <string name="solving_tips_strip_hidden_range">Verborgene Werte der Zahlenreihe müssen weiterhin zwischen ihre sichtbaren Nachbarn passen.</string>
+    <string name="solving_tips_strip_highest_anchor">Der höchste Wert der Zahlenreihe ist ein guter Anhaltspunkt für große Produkte und unmögliche Summen.</string>
+    <string name="solving_tips_products_title">Produkte finden</string>
+    <string name="solving_tips_products_large_results">Große Ergebnisse gehören meist zu Multiplikationskacheln.</string>
+    <string name="solving_tips_products_factors">Prüfe die Faktoren des Ergebnisses.</string>
+    <string name="solving_tips_sums_title">Summen finden</string>
+    <string name="solving_tips_sums_prime_results">Auf leichtem Schwierigkeitsgrad sind Primzahlergebnisse immer Additionskacheln.</string>
+    <string name="solving_tips_ui_clues_title">Nutze die Hinweise der Oberfläche</string>
+    <string name="solving_tips_ui_clues_operand_usage">Bei der Auswahl der Operanden wird ihre Verwendung für Addition und Multiplikation angezeigt.</string>
+
+    <!-- Game screen: validation messages -->
+    <string name="puzzle_outcome_invalid_title">Abgeschlossen, aber nicht gelöst</string>
+    <string name="puzzle_outcome_invalid_tiles_message">Mindestens eine vollständig ausgefüllte Kachel ist falsch.</string>
+    <string name="puzzle_outcome_missing_identities_message">Bei einigen vollständig ausgefüllten Kacheln fehlen die zugehörigen Einträge der Zahlenreihe.</string>
+    <string name="puzzle_outcome_mismatched_pairings_message">Additions- und Multiplikationskacheln verwenden nicht dieselben Paare aus der Zahlenreihe.</string>
+    <string name="puzzle_outcome_invalid_usage_message">Jeder Eintrag der Zahlenreihe muss genau einmal in einer Addition und einmal in einer Multiplikation verwendet werden.</string>
+    <string name="local_rule_conflict_duplicate_operator_usage_message">Ein Operand kann mit demselben Rechenzeichen nur einmal mit einem anderen Operanden gepaart werden.</string>
+    <string name="local_rule_conflict_mismatched_pairing_message">Ein Operand muss bei Addition und Multiplikation denselben Partner haben.</string>
+</resources>
