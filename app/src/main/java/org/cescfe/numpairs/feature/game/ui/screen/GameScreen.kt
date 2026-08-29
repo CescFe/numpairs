@@ -63,7 +63,7 @@ fun GameScreen(
     onStripItemTapped: (Int) -> Unit = {},
     onStripItemEntryInputChanged: (String) -> Unit = {},
     onStripItemEntryInputConfirmed: () -> Unit = {},
-    onStripItemEntryInputFocusLost: () -> Unit = {},
+    onStripItemEntryInputFocusLost: (Int) -> Unit = {},
     onTileLeftOperandTapped: (Int) -> Unit = {},
     onTileRightOperandTapped: (Int) -> Unit = {},
     onTileOperandSelectionDismissed: () -> Unit = {},

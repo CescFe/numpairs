@@ -78,8 +78,10 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
         confirmStripItemEntryInput()
     }
 
-    fun onStripItemEntryInputFocusLost() {
-        confirmStripItemEntryInput()
+    fun onStripItemEntryInputFocusLost(stripItemIndex: Int) {
+        if (presentationState.stripItemEntryInput?.stripItemIndex == stripItemIndex) {
+            confirmStripItemEntryInput()
+        }
     }
 
     fun onStripItemEntryInputCancelled() {

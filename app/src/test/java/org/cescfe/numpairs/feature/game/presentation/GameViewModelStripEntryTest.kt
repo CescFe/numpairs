@@ -143,7 +143,7 @@ class GameViewModelStripEntryTest {
 
         viewModel.onStripItemTapped(index = 1)
         viewModel.onStripItemEntryInputChanged(draftText = "2")
-        viewModel.onStripItemEntryInputFocusLost()
+        viewModel.onStripItemEntryInputFocusLost(stripItemIndex = 1)
 
         val uiState = viewModel.uiState.value
 
@@ -152,12 +152,28 @@ class GameViewModelStripEntryTest {
     }
 
     @Test
+    fun late_focus_loss_from_previous_inline_entry_does_not_resolve_active_entry() {
+        val viewModel = GameViewModel()
+
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryInputChanged(draftText = "2")
+        viewModel.onStripItemTapped(index = 3)
+        viewModel.onStripItemEntryInputFocusLost(stripItemIndex = 1)
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals("2", uiState.stripItems[1].label)
+        assertEquals(3, uiState.stripItemEntryInput?.stripItemIndex)
+        assertEquals("", uiState.stripItemEntryInput?.draftText)
+    }
+
+    @Test
     fun losing_focus_with_an_invalid_inline_entry_keeps_the_input_active_and_preserves_the_item() {
         val viewModel = GameViewModel()
 
         viewModel.onStripItemTapped(index = 1)
         viewModel.onStripItemEntryInputChanged(draftText = "9")
-        viewModel.onStripItemEntryInputFocusLost()
+        viewModel.onStripItemEntryInputFocusLost(stripItemIndex = 1)
 
         val uiState = viewModel.uiState.value
 
@@ -178,7 +194,7 @@ class GameViewModelStripEntryTest {
         val viewModel = GameViewModel()
 
         viewModel.onStripItemTapped(index = 1)
-        viewModel.onStripItemEntryInputFocusLost()
+        viewModel.onStripItemEntryInputFocusLost(stripItemIndex = 1)
 
         val uiState = viewModel.uiState.value
 

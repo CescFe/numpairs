@@ -96,7 +96,7 @@ fun GameRoute(
         currentOnGameUiStateChanged(uiState)
     }
 
-    fun resolveActiveStripItemEntryInputIfAllowed(): Boolean {
+    fun resolveActiveStripItemEntryInputIfAllowed(focusLossSourceIndex: Int? = null): Boolean {
         val input = uiState.stripItemEntryInput ?: return true
         val value = input.draftText.toIntOrNull()
         val isInvalid = input.draftText.isNotBlank() &&
@@ -111,7 +111,9 @@ fun GameRoute(
             return false
         }
 
-        gameViewModel.onStripItemEntryInputFocusLost()
+        gameViewModel.onStripItemEntryInputFocusLost(
+            stripItemIndex = focusLossSourceIndex ?: input.stripItemIndex
+        )
 
         return input.draftText.isBlank() || !isInvalid
     }
@@ -130,7 +132,9 @@ fun GameRoute(
         },
         onStripItemEntryInputChanged = gameViewModel::onStripItemEntryInputChanged,
         onStripItemEntryInputConfirmed = { resolveActiveStripItemEntryInputIfAllowed() },
-        onStripItemEntryInputFocusLost = { resolveActiveStripItemEntryInputIfAllowed() },
+        onStripItemEntryInputFocusLost = { stripItemIndex ->
+            resolveActiveStripItemEntryInputIfAllowed(focusLossSourceIndex = stripItemIndex)
+        },
         onTileLeftOperandTapped = { index ->
             if (interactionPolicy.canTapTileLeftOperand(index) && resolveActiveStripItemEntryInputIfAllowed()) {
                 gameViewModel.onTileLeftOperandTapped(index)

@@ -67,6 +67,50 @@ class GameScreenStripEntryInputTest : GameScreenTestHost() {
     }
 
     @Test
+    fun switchingFromAValidStripEntryTransfersFocusAndAcceptsInput() {
+        screen
+            .tapStripItem(1)
+            .enterStripValue("2")
+            .tapStripItem(3)
+            .assertStripEntryInputDisplayed()
+            .assertStripEntryInputFocused()
+            .assertStripEntryInputValue("")
+            .enterStripValue("10")
+            .submitStripEntryInput()
+            .assertStripItemDescription(
+                1,
+                R.string.strip_item_player_entered_content_description,
+                "2"
+            )
+            .assertStripItemDescription(
+                3,
+                R.string.strip_item_player_entered_content_description,
+                "10"
+            )
+    }
+
+    @Test
+    fun switchingFromAnEmptyStripEntryTransfersFocusAndAcceptsInput() {
+        screen
+            .tapStripItem(1)
+            .tapStripItem(3)
+            .assertStripEntryInputDisplayed()
+            .assertStripEntryInputFocused()
+            .assertStripEntryInputValue("")
+            .enterStripValue("10")
+            .submitStripEntryInput()
+            .assertStripItemDescription(
+                1,
+                R.string.strip_item_hidden_content_description
+            )
+            .assertStripItemDescription(
+                3,
+                R.string.strip_item_player_entered_content_description,
+                "10"
+            )
+    }
+
+    @Test
     fun losingFocusWithAnInvalidValueKeepsInlineEditingActiveAndShowsFeedback() {
         screen
             .tapStripItem(1)
@@ -75,6 +119,29 @@ class GameScreenStripEntryInputTest : GameScreenTestHost() {
             .assertStripEntryInputDisplayed()
             .assertStripEntryInputInvalid()
             .assertStripEntryInvalidRange(minimum = 1, maximum = 6)
+    }
+
+    @Test
+    fun switchingFromAnInvalidStripEntryKeepsTheCurrentInputActive() {
+        screen
+            .tapStripItem(1)
+            .enterStripValue("9")
+            .tapStripItem(3)
+            .assertStripEntryInputDisplayed()
+            .assertStripEntryInputFocused()
+            .assertStripEntryInputValue("9")
+            .assertStripEntryInputInvalid()
+            .replaceStripValue("2")
+            .submitStripEntryInput()
+            .assertStripItemDescription(
+                1,
+                R.string.strip_item_player_entered_content_description,
+                "2"
+            )
+            .assertStripItemDescription(
+                3,
+                R.string.strip_item_hidden_content_description
+            )
     }
 
     @Test
