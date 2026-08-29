@@ -51,7 +51,7 @@ import kotlinx.coroutines.launch
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.preferences.PersonalizationPreferences
 import org.cescfe.numpairs.data.preferences.PersonalizationTheme
-import org.cescfe.numpairs.feature.personalization.PrivacyPolicyLaunchResult
+import org.cescfe.numpairs.feature.personalization.ExternalUriLaunchResult
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.cescfe.numpairs.ui.theme.NumPairsThemePreviewColors
@@ -65,15 +65,24 @@ fun PersonalizationScreen(
     preferences: PersonalizationPreferences,
     onThemeSelected: (PersonalizationTheme) -> Unit,
     onGeneratedGameHapticsEnabledChanged: (Boolean) -> Unit,
-    onPrivacyPolicySelected: () -> PrivacyPolicyLaunchResult,
+    onOpenSourceRepositorySelected: () -> ExternalUriLaunchResult,
+    onPrivacyPolicySelected: () -> ExternalUriLaunchResult,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+    val openSourceUnavailableMessage = stringResource(
+        R.string.personalization_open_source_unavailable
+    )
     val privacyPolicyUnavailableMessage = stringResource(
         R.string.personalization_privacy_policy_unavailable
     )
+    val showUnavailableMessage: (String) -> Unit = { message ->
+        coroutineScope.launch {
+            snackbarHostState.showSnackbar(message)
+        }
+    }
 
     Scaffold(
         modifier = modifier
@@ -153,17 +162,49 @@ fun PersonalizationScreen(
                     onEnabledChanged = onGeneratedGameHapticsEnabledChanged
                 )
                 Text(
+                    text = stringResource(R.string.personalization_about_section_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                ExternalLinkAction(
+                    title = stringResource(R.string.personalization_open_source_title),
+                    supportingText = stringResource(
+                        R.string.personalization_open_source_supporting_text
+                    ),
+                    actionContentDescription = stringResource(
+                        R.string.personalization_open_source_content_description
+                    ),
+                    testTag = PersonalizationScreenTestTags.OPEN_SOURCE_ACTION,
+                    onClick = {
+                        when (onOpenSourceRepositorySelected()) {
+                            ExternalUriLaunchResult.Launched -> Unit
+
+                            ExternalUriLaunchResult.Unavailable -> {
+                                showUnavailableMessage(openSourceUnavailableMessage)
+                            }
+                        }
+                    }
+                )
+                Text(
                     text = stringResource(R.string.personalization_legal_section_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
-                PrivacyPolicyAction(
+                ExternalLinkAction(
+                    title = stringResource(R.string.personalization_privacy_policy_title),
+                    supportingText = stringResource(
+                        R.string.personalization_privacy_policy_supporting_text
+                    ),
+                    actionContentDescription = stringResource(
+                        R.string.personalization_privacy_policy_content_description
+                    ),
+                    testTag = PersonalizationScreenTestTags.PRIVACY_POLICY_ACTION,
                     onClick = {
                         when (onPrivacyPolicySelected()) {
-                            PrivacyPolicyLaunchResult.Launched -> Unit
+                            ExternalUriLaunchResult.Launched -> Unit
 
-                            PrivacyPolicyLaunchResult.Unavailable -> coroutineScope.launch {
-                                snackbarHostState.showSnackbar(privacyPolicyUnavailableMessage)
+                            ExternalUriLaunchResult.Unavailable -> {
+                                showUnavailableMessage(privacyPolicyUnavailableMessage)
                             }
                         }
                     }
@@ -174,21 +215,23 @@ fun PersonalizationScreen(
 }
 
 @Composable
-private fun PrivacyPolicyAction(onClick: () -> Unit) {
-    val actionContentDescription = stringResource(
-        R.string.personalization_privacy_policy_content_description
-    )
-
+private fun ExternalLinkAction(
+    title: String,
+    supportingText: String,
+    actionContentDescription: String,
+    testTag: String,
+    onClick: () -> Unit
+) {
     Surface(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = PRIVACY_POLICY_ACTION_MIN_HEIGHT)
+            .defaultMinSize(minHeight = EXTERNAL_LINK_ACTION_MIN_HEIGHT)
             .semantics(mergeDescendants = true) {
                 contentDescription = actionContentDescription
                 role = Role.Button
             }
-            .testTag(PersonalizationScreenTestTags.PRIVACY_POLICY_ACTION),
+            .testTag(testTag),
         shape = NumPairsComponents.MediumShape,
         color = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -206,12 +249,12 @@ private fun PrivacyPolicyAction(onClick: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.personalization_privacy_policy_title),
+                    text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = stringResource(R.string.personalization_privacy_policy_supporting_text),
+                    text = supportingText,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -219,7 +262,7 @@ private fun PrivacyPolicyAction(onClick: () -> Unit) {
             Icon(
                 painter = painterResource(R.drawable.ic_open_in_new),
                 contentDescription = null,
-                modifier = Modifier.size(PRIVACY_POLICY_ACTION_ICON_SIZE),
+                modifier = Modifier.size(EXTERNAL_LINK_ACTION_ICON_SIZE),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -412,7 +455,8 @@ private fun PersonalizationScreenPreview(
             preferences = PersonalizationPreferences(selectedTheme = theme),
             onThemeSelected = {},
             onGeneratedGameHapticsEnabledChanged = {},
-            onPrivacyPolicySelected = { PrivacyPolicyLaunchResult.Launched },
+            onOpenSourceRepositorySelected = { ExternalUriLaunchResult.Launched },
+            onPrivacyPolicySelected = { ExternalUriLaunchResult.Launched },
             onNavigateBack = {}
         )
     }
@@ -424,6 +468,7 @@ object PersonalizationScreenTestTags {
     const val BRAND_MARK = "personalization_brand_mark"
     const val THEME_PREVIEW = "personalization_theme_preview"
     const val HAPTICS_TOGGLE = "personalization_haptics_toggle"
+    const val OPEN_SOURCE_ACTION = "personalization_open_source_action"
     const val PRIVACY_POLICY_ACTION = "personalization_privacy_policy_action"
 
     fun themeOption(theme: PersonalizationTheme): String = "personalization_theme_${theme.name.lowercase()}"
@@ -434,5 +479,5 @@ private val PERSONALIZATION_BRAND_MARK_SIZE = 72.dp
 private val THEME_OPTION_MIN_HEIGHT = 72.dp
 private val THEME_PREVIEW_SWATCH_SIZE = 22.dp
 private val HAPTICS_OPTION_MIN_HEIGHT = 80.dp
-private val PRIVACY_POLICY_ACTION_MIN_HEIGHT = 80.dp
-private val PRIVACY_POLICY_ACTION_ICON_SIZE = 24.dp
+private val EXTERNAL_LINK_ACTION_MIN_HEIGHT = 80.dp
+private val EXTERNAL_LINK_ACTION_ICON_SIZE = 24.dp

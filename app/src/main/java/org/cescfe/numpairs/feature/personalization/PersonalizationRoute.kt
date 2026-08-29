@@ -17,15 +17,15 @@ fun PersonalizationRoute(
     repository: PersonalizationPreferencesRepository,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
-    privacyPolicyLauncher: PrivacyPolicyLauncher? = null
+    externalUriLauncher: ExternalUriLauncher? = null
 ) {
     val preferences by repository.preferences.collectAsState(initial = PersonalizationPreferences())
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    val defaultPrivacyPolicyLauncher = remember(context) {
-        AndroidPrivacyPolicyLauncher(context)
+    val defaultExternalUriLauncher = remember(context) {
+        AndroidExternalUriLauncher(context)
     }
-    val activePrivacyPolicyLauncher = privacyPolicyLauncher ?: defaultPrivacyPolicyLauncher
+    val activeExternalUriLauncher = externalUriLauncher ?: defaultExternalUriLauncher
 
     PersonalizationScreen(
         preferences = preferences,
@@ -39,7 +39,12 @@ fun PersonalizationRoute(
                 repository.setGeneratedGameHapticsEnabled(enabled)
             }
         },
-        onPrivacyPolicySelected = activePrivacyPolicyLauncher::launch,
+        onOpenSourceRepositorySelected = {
+            activeExternalUriLauncher.launch(OPEN_SOURCE_REPOSITORY_URL)
+        },
+        onPrivacyPolicySelected = {
+            activeExternalUriLauncher.launch(PRIVACY_POLICY_URL)
+        },
         onNavigateBack = onNavigateBack,
         modifier = modifier
     )

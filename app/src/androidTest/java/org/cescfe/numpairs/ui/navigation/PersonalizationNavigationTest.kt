@@ -84,6 +84,10 @@ class PersonalizationNavigationTest {
             .onNodeWithTag(PersonalizationScreenTestTags.SCREEN)
             .assertIsDisplayed()
         composeTestRule
+            .onNodeWithTag(PersonalizationScreenTestTags.OPEN_SOURCE_ACTION)
+            .performScrollTo()
+            .assertIsDisplayed()
+        composeTestRule
             .onNodeWithTag(PersonalizationScreenTestTags.PRIVACY_POLICY_ACTION)
             .performScrollTo()
             .assertIsDisplayed()

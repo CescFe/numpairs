@@ -13,26 +13,31 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class PrivacyPolicyLauncherAndroidTest {
+class ExternalUriLauncherAndroidTest {
     @Test
-    fun intentFactoryCreatesAnExternalViewRequestForTheCanonicalPolicyUrl() {
-        val intent = PrivacyPolicyIntentFactory.create()
+    fun intentFactoryCreatesExternalViewRequestsForBothCanonicalUrls() {
+        listOf(
+            OPEN_SOURCE_REPOSITORY_URL,
+            PRIVACY_POLICY_URL
+        ).forEach { uri ->
+            val intent = ExternalUriIntentFactory.create(uri)
 
-        assertEquals(Intent.ACTION_VIEW, intent.action)
-        assertEquals(PRIVACY_POLICY_URL, intent.dataString)
-        assertEquals("https", intent.data?.scheme)
+            assertEquals(Intent.ACTION_VIEW, intent.action)
+            assertEquals(uri, intent.dataString)
+            assertEquals("https", intent.data?.scheme)
+        }
     }
 
     @Test
     fun launcherAddsNewTaskForNonActivityContextAndReportsSuccess() {
-        val context = RecordingPrivacyPolicyContext(
+        val context = RecordingExternalUriContext(
             base = InstrumentationRegistry.getInstrumentation().targetContext
         )
 
-        val result = AndroidPrivacyPolicyLauncher(context).launch()
+        val result = AndroidExternalUriLauncher(context).launch(OPEN_SOURCE_REPOSITORY_URL)
 
-        assertSame(PrivacyPolicyLaunchResult.Launched, result)
-        assertEquals(PRIVACY_POLICY_URL, context.startedIntent?.dataString)
+        assertSame(ExternalUriLaunchResult.Launched, result)
+        assertEquals(OPEN_SOURCE_REPOSITORY_URL, context.startedIntent?.dataString)
         assertTrue(
             requireNotNull(context.startedIntent).flags and Intent.FLAG_ACTIVITY_NEW_TASK != 0
         )
@@ -40,18 +45,18 @@ class PrivacyPolicyLauncherAndroidTest {
 
     @Test
     fun unavailableExternalHandlerReturnsTypedFailureWithoutCrashing() {
-        val context = RecordingPrivacyPolicyContext(
+        val context = RecordingExternalUriContext(
             base = InstrumentationRegistry.getInstrumentation().targetContext,
             failure = ActivityNotFoundException("No browser")
         )
 
-        val result = AndroidPrivacyPolicyLauncher(context).launch()
+        val result = AndroidExternalUriLauncher(context).launch(OPEN_SOURCE_REPOSITORY_URL)
 
-        assertSame(PrivacyPolicyLaunchResult.Unavailable, result)
+        assertSame(ExternalUriLaunchResult.Unavailable, result)
     }
 }
 
-private class RecordingPrivacyPolicyContext(base: Context, private val failure: ActivityNotFoundException? = null) :
+private class RecordingExternalUriContext(base: Context, private val failure: ActivityNotFoundException? = null) :
     ContextWrapper(base) {
     var startedIntent: Intent? = null
         private set

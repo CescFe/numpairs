@@ -51,6 +51,11 @@
     <string name="personalization_haptics_supporting_text">Gentle confirmation for valid assignments in generated games.</string>
     <string name="personalization_haptics_enabled">Enabled</string>
     <string name="personalization_haptics_disabled">Disabled</string>
+    <string name="personalization_about_section_title">About NumPairs</string>
+    <string name="personalization_open_source_title">Open source</string>
+    <string name="personalization_open_source_supporting_text">View the source code on GitHub · MIT License</string>
+    <string name="personalization_open_source_content_description">Open NumPairs source code on GitHub</string>
+    <string name="personalization_open_source_unavailable">No browser is available to open the NumPairs source code.</string>
     <string name="personalization_legal_section_title">Legal information</string>
     <string name="personalization_privacy_policy_title">Privacy policy</string>
     <string name="personalization_privacy_policy_supporting_text">Opens in your browser</string>

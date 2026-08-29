@@ -51,6 +51,11 @@
     <string name="personalization_haptics_supporting_text">Confirmación suave para las asignaciones válidas en partidas generadas.</string>
     <string name="personalization_haptics_enabled">Activada</string>
     <string name="personalization_haptics_disabled">Desactivada</string>
+    <string name="personalization_about_section_title">Acerca de NumPairs</string>
+    <string name="personalization_open_source_title">Código abierto</string>
+    <string name="personalization_open_source_supporting_text">Ver el código fuente en GitHub · Licencia MIT</string>
+    <string name="personalization_open_source_content_description">Abrir el código fuente de NumPairs en GitHub</string>
+    <string name="personalization_open_source_unavailable">No hay ningún navegador disponible para abrir el código fuente de NumPairs.</string>
     <string name="personalization_legal_section_title">Información legal</string>
     <string name="personalization_privacy_policy_title">Política de privacidad</string>
     <string name="personalization_privacy_policy_supporting_text">Se abrirá en tu navegador</string>
