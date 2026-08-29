@@ -105,7 +105,7 @@ class GameScreenStripEntryInputTest : GameScreenTestHost() {
     fun nonDigitInputIsFilteredOutByTheInlineField() {
         screen
             .tapStripItem(1)
-            .enterStripValue("2a!")
-            .assertStripEntryInputValue("2")
+            .enterStripValue("2,. -3")
+            .assertStripEntryInputValue("23")
     }
 }
