@@ -67,6 +67,9 @@ internal fun BoardSection(
     onTileResetTapped: (Int) -> Unit,
     tileOperatorSelectionDialog: TileOperatorSelectionDialogUiState?,
     tileOperandSelectionDialog: TileOperandSelectionDialogUiState?,
+    compactTileSelectorsEnabled: Boolean,
+    onTileOperatorSelectionDismissed: () -> Unit,
+    onTileOperatorSelectionConfirmed: (Operator) -> Unit,
     interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
     highlightState: GameHighlightState = GameHighlightState.None,
     correctTileFeedbackIdsByIndex: Map<Int, Long> = emptyMap(),
@@ -164,6 +167,18 @@ internal fun BoardSection(
                                     { onTileOperatorTapped(tileIndex) }
                                 } else {
                                     null
+                                },
+                                operatorOverlay = {
+                                    if (compactTileSelectorsEnabled) {
+                                        tileOperatorSelectionUiState?.let { dialogUiState ->
+                                            TileOperatorSelectionMenu(
+                                                dialogUiState = dialogUiState,
+                                                tile = tile,
+                                                onDismiss = onTileOperatorSelectionDismissed,
+                                                onConfirm = onTileOperatorSelectionConfirmed
+                                            )
+                                        }
+                                    }
                                 },
                                 isRightOperandHighlighted = highlightState.isTileExpressionSlotHighlighted(
                                     tileIndex = tileIndex,

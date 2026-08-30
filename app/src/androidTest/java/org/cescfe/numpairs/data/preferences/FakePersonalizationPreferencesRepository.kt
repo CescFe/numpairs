@@ -25,4 +25,10 @@ class FakePersonalizationPreferencesRepository(
             preferences.copy(generatedGameHapticsEnabled = enabled)
         }
     }
+
+    override suspend fun setCompactTileSelectorsEnabled(enabled: Boolean) {
+        mutablePreferences.update { preferences ->
+            preferences.copy(compactTileSelectorsEnabled = enabled)
+        }
+    }
 }

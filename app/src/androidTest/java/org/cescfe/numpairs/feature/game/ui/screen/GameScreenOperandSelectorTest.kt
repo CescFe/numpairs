@@ -10,6 +10,29 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class GameScreenOperandSelectorTest : GameScreenTestHost() {
     @Test
+    fun compactOperandSelectorHidesVisualGuidanceButKeepsItAccessible() {
+        enableCompactTileSelectors()
+
+        screen
+            .scrollToBoard()
+            .tapTileLeftOperand(0)
+            .assertOperandSelectorDisplayed()
+            .assertOperandSelectorTitleHidden()
+            .assertOperandSelectorExpressionHidden()
+            .assertOperandSelectorGuidance(
+                R.string.tile_operand_dialog_left_title,
+                R.string.tile_operand_dialog_left_expression_preview,
+                "?",
+                "?",
+                "?",
+                "223"
+            ).assertOperandOptionDisplayed(entryId = 2)
+            .tapOperandOption(entryId = 2)
+            .assertOperandSelectorHidden()
+            .assertOperatorSelectorDisplayed()
+    }
+
+    @Test
     fun selectingTheFirstOperandOnAnEmptyTileUpdatesTheTileAndOpensTheOperatorSelector() {
         screen
             .scrollToBoard()

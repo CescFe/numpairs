@@ -65,6 +65,7 @@ fun PersonalizationScreen(
     preferences: PersonalizationPreferences,
     onThemeSelected: (PersonalizationTheme) -> Unit,
     onGeneratedGameHapticsEnabledChanged: (Boolean) -> Unit,
+    onCompactTileSelectorsEnabledChanged: (Boolean) -> Unit,
     onOpenSourceRepositorySelected: () -> ExternalUriLaunchResult,
     onPrivacyPolicySelected: () -> ExternalUriLaunchResult,
     onNavigateBack: () -> Unit,
@@ -152,6 +153,15 @@ fun PersonalizationScreen(
                         )
                     }
                 }
+                Text(
+                    text = stringResource(R.string.personalization_gameplay_section_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                CompactTileSelectorsPreference(
+                    enabled = preferences.compactTileSelectorsEnabled,
+                    onEnabledChanged = onCompactTileSelectorsEnabledChanged
+                )
                 Text(
                     text = stringResource(R.string.personalization_feedback_section_title),
                     style = MaterialTheme.typography.titleLarge,
@@ -377,28 +387,58 @@ private fun ThemePreview(colors: NumPairsThemePreviewColors) {
 }
 
 @Composable
-private fun HapticsPreference(enabled: Boolean, onEnabledChanged: (Boolean) -> Unit) {
-    val stateDescriptionText = stringResource(
-        if (enabled) {
-            R.string.personalization_haptics_enabled
-        } else {
-            R.string.personalization_haptics_disabled
-        }
+private fun CompactTileSelectorsPreference(enabled: Boolean, onEnabledChanged: (Boolean) -> Unit) {
+    TogglePreference(
+        title = stringResource(R.string.personalization_compact_selectors_title),
+        supportingText = stringResource(R.string.personalization_compact_selectors_supporting_text),
+        enabledStateDescription = stringResource(R.string.personalization_compact_selectors_enabled),
+        disabledStateDescription = stringResource(R.string.personalization_compact_selectors_disabled),
+        enabled = enabled,
+        testTag = PersonalizationScreenTestTags.COMPACT_SELECTORS_TOGGLE,
+        onEnabledChanged = onEnabledChanged
     )
+}
 
+@Composable
+private fun HapticsPreference(enabled: Boolean, onEnabledChanged: (Boolean) -> Unit) {
+    TogglePreference(
+        title = stringResource(R.string.personalization_haptics_title),
+        supportingText = stringResource(R.string.personalization_haptics_supporting_text),
+        enabledStateDescription = stringResource(R.string.personalization_haptics_enabled),
+        disabledStateDescription = stringResource(R.string.personalization_haptics_disabled),
+        enabled = enabled,
+        testTag = PersonalizationScreenTestTags.HAPTICS_TOGGLE,
+        onEnabledChanged = onEnabledChanged
+    )
+}
+
+@Composable
+private fun TogglePreference(
+    title: String,
+    supportingText: String,
+    enabledStateDescription: String,
+    disabledStateDescription: String,
+    enabled: Boolean,
+    testTag: String,
+    onEnabledChanged: (Boolean) -> Unit
+) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = HAPTICS_OPTION_MIN_HEIGHT)
+            .defaultMinSize(minHeight = TOGGLE_PREFERENCE_MIN_HEIGHT)
             .toggleable(
                 value = enabled,
                 role = Role.Switch,
                 onValueChange = onEnabledChanged
             )
             .semantics(mergeDescendants = true) {
-                stateDescription = stateDescriptionText
+                stateDescription = if (enabled) {
+                    enabledStateDescription
+                } else {
+                    disabledStateDescription
+                }
             }
-            .testTag(PersonalizationScreenTestTags.HAPTICS_TOGGLE),
+            .testTag(testTag),
         shape = NumPairsComponents.MediumShape,
         color = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -416,12 +456,12 @@ private fun HapticsPreference(enabled: Boolean, onEnabledChanged: (Boolean) -> U
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.personalization_haptics_title),
+                    text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = stringResource(R.string.personalization_haptics_supporting_text),
+                    text = supportingText,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -455,6 +495,7 @@ private fun PersonalizationScreenPreview(
             preferences = PersonalizationPreferences(selectedTheme = theme),
             onThemeSelected = {},
             onGeneratedGameHapticsEnabledChanged = {},
+            onCompactTileSelectorsEnabledChanged = {},
             onOpenSourceRepositorySelected = { ExternalUriLaunchResult.Launched },
             onPrivacyPolicySelected = { ExternalUriLaunchResult.Launched },
             onNavigateBack = {}
@@ -467,6 +508,7 @@ object PersonalizationScreenTestTags {
     const val BACK_BUTTON = "personalization_back_button"
     const val BRAND_MARK = "personalization_brand_mark"
     const val THEME_PREVIEW = "personalization_theme_preview"
+    const val COMPACT_SELECTORS_TOGGLE = "personalization_compact_selectors_toggle"
     const val HAPTICS_TOGGLE = "personalization_haptics_toggle"
     const val OPEN_SOURCE_ACTION = "personalization_open_source_action"
     const val PRIVACY_POLICY_ACTION = "personalization_privacy_policy_action"
@@ -478,6 +520,6 @@ private val PERSONALIZATION_CONTENT_MAX_WIDTH = 520.dp
 private val PERSONALIZATION_BRAND_MARK_SIZE = 72.dp
 private val THEME_OPTION_MIN_HEIGHT = 72.dp
 private val THEME_PREVIEW_SWATCH_SIZE = 22.dp
-private val HAPTICS_OPTION_MIN_HEIGHT = 80.dp
+private val TOGGLE_PREFERENCE_MIN_HEIGHT = 80.dp
 private val EXTERNAL_LINK_ACTION_MIN_HEIGHT = 80.dp
 private val EXTERNAL_LINK_ACTION_ICON_SIZE = 24.dp

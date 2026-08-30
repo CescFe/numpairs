@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -34,6 +35,7 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import org.cescfe.numpairs.R
@@ -59,6 +61,7 @@ import org.cescfe.numpairs.ui.theme.numPairsSemanticColors
 internal fun TileOperandSelectionSheet(
     dialogUiState: TileOperandSelectionDialogUiState,
     tile: TileUiState,
+    compact: Boolean,
     onDismiss: () -> Unit,
     onConfirm: (Int) -> Unit
 ) {
@@ -76,37 +79,42 @@ internal fun TileOperandSelectionSheet(
             .testTag(GameScreenTestTags.TILE_OPERAND_SELECTOR)
             .semantics {
                 contentDescription = operandSheetTitle
+                if (compact) {
+                    stateDescription = expressionPreview
+                }
             },
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(topStart = NumPairsComponents.LargeRadius, topEnd = NumPairsComponents.LargeRadius),
         containerColor = NumPairsComponents.raisedSurfaceColor(),
         contentColor = MaterialTheme.colorScheme.onSurface
     ) {
-        Text(
-            text = operandSheetTitle,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier
-                .testTag(GameScreenTestTags.TILE_OPERAND_SELECTOR_TITLE)
-                .padding(
-                    start = TILE_OPERAND_SHEET_PADDING,
-                    end = TILE_OPERAND_SHEET_PADDING,
-                    bottom = 8.dp
-                )
-        )
-        Text(
-            text = expressionPreview,
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(GameScreenTestTags.TILE_OPERAND_SELECTOR_EXPRESSION)
-                .padding(
-                    start = TILE_OPERAND_SHEET_PADDING,
-                    end = TILE_OPERAND_SHEET_PADDING,
-                    bottom = 16.dp
-                ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = NumPairsTextStyles.TileExpression,
-            textAlign = TextAlign.Center
-        )
+        if (!compact) {
+            Text(
+                text = operandSheetTitle,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier
+                    .testTag(GameScreenTestTags.TILE_OPERAND_SELECTOR_TITLE)
+                    .padding(
+                        start = TILE_OPERAND_SHEET_PADDING,
+                        end = TILE_OPERAND_SHEET_PADDING,
+                        bottom = 8.dp
+                    )
+            )
+            Text(
+                text = expressionPreview,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(GameScreenTestTags.TILE_OPERAND_SELECTOR_EXPRESSION)
+                    .padding(
+                        start = TILE_OPERAND_SHEET_PADDING,
+                        end = TILE_OPERAND_SHEET_PADDING,
+                        bottom = 16.dp
+                    ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = NumPairsTextStyles.TileExpression,
+                textAlign = TextAlign.Center
+            )
+        }
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = TILE_OPERAND_SHEET_OPTION_MIN_WIDTH),
             modifier = Modifier
@@ -115,6 +123,7 @@ internal fun TileOperandSelectionSheet(
                 .selectableGroup(),
             contentPadding = PaddingValues(
                 start = TILE_OPERAND_SHEET_PADDING,
+                top = if (compact) TILE_OPERAND_SHEET_COMPACT_TOP_PADDING else 0.dp,
                 end = TILE_OPERAND_SHEET_PADDING,
                 bottom = TILE_OPERAND_SHEET_PADDING
             ),
@@ -345,6 +354,96 @@ private enum class OperandSelectorUsageHintVisualState(
         R.string.tile_operand_usage_state_rule_conflict,
         OperandSelectorUsageHintVisualStateValues.RULE_CONFLICT
     )
+}
+
+@Composable
+internal fun TileOperatorSelectionMenu(
+    dialogUiState: TileOperatorSelectionDialogUiState,
+    tile: TileUiState,
+    onDismiss: () -> Unit,
+    onConfirm: (Operator) -> Unit
+) {
+    val operatorMenuContentDescription = stringResource(R.string.tile_operator_dialog_title)
+    val expressionPreview = stringResource(
+        R.string.tile_operator_dialog_expression_preview,
+        tile.leftOperandLabel,
+        tile.rightOperandLabel,
+        tile.resultLabel
+    )
+
+    DropdownMenu(
+        expanded = true,
+        onDismissRequest = onDismiss,
+        modifier = Modifier
+            .testTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR)
+            .semantics {
+                contentDescription = operatorMenuContentDescription
+                stateDescription = expressionPreview
+            },
+        offset = DpOffset(x = 0.dp, y = 4.dp),
+        shape = NumPairsComponents.LargeShape,
+        containerColor = NumPairsComponents.raisedSurfaceColor(),
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
+        border = NumPairsComponents.subtleBorder()
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(TILE_OPERATOR_MENU_PADDING)
+                .selectableGroup(),
+            horizontalArrangement = Arrangement.spacedBy(TILE_OPERATOR_MENU_OPTION_SPACING)
+        ) {
+            dialogUiState.availableOperators.forEach { operator ->
+                val isSelected = dialogUiState.initialOperator == operator
+                val operatorSelectionLabel = operator.selectionLabel()
+
+                Surface(
+                    onClick = { onConfirm(operator) },
+                    modifier = Modifier
+                        .defaultMinSize(minWidth = 0.dp)
+                        .testTag(GameScreenTestTags.tileOperatorOption(operator))
+                        .semantics {
+                            contentDescription = operatorSelectionLabel
+                            selected = isSelected
+                        },
+                    shape = RoundedCornerShape(TILE_OPERATOR_MENU_CORNER_RADIUS),
+                    color = if (isSelected) {
+                        MaterialTheme.numPairsSemanticColors.selectionContainer
+                    } else {
+                        NumPairsComponents.subtleSurfaceColor()
+                    },
+                    contentColor = if (isSelected) {
+                        MaterialTheme.numPairsSemanticColors.onSelectionContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                    border = if (isSelected) {
+                        BorderStroke(
+                            width = NumPairsComponents.StrongBorderWidth,
+                            color = MaterialTheme.numPairsSemanticColors.selection
+                        )
+                    } else {
+                        NumPairsComponents.subtleBorder()
+                    }
+                ) {
+                    Text(
+                        text = operator.symbol,
+                        modifier = Modifier
+                            .testTag(GameScreenTestTags.tileOperatorOptionSymbol(operator))
+                            .padding(
+                                horizontal = TILE_OPERATOR_MENU_OPTION_HORIZONTAL_PADDING,
+                                vertical = TILE_OPERATOR_MENU_OPTION_VERTICAL_PADDING
+                            ),
+                        style = if (isSelected) {
+                            NumPairsTextStyles.OperatorOptionSelected
+                        } else {
+                            NumPairsTextStyles.OperatorOption
+                        }
+                    )
+                }
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

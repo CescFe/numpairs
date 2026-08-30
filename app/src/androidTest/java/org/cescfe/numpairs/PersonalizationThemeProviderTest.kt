@@ -68,5 +68,9 @@ class PersonalizationThemeProviderTest {
         override suspend fun setGeneratedGameHapticsEnabled(enabled: Boolean) {
             state.value = state.value.copy(generatedGameHapticsEnabled = enabled)
         }
+
+        override suspend fun setCompactTileSelectorsEnabled(enabled: Boolean) {
+            state.value = state.value.copy(compactTileSelectorsEnabled = enabled)
+        }
     }
 }

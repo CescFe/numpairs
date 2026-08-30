@@ -24,6 +24,29 @@ class PersonalizationRouteTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
+    fun compactSelectorsControlUpdatesThePersistedPreference() {
+        val repository = FakePersonalizationPreferencesRepository()
+
+        composeTestRule.setContent {
+            NumPairsTheme {
+                PersonalizationRoute(
+                    repository = repository,
+                    onNavigateBack = {}
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(PersonalizationScreenTestTags.COMPACT_SELECTORS_TOGGLE)
+            .performScrollTo()
+            .performClick()
+
+        composeTestRule.waitUntil {
+            repository.state.value.compactTileSelectorsEnabled
+        }
+    }
+
+    @Test
     fun externalActionsLaunchTheirCanonicalUrlsWithoutChangingPreferences() {
         val initialPreferences = PersonalizationPreferences()
         val repository = FakePersonalizationPreferencesRepository(initialPreferences)

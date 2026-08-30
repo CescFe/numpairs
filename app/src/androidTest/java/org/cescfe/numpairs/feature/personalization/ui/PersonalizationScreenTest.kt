@@ -9,6 +9,7 @@ import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
@@ -60,11 +61,13 @@ class PersonalizationScreenTest {
     }
 
     @Test
-    fun themeAndHapticsControlsEmitTheirRequestedPreferences() {
+    fun themeAndToggleControlsEmitTheirRequestedPreferences() {
         var selectedTheme: PersonalizationTheme? = null
+        var compactSelectorsEnabled: Boolean? = null
         var hapticsEnabled: Boolean? = null
         setContent(
             onThemeSelected = { theme -> selectedTheme = theme },
+            onCompactSelectorsChanged = { enabled -> compactSelectorsEnabled = enabled },
             onHapticsChanged = { enabled -> hapticsEnabled = enabled }
         )
 
@@ -73,6 +76,18 @@ class PersonalizationScreenTest {
             .performScrollTo()
             .performClick()
         composeTestRule
+            .onNodeWithTag(PersonalizationScreenTestTags.COMPACT_SELECTORS_TOGGLE)
+            .performScrollTo()
+            .assertIsOff()
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.StateDescription,
+                    composeTestRule.activity.getString(
+                        R.string.personalization_compact_selectors_disabled
+                    )
+                )
+            ).performClick()
+        composeTestRule
             .onNodeWithTag(PersonalizationScreenTestTags.HAPTICS_TOGGLE)
             .performScrollTo()
             .assertIsOn()
@@ -80,8 +95,39 @@ class PersonalizationScreenTest {
 
         composeTestRule.runOnIdle {
             assertEquals(PersonalizationTheme.FROST, selectedTheme)
+            assertEquals(true, compactSelectorsEnabled)
             assertEquals(false, hapticsEnabled)
         }
+    }
+
+    @Test
+    fun compactSelectorsPreferenceDisplaysItsLocalizedExplanationAndEnabledState() {
+        setContent(
+            preferences = PersonalizationPreferences(
+                compactTileSelectorsEnabled = true
+            )
+        )
+
+        composeTestRule
+            .onNodeWithText(
+                composeTestRule.activity.getString(R.string.personalization_compact_selectors_title)
+            ).performScrollTo()
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(
+                composeTestRule.activity.getString(R.string.personalization_compact_selectors_supporting_text)
+            ).assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(PersonalizationScreenTestTags.COMPACT_SELECTORS_TOGGLE)
+            .assertIsOn()
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.StateDescription,
+                    composeTestRule.activity.getString(
+                        R.string.personalization_compact_selectors_enabled
+                    )
+                )
+            )
     }
 
     @Test
@@ -227,6 +273,15 @@ class PersonalizationScreenTest {
         assertTrue(hapticsBounds.height >= minimumTouchTargetPx)
         assertTrue(hapticsBounds.width >= minimumTouchTargetPx)
 
+        val compactSelectorsBounds = composeTestRule
+            .onNodeWithTag(PersonalizationScreenTestTags.COMPACT_SELECTORS_TOGGLE)
+            .performScrollTo()
+            .assertIsDisplayed()
+            .fetchSemanticsNode()
+            .boundsInRoot
+        assertTrue(compactSelectorsBounds.height >= minimumTouchTargetPx)
+        assertTrue(compactSelectorsBounds.width >= minimumTouchTargetPx)
+
         val openSourceBounds = composeTestRule
             .onNodeWithTag(PersonalizationScreenTestTags.OPEN_SOURCE_ACTION)
             .performScrollTo()
@@ -249,6 +304,7 @@ class PersonalizationScreenTest {
     private fun setContent(
         preferences: PersonalizationPreferences = PersonalizationPreferences(),
         onThemeSelected: (PersonalizationTheme) -> Unit = {},
+        onCompactSelectorsChanged: (Boolean) -> Unit = {},
         onHapticsChanged: (Boolean) -> Unit = {},
         onOpenSourceRepositorySelected: () -> ExternalUriLaunchResult = {
             ExternalUriLaunchResult.Launched
@@ -262,6 +318,7 @@ class PersonalizationScreenTest {
                 PersonalizationScreen(
                     preferences = preferences,
                     onThemeSelected = onThemeSelected,
+                    onCompactTileSelectorsEnabledChanged = onCompactSelectorsChanged,
                     onGeneratedGameHapticsEnabledChanged = onHapticsChanged,
                     onOpenSourceRepositorySelected = onOpenSourceRepositorySelected,
                     onPrivacyPolicySelected = onPrivacyPolicySelected,

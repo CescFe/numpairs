@@ -61,6 +61,7 @@ fun DailyChallengeRoute(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
     isGeneratedGameHapticsEnabled: Boolean = true,
+    compactTileSelectorsEnabled: Boolean = false,
     shareLauncher: DailyCompletionShareLauncher? = null
 ) {
     if (DailyRecipes.catalog.resolveOrNull(identity.recipeVersion) == null) {
@@ -121,6 +122,7 @@ fun DailyChallengeRoute(
             state = state,
             modifier = modifier,
             isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,
+            compactTileSelectorsEnabled = compactTileSelectorsEnabled,
             onPuzzleChanged = viewModel::onCommittedPuzzleChanged,
             onRetryPersistence = viewModel::retryPersistence,
             onNavigateBack = onNavigateBack
@@ -140,6 +142,7 @@ fun DailyChallengeRoute(
                     state = state,
                     modifier = modifier,
                     isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,
+                    compactTileSelectorsEnabled = compactTileSelectorsEnabled,
                     onPuzzleChanged = viewModel::onCommittedPuzzleChanged,
                     onRetryPersistence = viewModel::retryPersistence,
                     completionContent = dailyCompletionOverlayContent(
@@ -247,6 +250,7 @@ private fun DailyGameContent(
     state: DailyPuzzleUiState,
     modifier: Modifier,
     isGeneratedGameHapticsEnabled: Boolean,
+    compactTileSelectorsEnabled: Boolean,
     onPuzzleChanged: (
         org.cescfe.numpairs.data.daily.session.DailySessionId,
         org.cescfe.numpairs.domain.puzzle.model.Puzzle
@@ -275,6 +279,7 @@ private fun DailyGameContent(
             successOverlayContent = completionContent,
             isCorrectTileMotionEnabled = true,
             isCompletionCelebrationEnabled = true,
+            compactTileSelectorsEnabled = compactTileSelectorsEnabled,
             onPuzzleChanged = { puzzle ->
                 onPuzzleChanged(session.id, puzzle)
             },

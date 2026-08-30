@@ -215,7 +215,8 @@ class DailyCompletionSurfaceTest {
         )
         val preferencesRepository = FakePersonalizationPreferencesRepository(
             initialPreferences = PersonalizationPreferences(
-                generatedGameHapticsEnabled = false
+                generatedGameHapticsEnabled = false,
+                compactTileSelectorsEnabled = true
             )
         )
         val hapticFeedback = RecordingHapticFeedback()
@@ -471,6 +472,9 @@ class DailyCompletionSurfaceTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
             .performClick()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR_TITLE, useUnmergedTree = true)
+            .assertDoesNotExist()
         composeTestRule
             .onNodeWithTag(
                 GameScreenTestTags.tileOperatorOption(operator),

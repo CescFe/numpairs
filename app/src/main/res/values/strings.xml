@@ -46,6 +46,11 @@
     <string name="personalization_theme_obsidian">Obsidian</string>
     <string name="personalization_theme_terminal">Terminal</string>
     <string name="personalization_theme_ember">Ember</string>
+    <string name="personalization_gameplay_section_title">Gameplay</string>
+    <string name="personalization_compact_selectors_title">Compact selectors</string>
+    <string name="personalization_compact_selectors_supporting_text">Hide selection guidance and choose operators directly from the tile.</string>
+    <string name="personalization_compact_selectors_enabled">Enabled</string>
+    <string name="personalization_compact_selectors_disabled">Disabled</string>
     <string name="personalization_feedback_section_title">Game feedback</string>
     <string name="personalization_haptics_title">Game haptics</string>
     <string name="personalization_haptics_supporting_text">Gentle confirmation for valid assignments in generated games.</string>

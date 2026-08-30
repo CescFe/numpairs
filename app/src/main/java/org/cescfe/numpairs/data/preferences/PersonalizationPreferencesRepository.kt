@@ -17,7 +17,8 @@ enum class PersonalizationTheme(internal val persistedValue: String) {
 
 data class PersonalizationPreferences(
     val selectedTheme: PersonalizationTheme = PersonalizationTheme.WARM,
-    val generatedGameHapticsEnabled: Boolean = true
+    val generatedGameHapticsEnabled: Boolean = true,
+    val compactTileSelectorsEnabled: Boolean = false
 )
 
 interface PersonalizationPreferencesRepository {
@@ -26,4 +27,6 @@ interface PersonalizationPreferencesRepository {
     suspend fun selectTheme(theme: PersonalizationTheme)
 
     suspend fun setGeneratedGameHapticsEnabled(enabled: Boolean)
+
+    suspend fun setCompactTileSelectorsEnabled(enabled: Boolean)
 }

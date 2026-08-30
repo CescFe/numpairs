@@ -247,6 +247,8 @@ private fun UnlockedAppNavigation(
                     dependencies.generatedPuzzleGenerationUseCaseFactory,
                 isGeneratedGameHapticsEnabled =
                     personalizationPreferences?.generatedGameHapticsEnabled == true,
+                compactTileSelectorsEnabled =
+                    personalizationPreferences?.compactTileSelectorsEnabled == true,
                 onNavigateBack = navigateToMenu,
                 modifier = modifier
             )
@@ -297,6 +299,8 @@ private fun UnlockedAppNavigation(
                     topAppBarActionDiscoveryRepository = topAppBarActionDiscoveryRepository,
                     isGeneratedGameHapticsEnabled =
                         personalizationPreferences?.generatedGameHapticsEnabled == true,
+                    compactTileSelectorsEnabled =
+                        personalizationPreferences?.compactTileSelectorsEnabled == true,
                     newPuzzleChallengeProvider = {
                         generatedPlayChallengeSelector.select(
                             optionId = GeneratedPlayOptions.QUICK.id,
@@ -315,6 +319,8 @@ private fun UnlockedAppNavigation(
                     generatedSessionRepository = generatedSessionRepository,
                     isGeneratedGameHapticsEnabled =
                         personalizationPreferences?.generatedGameHapticsEnabled == true,
+                    compactTileSelectorsEnabled =
+                        personalizationPreferences?.compactTileSelectorsEnabled == true,
                     modifier = modifier,
                     onNavigateBack = navigateToMenu
                 )

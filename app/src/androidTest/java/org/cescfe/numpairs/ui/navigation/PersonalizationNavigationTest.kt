@@ -6,6 +6,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -21,6 +22,7 @@ import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesReposi
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.preferences.PersonalizationTheme
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
+import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
@@ -38,7 +40,7 @@ class PersonalizationNavigationTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun personalizationUpdatesPreferencesAndThemeWithoutReplacingGeneratedSession() {
+    fun personalizationUpdatesPreferencesAndGeneratedSelectorsWithoutReplacingTheSession() {
         val snapshot = GeneratedSessionSnapshot(
             sessionId = GeneratedSessionId("personalization-session"),
             modeId = GeneratedModes.FOUR_PAIRS.id.value,
@@ -105,10 +107,15 @@ class PersonalizationNavigationTest {
             .onNodeWithTag(PersonalizationScreenTestTags.HAPTICS_TOGGLE)
             .performScrollTo()
             .performClick()
+        composeTestRule
+            .onNodeWithTag(PersonalizationScreenTestTags.COMPACT_SELECTORS_TOGGLE)
+            .performScrollTo()
+            .performClick()
 
         composeTestRule.runOnIdle {
             assertEquals(PersonalizationTheme.EMBER, personalizationRepository.state.value.selectedTheme)
             assertEquals(false, personalizationRepository.state.value.generatedGameHapticsEnabled)
+            assertEquals(true, personalizationRepository.state.value.compactTileSelectorsEnabled)
             assertEquals(Color(0xFFA33A00), latestPrimary)
             assertEquals(snapshot, generatedSessionRepository.session.value)
         }
@@ -121,5 +128,27 @@ class PersonalizationNavigationTest {
         composeTestRule.runOnIdle {
             assertEquals(snapshot, generatedSessionRepository.session.value)
         }
+
+        composeTestRule
+            .onNodeWithTag(MenuScreenTestTags.RESUME_BUTTON)
+            .performClick()
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodesWithTag(GameScreenTestTags.SCREEN)
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.BOARD)
+            .performScrollTo()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.tileOperator(0), useUnmergedTree = true)
+            .performClick()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR, useUnmergedTree = true)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR_TITLE, useUnmergedTree = true)
+            .assertDoesNotExist()
     }
 }

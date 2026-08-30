@@ -39,6 +39,11 @@ fun PersonalizationRoute(
                 repository.setGeneratedGameHapticsEnabled(enabled)
             }
         },
+        onCompactTileSelectorsEnabledChanged = { enabled ->
+            coroutineScope.launch {
+                repository.setCompactTileSelectorsEnabled(enabled)
+            }
+        },
         onOpenSourceRepositorySelected = {
             activeExternalUriLauncher.launch(OPEN_SOURCE_REPOSITORY_URL)
         },

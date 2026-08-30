@@ -26,7 +26,8 @@ class DataStorePersonalizationPreferencesRepository(private val dataStore: DataS
                 selectedTheme = PersonalizationTheme.fromPersistedValue(
                     preferences[PreferenceKeys.SELECTED_THEME]
                 ),
-                generatedGameHapticsEnabled = preferences[PreferenceKeys.GENERATED_GAME_HAPTICS_ENABLED] ?: true
+                generatedGameHapticsEnabled = preferences[PreferenceKeys.GENERATED_GAME_HAPTICS_ENABLED] ?: true,
+                compactTileSelectorsEnabled = preferences[PreferenceKeys.COMPACT_TILE_SELECTORS_ENABLED] ?: false
             )
         }
 
@@ -42,8 +43,15 @@ class DataStorePersonalizationPreferencesRepository(private val dataStore: DataS
         }
     }
 
+    override suspend fun setCompactTileSelectorsEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferenceKeys.COMPACT_TILE_SELECTORS_ENABLED] = enabled
+        }
+    }
+
     private object PreferenceKeys {
         val SELECTED_THEME = stringPreferencesKey("personalization_selected_theme")
         val GENERATED_GAME_HAPTICS_ENABLED = booleanPreferencesKey("personalization_generated_game_haptics_enabled")
+        val COMPACT_TILE_SELECTORS_ENABLED = booleanPreferencesKey("personalization_compact_tile_selectors_enabled")
     }
 }

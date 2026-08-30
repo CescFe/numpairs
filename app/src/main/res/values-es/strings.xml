@@ -46,6 +46,11 @@
     <string name="personalization_theme_obsidian">Obsidian</string>
     <string name="personalization_theme_terminal">Terminal</string>
     <string name="personalization_theme_ember">Ember</string>
+    <string name="personalization_gameplay_section_title">Juego</string>
+    <string name="personalization_compact_selectors_title">Selectores compactos</string>
+    <string name="personalization_compact_selectors_supporting_text">Oculta las indicaciones de selección y permite elegir los operadores directamente sobre la ficha.</string>
+    <string name="personalization_compact_selectors_enabled">Activados</string>
+    <string name="personalization_compact_selectors_disabled">Desactivados</string>
     <string name="personalization_feedback_section_title">Respuesta del juego</string>
     <string name="personalization_haptics_title">Respuesta háptica del juego</string>
     <string name="personalization_haptics_supporting_text">Confirmación suave para las asignaciones válidas en partidas generadas.</string>

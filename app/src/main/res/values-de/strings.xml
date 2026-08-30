@@ -46,6 +46,11 @@
     <string name="personalization_theme_obsidian">Obsidian</string>
     <string name="personalization_theme_terminal">Terminal</string>
     <string name="personalization_theme_ember">Glut</string>
+    <string name="personalization_gameplay_section_title">Spiel</string>
+    <string name="personalization_compact_selectors_title">Kompakte Auswahlmenüs</string>
+    <string name="personalization_compact_selectors_supporting_text">Blendet Auswahlhinweise aus und lässt Operatoren direkt auf der Kachel auswählen.</string>
+    <string name="personalization_compact_selectors_enabled">Aktiviert</string>
+    <string name="personalization_compact_selectors_disabled">Deaktiviert</string>
     <string name="personalization_feedback_section_title">Spiel-Feedback</string>
     <string name="personalization_haptics_title">Haptisches Feedback</string>
     <string name="personalization_haptics_supporting_text">Sanfte Bestätigung bei gültigen Eingaben in generierten Spielen.</string>

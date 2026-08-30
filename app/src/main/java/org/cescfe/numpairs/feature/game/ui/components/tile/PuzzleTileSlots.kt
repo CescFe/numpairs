@@ -9,6 +9,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
@@ -93,6 +94,7 @@ internal fun TileExpressionRow(
     isOperatorInputActive: Boolean = false,
     operatorContentDescription: String? = null,
     onOperatorClick: (() -> Unit)? = null,
+    operatorOverlay: @Composable BoxScope.() -> Unit = {},
     rightOperandModifier: Modifier = Modifier,
     isRightOperandHighlighted: Boolean = false,
     isRightOperandInputActive: Boolean = false,
@@ -127,7 +129,8 @@ internal fun TileExpressionRow(
             isHighlighted = isOperatorHighlighted,
             isInputActive = isOperatorInputActive,
             onClick = onOperatorClick,
-            textColor = textColor
+            textColor = textColor,
+            overlayContent = operatorOverlay
         )
         TileExpressionItem(
             text = tile.rightOperandLabel,
@@ -155,7 +158,8 @@ private fun TileExpressionItem(
     onClick: (() -> Unit)? = null,
     textColor: Color = Color.Unspecified,
     isOperand: Boolean = false,
-    horizontalTextPadding: Dp = 0.dp
+    horizontalTextPadding: Dp = 0.dp,
+    overlayContent: @Composable BoxScope.() -> Unit = {}
 ) {
     val activeInputStateDescription = stringResource(R.string.tile_expression_active_input_state)
     val confirmationScale = remember { Animatable(1f) }
@@ -244,6 +248,7 @@ private fun TileExpressionItem(
             maxLines = 1,
             overflow = TextOverflow.Clip
         )
+        overlayContent()
     }
 }
 
