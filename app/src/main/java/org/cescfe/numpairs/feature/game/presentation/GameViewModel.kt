@@ -162,11 +162,9 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
         }
 
         commit(
-            updatedPuzzle = puzzle.copy(
-                strip = puzzle.strip.withUpdatedEntry(
-                    index = input.stripItemIndex,
-                    value = value
-                )
+            updatedPuzzle = puzzle.withUpdatedStripEntry(
+                index = input.stripItemIndex,
+                value = value
             )
         ) {
             dismissStripItemEntryInput()

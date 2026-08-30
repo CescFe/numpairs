@@ -1,6 +1,8 @@
 package org.cescfe.numpairs.feature.game.presentation
 
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
+import org.cescfe.numpairs.domain.puzzle.model.Expression
+import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Strip
 import org.cescfe.numpairs.domain.puzzle.model.StripEntryRange
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
@@ -238,6 +240,37 @@ class GameViewModelStripEntryTest {
         assertEquals(true, uiState.stripItems[1].isEntryEnabled)
         assertEquals(StripItemVisualStyle.PLAYER_ENTERED, uiState.stripItems[1].visualStyle)
         assertNull(uiState.stripItemEntryInput)
+    }
+
+    @Test
+    fun editing_a_player_entered_strip_item_updates_assigned_operands_after_reordering() {
+        val viewModel = GameViewModel()
+        viewModel.enterStripValue(index = 0, value = "5")
+        viewModel.enterStripValue(index = 1, value = "2")
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 0)
+        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.ADDITION)
+        viewModel.onTileOperandSelectionDismissed()
+        viewModel.onTileRightOperandTapped(index = 1)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 0)
+        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.MULTIPLICATION)
+        viewModel.onTileOperandSelectionDismissed()
+
+        viewModel.enterStripValue(index = 1, value = "1")
+
+        val currentPuzzle = viewModel.currentPuzzle.value
+
+        assertEquals(listOf(0, 1), currentPuzzle.strip.entries.take(2).map { entry -> entry.id })
+        assertEquals(
+            Expression.Operand.Known(value = 1, stripEntryId = 0),
+            currentPuzzle.board.tiles[0].expression.leftOperand
+        )
+        assertEquals(
+            Expression.Operand.Known(value = 1, stripEntryId = 0),
+            currentPuzzle.board.tiles[1].expression.rightOperand
+        )
+        assertEquals("1", viewModel.uiState.value.tiles[0].leftOperandLabel)
+        assertEquals("1", viewModel.uiState.value.tiles[1].rightOperandLabel)
     }
 
     @Test
