@@ -310,10 +310,22 @@ class GameScreenRobot(
             .assert(hasText(string(stringResId)))
     }
 
+    fun assertOperatorSelectorTitleHidden(): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR_TITLE, useUnmergedTree = true)
+            .assertDoesNotExist()
+    }
+
     fun assertOperatorSelectorExpression(@StringRes stringResId: Int, vararg formatArgs: Any): GameScreenRobot = apply {
         interactions
             .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR_EXPRESSION, useUnmergedTree = true)
             .assert(hasText(string(stringResId, *formatArgs)))
+    }
+
+    fun assertOperatorSelectorExpressionHidden(): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERATOR_SELECTOR_EXPRESSION, useUnmergedTree = true)
+            .assertDoesNotExist()
     }
 
     fun assertOperandSelectorTitle(@StringRes stringResId: Int): GameScreenRobot = apply {
@@ -322,10 +334,46 @@ class GameScreenRobot(
             .assert(hasText(string(stringResId)))
     }
 
+    fun assertOperandSelectorTitleHidden(): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERAND_SELECTOR_TITLE, useUnmergedTree = true)
+            .assertDoesNotExist()
+    }
+
     fun assertOperandSelectorExpression(@StringRes stringResId: Int, vararg formatArgs: Any): GameScreenRobot = apply {
         interactions
             .onNodeWithTag(GameScreenTestTags.TILE_OPERAND_SELECTOR_EXPRESSION, useUnmergedTree = true)
             .assert(hasText(string(stringResId, *formatArgs)))
+    }
+
+    fun assertOperandSelectorExpressionHidden(): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.TILE_OPERAND_SELECTOR_EXPRESSION, useUnmergedTree = true)
+            .assertDoesNotExist()
+    }
+
+    fun assertOperandSelectorGuidance(
+        @StringRes titleResId: Int,
+        @StringRes expressionResId: Int,
+        vararg formatArgs: Any
+    ): GameScreenRobot = apply {
+        assertSelectorGuidance(
+            testTag = GameScreenTestTags.TILE_OPERAND_SELECTOR,
+            title = string(titleResId),
+            expression = string(expressionResId, *formatArgs)
+        )
+    }
+
+    fun assertOperatorSelectorGuidance(
+        @StringRes titleResId: Int,
+        @StringRes expressionResId: Int,
+        vararg formatArgs: Any
+    ): GameScreenRobot = apply {
+        assertSelectorGuidance(
+            testTag = GameScreenTestTags.TILE_OPERATOR_SELECTOR,
+            title = string(titleResId),
+            expression = string(expressionResId, *formatArgs)
+        )
     }
 
     fun assertOperandOptionDisplayed(entryId: Int): GameScreenRobot = apply {
@@ -613,6 +661,22 @@ class GameScreenRobot(
                 SemanticsMatcher.expectValue(
                     SemanticsProperties.ContentDescription,
                     listOf(contentDescription)
+                )
+            )
+    }
+
+    private fun assertSelectorGuidance(testTag: String, title: String, expression: String) {
+        assertContentDescription(
+            testTag = testTag,
+            contentDescription = title,
+            useUnmergedTree = true
+        )
+        interactions
+            .onNodeWithTag(testTag, useUnmergedTree = true)
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.StateDescription,
+                    expression
                 )
             )
     }

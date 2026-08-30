@@ -48,12 +48,13 @@ import org.cescfe.numpairs.ui.theme.NumPairsComponents
 @Composable
 fun GeneratedModeRoute(
     challenge: GeneratedChallenge,
-    launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.DefaultNewPuzzle,
     title: String,
     generationUseCase: GeneratedPuzzleGenerationUseCase,
     generatedSessionRepository: GeneratedSessionRepository,
     modifier: Modifier = Modifier,
+    launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.DefaultNewPuzzle,
     isGeneratedGameHapticsEnabled: Boolean = true,
+    compactTileSelectorsEnabled: Boolean = false,
     isRulesHelperEnabled: Boolean = false,
     isRulesHelperActionDiscoveryDotVisible: Boolean = false,
     onRulesHelperActionTapped: () -> Unit = {},
@@ -91,6 +92,7 @@ fun GeneratedModeRoute(
             onRulesHelperPlayTutorialRequested = onRulesHelperPlayTutorialRequested,
             topBarActions = topBarActions,
             isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,
+            compactTileSelectorsEnabled = compactTileSelectorsEnabled,
             onNewPuzzleRequested = {
                 if (newPuzzleChallengeProvider == null) {
                     viewModel.onNewPuzzleRequested()
@@ -113,7 +115,7 @@ fun GeneratedModeRoute(
         return
     }
 
-    when (val state = uiState) {
+    when (uiState) {
         GeneratedPuzzleGenerationUiState.Idle -> Unit
 
         is GeneratedPuzzleGenerationUiState.Restoring,
@@ -152,6 +154,7 @@ private fun GeneratedPuzzleGameBoundary(
     onRulesHelperPlayTutorialRequested: (() -> Unit)?,
     topBarActions: @Composable RowScope.() -> Unit,
     isGeneratedGameHapticsEnabled: Boolean,
+    compactTileSelectorsEnabled: Boolean,
     onNewPuzzleRequested: () -> Unit,
     onPuzzleChanged: (GeneratedSessionId, Puzzle) -> Unit,
     onReplacementTransitionConsumed: (GeneratedPuzzleReplacementTransition) -> Unit,
@@ -171,7 +174,7 @@ private fun GeneratedPuzzleGameBoundary(
             activeReplacementTransition == null
     }
     val visibleTransition = activeReplacementTransition ?: transitionToStart
-    val visibleProgress = if (transitionToStart != null && activeReplacementTransition == null) {
+    val visibleProgress = if (transitionToStart != null) {
         0f
     } else {
         entranceProgress.value
@@ -228,6 +231,7 @@ private fun GeneratedPuzzleGameBoundary(
         onRulesHelperPlayTutorialRequested = onRulesHelperPlayTutorialRequested,
         topBarActions = topBarActions,
         isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,
+        compactTileSelectorsEnabled = compactTileSelectorsEnabled,
         onNewPuzzleRequested = onNewPuzzleRequested,
         onPuzzleChanged = onPuzzleChanged,
         onNavigateBack = onNavigateBack,
@@ -260,6 +264,7 @@ private fun GeneratedPuzzleGameContent(
     onRulesHelperPlayTutorialRequested: (() -> Unit)?,
     topBarActions: @Composable RowScope.() -> Unit,
     isGeneratedGameHapticsEnabled: Boolean,
+    compactTileSelectorsEnabled: Boolean,
     onNewPuzzleRequested: () -> Unit,
     onPuzzleChanged: (GeneratedSessionId, Puzzle) -> Unit,
     onNavigateBack: () -> Unit,
@@ -283,6 +288,7 @@ private fun GeneratedPuzzleGameContent(
             onRulesHelperPlayTutorialRequested = onRulesHelperPlayTutorialRequested,
             isCorrectTileMotionEnabled = true,
             isCompletionCelebrationEnabled = true,
+            compactTileSelectorsEnabled = compactTileSelectorsEnabled,
             topBarActions = topBarActions,
             onPuzzleChanged = { puzzle ->
                 onPuzzleChanged(session.id, puzzle)

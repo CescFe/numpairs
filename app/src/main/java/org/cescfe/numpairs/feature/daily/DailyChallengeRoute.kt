@@ -33,6 +33,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -61,6 +62,7 @@ fun DailyChallengeRoute(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
     isGeneratedGameHapticsEnabled: Boolean = true,
+    compactTileSelectorsEnabled: Boolean = false,
     shareLauncher: DailyCompletionShareLauncher? = null
 ) {
     if (DailyRecipes.catalog.resolveOrNull(identity.recipeVersion) == null) {
@@ -121,6 +123,7 @@ fun DailyChallengeRoute(
             state = state,
             modifier = modifier,
             isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,
+            compactTileSelectorsEnabled = compactTileSelectorsEnabled,
             onPuzzleChanged = viewModel::onCommittedPuzzleChanged,
             onRetryPersistence = viewModel::retryPersistence,
             onNavigateBack = onNavigateBack
@@ -140,6 +143,7 @@ fun DailyChallengeRoute(
                     state = state,
                     modifier = modifier,
                     isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,
+                    compactTileSelectorsEnabled = compactTileSelectorsEnabled,
                     onPuzzleChanged = viewModel::onCommittedPuzzleChanged,
                     onRetryPersistence = viewModel::retryPersistence,
                     completionContent = dailyCompletionOverlayContent(
@@ -247,6 +251,7 @@ private fun DailyGameContent(
     state: DailyPuzzleUiState,
     modifier: Modifier,
     isGeneratedGameHapticsEnabled: Boolean,
+    compactTileSelectorsEnabled: Boolean,
     onPuzzleChanged: (
         org.cescfe.numpairs.data.daily.session.DailySessionId,
         org.cescfe.numpairs.domain.puzzle.model.Puzzle
@@ -275,6 +280,7 @@ private fun DailyGameContent(
             successOverlayContent = completionContent,
             isCorrectTileMotionEnabled = true,
             isCompletionCelebrationEnabled = true,
+            compactTileSelectorsEnabled = compactTileSelectorsEnabled,
             onPuzzleChanged = { puzzle ->
                 onPuzzleChanged(session.id, puzzle)
             },
@@ -337,8 +343,9 @@ private fun rememberDailyShareResultAction(shareLauncher: DailyCompletionShareLa
     val defaultLauncher = remember(context) {
         AndroidDailyCompletionShareLauncher(context)
     }
-    val payloadFactory = remember(context.resources) {
-        AndroidDailyCompletionSharePayloadFactory(context.resources)
+    val resources = LocalResources.current
+    val payloadFactory = remember(resources) {
+        AndroidDailyCompletionSharePayloadFactory(resources)
     }
     val activeLauncher = shareLauncher ?: defaultLauncher
     return remember(activeLauncher, payloadFactory) {
@@ -491,7 +498,7 @@ private fun rememberDailyPuzzleViewModel(
         ?: error("DailyChallengeRoute requires a ComponentActivity host.")
     val currentDailyChallengeResolver = remember(identity) {
         CurrentDailyChallengeResolver(
-            localDateSource = DeviceLocalDateSource { identity.localDate },
+            localDateSource = { identity.localDate },
             activeRecipeVersion = identity.recipeVersion
         )
     }

@@ -13,6 +13,37 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class GameScreenOperatorSelectorTest : GameScreenTestHost() {
     @Test
+    fun compactOperatorSelectorUsesAnAccessibleAnchoredMenuAndPreservesSelection() {
+        enableCompactTileSelectors()
+
+        screen
+            .scrollToBoard()
+            .tapTileOperator(0)
+            .assertOperatorSelectorDisplayed()
+            .assertNoDialogDisplayed()
+            .assertOperatorSelectorTitleHidden()
+            .assertOperatorSelectorExpressionHidden()
+            .assertOperatorSelectorGuidance(
+                R.string.tile_operator_dialog_title,
+                R.string.tile_operator_dialog_expression_preview,
+                "?",
+                "?",
+                "223"
+            ).assertOperatorOptionDisplayed(Operator.ADDITION)
+            .assertOperatorOptionDisplayed(Operator.MULTIPLICATION)
+            .tapOperatorOption(Operator.ADDITION)
+            .assertOperatorSelectorHidden()
+            .tapTileOperator(0)
+            .assertOperatorOptionSelected(Operator.ADDITION)
+            .pressBack()
+            .assertOperatorDescription(
+                0,
+                R.string.tile_operator_content_description,
+                composeTestRule.activity.getString(R.string.tile_operator_option_addition)
+            ).assertOperatorSelectorHidden()
+    }
+
+    @Test
     fun tappingAHiddenTileOperatorOpensTheSelectorAndSelectionUpdatesTheTile() {
         screen
             .scrollToBoard()

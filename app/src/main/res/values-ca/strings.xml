@@ -46,6 +46,11 @@
     <string name="personalization_theme_obsidian">Obsidian</string>
     <string name="personalization_theme_terminal">Terminal</string>
     <string name="personalization_theme_ember">Ember</string>
+    <string name="personalization_gameplay_section_title">Joc</string>
+    <string name="personalization_compact_selectors_title">Selectors compactes</string>
+    <string name="personalization_compact_selectors_supporting_text">Amaga les indicacions de selecció i permet triar els operadors directament sobre la fitxa.</string>
+    <string name="personalization_compact_selectors_enabled">Activats</string>
+    <string name="personalization_compact_selectors_disabled">Desactivats</string>
     <string name="personalization_feedback_section_title">Resposta del joc</string>
     <string name="personalization_haptics_title">Resposta hàptica del joc</string>
     <string name="personalization_haptics_supporting_text">Confirmació suau per a les assignacions vàlides en partides generades.</string>

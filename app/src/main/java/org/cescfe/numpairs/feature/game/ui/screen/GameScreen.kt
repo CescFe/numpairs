@@ -82,6 +82,7 @@ fun GameScreen(
     successOverlayContent: GameSuccessOverlayContent? = null,
     isBoardVisible: Boolean = true,
     stripItemEntryGuidance: String? = null,
+    compactTileSelectorsEnabled: Boolean = false,
     interactionPolicy: GameInteractionPolicy = GameInteractionPolicy.AllowAll,
     highlightState: GameHighlightState = GameHighlightState.None,
     correctTileFeedbackIdsByIndex: Map<Int, Long> = emptyMap(),
@@ -170,6 +171,9 @@ fun GameScreen(
                         onTileResetTapped = onTileResetTapped,
                         tileOperatorSelectionDialog = tileOperatorSelectionDialog,
                         tileOperandSelectionDialog = tileOperandSelectionDialog,
+                        compactTileSelectorsEnabled = compactTileSelectorsEnabled,
+                        onTileOperatorSelectionDismissed = onTileOperatorSelectionDismissed,
+                        onTileOperatorSelectionConfirmed = onTileOperatorSelectionConfirmed,
                         interactionPolicy = interactionPolicy,
                         highlightState = highlightState,
                         correctTileFeedbackIdsByIndex = correctTileFeedbackIdsByIndex,
@@ -194,15 +198,17 @@ fun GameScreen(
         }
     }
 
-    tileOperatorSelectionDialog?.let { dialogUiState ->
-        val tile = uiState.tiles.getOrNull(dialogUiState.tileIndex) ?: return@let
+    if (!compactTileSelectorsEnabled) {
+        tileOperatorSelectionDialog?.let { dialogUiState ->
+            val tile = uiState.tiles.getOrNull(dialogUiState.tileIndex) ?: return@let
 
-        TileOperatorSelectionSheet(
-            dialogUiState = dialogUiState,
-            tile = tile,
-            onDismiss = onTileOperatorSelectionDismissed,
-            onConfirm = onTileOperatorSelectionConfirmed
-        )
+            TileOperatorSelectionSheet(
+                dialogUiState = dialogUiState,
+                tile = tile,
+                onDismiss = onTileOperatorSelectionDismissed,
+                onConfirm = onTileOperatorSelectionConfirmed
+            )
+        }
     }
     tileOperandSelectionDialog?.let { dialogUiState ->
         val tile = uiState.tiles.getOrNull(dialogUiState.tileIndex) ?: return@let
@@ -210,6 +216,7 @@ fun GameScreen(
         TileOperandSelectionSheet(
             dialogUiState = dialogUiState,
             tile = tile,
+            compact = compactTileSelectorsEnabled,
             onDismiss = onTileOperandSelectionDismissed,
             onConfirm = onTileOperandSelectionConfirmed
         )

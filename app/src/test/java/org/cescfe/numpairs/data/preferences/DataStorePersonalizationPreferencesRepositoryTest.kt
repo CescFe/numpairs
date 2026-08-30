@@ -32,13 +32,14 @@ class DataStorePersonalizationPreferencesRepositoryTest {
     }
 
     @Test
-    fun freshPreferencesDefaultToWarmWithGeneratedGameHapticsEnabled() = runBlocking {
+    fun freshPreferencesDefaultToWarmWithHapticsEnabledAndCompactSelectorsDisabled() = runBlocking {
         val fixture = createRepository()
 
         assertEquals(
             PersonalizationPreferences(
                 selectedTheme = PersonalizationTheme.WARM,
-                generatedGameHapticsEnabled = true
+                generatedGameHapticsEnabled = true,
+                compactTileSelectorsEnabled = false
             ),
             fixture.repository.preferences.first()
         )
@@ -55,12 +56,13 @@ class DataStorePersonalizationPreferencesRepositoryTest {
     }
 
     @Test
-    fun themeAndHapticsPersistIndependentlyAcrossRepositoryInstances() = runBlocking {
+    fun personalizationPreferencesPersistIndependentlyAcrossRepositoryInstances() = runBlocking {
         val dataStoreFile = createDataStoreFile()
         val firstFixture = createRepository(dataStoreFile)
 
         firstFixture.repository.selectTheme(PersonalizationTheme.TERMINAL)
         firstFixture.repository.setGeneratedGameHapticsEnabled(false)
+        firstFixture.repository.setCompactTileSelectorsEnabled(true)
         firstFixture.close()
 
         val secondFixture = createRepository(dataStoreFile)
@@ -68,7 +70,8 @@ class DataStorePersonalizationPreferencesRepositoryTest {
         assertEquals(
             PersonalizationPreferences(
                 selectedTheme = PersonalizationTheme.TERMINAL,
-                generatedGameHapticsEnabled = false
+                generatedGameHapticsEnabled = false,
+                compactTileSelectorsEnabled = true
             ),
             secondFixture.repository.preferences.first()
         )
@@ -81,11 +84,13 @@ class DataStorePersonalizationPreferencesRepositoryTest {
             preferences[stringPreferencesKey("personalization_selected_theme")] = "future-theme"
         }
         fixture.repository.setGeneratedGameHapticsEnabled(false)
+        fixture.repository.setCompactTileSelectorsEnabled(true)
 
         assertEquals(
             PersonalizationPreferences(
                 selectedTheme = PersonalizationTheme.WARM,
-                generatedGameHapticsEnabled = false
+                generatedGameHapticsEnabled = false,
+                compactTileSelectorsEnabled = true
             ),
             fixture.repository.preferences.first()
         )
@@ -96,12 +101,14 @@ class DataStorePersonalizationPreferencesRepositoryTest {
         val fixture = createRepository()
 
         fixture.repository.setGeneratedGameHapticsEnabled(false)
+        fixture.repository.setCompactTileSelectorsEnabled(true)
         fixture.repository.selectTheme(PersonalizationTheme.EMBER)
 
         assertEquals(
             PersonalizationPreferences(
                 selectedTheme = PersonalizationTheme.EMBER,
-                generatedGameHapticsEnabled = false
+                generatedGameHapticsEnabled = false,
+                compactTileSelectorsEnabled = true
             ),
             fixture.repository.preferences.first()
         )
