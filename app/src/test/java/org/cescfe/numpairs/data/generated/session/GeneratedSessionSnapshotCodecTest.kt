@@ -100,6 +100,36 @@ class GeneratedSessionSnapshotCodecTest {
     }
 
     @Test
+    fun `round trips progress after a player-entered strip value is cleared`() {
+        val initialPuzzle = repeatedValuePuzzle()
+        val enteredPuzzle = repeatedValuePuzzle(
+            strip = Strip.fromEntries(
+                entries = listOf(
+                    StripEntry(id = 0, item = StripItem.Known(2)),
+                    StripEntry(id = 1, item = StripItem.PlayerEntered(2)),
+                    StripEntry(id = 2, item = StripItem.Known(3)),
+                    StripEntry(id = 3, item = StripItem.PlayerEntered(4))
+                )
+            ),
+            firstExpression = Expression(
+                leftOperand = Expression.Operand.Known(value = 2, stripEntryId = 0),
+                operator = Operator.ADDITION,
+                rightOperand = Expression.Operand.Known(value = 2, stripEntryId = 1)
+            )
+        )
+        val clearedPuzzle = enteredPuzzle.withClearedStripEntry(index = 1)
+        val snapshot = snapshot(
+            initialPuzzle = initialPuzzle,
+            currentPuzzle = clearedPuzzle
+        )
+
+        assertEquals(
+            GeneratedSessionSnapshotDecodingResult.Decoded(snapshot),
+            codec.decode(codec.encode(snapshot))
+        )
+    }
+
+    @Test
     fun `reports unsupported schema version`() {
         val encoded = codec.encode(snapshot())
         ByteBuffer.wrap(encoded).putInt(Int.SIZE_BYTES, GENERATED_SESSION_SCHEMA_VERSION + 1)

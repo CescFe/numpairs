@@ -272,6 +272,47 @@ class StripTest {
     }
 
     @Test
+    fun clearing_a_player_entered_entry_preserves_its_identity_and_the_remaining_order() {
+        val strip = Strip.fromEntries(
+            entries = listOf(
+                StripEntry(11, StripItem.PlayerEntered(2)),
+                StripEntry(10, StripItem.Hidden),
+                StripEntry(12, StripItem.PlayerEntered(5)),
+                StripEntry(13, StripItem.Known(6))
+            )
+        )
+
+        val clearedStrip = strip.withClearedEntry(index = 0)
+
+        assertEquals(listOf(11, 10, 12, 13), clearedStrip.entries.map(StripEntry::id))
+        assertEquals(
+            listOf(
+                StripItem.Hidden,
+                StripItem.Hidden,
+                StripItem.PlayerEntered(5),
+                StripItem.Known(6)
+            ),
+            clearedStrip.items
+        )
+    }
+
+    @Test
+    fun clearing_requires_a_player_entered_entry() {
+        val strip = Strip.fromItems(
+            items = listOf(
+                StripItem.Hidden,
+                StripItem.Known(2)
+            )
+        )
+
+        listOf(0, 1).forEach { index ->
+            assertThrows(IllegalArgumentException::class.java) {
+                strip.withClearedEntry(index = index)
+            }
+        }
+    }
+
+    @Test
     fun updating_an_entry_requires_a_value_within_the_valid_range() {
         val strip = Strip.fromItems(
             items = listOf(

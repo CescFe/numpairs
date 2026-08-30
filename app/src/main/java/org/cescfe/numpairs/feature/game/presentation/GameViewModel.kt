@@ -78,6 +78,10 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
         confirmStripItemEntryInput()
     }
 
+    fun onStripItemEntryInputCleared() {
+        clearActiveStripItemEntryInput()
+    }
+
     fun onStripItemEntryInputFocusLost(stripItemIndex: Int) {
         if (presentationState.stripItemEntryInput?.stripItemIndex == stripItemIndex) {
             confirmStripItemEntryInput()
@@ -145,7 +149,11 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
 
         val resolvedDraftText = input.draftText
         if (resolvedDraftText.isBlank()) {
-            commit { dismissStripItemEntryInput() }
+            if (currentStripItem is StripItem.PlayerEntered) {
+                clearActiveStripItemEntryInput()
+            } else {
+                commit { dismissStripItemEntryInput() }
+            }
             return true
         }
 
@@ -166,6 +174,23 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
                 index = input.stripItemIndex,
                 value = value
             )
+        ) {
+            dismissStripItemEntryInput()
+        }
+
+        return true
+    }
+
+    private fun clearActiveStripItemEntryInput(): Boolean {
+        val input = presentationState.stripItemEntryInput ?: return false
+        val currentStripItem = puzzle.strip.items.getOrNull(input.stripItemIndex) ?: return false
+
+        if (currentStripItem !is StripItem.PlayerEntered) {
+            return false
+        }
+
+        commit(
+            updatedPuzzle = puzzle.withClearedStripEntry(index = input.stripItemIndex)
         ) {
             dismissStripItemEntryInput()
         }

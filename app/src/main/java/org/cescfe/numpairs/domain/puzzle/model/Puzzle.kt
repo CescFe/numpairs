@@ -44,6 +44,18 @@ data class Puzzle(val board: Board, val strip: Strip) {
         )
     }
 
+    fun withClearedStripEntry(index: Int): Puzzle {
+        val currentStripEntry = requireNotNull(strip.entries.getOrNull(index)) {
+            "Strip item index must be within the strip bounds."
+        }
+        val updatedStrip = strip.withClearedEntry(index = index)
+
+        return copy(
+            board = board.withClearedStripEntryOperands(stripEntryId = currentStripEntry.id),
+            strip = updatedStrip
+        )
+    }
+
     private companion object {
         const val MIN_STRIP_ENTRY_COUNT = 2
     }
@@ -70,6 +82,24 @@ private fun Expression.Operand.withUpdatedStripEntryOperandValue(stripEntryId: I
         Expression.Operand.Hidden -> this
         is Expression.Operand.Known -> if (this.stripEntryId == stripEntryId) copy(value = value) else this
     }
+
+private fun Board.withClearedStripEntryOperands(stripEntryId: Int): Board = copy(
+    tiles = tiles.map { tile ->
+        tile.copy(
+            expression = tile.expression.withClearedStripEntryOperands(stripEntryId = stripEntryId)
+        )
+    }
+)
+
+private fun Expression.withClearedStripEntryOperands(stripEntryId: Int): Expression = copy(
+    leftOperand = leftOperand.withClearedStripEntryOperand(stripEntryId = stripEntryId),
+    rightOperand = rightOperand.withClearedStripEntryOperand(stripEntryId = stripEntryId)
+)
+
+private fun Expression.Operand.withClearedStripEntryOperand(stripEntryId: Int): Expression.Operand = when (this) {
+    Expression.Operand.Hidden -> this
+    is Expression.Operand.Known -> if (this.stripEntryId == stripEntryId) Expression.Operand.Hidden else this
+}
 
 enum class PuzzleCompletionState {
     INCOMPLETE,

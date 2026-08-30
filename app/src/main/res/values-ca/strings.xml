@@ -164,6 +164,7 @@
     <string name="strip_entry_valid_range_unbounded">Rang vàlid: %1$d o més</string>
     <string name="strip_entry_invalid_range_bounded">Número no vàlid. Rang vàlid: de %1$d a %2$d</string>
     <string name="strip_entry_invalid_range_unbounded">Número no vàlid. Rang vàlid: %1$d o més</string>
+    <string name="strip_entry_clear_action">Neteja</string>
 
     <!-- Game screen: tile selection dialogs -->
     <string name="tile_operand_dialog_left_title">Ara tria l’operand esquerre</string>

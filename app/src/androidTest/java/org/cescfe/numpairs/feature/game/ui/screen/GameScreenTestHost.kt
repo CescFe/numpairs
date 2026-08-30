@@ -11,6 +11,7 @@ import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.cescfe.numpairs.feature.game.GameHighlightState
+import org.cescfe.numpairs.feature.game.GameInteractionPolicy
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.GameViewModel
 import org.cescfe.numpairs.feature.game.presentation.TileOperatorSelectionDialogUiState
@@ -29,6 +30,7 @@ abstract class GameScreenTestHost {
     private var onTileOperatorTappedOverride: ((Int) -> Unit)? by mutableStateOf(null)
     private var onSuccessOverlayDismissedOverride: (() -> Unit)? by mutableStateOf(null)
     private var highlightState by mutableStateOf(GameHighlightState.None)
+    private var interactionPolicy by mutableStateOf(GameInteractionPolicy.AllowAll)
     private var compactTileSelectorsEnabled by mutableStateOf(false)
     private var isSuccessOverlayEnabled by mutableStateOf(true)
     private var useSolvedOverlayFixture by mutableStateOf(false)
@@ -41,6 +43,7 @@ abstract class GameScreenTestHost {
         onTileOperatorTappedOverride = null
         onSuccessOverlayDismissedOverride = null
         highlightState = GameHighlightState.None
+        interactionPolicy = GameInteractionPolicy.AllowAll
         compactTileSelectorsEnabled = false
         isSuccessOverlayEnabled = true
         useSolvedOverlayFixture = false
@@ -68,6 +71,7 @@ abstract class GameScreenTestHost {
                     onStripItemTapped = currentViewModel::onStripItemTapped,
                     onStripItemEntryInputChanged = currentViewModel::onStripItemEntryInputChanged,
                     onStripItemEntryInputConfirmed = currentViewModel::onStripItemEntryInputConfirmed,
+                    onStripItemEntryInputCleared = currentViewModel::onStripItemEntryInputCleared,
                     onStripItemEntryInputFocusLost = currentViewModel::onStripItemEntryInputFocusLost,
                     onTileLeftOperandTapped = currentViewModel::onTileLeftOperandTapped,
                     onTileRightOperandTapped = currentViewModel::onTileRightOperandTapped,
@@ -80,6 +84,7 @@ abstract class GameScreenTestHost {
                     onSuccessOverlayDismissed = onSuccessOverlayDismissed,
                     isSuccessOverlayEnabled = isSuccessOverlayEnabled,
                     compactTileSelectorsEnabled = compactTileSelectorsEnabled,
+                    interactionPolicy = interactionPolicy,
                     highlightState = highlightState
                 )
             }
@@ -89,6 +94,12 @@ abstract class GameScreenTestHost {
             activity = composeTestRule.activity,
             interactions = composeTestRule
         )
+    }
+
+    protected fun useInteractionPolicy(policy: GameInteractionPolicy) {
+        composeTestRule.runOnIdle {
+            interactionPolicy = policy
+        }
     }
 
     protected fun showSolvedOverlayFixture() {

@@ -161,6 +161,12 @@ class GameScreenRobot(
             .performImeAction()
     }
 
+    fun tapStripEntryClearAction(): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CLEAR_ACTION)
+            .performClick()
+    }
+
     fun pressBack(): GameScreenRobot = apply {
         espressoPressBack()
     }
@@ -190,6 +196,19 @@ class GameScreenRobot(
         interactions
             .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_INPUT)
             .assertIsFocused()
+    }
+
+    fun assertStripEntryClearActionDisplayed(): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CLEAR_ACTION)
+            .assertIsDisplayed()
+            .assert(hasText(string(R.string.strip_entry_clear_action)))
+    }
+
+    fun assertStripEntryClearActionHidden(): GameScreenRobot = apply {
+        interactions
+            .onNodeWithTag(GameScreenTestTags.STRIP_ENTRY_CLEAR_ACTION)
+            .assertDoesNotExist()
     }
 
     fun assertStripEntryInputValue(value: String): GameScreenRobot = apply {

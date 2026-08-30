@@ -154,7 +154,7 @@ normal generated sessions and preferences, and is not synchronized across instal
 The latest committed domain state of the puzzle being played in a normal generated session or
 Daily Session.
 
-Current puzzle changes include committed strip values, operand assignments, operator assignments, and tile resets. Transient presentation state such as drafts, open selectors, dialogs, overlays, highlights, and scroll position is not part of the current puzzle.
+Current puzzle changes include committed or cleared strip values, operand assignments, operator assignments, and tile resets. Transient presentation state such as drafts, open selectors, dialogs, overlays, highlights, and scroll position is not part of the current puzzle.
 
 ## Tutorial
 A gameplay mode that teaches the core NumPairs rules through authored content and guided player practice.
@@ -258,6 +258,8 @@ A strip item whose value is visible to the player at the beginning of the puzzle
 
 ## Player-entered Strip Item
 A strip item whose value was entered by the player after starting from a hidden state.
+
+A player-entered strip item may be cleared, returning the same strip entry identity to a hidden state.
 
 ## Available Number
 A UI-facing shorthand for the visible numeric value exposed by a strip entry.
