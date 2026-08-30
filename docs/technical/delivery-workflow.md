@@ -48,7 +48,9 @@ For milestone delivery:
 6. Apply the required assignee, label, type, and milestone.
 7. Wait for and verify automatic Project 11 intake and `Backlog` initialization, then apply the remaining Project fields and iteration.
 8. Set Project `Status` to `Ready For Dev` for each planned issue.
-9. Set Project `Status` to `In Progress` immediately before implementation begins on an existing issue.
+9. Project 11's **Pull request linked to issue** workflow moves the issue to `In Progress` when a
+   PR linked with `Resolves #<issue>` (or another supported closing keyword) is opened. Verify the
+   automatic transition after opening the PR; do not manually change the status during implementation.
 
 Do not combine unrelated product behavior, refactors, or documentation in one issue merely to reduce the number of Pull Requests.
 
@@ -175,20 +177,20 @@ Do not mark criteria complete merely because implementation has ended or checks 
 
 For each authorized issue:
 
-1. Set the issue's Project `Status` to `In Progress`.
-2. Update local `main` from `origin/main`.
-3. Create the issue branch using the assigned work reference.
-4. Implement only the issue acceptance criteria.
-5. Validate in proportion to the change.
-6. Review `git diff` and `git diff --check`.
-7. Commit using the required convention.
-8. Push the branch.
-9. Open and configure the Pull Request.
-10. Start one terminal watcher for required GitHub checks when a merge is part of the requested cycle.
-11. Review the associated issue's acceptance criteria and mark only fulfilled criteria complete.
-12. If checks pass, every required criterion is fulfilled, and the delivery scope authorizes merging, squash and merge with the required title without requesting per-Pull-Request confirmation.
-13. Update local `main` before starting the next issue.
-14. Return the concise issue summary to the coordinating context and compact it before starting the
+1. Update local `main` from `origin/main`.
+2. Create the issue branch using the assigned work reference.
+3. Implement only the issue acceptance criteria.
+4. Validate in proportion to the change.
+5. Review `git diff` and `git diff --check`.
+6. Commit using the required convention.
+7. Push the branch.
+8. Open and configure the Pull Request with `Resolves #<issue>` so Project 11 moves the issue to
+   `In Progress` automatically.
+9. Start one terminal watcher for required GitHub checks when a merge is part of the requested cycle.
+10. Review the associated issue's acceptance criteria and mark only fulfilled criteria complete.
+11. If checks pass, every required criterion is fulfilled, and the delivery scope authorizes merging, squash and merge with the required title without requesting per-Pull-Request confirmation.
+12. Update local `main` before starting the next issue.
+13. Return the concise issue summary to the coordinating context and compact it before starting the
     next issue.
 
 Do not start dependent implementation from an unmerged branch when the requested workflow requires sequential integration into `main`.
@@ -244,6 +246,11 @@ Run `lintDebug` when completing a stage or milestone and for changes with broade
 Instrumented tests must only be compiled. Do not start an emulator or run connected-device tasks because doing so can make the development machine unusable.
 
 For documentation-only changes, validate Markdown structure, relative links, consistency, and `git diff --check`. Android build tasks are not required unless the documentation change affects build configuration or executable examples.
+
+The manual Google Play release procedure is documented in
+[manual-google-play-release.md](manual-google-play-release.md). Keep that guide aligned with the
+current Play Console flow and link to Google's documentation wherever policy or console behavior
+may change.
 
 ## Milestone Completion
 
