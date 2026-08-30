@@ -165,7 +165,7 @@ class LocalizationResourceTest {
 
     @Test
     fun unsupportedDeviceLanguageFallsBackToEnglishResources() {
-        val resources = resourcesFor(languageTag = "de")
+        val resources = resourcesFor(languageTag = "fr")
 
         assertEquals(
             "Choose difficulty for Quick",
