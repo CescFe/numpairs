@@ -26,7 +26,6 @@ import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
-import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.feature.personalization.ui.PersonalizationScreenTestTags
 import org.junit.Assert.assertEquals
@@ -66,7 +65,7 @@ class PersonalizationNavigationTest {
                     personalizationPreferencesRepository = personalizationRepository,
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
                     generatedChallengeCatalog = GeneratedModes.catalog,
-                    generatedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory {
+                    generatedPuzzleGenerationUseCaseFactory = {
                         GeneratedPuzzleGenerationUseCase { request ->
                             GeneratedPuzzleGenerationResult.Generated(
                                 request = request,

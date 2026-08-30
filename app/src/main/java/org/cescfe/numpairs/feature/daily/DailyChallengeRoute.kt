@@ -33,6 +33,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -342,8 +343,9 @@ private fun rememberDailyShareResultAction(shareLauncher: DailyCompletionShareLa
     val defaultLauncher = remember(context) {
         AndroidDailyCompletionShareLauncher(context)
     }
-    val payloadFactory = remember(context.resources) {
-        AndroidDailyCompletionSharePayloadFactory(context.resources)
+    val resources = LocalResources.current
+    val payloadFactory = remember(resources) {
+        AndroidDailyCompletionSharePayloadFactory(resources)
     }
     val activeLauncher = shareLauncher ?: defaultLauncher
     return remember(activeLauncher, payloadFactory) {
@@ -496,7 +498,7 @@ private fun rememberDailyPuzzleViewModel(
         ?: error("DailyChallengeRoute requires a ComponentActivity host.")
     val currentDailyChallengeResolver = remember(identity) {
         CurrentDailyChallengeResolver(
-            localDateSource = DeviceLocalDateSource { identity.localDate },
+            localDateSource = { identity.localDate },
             activeRecipeVersion = identity.recipeVersion
         )
     }

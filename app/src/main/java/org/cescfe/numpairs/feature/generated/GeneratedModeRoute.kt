@@ -48,11 +48,11 @@ import org.cescfe.numpairs.ui.theme.NumPairsComponents
 @Composable
 fun GeneratedModeRoute(
     challenge: GeneratedChallenge,
-    launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.DefaultNewPuzzle,
     title: String,
     generationUseCase: GeneratedPuzzleGenerationUseCase,
     generatedSessionRepository: GeneratedSessionRepository,
     modifier: Modifier = Modifier,
+    launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.DefaultNewPuzzle,
     isGeneratedGameHapticsEnabled: Boolean = true,
     compactTileSelectorsEnabled: Boolean = false,
     isRulesHelperEnabled: Boolean = false,
@@ -115,7 +115,7 @@ fun GeneratedModeRoute(
         return
     }
 
-    when (val state = uiState) {
+    when (uiState) {
         GeneratedPuzzleGenerationUiState.Idle -> Unit
 
         is GeneratedPuzzleGenerationUiState.Restoring,
@@ -174,7 +174,7 @@ private fun GeneratedPuzzleGameBoundary(
             activeReplacementTransition == null
     }
     val visibleTransition = activeReplacementTransition ?: transitionToStart
-    val visibleProgress = if (transitionToStart != null && activeReplacementTransition == null) {
+    val visibleProgress = if (transitionToStart != null) {
         0f
     } else {
         entranceProgress.value

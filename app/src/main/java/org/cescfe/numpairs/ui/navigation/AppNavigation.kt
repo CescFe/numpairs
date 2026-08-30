@@ -19,7 +19,6 @@ import org.cescfe.numpairs.feature.daily.DailyChallengeRoute
 import org.cescfe.numpairs.feature.daily.DailyCompletedTodayRoute
 import org.cescfe.numpairs.feature.daily.DailyFeatureDependencies
 import org.cescfe.numpairs.feature.daily.calendar.DailyCalendarRoute
-import org.cescfe.numpairs.feature.generated.GeneratedChallenge
 import org.cescfe.numpairs.feature.generated.GeneratedChallengeCatalog
 import org.cescfe.numpairs.feature.generated.GeneratedChallengeId
 import org.cescfe.numpairs.feature.generated.GeneratedLearningRoute
@@ -61,10 +60,10 @@ fun AppNavigation(
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     generatedChallengeCatalog: GeneratedChallengeCatalog,
     generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory,
+    modifier: Modifier = Modifier,
     generatedPlayChallengeSelector: GeneratedPlayChallengeSelector =
         GeneratedPlayChallengeSelector(generatedChallengeCatalog),
     dailyFeatureDependencies: DailyFeatureDependencies? = null,
-    modifier: Modifier = Modifier,
     startDestination: AppDestination = AppDestination.Menu
 ) {
     val onboardingState by onboardingRepository.onboardingState.collectAsState(initial = null)
@@ -100,10 +99,10 @@ internal fun ReadyAppNavigation(
     topAppBarActionDiscoveryRepository: TopAppBarActionDiscoveryRepository,
     generatedChallengeCatalog: GeneratedChallengeCatalog,
     generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory,
+    modifier: Modifier = Modifier,
     generatedPlayChallengeSelector: GeneratedPlayChallengeSelector =
         GeneratedPlayChallengeSelector(generatedChallengeCatalog),
     dailyFeatureDependencies: DailyFeatureDependencies? = null,
-    modifier: Modifier = Modifier,
     startDestination: AppDestination = AppDestination.Menu
 ) {
     if (!onboardingState.firstRunTutorialOutcome.isResolved) {
@@ -180,15 +179,12 @@ private fun UnlockedAppNavigation(
 
     when (val destination = currentDestination) {
         AppDestination.Menu -> {
-            val dailyDependencies = dailyFeatureDependencies
             MenuRoute(
                 generatedDifficultySelectionRepository = generatedDifficultySelectionRepository,
-                dailySessionRepository = dailyDependencies?.dailySessionRepository,
-                deviceLocalDateSource = dailyDependencies?.deviceLocalDateSource,
+                dailySessionRepository = dailyFeatureDependencies?.dailySessionRepository,
+                deviceLocalDateSource = dailyFeatureDependencies?.deviceLocalDateSource,
                 modifier = modifier,
-                resumeChallengeName = resumableSession?.challenge?.let { challenge ->
-                    challenge.localizedTitle(generatedChallengeCatalog)
-                },
+                resumeChallengeName = resumableSession?.challenge?.localizedTitle(generatedChallengeCatalog),
                 onResumeSelected = {
                     resumableSession?.let { session ->
                         currentDestination = AppDestination.GeneratedChallenge(
