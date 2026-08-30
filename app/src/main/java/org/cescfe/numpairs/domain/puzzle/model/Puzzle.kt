@@ -29,10 +29,47 @@ data class Puzzle(val board: Board, val strip: Strip) {
     val isSolved: Boolean
         get() = completionState == PuzzleCompletionState.SOLVED
 
+    fun withUpdatedStripEntry(index: Int, value: Int): Puzzle {
+        val currentStripEntry = requireNotNull(strip.entries.getOrNull(index)) {
+            "Strip item index must be within the strip bounds."
+        }
+        val updatedStrip = strip.withUpdatedEntry(index = index, value = value)
+
+        return copy(
+            board = board.withUpdatedStripEntryOperandValue(
+                stripEntryId = currentStripEntry.id,
+                value = value
+            ),
+            strip = updatedStrip
+        )
+    }
+
     private companion object {
         const val MIN_STRIP_ENTRY_COUNT = 2
     }
 }
+
+private fun Board.withUpdatedStripEntryOperandValue(stripEntryId: Int, value: Int): Board = copy(
+    tiles = tiles.map { tile ->
+        tile.copy(
+            expression = tile.expression.withUpdatedStripEntryOperandValue(
+                stripEntryId = stripEntryId,
+                value = value
+            )
+        )
+    }
+)
+
+private fun Expression.withUpdatedStripEntryOperandValue(stripEntryId: Int, value: Int): Expression = copy(
+    leftOperand = leftOperand.withUpdatedStripEntryOperandValue(stripEntryId = stripEntryId, value = value),
+    rightOperand = rightOperand.withUpdatedStripEntryOperandValue(stripEntryId = stripEntryId, value = value)
+)
+
+private fun Expression.Operand.withUpdatedStripEntryOperandValue(stripEntryId: Int, value: Int): Expression.Operand =
+    when (this) {
+        Expression.Operand.Hidden -> this
+        is Expression.Operand.Known -> if (this.stripEntryId == stripEntryId) copy(value = value) else this
+    }
 
 enum class PuzzleCompletionState {
     INCOMPLETE,
