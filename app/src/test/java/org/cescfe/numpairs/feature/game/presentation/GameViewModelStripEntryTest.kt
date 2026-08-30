@@ -243,6 +243,82 @@ class GameViewModelStripEntryTest {
     }
 
     @Test
+    fun confirming_an_empty_player_entered_draft_clears_the_item_and_exits_editing() {
+        val viewModel = GameViewModel()
+        viewModel.enterStripValue(index = 1, value = "2")
+        viewModel.onStripItemTapped(index = 1)
+
+        viewModel.onStripItemEntryInputChanged(draftText = "")
+        viewModel.onStripItemEntryInputConfirmed()
+
+        val uiState = viewModel.uiState.value
+
+        assertEquals("?", uiState.stripItems[1].label)
+        assertEquals(StripItemVisualStyle.HIDDEN, uiState.stripItems[1].visualStyle)
+        assertEquals(StripItem.Hidden, viewModel.currentPuzzle.value.strip.items[1])
+        assertNull(uiState.stripItemEntryInput)
+    }
+
+    @Test
+    fun losing_focus_with_an_empty_player_entered_draft_clears_the_item() {
+        val viewModel = GameViewModel()
+        viewModel.enterStripValue(index = 1, value = "2")
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryInputChanged(draftText = "")
+
+        viewModel.onStripItemEntryInputFocusLost(stripItemIndex = 1)
+
+        assertEquals(StripItem.Hidden, viewModel.currentPuzzle.value.strip.items[1])
+        assertNull(viewModel.uiState.value.stripItemEntryInput)
+    }
+
+    @Test
+    fun explicit_clear_discards_an_invalid_draft_and_clears_the_player_entered_item() {
+        val viewModel = GameViewModel()
+        viewModel.enterStripValue(index = 1, value = "2")
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryInputChanged(draftText = "9")
+
+        viewModel.onStripItemEntryInputCleared()
+
+        assertEquals(StripItem.Hidden, viewModel.currentPuzzle.value.strip.items[1])
+        assertNull(viewModel.uiState.value.stripItemEntryInput)
+    }
+
+    @Test
+    fun explicit_clear_ignores_hidden_known_and_missing_active_inputs() {
+        val viewModel = GameViewModel()
+
+        viewModel.onStripItemEntryInputCleared()
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryInputCleared()
+
+        assertEquals(StripItem.Hidden, viewModel.currentPuzzle.value.strip.items[1])
+        assertEquals(1, viewModel.uiState.value.stripItemEntryInput?.stripItemIndex)
+
+        viewModel.onStripItemEntryInputCancelled()
+        viewModel.onStripItemTapped(index = 2)
+        viewModel.onStripItemEntryInputCleared()
+
+        assertEquals(StripItem.Known(6), viewModel.currentPuzzle.value.strip.items[2])
+        assertNull(viewModel.uiState.value.stripItemEntryInput)
+    }
+
+    @Test
+    fun late_focus_loss_after_clearing_does_not_resolve_a_new_active_entry() {
+        val viewModel = GameViewModel()
+        viewModel.enterStripValue(index = 1, value = "2")
+        viewModel.onStripItemTapped(index = 1)
+        viewModel.onStripItemEntryInputCleared()
+        viewModel.onStripItemTapped(index = 3)
+
+        viewModel.onStripItemEntryInputFocusLost(stripItemIndex = 1)
+
+        assertEquals(3, viewModel.uiState.value.stripItemEntryInput?.stripItemIndex)
+        assertEquals("", viewModel.uiState.value.stripItemEntryInput?.draftText)
+    }
+
+    @Test
     fun editing_a_player_entered_strip_item_updates_assigned_operands_after_reordering() {
         val viewModel = GameViewModel()
         viewModel.enterStripValue(index = 0, value = "5")
@@ -271,6 +347,35 @@ class GameViewModelStripEntryTest {
         )
         assertEquals("1", viewModel.uiState.value.tiles[0].leftOperandLabel)
         assertEquals("1", viewModel.uiState.value.tiles[1].rightOperandLabel)
+    }
+
+    @Test
+    fun clearing_a_player_entered_item_hides_assigned_operands_and_releases_its_usage() {
+        val viewModel = GameViewModel()
+        viewModel.enterStripValue(index = 0, value = "5")
+        viewModel.enterStripValue(index = 1, value = "2")
+        viewModel.onTileLeftOperandTapped(index = 0)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 0)
+        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.ADDITION)
+        viewModel.onTileOperandSelectionDismissed()
+        viewModel.onTileRightOperandTapped(index = 1)
+        viewModel.onTileOperandSelectionConfirmed(stripEntryId = 0)
+        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.MULTIPLICATION)
+        viewModel.onTileOperandSelectionDismissed()
+        viewModel.onStripItemTapped(index = 1)
+
+        viewModel.onStripItemEntryInputCleared()
+
+        val currentPuzzle = viewModel.currentPuzzle.value
+        val uiState = viewModel.uiState.value
+
+        assertEquals(Expression.Operand.Hidden, currentPuzzle.board.tiles[0].expression.leftOperand)
+        assertEquals(Expression.Operand.Hidden, currentPuzzle.board.tiles[1].expression.rightOperand)
+        assertEquals("?", uiState.tiles[0].leftOperandLabel)
+        assertEquals("?", uiState.tiles[1].rightOperandLabel)
+        assertEquals(StripItemVisualStyle.HIDDEN, uiState.stripItems[1].visualStyle)
+        assertEquals(false, uiState.stripItems[1].additionUsed)
+        assertEquals(false, uiState.stripItems[1].multiplicationUsed)
     }
 
     @Test

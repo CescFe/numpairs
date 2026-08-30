@@ -56,4 +56,59 @@ class PuzzleStripEntryUpdateTest {
         )
         assertEquals(PuzzleCompletionState.INCORRECT_TILES, updatedPuzzle.completionState)
     }
+
+    @Test
+    fun clearing_a_strip_entry_hides_every_referencing_operand_and_preserves_each_remaining_expression() {
+        val puzzle = Puzzle(
+            board = Board(
+                tiles = listOf(
+                    Tile(
+                        expression = Expression(
+                            leftOperand = Expression.Operand.Known(value = 5, stripEntryId = 10),
+                            operator = Operator.ADDITION,
+                            rightOperand = Expression.Operand.Known(value = 2, stripEntryId = 11)
+                        ),
+                        result = 7
+                    ),
+                    Tile(
+                        expression = Expression(
+                            leftOperand = Expression.Operand.Known(value = 2, stripEntryId = 11),
+                            operator = Operator.MULTIPLICATION,
+                            rightOperand = Expression.Operand.Known(value = 5, stripEntryId = 10)
+                        ),
+                        result = 10
+                    )
+                )
+            ),
+            strip = Strip.fromEntries(
+                entries = listOf(
+                    StripEntry(id = 11, item = StripItem.PlayerEntered(2)),
+                    StripEntry(id = 10, item = StripItem.PlayerEntered(5))
+                )
+            )
+        )
+
+        val updatedPuzzle = puzzle.withClearedStripEntry(index = 1)
+
+        assertEquals(
+            listOf(
+                StripEntry(id = 11, item = StripItem.PlayerEntered(2)),
+                StripEntry(id = 10, item = StripItem.Hidden)
+            ),
+            updatedPuzzle.strip.entries
+        )
+        assertEquals(Expression.Operand.Hidden, updatedPuzzle.board.tiles[0].expression.leftOperand)
+        assertEquals(
+            Expression.Operand.Known(value = 2, stripEntryId = 11),
+            updatedPuzzle.board.tiles[0].expression.rightOperand
+        )
+        assertEquals(Operator.ADDITION, updatedPuzzle.board.tiles[0].expression.operator)
+        assertEquals(
+            Expression.Operand.Known(value = 2, stripEntryId = 11),
+            updatedPuzzle.board.tiles[1].expression.leftOperand
+        )
+        assertEquals(Expression.Operand.Hidden, updatedPuzzle.board.tiles[1].expression.rightOperand)
+        assertEquals(Operator.MULTIPLICATION, updatedPuzzle.board.tiles[1].expression.operator)
+        assertEquals(PuzzleCompletionState.INCOMPLETE, updatedPuzzle.completionState)
+    }
 }

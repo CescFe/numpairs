@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -215,6 +216,7 @@ internal fun StripSection(
     onStripItemTapped: (Int) -> Unit,
     onStripItemEntryInputChanged: (String) -> Unit = {},
     onStripItemEntryInputConfirmed: () -> Unit = {},
+    onStripItemEntryInputCleared: () -> Unit = {},
     onStripItemEntryInputFocusLost: (Int) -> Unit = {},
     stripItemEntryGuidance: String? = null,
     isStripItemEnabled: (Int) -> Boolean = { true },
@@ -224,6 +226,10 @@ internal fun StripSection(
     val stripEntryFeedbackText = stripItemEntryInput?.feedbackText(
         entryGuidance = stripItemEntryGuidance
     )
+    val isClearActionVisible = stripItemEntryInput?.let { input ->
+        stripItems.getOrNull(input.stripItemIndex)?.visualStyle == StripItemVisualStyle.PLAYER_ENTERED &&
+            isStripItemEnabled(input.stripItemIndex)
+    } == true
     val minimumChipWidth = requiredStripChipWidth(
         stripItems = stripItems,
         stripItemEntryInput = stripItemEntryInput
@@ -305,9 +311,8 @@ internal fun StripSection(
                 StripEntryFeedback(
                     message = stripEntryFeedbackText,
                     isError = stripItemEntryInput.isInvalid,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag(GameScreenTestTags.STRIP_ENTRY_RANGE)
+                    onClear = onStripItemEntryInputCleared.takeIf { isClearActionVisible },
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }
@@ -413,22 +418,44 @@ private fun requiredStripChipWidth(
 }
 
 @Composable
-private fun StripEntryFeedback(message: String, isError: Boolean, modifier: Modifier = Modifier) {
-    Text(
-        text = message,
-        modifier = modifier.semantics {
-            contentDescription = message
-            if (isError) {
-                error(message)
+private fun StripEntryFeedback(
+    message: String,
+    isError: Boolean,
+    onClear: (() -> Unit)?,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(STRIP_ENTRY_FEEDBACK_ACTION_SPACING),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = message,
+            modifier = Modifier
+                .weight(1f)
+                .testTag(GameScreenTestTags.STRIP_ENTRY_RANGE)
+                .semantics {
+                    contentDescription = message
+                    if (isError) {
+                        error(message)
+                    }
+                },
+            color = if (isError) {
+                MaterialTheme.numPairsSemanticColors.error
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
+            style = MaterialTheme.typography.bodySmall
+        )
+        onClear?.let { clearAction ->
+            TextButton(
+                onClick = clearAction,
+                modifier = Modifier.testTag(GameScreenTestTags.STRIP_ENTRY_CLEAR_ACTION)
+            ) {
+                Text(text = stringResource(R.string.strip_entry_clear_action))
             }
-        },
-        color = if (isError) {
-            MaterialTheme.numPairsSemanticColors.error
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        },
-        style = MaterialTheme.typography.bodySmall
-    )
+        }
+    }
 }
 
 @Composable

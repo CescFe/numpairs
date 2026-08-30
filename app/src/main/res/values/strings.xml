@@ -164,6 +164,7 @@
     <string name="strip_entry_valid_range_unbounded">Valid range: %1$d or greater</string>
     <string name="strip_entry_invalid_range_bounded">Invalid number. Valid range: %1$d to %2$d</string>
     <string name="strip_entry_invalid_range_unbounded">Invalid number. Valid range: %1$d or greater</string>
+    <string name="strip_entry_clear_action">Clear</string>
 
     <!-- Game screen: tile selection dialogs -->
     <string name="tile_operand_dialog_left_title">Now choose the left operand</string>

@@ -164,6 +164,7 @@
     <string name="strip_entry_valid_range_unbounded">Gültiger Bereich: %1$d oder größer</string>
     <string name="strip_entry_invalid_range_bounded">Ungültige Zahl. Gültiger Bereich: %1$d bis %2$d</string>
     <string name="strip_entry_invalid_range_unbounded">Ungültige Zahl. Gültiger Bereich: %1$d oder größer</string>
+    <string name="strip_entry_clear_action">Leeren</string>
 
     <!-- Game screen: tile selection dialogs -->
     <string name="tile_operand_dialog_left_title">Wähle jetzt den linken Operanden</string>

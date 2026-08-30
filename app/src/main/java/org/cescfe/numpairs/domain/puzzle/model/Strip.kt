@@ -48,6 +48,23 @@ data class Strip private constructor(val entries: List<StripEntry>) {
         return Strip(entries = updatedEntries)
     }
 
+    fun withClearedEntry(index: Int): Strip {
+        val currentStripEntry = requireEditableEntryAt(index)
+
+        require(currentStripEntry.item is StripItem.PlayerEntered) {
+            "Only player-entered strip items can be cleared."
+        }
+
+        return Strip(
+            entries = entries.toMutableList().apply {
+                set(
+                    index,
+                    currentStripEntry.copy(item = StripItem.Hidden)
+                )
+            }
+        )
+    }
+
     private fun entryRangeFor(editableRun: IntRange): StripEntryRange {
         val minimumValue = entries
             .getOrNull(editableRun.first - 1)

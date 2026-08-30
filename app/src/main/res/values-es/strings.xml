@@ -164,6 +164,7 @@
     <string name="strip_entry_valid_range_unbounded">Rango válido: %1$d o más</string>
     <string name="strip_entry_invalid_range_bounded">Número no válido. Rango válido: de %1$d a %2$d</string>
     <string name="strip_entry_invalid_range_unbounded">Número no válido. Rango válido: %1$d o más</string>
+    <string name="strip_entry_clear_action">Limpiar</string>
 
     <!-- Game screen: tile selection dialogs -->
     <string name="tile_operand_dialog_left_title">Ahora elige el operando izquierdo</string>

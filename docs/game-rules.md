@@ -24,6 +24,8 @@ The number strip is a sequence of positive integers with the following propertie
 
 For current behavior, this means known strip items stay fixed while player-entered values may be reordered within adjacent editable positions so the strip remains sorted.
 
+A player-entered strip item may be cleared, returning the same strip entry to a hidden state. Every tile operand that references that strip entry becomes hidden again, while the rest of each affected tile remains unchanged.
+
 Example:
 
 1, 2, ?, 4, 4, ?, 7, 9

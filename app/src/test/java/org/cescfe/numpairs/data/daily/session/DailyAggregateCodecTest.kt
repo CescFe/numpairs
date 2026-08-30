@@ -49,6 +49,24 @@ class DailyAggregateCodecTest {
     }
 
     @Test
+    fun aggregate_round_trip_preserves_progress_after_a_player_entered_strip_value_is_cleared() {
+        val fixture = generatedDailyFixture()
+        val completedPuzzle = fixture.solvedProgressPuzzle()
+        val clearIndex = completedPuzzle.strip.items.indexOfFirst { item ->
+            item is StripItem.PlayerEntered
+        }
+        val clearedPuzzle = completedPuzzle.withClearedStripEntry(index = clearIndex)
+        val aggregate = DailyAggregate(
+            activeSession = fixture.snapshot(currentPuzzle = clearedPuzzle)
+        )
+
+        assertEquals(
+            DailyAggregateDecodingResult.Decoded(aggregate),
+            codec.decode(codec.encode(aggregate))
+        )
+    }
+
+    @Test
     fun encoding_is_deterministic() {
         val aggregate = DailyAggregate(
             activeSession = generatedDailyFixture().snapshot(),

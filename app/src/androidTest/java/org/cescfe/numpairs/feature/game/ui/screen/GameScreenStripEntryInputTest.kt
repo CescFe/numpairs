@@ -2,6 +2,7 @@ package org.cescfe.numpairs.feature.game.ui.screen
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.feature.game.GameInteractionPolicy
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -14,6 +15,7 @@ class GameScreenStripEntryInputTest : GameScreenTestHost() {
             .assertNoDialogDisplayed()
             .assertStripEntryInputDisplayed()
             .assertStripEntryInputFocused()
+            .assertStripEntryClearActionHidden()
             .assertStripEntryValidRange(minimum = 1, maximum = 6)
             .enterStripValue("2")
             .submitStripEntryInput()
@@ -32,7 +34,77 @@ class GameScreenStripEntryInputTest : GameScreenTestHost() {
             .submitStripEntryInput()
             .tapStripItem(1)
             .assertStripEntryInputValue("2")
+            .assertStripEntryClearActionDisplayed()
             .assertStripEntryInputNotInvalid()
+    }
+
+    @Test
+    fun explicitClearActionReturnsAPlayerEnteredItemToHidden() {
+        screen
+            .tapStripItem(1)
+            .enterStripValue("2")
+            .submitStripEntryInput()
+            .tapStripItem(1)
+            .assertStripEntryClearActionDisplayed()
+            .tapStripEntryClearAction()
+            .assertStripEntryInputHidden()
+            .assertStripEntryClearActionHidden()
+            .assertStripItemDescription(
+                1,
+                R.string.strip_item_hidden_content_description
+            )
+    }
+
+    @Test
+    fun confirmingAnEmptyPlayerEnteredDraftReturnsTheItemToHidden() {
+        screen
+            .tapStripItem(1)
+            .enterStripValue("2")
+            .submitStripEntryInput()
+            .tapStripItem(1)
+            .replaceStripValue("")
+            .submitStripEntryInput()
+            .assertStripEntryInputHidden()
+            .assertStripItemDescription(
+                1,
+                R.string.strip_item_hidden_content_description
+            )
+    }
+
+    @Test
+    fun clearActionRemainsAvailableForAnInvalidDraft() {
+        screen
+            .tapStripItem(1)
+            .enterStripValue("2")
+            .submitStripEntryInput()
+            .tapStripItem(1)
+            .replaceStripValue("9")
+            .assertStripEntryInputInvalid()
+            .assertStripEntryClearActionDisplayed()
+            .tapStripEntryClearAction()
+            .assertStripEntryInputHidden()
+            .assertStripItemDescription(
+                1,
+                R.string.strip_item_hidden_content_description
+            )
+    }
+
+    @Test
+    fun interactionPolicyHidesClearActionForALockedPlayerEnteredItem() {
+        screen
+            .tapStripItem(1)
+            .enterStripValue("2")
+            .submitStripEntryInput()
+            .tapStripItem(1)
+            .assertStripEntryClearActionDisplayed()
+
+        useInteractionPolicy(
+            GameInteractionPolicy(
+                canTapStripItem = { false }
+            )
+        )
+
+        screen.assertStripEntryClearActionHidden()
     }
 
     @Test

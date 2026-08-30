@@ -16,6 +16,7 @@ internal val STRIP_CHIP_MAX_WIDTH = 56.dp
 internal val STRIP_CHIP_SPACING = 4.dp
 internal val STRIP_ROW_SPACING = 8.dp
 internal val STRIP_ENTRY_FEEDBACK_TOP_SPACING = 8.dp
+internal val STRIP_ENTRY_FEEDBACK_ACTION_SPACING = 8.dp
 internal val STRIP_HIGHLIGHTED_BORDER_WIDTH = 3.dp
 internal val STRIP_HORIZONTAL_PADDING = 8.dp
 internal val STRIP_VERTICAL_PADDING = 14.dp

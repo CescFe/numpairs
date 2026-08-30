@@ -133,6 +133,13 @@ fun GameRoute(
         },
         onStripItemEntryInputChanged = gameViewModel::onStripItemEntryInputChanged,
         onStripItemEntryInputConfirmed = { resolveActiveStripItemEntryInputIfAllowed() },
+        onStripItemEntryInputCleared = {
+            val input = uiState.stripItemEntryInput
+
+            if (input != null && interactionPolicy.canTapStripItem(input.stripItemIndex)) {
+                gameViewModel.onStripItemEntryInputCleared()
+            }
+        },
         onStripItemEntryInputFocusLost = { stripItemIndex ->
             resolveActiveStripItemEntryInputIfAllowed(focusLossSourceIndex = stripItemIndex)
         },

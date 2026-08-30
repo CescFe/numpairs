@@ -21,6 +21,7 @@ object GameScreenTestTags {
     const val STRIP = "game_strip"
     const val STRIP_ENTRY_INPUT = "strip_entry_input"
     const val STRIP_ENTRY_RANGE = "strip_entry_range"
+    const val STRIP_ENTRY_CLEAR_ACTION = "strip_entry_clear_action"
     const val TILE_OPERAND_SELECTOR = "tile_operand_selector"
     const val TILE_OPERAND_SELECTOR_TITLE = "tile_operand_selector_title"
     const val TILE_OPERAND_SELECTOR_EXPRESSION = "tile_operand_selector_expression"
