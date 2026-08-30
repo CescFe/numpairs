@@ -20,3 +20,6 @@ local.properties
 *.keystore
 *.p12
 *.pfx
+
+# AAB release
+/app/release/app-release.aab
