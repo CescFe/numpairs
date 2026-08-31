@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -166,6 +167,28 @@ internal fun SuccessOverlay(
                     style = MaterialTheme.typography.headlineSmall,
                     textAlign = TextAlign.Center
                 )
+                content?.highlightText?.let { highlightText ->
+                    val highlightModifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(GameScreenTestTags.SUCCESS_OVERLAY_HIGHLIGHT)
+                        .let { modifier ->
+                            content.highlightContentDescription?.let { description ->
+                                modifier.semantics {
+                                    contentDescription = description
+                                }
+                            } ?: modifier
+                        }
+                    Text(
+                        text = highlightText,
+                        modifier = highlightModifier,
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontFamily = FontFamily.Monospace,
+                            fontFeatureSettings = "tnum",
+                            fontWeight = FontWeight.Bold
+                        ),
+                        textAlign = TextAlign.Center
+                    )
+                }
                 Text(
                     text = content?.supportingText ?: stringResource(R.string.success_overlay_supporting_text),
                     modifier = Modifier.fillMaxWidth(),

@@ -114,6 +114,8 @@
     <string name="daily_completion_message">Daily completat!</string>
     <string name="daily_completion_supporting_text">Has completat el repte de hui.</string>
     <string name="daily_completion_challenge_name">4 parelles · Baixa</string>
+    <string name="daily_elapsed_time_content_description">Temps transcorregut: %1$s</string>
+    <string name="daily_completion_duration_label">Temps de resolució</string>
     <string name="daily_share_result_action">Compartix el resultat</string>
     <string name="daily_view_calendar_action">Mostra el calendari</string>
     <string name="daily_back_to_menu_action">Torna al menú</string>

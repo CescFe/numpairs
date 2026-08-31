@@ -11,6 +11,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
@@ -57,6 +58,7 @@ import org.cescfe.numpairs.feature.daily.share.DailyCompletionShareLaunchResult
 import org.cescfe.numpairs.feature.daily.share.DailyCompletionShareLauncher
 import org.cescfe.numpairs.feature.game.GameRoute
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
+import org.cescfe.numpairs.feature.game.ui.screen.SuccessOverlay
 import org.cescfe.numpairs.feature.generated.ConfiguredGeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
@@ -81,7 +83,7 @@ class DailyCompletionSurfaceTest {
         val repository = RecordingDailyRepository(
             DailyState(
                 activeSession = null,
-                completions = listOf(completion(identity))
+                completions = listOf(completion(identity, DailyElapsedTime(125_999)))
             )
         )
         var sharedText: String? = null
@@ -109,6 +111,9 @@ class DailyCompletionSurfaceTest {
             .onNodeWithTag(DailyScreenTestTags.COMPLETION_SUMMARY)
             .assertIsDisplayed()
         composeTestRule
+            .onNodeWithTag(DailyScreenTestTags.COMPLETION_DURATION)
+            .assertTextEquals("02:05")
+        composeTestRule
             .onNodeWithTag(DailyScreenTestTags.SHARE_RESULT)
             .performClick()
         composeTestRule.runOnIdle {
@@ -128,6 +133,9 @@ class DailyCompletionSurfaceTest {
         composeTestRule
             .onNodeWithTag(DailyScreenTestTags.COMPLETION_SUMMARY)
             .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(DailyScreenTestTags.COMPLETION_DURATION)
+            .assertTextEquals("02:05")
         composeTestRule.runOnIdle {
             assertEquals(0, repository.mutationCount)
             assertEquals(emptyList<HapticFeedbackType>(), hapticFeedback.requestedTypes)
@@ -203,9 +211,52 @@ class DailyCompletionSurfaceTest {
             .onNodeWithTag(GameScreenTestTags.SCREEN)
             .assertIsDisplayed()
         composeTestRule.runOnIdle {
-            assertEquals(1, repository.mutationCount)
+            assertEquals(2, repository.mutationCount)
             assertEquals(identity, repository.lastReplacement?.dailyChallengeId)
         }
+    }
+
+    @Test
+    fun daily_top_bar_shows_a_non_interactive_accessible_chronometer() {
+        val identity = identity()
+        val repository = RecordingDailyRepository(
+            DailyState(
+                activeSession = generatedSnapshot(identity).copy(
+                    timingStartInstant = DailyTimingStartInstant(1_000)
+                ),
+                completions = emptyList()
+            )
+        )
+
+        composeTestRule.setContent {
+            NumPairsTheme {
+                DailyChallengeRoute(
+                    identity = identity,
+                    dailySessionRepository = repository,
+                    deviceLocalDateSource = { identity.localDate },
+                    generatedPuzzleGenerationUseCaseFactory =
+                        ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
+                            challengeCatalog = GeneratedModes.catalog
+                        ),
+                    timeSource = {
+                        DailyTimeReading(
+                            epochMilliseconds = 126_999,
+                            monotonicMilliseconds = 500
+                        )
+                    },
+                    onNavigateBack = {}
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(DailyScreenTestTags.CHRONOMETER)
+            .assertIsDisplayed()
+            .assertTextEquals("02:05")
+            .assertHasNoClickAction()
+        composeTestRule
+            .onNodeWithContentDescription("Elapsed time: 02:05")
+            .assertIsDisplayed()
     }
 
     @Test
@@ -377,6 +428,86 @@ class DailyCompletionSurfaceTest {
     }
 
     @Test
+    fun timed_completion_uses_the_frozen_duration_in_the_success_overlay() {
+        val elapsedTime = DailyElapsedTime(125_999)
+
+        composeTestRule.setContent {
+            NumPairsTheme {
+                SuccessOverlay(
+                    onDismiss = {},
+                    content = dailyCompletionOverlayContent(
+                        elapsedTime = elapsedTime,
+                        onShareResult = {},
+                        onViewCalendar = {},
+                        onNavigateBack = {}
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_HIGHLIGHT)
+            .assertIsDisplayed()
+            .assertTextEquals("02:05")
+        composeTestRule
+            .onNodeWithContentDescription("Elapsed time: 02:05")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun completed_today_summary_uses_the_persisted_duration() {
+        val elapsedTime = DailyElapsedTime(125_999)
+
+        composeTestRule.setContent {
+            NumPairsTheme {
+                DailyCompletionScreen(
+                    presentation = DailyChallengeTitle(
+                        visibleText = "Daily · Jul 25, 2026",
+                        accessibilityText = "Daily · Jul 25, 2026, 4 pairs · Low"
+                    ),
+                    elapsedTime = elapsedTime,
+                    onShareResult = {},
+                    onViewCalendar = {},
+                    onNavigateBack = {}
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(DailyScreenTestTags.COMPLETION_DURATION)
+            .assertIsDisplayed()
+            .assertTextEquals("02:05")
+        composeTestRule
+            .onNodeWithContentDescription("Elapsed time: 02:05")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun legacy_completion_does_not_fabricate_a_zero_duration() {
+        composeTestRule.setContent {
+            NumPairsTheme {
+                DailyCompletionScreen(
+                    presentation = DailyChallengeTitle(
+                        visibleText = "Daily · Jul 25, 2026",
+                        accessibilityText = "Daily · Jul 25, 2026, 4 pairs · Low"
+                    ),
+                    elapsedTime = null,
+                    onShareResult = {},
+                    onViewCalendar = {},
+                    onNavigateBack = {}
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(DailyScreenTestTags.COMPLETION_DURATION)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithText("00:00")
+            .assertDoesNotExist()
+    }
+
+    @Test
     fun wide_completion_summary_caps_and_aligns_all_actions() {
         composeTestRule.setContent {
             NumPairsTheme {
@@ -467,6 +598,9 @@ class DailyCompletionSurfaceTest {
         composeTestRule
             .onNodeWithContentDescription(accessibilityTitle)
             .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(DailyScreenTestTags.CHRONOMETER)
+            .assertDoesNotExist()
     }
 
     private fun assignFirstTileOperator(operator: Operator) {
@@ -534,6 +668,7 @@ private class RecordingDailyRepository(initialState: DailyState) : DailySessionR
     override suspend fun replaceSession(snapshot: DailySessionSnapshot): DailySessionReplacementResult {
         mutationCount += 1
         lastReplacement = snapshot
+        state.value = state.value.copy(activeSession = snapshot)
         return DailySessionReplacementResult.Replaced
     }
 
@@ -548,7 +683,21 @@ private class RecordingDailyRepository(initialState: DailyState) : DailySessionR
     override suspend fun startTiming(
         expectedSessionId: DailySessionId,
         startInstant: DailyTimingStartInstant
-    ): DailySessionTimingStartResult = DailySessionTimingStartResult.StaleSession
+    ): DailySessionTimingStartResult {
+        val activeSession = state.value.activeSession
+        if (activeSession?.sessionId != expectedSessionId) {
+            return DailySessionTimingStartResult.StaleSession
+        }
+        val existingStart = activeSession.timingStartInstant
+        if (existingStart != null) {
+            return DailySessionTimingStartResult.AlreadyStarted(existingStart)
+        }
+        mutationCount += 1
+        state.value = state.value.copy(
+            activeSession = activeSession.copy(timingStartInstant = startInstant)
+        )
+        return DailySessionTimingStartResult.Started(startInstant)
+    }
 
     override suspend fun clearSession(expectedSessionId: DailySessionId): DailySessionClearResult {
         mutationCount += 1
@@ -571,7 +720,8 @@ private class RecordingDailyRepository(initialState: DailyState) : DailySessionR
     }
 }
 
-private fun completion(identity: DailyChallengeId): DailyCompletion = DailyCompletion(
-    identity = identity,
-    elapsedTime = null
-)
+private fun completion(identity: DailyChallengeId, elapsedTime: DailyElapsedTime? = null): DailyCompletion =
+    DailyCompletion(
+        identity = identity,
+        elapsedTime = elapsedTime
+    )

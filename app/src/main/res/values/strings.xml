@@ -114,6 +114,8 @@
     <string name="daily_completion_message">Daily completed!</string>
     <string name="daily_completion_supporting_text">Today’s challenge is complete.</string>
     <string name="daily_completion_challenge_name">4 pairs · Low</string>
+    <string name="daily_elapsed_time_content_description">Elapsed time: %1$s</string>
+    <string name="daily_completion_duration_label">Completion time</string>
     <string name="daily_share_result_action">Share result</string>
     <string name="daily_view_calendar_action">View calendar</string>
     <string name="daily_back_to_menu_action">Back to menu</string>

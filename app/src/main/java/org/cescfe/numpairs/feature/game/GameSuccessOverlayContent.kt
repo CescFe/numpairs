@@ -3,6 +3,8 @@ package org.cescfe.numpairs.feature.game
 data class GameSuccessOverlayContent(
     val message: String,
     val supportingText: String,
+    val highlightText: String? = null,
+    val highlightContentDescription: String? = null,
     val primaryActionLabel: String,
     val onPrimaryAction: () -> Unit,
     val secondaryActionLabel: String? = null,
@@ -12,6 +14,9 @@ data class GameSuccessOverlayContent(
     val onBackRequested: (() -> Unit)? = null
 ) {
     init {
+        require(highlightText != null || highlightContentDescription == null) {
+            "A completion highlight description requires visible highlight text."
+        }
         require((secondaryActionLabel == null) == (onSecondaryAction == null)) {
             "A custom secondary completion action requires both a label and callback."
         }

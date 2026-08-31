@@ -16,9 +16,12 @@ import org.cescfe.numpairs.data.daily.session.DailySessionProgressUpdateResult
 import org.cescfe.numpairs.data.daily.session.DailySessionReplacementResult
 import org.cescfe.numpairs.data.daily.session.DailySessionRepository
 import org.cescfe.numpairs.data.daily.session.DailySessionSnapshot
+import org.cescfe.numpairs.data.daily.session.DailySessionTimingStartResult
 import org.cescfe.numpairs.data.daily.session.requireValidActivePuzzle
 import org.cescfe.numpairs.data.daily.session.requireValidSolvedPuzzle
 import org.cescfe.numpairs.domain.daily.DailyCompletion
+import org.cescfe.numpairs.domain.daily.DailyElapsedTime
+import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
 fun interface DailySessionIdSource {
@@ -62,8 +65,11 @@ internal sealed interface DailyPuzzleUiState {
 
     data class Loading(val currentDailyChallenge: CurrentDailyChallenge) : DailyPuzzleUiState
 
-    data class Ready(val session: DailyGameSession, val persistenceFailure: DailyPuzzlePersistenceFailure? = null) :
-        DailyPuzzleUiState
+    data class Ready(
+        val session: DailyGameSession,
+        val elapsedTime: DailyElapsedTime? = null,
+        val persistenceFailure: DailyPuzzlePersistenceFailure? = null
+    ) : DailyPuzzleUiState
 
     data class Completed(val session: DailyGameSession, val completion: DailyPuzzleCompletion) : DailyPuzzleUiState {
         init {
@@ -100,7 +106,8 @@ internal class DailyPuzzleViewModel(
     private val availabilityResolver: CurrentDailyAvailabilityResolver,
     private val puzzleGenerator: DailyPuzzleGenerator,
     private val dailySessionRepository: DailySessionRepository,
-    private val sessionIdSource: DailySessionIdSource = UuidDailySessionIdSource
+    private val sessionIdSource: DailySessionIdSource = UuidDailySessionIdSource,
+    private val timeSource: DailyTimeSource = SystemDailyTimeSource
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<DailyPuzzleUiState>(DailyPuzzleUiState.Idle)
     val uiState: StateFlow<DailyPuzzleUiState> = _uiState.asStateFlow()
@@ -110,6 +117,10 @@ internal class DailyPuzzleViewModel(
     private var pendingSessionId: DailySessionId? = null
     private var sessionWriteJob: Job? = null
     private var persistenceRevision: Int = 0
+    private var visibleTimer: VisibleDailyTimer? = null
+    private var pendingTimingStart: PendingDailyTimingStart? = null
+    private var pendingCompletionElapsedTime: PendingDailyCompletionElapsedTime? = null
+    private val elapsedHighWaterBySessionId = mutableMapOf<DailySessionId, DailyElapsedTime>()
 
     fun onRouteEntered() {
         if (preparationJob != null || _uiState.value != DailyPuzzleUiState.Idle) {
@@ -124,7 +135,98 @@ internal class DailyPuzzleViewModel(
         preparationJob = null
         pendingSessionId = null
         persistenceRevision++
+        visibleTimer = null
+        pendingCompletionElapsedTime = null
         _uiState.value = DailyPuzzleUiState.Idle
+    }
+
+    fun onPuzzlePresented(expectedSessionId: DailySessionId) {
+        val state = _uiState.value as? DailyPuzzleUiState.Ready ?: return
+        if (
+            state.session.id != expectedSessionId ||
+            state.session.currentPuzzle.isSolved ||
+            visibleTimer?.sessionId == expectedSessionId
+        ) {
+            return
+        }
+
+        val reading = timeSource.read()
+        val persistedStart = state.session.snapshot.timingStartInstant
+        val pendingStart = pendingTimingStart
+            ?.takeIf { pending -> pending.sessionId == expectedSessionId }
+            ?.startInstant
+        val startInstant = persistedStart
+            ?: pendingStart
+            ?: DailyTimingStartInstant(reading.epochMilliseconds)
+        val session = state.session.withTimingStart(startInstant)
+        val restoredElapsed = DailyElapsedTime(
+            nonNegativeDifference(
+                current = reading.epochMilliseconds,
+                earlier = startInstant.epochMilliseconds
+            )
+        )
+        val elapsedAtAnchor = maxElapsedTime(
+            restoredElapsed,
+            elapsedHighWaterBySessionId[expectedSessionId]
+        )
+        visibleTimer = VisibleDailyTimer(
+            sessionId = expectedSessionId,
+            anchorMonotonicMilliseconds = reading.monotonicMilliseconds,
+            elapsedAtAnchor = elapsedAtAnchor,
+            highWater = elapsedAtAnchor
+        )
+        elapsedHighWaterBySessionId[expectedSessionId] = elapsedAtAnchor
+        _uiState.value = state.copy(
+            session = session,
+            elapsedTime = elapsedAtAnchor
+        )
+
+        if (persistedStart == null) {
+            pendingTimingStart = PendingDailyTimingStart(
+                sessionId = expectedSessionId,
+                startInstant = startInstant
+            )
+            enqueuePersistence(
+                session = session,
+                elapsedTime = elapsedAtAnchor,
+                timingStartOnly = true
+            )
+        }
+    }
+
+    fun onTimerRefresh(expectedSessionId: DailySessionId) {
+        val state = _uiState.value as? DailyPuzzleUiState.Ready ?: return
+        val timer = visibleTimer ?: return
+        if (
+            state.session.id != expectedSessionId ||
+            state.session.currentPuzzle.isSolved ||
+            timer.sessionId != expectedSessionId
+        ) {
+            return
+        }
+
+        val elapsedTime = timer.readElapsed(timeSource.read())
+        elapsedHighWaterBySessionId[expectedSessionId] = elapsedTime
+        if (elapsedTime != state.elapsedTime) {
+            _uiState.value = state.copy(elapsedTime = elapsedTime)
+        }
+    }
+
+    fun onPuzzleSolved(expectedSessionId: DailySessionId) {
+        val state = _uiState.value as? DailyPuzzleUiState.Ready ?: return
+        if (
+            state.session.id != expectedSessionId ||
+            state.session.currentPuzzle.isSolved ||
+            pendingCompletionElapsedTime?.sessionId == expectedSessionId
+        ) {
+            return
+        }
+        val elapsedTime = captureCompletionElapsedTime(state.session)
+        pendingCompletionElapsedTime = PendingDailyCompletionElapsedTime(
+            sessionId = expectedSessionId,
+            elapsedTime = elapsedTime
+        )
+        _uiState.value = state.copy(elapsedTime = elapsedTime)
     }
 
     fun retry() {
@@ -161,8 +263,22 @@ internal class DailyPuzzleViewModel(
             return
         }
 
-        _uiState.value = DailyPuzzleUiState.Ready(session = updatedSession)
-        enqueuePersistence(session = updatedSession)
+        val elapsedTime = if (puzzle.isSolved) {
+            pendingCompletionElapsedTime
+                ?.takeIf { pending -> pending.sessionId == expectedSessionId }
+                ?.elapsedTime
+                ?: captureCompletionElapsedTime(visibleSession)
+        } else {
+            state.elapsedTime
+        }
+        _uiState.value = DailyPuzzleUiState.Ready(
+            session = updatedSession,
+            elapsedTime = elapsedTime
+        )
+        enqueuePersistence(
+            session = updatedSession,
+            elapsedTime = elapsedTime
+        )
     }
 
     fun retryPersistence() {
@@ -171,7 +287,10 @@ internal class DailyPuzzleViewModel(
             return
         }
         _uiState.value = readyState.copy(persistenceFailure = null)
-        enqueuePersistence(session = readyState.session)
+        enqueuePersistence(
+            session = readyState.session,
+            elapsedTime = readyState.elapsedTime
+        )
     }
 
     private fun resolveAndPrepare() {
@@ -325,14 +444,24 @@ internal class DailyPuzzleViewModel(
         }
     }
 
-    private fun enqueuePersistence(session: DailyGameSession) {
+    private fun enqueuePersistence(
+        session: DailyGameSession,
+        elapsedTime: DailyElapsedTime?,
+        timingStartOnly: Boolean = false
+    ) {
         val revision = ++persistenceRevision
         val precedingWrite = sessionWriteJob
         val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
             precedingWrite?.join()
             val failure = try {
-                if (session.currentPuzzle.isSolved) {
-                    persistCompletion(session = session)
+                val timingFailure = persistPendingTimingStart(session)
+                if (timingFailure != null || timingStartOnly) {
+                    timingFailure
+                } else if (session.currentPuzzle.isSolved) {
+                    persistCompletion(
+                        session = session,
+                        elapsedTime = elapsedTime
+                    )
                 } else {
                     persistProgress(session = session)
                 }
@@ -353,6 +482,38 @@ internal class DailyPuzzleViewModel(
         job.start()
     }
 
+    private suspend fun persistPendingTimingStart(session: DailyGameSession): DailyPuzzlePersistenceFailure? {
+        val pending = pendingTimingStart
+            ?.takeIf { pendingStart -> pendingStart.sessionId == session.id }
+            ?: return null
+        return when (
+            val result = dailySessionRepository.startTiming(
+                expectedSessionId = pending.sessionId,
+                startInstant = pending.startInstant
+            )
+        ) {
+            is DailySessionTimingStartResult.Started -> {
+                acceptPersistedTimingStart(
+                    sessionId = pending.sessionId,
+                    startInstant = result.startInstant
+                )
+                null
+            }
+
+            is DailySessionTimingStartResult.AlreadyStarted -> {
+                acceptPersistedTimingStart(
+                    sessionId = pending.sessionId,
+                    startInstant = result.startInstant
+                )
+                null
+            }
+
+            DailySessionTimingStartResult.StaleSession -> {
+                DailyPuzzlePersistenceFailure.StaleSession
+            }
+        }
+    }
+
     private suspend fun persistProgress(session: DailyGameSession): DailyPuzzlePersistenceFailure? = when (
         dailySessionRepository.updateCurrentPuzzle(
             expectedSessionId = session.id,
@@ -370,11 +531,15 @@ internal class DailyPuzzleViewModel(
         }
     }
 
-    private suspend fun persistCompletion(session: DailyGameSession): DailyPuzzlePersistenceFailure? = when (
+    private suspend fun persistCompletion(
+        session: DailyGameSession,
+        elapsedTime: DailyElapsedTime?
+    ): DailyPuzzlePersistenceFailure? = when (
         val result = dailySessionRepository.complete(
             expectedSessionId = session.id,
             expectedDailyChallengeId = session.currentDailyChallenge.identity,
-            solvedPuzzle = session.currentPuzzle
+            solvedPuzzle = session.currentPuzzle,
+            elapsedTime = elapsedTime
         )
     ) {
         is DailySessionCompletionResult.Completed -> {
@@ -423,6 +588,84 @@ internal class DailyPuzzleViewModel(
         }
     }
 
+    private fun captureCompletionElapsedTime(session: DailyGameSession): DailyElapsedTime? {
+        val timer = visibleTimer
+        val elapsedTime = when {
+            timer?.sessionId == session.id -> timer.readElapsed(timeSource.read())
+
+            session.snapshot.timingStartInstant != null -> {
+                val reading = timeSource.read()
+                DailyElapsedTime(
+                    nonNegativeDifference(
+                        current = reading.epochMilliseconds,
+                        earlier = session.snapshot.timingStartInstant.epochMilliseconds
+                    )
+                )
+            }
+
+            else -> null
+        }
+        if (elapsedTime != null) {
+            val frozenElapsedTime = maxElapsedTime(
+                elapsedTime,
+                elapsedHighWaterBySessionId[session.id]
+            )
+            elapsedHighWaterBySessionId[session.id] = frozenElapsedTime
+            visibleTimer = null
+            return frozenElapsedTime
+        }
+        visibleTimer = null
+        return null
+    }
+
+    private fun acceptPersistedTimingStart(sessionId: DailySessionId, startInstant: DailyTimingStartInstant) {
+        val pending = pendingTimingStart ?: return
+        if (pending.sessionId != sessionId) {
+            return
+        }
+        pendingTimingStart = null
+
+        val state = _uiState.value as? DailyPuzzleUiState.Ready ?: return
+        if (state.session.id != sessionId) {
+            return
+        }
+        val authoritativeSession = state.session.withTimingStart(
+            startInstant = startInstant,
+            replaceExisting = true
+        )
+        if (state.session.snapshot.timingStartInstant == startInstant) {
+            return
+        }
+        if (authoritativeSession.currentPuzzle.isSolved) {
+            _uiState.value = state.copy(session = authoritativeSession)
+            return
+        }
+
+        val reading = timeSource.read()
+        val restoredElapsed = DailyElapsedTime(
+            nonNegativeDifference(
+                current = reading.epochMilliseconds,
+                earlier = startInstant.epochMilliseconds
+            )
+        )
+        val elapsedTime = maxElapsedTime(
+            restoredElapsed,
+            state.elapsedTime,
+            elapsedHighWaterBySessionId[sessionId]
+        )
+        elapsedHighWaterBySessionId[sessionId] = elapsedTime
+        visibleTimer = VisibleDailyTimer(
+            sessionId = sessionId,
+            anchorMonotonicMilliseconds = reading.monotonicMilliseconds,
+            elapsedAtAnchor = elapsedTime,
+            highWater = elapsedTime
+        )
+        _uiState.value = state.copy(
+            session = authoritativeSession,
+            elapsedTime = elapsedTime
+        )
+    }
+
     private fun publishPersistenceFailure(expectedSessionId: DailySessionId, failure: DailyPuzzlePersistenceFailure) {
         val readyState = _uiState.value as? DailyPuzzleUiState.Ready ?: return
         if (readyState.session.id == expectedSessionId) {
@@ -464,4 +707,63 @@ internal data class DailyGameSession(
             currentPuzzle = puzzle
         )
     }
+
+    fun withTimingStart(startInstant: DailyTimingStartInstant, replaceExisting: Boolean = false): DailyGameSession {
+        val timingStartInstant = if (replaceExisting) {
+            startInstant
+        } else {
+            snapshot.timingStartInstant ?: startInstant
+        }
+        return copy(
+            snapshot = snapshot.copy(timingStartInstant = timingStartInstant)
+        )
+    }
 }
+
+private data class PendingDailyTimingStart(val sessionId: DailySessionId, val startInstant: DailyTimingStartInstant)
+
+private data class PendingDailyCompletionElapsedTime(val sessionId: DailySessionId, val elapsedTime: DailyElapsedTime?)
+
+private data class VisibleDailyTimer(
+    val sessionId: DailySessionId,
+    val anchorMonotonicMilliseconds: Long,
+    val elapsedAtAnchor: DailyElapsedTime,
+    var highWater: DailyElapsedTime
+) {
+    fun readElapsed(reading: DailyTimeReading): DailyElapsedTime {
+        val monotonicDelta = nonNegativeDifference(
+            current = reading.monotonicMilliseconds,
+            earlier = anchorMonotonicMilliseconds
+        )
+        val measuredElapsed = DailyElapsedTime(
+            saturatedSum(elapsedAtAnchor.milliseconds, monotonicDelta)
+        )
+        highWater = maxElapsedTime(highWater, measuredElapsed)
+        return highWater
+    }
+}
+
+private fun nonNegativeDifference(current: Long, earlier: Long): Long = if (current >= earlier) {
+    current - earlier
+} else {
+    0L
+}
+
+private fun saturatedSum(first: Long, second: Long): Long = if (Long.MAX_VALUE - first < second) {
+    Long.MAX_VALUE
+} else {
+    first + second
+}
+
+private fun maxElapsedTime(first: DailyElapsedTime, second: DailyElapsedTime?): DailyElapsedTime =
+    if (second != null && second.milliseconds > first.milliseconds) {
+        second
+    } else {
+        first
+    }
+
+private fun maxElapsedTime(
+    first: DailyElapsedTime,
+    second: DailyElapsedTime?,
+    third: DailyElapsedTime?
+): DailyElapsedTime = maxElapsedTime(maxElapsedTime(first, second), third)
