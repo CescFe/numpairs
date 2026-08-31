@@ -272,35 +272,35 @@ class DailyAggregateCodecTest {
             )
         )
 
-        assertThrows(IllegalArgumentException::class.java) {
+        assertRejectedByValidation {
             validSnapshot.copy(seed = validSnapshot.seed + 1)
         }
-        assertThrows(IllegalArgumentException::class.java) {
+        assertRejectedByValidation {
             validSnapshot.copy(candidateIndex = DailyCandidateIndex(4))
         }
-        assertThrows(IllegalArgumentException::class.java) {
+        assertRejectedByValidation {
             validSnapshot.copy(
                 dailyChallengeId = validSnapshot.dailyChallengeId.copy(
                     recipeVersion = DailyRecipeVersion("unsupported-recipe")
                 )
             )
         }
-        assertThrows(IllegalArgumentException::class.java) {
+        assertRejectedByValidation {
             validSnapshot.copy(
                 initialPuzzle = threePairsPuzzle,
                 currentPuzzle = threePairsPuzzle
             )
         }
-        assertThrows(IllegalArgumentException::class.java) {
+        assertRejectedByValidation {
             validSnapshot.copy(currentPuzzle = changedResultsPuzzle)
         }
-        assertThrows(IllegalArgumentException::class.java) {
+        assertRejectedByValidation {
             validSnapshot.copy(currentPuzzle = removedKnownEntryPuzzle)
         }
-        assertThrows(IllegalArgumentException::class.java) {
+        assertRejectedByValidation {
             validSnapshot.copy(currentPuzzle = changedEntryIdentityPuzzle)
         }
-        assertThrows(IllegalArgumentException::class.java) {
+        assertRejectedByValidation {
             validSnapshot.copy(currentPuzzle = fixture.generatedPuzzle.solvedPuzzle)
         }
     }
@@ -344,15 +344,22 @@ class DailyAggregateCodecTest {
             )
         )
 
-        assertThrows(IllegalArgumentException::class.java) {
+        assertRejectedByValidation {
             snapshot.copy(
                 initialPuzzle = playerEnteredInitial,
                 currentPuzzle = playerEnteredInitial
             )
         }
-        assertThrows(IllegalArgumentException::class.java) {
+        assertRejectedByValidation {
             snapshot.copy(currentPuzzle = invalidAssignment)
         }
+    }
+}
+
+private fun <T> assertRejectedByValidation(block: () -> T) {
+    assertThrows(IllegalArgumentException::class.java) {
+        val unexpectedResult = block()
+        throw AssertionError("Expected validation to reject $unexpectedResult")
     }
 }
 

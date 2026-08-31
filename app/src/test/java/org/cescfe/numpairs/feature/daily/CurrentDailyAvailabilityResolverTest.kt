@@ -18,7 +18,6 @@ import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
-import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
@@ -104,7 +103,7 @@ class CurrentDailyAvailabilityResolverTest {
         )
         val resolver = CurrentDailyAvailabilityResolver(
             currentDailyChallengeResolver = CurrentDailyChallengeResolver(
-                localDateSource = DeviceLocalDateSource { currentDate }
+                localDateSource = { currentDate }
             ),
             dailySessionRepository = repository
         )
@@ -127,7 +126,7 @@ class CurrentDailyAvailabilityResolverTest {
             )
         )
         val currentResolver = CurrentDailyChallengeResolver(
-            localDateSource = DeviceLocalDateSource { currentDate }
+            localDateSource = { currentDate }
         )
         val resolver = CurrentDailyAvailabilityResolver(
             currentDailyChallengeResolver = currentResolver,
@@ -156,7 +155,7 @@ class CurrentDailyAvailabilityResolverTest {
 private fun resolver(date: LocalDate, repository: DailySessionRepository): CurrentDailyAvailabilityResolver =
     CurrentDailyAvailabilityResolver(
         currentDailyChallengeResolver = CurrentDailyChallengeResolver(
-            localDateSource = DeviceLocalDateSource { date }
+            localDateSource = { date }
         ),
         dailySessionRepository = repository
     )

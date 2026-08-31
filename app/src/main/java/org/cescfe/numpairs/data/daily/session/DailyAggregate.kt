@@ -47,12 +47,8 @@ data class DailySessionSnapshot(
             "Daily Session seed must match its recipe candidate."
         }
         requirePuzzleMatchesRecipe(initialPuzzle, recipeContract)
-        requirePuzzleMatchesRecipe(currentPuzzle, recipeContract)
         require(initialPuzzle.isIncomplete) {
             "Initial Daily Session puzzle must be incomplete."
-        }
-        require(!currentPuzzle.isSolved) {
-            "An active Daily Session puzzle must be unsolved."
         }
         require(
             initialPuzzle.board.tiles.all { tile ->
@@ -67,9 +63,17 @@ data class DailySessionSnapshot(
             "Initial Daily Session strip entries cannot be player-entered."
         }
         requireInitialStripMatchesRecipe(initialPuzzle, recipeContract)
-        requireConsistentProgress(initialPuzzle = initialPuzzle, currentPuzzle = currentPuzzle)
-        requireValidCurrentAssignments(currentPuzzle)
+        requireValidActivePuzzle(currentPuzzle)
     }
+}
+
+internal fun DailySessionSnapshot.requireValidActivePuzzle(activePuzzle: Puzzle) {
+    requirePuzzleMatchesRecipe(activePuzzle, recipeContract)
+    require(!activePuzzle.isSolved) {
+        "An active Daily Session puzzle must be unsolved."
+    }
+    requireConsistentProgress(initialPuzzle = initialPuzzle, currentPuzzle = activePuzzle)
+    requireValidCurrentAssignments(activePuzzle)
 }
 
 internal fun DailySessionSnapshot.requireValidSolvedPuzzle(solvedPuzzle: Puzzle) {
@@ -86,9 +90,6 @@ data class DailyAggregate(
     val activeSession: DailySessionSnapshot? = null,
     val completions: List<DailyCompletion> = emptyList()
 ) {
-    val completedChallengeIds: List<DailyChallengeId>
-        get() = completions.map(DailyCompletion::identity)
-
     init {
         require(schemaVersion == DAILY_AGGREGATE_SCHEMA_VERSION) {
             "Daily aggregate schema version is unsupported."

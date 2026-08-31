@@ -16,8 +16,8 @@ import org.cescfe.numpairs.data.daily.session.DailySessionProgressUpdateResult
 import org.cescfe.numpairs.data.daily.session.DailySessionReplacementResult
 import org.cescfe.numpairs.data.daily.session.DailySessionRepository
 import org.cescfe.numpairs.data.daily.session.DailySessionSnapshot
+import org.cescfe.numpairs.data.daily.session.requireValidActivePuzzle
 import org.cescfe.numpairs.data.daily.session.requireValidSolvedPuzzle
-import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
@@ -446,7 +446,7 @@ internal data class DailyGameSession(
         if (currentPuzzle.isSolved) {
             snapshot.requireValidSolvedPuzzle(currentPuzzle)
         } else {
-            snapshot.copy(currentPuzzle = currentPuzzle)
+            snapshot.requireValidActivePuzzle(currentPuzzle)
         }
     }
 

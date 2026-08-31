@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.first
 import org.cescfe.numpairs.data.daily.session.DailySessionRepository
 import org.cescfe.numpairs.data.daily.session.DailySessionSnapshot
 import org.cescfe.numpairs.data.daily.session.DailyState
-import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DailyCompletion
 
 sealed interface CurrentDailyAvailability {

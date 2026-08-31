@@ -264,7 +264,7 @@ class DailyPuzzleViewModelTest {
             initialState = DailyState(null, emptyList())
         )
         val viewModel = viewModel(
-            dateSource = DeviceLocalDateSource { date },
+            dateSource = { date },
             repository = repository,
             generator = generator
         )
@@ -314,7 +314,7 @@ class DailyPuzzleViewModelTest {
             )
         )
         val viewModel = viewModel(
-            dateSource = DeviceLocalDateSource { date },
+            dateSource = { date },
             repository = repository,
             generator = generator,
             idSource = QueueDailySessionIdSource(
@@ -615,7 +615,7 @@ class DailyPuzzleViewModelTest {
             initialState = DailyState(fixture.snapshot(), emptyList())
         )
         val viewModel = viewModel(
-            dateSource = DeviceLocalDateSource { currentDate },
+            dateSource = { currentDate },
             repository = repository,
             generator = RecordingDailyPuzzleGenerator()
         )
@@ -644,7 +644,7 @@ private fun viewModel(
     generator: DailyPuzzleGenerator,
     idSource: DailySessionIdSource = QueueDailySessionIdSource("daily-session")
 ): DailyPuzzleViewModel = viewModel(
-    dateSource = DeviceLocalDateSource { date },
+    dateSource = { date },
     repository = repository,
     generator = generator,
     idSource = idSource
