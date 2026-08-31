@@ -147,8 +147,8 @@ class DailyPuzzleViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(
-            DailyTimingStartInstant(25_000),
-            repository.currentState.activeSession?.timingStartInstant
+            25_000L,
+            requireNotNull(repository.currentState.activeSession?.timingStartInstant).epochMilliseconds
         )
         assertEquals(1, repository.timingStartAttempts.size)
     }
@@ -650,12 +650,12 @@ class DailyPuzzleViewModelTest {
             repository.timingStartAttempts
         )
         assertEquals(
-            DailyTimingStartInstant(10_000),
-            repository.currentState.activeSession?.timingStartInstant
+            10_000L,
+            requireNotNull(repository.currentState.activeSession?.timingStartInstant).epochMilliseconds
         )
         assertEquals(
-            DailyElapsedTime(0),
-            (viewModel.uiState.value as DailyPuzzleUiState.Ready).elapsedTime
+            0L,
+            requireNotNull((viewModel.uiState.value as DailyPuzzleUiState.Ready).elapsedTime).milliseconds
         )
     }
 
@@ -684,22 +684,22 @@ class DailyPuzzleViewModelTest {
 
         viewModel.onPuzzlePresented(sessionId)
         assertEquals(
-            DailyElapsedTime(5_000),
-            (viewModel.uiState.value as DailyPuzzleUiState.Ready).elapsedTime
+            5_000L,
+            requireNotNull((viewModel.uiState.value as DailyPuzzleUiState.Ready).elapsedTime).milliseconds
         )
 
         timeSource.set(epochMilliseconds = 500, monotonicMilliseconds = 2_100)
         viewModel.onTimerRefresh(sessionId)
         assertEquals(
-            DailyElapsedTime(7_000),
-            (viewModel.uiState.value as DailyPuzzleUiState.Ready).elapsedTime
+            7_000L,
+            requireNotNull((viewModel.uiState.value as DailyPuzzleUiState.Ready).elapsedTime).milliseconds
         )
 
         timeSource.set(epochMilliseconds = 500, monotonicMilliseconds = 1_000)
         viewModel.onTimerRefresh(sessionId)
         assertEquals(
-            DailyElapsedTime(7_000),
-            (viewModel.uiState.value as DailyPuzzleUiState.Ready).elapsedTime
+            7_000L,
+            requireNotNull((viewModel.uiState.value as DailyPuzzleUiState.Ready).elapsedTime).milliseconds
         )
         assertTrue(repository.timingStartAttempts.isEmpty())
     }
@@ -726,8 +726,8 @@ class DailyPuzzleViewModelTest {
         val firstSessionId = (firstOwner.uiState.value as DailyPuzzleUiState.Ready).session.id
         firstOwner.onPuzzlePresented(firstSessionId)
         assertEquals(
-            DailyElapsedTime(3_000),
-            (firstOwner.uiState.value as DailyPuzzleUiState.Ready).elapsedTime
+            3_000L,
+            requireNotNull((firstOwner.uiState.value as DailyPuzzleUiState.Ready).elapsedTime).milliseconds
         )
 
         val recreatedOwner = viewModel(
@@ -742,8 +742,8 @@ class DailyPuzzleViewModelTest {
         recreatedOwner.onPuzzlePresented(recreatedSessionId)
 
         assertEquals(
-            DailyElapsedTime(8_000),
-            (recreatedOwner.uiState.value as DailyPuzzleUiState.Ready).elapsedTime
+            8_000L,
+            requireNotNull((recreatedOwner.uiState.value as DailyPuzzleUiState.Ready).elapsedTime).milliseconds
         )
         assertTrue(repository.timingStartAttempts.isEmpty())
     }
@@ -770,8 +770,8 @@ class DailyPuzzleViewModelTest {
         timeSource.set(epochMilliseconds = 15_000, monotonicMilliseconds = 6_000)
         viewModel.onTimerRefresh(sessionId)
         assertEquals(
-            DailyElapsedTime(5_000),
-            (viewModel.uiState.value as DailyPuzzleUiState.Ready).elapsedTime
+            5_000L,
+            requireNotNull((viewModel.uiState.value as DailyPuzzleUiState.Ready).elapsedTime).milliseconds
         )
 
         viewModel.onRouteExited()
@@ -783,8 +783,8 @@ class DailyPuzzleViewModelTest {
 
         assertEquals(sessionId, restoredSessionId)
         assertEquals(
-            DailyElapsedTime(10_000),
-            (viewModel.uiState.value as DailyPuzzleUiState.Ready).elapsedTime
+            10_000L,
+            requireNotNull((viewModel.uiState.value as DailyPuzzleUiState.Ready).elapsedTime).milliseconds
         )
         assertEquals(1, repository.timingStartAttempts.size)
     }
@@ -826,8 +826,8 @@ class DailyPuzzleViewModelTest {
             repository.timingStartAttempts
         )
         assertEquals(
-            DailyTimingStartInstant(10_000),
-            repository.currentState.activeSession?.timingStartInstant
+            10_000L,
+            requireNotNull(repository.currentState.activeSession?.timingStartInstant).epochMilliseconds
         )
     }
 
@@ -859,10 +859,10 @@ class DailyPuzzleViewModelTest {
         dispatcher.scheduler.runCurrent()
 
         assertEquals(
-            DailyElapsedTime(1_234),
-            (viewModel.uiState.value as DailyPuzzleUiState.Ready).elapsedTime
+            1_234L,
+            requireNotNull((viewModel.uiState.value as DailyPuzzleUiState.Ready).elapsedTime).milliseconds
         )
-        assertEquals(DailyElapsedTime(1_234), repository.completionAttempts.single().elapsedTime)
+        assertEquals(1_234L, requireNotNull(repository.completionAttempts.single().elapsedTime).milliseconds)
 
         timeSource.set(epochMilliseconds = 99_000, monotonicMilliseconds = 90_000)
         completionGate.complete(Unit)
@@ -870,8 +870,10 @@ class DailyPuzzleViewModelTest {
 
         val completed = viewModel.uiState.value as DailyPuzzleUiState.Completed
         assertEquals(
-            DailyElapsedTime(1_234),
-            (completed.completion as DailyPuzzleCompletion.Completed).completion.elapsedTime
+            1_234L,
+            requireNotNull(
+                (completed.completion as DailyPuzzleCompletion.Completed).completion.elapsedTime
+            ).milliseconds
         )
     }
 
@@ -913,8 +915,10 @@ class DailyPuzzleViewModelTest {
         )
         val completed = viewModel.uiState.value as DailyPuzzleUiState.Completed
         assertEquals(
-            DailyElapsedTime(3_456),
-            (completed.completion as DailyPuzzleCompletion.Completed).completion.elapsedTime
+            3_456L,
+            requireNotNull(
+                (completed.completion as DailyPuzzleCompletion.Completed).completion.elapsedTime
+            ).milliseconds
         )
     }
 

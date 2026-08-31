@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import java.util.Locale
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -300,7 +301,7 @@ private fun DailyGameContent(
         }
         onPuzzlePresented(session.id)
         while (currentCoroutineContext().isActive) {
-            delay(DAILY_TIMER_REFRESH_INTERVAL_MILLISECONDS)
+            delay(DAILY_TIMER_REFRESH_INTERVAL_MILLISECONDS.milliseconds)
             onTimerRefresh(session.id)
         }
     }
