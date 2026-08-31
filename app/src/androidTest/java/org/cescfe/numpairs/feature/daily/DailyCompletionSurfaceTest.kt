@@ -66,7 +66,6 @@ import org.cescfe.numpairs.ui.navigation.AppDestination
 import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -117,7 +116,7 @@ class DailyCompletionSurfaceTest {
             .onNodeWithTag(DailyScreenTestTags.SHARE_RESULT)
             .performClick()
         composeTestRule.runOnIdle {
-            assertNotNull(sharedText)
+            assertTrue(requireNotNull(sharedText).endsWith("Completed in 02:05"))
             assertEquals(0, repository.mutationCount)
         }
 

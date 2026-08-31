@@ -6,7 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import org.cescfe.numpairs.R
-import org.cescfe.numpairs.domain.daily.DailyChallengeId
+import org.cescfe.numpairs.domain.daily.DailyCompletion
 
 data class DailyCompletionSharePayload(val text: DailyCompletionShareText, val chooserTitle: String) {
     init {
@@ -20,13 +20,13 @@ class AndroidDailyCompletionSharePayloadFactory(
     private val resources: Resources,
     private val formatter: DailyCompletionShareTextFormatter = DailyCompletionShareTextFormatter()
 ) {
-    fun create(completedIdentity: DailyChallengeId): DailyCompletionSharePayload {
+    fun create(completion: DailyCompletion): DailyCompletionSharePayload {
         val locale = resources.configuration.locales[0]
         val fourPairsName = resources.getString(R.string.four_pairs_screen_title)
         val lowDifficultyName = resources.getString(R.string.generated_difficulty_low)
         return DailyCompletionSharePayload(
             text = formatter.format(
-                completedIdentity = completedIdentity,
+                completion = completion,
                 copy = DailyCompletionShareCopy(
                     dailyName = resources.getString(R.string.daily_share_name),
                     challengeName = resources.getString(
@@ -36,6 +36,9 @@ class AndroidDailyCompletionSharePayloadFactory(
                     ),
                     completedStatus = resources.getString(
                         R.string.daily_share_completed_status
+                    ),
+                    completedInStatusFormat = resources.getString(
+                        R.string.daily_share_completed_in_status
                     )
                 ),
                 locale = locale

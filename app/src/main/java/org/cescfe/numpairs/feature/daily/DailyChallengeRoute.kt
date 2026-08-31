@@ -48,6 +48,7 @@ import kotlinx.coroutines.isActive
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.daily.session.DailySessionRepository
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
+import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
 import org.cescfe.numpairs.feature.daily.calendar.DailyCalendarRoute
@@ -141,8 +142,8 @@ fun DailyChallengeRoute(
         )
 
         is DailyPuzzleUiState.Completed -> {
-            val completedIdentity = state.completedIdentity()
-            if (DailyRecipes.catalog.resolveOrNull(completedIdentity.recipeVersion) == null) {
+            val completion = state.completion.record()
+            if (DailyRecipes.catalog.resolveOrNull(completion.identity.recipeVersion) == null) {
                 DailyFailureScreen(
                     modifier = modifier,
                     message = stringResource(R.string.daily_completion_unavailable_message),
@@ -161,9 +162,9 @@ fun DailyChallengeRoute(
                     onPuzzleSolved = viewModel::onPuzzleSolved,
                     onRetryPersistence = viewModel::retryPersistence,
                     completionContent = dailyCompletionOverlayContent(
-                        elapsedTime = state.completion.elapsedTime(),
+                        elapsedTime = completion.elapsedTime,
                         onShareResult = {
-                            shareResult(completedIdentity)
+                            shareResult(completion)
                         },
                         onViewCalendar = {
                             isCalendarVisible = true
@@ -189,7 +190,7 @@ fun DailyChallengeRoute(
                     presentation = presentation,
                     elapsedTime = state.completion.elapsedTime,
                     onShareResult = {
-                        shareResult(state.completion.identity)
+                        shareResult(state.completion)
                     },
                     onViewCalendar = {
                         isCalendarVisible = true
@@ -247,7 +248,7 @@ fun DailyCompletedTodayRoute(
                 presentation = presentation,
                 elapsedTime = completion.elapsedTime,
                 onShareResult = {
-                    shareResult(identity)
+                    shareResult(completion)
                 },
                 onViewCalendar = {
                     isCalendarVisible = true
@@ -292,7 +293,7 @@ private fun DailyGameContent(
     val hapticFeedback = LocalHapticFeedback.current
     val elapsedTime = when (state) {
         is DailyPuzzleUiState.Ready -> state.elapsedTime ?: ZERO_DAILY_ELAPSED_TIME
-        is DailyPuzzleUiState.Completed -> state.completion.elapsedTime()
+        is DailyPuzzleUiState.Completed -> state.completion.record().elapsedTime
     }
 
     LaunchedEffect(session.id, session.currentPuzzle.isSolved) {
@@ -392,7 +393,7 @@ private fun rememberDailyChallengeTitle(identity: DailyChallengeId): DailyChalle
 }
 
 @Composable
-private fun rememberDailyShareResultAction(shareLauncher: DailyCompletionShareLauncher?): (DailyChallengeId) -> Unit {
+private fun rememberDailyShareResultAction(shareLauncher: DailyCompletionShareLauncher?): (DailyCompletion) -> Unit {
     val context = LocalContext.current
     val defaultLauncher = remember(context) {
         AndroidDailyCompletionShareLauncher(context)
@@ -403,8 +404,8 @@ private fun rememberDailyShareResultAction(shareLauncher: DailyCompletionShareLa
     }
     val activeLauncher = shareLauncher ?: defaultLauncher
     return remember(activeLauncher, payloadFactory) {
-        { completedIdentity ->
-            activeLauncher.launch(payloadFactory.create(completedIdentity))
+        { completion ->
+            activeLauncher.launch(payloadFactory.create(completion))
         }
     }
 }
@@ -534,14 +535,9 @@ private fun DailyPuzzlePersistenceFailure.messageResource(): Int = when (this) {
     DailyPuzzlePersistenceFailure.Persistence -> R.string.daily_storage_failure_message
 }
 
-private fun DailyPuzzleUiState.Completed.completedIdentity(): DailyChallengeId = when (val result = completion) {
-    is DailyPuzzleCompletion.Completed -> result.completion.identity
-    is DailyPuzzleCompletion.AlreadyCompleted -> result.completion.identity
-}
-
-private fun DailyPuzzleCompletion.elapsedTime(): DailyElapsedTime? = when (this) {
-    is DailyPuzzleCompletion.Completed -> completion.elapsedTime
-    is DailyPuzzleCompletion.AlreadyCompleted -> completion.elapsedTime
+private fun DailyPuzzleCompletion.record(): DailyCompletion = when (this) {
+    is DailyPuzzleCompletion.Completed -> completion
+    is DailyPuzzleCompletion.AlreadyCompleted -> completion
 }
 
 private fun DailyChallengeId.canonicalKey(): String = "$canonicalLocalDate:${recipeVersion.value}"

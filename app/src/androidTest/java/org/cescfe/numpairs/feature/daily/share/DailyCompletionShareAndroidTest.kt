@@ -9,6 +9,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import java.time.LocalDate
 import org.cescfe.numpairs.R
+import org.cescfe.numpairs.domain.daily.DailyCompletion
+import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.feature.daily.DailyRecipes
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -20,7 +22,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class DailyCompletionShareAndroidTest {
     @Test
-    fun payload_factory_uses_localized_v10_daily_completion_copy() {
+    fun payload_factory_uses_localized_timed_daily_completion_copy() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
             LocalDate.of(2026, 7, 25)
@@ -28,7 +30,12 @@ class DailyCompletionShareAndroidTest {
 
         val payload = AndroidDailyCompletionSharePayloadFactory(
             resources = context.resources
-        ).create(completedIdentity = identity)
+        ).create(
+            completion = DailyCompletion(
+                identity = identity,
+                elapsedTime = DailyElapsedTime(125_999)
+            )
+        )
 
         assertTrue(payload.text.value.startsWith(context.getString(R.string.daily_share_name)))
         assertTrue(
@@ -42,13 +49,37 @@ class DailyCompletionShareAndroidTest {
         )
         assertTrue(
             payload.text.value.endsWith(
-                context.getString(R.string.daily_share_completed_status)
+                context.getString(R.string.daily_share_completed_in_status, "02:05")
             )
         )
         assertEquals(
             context.getString(R.string.daily_share_chooser_title),
             payload.chooserTitle
         )
+    }
+
+    @Test
+    fun payload_factory_keeps_legacy_completion_copy_without_inventing_a_duration() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
+            LocalDate.of(2026, 7, 25)
+        )
+
+        val payload = AndroidDailyCompletionSharePayloadFactory(
+            resources = context.resources
+        ).create(
+            completion = DailyCompletion(
+                identity = identity,
+                elapsedTime = null
+            )
+        )
+
+        assertTrue(
+            payload.text.value.endsWith(
+                context.getString(R.string.daily_share_completed_status)
+            )
+        )
+        assertFalse(payload.text.value.contains("00:00"))
     }
 
     @Test
