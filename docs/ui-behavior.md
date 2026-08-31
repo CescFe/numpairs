@@ -346,17 +346,20 @@ Daily Session before the completed Menu state is published.
 
 The immediate completion surface keeps the solved board visible and shows exactly:
 
+- the frozen completion duration when one was recorded
 - primary: `Share result`
 - secondary: `View calendar`
 - tertiary navigation: `Back to menu`
 
-It does not show `Play another`, restart, change difficulty, solution reveal, timer, score, or
-replay.
+It does not show `Play another`, restart, change difficulty, solution reveal, a running timer,
+score, or replay. A migrated completion without a recorded duration omits the duration rather than
+displaying a fabricated value.
 
 If the player later activates `Daily completed`, NumPairs opens a lightweight Daily completion
 summary for the current date. Because the solved session snapshot has been removed, the summary
 does not reconstruct or display the solved board. It identifies the date and `4 Pairs · Low` and
-shows the same Share result, View calendar, and Back to menu actions.
+shows the same frozen completion duration when available, Share result, View calendar, and Back to
+menu actions.
 
 Opening either completion surface does not add another completion record. Pressing system back
 returns to the normal menu.
@@ -411,8 +414,8 @@ process recreation does not require restoring the displayed month or caller.
 
 ### Daily Textual Sharing
 
-Status: non-spoiling localized text formatting and the Android Sharesheet boundary implemented;
-integrated with valid immediate and reopened Daily completion surfaces.
+Status: non-spoiling localized timed-result formatting and the Android Sharesheet boundary
+implemented; integrated with valid immediate and reopened Daily completion surfaces.
 
 `Share result` opens the Android Sharesheet with localized `text/plain` content containing:
 
@@ -420,22 +423,30 @@ integrated with valid immediate and reopened Daily completion surfaces.
 - the completed local date
 - `4 Pairs · Low`
 - an explicit completed status
+- the authoritative completion duration when one was recorded
 
 One representative structure is:
 
 ```text
 NumPairs Daily · 25 Jul 2026
-4 Pairs · Low · Completed
+4 Pairs · Low · Completed in 02:05
 ```
 
-The localized date and completion text may vary by locale, but the shared result never contains
-strip values, board results, pairs, operators, tile positions, a solved-board encoding, time,
-score, action count, streak, or ranking.
+The localized date and completion text may vary by locale. Durations use the same unbounded-minute
+`MM:SS` formatting and sub-second truncation as the Daily timer and completion surfaces. A migrated
+completion without a recorded duration retains the prior `Completed` text and never invents a
+duration.
+
+The shared result never contains strip values, board results, pairs, operators, tile positions, a
+solved-board encoding, score, action count, streak, or ranking.
 
 The Sharesheet chooser title is localized. Cancelling sharing, returning from the target
 application, or having no compatible target does not change completion, calendar, session, or
 navigation state and must not crash NumPairs. Sharesheet state is transient and is never restored
 after process death.
+
+Sharing remains an explicit player action. NumPairs does not automatically transmit the duration,
+select a recipient, or receive data back from the chosen destination.
 
 Past calendar dates do not expose sharing in v10.
 

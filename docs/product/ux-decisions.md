@@ -179,11 +179,14 @@ Current visual direction:
 - A calendar gives Daily completion durable meaning without introducing a streak or score.
 - Non-interactive past dates keep v10 out of catch-up and backfill behavior.
 - Neutral history avoids punishing players for days before installation or voluntary breaks.
-- Text-only sharing celebrates participation without revealing puzzle content.
+- Text-only sharing includes the recorded completion duration to support friendly speed comparison
+  without revealing puzzle content.
 
 ### Potential Concerns
 
 - Device-clock changes can alter which date is considered today; v10 explicitly trusts local time.
 - Clearing application data or reinstalling resets the calendar because no account or backup owns
   it.
-- Sharing without a score or time is intentionally ceremonial rather than competitive.
+- A shared duration is a local, player-initiated result rather than proof of fair play or a ranked
+  score.
+- Migrated completions without a duration retain the earlier ceremonial completion text.
