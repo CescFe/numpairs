@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
+import androidx.core.net.toUri
 
 sealed interface ExternalUriLaunchResult {
     data object Launched : ExternalUriLaunchResult
@@ -33,7 +33,7 @@ class AndroidExternalUriLauncher(private val context: Context) : ExternalUriLaun
 object ExternalUriIntentFactory {
     fun create(uri: String): Intent = Intent(
         Intent.ACTION_VIEW,
-        Uri.parse(uri)
+        uri.toUri()
     )
 }
 

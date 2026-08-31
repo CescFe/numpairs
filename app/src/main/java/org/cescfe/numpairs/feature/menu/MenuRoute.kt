@@ -28,9 +28,9 @@ import org.cescfe.numpairs.feature.menu.ui.MenuScreen
 @Composable
 fun MenuRoute(
     generatedDifficultySelectionRepository: GeneratedDifficultySelectionRepository,
+    modifier: Modifier = Modifier,
     dailySessionRepository: DailySessionRepository? = null,
     deviceLocalDateSource: DeviceLocalDateSource? = null,
-    modifier: Modifier = Modifier,
     resumeChallengeName: String? = null,
     onResumeSelected: () -> Unit = {},
     onTutorialSelected: () -> Unit = {},

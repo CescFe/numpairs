@@ -70,7 +70,6 @@
     <!-- Generated mode screens -->
     <string name="quick_screen_title">Schnell</string>
     <string name="classic_screen_title">Klassisch</string>
-    <string name="three_pairs_accessibility_name">3 Paare</string>
     <string name="four_pairs_screen_title">4 Paare</string>
 
     <!-- Generated puzzle creation -->
