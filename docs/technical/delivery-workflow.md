@@ -52,29 +52,22 @@ Do not combine unrelated product behavior, refactors, or documentation in one is
 
 ## Delivery Context Isolation
 
-For a delivery batch with multiple atomic issues, keep two distinct context roles:
+For delivery batches with multiple atomic issues:
 
-- a lightweight coordinating context that owns milestone scope, dependency order, work references,
-  issue and Pull Request state, and cross-issue decisions
-- one fresh isolated execution context for each atomic issue that owns only that issue's
-  implementation cycle
-
-Start each isolated issue context only after its dependencies are merged and local `main` is
-current. Provide the issue URL or number, assigned work reference, applicable delivery inputs,
-dependency decisions, and the repository instructions and sources required for that issue. Do not
-fork or copy the accumulated coordinator conversation or any prior issue's implementation
-transcript into the new context. Repository required-reading rules still apply inside every issue
-context.
-
-When an issue cycle ends, return only a concise delivery summary to the coordinator: issue and work
-reference, branch and Pull Request, merge result, validation evidence, and any decision or blocker
-that can affect later issues. After every merge, update the coordinator with that summary and
-compact the coordinating context before starting the next issue. Use the active Codex surface's
-fresh-context and compaction mechanisms; if either is unavailable, report that limitation before
-starting multi-issue implementation instead of silently reusing the accumulated transcript.
-
-Context isolation does not relax sequential integration. Do not run dependent issue implementation
-in parallel or start it from an unmerged branch.
+- Keep a lightweight coordinating context for milestone scope, dependency order, work references,
+  issue and Pull Request state, and cross-issue decisions.
+- Use one fresh isolated execution context for each atomic issue.
+- Start an issue context only after its dependencies are merged and local `main` is current.
+- Provide the issue URL or number, assigned work reference, applicable delivery inputs, dependency
+  decisions, and required repository instructions and sources.
+- Do not fork or copy the coordinating context or prior issue transcripts into a new issue context.
+- Apply repository required-reading rules in every issue context.
+- Return only a concise delivery summary to the coordinating context: issue, work reference, branch,
+  Pull Request, merge result, validation evidence, and decisions or blockers that affect later issues.
+- After each merge, update and compact the coordinating context before starting the next issue.
+- Use the active Codex surface's fresh-context and compaction mechanisms.
+- Report unavailable isolation or compaction mechanisms before starting multi-issue implementation.
+- Integrate dependent issues sequentially; do not start them in parallel or from an unmerged branch.
 
 ## Work References And Branches
 
@@ -142,13 +135,14 @@ Pull Request title format:
 [{reference}] {Relevant sentence-case message}
 ```
 
-A user request to complete an issue, delivery batch, or milestone end to end authorizes every
-in-scope merge in that delivery cycle. No additional per-Pull-Request merge confirmation is
-required. This authorization remains limited to the requested delivery scope and does not extend
-to unrelated future work.
+Merge authorization rules:
 
-A request limited to implementation, Pull Request creation, or review does not authorize merge.
-An explicit review-first or no-merge instruction overrides a broader workflow request.
+- Treat a request to complete an issue, delivery batch, or milestone end to end as authorization for
+  every in-scope merge in that delivery cycle.
+- Do not request additional per-Pull-Request merge confirmation within that scope.
+- Do not extend merge authorization to unrelated future work.
+- Do not treat implementation, Pull Request creation, or review requests as merge authorization.
+- Honor an explicit review-first or no-merge instruction over broader workflow requests.
 
 For every authorized merge, use squash and merge with this squash commit title:
 
@@ -156,9 +150,9 @@ For every authorized merge, use squash and merge with this squash commit title:
 [{reference}] {Relevant sentence-case message}
 ```
 
-Do not merge while a required check is pending, unexpectedly skipped, cancelled, or failing. If
-the delivery is not authorized end to end, or the user asks to review the Pull Request first or
-explicitly says not to merge, stop after creating and reporting the Pull Request.
+- Do not merge while a required check is pending, unexpectedly skipped, cancelled, or failing.
+- Stop after creating and reporting the Pull Request when merge is not authorized or the user asks
+  for review first or no merge.
 
 Before any authorized merge:
 
@@ -193,43 +187,40 @@ Do not start dependent implementation from an unmerged branch when the requested
 
 ### Required Check Watching
 
-Wait approximately six and a half minutes after moving the Pull Request to `Ready for review`,
-without querying GitHub during that initial delay. Then start
-`gh pr checks <pr> --watch --interval 15` once. If the command continues in the background, wait on
-that same terminal session using the longest practical wait interval supported by the surface. Keep
-repetitive watcher progress out of the model context and retrieve only the final bounded summary or
-the failure details needed for diagnosis.
+After moving a Pull Request to `Ready for review`:
 
-Do not repeatedly invoke `gh pr checks`, query individual run status, or poll the watcher terminal
-at short intervals. A watcher failure or interruption may be followed by one bounded status query
-to diagnose the terminal state before deciding whether to resume the same watcher or address a
-failed check.
+1. Wait approximately six and a half minutes without querying GitHub.
+2. Start `gh pr checks <pr> --watch --interval 15` once.
+3. Continue waiting on that terminal session using the longest practical interval.
+4. Return only the final bounded summary or failure details needed for diagnosis.
+
+- Do not restart `gh pr checks`, query individual runs, or poll the watcher at short intervals.
+- After a watcher failure or interruption, use at most one bounded status query before resuming the
+  watcher or addressing a failed check.
 
 ### Tool And Output Efficiency
 
-- Group independent read-only discovery into one parallel tool round trip when it remains easy to
-  attribute results and failures.
-- Group related sequential operations into one tool call when ordering, approval scope, and failure
-  attribution remain clear. Keep destructive or materially different actions separate.
-- Prefer targeted `rg` searches and bounded file ranges. Read required canonical documents in full,
-  but do not dump unrelated files, complete directories, or already-seen content into the context.
-- Set output bounds proportional to the expected result. Suppress repetitive progress from Gradle,
-  GitHub watchers, and other long-running commands; surface the final summary and relevant failure
-  excerpt instead.
-- Start a long-running command once and continue through its existing terminal session. Do not
-  restart it merely to obtain progress.
-- Pass the relevant Android validation tasks to one Gradle invocation in the documented order when
-  feasible. Split or rerun tasks only when required to diagnose a failure or preserve correctness.
-
-These efficiency rules do not remove, skip, or weaken any required inspection, validation,
-acceptance-criteria review, approval, or merge safeguard.
+- Group safe independent reads in one parallel call when results and failures remain attributable.
+- Group related sequential operations in one call when ordering, approval scope, and failures remain
+  clear.
+- Keep destructive or materially different actions separate.
+- Use targeted `rg` searches and bounded reads.
+- Read required canonical documents in full.
+- Avoid dumping unrelated files, directories, or previously read content.
+- Bound tool output and suppress repetitive progress.
+- Surface only final summaries and relevant failure details.
+- Start long-running commands once and reuse their terminal sessions.
+- Run Android validation tasks in one Gradle invocation and documented order when feasible.
+- Split or rerun tasks only to diagnose a failure or preserve correctness.
+- Never weaken required inspections, validation, acceptance review, approval, or merge safeguards
+  for efficiency.
 
 For Compose UI changes, the diff review must include a design-system consistency pass:
 
-- inspect newly introduced or configured direct Material components
-- inspect feature-local shapes, colors, typography, and other visual styling
-- compare each affected visual role with `NumPairsComponents` and the nearest analogous UI
-- identify in the Pull Request any intentional deviation from an established shared component or token
+- Inspect newly introduced or configured direct Material components.
+- Inspect feature-local shapes, colors, typography, and other visual styling.
+- Compare each affected visual role with `NumPairsComponents` and the nearest analogous UI.
+- Record any intentional deviation from an established shared component or token in the Pull Request.
 
 ## Android Validation
 
@@ -249,9 +240,11 @@ For application changes, run the relevant tasks sequentially:
 - Treat Android Lint and IDE-only IntelliJ inspections separately; do not claim Gradle validation
   covers IDE-only warnings.
 
-Instrumented tests must only be compiled. Do not start an emulator or run connected-device tasks because doing so can make the development machine unusable.
-
-For documentation-only changes, validate Markdown structure, relative links, consistency, and `git diff --check`. Android build tasks are not required unless the documentation change affects build configuration or executable examples.
+- Compile instrumented tests only; do not start an emulator or run connected-device tasks.
+- For documentation-only changes, validate Markdown structure, relative links, consistency, and
+  `git diff --check`.
+- Skip Android build tasks for documentation-only changes unless they affect build configuration or
+  executable examples.
 
 ## Milestone Completion
 
