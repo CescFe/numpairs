@@ -22,6 +22,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,9 +41,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import java.util.Locale
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.daily.session.DailySessionRepository
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
+import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
 import org.cescfe.numpairs.feature.daily.calendar.DailyCalendarRoute
 import org.cescfe.numpairs.feature.daily.share.AndroidDailyCompletionShareLauncher
@@ -63,7 +68,8 @@ fun DailyChallengeRoute(
     modifier: Modifier = Modifier,
     isGeneratedGameHapticsEnabled: Boolean = true,
     compactTileSelectorsEnabled: Boolean = false,
-    shareLauncher: DailyCompletionShareLauncher? = null
+    shareLauncher: DailyCompletionShareLauncher? = null,
+    timeSource: DailyTimeSource = SystemDailyTimeSource
 ) {
     if (DailyRecipes.catalog.resolveOrNull(identity.recipeVersion) == null) {
         DailyFailureScreen(
@@ -77,7 +83,8 @@ fun DailyChallengeRoute(
     val viewModel = rememberDailyPuzzleViewModel(
         identity = identity,
         dailySessionRepository = dailySessionRepository,
-        generatedPuzzleGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory
+        generatedPuzzleGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory,
+        timeSource = timeSource
     )
     val uiState by viewModel.uiState.collectAsState()
     var isCalendarVisible by remember(identity) { mutableStateOf(false) }
@@ -125,6 +132,9 @@ fun DailyChallengeRoute(
             isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,
             compactTileSelectorsEnabled = compactTileSelectorsEnabled,
             onPuzzleChanged = viewModel::onCommittedPuzzleChanged,
+            onPuzzlePresented = viewModel::onPuzzlePresented,
+            onTimerRefresh = viewModel::onTimerRefresh,
+            onPuzzleSolved = viewModel::onPuzzleSolved,
             onRetryPersistence = viewModel::retryPersistence,
             onNavigateBack = onNavigateBack
         )
@@ -145,8 +155,12 @@ fun DailyChallengeRoute(
                     isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,
                     compactTileSelectorsEnabled = compactTileSelectorsEnabled,
                     onPuzzleChanged = viewModel::onCommittedPuzzleChanged,
+                    onPuzzlePresented = viewModel::onPuzzlePresented,
+                    onTimerRefresh = viewModel::onTimerRefresh,
+                    onPuzzleSolved = viewModel::onPuzzleSolved,
                     onRetryPersistence = viewModel::retryPersistence,
                     completionContent = dailyCompletionOverlayContent(
+                        elapsedTime = state.completion.elapsedTime(),
                         onShareResult = {
                             shareResult(completedIdentity)
                         },
@@ -172,6 +186,7 @@ fun DailyChallengeRoute(
                 val presentation = rememberDailyChallengeTitle(state.completion.identity)
                 DailyCompletionScreen(
                     presentation = presentation,
+                    elapsedTime = state.completion.elapsedTime,
                     onShareResult = {
                         shareResult(state.completion.identity)
                     },
@@ -223,9 +238,13 @@ fun DailyCompletedTodayRoute(
 
         requireNotNull(dailyState).completions.any { completion -> completion.identity == identity } &&
             DailyRecipes.catalog.resolveOrNull(identity.recipeVersion) != null -> {
+            val completion = requireNotNull(dailyState).completions.single { completion ->
+                completion.identity == identity
+            }
             val presentation = rememberDailyChallengeTitle(identity)
             DailyCompletionScreen(
                 presentation = presentation,
+                elapsedTime = completion.elapsedTime,
                 onShareResult = {
                     shareResult(identity)
                 },
@@ -256,6 +275,9 @@ private fun DailyGameContent(
         org.cescfe.numpairs.data.daily.session.DailySessionId,
         org.cescfe.numpairs.domain.puzzle.model.Puzzle
     ) -> Unit,
+    onPuzzlePresented: (org.cescfe.numpairs.data.daily.session.DailySessionId) -> Unit,
+    onTimerRefresh: (org.cescfe.numpairs.data.daily.session.DailySessionId) -> Unit,
+    onPuzzleSolved: (org.cescfe.numpairs.data.daily.session.DailySessionId) -> Unit,
     onRetryPersistence: () -> Unit,
     completionContent: GameSuccessOverlayContent? = null,
     onNavigateBack: () -> Unit
@@ -267,6 +289,21 @@ private fun DailyGameContent(
     }
     val title = rememberDailyChallengeTitle(session.currentDailyChallenge.identity)
     val hapticFeedback = LocalHapticFeedback.current
+    val elapsedTime = when (state) {
+        is DailyPuzzleUiState.Ready -> state.elapsedTime ?: ZERO_DAILY_ELAPSED_TIME
+        is DailyPuzzleUiState.Completed -> state.completion.elapsedTime()
+    }
+
+    LaunchedEffect(session.id, session.currentPuzzle.isSolved) {
+        if (session.currentPuzzle.isSolved) {
+            return@LaunchedEffect
+        }
+        onPuzzlePresented(session.id)
+        while (currentCoroutineContext().isActive) {
+            delay(DAILY_TIMER_REFRESH_INTERVAL_MILLISECONDS)
+            onTimerRefresh(session.id)
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         GameRoute(
@@ -284,9 +321,17 @@ private fun DailyGameContent(
             onPuzzleChanged = { puzzle ->
                 onPuzzleChanged(session.id, puzzle)
             },
-            onTileAssignmentCommitted = {
+            onTileAssignmentCommitted = { commit ->
+                if (commit.madePuzzleSolved) {
+                    onPuzzleSolved(session.id)
+                }
                 if (isGeneratedGameHapticsEnabled) {
                     hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
+                }
+            },
+            topBarActions = {
+                elapsedTime?.let { visibleElapsedTime ->
+                    DailyChronometer(elapsedTime = visibleElapsedTime)
                 }
             },
             onNavigateBack = onNavigateBack
@@ -303,21 +348,29 @@ private fun DailyGameContent(
 }
 
 @Composable
-private fun dailyCompletionOverlayContent(
+internal fun dailyCompletionOverlayContent(
+    elapsedTime: DailyElapsedTime?,
     onShareResult: () -> Unit,
     onViewCalendar: () -> Unit,
     onNavigateBack: () -> Unit
-): GameSuccessOverlayContent = GameSuccessOverlayContent(
-    message = stringResource(R.string.daily_completion_message),
-    supportingText = stringResource(R.string.daily_completion_supporting_text),
-    primaryActionLabel = stringResource(R.string.daily_share_result_action),
-    onPrimaryAction = onShareResult,
-    secondaryActionLabel = stringResource(R.string.daily_view_calendar_action),
-    onSecondaryAction = onViewCalendar,
-    tertiaryActionLabel = stringResource(R.string.daily_back_to_menu_action),
-    onTertiaryAction = onNavigateBack,
-    onBackRequested = onNavigateBack
-)
+): GameSuccessOverlayContent {
+    val formattedElapsedTime = elapsedTime?.let(DailyElapsedTimeFormatter::format)
+    return GameSuccessOverlayContent(
+        message = stringResource(R.string.daily_completion_message),
+        supportingText = stringResource(R.string.daily_completion_supporting_text),
+        highlightText = formattedElapsedTime,
+        highlightContentDescription = formattedElapsedTime?.let { formatted ->
+            stringResource(R.string.daily_elapsed_time_content_description, formatted)
+        },
+        primaryActionLabel = stringResource(R.string.daily_share_result_action),
+        onPrimaryAction = onShareResult,
+        secondaryActionLabel = stringResource(R.string.daily_view_calendar_action),
+        onSecondaryAction = onViewCalendar,
+        tertiaryActionLabel = stringResource(R.string.daily_back_to_menu_action),
+        onTertiaryAction = onNavigateBack,
+        onBackRequested = onNavigateBack
+    )
+}
 
 @Composable
 private fun rememberDailyChallengeTitle(identity: DailyChallengeId): DailyChallengeTitle {
@@ -485,15 +538,23 @@ private fun DailyPuzzleUiState.Completed.completedIdentity(): DailyChallengeId =
     is DailyPuzzleCompletion.AlreadyCompleted -> result.completion.identity
 }
 
+private fun DailyPuzzleCompletion.elapsedTime(): DailyElapsedTime? = when (this) {
+    is DailyPuzzleCompletion.Completed -> completion.elapsedTime
+    is DailyPuzzleCompletion.AlreadyCompleted -> completion.elapsedTime
+}
+
 private fun DailyChallengeId.canonicalKey(): String = "$canonicalLocalDate:${recipeVersion.value}"
 
 private val DAILY_STATUS_MAX_WIDTH = 480.dp
+private const val DAILY_TIMER_REFRESH_INTERVAL_MILLISECONDS = 250L
+private val ZERO_DAILY_ELAPSED_TIME = DailyElapsedTime(0)
 
 @Composable
 private fun rememberDailyPuzzleViewModel(
     identity: DailyChallengeId,
     dailySessionRepository: DailySessionRepository,
-    generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory
+    generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory,
+    timeSource: DailyTimeSource
 ): DailyPuzzleViewModel {
     val activity = LocalContext.current.findComponentActivity()
         ?: error("DailyChallengeRoute requires a ComponentActivity host.")
@@ -506,7 +567,8 @@ private fun rememberDailyPuzzleViewModel(
     val factory = remember(
         currentDailyChallengeResolver,
         dailySessionRepository,
-        generatedPuzzleGenerationUseCaseFactory
+        generatedPuzzleGenerationUseCaseFactory,
+        timeSource
     ) {
         DailyPuzzleViewModelFactory(
             availabilityResolver = CurrentDailyAvailabilityResolver(
@@ -517,7 +579,8 @@ private fun rememberDailyPuzzleViewModel(
                 currentDailyChallengeResolver = currentDailyChallengeResolver,
                 generatedPuzzleGenerationUseCaseFactory = generatedPuzzleGenerationUseCaseFactory
             ),
-            dailySessionRepository = dailySessionRepository
+            dailySessionRepository = dailySessionRepository,
+            timeSource = timeSource
         )
     }
     return remember(activity, identity, factory) {
@@ -531,7 +594,8 @@ private fun rememberDailyPuzzleViewModel(
 private class DailyPuzzleViewModelFactory(
     private val availabilityResolver: CurrentDailyAvailabilityResolver,
     private val puzzleGenerator: DailyPuzzleGenerator,
-    private val dailySessionRepository: DailySessionRepository
+    private val dailySessionRepository: DailySessionRepository,
+    private val timeSource: DailyTimeSource
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         require(modelClass.isAssignableFrom(DailyPuzzleViewModel::class.java)) {
@@ -542,7 +606,8 @@ private class DailyPuzzleViewModelFactory(
                 DailyPuzzleViewModel(
                     availabilityResolver = availabilityResolver,
                     puzzleGenerator = puzzleGenerator,
-                    dailySessionRepository = dailySessionRepository
+                    dailySessionRepository = dailySessionRepository,
+                    timeSource = timeSource
                 )
             )
         )

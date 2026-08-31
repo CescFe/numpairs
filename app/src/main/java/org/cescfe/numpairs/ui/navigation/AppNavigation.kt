@@ -241,6 +241,7 @@ private fun UnlockedAppNavigation(
                 deviceLocalDateSource = dependencies.deviceLocalDateSource,
                 generatedPuzzleGenerationUseCaseFactory =
                     dependencies.generatedPuzzleGenerationUseCaseFactory,
+                timeSource = dependencies.timeSource,
                 isGeneratedGameHapticsEnabled =
                     personalizationPreferences?.generatedGameHapticsEnabled == true,
                 compactTileSelectorsEnabled =

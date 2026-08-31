@@ -7,5 +7,6 @@ import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFac
 data class DailyFeatureDependencies(
     val dailySessionRepository: DailySessionRepository,
     val deviceLocalDateSource: DeviceLocalDateSource,
-    val generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory
+    val generatedPuzzleGenerationUseCaseFactory: GeneratedPuzzleGenerationUseCaseFactory,
+    val timeSource: DailyTimeSource = SystemDailyTimeSource
 )

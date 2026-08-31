@@ -114,6 +114,8 @@
     <string name="daily_completion_message">¡Daily completado!</string>
     <string name="daily_completion_supporting_text">Has completado el reto de hoy.</string>
     <string name="daily_completion_challenge_name">4 pares · Baja</string>
+    <string name="daily_elapsed_time_content_description">Tiempo transcurrido: %1$s</string>
+    <string name="daily_completion_duration_label">Tiempo de resolución</string>
     <string name="daily_share_result_action">Compartir resultado</string>
     <string name="daily_view_calendar_action">Ver calendario</string>
     <string name="daily_back_to_menu_action">Volver al menú</string>

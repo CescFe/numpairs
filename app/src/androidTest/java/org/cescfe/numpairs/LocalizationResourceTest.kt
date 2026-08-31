@@ -85,6 +85,11 @@ class LocalizationResourceTest {
         assertEquals("Saltar igualmente", resources.getString(R.string.onboarding_skip_anyway_button))
         assertEquals("No se puede abrir NumPairs", resources.getString(R.string.onboarding_startup_failure_title))
         assertEquals("Reintentar", resources.getString(R.string.onboarding_startup_retry_button))
+        assertDailyTimingCopy(
+            resources = resources,
+            accessibilityDescription = "Tiempo transcurrido: 02:05",
+            completionLabel = "Tiempo de resolución"
+        )
     }
 
     @Test
@@ -161,6 +166,11 @@ class LocalizationResourceTest {
         assertEquals("Omet-lo igualment", resources.getString(R.string.onboarding_skip_anyway_button))
         assertEquals("No es pot obrir NumPairs", resources.getString(R.string.onboarding_startup_failure_title))
         assertEquals("Torna-ho a provar", resources.getString(R.string.onboarding_startup_retry_button))
+        assertDailyTimingCopy(
+            resources = resources,
+            accessibilityDescription = "Temps transcorregut: 02:05",
+            completionLabel = "Temps de resolució"
+        )
     }
 
     @Test
@@ -236,6 +246,20 @@ class LocalizationResourceTest {
         assertEquals("Skip anyway", resources.getString(R.string.onboarding_skip_anyway_button))
         assertEquals("Unable to open NumPairs", resources.getString(R.string.onboarding_startup_failure_title))
         assertEquals("Retry", resources.getString(R.string.onboarding_startup_retry_button))
+        assertDailyTimingCopy(
+            resources = resources,
+            accessibilityDescription = "Elapsed time: 02:05",
+            completionLabel = "Completion time"
+        )
+    }
+
+    @Test
+    fun germanDeviceLanguageUsesGermanDailyTimingResources() {
+        assertDailyTimingCopy(
+            resources = resourcesFor(languageTag = "de"),
+            accessibilityDescription = "Verstrichene Zeit: 02:05",
+            completionLabel = "Lösungszeit"
+        )
     }
 
     private fun assertTutorialCopy(resources: Resources, expectedCopy: List<String>) {
@@ -278,6 +302,14 @@ class LocalizationResourceTest {
         assertEquals(message, resources.getString(R.string.tutorial_success_overlay_message))
         assertEquals(supportingText, resources.getString(R.string.tutorial_success_overlay_supporting_text))
         assertEquals(continueAction, resources.getString(R.string.tutorial_success_overlay_continue_button))
+    }
+
+    private fun assertDailyTimingCopy(resources: Resources, accessibilityDescription: String, completionLabel: String) {
+        assertEquals(
+            accessibilityDescription,
+            resources.getString(R.string.daily_elapsed_time_content_description, "02:05")
+        )
+        assertEquals(completionLabel, resources.getString(R.string.daily_completion_duration_label))
     }
 
     private fun resourcesFor(languageTag: String): Resources {
