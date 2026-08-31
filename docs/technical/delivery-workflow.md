@@ -236,10 +236,18 @@ For Compose UI changes, the diff review must include a design-system consistency
 For application changes, run the relevant tasks sequentially:
 
 ```text
-./gradlew spotlessApply testDebugUnitTest spotlessCheck compileDebugAndroidTestKotlin
+./gradlew spotlessApply testDebugUnitTest spotlessCheck compileDebugAndroidTestKotlin lintDebug
 ```
 
-Run `lintDebug` when completing a stage or milestone and for changes with broader Android risk.
+- Run `lintDebug` for every Android or Kotlin production or test change, stage or milestone
+  completion, and other change with broader Android risk.
+- Inspect each affected module's `build/reports/lint-results-debug.*`, even when the task succeeds;
+  success can still include warnings.
+- For warnings in changed files, fix each safe warning or record the warning and why it remains.
+- Do not expand the atomic issue for warnings outside the current diff; report material
+  pre-existing findings separately.
+- Treat Android Lint and IDE-only IntelliJ inspections separately; do not claim Gradle validation
+  covers IDE-only warnings.
 
 Instrumented tests must only be compiled. Do not start an emulator or run connected-device tasks because doing so can make the development machine unusable.
 
