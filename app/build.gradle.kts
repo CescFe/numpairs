@@ -77,6 +77,15 @@ android {
     androidResources {
         generateLocaleConfig = true
     }
+    lint {
+        warningsAsErrors = true
+
+        // External release timing must not break an otherwise unrelated change.
+        informational += setOf(
+            "AndroidGradlePluginVersion",
+            "NewerVersionAvailable"
+        )
+    }
 }
 
 dependencies {
