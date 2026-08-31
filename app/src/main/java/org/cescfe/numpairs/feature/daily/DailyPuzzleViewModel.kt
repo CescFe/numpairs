@@ -18,6 +18,7 @@ import org.cescfe.numpairs.data.daily.session.DailySessionRepository
 import org.cescfe.numpairs.data.daily.session.DailySessionSnapshot
 import org.cescfe.numpairs.data.daily.session.requireValidSolvedPuzzle
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
+import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
 fun interface DailySessionIdSource {
@@ -43,13 +44,15 @@ internal sealed interface DailyPuzzlePersistenceFailure {
 
     data object InvalidPuzzle : DailyPuzzlePersistenceFailure
 
+    data object InvalidTiming : DailyPuzzlePersistenceFailure
+
     data object Persistence : DailyPuzzlePersistenceFailure
 }
 
 internal sealed interface DailyPuzzleCompletion {
-    data object Completed : DailyPuzzleCompletion
+    data class Completed(val completion: DailyCompletion) : DailyPuzzleCompletion
 
-    data class AlreadyCompleted(val completion: DailyChallengeId) : DailyPuzzleCompletion
+    data class AlreadyCompleted(val completion: DailyCompletion) : DailyPuzzleCompletion
 }
 
 internal sealed interface DailyPuzzleUiState {
@@ -68,8 +71,8 @@ internal sealed interface DailyPuzzleUiState {
                 "A completed Daily UI state requires a solved in-memory puzzle."
             }
             val completedIdentity = when (completion) {
-                DailyPuzzleCompletion.Completed -> session.currentDailyChallenge.identity
-                is DailyPuzzleCompletion.AlreadyCompleted -> completion.completion
+                is DailyPuzzleCompletion.Completed -> completion.completion.identity
+                is DailyPuzzleCompletion.AlreadyCompleted -> completion.completion.identity
             }
             require(
                 completedIdentity.localDate ==
@@ -80,10 +83,10 @@ internal sealed interface DailyPuzzleUiState {
         }
     }
 
-    data class CompletedToday(val currentDailyChallenge: CurrentDailyChallenge, val completion: DailyChallengeId) :
+    data class CompletedToday(val currentDailyChallenge: CurrentDailyChallenge, val completion: DailyCompletion) :
         DailyPuzzleUiState {
         init {
-            require(completion.localDate == currentDailyChallenge.identity.localDate) {
+            require(completion.identity.localDate == currentDailyChallenge.identity.localDate) {
                 "A completed Daily UI state must own the captured local date."
             }
         }
@@ -374,10 +377,12 @@ internal class DailyPuzzleViewModel(
             solvedPuzzle = session.currentPuzzle
         )
     ) {
-        DailySessionCompletionResult.Completed -> {
+        is DailySessionCompletionResult.Completed -> {
             publishCompletion(
                 expectedSessionId = session.id,
-                completion = DailyPuzzleCompletion.Completed
+                completion = DailyPuzzleCompletion.Completed(
+                    completion = result.completion
+                )
             )
             null
         }
@@ -398,6 +403,10 @@ internal class DailyPuzzleViewModel(
 
         DailySessionCompletionResult.InvalidPuzzle -> {
             DailyPuzzlePersistenceFailure.InvalidPuzzle
+        }
+
+        DailySessionCompletionResult.InvalidTiming -> {
+            DailyPuzzlePersistenceFailure.InvalidTiming
         }
     }
 

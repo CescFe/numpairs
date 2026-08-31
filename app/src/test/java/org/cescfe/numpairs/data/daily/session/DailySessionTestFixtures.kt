@@ -3,8 +3,11 @@ package org.cescfe.numpairs.data.daily.session
 import java.time.LocalDate
 import org.cescfe.numpairs.domain.daily.DailyCandidateIndex
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
+import org.cescfe.numpairs.domain.daily.DailyCompletion
+import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyRecipeContracts
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
+import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerator
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
@@ -23,14 +26,16 @@ internal data class GeneratedDailyFixture(
 ) {
     fun snapshot(
         sessionId: String = "daily-session-${identity.canonicalLocalDate}",
-        currentPuzzle: Puzzle = generatedPuzzle.initialPuzzle
+        currentPuzzle: Puzzle = generatedPuzzle.initialPuzzle,
+        timingStartInstant: DailyTimingStartInstant? = null
     ): DailySessionSnapshot = DailySessionSnapshot(
         sessionId = DailySessionId(sessionId),
         dailyChallengeId = identity,
         candidateIndex = candidateIndex,
         seed = seed,
         initialPuzzle = generatedPuzzle.initialPuzzle,
-        currentPuzzle = currentPuzzle
+        currentPuzzle = currentPuzzle,
+        timingStartInstant = timingStartInstant
     )
 
     fun progressPuzzle(): Puzzle {
@@ -99,6 +104,12 @@ internal fun dailyChallengeId(
     localDate = date,
     recipeVersion = recipeVersion
 )
+
+internal fun dailyCompletion(identity: DailyChallengeId, elapsedMilliseconds: Long? = null): DailyCompletion =
+    DailyCompletion(
+        identity = identity,
+        elapsedTime = elapsedMilliseconds?.let(::DailyElapsedTime)
+    )
 
 internal fun generatedPuzzleFixture(profile: GeneratedPuzzleProfile, seed: Int): GeneratedPairsPuzzle {
     val outcome = GeneratedPairsPuzzleGenerator(profile).generate(

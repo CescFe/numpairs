@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
+import org.cescfe.numpairs.domain.daily.DailyCompletion
+import org.cescfe.numpairs.domain.daily.DailyElapsedTime
+import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
 class DataStoreDailySessionRepository(
@@ -31,8 +34,8 @@ class DataStoreDailySessionRepository(
         var result: DailySessionReplacementResult? = null
         dataStore.edit { preferences ->
             val aggregate = preferences.currentAggregate()
-            val completion = aggregate.completedChallengeIds.singleOrNull { completedIdentity ->
-                completedIdentity.localDate == snapshot.dailyChallengeId.localDate
+            val completion = aggregate.completions.singleOrNull { completed ->
+                completed.identity.localDate == snapshot.dailyChallengeId.localDate
             }
             if (completion != null) {
                 result = DailySessionReplacementResult.DateAlreadyCompleted(completion)
@@ -42,6 +45,37 @@ class DataStoreDailySessionRepository(
                 )
                 result = DailySessionReplacementResult.Replaced
             }
+        }
+        return requireNotNull(result)
+    }
+
+    override suspend fun startTiming(
+        expectedSessionId: DailySessionId,
+        startInstant: DailyTimingStartInstant
+    ): DailySessionTimingStartResult {
+        var result: DailySessionTimingStartResult? = null
+        dataStore.edit { preferences ->
+            val aggregate = preferences.currentAggregate()
+            val activeSession = aggregate.activeSession
+            if (activeSession?.sessionId != expectedSessionId) {
+                result = DailySessionTimingStartResult.StaleSession
+                return@edit
+            }
+
+            val existingStartInstant = activeSession.timingStartInstant
+            if (existingStartInstant != null) {
+                result = DailySessionTimingStartResult.AlreadyStarted(existingStartInstant)
+                return@edit
+            }
+
+            preferences[PreferenceKeys.AGGREGATE] = codec.encode(
+                aggregate.copy(
+                    activeSession = activeSession.copy(
+                        timingStartInstant = startInstant
+                    )
+                )
+            )
+            result = DailySessionTimingStartResult.Started(startInstant)
         }
         return requireNotNull(result)
     }
@@ -95,13 +129,14 @@ class DataStoreDailySessionRepository(
     override suspend fun complete(
         expectedSessionId: DailySessionId,
         expectedDailyChallengeId: DailyChallengeId,
-        solvedPuzzle: Puzzle
+        solvedPuzzle: Puzzle,
+        elapsedTime: DailyElapsedTime?
     ): DailySessionCompletionResult {
         var result: DailySessionCompletionResult? = null
         dataStore.edit { preferences ->
             val aggregate = preferences.currentAggregate()
-            val existingCompletion = aggregate.completedChallengeIds.singleOrNull { completedIdentity ->
-                completedIdentity.localDate == expectedDailyChallengeId.localDate
+            val existingCompletion = aggregate.completions.singleOrNull { completion ->
+                completion.identity.localDate == expectedDailyChallengeId.localDate
             }
             if (existingCompletion != null) {
                 result = DailySessionCompletionResult.AlreadyCompleted(existingCompletion)
@@ -126,15 +161,24 @@ class DataStoreDailySessionRepository(
                 return@edit
             }
 
-            val completedChallengeIds = (aggregate.completedChallengeIds + expectedDailyChallengeId)
-                .sortedWith(DAILY_CHALLENGE_ID_COMPARATOR)
+            if ((activeSession.timingStartInstant == null) != (elapsedTime == null)) {
+                result = DailySessionCompletionResult.InvalidTiming
+                return@edit
+            }
+
+            val completion = DailyCompletion(
+                identity = expectedDailyChallengeId,
+                elapsedTime = elapsedTime
+            )
+            val completions = (aggregate.completions + completion)
+                .sortedWith(DAILY_COMPLETION_COMPARATOR)
             preferences[PreferenceKeys.AGGREGATE] = codec.encode(
                 aggregate.copy(
                     activeSession = null,
-                    completedChallengeIds = completedChallengeIds
+                    completions = completions
                 )
             )
-            result = DailySessionCompletionResult.Completed
+            result = DailySessionCompletionResult.Completed(completion)
         }
         return requireNotNull(result)
     }
@@ -151,7 +195,7 @@ class DataStoreDailySessionRepository(
 
 private fun DailyAggregate.toDailyState(): DailyState = DailyState(
     activeSession = activeSession,
-    completedChallengeIds = completedChallengeIds
+    completions = completions
 )
 
 private fun DailyAggregateDecodingResult.decodedAggregateOrEmpty(): DailyAggregate = when (this) {

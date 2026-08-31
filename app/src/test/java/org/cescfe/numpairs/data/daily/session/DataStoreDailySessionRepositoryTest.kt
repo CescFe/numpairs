@@ -25,13 +25,17 @@ import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionSnapshot
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
+import org.cescfe.numpairs.domain.daily.DailyCompletion
+import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
+import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -52,7 +56,7 @@ class DataStoreDailySessionRepositoryTest {
         val fixture = createRepository()
 
         assertEquals(
-            DailyState(activeSession = null, completedChallengeIds = emptyList()),
+            DailyState(activeSession = null, completions = emptyList()),
             fixture.repository.state.first()
         )
     }
@@ -80,20 +84,56 @@ class DataStoreDailySessionRepositoryTest {
         val fixture = createRepository()
         val previous = generatedDailyFixture(date = LocalDate.of(2027, 4, 17)).snapshot()
         val completedIdentity = dailyChallengeId(LocalDate.of(2027, 4, 18))
+        val completion = untimedCompletion(completedIdentity)
         fixture.storeAggregate(
             DailyAggregate(
                 activeSession = previous,
-                completedChallengeIds = listOf(completedIdentity)
+                completions = listOf(completion)
             )
         )
         val rejected = generatedDailyFixture(date = completedIdentity.localDate).snapshot()
 
         assertEquals(
-            DailySessionReplacementResult.DateAlreadyCompleted(completedIdentity),
+            DailySessionReplacementResult.DateAlreadyCompleted(completion),
             fixture.repository.replaceSession(rejected)
         )
         assertEquals(previous, fixture.repository.state.first().activeSession)
         assertEquals(listOf(completedIdentity), fixture.repository.state.first().completedChallengeIds)
+    }
+
+    @Test
+    fun timing_start_is_identity_guarded_persisted_and_cannot_be_reset() = runBlocking {
+        val fixture = createRepository()
+        val snapshot = generatedDailyFixture().snapshot()
+        val firstStart = DailyTimingStartInstant(1_798_761_600_123)
+        val laterStart = DailyTimingStartInstant(1_798_761_605_987)
+        fixture.repository.replaceSession(snapshot)
+
+        assertEquals(
+            DailySessionTimingStartResult.StaleSession,
+            fixture.repository.startTiming(
+                expectedSessionId = DailySessionId("stale"),
+                startInstant = firstStart
+            )
+        )
+        assertEquals(
+            DailySessionTimingStartResult.Started(firstStart),
+            fixture.repository.startTiming(
+                expectedSessionId = snapshot.sessionId,
+                startInstant = firstStart
+            )
+        )
+        assertEquals(
+            DailySessionTimingStartResult.AlreadyStarted(firstStart),
+            fixture.repository.startTiming(
+                expectedSessionId = snapshot.sessionId,
+                startInstant = laterStart
+            )
+        )
+        assertEquals(
+            snapshot.copy(timingStartInstant = firstStart),
+            fixture.repository.state.first().activeSession
+        )
     }
 
     @Test
@@ -158,11 +198,11 @@ class DataStoreDailySessionRepositoryTest {
     fun clear_removes_only_the_owning_daily_session_and_preserves_completions() = runBlocking {
         val fixture = createRepository()
         val snapshot = generatedDailyFixture().snapshot()
-        val completion = dailyChallengeId(LocalDate.of(2027, 4, 17))
+        val completion = untimedCompletion(dailyChallengeId(LocalDate.of(2027, 4, 17)))
         fixture.storeAggregate(
             DailyAggregate(
                 activeSession = snapshot,
-                completedChallengeIds = listOf(completion)
+                completions = listOf(completion)
             )
         )
 
@@ -176,19 +216,19 @@ class DataStoreDailySessionRepositoryTest {
             fixture.repository.clearSession(snapshot.sessionId)
         )
         assertNull(fixture.repository.state.first().activeSession)
-        assertEquals(listOf(completion), fixture.repository.state.first().completedChallengeIds)
+        assertEquals(listOf(completion), fixture.repository.state.first().completions)
     }
 
     @Test
     fun exact_daily_state_survives_repository_and_data_store_recreation() = runBlocking {
         val dataStoreFile = createDataStoreFile()
         val snapshot = generatedDailyFixture().snapshot()
-        val completion = dailyChallengeId(LocalDate.of(2027, 4, 17))
+        val completion = untimedCompletion(dailyChallengeId(LocalDate.of(2027, 4, 17)))
         val firstFixture = createRepository(dataStoreFile)
         firstFixture.storeAggregate(
             DailyAggregate(
                 activeSession = snapshot,
-                completedChallengeIds = listOf(completion)
+                completions = listOf(completion)
             )
         )
         firstFixture.close()
@@ -198,7 +238,7 @@ class DataStoreDailySessionRepositoryTest {
         assertEquals(
             DailyState(
                 activeSession = snapshot,
-                completedChallengeIds = listOf(completion)
+                completions = listOf(completion)
             ),
             secondFixture.repository.state.first()
         )
@@ -210,9 +250,10 @@ class DataStoreDailySessionRepositoryTest {
         val generatedFixture = generatedDailyFixture()
         val snapshot = generatedFixture.snapshot()
         fixture.repository.replaceSession(snapshot)
+        val completion = untimedCompletion(snapshot.dailyChallengeId)
 
         assertEquals(
-            DailySessionCompletionResult.Completed,
+            DailySessionCompletionResult.Completed(completion),
             fixture.repository.complete(
                 expectedSessionId = snapshot.sessionId,
                 expectedDailyChallengeId = snapshot.dailyChallengeId,
@@ -222,10 +263,82 @@ class DataStoreDailySessionRepositoryTest {
         assertEquals(
             DailyState(
                 activeSession = null,
-                completedChallengeIds = listOf(snapshot.dailyChallengeId)
+                completions = listOf(completion)
             ),
             fixture.repository.state.first()
         )
+    }
+
+    @Test
+    fun timed_completion_atomically_records_the_exact_elapsed_time_and_is_idempotent() = runBlocking {
+        val fixture = createRepository()
+        val generatedFixture = generatedDailyFixture()
+        val startInstant = DailyTimingStartInstant(1_798_761_600_123)
+        val elapsedTime = DailyElapsedTime(91_234)
+        val snapshot = generatedFixture.snapshot(timingStartInstant = startInstant)
+        val completion = DailyCompletion(
+            identity = snapshot.dailyChallengeId,
+            elapsedTime = elapsedTime
+        )
+        fixture.repository.replaceSession(snapshot)
+
+        assertEquals(
+            DailySessionCompletionResult.Completed(completion),
+            fixture.repository.complete(
+                expectedSessionId = snapshot.sessionId,
+                expectedDailyChallengeId = snapshot.dailyChallengeId,
+                solvedPuzzle = generatedFixture.solvedProgressPuzzle(),
+                elapsedTime = elapsedTime
+            )
+        )
+        assertEquals(
+            DailyState(activeSession = null, completions = listOf(completion)),
+            fixture.repository.state.first()
+        )
+        assertEquals(
+            DailySessionCompletionResult.AlreadyCompleted(completion),
+            fixture.repository.complete(
+                expectedSessionId = snapshot.sessionId,
+                expectedDailyChallengeId = snapshot.dailyChallengeId,
+                solvedPuzzle = generatedFixture.solvedProgressPuzzle(),
+                elapsedTime = DailyElapsedTime(999_999)
+            )
+        )
+        assertEquals(listOf(completion), fixture.repository.state.first().completions)
+    }
+
+    @Test
+    fun completion_rejects_missing_or_unowned_timing_without_mutating_the_session() = runBlocking {
+        val fixture = createRepository()
+        val generatedFixture = generatedDailyFixture()
+        val startedSnapshot = generatedFixture.snapshot(
+            timingStartInstant = DailyTimingStartInstant(1_798_761_600_123)
+        )
+        fixture.repository.replaceSession(startedSnapshot)
+
+        assertEquals(
+            DailySessionCompletionResult.InvalidTiming,
+            fixture.repository.complete(
+                expectedSessionId = startedSnapshot.sessionId,
+                expectedDailyChallengeId = startedSnapshot.dailyChallengeId,
+                solvedPuzzle = generatedFixture.solvedProgressPuzzle()
+            )
+        )
+        assertEquals(startedSnapshot, fixture.repository.state.first().activeSession)
+
+        val untimedSnapshot = generatedFixture.snapshot(sessionId = "untimed")
+        fixture.repository.replaceSession(untimedSnapshot)
+        assertEquals(
+            DailySessionCompletionResult.InvalidTiming,
+            fixture.repository.complete(
+                expectedSessionId = untimedSnapshot.sessionId,
+                expectedDailyChallengeId = untimedSnapshot.dailyChallengeId,
+                solvedPuzzle = generatedFixture.solvedProgressPuzzle(),
+                elapsedTime = DailyElapsedTime(91_234)
+            )
+        )
+        assertEquals(untimedSnapshot, fixture.repository.state.first().activeSession)
+        assertTrue(fixture.repository.state.first().completions.isEmpty())
     }
 
     @Test
@@ -234,6 +347,7 @@ class DataStoreDailySessionRepositoryTest {
         val generatedFixture = generatedDailyFixture()
         val snapshot = generatedFixture.snapshot()
         val solvedPuzzle = generatedFixture.solvedProgressPuzzle()
+        val completion = untimedCompletion(snapshot.dailyChallengeId)
         fixture.repository.replaceSession(snapshot)
         fixture.repository.complete(
             expectedSessionId = snapshot.sessionId,
@@ -242,7 +356,7 @@ class DataStoreDailySessionRepositoryTest {
         )
 
         assertEquals(
-            DailySessionCompletionResult.AlreadyCompleted(snapshot.dailyChallengeId),
+            DailySessionCompletionResult.AlreadyCompleted(completion),
             fixture.repository.complete(
                 expectedSessionId = snapshot.sessionId,
                 expectedDailyChallengeId = snapshot.dailyChallengeId,
@@ -258,14 +372,16 @@ class DataStoreDailySessionRepositoryTest {
     @Test
     fun another_recipe_cannot_add_a_second_completion_for_the_same_date() = runBlocking {
         val fixture = createRepository()
-        val existingCompletion = dailyChallengeId(
-            date = LocalDate.of(2027, 4, 18),
-            recipeVersion = DailyRecipeVersion("retired-recipe")
+        val existingCompletion = untimedCompletion(
+            dailyChallengeId(
+                date = LocalDate.of(2027, 4, 18),
+                recipeVersion = DailyRecipeVersion("retired-recipe")
+            )
         )
         fixture.storeAggregate(
-            DailyAggregate(completedChallengeIds = listOf(existingCompletion))
+            DailyAggregate(completions = listOf(existingCompletion))
         )
-        val currentFixture = generatedDailyFixture(date = existingCompletion.localDate)
+        val currentFixture = generatedDailyFixture(date = existingCompletion.identity.localDate)
 
         assertEquals(
             DailySessionCompletionResult.AlreadyCompleted(existingCompletion),
@@ -277,7 +393,7 @@ class DataStoreDailySessionRepositoryTest {
         )
         assertEquals(
             listOf(existingCompletion),
-            fixture.repository.state.first().completedChallengeIds
+            fixture.repository.state.first().completions
         )
     }
 
@@ -365,7 +481,7 @@ class DataStoreDailySessionRepositoryTest {
         assertEquals(
             DailyState(
                 activeSession = null,
-                completedChallengeIds = listOf(snapshot.dailyChallengeId)
+                completions = listOf(untimedCompletion(snapshot.dailyChallengeId))
             ),
             secondFixture.repository.state.first()
         )
@@ -380,7 +496,7 @@ class DataStoreDailySessionRepositoryTest {
         }
 
         assertEquals(
-            DailyState(activeSession = null, completedChallengeIds = emptyList()),
+            DailyState(activeSession = null, completions = emptyList()),
             fixture.repository.state.first()
         )
 
@@ -462,7 +578,7 @@ class DataStoreDailySessionRepositoryTest {
 
         assertSame(expectedFailure, actualFailure)
         assertEquals(
-            DailyState(activeSession = activeSession, completedChallengeIds = emptyList()),
+            DailyState(activeSession = activeSession, completions = emptyList()),
             runBlocking { repository.state.first() }
         )
     }
@@ -537,3 +653,8 @@ class DataStoreDailySessionRepositoryTest {
         }
     }
 }
+
+private fun untimedCompletion(identity: DailyChallengeId): DailyCompletion = DailyCompletion(
+    identity = identity,
+    elapsedTime = null
+)

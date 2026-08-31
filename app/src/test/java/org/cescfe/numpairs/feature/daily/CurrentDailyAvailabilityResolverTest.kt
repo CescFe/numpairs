@@ -10,10 +10,14 @@ import org.cescfe.numpairs.data.daily.session.DailySessionProgressUpdateResult
 import org.cescfe.numpairs.data.daily.session.DailySessionReplacementResult
 import org.cescfe.numpairs.data.daily.session.DailySessionRepository
 import org.cescfe.numpairs.data.daily.session.DailySessionSnapshot
+import org.cescfe.numpairs.data.daily.session.DailySessionTimingStartResult
 import org.cescfe.numpairs.data.daily.session.DailyState
+import org.cescfe.numpairs.data.daily.session.dailyCompletion
 import org.cescfe.numpairs.data.daily.session.generatedDailyFixture
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
+import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
+import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.junit.Assert.assertEquals
@@ -33,14 +37,14 @@ class CurrentDailyAvailabilityResolverTest {
         val repository = FakeDailySessionRepository(
             initialState = DailyState(
                 activeSession = snapshot,
-                completedChallengeIds = listOf(olderRecipeCompletion)
+                completions = listOf(dailyCompletion(olderRecipeCompletion))
             )
         )
 
         val availability = resolver(date = date, repository = repository).resolve()
             as CurrentDailyAvailability.CompletedToday
 
-        assertEquals(olderRecipeCompletion, availability.completion)
+        assertEquals(dailyCompletion(olderRecipeCompletion), availability.completion)
         assertEquals(date, availability.currentDailyChallenge.identity.localDate)
         assertEquals(0, repository.mutationCount)
     }
@@ -53,7 +57,7 @@ class CurrentDailyAvailabilityResolverTest {
         val repository = FakeDailySessionRepository(
             initialState = DailyState(
                 activeSession = snapshot,
-                completedChallengeIds = emptyList()
+                completions = emptyList()
             )
         )
 
@@ -72,7 +76,7 @@ class CurrentDailyAvailabilityResolverTest {
         val repository = FakeDailySessionRepository(
             initialState = DailyState(
                 activeSession = staleSnapshot,
-                completedChallengeIds = emptyList()
+                completions = emptyList()
             )
         )
 
@@ -95,7 +99,7 @@ class CurrentDailyAvailabilityResolverTest {
         val repository = FakeDailySessionRepository(
             initialState = DailyState(
                 activeSession = retainedSnapshot,
-                completedChallengeIds = emptyList()
+                completions = emptyList()
             )
         )
         val resolver = CurrentDailyAvailabilityResolver(
@@ -119,7 +123,7 @@ class CurrentDailyAvailabilityResolverTest {
         val repository = FakeDailySessionRepository(
             initialState = DailyState(
                 activeSession = null,
-                completedChallengeIds = emptyList()
+                completions = emptyList()
             )
         )
         val currentResolver = CurrentDailyChallengeResolver(
@@ -136,7 +140,7 @@ class CurrentDailyAvailabilityResolverTest {
             currentDailyChallenge = capturedChallenge,
             dailyState = DailyState(
                 activeSession = null,
-                completedChallengeIds = listOf(capturedChallenge.identity)
+                completions = listOf(dailyCompletion(capturedChallenge.identity))
             )
         )
 
@@ -181,6 +185,14 @@ private class FakeDailySessionRepository(initialState: DailyState) : DailySessio
         return DailySessionProgressUpdateResult.StaleSession
     }
 
+    override suspend fun startTiming(
+        expectedSessionId: DailySessionId,
+        startInstant: DailyTimingStartInstant
+    ): DailySessionTimingStartResult {
+        mutationCount += 1
+        return DailySessionTimingStartResult.StaleSession
+    }
+
     override suspend fun clearSession(expectedSessionId: DailySessionId): DailySessionClearResult {
         mutationCount += 1
         return DailySessionClearResult.StaleSession
@@ -189,7 +201,8 @@ private class FakeDailySessionRepository(initialState: DailyState) : DailySessio
     override suspend fun complete(
         expectedSessionId: DailySessionId,
         expectedDailyChallengeId: DailyChallengeId,
-        solvedPuzzle: Puzzle
+        solvedPuzzle: Puzzle,
+        elapsedTime: DailyElapsedTime?
     ): DailySessionCompletionResult {
         mutationCount += 1
         return DailySessionCompletionResult.StaleSession

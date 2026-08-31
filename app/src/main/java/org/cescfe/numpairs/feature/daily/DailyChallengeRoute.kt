@@ -161,7 +161,7 @@ fun DailyChallengeRoute(
         }
 
         is DailyPuzzleUiState.CompletedToday -> {
-            if (DailyRecipes.catalog.resolveOrNull(state.completion.recipeVersion) == null) {
+            if (DailyRecipes.catalog.resolveOrNull(state.completion.identity.recipeVersion) == null) {
                 DailyFailureScreen(
                     modifier = modifier,
                     message = stringResource(R.string.daily_completion_unavailable_message),
@@ -169,11 +169,11 @@ fun DailyChallengeRoute(
                     onNavigateBack = onNavigateBack
                 )
             } else {
-                val presentation = rememberDailyChallengeTitle(state.completion)
+                val presentation = rememberDailyChallengeTitle(state.completion.identity)
                 DailyCompletionScreen(
                     presentation = presentation,
                     onShareResult = {
-                        shareResult(state.completion)
+                        shareResult(state.completion.identity)
                     },
                     onViewCalendar = {
                         isCalendarVisible = true
@@ -221,7 +221,7 @@ fun DailyCompletedTodayRoute(
             onNavigateBack = onNavigateBack
         )
 
-        identity in requireNotNull(dailyState).completedChallengeIds &&
+        requireNotNull(dailyState).completions.any { completion -> completion.identity == identity } &&
             DailyRecipes.catalog.resolveOrNull(identity.recipeVersion) != null -> {
             val presentation = rememberDailyChallengeTitle(identity)
             DailyCompletionScreen(
@@ -476,12 +476,13 @@ private fun DailyPuzzlePreparationFailure.messageResource(): Int = when (this) {
 private fun DailyPuzzlePersistenceFailure.messageResource(): Int = when (this) {
     DailyPuzzlePersistenceFailure.StaleSession -> R.string.daily_stale_session_message
     DailyPuzzlePersistenceFailure.InvalidPuzzle -> R.string.daily_invalid_progress_message
+    DailyPuzzlePersistenceFailure.InvalidTiming -> R.string.daily_invalid_progress_message
     DailyPuzzlePersistenceFailure.Persistence -> R.string.daily_storage_failure_message
 }
 
 private fun DailyPuzzleUiState.Completed.completedIdentity(): DailyChallengeId = when (val result = completion) {
-    DailyPuzzleCompletion.Completed -> session.currentDailyChallenge.identity
-    is DailyPuzzleCompletion.AlreadyCompleted -> result.completion
+    is DailyPuzzleCompletion.Completed -> result.completion.identity
+    is DailyPuzzleCompletion.AlreadyCompleted -> result.completion.identity
 }
 
 private fun DailyChallengeId.canonicalKey(): String = "$canonicalLocalDate:${recipeVersion.value}"

@@ -14,6 +14,7 @@ v10 adds one Daily Challenge for each device-local calendar date. The first dail
 - deterministic seed selection shared by every installation on the same recipe version
 - exact progress restoration after process death
 - one local completion per date
+- durable no-pause elapsed timing from first presentation to solution
 - a completion calendar
 - coexistence with an unfinished normal generated session
 - explicit behavior when the local date, recipe, or generator changes
@@ -122,8 +123,9 @@ The Daily aggregate is separate from:
 - personalization and settings
 
 One aggregate and one DataStore edit own the transition from an active solved puzzle to a
-completion record with no resumable Daily Session. A second completion for the same local calendar
-date is rejected even if a different recipe version is later resolved for that date.
+completion record, including its captured elapsed time when timing started, with no resumable Daily
+Session. A second completion for the same local calendar date is rejected even if a different
+recipe version is later resolved for that date.
 
 ### Daily Session Snapshot
 
@@ -134,6 +136,7 @@ The snapshot stores:
 - the successful candidate index and derived seed
 - exact initial `Puzzle`
 - exact current `Puzzle`
+- an optional timing start instant stored as Unix epoch milliseconds
 
 The recipe version resolves the exact generated challenge. Mode, difficulty, profile parameters,
 and display strings are therefore not persisted redundantly in the Daily snapshot.
@@ -142,14 +145,36 @@ Restoration resolves the stored recipe version, verifies its challenge against t
 and snapshot metadata, and reads the exact current puzzle. It never regenerates historical
 progress from the seed.
 
+### Elapsed Timing
+
+Daily elapsed time uses non-negative millisecond precision. An active session starts without a
+timing anchor because generation and persistence occur before the puzzle is presented. An
+identity-guarded repository transition records one UTC timing start instant when the playable
+puzzle is first presented. A repeated start request returns the original instant and cannot reset
+the timer.
+
+Timing does not pause for navigation, backgrounding, device locking, configuration change, or
+process recreation. The first transition to a solved current puzzle captures the elapsed duration
+before completion persistence and presentation work. Completion requires an elapsed duration if
+the active session has a timing start and rejects a duration if the active session has no timing
+start. Retrying completion reuses the originally captured duration.
+
+The timing start uses the trusted device clock so an unfinished timer can be reconstructed after
+process death or device restart. Runtime presentation may use a monotonic clock between persisted
+anchors. Manual device-clock changes can affect reconstructed elapsed time; the local-only product
+does not claim anti-cheat guarantees.
+
 ### Completion History
 
 A Daily Completion record stores:
 
 - canonical Daily Challenge identity
+- authoritative elapsed time in milliseconds for a newly timed completion
 
-The identity supplies the completed local date and recipe version. Completion does not store a
-score, elapsed time, action count, streak, reward, display label, or full puzzle.
+The identity supplies the completed local date and recipe version. A completion migrated from the
+version-1 aggregate explicitly has no elapsed time, and presentation or sharing must not fabricate
+one. Completion does not store an exact completion instant, score, action count, streak, reward,
+display label, or full puzzle.
 
 Completion is recorded only by an identity-guarded atomic repository transition that receives a
 solved current puzzle consistent with the active snapshot. Repeating the transition cannot create
@@ -157,6 +182,14 @@ another record.
 
 Calendar presentation may preserve and display the completed date of a record whose recipe version
 is no longer active. An active snapshot whose recipe version cannot be resolved is not resumable.
+
+### Aggregate Schema Migration
+
+Daily timing changes the aggregate schema from version 1 to version 2. The version-2 codec reads the
+version-1 binary layout explicitly, preserves an exact active session and every completion
+identity, and maps them into the current aggregate. A migrated session has no timing start and a
+migrated completion has no elapsed time. Unsupported future versions and invalid payloads retain
+the existing safe-recovery behavior; version 1 is not treated as unsupported or empty.
 
 ### Replacement And Rollover
 
@@ -191,6 +224,8 @@ history. Account sync and cross-device transfer remain unsupported.
 - Daily cadence does not distort generated mode, difficulty, or profile ownership.
 - Normal and Daily progress can be resumable simultaneously.
 - Solved state, completion recording, and removal from Daily Resume are atomic.
+- A timing start cannot be reset, and a completion preserves the exact captured millisecond
+  duration across recreation and later sharing.
 - A recipe version gives date-derived content a stable compatibility boundary.
 - The generator remains reusable and unaware of clocks or presentation.
 - Exact snapshots protect progress from future generator changes.
@@ -202,6 +237,8 @@ history. Account sync and cross-device transfer remain unsupported.
 - A versioned aggregate and codec must preserve both optional session state and growing completion
   history.
 - Old recipe resolvers must remain available while their active snapshots may still be restored.
+- Trusted local-clock changes can alter reconstructed elapsed time and cannot establish competitive
+  integrity.
 - Date rollover, clock changes, stale callbacks, recipe mismatches, and partial corruption require
   explicit test coverage.
 - Local-only history can be reset or manipulated and cannot prove fair participation.

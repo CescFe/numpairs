@@ -30,7 +30,7 @@ fun DailyCalendarRoute(
     val dailyState by dailySessionRepository.state.collectAsState(
         initial = DailyState(
             activeSession = null,
-            completedChallengeIds = emptyList()
+            completions = emptyList()
         )
     )
     val configuration = LocalConfiguration.current
@@ -40,13 +40,13 @@ fun DailyCalendarRoute(
     val calendarMonth = remember(
         capturedCurrentDate,
         displayedMonth,
-        dailyState.completedChallengeIds,
+        dailyState.completions,
         locale
     ) {
         DailyCalendarMonth.create(
             capturedCurrentDate = capturedCurrentDate,
             displayedMonth = displayedMonth,
-            completedChallengeIds = dailyState.completedChallengeIds,
+            completions = dailyState.completions,
             locale = locale
         )
     }

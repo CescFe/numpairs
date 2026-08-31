@@ -5,7 +5,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.temporal.WeekFields
 import java.util.Locale
-import org.cescfe.numpairs.domain.daily.DailyChallengeId
+import org.cescfe.numpairs.domain.daily.DailyCompletion
 
 data class DailyCalendarDate(
     val date: LocalDate,
@@ -61,15 +61,15 @@ data class DailyCalendarMonth(
         fun create(
             capturedCurrentDate: LocalDate,
             displayedMonth: YearMonth = YearMonth.from(capturedCurrentDate),
-            completedChallengeIds: Collection<DailyChallengeId> = emptyList(),
+            completions: Collection<DailyCompletion> = emptyList(),
             locale: Locale = Locale.getDefault()
         ): DailyCalendarMonth {
             require(displayedMonth <= YearMonth.from(capturedCurrentDate)) {
                 "Daily calendar cannot display a future month."
             }
             require(
-                completedChallengeIds.map(DailyChallengeId::localDate).distinct().size ==
-                    completedChallengeIds.size
+                completions.map { completion -> completion.identity.localDate }.distinct().size ==
+                    completions.size
             ) {
                 "Daily calendar history can contain at most one completion per local date."
             }
@@ -80,7 +80,7 @@ data class DailyCalendarMonth(
                     firstDayOfWeek.value +
                     DAYS_PER_WEEK
                 ) % DAYS_PER_WEEK
-            val completedDates = completedChallengeIds.map(DailyChallengeId::localDate).toSet()
+            val completedDates = completions.map { completion -> completion.identity.localDate }.toSet()
             val inMonthPositions = (1..displayedMonth.lengthOfMonth()).map { day ->
                 val date = displayedMonth.atDay(day)
                 DailyCalendarPosition.InMonth(

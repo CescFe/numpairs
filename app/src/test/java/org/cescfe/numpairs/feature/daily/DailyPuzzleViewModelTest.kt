@@ -16,11 +16,16 @@ import org.cescfe.numpairs.data.daily.session.DailySessionProgressUpdateResult
 import org.cescfe.numpairs.data.daily.session.DailySessionReplacementResult
 import org.cescfe.numpairs.data.daily.session.DailySessionRepository
 import org.cescfe.numpairs.data.daily.session.DailySessionSnapshot
+import org.cescfe.numpairs.data.daily.session.DailySessionTimingStartResult
 import org.cescfe.numpairs.data.daily.session.DailyState
 import org.cescfe.numpairs.data.daily.session.GeneratedDailyFixture
+import org.cescfe.numpairs.data.daily.session.dailyCompletion
 import org.cescfe.numpairs.data.daily.session.generatedDailyFixture
 import org.cescfe.numpairs.data.daily.session.requireValidSolvedPuzzle
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
+import org.cescfe.numpairs.domain.daily.DailyCompletion
+import org.cescfe.numpairs.domain.daily.DailyElapsedTime
+import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationFailureReason
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
@@ -77,11 +82,11 @@ class DailyPuzzleViewModelTest {
     @Test
     fun same_date_completion_is_published_without_generation_or_writes() {
         val date = LocalDate.of(2027, 4, 18)
-        val completion = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(date)
+        val completion = dailyCompletion(DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(date))
         val repository = RecordingDailySessionRepository(
             initialState = DailyState(
                 activeSession = null,
-                completedChallengeIds = listOf(completion)
+                completions = listOf(completion)
             )
         )
         val generator = RecordingDailyPuzzleGenerator()
@@ -105,7 +110,7 @@ class DailyPuzzleViewModelTest {
         val fixture = generatedDailyFixture()
         val writeGate = CompletableDeferred<Unit>()
         val repository = RecordingDailySessionRepository(
-            initialState = DailyState(activeSession = null, completedChallengeIds = emptyList()),
+            initialState = DailyState(activeSession = null, completions = emptyList()),
             nextReplaceGate = writeGate
         )
         val generator = RecordingDailyPuzzleGenerator(
@@ -418,7 +423,10 @@ class DailyPuzzleViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
 
         val completed = viewModel.uiState.value as DailyPuzzleUiState.Completed
-        assertEquals(DailyPuzzleCompletion.Completed, completed.completion)
+        assertEquals(
+            DailyPuzzleCompletion.Completed(dailyCompletion(fixture.identity)),
+            completed.completion
+        )
         assertEquals(solved, completed.session.currentPuzzle)
         assertEquals(fixture.identity, repository.currentState.completedChallengeIds.single())
         assertSame(null, repository.currentState.activeSession)
@@ -432,7 +440,7 @@ class DailyPuzzleViewModelTest {
         val repository = RecordingDailySessionRepository(
             initialState = DailyState(fixture.snapshot(), emptyList()),
             completionResults = ArrayDeque(
-                listOf(DailySessionCompletionResult.AlreadyCompleted(fixture.identity))
+                listOf(DailySessionCompletionResult.AlreadyCompleted(dailyCompletion(fixture.identity)))
             )
         )
         val viewModel = viewModel(
@@ -449,7 +457,7 @@ class DailyPuzzleViewModelTest {
 
         val completed = viewModel.uiState.value as DailyPuzzleUiState.Completed
         assertEquals(
-            DailyPuzzleCompletion.AlreadyCompleted(fixture.identity),
+            DailyPuzzleCompletion.AlreadyCompleted(dailyCompletion(fixture.identity)),
             completed.completion
         )
         assertTrue(completed.session.currentPuzzle.isSolved)
@@ -799,8 +807,8 @@ private class RecordingDailySessionRepository(
         if (replaceFailures.isNotEmpty()) {
             throw replaceFailures.removeFirst()
         }
-        val completion = mutableState.value.completedChallengeIds.singleOrNull { completedIdentity ->
-            completedIdentity.localDate == snapshot.dailyChallengeId.localDate
+        val completion = mutableState.value.completions.singleOrNull { completed ->
+            completed.identity.localDate == snapshot.dailyChallengeId.localDate
         }
         if (completion != null) {
             return DailySessionReplacementResult.DateAlreadyCompleted(completion)
@@ -839,18 +847,38 @@ private class RecordingDailySessionRepository(
         return DailySessionProgressUpdateResult.Updated
     }
 
+    override suspend fun startTiming(
+        expectedSessionId: DailySessionId,
+        startInstant: DailyTimingStartInstant
+    ): DailySessionTimingStartResult {
+        val activeSession = mutableState.value.activeSession
+        if (activeSession?.sessionId != expectedSessionId) {
+            return DailySessionTimingStartResult.StaleSession
+        }
+        val existingStart = activeSession.timingStartInstant
+        if (existingStart != null) {
+            return DailySessionTimingStartResult.AlreadyStarted(existingStart)
+        }
+        mutableState.value = mutableState.value.copy(
+            activeSession = activeSession.copy(timingStartInstant = startInstant)
+        )
+        return DailySessionTimingStartResult.Started(startInstant)
+    }
+
     override suspend fun clearSession(expectedSessionId: DailySessionId): DailySessionClearResult =
         DailySessionClearResult.StaleSession
 
     override suspend fun complete(
         expectedSessionId: DailySessionId,
         expectedDailyChallengeId: DailyChallengeId,
-        solvedPuzzle: Puzzle
+        solvedPuzzle: Puzzle,
+        elapsedTime: DailyElapsedTime?
     ): DailySessionCompletionResult {
         completionAttempts += CompletionAttempt(
             sessionId = expectedSessionId,
             identity = expectedDailyChallengeId,
-            solvedPuzzle = solvedPuzzle
+            solvedPuzzle = solvedPuzzle,
+            elapsedTime = elapsedTime
         )
         if (completionFailures.isNotEmpty()) {
             throw completionFailures.removeFirst()
@@ -858,8 +886,8 @@ private class RecordingDailySessionRepository(
         if (completionResults.isNotEmpty()) {
             return completionResults.removeFirst()
         }
-        val completion = mutableState.value.completedChallengeIds.singleOrNull { identity ->
-            identity.localDate == expectedDailyChallengeId.localDate
+        val completion = mutableState.value.completions.singleOrNull { completed ->
+            completed.identity.localDate == expectedDailyChallengeId.localDate
         }
         if (completion != null) {
             return DailySessionCompletionResult.AlreadyCompleted(completion)
@@ -878,11 +906,18 @@ private class RecordingDailySessionRepository(
         } catch (_: IllegalStateException) {
             return DailySessionCompletionResult.InvalidPuzzle
         }
+        if ((activeSession.timingStartInstant == null) != (elapsedTime == null)) {
+            return DailySessionCompletionResult.InvalidTiming
+        }
+        val completed = DailyCompletion(
+            identity = expectedDailyChallengeId,
+            elapsedTime = elapsedTime
+        )
         mutableState.value = DailyState(
             activeSession = null,
-            completedChallengeIds = mutableState.value.completedChallengeIds + expectedDailyChallengeId
+            completions = mutableState.value.completions + completed
         )
-        return DailySessionCompletionResult.Completed
+        return DailySessionCompletionResult.Completed(completed)
     }
 }
 
@@ -891,5 +926,6 @@ private data class ProgressAttempt(val sessionId: DailySessionId, val puzzle: Pu
 private data class CompletionAttempt(
     val sessionId: DailySessionId,
     val identity: DailyChallengeId,
-    val solvedPuzzle: Puzzle
+    val solvedPuzzle: Puzzle,
+    val elapsedTime: DailyElapsedTime?
 )

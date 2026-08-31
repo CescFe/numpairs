@@ -5,6 +5,7 @@ import org.cescfe.numpairs.data.daily.session.DailySessionRepository
 import org.cescfe.numpairs.data.daily.session.DailySessionSnapshot
 import org.cescfe.numpairs.data.daily.session.DailyState
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
+import org.cescfe.numpairs.domain.daily.DailyCompletion
 
 sealed interface CurrentDailyAvailability {
     val currentDailyChallenge: CurrentDailyChallenge
@@ -27,10 +28,10 @@ sealed interface CurrentDailyAvailability {
 
     data class CompletedToday(
         override val currentDailyChallenge: CurrentDailyChallenge,
-        val completion: DailyChallengeId
+        val completion: DailyCompletion
     ) : CurrentDailyAvailability {
         init {
-            require(completion.localDate == currentDailyChallenge.identity.localDate) {
+            require(completion.identity.localDate == currentDailyChallenge.identity.localDate) {
                 "A current Daily completion must own the captured local date."
             }
         }
@@ -51,8 +52,8 @@ class CurrentDailyAvailabilityResolver(
     }
 
     fun resolve(currentDailyChallenge: CurrentDailyChallenge, dailyState: DailyState): CurrentDailyAvailability {
-        val completion = dailyState.completedChallengeIds.singleOrNull { completedIdentity ->
-            completedIdentity.localDate == currentDailyChallenge.identity.localDate
+        val completion = dailyState.completions.singleOrNull { completed ->
+            completed.identity.localDate == currentDailyChallenge.identity.localDate
         }
         if (completion != null) {
             return CurrentDailyAvailability.CompletedToday(

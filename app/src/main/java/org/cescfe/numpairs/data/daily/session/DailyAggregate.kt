@@ -2,14 +2,17 @@ package org.cescfe.numpairs.data.daily.session
 
 import org.cescfe.numpairs.domain.daily.DailyCandidateIndex
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
+import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyRecipeContract
 import org.cescfe.numpairs.domain.daily.DailyRecipeContracts
+import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.puzzle.model.Expression
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 
-const val DAILY_AGGREGATE_SCHEMA_VERSION: Int = 1
+const val DAILY_AGGREGATE_SCHEMA_VERSION: Int = 2
+internal const val LEGACY_DAILY_AGGREGATE_SCHEMA_VERSION: Int = 1
 internal const val MAX_DAILY_COMPLETION_COUNT: Int = 10_000
 
 @JvmInline
@@ -27,7 +30,8 @@ data class DailySessionSnapshot(
     val candidateIndex: DailyCandidateIndex,
     val seed: Int,
     val initialPuzzle: Puzzle,
-    val currentPuzzle: Puzzle
+    val currentPuzzle: Puzzle,
+    val timingStartInstant: DailyTimingStartInstant? = null
 ) {
     val recipeContract: DailyRecipeContract = requireNotNull(
         DailyRecipeContracts.catalog.resolveOrNull(dailyChallengeId.recipeVersion)
@@ -80,25 +84,31 @@ internal fun DailySessionSnapshot.requireValidSolvedPuzzle(solvedPuzzle: Puzzle)
 data class DailyAggregate(
     val schemaVersion: Int = DAILY_AGGREGATE_SCHEMA_VERSION,
     val activeSession: DailySessionSnapshot? = null,
-    val completedChallengeIds: List<DailyChallengeId> = emptyList()
+    val completions: List<DailyCompletion> = emptyList()
 ) {
+    val completedChallengeIds: List<DailyChallengeId>
+        get() = completions.map(DailyCompletion::identity)
+
     init {
         require(schemaVersion == DAILY_AGGREGATE_SCHEMA_VERSION) {
             "Daily aggregate schema version is unsupported."
         }
-        require(completedChallengeIds.size <= MAX_DAILY_COMPLETION_COUNT) {
+        require(completions.size <= MAX_DAILY_COMPLETION_COUNT) {
             "Daily aggregate completion count exceeds the supported bound."
         }
-        require(completedChallengeIds == completedChallengeIds.sortedWith(DAILY_CHALLENGE_ID_COMPARATOR)) {
+        require(completions == completions.sortedWith(DAILY_COMPLETION_COMPARATOR)) {
             "Daily aggregate completions must use canonical date and recipe order."
         }
-        require(completedChallengeIds.distinct().size == completedChallengeIds.size) {
+        require(completions.map(DailyCompletion::identity).distinct().size == completions.size) {
             "Daily aggregate completion identities must be unique."
         }
-        require(completedChallengeIds.map(DailyChallengeId::localDate).distinct().size == completedChallengeIds.size) {
+        require(completions.map { completion -> completion.identity.localDate }.distinct().size == completions.size) {
             "Daily aggregate can contain at most one completion per local date."
         }
-        require(activeSession?.dailyChallengeId?.localDate !in completedChallengeIds.map(DailyChallengeId::localDate)) {
+        require(
+            activeSession?.dailyChallengeId?.localDate !in
+                completions.map { completion -> completion.identity.localDate }
+        ) {
             "Daily aggregate cannot keep an active session for a completed local date."
         }
     }
@@ -106,6 +116,9 @@ data class DailyAggregate(
 
 internal val DAILY_CHALLENGE_ID_COMPARATOR: Comparator<DailyChallengeId> =
     compareBy(DailyChallengeId::localDate, { identity -> identity.recipeVersion.value })
+
+internal val DAILY_COMPLETION_COMPARATOR: Comparator<DailyCompletion> =
+    compareBy(DAILY_CHALLENGE_ID_COMPARATOR, DailyCompletion::identity)
 
 private fun requirePuzzleMatchesRecipe(puzzle: Puzzle, recipeContract: DailyRecipeContract) {
     require(puzzle.board.tiles.size == recipeContract.profile.size.boardTileCount) {

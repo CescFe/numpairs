@@ -2,14 +2,28 @@ package org.cescfe.numpairs.data.daily.session
 
 import kotlinx.coroutines.flow.Flow
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
+import org.cescfe.numpairs.domain.daily.DailyCompletion
+import org.cescfe.numpairs.domain.daily.DailyElapsedTime
+import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
-data class DailyState(val activeSession: DailySessionSnapshot?, val completedChallengeIds: List<DailyChallengeId>)
+data class DailyState(val activeSession: DailySessionSnapshot?, val completions: List<DailyCompletion>) {
+    val completedChallengeIds: List<DailyChallengeId>
+        get() = completions.map(DailyCompletion::identity)
+}
 
 sealed interface DailySessionReplacementResult {
     data object Replaced : DailySessionReplacementResult
 
-    data class DateAlreadyCompleted(val completion: DailyChallengeId) : DailySessionReplacementResult
+    data class DateAlreadyCompleted(val completion: DailyCompletion) : DailySessionReplacementResult
+}
+
+sealed interface DailySessionTimingStartResult {
+    data class Started(val startInstant: DailyTimingStartInstant) : DailySessionTimingStartResult
+
+    data class AlreadyStarted(val startInstant: DailyTimingStartInstant) : DailySessionTimingStartResult
+
+    data object StaleSession : DailySessionTimingStartResult
 }
 
 sealed interface DailySessionProgressUpdateResult {
@@ -27,19 +41,26 @@ sealed interface DailySessionClearResult {
 }
 
 sealed interface DailySessionCompletionResult {
-    data object Completed : DailySessionCompletionResult
+    data class Completed(val completion: DailyCompletion) : DailySessionCompletionResult
 
-    data class AlreadyCompleted(val completion: DailyChallengeId) : DailySessionCompletionResult
+    data class AlreadyCompleted(val completion: DailyCompletion) : DailySessionCompletionResult
 
     data object StaleSession : DailySessionCompletionResult
 
     data object InvalidPuzzle : DailySessionCompletionResult
+
+    data object InvalidTiming : DailySessionCompletionResult
 }
 
 interface DailySessionRepository {
     val state: Flow<DailyState>
 
     suspend fun replaceSession(snapshot: DailySessionSnapshot): DailySessionReplacementResult
+
+    suspend fun startTiming(
+        expectedSessionId: DailySessionId,
+        startInstant: DailyTimingStartInstant
+    ): DailySessionTimingStartResult
 
     suspend fun updateCurrentPuzzle(expectedSessionId: DailySessionId, puzzle: Puzzle): DailySessionProgressUpdateResult
 
@@ -48,6 +69,7 @@ interface DailySessionRepository {
     suspend fun complete(
         expectedSessionId: DailySessionId,
         expectedDailyChallengeId: DailyChallengeId,
-        solvedPuzzle: Puzzle
+        solvedPuzzle: Puzzle,
+        elapsedTime: DailyElapsedTime? = null
     ): DailySessionCompletionResult
 }

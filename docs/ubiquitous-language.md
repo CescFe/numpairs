@@ -121,7 +121,9 @@ The playable lifecycle for one Daily Challenge identity.
 
 NumPairs owns at most one Daily Session slot, separate from the normal generated-session slot. A
 Daily Session carries a stable session identity, recipe and date identity, successful candidate
-metadata, exact initial puzzle, and exact current puzzle.
+metadata, exact initial puzzle, exact current puzzle, and an optional Daily Timing Start Instant.
+The timing start is absent before the puzzle is first presented and on a session migrated from
+storage that predates Daily timing.
 
 ## Resumable Daily Session
 The Daily Session currently stored in the Daily aggregate when its identity matches the current
@@ -136,13 +138,32 @@ The versioned local representation of one Daily Session.
 
 The snapshot preserves stable Daily Session, Daily Challenge, candidate, board, tile, expression,
 strip-entry, and strip-item identity needed to restore exact progress. Seed and candidate index are
-metadata verified against the recipe; restoration never regenerates from them.
+metadata verified against the recipe; restoration never regenerates from them. Once timing has
+started, the snapshot also preserves its one immutable Daily Timing Start Instant.
+
+## Daily Timing Start Instant
+The device-clock UTC instant, stored with millisecond precision, that anchors elapsed timing for one
+Daily Session.
+
+The start is recorded at most once when the playable puzzle is first presented. It is not reset or
+paused by navigation, backgrounding, device locking, configuration change, or process recreation.
+
+## Daily Elapsed Time
+The non-negative millisecond duration captured from a Daily Timing Start Instant until the current
+puzzle first becomes solved.
+
+Millisecond precision is authoritative for persistence and future comparison. Player-facing
+formatting may show coarser precision. Elapsed timing excludes Daily resolution, generation, and
+loading before the puzzle is presented, and excludes persistence or presentation work after the
+puzzle becomes solved.
 
 ## Daily Completion
 The local fact that the puzzle for one Daily Challenge identity became solved.
 
-A completion owns its canonical date and recipe version. It contains no score, time, streak,
-reward, display text, or puzzle.
+A completion owns its canonical date and recipe version. A newly timed completion also owns its
+authoritative Daily Elapsed Time. A completion migrated from storage that predates Daily timing has
+no elapsed time; consumers must not fabricate one. A completion contains no score, streak, reward,
+display text, exact completion instant, or puzzle.
 
 ## Daily Completion History
 The local collection of Daily Completion records displayed by the calendar.
