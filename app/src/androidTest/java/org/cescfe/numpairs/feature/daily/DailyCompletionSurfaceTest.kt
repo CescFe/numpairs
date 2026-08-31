@@ -37,6 +37,7 @@ import org.cescfe.numpairs.data.daily.session.DailySessionProgressUpdateResult
 import org.cescfe.numpairs.data.daily.session.DailySessionReplacementResult
 import org.cescfe.numpairs.data.daily.session.DailySessionRepository
 import org.cescfe.numpairs.data.daily.session.DailySessionSnapshot
+import org.cescfe.numpairs.data.daily.session.DailySessionTimingStartResult
 import org.cescfe.numpairs.data.daily.session.DailyState
 import org.cescfe.numpairs.data.generated.selection.FakeGeneratedDifficultySelectionRepository
 import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
@@ -46,6 +47,9 @@ import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryReposito
 import org.cescfe.numpairs.data.preferences.PersonalizationPreferences
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
+import org.cescfe.numpairs.domain.daily.DailyCompletion
+import org.cescfe.numpairs.domain.daily.DailyElapsedTime
+import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.daily.calendar.DailyCalendarScreenTestTags
@@ -77,7 +81,7 @@ class DailyCompletionSurfaceTest {
         val repository = RecordingDailyRepository(
             DailyState(
                 activeSession = null,
-                completedChallengeIds = listOf(identity)
+                completions = listOf(completion(identity))
             )
         )
         var sharedText: String? = null
@@ -136,7 +140,7 @@ class DailyCompletionSurfaceTest {
         val repository = RecordingDailyRepository(
             DailyState(
                 activeSession = null,
-                completedChallengeIds = listOf(identity)
+                completions = listOf(completion(identity))
             )
         )
 
@@ -167,7 +171,7 @@ class DailyCompletionSurfaceTest {
         val repository = RecordingDailyRepository(
             DailyState(
                 activeSession = null,
-                completedChallengeIds = emptyList()
+                completions = emptyList()
             )
         )
 
@@ -210,7 +214,7 @@ class DailyCompletionSurfaceTest {
         val repository = RecordingDailyRepository(
             DailyState(
                 activeSession = generatedSnapshot(identity),
-                completedChallengeIds = emptyList()
+                completions = emptyList()
             )
         )
         val preferencesRepository = FakePersonalizationPreferencesRepository(
@@ -277,7 +281,7 @@ class DailyCompletionSurfaceTest {
         val repository = RecordingDailyRepository(
             DailyState(
                 activeSession = null,
-                completedChallengeIds = listOf(identity)
+                completions = listOf(completion(identity))
             )
         )
         val generationFactory = ConfiguredGeneratedPuzzleGenerationUseCaseFactory(
@@ -541,6 +545,11 @@ private class RecordingDailyRepository(initialState: DailyState) : DailySessionR
         return DailySessionProgressUpdateResult.Updated
     }
 
+    override suspend fun startTiming(
+        expectedSessionId: DailySessionId,
+        startInstant: DailyTimingStartInstant
+    ): DailySessionTimingStartResult = DailySessionTimingStartResult.StaleSession
+
     override suspend fun clearSession(expectedSessionId: DailySessionId): DailySessionClearResult {
         mutationCount += 1
         return DailySessionClearResult.Cleared
@@ -549,9 +558,20 @@ private class RecordingDailyRepository(initialState: DailyState) : DailySessionR
     override suspend fun complete(
         expectedSessionId: DailySessionId,
         expectedDailyChallengeId: DailyChallengeId,
-        solvedPuzzle: Puzzle
+        solvedPuzzle: Puzzle,
+        elapsedTime: DailyElapsedTime?
     ): DailySessionCompletionResult {
         mutationCount += 1
-        return DailySessionCompletionResult.Completed
+        return DailySessionCompletionResult.Completed(
+            DailyCompletion(
+                identity = expectedDailyChallengeId,
+                elapsedTime = elapsedTime
+            )
+        )
     }
 }
+
+private fun completion(identity: DailyChallengeId): DailyCompletion = DailyCompletion(
+    identity = identity,
+    elapsedTime = null
+)

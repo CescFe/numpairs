@@ -165,7 +165,7 @@ private fun CurrentDailyAvailability.toMenuUiState(): DailyMenuUiState = when (t
     )
 
     is CurrentDailyAvailability.CompletedToday -> DailyMenuUiState.CompletedToday(
-        identity = completion
+        identity = completion.identity
     )
 }
 

@@ -17,6 +17,7 @@ import kotlinx.coroutines.runBlocking
 import org.cescfe.numpairs.data.daily.session.DailySessionRepository
 import org.cescfe.numpairs.data.daily.session.DailyState
 import org.cescfe.numpairs.data.daily.session.DataStoreDailySessionRepository
+import org.cescfe.numpairs.data.daily.session.dailyCompletion
 import org.cescfe.numpairs.data.daily.session.generatedDailyFixture
 import org.cescfe.numpairs.data.generated.session.DataStoreGeneratedSessionRepository
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
@@ -62,7 +63,7 @@ class GeneratedAndDailySessionRecreationTest {
 
         assertEquals(quickSession, originalRepositories.generated.session.first())
         assertEquals(
-            DailyState(activeSession = dailySession, completedChallengeIds = emptyList()),
+            DailyState(activeSession = dailySession, completions = emptyList()),
             originalRepositories.daily.state.first()
         )
 
@@ -74,7 +75,7 @@ class GeneratedAndDailySessionRecreationTest {
 
         assertEquals(quickSession, recreatedRepositories.generated.session.first())
         assertEquals(
-            DailyState(activeSession = dailySession, completedChallengeIds = emptyList()),
+            DailyState(activeSession = dailySession, completions = emptyList()),
             recreatedRepositories.daily.state.first()
         )
 
@@ -88,7 +89,7 @@ class GeneratedAndDailySessionRecreationTest {
         assertEquals(
             DailyState(
                 activeSession = null,
-                completedChallengeIds = listOf(dailySession.dailyChallengeId)
+                completions = listOf(dailyCompletion(dailySession.dailyChallengeId))
             ),
             recreatedRepositories.daily.state.first()
         )
@@ -101,7 +102,7 @@ class GeneratedAndDailySessionRecreationTest {
         assertEquals(
             DailyState(
                 activeSession = null,
-                completedChallengeIds = listOf(dailySession.dailyChallengeId)
+                completions = listOf(dailyCompletion(dailySession.dailyChallengeId))
             ),
             recreatedRepositories.daily.state.first()
         )

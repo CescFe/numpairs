@@ -18,6 +18,7 @@ import org.cescfe.numpairs.data.daily.session.DailySessionProgressUpdateResult
 import org.cescfe.numpairs.data.daily.session.DailySessionReplacementResult
 import org.cescfe.numpairs.data.daily.session.DailySessionRepository
 import org.cescfe.numpairs.data.daily.session.DailySessionSnapshot
+import org.cescfe.numpairs.data.daily.session.DailySessionTimingStartResult
 import org.cescfe.numpairs.data.daily.session.DailyState
 import org.cescfe.numpairs.data.generated.selection.FakeGeneratedDifficultySelectionRepository
 import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
@@ -26,6 +27,9 @@ import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesReposi
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
+import org.cescfe.numpairs.domain.daily.DailyCompletion
+import org.cescfe.numpairs.domain.daily.DailyElapsedTime
+import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.daily.CurrentDailyChallengeResolver
@@ -63,7 +67,7 @@ class DailyMenuNavigationTest {
         val repository = MutableDailyRepository(
             DailyState(
                 activeSession = null,
-                completedChallengeIds = listOf(completedIdentity)
+                completions = listOf(completion(completedIdentity))
             )
         )
         val generationCounter = GenerationCounter()
@@ -104,7 +108,7 @@ class DailyMenuNavigationTest {
         val repository = MutableDailyRepository(
             DailyState(
                 activeSession = null,
-                completedChallengeIds = listOf(identity(dateSource.currentDate))
+                completions = listOf(completion(identity(dateSource.currentDate)))
             )
         )
         val generationCounter = GenerationCounter()
@@ -139,7 +143,7 @@ class DailyMenuNavigationTest {
         val repository = MutableDailyRepository(
             DailyState(
                 activeSession = snapshot,
-                completedChallengeIds = emptyList()
+                completions = emptyList()
             )
         )
         val generationCounter = GenerationCounter()
@@ -168,7 +172,7 @@ class DailyMenuNavigationTest {
         val repository = MutableDailyRepository(
             DailyState(
                 activeSession = null,
-                completedChallengeIds = emptyList()
+                completions = emptyList()
             )
         )
         val generationCounter = GenerationCounter()
@@ -288,6 +292,14 @@ private class MutableDailyRepository(initialState: DailyState) : DailySessionRep
         return DailySessionProgressUpdateResult.Updated
     }
 
+    override suspend fun startTiming(
+        expectedSessionId: DailySessionId,
+        startInstant: DailyTimingStartInstant
+    ): DailySessionTimingStartResult {
+        mutationCount += 1
+        return DailySessionTimingStartResult.StaleSession
+    }
+
     override suspend fun clearSession(expectedSessionId: DailySessionId): DailySessionClearResult {
         mutationCount += 1
         return DailySessionClearResult.Cleared
@@ -296,12 +308,23 @@ private class MutableDailyRepository(initialState: DailyState) : DailySessionRep
     override suspend fun complete(
         expectedSessionId: DailySessionId,
         expectedDailyChallengeId: DailyChallengeId,
-        solvedPuzzle: Puzzle
+        solvedPuzzle: Puzzle,
+        elapsedTime: DailyElapsedTime?
     ): DailySessionCompletionResult {
         mutationCount += 1
-        return DailySessionCompletionResult.Completed
+        return DailySessionCompletionResult.Completed(
+            DailyCompletion(
+                identity = expectedDailyChallengeId,
+                elapsedTime = elapsedTime
+            )
+        )
     }
 }
+
+private fun completion(identity: DailyChallengeId): DailyCompletion = DailyCompletion(
+    identity = identity,
+    elapsedTime = null
+)
 
 private class GenerationCounter {
     var count: Int = 0

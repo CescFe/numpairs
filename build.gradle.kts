@@ -13,7 +13,8 @@ spotless {
                 mapOf(
                     "ktlint_code_style" to "android_studio",
                     "max_line_length" to "120",
-                    "ktlint_standard_function-naming" to "disabled"
+                    "ktlint_standard_function-naming" to "disabled",
+                    "ktlint_standard_no-unused-imports" to "enabled"
                 )
             )
     }
@@ -23,7 +24,8 @@ spotless {
             .editorConfigOverride(
                 mapOf(
                     "ktlint_code_style" to "android_studio",
-                    "max_line_length" to "120"
+                    "max_line_length" to "120",
+                    "ktlint_standard_no-unused-imports" to "enabled"
                 )
             )
     }

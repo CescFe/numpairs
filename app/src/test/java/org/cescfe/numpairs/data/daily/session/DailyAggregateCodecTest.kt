@@ -4,9 +4,13 @@ import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 import java.nio.ByteBuffer
 import java.time.LocalDate
+import org.cescfe.numpairs.data.puzzle.writePuzzleSnapshot
 import org.cescfe.numpairs.domain.daily.DailyCandidateIndex
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
+import org.cescfe.numpairs.domain.daily.DailyCompletion
+import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
+import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfiles
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Expression
@@ -22,20 +26,29 @@ class DailyAggregateCodecTest {
     private val codec = DailyAggregateCodec()
 
     @Test
-    fun aggregate_round_trip_preserves_exact_session_progress_and_completion_identity() {
+    fun aggregate_round_trip_preserves_exact_session_progress_timing_and_completions() {
         val fixture = generatedDailyFixture()
         val currentPuzzle = fixture.progressPuzzle()
-        val snapshot = fixture.snapshot(currentPuzzle = currentPuzzle)
+        val snapshot = fixture.snapshot(
+            currentPuzzle = currentPuzzle,
+            timingStartInstant = DailyTimingStartInstant(1_798_761_600_123)
+        )
         val completions = listOf(
-            dailyChallengeId(date = LocalDate.of(2026, 12, 31)),
-            dailyChallengeId(
-                date = LocalDate.of(2027, 1, 1),
-                recipeVersion = DailyRecipeVersion("retired-daily-recipe")
+            DailyCompletion(
+                identity = dailyChallengeId(date = LocalDate.of(2026, 12, 31)),
+                elapsedTime = DailyElapsedTime(91_234)
+            ),
+            DailyCompletion(
+                identity = dailyChallengeId(
+                    date = LocalDate.of(2027, 1, 1),
+                    recipeVersion = DailyRecipeVersion("retired-daily-recipe")
+                ),
+                elapsedTime = null
             )
         )
         val aggregate = DailyAggregate(
             activeSession = snapshot,
-            completedChallengeIds = completions
+            completions = completions
         )
 
         val decoded = codec.decode(codec.encode(aggregate))
@@ -46,6 +59,7 @@ class DailyAggregateCodecTest {
         assertEquals(currentPuzzle.strip.entries, decodedSnapshot.currentPuzzle.strip.entries)
         assertEquals(snapshot.candidateIndex, decodedSnapshot.candidateIndex)
         assertEquals(snapshot.seed, decodedSnapshot.seed)
+        assertEquals(snapshot.timingStartInstant, decodedSnapshot.timingStartInstant)
     }
 
     @Test
@@ -70,7 +84,12 @@ class DailyAggregateCodecTest {
     fun encoding_is_deterministic() {
         val aggregate = DailyAggregate(
             activeSession = generatedDailyFixture().snapshot(),
-            completedChallengeIds = listOf(dailyChallengeId(LocalDate.of(2026, 12, 31)))
+            completions = listOf(
+                DailyCompletion(
+                    identity = dailyChallengeId(LocalDate.of(2026, 12, 31)),
+                    elapsedTime = DailyElapsedTime(123_456)
+                )
+            )
         )
 
         assertTrue(codec.encode(aggregate).contentEquals(codec.encode(aggregate)))
@@ -78,11 +97,14 @@ class DailyAggregateCodecTest {
 
     @Test
     fun malformed_optional_session_is_discarded_while_valid_completions_are_preserved() {
-        val completion = dailyChallengeId(LocalDate.of(2026, 12, 31))
+        val completion = DailyCompletion(
+            identity = dailyChallengeId(LocalDate.of(2026, 12, 31)),
+            elapsedTime = DailyElapsedTime(123_456)
+        )
         val encoded = codec.encode(
             DailyAggregate(
                 activeSession = generatedDailyFixture().snapshot(),
-                completedChallengeIds = listOf(completion)
+                completions = listOf(completion)
             )
         )
         encoded[SESSION_PAYLOAD_OFFSET] = 0
@@ -91,7 +113,39 @@ class DailyAggregateCodecTest {
         val decoded = codec.decode(encoded) as DailyAggregateDecodingResult.Decoded
 
         assertNull(decoded.aggregate.activeSession)
-        assertEquals(listOf(completion), decoded.aggregate.completedChallengeIds)
+        assertEquals(listOf(completion), decoded.aggregate.completions)
+    }
+
+    @Test
+    fun version_one_aggregate_migrates_progress_and_history_without_fabricating_timing() {
+        val fixture = generatedDailyFixture()
+        val legacySession = fixture.snapshot(currentPuzzle = fixture.progressPuzzle())
+        val legacyCompletionIds = listOf(
+            dailyChallengeId(LocalDate.of(2026, 12, 31)),
+            dailyChallengeId(
+                date = LocalDate.of(2027, 1, 1),
+                recipeVersion = DailyRecipeVersion("retired-daily-recipe")
+            )
+        )
+
+        val decoded = codec.decode(
+            encodeLegacyAggregate(
+                activeSession = legacySession,
+                completedChallengeIds = legacyCompletionIds
+            )
+        )
+
+        assertEquals(
+            DailyAggregateDecodingResult.Decoded(
+                DailyAggregate(
+                    activeSession = legacySession,
+                    completions = legacyCompletionIds.map { identity ->
+                        DailyCompletion(identity = identity, elapsedTime = null)
+                    }
+                )
+            ),
+            decoded
+        )
     }
 
     @Test
@@ -167,15 +221,15 @@ class DailyAggregateCodecTest {
         val activeSession = generatedDailyFixture(date = second.localDate).snapshot()
 
         assertThrows(IllegalArgumentException::class.java) {
-            DailyAggregate(completedChallengeIds = listOf(first, first))
+            DailyAggregate(completions = listOf(first, first).map(::untimedCompletion))
         }
         assertThrows(IllegalArgumentException::class.java) {
-            DailyAggregate(completedChallengeIds = listOf(second, first))
+            DailyAggregate(completions = listOf(second, first).map(::untimedCompletion))
         }
         assertThrows(IllegalArgumentException::class.java) {
             DailyAggregate(
                 activeSession = activeSession,
-                completedChallengeIds = listOf(second)
+                completions = listOf(untimedCompletion(second))
             )
         }
     }
@@ -218,35 +272,35 @@ class DailyAggregateCodecTest {
             )
         )
 
-        assertThrows(IllegalArgumentException::class.java) {
+        assertRejectedByValidation {
             validSnapshot.copy(seed = validSnapshot.seed + 1)
         }
-        assertThrows(IllegalArgumentException::class.java) {
+        assertRejectedByValidation {
             validSnapshot.copy(candidateIndex = DailyCandidateIndex(4))
         }
-        assertThrows(IllegalArgumentException::class.java) {
+        assertRejectedByValidation {
             validSnapshot.copy(
                 dailyChallengeId = validSnapshot.dailyChallengeId.copy(
                     recipeVersion = DailyRecipeVersion("unsupported-recipe")
                 )
             )
         }
-        assertThrows(IllegalArgumentException::class.java) {
+        assertRejectedByValidation {
             validSnapshot.copy(
                 initialPuzzle = threePairsPuzzle,
                 currentPuzzle = threePairsPuzzle
             )
         }
-        assertThrows(IllegalArgumentException::class.java) {
+        assertRejectedByValidation {
             validSnapshot.copy(currentPuzzle = changedResultsPuzzle)
         }
-        assertThrows(IllegalArgumentException::class.java) {
+        assertRejectedByValidation {
             validSnapshot.copy(currentPuzzle = removedKnownEntryPuzzle)
         }
-        assertThrows(IllegalArgumentException::class.java) {
+        assertRejectedByValidation {
             validSnapshot.copy(currentPuzzle = changedEntryIdentityPuzzle)
         }
-        assertThrows(IllegalArgumentException::class.java) {
+        assertRejectedByValidation {
             validSnapshot.copy(currentPuzzle = fixture.generatedPuzzle.solvedPuzzle)
         }
     }
@@ -290,15 +344,22 @@ class DailyAggregateCodecTest {
             )
         )
 
-        assertThrows(IllegalArgumentException::class.java) {
+        assertRejectedByValidation {
             snapshot.copy(
                 initialPuzzle = playerEnteredInitial,
                 currentPuzzle = playerEnteredInitial
             )
         }
-        assertThrows(IllegalArgumentException::class.java) {
+        assertRejectedByValidation {
             snapshot.copy(currentPuzzle = invalidAssignment)
         }
+    }
+}
+
+private fun <T> assertRejectedByValidation(block: () -> T) {
+    assertThrows(IllegalArgumentException::class.java) {
+        val unexpectedResult = block()
+        throw AssertionError("Expected validation to reject $unexpectedResult")
     }
 }
 
@@ -323,10 +384,51 @@ private fun rawCompletionAggregate(vararg completions: DailyChallengeId): ByteAr
             completions.forEach { identity ->
                 output.writeUTF(identity.canonicalLocalDate)
                 output.writeUTF(identity.recipeVersion.value)
+                output.writeBoolean(false)
             }
         }
         bytes.toByteArray()
     }
+
+private fun encodeLegacyAggregate(
+    activeSession: DailySessionSnapshot?,
+    completedChallengeIds: List<DailyChallengeId>
+): ByteArray = ByteArrayOutputStream().use { bytes ->
+    DataOutputStream(bytes).use { output ->
+        output.writeInt(DAILY_AGGREGATE_FILE_MAGIC)
+        output.writeInt(LEGACY_DAILY_AGGREGATE_SCHEMA_VERSION)
+        output.writeBoolean(activeSession != null)
+        activeSession?.let { snapshot ->
+            val sessionPayload = encodeLegacySession(snapshot)
+            output.writeInt(sessionPayload.size)
+            output.write(sessionPayload)
+        }
+        output.writeInt(completedChallengeIds.size)
+        completedChallengeIds.forEach { identity ->
+            output.writeUTF(identity.canonicalLocalDate)
+            output.writeUTF(identity.recipeVersion.value)
+        }
+    }
+    bytes.toByteArray()
+}
+
+private fun encodeLegacySession(snapshot: DailySessionSnapshot): ByteArray = ByteArrayOutputStream().use { bytes ->
+    DataOutputStream(bytes).use { output ->
+        output.writeUTF(snapshot.sessionId.value)
+        output.writeUTF(snapshot.dailyChallengeId.canonicalLocalDate)
+        output.writeUTF(snapshot.dailyChallengeId.recipeVersion.value)
+        output.writeInt(snapshot.candidateIndex.value)
+        output.writeInt(snapshot.seed)
+        output.writePuzzleSnapshot(snapshot.initialPuzzle)
+        output.writePuzzleSnapshot(snapshot.currentPuzzle)
+    }
+    bytes.toByteArray()
+}
+
+private fun untimedCompletion(identity: DailyChallengeId): DailyCompletion = DailyCompletion(
+    identity = identity,
+    elapsedTime = null
+)
 
 private const val DAILY_AGGREGATE_FILE_MAGIC = 0x4E504441
 private const val SESSION_PAYLOAD_OFFSET = 13

@@ -36,9 +36,13 @@ import org.cescfe.numpairs.data.daily.session.DailySessionProgressUpdateResult
 import org.cescfe.numpairs.data.daily.session.DailySessionReplacementResult
 import org.cescfe.numpairs.data.daily.session.DailySessionRepository
 import org.cescfe.numpairs.data.daily.session.DailySessionSnapshot
+import org.cescfe.numpairs.data.daily.session.DailySessionTimingStartResult
 import org.cescfe.numpairs.data.daily.session.DailyState
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
+import org.cescfe.numpairs.domain.daily.DailyCompletion
+import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
+import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
@@ -60,9 +64,9 @@ class DailyCalendarScreenTest {
         setScreen(
             DailyCalendarMonth.create(
                 capturedCurrentDate = currentDate,
-                completedChallengeIds = listOf(
-                    identity(pastCompletion),
-                    identity(currentDate)
+                completions = listOf(
+                    completion(identity(pastCompletion)),
+                    completion(identity(currentDate))
                 ),
                 locale = Locale.US
             )
@@ -142,11 +146,11 @@ class DailyCalendarScreenTest {
     @Test
     fun route_captures_date_once_reads_history_and_never_mutates_the_repository() {
         val currentDate = LocalDate.of(2026, 7, 25)
-        val completion = identity(LocalDate.of(2026, 7, 3))
+        val completedIdentity = identity(LocalDate.of(2026, 7, 3))
         val repository = ReadOnlyRecordingDailyRepository(
             DailyState(
                 activeSession = null,
-                completedChallengeIds = listOf(completion)
+                completions = listOf(completion(completedIdentity))
             )
         )
         var dateReadCount = 0
@@ -165,11 +169,11 @@ class DailyCalendarScreenTest {
         }
 
         composeTestRule
-            .onNodeWithTag(DailyCalendarScreenTestTags.date(completion.localDate))
+            .onNodeWithTag(DailyCalendarScreenTestTags.date(completedIdentity.localDate))
             .assertContentDescriptionEquals(
                 string(
                     R.string.daily_calendar_completed_date_description,
-                    localizedDate(completion.localDate)
+                    localizedDate(completedIdentity.localDate)
                 )
             )
         composeTestRule
@@ -334,6 +338,14 @@ private class ReadOnlyRecordingDailyRepository(initialState: DailyState) : Daily
         return DailySessionProgressUpdateResult.StaleSession
     }
 
+    override suspend fun startTiming(
+        expectedSessionId: DailySessionId,
+        startInstant: DailyTimingStartInstant
+    ): DailySessionTimingStartResult {
+        mutationCount += 1
+        return DailySessionTimingStartResult.StaleSession
+    }
+
     override suspend fun clearSession(expectedSessionId: DailySessionId): DailySessionClearResult {
         mutationCount += 1
         return DailySessionClearResult.StaleSession
@@ -342,7 +354,8 @@ private class ReadOnlyRecordingDailyRepository(initialState: DailyState) : Daily
     override suspend fun complete(
         expectedSessionId: DailySessionId,
         expectedDailyChallengeId: DailyChallengeId,
-        solvedPuzzle: Puzzle
+        solvedPuzzle: Puzzle,
+        elapsedTime: DailyElapsedTime?
     ): DailySessionCompletionResult {
         mutationCount += 1
         return DailySessionCompletionResult.StaleSession
@@ -352,4 +365,9 @@ private class ReadOnlyRecordingDailyRepository(initialState: DailyState) : Daily
 private fun identity(date: LocalDate): DailyChallengeId = DailyChallengeId(
     localDate = date,
     recipeVersion = DailyRecipeVersion("daily-calendar-test")
+)
+
+private fun completion(identity: DailyChallengeId): DailyCompletion = DailyCompletion(
+    identity = identity,
+    elapsedTime = null
 )

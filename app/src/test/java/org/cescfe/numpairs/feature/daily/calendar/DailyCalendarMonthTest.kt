@@ -5,6 +5,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.Locale
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
+import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -68,10 +69,10 @@ class DailyCalendarMonthTest {
         val futureCompletionFromTrustedClock = identity(LocalDate.of(2026, 7, 27))
         val month = DailyCalendarMonth.create(
             capturedCurrentDate = currentDate,
-            completedChallengeIds = listOf(
-                pastCompletion,
-                todayCompletion,
-                futureCompletionFromTrustedClock
+            completions = listOf(
+                completion(pastCompletion),
+                completion(todayCompletion),
+                completion(futureCompletionFromTrustedClock)
             ),
             locale = Locale.UK
         )
@@ -142,9 +143,9 @@ class DailyCalendarMonthTest {
         assertThrows(IllegalArgumentException::class.java) {
             DailyCalendarMonth.create(
                 capturedCurrentDate = LocalDate.of(2026, 7, 25),
-                completedChallengeIds = listOf(
-                    identity(completedDate, recipe = "recipe-one"),
-                    identity(completedDate, recipe = "recipe-two")
+                completions = listOf(
+                    completion(identity(completedDate, recipe = "recipe-one")),
+                    completion(identity(completedDate, recipe = "recipe-two"))
                 )
             )
         }
@@ -167,4 +168,9 @@ private fun DailyCalendarMonth.date(date: LocalDate): DailyCalendarDate = inMont
 private fun identity(date: LocalDate, recipe: String = "daily-test-recipe"): DailyChallengeId = DailyChallengeId(
     localDate = date,
     recipeVersion = DailyRecipeVersion(recipe)
+)
+
+private fun completion(identity: DailyChallengeId): DailyCompletion = DailyCompletion(
+    identity = identity,
+    elapsedTime = null
 )
