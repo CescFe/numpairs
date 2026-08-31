@@ -46,9 +46,7 @@ For milestone delivery:
 4. Give each issue one observable outcome and one Pull Request.
 5. Write each issue in English using the selected issue template.
 6. Apply the required assignee, label, type, and milestone.
-7. Wait for and verify automatic Project 11 intake and `Backlog` initialization, then apply the remaining Project fields and iteration.
-8. Set Project `Status` to `Ready For Dev` for each planned issue.
-9. Set Project `Status` to `In Progress` immediately before implementation begins on an existing issue.
+7. Set Project `Status` to `Ready For Dev` for each planned issue.
 
 Do not combine unrelated product behavior, refactors, or documentation in one issue merely to reduce the number of Pull Requests.
 
@@ -175,15 +173,15 @@ Do not mark criteria complete merely because implementation has ended or checks 
 
 For each authorized issue:
 
-1. Set the issue's Project `Status` to `In Progress`.
-2. Update local `main` from `origin/main`.
-3. Create the issue branch using the assigned work reference.
+1. Update local `main` from `origin/main`.
+2. Create the issue branch using the assigned work reference.
+3. Create a Draft Pull Request with `Resolves #<issue>` to trigger the **Pull request linked to issue** workflow (moves the issue to `In Progress`).
 4. Implement only the issue acceptance criteria.
 5. Validate in proportion to the change.
 6. Review `git diff` and `git diff --check`.
 7. Commit using the required convention.
 8. Push the branch.
-9. Open and configure the Pull Request.
+9. Move the Pull Request to `Ready for review`.
 10. Start one terminal watcher for required GitHub checks when a merge is part of the requested cycle.
 11. Review the associated issue's acceptance criteria and mark only fulfilled criteria complete.
 12. If checks pass, every required criterion is fulfilled, and the delivery scope authorizes merging, squash and merge with the required title without requesting per-Pull-Request confirmation.
@@ -195,10 +193,12 @@ Do not start dependent implementation from an unmerged branch when the requested
 
 ### Required Check Watching
 
-Start `gh pr checks <pr> --watch --interval 30` once. If the command continues in the background,
-wait on that same terminal session using the longest practical wait interval supported by the
-surface. Keep repetitive watcher progress out of the model context and retrieve only the final
-bounded summary or the failure details needed for diagnosis.
+Wait approximately six and a half minutes after moving the Pull Request to `Ready for review`,
+without querying GitHub during that initial delay. Then start
+`gh pr checks <pr> --watch --interval 15` once. If the command continues in the background, wait on
+that same terminal session using the longest practical wait interval supported by the surface. Keep
+repetitive watcher progress out of the model context and retrieve only the final bounded summary or
+the failure details needed for diagnosis.
 
 Do not repeatedly invoke `gh pr checks`, query individual run status, or poll the watcher terminal
 at short intervals. A watcher failure or interruption may be followed by one bounded status query
