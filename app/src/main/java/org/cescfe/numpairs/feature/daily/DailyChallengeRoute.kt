@@ -184,7 +184,7 @@ fun DailyChallengeRoute(
                         personalBestResult = personalBestResult,
                         isPersonalRecordPresentation = isPersonalRecordPresentation,
                         onShareResult = {
-                            shareResult(completion)
+                            shareResult(completion, personalBestResult)
                         },
                         onViewCalendar = {
                             isCalendarVisible = true
@@ -217,7 +217,7 @@ fun DailyChallengeRoute(
                     movementCount = state.completion.movementCount,
                     bestElapsedTime = state.personalBestResult.bestElapsedTime,
                     onShareResult = {
-                        shareResult(state.completion)
+                        shareResult(state.completion, state.personalBestResult)
                     },
                     onViewCalendar = {
                         isCalendarVisible = true
@@ -284,7 +284,7 @@ fun DailyCompletedTodayRoute(
                 movementCount = completion.movementCount,
                 bestElapsedTime = personalBestResult.bestElapsedTime,
                 onShareResult = {
-                    shareResult(completion)
+                    shareResult(completion, personalBestResult)
                 },
                 onViewCalendar = {
                     isCalendarVisible = true
@@ -519,7 +519,9 @@ private fun rememberDailyChallengeTitle(identity: DailyChallengeId): DailyChalle
 }
 
 @Composable
-private fun rememberDailyShareResultAction(shareLauncher: DailyCompletionShareLauncher?): (DailyCompletion) -> Unit {
+private fun rememberDailyShareResultAction(
+    shareLauncher: DailyCompletionShareLauncher?
+): (DailyCompletion, DailyPersonalBestResult) -> Unit {
     val context = LocalContext.current
     val defaultLauncher = remember(context) {
         AndroidDailyCompletionShareLauncher(context)
@@ -530,8 +532,13 @@ private fun rememberDailyShareResultAction(shareLauncher: DailyCompletionShareLa
     }
     val activeLauncher = shareLauncher ?: defaultLauncher
     return remember(activeLauncher, payloadFactory) {
-        { completion ->
-            activeLauncher.launch(payloadFactory.create(completion))
+        { completion, personalBestResult ->
+            activeLauncher.launch(
+                payloadFactory.create(
+                    completion = completion,
+                    personalBestResult = personalBestResult
+                )
+            )
         }
     }
 }

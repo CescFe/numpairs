@@ -8,15 +8,240 @@ import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyMovementCount
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestCategory
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestOutcome
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestResult
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
 import org.cescfe.numpairs.feature.daily.DailyChallengeNameCopy
 import org.cescfe.numpairs.feature.daily.DailyRecipes
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
 import org.junit.Test
 
 class DailyCompletionShareTextFormatterTest {
+    @Test
+    fun strict_personal_record_uses_exactly_three_nonblank_lines_with_comparable_identity() {
+        val completion = completion(
+            identity = DailyRecipes.WEEKLY_SCHEDULE_V2.identityFor(LocalDate.of(2026, 9, 1)),
+            elapsedMilliseconds = 108_999,
+            movementCount = 23
+        )
+
+        val text = DailyCompletionShareTextFormatter().format(
+            completion = completion,
+            personalBestResult = personalRecordResult(completion),
+            copy = englishCopy(),
+            locale = Locale.US
+        )
+
+        assertEquals(
+            "NumPairs Daily · Sep 1, 2026 · 4 Pairs · Low\n" +
+                "🏆 New personal best: 01:48 · 23 moves\n" +
+                "Can you beat my time?",
+            text.value
+        )
+        assertEquals(3, text.value.lines().count(String::isNotBlank))
+    }
+
+    @Test
+    fun personal_record_copy_is_localized_in_every_supported_locale() {
+        val identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(LocalDate.of(2026, 7, 25))
+        val completion = completion(identity, elapsedMilliseconds = 108_999, movementCount = 23)
+        val scenarios = listOf(
+            LocalizedRecordScenario(
+                locale = Locale.US,
+                copy = englishCopy(),
+                expectedRecord = "🏆 New personal best: 01:48 · 23 moves",
+                expectedInvitation = "Can you beat my time?"
+            ),
+            LocalizedRecordScenario(
+                locale = Locale.forLanguageTag("es-ES"),
+                copy = englishCopy(
+                    challengeNames = challengeNames(fourPairsLow = "4 pares · Baja"),
+                    movementSingularFormat = "%1\$s movimiento",
+                    movementPluralFormat = "%1\$s movimientos",
+                    personalRecordResultFormat = "🏆 Nuevo récord personal: %1\$s",
+                    personalRecordInvitation = "¿Puedes superar mi tiempo?"
+                ),
+                expectedRecord = "🏆 Nuevo récord personal: 01:48 · 23 movimientos",
+                expectedInvitation = "¿Puedes superar mi tiempo?"
+            ),
+            LocalizedRecordScenario(
+                locale = Locale.forLanguageTag("ca-ES-valencia"),
+                copy = englishCopy(
+                    challengeNames = challengeNames(fourPairsLow = "4 parelles · Baixa"),
+                    movementSingularFormat = "%1\$s moviment",
+                    movementPluralFormat = "%1\$s moviments",
+                    personalRecordResultFormat = "🏆 Nou rècord personal: %1\$s",
+                    personalRecordInvitation = "Pots superar el meu temps?"
+                ),
+                expectedRecord = "🏆 Nou rècord personal: 01:48 · 23 moviments",
+                expectedInvitation = "Pots superar el meu temps?"
+            ),
+            LocalizedRecordScenario(
+                locale = Locale.GERMANY,
+                copy = englishCopy(
+                    challengeNames = challengeNames(fourPairsLow = "4 Paare · Leicht"),
+                    movementSingularFormat = "%1\$s Zug",
+                    movementPluralFormat = "%1\$s Züge",
+                    personalRecordResultFormat = "🏆 Neuer persönlicher Rekord: %1\$s",
+                    personalRecordInvitation = "Kannst du meine Zeit schlagen?"
+                ),
+                expectedRecord = "🏆 Neuer persönlicher Rekord: 01:48 · 23 Züge",
+                expectedInvitation = "Kannst du meine Zeit schlagen?"
+            )
+        )
+
+        scenarios.forEach { scenario ->
+            val lines = DailyCompletionShareTextFormatter().format(
+                completion = completion,
+                personalBestResult = personalRecordResult(completion),
+                copy = scenario.copy,
+                locale = scenario.locale
+            ).value.lines()
+
+            assertEquals(scenario.expectedRecord, lines[1])
+            assertEquals(scenario.expectedInvitation, lines[2])
+        }
+    }
+
+    @Test
+    fun every_personal_best_category_keeps_its_selected_size_and_difficulty() {
+        val scenarios = listOf(
+            LocalDate.of(2026, 8, 31) to "3 Pairs · Low",
+            LocalDate.of(2026, 9, 1) to "4 Pairs · Low",
+            LocalDate.of(2026, 9, 2) to "3 Pairs · Medium",
+            LocalDate.of(2026, 9, 3) to "4 Pairs · Medium",
+            LocalDate.of(2026, 9, 4) to "8 Pairs · Medium"
+        )
+
+        scenarios.forEach { (date, challengeName) ->
+            val completion = completion(
+                identity = DailyRecipes.WEEKLY_SCHEDULE_V2.identityFor(date),
+                elapsedMilliseconds = 108_999,
+                movementCount = 23
+            )
+            val text = DailyCompletionShareTextFormatter().format(
+                completion = completion,
+                personalBestResult = personalRecordResult(completion),
+                copy = englishCopy(),
+                locale = Locale.US
+            )
+
+            assertEquals(
+                "NumPairs Daily · ${localizedDate(completion.identity, Locale.US)} · $challengeName",
+                text.value.lineSequence().first()
+            )
+        }
+    }
+
+    @Test
+    fun personal_record_preserves_unknown_singular_zero_and_large_movement_counts() {
+        val identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(LocalDate.of(2026, 7, 25))
+        val scenarios = listOf(
+            null to "🏆 New personal best: 01:48",
+            1L to "🏆 New personal best: 01:48 · 1 move",
+            0L to "🏆 New personal best: 01:48 · 0 moves",
+            Long.MAX_VALUE to "🏆 New personal best: 01:48 · ${Long.MAX_VALUE} moves"
+        )
+
+        scenarios.forEach { (movementCount, expectedRecord) ->
+            val completion = completion(identity, elapsedMilliseconds = 108_999, movementCount = movementCount)
+
+            val text = DailyCompletionShareTextFormatter().format(
+                completion = completion,
+                personalBestResult = personalRecordResult(completion),
+                copy = englishCopy(),
+                locale = Locale.US
+            )
+
+            assertEquals(expectedRecord, text.value.lines()[1])
+        }
+    }
+
+    @Test
+    fun baseline_tie_slower_untimed_and_unresolved_results_keep_the_existing_share_format() {
+        val identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(LocalDate.of(2026, 7, 25))
+        val category = DailyPersonalBestCategory(GeneratedModes.FOUR_PAIRS_LOW.id.value)
+        val timedCompletion = completion(identity, elapsedMilliseconds = 108_999, movementCount = 23)
+        val untimedCompletion = completion(identity, elapsedMilliseconds = null, movementCount = 23)
+        val timedFallback = "NumPairs Daily · Jul 25, 2026\n" +
+            "4 Pairs · Low · Completed in 01:48 · 23 moves"
+        val untimedFallback = "NumPairs Daily · Jul 25, 2026\n" +
+            "4 Pairs · Low · Completed in 23 moves"
+        val scenarios = listOf(
+            Triple(
+                timedCompletion,
+                DailyPersonalBestResult(
+                    category = category,
+                    currentElapsedTime = timedCompletion.elapsedTime,
+                    previousBestElapsedTime = null,
+                    bestElapsedTime = timedCompletion.elapsedTime,
+                    outcome = DailyPersonalBestOutcome.BASELINE
+                ),
+                timedFallback
+            ),
+            Triple(
+                timedCompletion,
+                DailyPersonalBestResult(
+                    category = category,
+                    currentElapsedTime = timedCompletion.elapsedTime,
+                    previousBestElapsedTime = timedCompletion.elapsedTime,
+                    bestElapsedTime = timedCompletion.elapsedTime,
+                    outcome = DailyPersonalBestOutcome.NOT_RECORD
+                ),
+                timedFallback
+            ),
+            Triple(
+                timedCompletion,
+                DailyPersonalBestResult(
+                    category = category,
+                    currentElapsedTime = timedCompletion.elapsedTime,
+                    previousBestElapsedTime = DailyElapsedTime(100_000),
+                    bestElapsedTime = DailyElapsedTime(100_000),
+                    outcome = DailyPersonalBestOutcome.NOT_RECORD
+                ),
+                timedFallback
+            ),
+            Triple(
+                untimedCompletion,
+                DailyPersonalBestResult(
+                    category = category,
+                    currentElapsedTime = null,
+                    previousBestElapsedTime = DailyElapsedTime(100_000),
+                    bestElapsedTime = DailyElapsedTime(100_000),
+                    outcome = DailyPersonalBestOutcome.NOT_RECORD
+                ),
+                untimedFallback
+            ),
+            Triple(
+                timedCompletion,
+                DailyPersonalBestResult(
+                    category = null,
+                    currentElapsedTime = timedCompletion.elapsedTime,
+                    previousBestElapsedTime = null,
+                    bestElapsedTime = null,
+                    outcome = DailyPersonalBestOutcome.NOT_RECORD
+                ),
+                timedFallback
+            )
+        )
+
+        scenarios.forEach { (completion, personalBestResult, expectedText) ->
+            val text = DailyCompletionShareTextFormatter().format(
+                completion = completion,
+                personalBestResult = personalBestResult,
+                copy = englishCopy(),
+                locale = Locale.US
+            )
+
+            assertEquals(expectedText, text.value)
+            assertFalse(text.value.contains("🏆"))
+        }
+    }
+
     @Test
     fun timed_result_with_movements_contains_the_shared_frozen_completion_metrics() {
         val identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
@@ -24,7 +249,7 @@ class DailyCompletionShareTextFormatterTest {
         )
         val locale = Locale.US
 
-        val text = DailyCompletionShareTextFormatter().format(
+        val text = DailyCompletionShareTextFormatter().formatNonRecord(
             completion = completion(
                 identity = identity,
                 elapsedMilliseconds = 125_999,
@@ -47,7 +272,7 @@ class DailyCompletionShareTextFormatterTest {
             LocalDate.of(2026, 7, 25)
         )
 
-        val text = DailyCompletionShareTextFormatter().format(
+        val text = DailyCompletionShareTextFormatter().formatNonRecord(
             completion = completion(identity, elapsedMilliseconds = 3_661_999),
             copy = englishCopy(),
             locale = Locale.US
@@ -67,7 +292,7 @@ class DailyCompletionShareTextFormatterTest {
         val canonicalDate = identity.canonicalLocalDate
         val locale = Locale.forLanguageTag("es-ES")
 
-        val text = DailyCompletionShareTextFormatter().format(
+        val text = DailyCompletionShareTextFormatter().formatNonRecord(
             completion = completion(identity, elapsedMilliseconds = 65_432),
             copy = DailyCompletionShareCopy(
                 dailyName = "NumPairs Daily",
@@ -75,7 +300,9 @@ class DailyCompletionShareTextFormatterTest {
                 completedStatus = "Completado",
                 completedResultStatusFormat = "Completado en %1\$s",
                 movementSingularFormat = "%1\$s movimiento",
-                movementPluralFormat = "%1\$s movimientos"
+                movementPluralFormat = "%1\$s movimientos",
+                personalRecordResultFormat = "🏆 Nuevo récord personal: %1\$s",
+                personalRecordInvitation = "¿Puedes superar mi tiempo?"
             ),
             locale = locale
         )
@@ -103,7 +330,7 @@ class DailyCompletionShareTextFormatterTest {
 
         scenarios.forEach { (date, expectedChallengeName) ->
             val identity = DailyRecipes.WEEKLY_SCHEDULE_V2.identityFor(date)
-            val text = DailyCompletionShareTextFormatter().format(
+            val text = DailyCompletionShareTextFormatter().formatNonRecord(
                 completion = completion(identity, elapsedMilliseconds = 65_432),
                 copy = englishCopy(),
                 locale = Locale.US
@@ -163,7 +390,7 @@ class DailyCompletionShareTextFormatterTest {
 
             assertEquals(
                 "Daily · $localizedDate\nChallenge · ${scenario.expectedSingularStatus}",
-                DailyCompletionShareTextFormatter().format(
+                DailyCompletionShareTextFormatter().formatNonRecord(
                     completion = completion(identity, elapsedMilliseconds = 1_999, movementCount = 1),
                     copy = copy,
                     locale = scenario.locale
@@ -171,7 +398,7 @@ class DailyCompletionShareTextFormatterTest {
             )
             assertEquals(
                 "Daily · $localizedDate\nChallenge · ${scenario.expectedPluralStatus}",
-                DailyCompletionShareTextFormatter().format(
+                DailyCompletionShareTextFormatter().formatNonRecord(
                     completion = completion(identity, elapsedMilliseconds = 1_999, movementCount = 0),
                     copy = copy,
                     locale = scenario.locale
@@ -187,7 +414,7 @@ class DailyCompletionShareTextFormatterTest {
         )
         val locale = Locale.US
 
-        val text = DailyCompletionShareTextFormatter().format(
+        val text = DailyCompletionShareTextFormatter().formatNonRecord(
             completion = completion(
                 identity = identity,
                 elapsedMilliseconds = null,
@@ -211,7 +438,7 @@ class DailyCompletionShareTextFormatterTest {
         )
         val locale = Locale.US
 
-        val text = DailyCompletionShareTextFormatter().format(
+        val text = DailyCompletionShareTextFormatter().formatNonRecord(
             completion = completion(identity, elapsedMilliseconds = null),
             copy = englishCopy(),
             locale = locale
@@ -232,7 +459,7 @@ class DailyCompletionShareTextFormatterTest {
         )
 
         assertThrows(IllegalArgumentException::class.java) {
-            DailyCompletionShareTextFormatter().format(
+            DailyCompletionShareTextFormatter().formatNonRecord(
                 completion = completion(identity, elapsedMilliseconds = 65_432, movementCount = 23),
                 copy = englishCopy(),
                 locale = Locale.US
@@ -262,6 +489,12 @@ class DailyCompletionShareTextFormatterTest {
         assertThrows(IllegalArgumentException::class.java) {
             englishCopy(movementPluralFormat = " ")
         }
+        assertThrows(IllegalArgumentException::class.java) {
+            englishCopy(personalRecordResultFormat = "")
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            englishCopy(personalRecordInvitation = " ")
+        }
     }
 }
 
@@ -281,14 +514,25 @@ private fun englishCopy(
     completedStatus: String = "Completed",
     completedResultStatusFormat: String = "Completed in %1\$s",
     movementSingularFormat: String = "%1\$s move",
-    movementPluralFormat: String = "%1\$s moves"
+    movementPluralFormat: String = "%1\$s moves",
+    personalRecordResultFormat: String = "🏆 New personal best: %1\$s",
+    personalRecordInvitation: String = "Can you beat my time?"
 ): DailyCompletionShareCopy = DailyCompletionShareCopy(
     dailyName = dailyName,
     challengeNames = challengeNames,
     completedStatus = completedStatus,
     completedResultStatusFormat = completedResultStatusFormat,
     movementSingularFormat = movementSingularFormat,
-    movementPluralFormat = movementPluralFormat
+    movementPluralFormat = movementPluralFormat,
+    personalRecordResultFormat = personalRecordResultFormat,
+    personalRecordInvitation = personalRecordInvitation
+)
+
+private data class LocalizedRecordScenario(
+    val locale: Locale,
+    val copy: DailyCompletionShareCopy,
+    val expectedRecord: String,
+    val expectedInvitation: String
 )
 
 private data class LocalizedMovementScenario(
@@ -309,11 +553,42 @@ private fun localizedMovementCopy(scenario: LocalizedMovementScenario): DailyCom
         completedStatus = "Completed",
         completedResultStatusFormat = scenario.completedResultStatusFormat,
         movementSingularFormat = scenario.movementSingularFormat,
-        movementPluralFormat = scenario.movementPluralFormat
+        movementPluralFormat = scenario.movementPluralFormat,
+        personalRecordResultFormat = "🏆 Record: %1\$s",
+        personalRecordInvitation = "Beat it?"
     )
 
 private fun localizedDate(identity: DailyChallengeId, locale: Locale): String = identity.localDate.format(
     DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
+)
+
+private fun DailyCompletionShareTextFormatter.formatNonRecord(
+    completion: DailyCompletion,
+    copy: DailyCompletionShareCopy,
+    locale: Locale
+): DailyCompletionShareText = format(
+    completion = completion,
+    personalBestResult = DailyPersonalBestResult(
+        category = null,
+        currentElapsedTime = completion.elapsedTime,
+        previousBestElapsedTime = null,
+        bestElapsedTime = null,
+        outcome = DailyPersonalBestOutcome.NOT_RECORD
+    ),
+    copy = copy,
+    locale = locale
+)
+
+private fun personalRecordResult(completion: DailyCompletion): DailyPersonalBestResult = DailyPersonalBestResult(
+    category = DailyPersonalBestCategory(
+        DailyRecipes.catalog.challengeFor(completion.identity).id.value
+    ),
+    currentElapsedTime = requireNotNull(completion.elapsedTime),
+    previousBestElapsedTime = DailyElapsedTime(
+        requireNotNull(completion.elapsedTime).milliseconds + 1
+    ),
+    bestElapsedTime = completion.elapsedTime,
+    outcome = DailyPersonalBestOutcome.PERSONAL_RECORD
 )
 
 private fun challengeNames(
