@@ -7,6 +7,7 @@ import java.util.Locale
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
+import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
 import org.cescfe.numpairs.feature.daily.DailyRecipes
 import org.junit.Assert.assertEquals
@@ -15,27 +16,31 @@ import org.junit.Test
 
 class DailyCompletionShareTextFormatterTest {
     @Test
-    fun timed_result_contains_the_shared_truncated_completion_duration() {
+    fun timed_result_with_movements_contains_the_shared_frozen_completion_metrics() {
         val identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
             LocalDate.of(2026, 7, 25)
         )
         val locale = Locale.US
 
         val text = DailyCompletionShareTextFormatter().format(
-            completion = completion(identity, elapsedMilliseconds = 125_999),
+            completion = completion(
+                identity = identity,
+                elapsedMilliseconds = 125_999,
+                movementCount = 23
+            ),
             copy = englishCopy(),
             locale = locale
         )
         val expectedDate = localizedDate(identity, locale)
 
         assertEquals(
-            "NumPairs Daily · $expectedDate\n4 Pairs · Low · Completed in 02:05",
+            "NumPairs Daily · $expectedDate\n4 Pairs · Low · Completed in 02:05 · 23 moves",
             text.value
         )
     }
 
     @Test
-    fun durations_of_sixty_minutes_or_more_keep_unbounded_minutes() {
+    fun timed_legacy_completion_without_movements_keeps_unbounded_minutes() {
         val identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
             LocalDate.of(2026, 7, 25)
         )
@@ -66,7 +71,9 @@ class DailyCompletionShareTextFormatterTest {
                 dailyName = "NumPairs Daily",
                 challengeName = "4 pares · Baja",
                 completedStatus = "Completado",
-                completedInStatusFormat = "Completado en %1\$s"
+                completedResultStatusFormat = "Completado en %1\$s",
+                movementSingularFormat = "%1\$s movimiento",
+                movementPluralFormat = "%1\$s movimientos"
             ),
             locale = locale
         )
@@ -78,6 +85,93 @@ class DailyCompletionShareTextFormatterTest {
         )
         assertEquals("2028-02-29", canonicalDate)
         assertEquals(canonicalDate, identity.canonicalLocalDate)
+    }
+
+    @Test
+    fun supported_locales_use_their_singular_and_plural_movement_copy() {
+        val identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
+            LocalDate.of(2026, 7, 25)
+        )
+        val scenarios = listOf(
+            LocalizedMovementScenario(
+                locale = Locale.US,
+                completedResultStatusFormat = "Completed in %1\$s",
+                movementSingularFormat = "%1\$s move",
+                movementPluralFormat = "%1\$s moves",
+                expectedSingularStatus = "Completed in 00:01 · 1 move",
+                expectedPluralStatus = "Completed in 00:01 · 0 moves"
+            ),
+            LocalizedMovementScenario(
+                locale = Locale.forLanguageTag("es-ES"),
+                completedResultStatusFormat = "Completado en %1\$s",
+                movementSingularFormat = "%1\$s movimiento",
+                movementPluralFormat = "%1\$s movimientos",
+                expectedSingularStatus = "Completado en 00:01 · 1 movimiento",
+                expectedPluralStatus = "Completado en 00:01 · 0 movimientos"
+            ),
+            LocalizedMovementScenario(
+                locale = Locale.forLanguageTag("ca-ES-valencia"),
+                completedResultStatusFormat = "Completat en %1\$s",
+                movementSingularFormat = "%1\$s moviment",
+                movementPluralFormat = "%1\$s moviments",
+                expectedSingularStatus = "Completat en 00:01 · 1 moviment",
+                expectedPluralStatus = "Completat en 00:01 · 0 moviments"
+            ),
+            LocalizedMovementScenario(
+                locale = Locale.GERMANY,
+                completedResultStatusFormat = "Abgeschlossen in %1\$s",
+                movementSingularFormat = "%1\$s Zug",
+                movementPluralFormat = "%1\$s Züge",
+                expectedSingularStatus = "Abgeschlossen in 00:01 · 1 Zug",
+                expectedPluralStatus = "Abgeschlossen in 00:01 · 0 Züge"
+            )
+        )
+
+        scenarios.forEach { scenario ->
+            val copy = localizedMovementCopy(scenario)
+            val localizedDate = localizedDate(identity, scenario.locale)
+
+            assertEquals(
+                "Daily · $localizedDate\nChallenge · ${scenario.expectedSingularStatus}",
+                DailyCompletionShareTextFormatter().format(
+                    completion = completion(identity, elapsedMilliseconds = 1_999, movementCount = 1),
+                    copy = copy,
+                    locale = scenario.locale
+                ).value
+            )
+            assertEquals(
+                "Daily · $localizedDate\nChallenge · ${scenario.expectedPluralStatus}",
+                DailyCompletionShareTextFormatter().format(
+                    completion = completion(identity, elapsedMilliseconds = 1_999, movementCount = 0),
+                    copy = copy,
+                    locale = scenario.locale
+                ).value
+            )
+        }
+    }
+
+    @Test
+    fun movement_only_result_preserves_the_full_authoritative_count() {
+        val identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
+            LocalDate.of(2026, 7, 25)
+        )
+        val locale = Locale.US
+
+        val text = DailyCompletionShareTextFormatter().format(
+            completion = completion(
+                identity = identity,
+                elapsedMilliseconds = null,
+                movementCount = Long.MAX_VALUE
+            ),
+            copy = englishCopy(),
+            locale = locale
+        )
+
+        assertEquals(
+            "NumPairs Daily · ${localizedDate(identity, locale)}\n" +
+                "4 Pairs · Low · Completed in ${Long.MAX_VALUE} moves",
+            text.value
+        )
     }
 
     @Test
@@ -109,7 +203,7 @@ class DailyCompletionShareTextFormatterTest {
 
         assertThrows(IllegalArgumentException::class.java) {
             DailyCompletionShareTextFormatter().format(
-                completion = completion(identity, elapsedMilliseconds = 65_432),
+                completion = completion(identity, elapsedMilliseconds = 65_432, movementCount = 23),
                 copy = englishCopy(),
                 locale = Locale.US
             )
@@ -128,27 +222,61 @@ class DailyCompletionShareTextFormatterTest {
             englishCopy(completedStatus = "")
         }
         assertThrows(IllegalArgumentException::class.java) {
-            englishCopy(completedInStatusFormat = " ")
+            englishCopy(completedResultStatusFormat = " ")
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            englishCopy(movementSingularFormat = "")
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            englishCopy(movementPluralFormat = " ")
         }
     }
 }
 
-private fun completion(identity: DailyChallengeId, elapsedMilliseconds: Long?): DailyCompletion = DailyCompletion(
+private fun completion(
+    identity: DailyChallengeId,
+    elapsedMilliseconds: Long?,
+    movementCount: Long? = null
+): DailyCompletion = DailyCompletion(
     identity = identity,
-    elapsedTime = elapsedMilliseconds?.let(::DailyElapsedTime)
+    elapsedTime = elapsedMilliseconds?.let(::DailyElapsedTime),
+    movementCount = movementCount?.let(::DailyMovementCount)
 )
 
 private fun englishCopy(
     dailyName: String = "NumPairs Daily",
     challengeName: String = "4 Pairs · Low",
     completedStatus: String = "Completed",
-    completedInStatusFormat: String = "Completed in %1\$s"
+    completedResultStatusFormat: String = "Completed in %1\$s",
+    movementSingularFormat: String = "%1\$s move",
+    movementPluralFormat: String = "%1\$s moves"
 ): DailyCompletionShareCopy = DailyCompletionShareCopy(
     dailyName = dailyName,
     challengeName = challengeName,
     completedStatus = completedStatus,
-    completedInStatusFormat = completedInStatusFormat
+    completedResultStatusFormat = completedResultStatusFormat,
+    movementSingularFormat = movementSingularFormat,
+    movementPluralFormat = movementPluralFormat
 )
+
+private data class LocalizedMovementScenario(
+    val locale: Locale,
+    val completedResultStatusFormat: String,
+    val movementSingularFormat: String,
+    val movementPluralFormat: String,
+    val expectedSingularStatus: String,
+    val expectedPluralStatus: String
+)
+
+private fun localizedMovementCopy(scenario: LocalizedMovementScenario): DailyCompletionShareCopy =
+    DailyCompletionShareCopy(
+        dailyName = "Daily",
+        challengeName = "Challenge",
+        completedStatus = "Completed",
+        completedResultStatusFormat = scenario.completedResultStatusFormat,
+        movementSingularFormat = scenario.movementSingularFormat,
+        movementPluralFormat = scenario.movementPluralFormat
+    )
 
 private fun localizedDate(identity: DailyChallengeId, locale: Locale): String = identity.localDate.format(
     DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)

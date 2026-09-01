@@ -4,15 +4,20 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 import org.cescfe.numpairs.domain.daily.DailyCompletion
+import org.cescfe.numpairs.feature.daily.DailyCompletionResultFormatter
 import org.cescfe.numpairs.feature.daily.DailyElapsedTimeFormatter
+import org.cescfe.numpairs.feature.daily.DailyMovementCountFormatter
 import org.cescfe.numpairs.feature.daily.DailyRecipeCatalog
 import org.cescfe.numpairs.feature.daily.DailyRecipes
+import org.cescfe.numpairs.feature.daily.pluralQuantity
 
 data class DailyCompletionShareCopy(
     val dailyName: String,
     val challengeName: String,
     val completedStatus: String,
-    val completedInStatusFormat: String
+    val completedResultStatusFormat: String,
+    val movementSingularFormat: String,
+    val movementPluralFormat: String
 ) {
     init {
         require(dailyName.isNotBlank()) {
@@ -24,8 +29,14 @@ data class DailyCompletionShareCopy(
         require(completedStatus.isNotBlank()) {
             "Daily share completed status must not be blank."
         }
-        require(completedInStatusFormat.isNotBlank()) {
-            "Daily share completed-in status format must not be blank."
+        require(completedResultStatusFormat.isNotBlank()) {
+            "Daily share completed-result status format must not be blank."
+        }
+        require(movementSingularFormat.isNotBlank()) {
+            "Daily share singular movement format must not be blank."
+        }
+        require(movementPluralFormat.isNotBlank()) {
+            "Daily share plural movement format must not be blank."
         }
     }
 }
@@ -46,12 +57,24 @@ class DailyCompletionShareTextFormatter(private val recipeCatalog: DailyRecipeCa
         val localizedDate = completedIdentity.localDate.format(
             DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
         )
-        val completedStatus = completion.elapsedTime?.let { elapsedTime ->
+        val formattedElapsedTime = completion.elapsedTime?.let(DailyElapsedTimeFormatter::format)
+        val formattedMovementCount = completion.movementCount?.let { movementCount ->
             String.format(
                 locale,
-                copy.completedInStatusFormat,
-                DailyElapsedTimeFormatter.format(elapsedTime)
+                if (movementCount.pluralQuantity() == 1) {
+                    copy.movementSingularFormat
+                } else {
+                    copy.movementPluralFormat
+                },
+                DailyMovementCountFormatter.format(movementCount)
             )
+        }
+        val formattedResult = DailyCompletionResultFormatter.format(
+            formattedElapsedTime = formattedElapsedTime,
+            formattedMovementCount = formattedMovementCount
+        )
+        val completedStatus = formattedResult?.let { result ->
+            String.format(locale, copy.completedResultStatusFormat, result)
         } ?: copy.completedStatus
         return DailyCompletionShareText(
             value = "${copy.dailyName} · $localizedDate\n" +

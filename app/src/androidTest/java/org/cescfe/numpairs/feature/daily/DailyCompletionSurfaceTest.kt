@@ -126,7 +126,7 @@ class DailyCompletionSurfaceTest {
             .onNodeWithTag(DailyScreenTestTags.SHARE_RESULT)
             .performClick()
         composeTestRule.runOnIdle {
-            assertTrue(requireNotNull(sharedText).endsWith("Completed in 02:05"))
+            assertTrue(requireNotNull(sharedText).endsWith("Completed in 02:05 · 23 moves"))
             assertEquals(0, repository.mutationCount)
         }
 

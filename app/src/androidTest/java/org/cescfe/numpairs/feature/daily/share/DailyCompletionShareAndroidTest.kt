@@ -11,6 +11,7 @@ import java.time.LocalDate
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
+import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.feature.daily.DailyRecipes
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -22,7 +23,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class DailyCompletionShareAndroidTest {
     @Test
-    fun payload_factory_uses_localized_timed_daily_completion_copy() {
+    fun payload_factory_uses_localized_timed_daily_completion_copy_with_movements() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
             LocalDate.of(2026, 7, 25)
@@ -33,8 +34,14 @@ class DailyCompletionShareAndroidTest {
         ).create(
             completion = DailyCompletion(
                 identity = identity,
-                elapsedTime = DailyElapsedTime(125_999)
+                elapsedTime = DailyElapsedTime(125_999),
+                movementCount = DailyMovementCount(23)
             )
+        )
+        val formattedMovements = context.resources.getQuantityString(
+            R.plurals.daily_movement_count,
+            2,
+            "23"
         )
 
         assertTrue(payload.text.value.startsWith(context.getString(R.string.daily_share_name)))
@@ -49,12 +56,39 @@ class DailyCompletionShareAndroidTest {
         )
         assertTrue(
             payload.text.value.endsWith(
-                context.getString(R.string.daily_share_completed_in_status, "02:05")
+                context.getString(
+                    R.string.daily_share_completed_in_status,
+                    "02:05 · $formattedMovements"
+                )
             )
         )
         assertEquals(
             context.getString(R.string.daily_share_chooser_title),
             payload.chooserTitle
+        )
+    }
+
+    @Test
+    fun payload_factory_keeps_timed_copy_when_movement_count_is_unknown() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
+            LocalDate.of(2026, 7, 25)
+        )
+
+        val payload = AndroidDailyCompletionSharePayloadFactory(
+            resources = context.resources
+        ).create(
+            completion = DailyCompletion(
+                identity = identity,
+                elapsedTime = DailyElapsedTime(125_999),
+                movementCount = null
+            )
+        )
+
+        assertTrue(
+            payload.text.value.endsWith(
+                context.getString(R.string.daily_share_completed_in_status, "02:05")
+            )
         )
     }
 
