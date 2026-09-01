@@ -3,7 +3,6 @@ package org.cescfe.numpairs.feature.daily
 import java.time.DayOfWeek
 import java.time.LocalDate
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
-import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
@@ -15,7 +14,7 @@ class CurrentDailyChallengeResolverTest {
     fun resolver_reads_the_local_date_once_and_combines_it_with_the_active_recipe() {
         var dateReadCount = 0
         val resolver = CurrentDailyChallengeResolver(
-            localDateSource = DeviceLocalDateSource {
+            localDateSource = {
                 dateReadCount += 1
                 LocalDate.of(2026, 7, 25)
             }
@@ -34,7 +33,7 @@ class CurrentDailyChallengeResolverTest {
     fun resolved_identity_does_not_change_when_the_local_date_source_changes() {
         var currentDate = LocalDate.of(2026, 12, 31)
         val resolver = CurrentDailyChallengeResolver(
-            localDateSource = DeviceLocalDateSource { currentDate }
+            localDateSource = { currentDate }
         )
 
         val firstResolution = resolver.resolve()
@@ -61,7 +60,7 @@ class CurrentDailyChallengeResolverTest {
 
         expectedChallenges.forEach { (dayOfWeek, expectedChallenge) ->
             val resolver = CurrentDailyChallengeResolver(
-                localDateSource = DeviceLocalDateSource { dateFor(dayOfWeek) }
+                localDateSource = { dateFor(dayOfWeek) }
             )
 
             assertSame(expectedChallenge, resolver.resolve().challenge)

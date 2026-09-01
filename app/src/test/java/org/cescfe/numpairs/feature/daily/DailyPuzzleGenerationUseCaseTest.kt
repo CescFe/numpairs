@@ -30,11 +30,11 @@ class DailyPuzzleGenerationUseCaseTest {
         val requests = mutableListOf<GeneratedPuzzleGenerationRequest>()
         val createdChallenges = mutableListOf<GeneratedChallenge>()
         val useCase = dailyGenerationUseCase(
-            dateSource = DeviceLocalDateSource {
+            dateSource = {
                 dateReadCount += 1
                 date
             },
-            generatedFactory = GeneratedPuzzleGenerationUseCaseFactory { challenge ->
+            generatedFactory = { challenge ->
                 createdChallenges += challenge
                 GeneratedPuzzleGenerationUseCase { request ->
                     requests += request
@@ -89,10 +89,10 @@ class DailyPuzzleGenerationUseCaseTest {
             val requests = mutableListOf<GeneratedPuzzleGenerationRequest>()
             val createdChallenges = mutableListOf<GeneratedChallenge>()
             val useCase = dailyGenerationUseCase(
-                dateSource = DeviceLocalDateSource {
+                dateSource = {
                     LocalDate.of(2026, 8, 31).plusDays(dayOffset.toLong())
                 },
-                generatedFactory = GeneratedPuzzleGenerationUseCaseFactory { challenge ->
+                generatedFactory = { challenge ->
                     createdChallenges += challenge
                     GeneratedPuzzleGenerationUseCase { request ->
                         requests += request
@@ -121,7 +121,7 @@ class DailyPuzzleGenerationUseCaseTest {
             GeneratedPairsPuzzleGenerationFailureReason.AttemptsExhausted
         )
         val useCase = dailyGenerationUseCase(
-            dateSource = DeviceLocalDateSource { LocalDate.of(2026, 12, 31) },
+            dateSource = { LocalDate.of(2026, 12, 31) },
             generatedFactory = generatedFactory { request, attempt ->
                 failedResult(request = request, reason = reasons[attempt])
             }
@@ -143,7 +143,7 @@ class DailyPuzzleGenerationUseCaseTest {
     fun typed_cancellation_is_terminal_and_does_not_attempt_later_candidates() = runBlocking {
         val requests = mutableListOf<GeneratedPuzzleGenerationRequest>()
         val useCase = dailyGenerationUseCase(
-            dateSource = DeviceLocalDateSource { LocalDate.of(2028, 2, 29) },
+            dateSource = { LocalDate.of(2028, 2, 29) },
             generatedFactory = generatedFactory { request, attempt ->
                 requests += request
                 failedResult(
@@ -170,8 +170,8 @@ class DailyPuzzleGenerationUseCaseTest {
     @Test
     fun coroutine_cancellation_is_not_converted_into_exhaustion() {
         val useCase = dailyGenerationUseCase(
-            dateSource = DeviceLocalDateSource { LocalDate.of(2026, 7, 25) },
-            generatedFactory = GeneratedPuzzleGenerationUseCaseFactory {
+            dateSource = { LocalDate.of(2026, 7, 25) },
+            generatedFactory = {
                 GeneratedPuzzleGenerationUseCase {
                     throw CancellationException("cancel test")
                 }
@@ -199,7 +199,7 @@ class DailyPuzzleGenerationUseCaseTest {
     fun every_date_in_2027_generates_within_the_configured_four_candidates() = runBlocking {
         var currentDate = LocalDate.of(2027, 1, 1)
         val useCase = configuredDailyGenerationUseCase(
-            dateSource = DeviceLocalDateSource { currentDate }
+            dateSource = { currentDate }
         )
         val successfulCandidateCounts = IntArray(4)
 
@@ -224,7 +224,7 @@ private fun dailyGenerationUseCase(
 
 private fun configuredDailyGenerationUseCase(date: LocalDate): DailyPuzzleGenerationUseCase =
     configuredDailyGenerationUseCase(
-        dateSource = DeviceLocalDateSource { date }
+        dateSource = { date }
     )
 
 private fun configuredDailyGenerationUseCase(dateSource: DeviceLocalDateSource): DailyPuzzleGenerationUseCase =
