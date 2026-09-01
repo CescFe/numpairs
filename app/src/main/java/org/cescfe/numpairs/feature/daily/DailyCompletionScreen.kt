@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.preferences.PersonalizationTheme
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
+import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.cescfe.numpairs.ui.theme.NumPairsThemePreviewParameterProvider
@@ -44,7 +46,8 @@ internal fun DailyCompletionScreen(
     onViewCalendar: () -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
-    elapsedTime: DailyElapsedTime? = null
+    elapsedTime: DailyElapsedTime? = null,
+    movementCount: DailyMovementCount? = null
 ) {
     Scaffold(
         modifier = modifier
@@ -126,6 +129,33 @@ internal fun DailyCompletionScreen(
                             textAlign = TextAlign.Center
                         )
                     }
+                    movementCount?.let { completedMovementCount ->
+                        val formattedMovementCount = DailyMovementCountFormatter.format(completedMovementCount)
+                        val accessibilityDescription = pluralStringResource(
+                            R.plurals.daily_movement_count_content_description,
+                            completedMovementCount.pluralQuantity(),
+                            formattedMovementCount
+                        )
+                        Text(
+                            text = stringResource(R.string.daily_completion_movements_label),
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center
+                        )
+                        Text(
+                            text = formattedMovementCount,
+                            modifier = Modifier
+                                .testTag(DailyScreenTestTags.COMPLETION_MOVEMENTS)
+                                .semantics {
+                                    contentDescription = accessibilityDescription
+                                },
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontFamily = FontFamily.Monospace,
+                                fontFeatureSettings = "tnum",
+                                fontWeight = FontWeight.Bold
+                            ),
+                            textAlign = TextAlign.Center
+                        )
+                    }
                     NumPairsComponents.PrimaryCtaButton(
                         onClick = onShareResult,
                         modifier = Modifier
@@ -176,6 +206,7 @@ object DailyScreenTestTags {
     const val PERSISTENCE_FAILURE = "daily_persistence_failure"
     const val CHRONOMETER = "daily_chronometer"
     const val COMPLETION_DURATION = "daily_completion_duration"
+    const val COMPLETION_MOVEMENTS = "daily_completion_movements"
 }
 
 private val DAILY_COMPLETION_MAX_WIDTH = 480.dp
@@ -192,6 +223,7 @@ private fun DailyCompletionScreenPreview(
                 accessibilityText = "Daily · Jul 25, 2026, 4 pairs · Low"
             ),
             elapsedTime = DailyElapsedTime(83_456),
+            movementCount = DailyMovementCount(23),
             onShareResult = {},
             onViewCalendar = {},
             onNavigateBack = {}

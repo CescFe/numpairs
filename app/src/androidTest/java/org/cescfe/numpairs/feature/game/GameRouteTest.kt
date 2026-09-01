@@ -30,6 +30,7 @@ import org.cescfe.numpairs.feature.game.ui.screen.GameScreenRobot
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -161,8 +162,119 @@ class GameRouteTest {
     }
 
     @Test
+    fun exposes_each_effective_puzzle_mutation_synchronously_without_conflating_rapid_commits() {
+        val committedMutations = mutableListOf<Puzzle>()
+
+        composeTestRule.setContent {
+            NumPairsTheme {
+                GameRoute(
+                    title = "4 pairs",
+                    initialPuzzle = samplePuzzle,
+                    gameSessionKey = "committed-puzzle-mutations",
+                    onPuzzleMutationCommitted = committedMutations::add
+                )
+            }
+        }
+
+        GameScreenRobot(
+            activity = composeTestRule.activity,
+            interactions = composeTestRule
+        ).tapStripItem(index = 5)
+            .enterStripValue("100")
+            .submitStripEntryInput()
+            .tapStripItem(index = 5)
+            .replaceStripValue("101")
+            .submitStripEntryInput()
+            .tapStripItem(index = 5)
+            .tapStripEntryClearAction()
+            .scrollToBoard()
+            .tapTileLeftOperand(index = 0)
+            .tapOperandOption(entryId = 2)
+            .tapOperatorOption(Operator.ADDITION)
+            .tapOperandOption(entryId = 4)
+            .tapTileReset(index = 0)
+
+        composeTestRule.runOnIdle {
+            assertEquals(7, committedMutations.size)
+            assertEquals(StripItem.PlayerEntered(100), committedMutations[0].strip.items[5])
+            assertEquals(StripItem.PlayerEntered(101), committedMutations[1].strip.items[5])
+            assertEquals(StripItem.Hidden, committedMutations[2].strip.items[5])
+            assertEquals(Operator.ADDITION, committedMutations[4].board.tiles[0].expression.operator)
+            assertEquals(samplePuzzle.board.tiles[0], committedMutations.last().board.tiles[0])
+        }
+    }
+
+    @Test
+    fun transient_and_no_op_interactions_do_not_report_puzzle_mutations() {
+        val committedMutations = mutableListOf<Puzzle>()
+        val initialPuzzle = puzzleWithEnteredStripAndNonPristineTile()
+
+        composeTestRule.setContent {
+            NumPairsTheme {
+                GameRoute(
+                    title = "4 pairs",
+                    initialPuzzle = initialPuzzle,
+                    gameSessionKey = "ignored-puzzle-interactions",
+                    onPuzzleMutationCommitted = committedMutations::add
+                )
+            }
+        }
+
+        val screen = GameScreenRobot(
+            activity = composeTestRule.activity,
+            interactions = composeTestRule
+        )
+        screen.tapStripItem(index = 5)
+            .submitStripEntryInput()
+            .scrollToBoard()
+            .tapTileOperator(index = 1)
+            .pressBack()
+            .tapStripItem(index = 0)
+            .enterStripValue("999")
+            .submitStripEntryInput()
+
+        composeTestRule.runOnIdle {
+            assertEquals(emptyList<Puzzle>(), committedMutations)
+        }
+    }
+
+    @Test
+    fun one_action_that_commits_a_pending_strip_edit_and_resets_a_tile_reports_both_mutations() {
+        val committedMutations = mutableListOf<Puzzle>()
+        val initialPuzzle = puzzleWithEnteredStripAndNonPristineTile()
+
+        composeTestRule.setContent {
+            NumPairsTheme {
+                GameRoute(
+                    title = "4 pairs",
+                    initialPuzzle = initialPuzzle,
+                    gameSessionKey = "compound-puzzle-mutation",
+                    onPuzzleMutationCommitted = committedMutations::add
+                )
+            }
+        }
+
+        GameScreenRobot(
+            activity = composeTestRule.activity,
+            interactions = composeTestRule
+        ).tapStripItem(index = 5)
+            .replaceStripValue("101")
+            .tapTileReset(index = 0)
+
+        composeTestRule.runOnIdle {
+            assertEquals(2, committedMutations.size)
+            assertEquals(StripItem.PlayerEntered(101), committedMutations[0].strip.items[5])
+            assertEquals(Operator.ADDITION, committedMutations[0].board.tiles[0].expression.operator)
+            assertEquals(StripItem.PlayerEntered(101), committedMutations[1].strip.items[5])
+            assertEquals(samplePuzzle.board.tiles[0], committedMutations[1].board.tiles[0])
+        }
+    }
+
+    @Test
     fun exposes_each_tile_assignment_commit_once_without_replaying_it() {
         val commits = mutableListOf<TileAssignmentCommit>()
+        val committedMutations = mutableListOf<Puzzle>()
+        val callbackOrder = mutableListOf<String>()
         var recompositionMarker by mutableStateOf(0)
         var puzzleResetKey by mutableStateOf(0)
 
@@ -175,7 +287,14 @@ class GameRouteTest {
                         initialPuzzle = oneOperatorAwayFromSolvedOnePairPuzzle(),
                         gameSessionKey = "assignment-commit",
                         puzzleResetKey = puzzleResetKey,
-                        onTileAssignmentCommitted = commits::add
+                        onPuzzleMutationCommitted = { puzzle ->
+                            committedMutations += puzzle
+                            callbackOrder += "mutation"
+                        },
+                        onTileAssignmentCommitted = { commit ->
+                            commits += commit
+                            callbackOrder += "assignment"
+                        }
                     )
                 }
             }
@@ -200,16 +319,21 @@ class GameRouteTest {
                 ),
                 commits.single()
             )
+            assertEquals(listOf("mutation", "assignment"), callbackOrder)
+            assertEquals(1, committedMutations.size)
+            assertTrue(committedMutations.single().isSolved)
             recompositionMarker += 1
         }
         composeTestRule.waitForIdle()
         composeTestRule.runOnIdle {
             assertEquals(1, commits.size)
+            assertEquals(1, committedMutations.size)
             puzzleResetKey += 1
         }
         composeTestRule.waitForIdle()
         composeTestRule.runOnIdle {
             assertEquals(1, commits.size)
+            assertEquals(1, committedMutations.size)
         }
     }
 
@@ -367,3 +491,19 @@ private fun Puzzle.withStripItem(index: Int, item: StripItem): Puzzle = copy(
         }
     )
 )
+
+private fun puzzleWithEnteredStripAndNonPristineTile(): Puzzle = samplePuzzle
+    .withStripItem(index = 5, item = StripItem.PlayerEntered(100))
+    .copy(
+        board = Board(
+            tiles = samplePuzzle.board.tiles.toMutableList().apply {
+                val tile = get(0)
+                set(
+                    0,
+                    tile.copy(
+                        expression = tile.expression.copy(operator = Operator.ADDITION)
+                    )
+                )
+            }
+        )
+    )

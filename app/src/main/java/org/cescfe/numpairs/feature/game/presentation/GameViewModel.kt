@@ -18,6 +18,7 @@ import org.cescfe.numpairs.domain.puzzle.model.TileResolutionState
 class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
     private var puzzle: Puzzle = initialPuzzle
     private var presentationState = GamePresentationState()
+    private val committedPuzzleMutations = ArrayDeque<Puzzle>()
 
     private val _currentPuzzle = MutableStateFlow(puzzle)
     val currentPuzzle: StateFlow<Puzzle> = _currentPuzzle.asStateFlow()
@@ -30,8 +31,15 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
     fun reset(initialPuzzle: Puzzle) {
         puzzle = initialPuzzle
         presentationState = GamePresentationState()
+        committedPuzzleMutations.clear()
         _currentPuzzle.value = puzzle
         publishUiState()
+    }
+
+    internal fun consumeCommittedPuzzleMutations(): List<Puzzle> {
+        val mutations = committedPuzzleMutations.toList()
+        committedPuzzleMutations.clear()
+        return mutations
     }
 
     fun onStripItemTapped(index: Int) {
@@ -295,6 +303,7 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
 
         if (hasStateChanged) {
             if (hasPuzzleChanged) {
+                committedPuzzleMutations.addLast(puzzle)
                 _currentPuzzle.value = puzzle
             }
             publishUiState()

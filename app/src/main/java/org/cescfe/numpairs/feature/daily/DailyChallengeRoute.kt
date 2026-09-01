@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -50,6 +51,7 @@ import org.cescfe.numpairs.data.daily.session.DailySessionRepository
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
+import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
 import org.cescfe.numpairs.feature.daily.calendar.DailyCalendarRoute
 import org.cescfe.numpairs.feature.daily.share.AndroidDailyCompletionShareLauncher
@@ -133,10 +135,9 @@ fun DailyChallengeRoute(
             modifier = modifier,
             isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,
             compactTileSelectorsEnabled = compactTileSelectorsEnabled,
-            onPuzzleChanged = viewModel::onCommittedPuzzleChanged,
+            onPuzzleMutationCommitted = viewModel::onPuzzleMutationCommitted,
             onPuzzlePresented = viewModel::onPuzzlePresented,
             onTimerRefresh = viewModel::onTimerRefresh,
-            onPuzzleSolved = viewModel::onPuzzleSolved,
             onRetryPersistence = viewModel::retryPersistence,
             onNavigateBack = onNavigateBack
         )
@@ -156,13 +157,13 @@ fun DailyChallengeRoute(
                     modifier = modifier,
                     isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,
                     compactTileSelectorsEnabled = compactTileSelectorsEnabled,
-                    onPuzzleChanged = viewModel::onCommittedPuzzleChanged,
+                    onPuzzleMutationCommitted = viewModel::onPuzzleMutationCommitted,
                     onPuzzlePresented = viewModel::onPuzzlePresented,
                     onTimerRefresh = viewModel::onTimerRefresh,
-                    onPuzzleSolved = viewModel::onPuzzleSolved,
                     onRetryPersistence = viewModel::retryPersistence,
                     completionContent = dailyCompletionOverlayContent(
                         elapsedTime = completion.elapsedTime,
+                        movementCount = completion.movementCount,
                         onShareResult = {
                             shareResult(completion)
                         },
@@ -189,6 +190,7 @@ fun DailyChallengeRoute(
                 DailyCompletionScreen(
                     presentation = presentation,
                     elapsedTime = state.completion.elapsedTime,
+                    movementCount = state.completion.movementCount,
                     onShareResult = {
                         shareResult(state.completion)
                     },
@@ -247,6 +249,7 @@ fun DailyCompletedTodayRoute(
             DailyCompletionScreen(
                 presentation = presentation,
                 elapsedTime = completion.elapsedTime,
+                movementCount = completion.movementCount,
                 onShareResult = {
                     shareResult(completion)
                 },
@@ -273,13 +276,12 @@ private fun DailyGameContent(
     modifier: Modifier,
     isGeneratedGameHapticsEnabled: Boolean,
     compactTileSelectorsEnabled: Boolean,
-    onPuzzleChanged: (
+    onPuzzleMutationCommitted: (
         org.cescfe.numpairs.data.daily.session.DailySessionId,
         org.cescfe.numpairs.domain.puzzle.model.Puzzle
     ) -> Unit,
     onPuzzlePresented: (org.cescfe.numpairs.data.daily.session.DailySessionId) -> Unit,
     onTimerRefresh: (org.cescfe.numpairs.data.daily.session.DailySessionId) -> Unit,
-    onPuzzleSolved: (org.cescfe.numpairs.data.daily.session.DailySessionId) -> Unit,
     onRetryPersistence: () -> Unit,
     completionContent: GameSuccessOverlayContent? = null,
     onNavigateBack: () -> Unit
@@ -320,13 +322,10 @@ private fun DailyGameContent(
             isCorrectTileMotionEnabled = true,
             isCompletionCelebrationEnabled = true,
             compactTileSelectorsEnabled = compactTileSelectorsEnabled,
-            onPuzzleChanged = { puzzle ->
-                onPuzzleChanged(session.id, puzzle)
+            onPuzzleMutationCommitted = { puzzle ->
+                onPuzzleMutationCommitted(session.id, puzzle)
             },
-            onTileAssignmentCommitted = { commit ->
-                if (commit.madePuzzleSolved) {
-                    onPuzzleSolved(session.id)
-                }
+            onTileAssignmentCommitted = { _ ->
                 if (isGeneratedGameHapticsEnabled) {
                     hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
                 }
@@ -352,18 +351,28 @@ private fun DailyGameContent(
 @Composable
 internal fun dailyCompletionOverlayContent(
     elapsedTime: DailyElapsedTime?,
+    movementCount: DailyMovementCount? = null,
     onShareResult: () -> Unit,
     onViewCalendar: () -> Unit,
     onNavigateBack: () -> Unit
 ): GameSuccessOverlayContent {
     val formattedElapsedTime = elapsedTime?.let(DailyElapsedTimeFormatter::format)
+    val formattedMovementCount = movementCount?.let { count ->
+        formattedDailyMovementCount(count)
+    }
+    val formattedResult = DailyCompletionResultFormatter.format(
+        formattedElapsedTime = formattedElapsedTime,
+        formattedMovementCount = formattedMovementCount
+    )
+    val resultContentDescription = dailyCompletionResultContentDescription(
+        formattedElapsedTime = formattedElapsedTime,
+        movementCount = movementCount
+    )
     return GameSuccessOverlayContent(
         message = stringResource(R.string.daily_completion_message),
         supportingText = stringResource(R.string.daily_completion_supporting_text),
-        highlightText = formattedElapsedTime,
-        highlightContentDescription = formattedElapsedTime?.let { formatted ->
-            stringResource(R.string.daily_elapsed_time_content_description, formatted)
-        },
+        highlightText = formattedResult,
+        highlightContentDescription = resultContentDescription,
         primaryActionLabel = stringResource(R.string.daily_share_result_action),
         onPrimaryAction = onShareResult,
         secondaryActionLabel = stringResource(R.string.daily_view_calendar_action),
@@ -372,6 +381,41 @@ internal fun dailyCompletionOverlayContent(
         onTertiaryAction = onNavigateBack,
         onBackRequested = onNavigateBack
     )
+}
+
+@Composable
+private fun formattedDailyMovementCount(movementCount: DailyMovementCount): String = pluralStringResource(
+    R.plurals.daily_movement_count,
+    movementCount.pluralQuantity(),
+    DailyMovementCountFormatter.format(movementCount)
+)
+
+@Composable
+private fun dailyCompletionResultContentDescription(
+    formattedElapsedTime: String?,
+    movementCount: DailyMovementCount?
+): String? {
+    val elapsedDescription = formattedElapsedTime?.let { elapsedTime ->
+        stringResource(R.string.daily_elapsed_time_content_description, elapsedTime)
+    }
+    val movementDescription = movementCount?.let { count ->
+        pluralStringResource(
+            R.plurals.daily_movement_count_content_description,
+            count.pluralQuantity(),
+            DailyMovementCountFormatter.format(count)
+        )
+    }
+    return when {
+        elapsedDescription != null && movementDescription != null -> stringResource(
+            R.string.daily_completion_result_content_description,
+            elapsedDescription,
+            movementDescription
+        )
+
+        elapsedDescription != null -> elapsedDescription
+
+        else -> movementDescription
+    }
 }
 
 @Composable

@@ -52,6 +52,7 @@ fun GameRoute(
     contentBeforePuzzle: @Composable ColumnScope.() -> Unit = {},
     onGameUiStateChanged: (GameUiState) -> Unit = {},
     onPuzzleChanged: (Puzzle) -> Unit = {},
+    onPuzzleMutationCommitted: (Puzzle) -> Unit = {},
     onTileAssignmentCommitted: (TileAssignmentCommit) -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
@@ -62,6 +63,7 @@ fun GameRoute(
     val uiState by gameViewModel.uiState.collectAsState()
     val currentOnGameUiStateChanged by rememberUpdatedState(onGameUiStateChanged)
     val currentOnPuzzleChanged by rememberUpdatedState(onPuzzleChanged)
+    val currentOnPuzzleMutationCommitted by rememberUpdatedState(onPuzzleMutationCommitted)
     val currentOnTileAssignmentCommitted by rememberUpdatedState(onTileAssignmentCommitted)
     var nextCorrectTileFeedbackId by remember(gameViewModel) { mutableLongStateOf(0L) }
     var correctTileFeedbackIdsByIndex by remember(gameViewModel, puzzleResetKey) {
@@ -84,6 +86,14 @@ fun GameRoute(
             nextCompletionFeedbackId += 1
             completionFeedbackId = nextCompletionFeedbackId
         }
+    }
+
+    fun <T> performPuzzleAction(action: () -> T): T {
+        val result = action()
+        gameViewModel.consumeCommittedPuzzleMutations().forEach { committedPuzzle ->
+            currentOnPuzzleMutationCommitted(committedPuzzle)
+        }
+        return result
     }
 
     LaunchedEffect(gameViewModel, puzzleResetKey) {
@@ -112,9 +122,11 @@ fun GameRoute(
             return false
         }
 
-        gameViewModel.onStripItemEntryInputFocusLost(
-            stripItemIndex = focusLossSourceIndex ?: input.stripItemIndex
-        )
+        performPuzzleAction {
+            gameViewModel.onStripItemEntryInputFocusLost(
+                stripItemIndex = focusLossSourceIndex ?: input.stripItemIndex
+            )
+        }
 
         return input.draftText.isBlank() || !isInvalid
     }
@@ -128,7 +140,9 @@ fun GameRoute(
         onNavigateBack = onNavigateBack,
         onStripItemTapped = { index ->
             if (interactionPolicy.canTapStripItem(index) && resolveActiveStripItemEntryInputIfAllowed()) {
-                gameViewModel.onStripItemTapped(index)
+                performPuzzleAction {
+                    gameViewModel.onStripItemTapped(index)
+                }
             }
         },
         onStripItemEntryInputChanged = gameViewModel::onStripItemEntryInputChanged,
@@ -137,7 +151,7 @@ fun GameRoute(
             val input = uiState.stripItemEntryInput
 
             if (input != null && interactionPolicy.canTapStripItem(input.stripItemIndex)) {
-                gameViewModel.onStripItemEntryInputCleared()
+                performPuzzleAction(gameViewModel::onStripItemEntryInputCleared)
             }
         },
         onStripItemEntryInputFocusLost = { stripItemIndex ->
@@ -145,12 +159,16 @@ fun GameRoute(
         },
         onTileLeftOperandTapped = { index ->
             if (interactionPolicy.canTapTileLeftOperand(index) && resolveActiveStripItemEntryInputIfAllowed()) {
-                gameViewModel.onTileLeftOperandTapped(index)
+                performPuzzleAction {
+                    gameViewModel.onTileLeftOperandTapped(index)
+                }
             }
         },
         onTileRightOperandTapped = { index ->
             if (interactionPolicy.canTapTileRightOperand(index) && resolveActiveStripItemEntryInputIfAllowed()) {
-                gameViewModel.onTileRightOperandTapped(index)
+                performPuzzleAction {
+                    gameViewModel.onTileRightOperandTapped(index)
+                }
             }
         },
         onTileOperandSelectionDismissed = gameViewModel::onTileOperandSelectionDismissed,
@@ -158,18 +176,24 @@ fun GameRoute(
             val dialog = uiState.tileOperandSelectionDialog ?: return@onTileOperandSelectionConfirmed
 
             if (interactionPolicy.canConfirmTileOperand(dialog.tileIndex, dialog.slot, stripEntryId)) {
-                gameViewModel.onTileOperandSelectionConfirmed(stripEntryId)
+                performPuzzleAction {
+                    gameViewModel.onTileOperandSelectionConfirmed(stripEntryId)
+                }
                     ?.let(::handleTileAssignmentCommit)
             }
         },
         onTileOperatorTapped = { index ->
             if (interactionPolicy.canTapTileOperator(index) && resolveActiveStripItemEntryInputIfAllowed()) {
-                gameViewModel.onTileOperatorTapped(index)
+                performPuzzleAction {
+                    gameViewModel.onTileOperatorTapped(index)
+                }
             }
         },
         onTileResetTapped = { index ->
             if (interactionPolicy.canTapTileReset(index) && resolveActiveStripItemEntryInputIfAllowed()) {
-                gameViewModel.onTileResetTapped(index)
+                performPuzzleAction {
+                    gameViewModel.onTileResetTapped(index)
+                }
                 correctTileFeedbackIdsByIndex = correctTileFeedbackIdsByIndex - index
                 completionFeedbackId = null
             }
@@ -179,7 +203,9 @@ fun GameRoute(
             val tileIndex = uiState.tileOperatorSelectionDialog?.tileIndex ?: return@onTileOperatorSelectionConfirmed
 
             if (interactionPolicy.canConfirmTileOperator(tileIndex, operator)) {
-                gameViewModel.onTileOperatorSelectionConfirmed(operator)
+                performPuzzleAction {
+                    gameViewModel.onTileOperatorSelectionConfirmed(operator)
+                }
                     ?.let(::handleTileAssignmentCommit)
             }
         },

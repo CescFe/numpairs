@@ -117,6 +117,18 @@
     <string name="daily_completion_challenge_name">4 pares · Baja</string>
     <string name="daily_elapsed_time_content_description">Tiempo transcurrido: %1$s</string>
     <string name="daily_completion_duration_label">Tiempo de resolución</string>
+    <plurals name="daily_movement_count">
+        <item quantity="one">%1$s movimiento</item>
+        <item quantity="many">%1$s movimientos</item>
+        <item quantity="other">%1$s movimientos</item>
+    </plurals>
+    <plurals name="daily_movement_count_content_description">
+        <item quantity="one">Movimiento: %1$s</item>
+        <item quantity="many">Movimientos: %1$s</item>
+        <item quantity="other">Movimientos: %1$s</item>
+    </plurals>
+    <string name="daily_completion_result_content_description">%1$s. %2$s</string>
+    <string name="daily_completion_movements_label">Movimientos</string>
     <string name="daily_share_result_action">Compartir resultado</string>
     <string name="daily_view_calendar_action">Ver calendario</string>
     <string name="daily_back_to_menu_action">Volver al menú</string>

@@ -80,4 +80,23 @@ class GameViewModelPuzzleStateTest {
 
         assertSame(replacement, viewModel.currentPuzzle.value)
     }
+
+    @Test
+    fun `committed puzzle mutations remain distinct when one action changes the strip and resets a tile`() {
+        val viewModel = GameViewModel(initialPuzzle = samplePuzzle)
+        viewModel.onTileOperatorTapped(index = 0)
+        viewModel.onTileOperatorSelectionConfirmed(operator = Operator.ADDITION)
+        assertEquals(1, viewModel.consumeCommittedPuzzleMutations().size)
+        viewModel.onStripItemTapped(index = 5)
+        viewModel.onStripItemEntryInputChanged(draftText = "100")
+
+        viewModel.onTileResetTapped(index = 0)
+
+        val mutations = viewModel.consumeCommittedPuzzleMutations()
+        assertEquals(2, mutations.size)
+        assertEquals(StripItem.PlayerEntered(100), mutations[0].strip.items[5])
+        assertEquals(Operator.ADDITION, mutations[0].board.tiles[0].expression.operator)
+        assertEquals(StripItem.PlayerEntered(100), mutations[1].strip.items[5])
+        assertEquals(samplePuzzle.board.tiles[0], mutations[1].board.tiles[0])
+    }
 }
