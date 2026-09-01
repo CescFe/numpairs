@@ -29,7 +29,7 @@ sealed interface DailyPuzzleGenerationResult {
         get() = currentDailyChallenge.identity
 
     val challenge: GeneratedChallenge
-        get() = currentDailyChallenge.recipe.challenge
+        get() = currentDailyChallenge.challenge
 
     data class Generated(
         override val currentDailyChallenge: CurrentDailyChallenge,
@@ -109,7 +109,7 @@ private fun CurrentDailyChallenge.requireFailuresMatchRecipe(attemptedFailures: 
         ) {
             "Daily candidate failure seed must match its recipe candidate."
         }
-        require(attemptedFailure.failure.request.profile == recipe.challenge.profile) {
+        require(attemptedFailure.failure.request.profile == challenge.profile) {
             "Daily candidate failure profile must match its recipe challenge."
         }
     }
@@ -129,7 +129,7 @@ class DailyPuzzleGenerationUseCase(
 
     override suspend fun generate(currentDailyChallenge: CurrentDailyChallenge): DailyPuzzleGenerationResult {
         val recipe = currentDailyChallenge.recipe
-        val challenge = recipe.challenge
+        val challenge = currentDailyChallenge.challenge
         val generationUseCase = generatedPuzzleGenerationUseCaseFactory.create(challenge)
         val attemptedFailures = mutableListOf<DailyCandidateGenerationFailure>()
 

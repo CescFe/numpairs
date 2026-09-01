@@ -9,9 +9,9 @@
     <string name="menu_daily_start_button">Reto Daily</string>
     <string name="menu_daily_continue_button">Continuar Daily</string>
     <string name="menu_daily_completed_button">Daily completado</string>
-    <string name="menu_daily_start_content_description">Empezar el reto Daily de hoy, 4 pares, dificultad Baja</string>
-    <string name="menu_daily_continue_content_description">Continuar el reto Daily de hoy, 4 pares, dificultad Baja</string>
-    <string name="menu_daily_completed_content_description">Abrir el reto Daily completado de hoy, 4 pares, dificultad Baja</string>
+    <string name="menu_daily_start_content_description">Empezar el reto Daily de hoy, %1$s</string>
+    <string name="menu_daily_continue_content_description">Continuar el reto Daily de hoy, %1$s</string>
+    <string name="menu_daily_completed_content_description">Abrir el reto Daily completado de hoy, %1$s</string>
     <string name="menu_daily_calendar_content_description">Ver calendario de finalizaciones Daily</string>
     <string name="menu_daily_not_started_state">No empezado hoy</string>
     <string name="menu_daily_in_progress_state">En curso hoy</string>
@@ -70,7 +70,9 @@
     <!-- Generated mode screens -->
     <string name="quick_screen_title">Quick</string>
     <string name="classic_screen_title">Clásico</string>
+    <string name="three_pairs_screen_title">3 pares</string>
     <string name="four_pairs_screen_title">4 pares</string>
+    <string name="eight_pairs_screen_title">8 pares</string>
 
     <!-- Generated puzzle creation -->
     <string name="generated_puzzle_loading_message">Creando puzle…</string>
@@ -114,7 +116,6 @@
     <string name="daily_completion_screen_title">Daily completado</string>
     <string name="daily_completion_message">¡Daily completado!</string>
     <string name="daily_completion_supporting_text">Has completado el reto de hoy.</string>
-    <string name="daily_completion_challenge_name">4 pares · Baja</string>
     <string name="daily_elapsed_time_content_description">Tiempo transcurrido: %1$s</string>
     <string name="daily_completion_duration_label">Tiempo de resolución</string>
     <plurals name="daily_movement_count">

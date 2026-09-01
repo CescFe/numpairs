@@ -405,7 +405,8 @@ class DailyCompletionSurfaceTest {
                         DailyCompletionScreen(
                             presentation = DailyChallengeTitle(
                                 visibleText = "Daily · 25 Jul 2026",
-                                accessibilityText = "Daily · 25 Jul 2026, 4 pairs · Low"
+                                accessibilityText = "Daily · 25 Jul 2026, 4 pairs · Low",
+                                challengeText = "4 pairs · Low"
                             ),
                             onShareResult = { shareCount += 1 },
                             onViewCalendar = { calendarCount += 1 },
@@ -498,7 +499,8 @@ class DailyCompletionSurfaceTest {
                 DailyCompletionScreen(
                     presentation = DailyChallengeTitle(
                         visibleText = "Daily · Jul 25, 2026",
-                        accessibilityText = "Daily · Jul 25, 2026, 4 pairs · Low"
+                        accessibilityText = "Daily · Jul 25, 2026, 4 pairs · Low",
+                        challengeText = "4 pairs · Low"
                     ),
                     elapsedTime = elapsedTime,
                     movementCount = DailyMovementCount(23),
@@ -532,7 +534,8 @@ class DailyCompletionSurfaceTest {
                 DailyCompletionScreen(
                     presentation = DailyChallengeTitle(
                         visibleText = "Daily · Jul 25, 2026",
-                        accessibilityText = "Daily · Jul 25, 2026, 4 pairs · Low"
+                        accessibilityText = "Daily · Jul 25, 2026, 4 pairs · Low",
+                        challengeText = "4 pairs · Low"
                     ),
                     elapsedTime = null,
                     onShareResult = {},
@@ -561,7 +564,8 @@ class DailyCompletionSurfaceTest {
                     DailyCompletionScreen(
                         presentation = DailyChallengeTitle(
                             visibleText = "Daily · Jul 25, 2026",
-                            accessibilityText = "Daily · Jul 25, 2026, 4 pairs · Low"
+                            accessibilityText = "Daily · Jul 25, 2026, 4 pairs · Low",
+                            challengeText = "4 pairs · Low"
                         ),
                         onShareResult = {},
                         onViewCalendar = {},
@@ -602,7 +606,8 @@ class DailyCompletionSurfaceTest {
     fun completion_identity_is_visible_without_reconstructing_a_game_board() {
         val presentation = DailyChallengeTitle(
             visibleText = "Daily · Jul 25, 2026",
-            accessibilityText = "Daily · Jul 25, 2026, 4 pairs · Low"
+            accessibilityText = "Daily · Jul 25, 2026, 4 pairs · Low",
+            challengeText = "4 pairs · Low"
         )
 
         composeTestRule.setContent {

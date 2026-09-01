@@ -7,6 +7,8 @@ import android.content.Intent
 import android.content.res.Resources
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.daily.DailyCompletion
+import org.cescfe.numpairs.feature.daily.DailyChallengeNameCopy
+import org.cescfe.numpairs.feature.generated.GeneratedModes
 
 data class DailyCompletionSharePayload(val text: DailyCompletionShareText, val chooserTitle: String) {
     init {
@@ -22,17 +24,44 @@ class AndroidDailyCompletionSharePayloadFactory(
 ) {
     fun create(completion: DailyCompletion): DailyCompletionSharePayload {
         val locale = resources.configuration.locales[0]
+        val threePairsName = resources.getString(R.string.three_pairs_screen_title)
         val fourPairsName = resources.getString(R.string.four_pairs_screen_title)
+        val eightPairsName = resources.getString(R.string.eight_pairs_screen_title)
         val lowDifficultyName = resources.getString(R.string.generated_difficulty_low)
+        val mediumDifficultyName = resources.getString(R.string.generated_difficulty_medium)
         return DailyCompletionSharePayload(
             text = formatter.format(
                 completion = completion,
                 copy = DailyCompletionShareCopy(
                     dailyName = resources.getString(R.string.daily_share_name),
-                    challengeName = resources.getString(
-                        R.string.generated_challenge_title,
-                        fourPairsName,
-                        lowDifficultyName
+                    challengeNames = DailyChallengeNameCopy(
+                        namesByChallengeId = mapOf(
+                            GeneratedModes.THREE_PAIRS_LOW.id to resources.getString(
+                                R.string.generated_challenge_title,
+                                threePairsName,
+                                lowDifficultyName
+                            ),
+                            GeneratedModes.FOUR_PAIRS_LOW.id to resources.getString(
+                                R.string.generated_challenge_title,
+                                fourPairsName,
+                                lowDifficultyName
+                            ),
+                            GeneratedModes.THREE_PAIRS_MEDIUM.id to resources.getString(
+                                R.string.generated_challenge_title,
+                                threePairsName,
+                                mediumDifficultyName
+                            ),
+                            GeneratedModes.FOUR_PAIRS_MEDIUM.id to resources.getString(
+                                R.string.generated_challenge_title,
+                                fourPairsName,
+                                mediumDifficultyName
+                            ),
+                            GeneratedModes.EIGHT_PAIRS_MEDIUM.id to resources.getString(
+                                R.string.generated_challenge_title,
+                                eightPairsName,
+                                mediumDifficultyName
+                            )
+                        )
                     ),
                     completedStatus = resources.getString(
                         R.string.daily_share_completed_status

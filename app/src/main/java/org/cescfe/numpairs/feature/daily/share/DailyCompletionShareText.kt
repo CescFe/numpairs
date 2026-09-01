@@ -4,6 +4,8 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 import org.cescfe.numpairs.domain.daily.DailyCompletion
+import org.cescfe.numpairs.feature.daily.DailyChallengeNameCopy
+import org.cescfe.numpairs.feature.daily.DailyChallengeNameFormatter
 import org.cescfe.numpairs.feature.daily.DailyCompletionResultFormatter
 import org.cescfe.numpairs.feature.daily.DailyElapsedTimeFormatter
 import org.cescfe.numpairs.feature.daily.DailyMovementCountFormatter
@@ -13,7 +15,7 @@ import org.cescfe.numpairs.feature.daily.pluralQuantity
 
 data class DailyCompletionShareCopy(
     val dailyName: String,
-    val challengeName: String,
+    val challengeNames: DailyChallengeNameCopy,
     val completedStatus: String,
     val completedResultStatusFormat: String,
     val movementSingularFormat: String,
@@ -22,9 +24,6 @@ data class DailyCompletionShareCopy(
     init {
         require(dailyName.isNotBlank()) {
             "Daily share name must not be blank."
-        }
-        require(challengeName.isNotBlank()) {
-            "Daily share challenge name must not be blank."
         }
         require(completedStatus.isNotBlank()) {
             "Daily share completed status must not be blank."
@@ -53,7 +52,10 @@ value class DailyCompletionShareText(val value: String) {
 class DailyCompletionShareTextFormatter(private val recipeCatalog: DailyRecipeCatalog = DailyRecipes.catalog) {
     fun format(completion: DailyCompletion, copy: DailyCompletionShareCopy, locale: Locale): DailyCompletionShareText {
         val completedIdentity = completion.identity
-        recipeCatalog.resolve(completedIdentity.recipeVersion)
+        val challengeName = DailyChallengeNameFormatter(recipeCatalog).format(
+            identity = completedIdentity,
+            copy = copy.challengeNames
+        )
         val localizedDate = completedIdentity.localDate.format(
             DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
         )
@@ -78,7 +80,7 @@ class DailyCompletionShareTextFormatter(private val recipeCatalog: DailyRecipeCa
         } ?: copy.completedStatus
         return DailyCompletionShareText(
             value = "${copy.dailyName} · $localizedDate\n" +
-                "${copy.challengeName} · $completedStatus"
+                "$challengeName · $completedStatus"
         )
     }
 }

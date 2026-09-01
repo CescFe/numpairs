@@ -425,7 +425,7 @@ private fun rememberDailyChallengeTitle(identity: DailyChallengeId): DailyChalle
         Locale.forLanguageTag(configuration.locales[0].toLanguageTag())
     }
     val dailyName = stringResource(R.string.daily_game_name)
-    val challengeName = stringResource(R.string.daily_completion_challenge_name)
+    val challengeName = identity.localizedDailyChallengeName()
     return remember(identity, dailyName, challengeName, locale) {
         DailyChallengeTitleFormatter().format(
             identity = identity,

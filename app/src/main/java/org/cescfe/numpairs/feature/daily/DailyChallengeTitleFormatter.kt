@@ -5,7 +5,7 @@ import java.time.format.FormatStyle
 import java.util.Locale
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
 
-data class DailyChallengeTitle(val visibleText: String, val accessibilityText: String)
+data class DailyChallengeTitle(val visibleText: String, val accessibilityText: String, val challengeText: String)
 
 class DailyChallengeTitleFormatter {
     fun format(
@@ -26,7 +26,8 @@ class DailyChallengeTitleFormatter {
         val visibleText = "$dailyName · $localizedDate"
         return DailyChallengeTitle(
             visibleText = visibleText,
-            accessibilityText = "$visibleText, $challengeName"
+            accessibilityText = "$visibleText, $challengeName",
+            challengeText = challengeName
         )
     }
 }

@@ -23,6 +23,7 @@ import org.cescfe.numpairs.data.generated.session.DataStoreGeneratedSessionRepos
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionSnapshot
+import org.cescfe.numpairs.domain.daily.DailyRecipeContracts
 import org.cescfe.numpairs.domain.generated.generation.generatedPuzzle
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfiles
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
@@ -55,7 +56,10 @@ class GeneratedAndDailySessionRecreationTest {
             dailySessionFile = dailySessionFile
         )
         val quickSession = quickSession()
-        val dailyFixture = generatedDailyFixture(date = LocalDate.of(2027, 4, 18))
+        val dailyFixture = generatedDailyFixture(
+            date = LocalDate.of(2027, 4, 18),
+            recipe = DailyRecipeContracts.WEEKLY_SCHEDULE_V2
+        )
         val dailySession = dailyFixture.snapshot(currentPuzzle = dailyFixture.progressPuzzle())
 
         originalRepositories.generated.replace(quickSession)

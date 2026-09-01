@@ -8,7 +8,9 @@ validated profile. Normal generated play owns one application-wide resumable ses
 starting another normal challenge safely replaces that slot.
 
 v10 adds one Daily Challenge for each device-local calendar date. The first daily recipe selects
-`4 Pairs Low`, but Daily behavior also requires:
+`4 Pairs Low`. A later product increment adds predictable weekly variety across the existing
+`3 Pairs Low`, `4 Pairs Low`, `3 Pairs Medium`, `4 Pairs Medium`, and `8 Pairs Medium`
+challenges. Daily behavior also requires:
 
 - one stable date-bound content identity
 - deterministic seed selection shared by every installation on the same recipe version
@@ -56,8 +58,8 @@ unchanged.
 
 ## Decision
 
-NumPairs will model Daily Challenge as a versioned local cadence over an explicitly configured
-generated challenge.
+NumPairs will model Daily Challenge as a versioned local cadence over explicitly configured
+generated challenges.
 
 ### Identity And Recipe
 
@@ -65,25 +67,35 @@ generated challenge.
   `DailyRecipeVersion`.
 - The canonical persisted date uses ISO-8601 `YYYY-MM-DD`.
 - `DailyRecipeVersion` identifies one immutable challenge-selection and seed-schedule contract.
-- The v10 recipe version is `daily-4-pairs-low-v1` and resolves to the existing `4 Pairs Low`
-  generated challenge.
+- The legacy v10 recipe version is `daily-4-pairs-low-v1` and resolves every date to the existing
+  `4 Pairs Low` generated challenge.
+- The active recipe version is `daily-weekly-schedule-v2`. It derives one exact generated
+  challenge from the captured date's `DayOfWeek`:
+  - Monday: `3 Pairs Low`
+  - Tuesday and Sunday: `4 Pairs Low`
+  - Wednesday and Saturday: `3 Pairs Medium`
+  - Thursday: `4 Pairs Medium`
+  - Friday: `8 Pairs Medium`
 - Display copy, localized date text, profile parameters, and current clock state are not part of
   Daily Challenge identity.
 
-The v10 recipe constructs one ASCII payload for each candidate:
+Each recipe constructs one ASCII payload for each candidate. The two implemented payloads are:
 
 `daily-4-pairs-low-v1|YYYY-MM-DD|candidate-index`
 
-It hashes the UTF-8 bytes with 32-bit FNV-1a, using offset basis `0x811C9DC5`, prime `0x01000193`,
-and defined 32-bit overflow. The resulting signed 32-bit bit pattern is the generation seed.
-Candidate indexes `0..3` are attempted in ascending order.
+`daily-weekly-schedule-v2|YYYY-MM-DD|candidate-index`
 
-The payload format, hash algorithm, constants, selected challenge, and four-candidate limit cannot
-change without a new recipe version.
+The recipe hashes the UTF-8 bytes with 32-bit FNV-1a, using offset basis `0x811C9DC5`, prime
+`0x01000193`, and defined 32-bit overflow. The resulting signed 32-bit bit pattern is the
+generation seed. Candidate indexes `0..3` are attempted in ascending order.
 
-This identity, immutable v10 recipe binding, configured-version resolver, and four-candidate seed
-schedule are implemented. Current device-local date capture and candidate generation are separate
-delivery boundaries.
+The payload format, hash algorithm, constants, day-to-challenge mapping, and four-candidate limit
+cannot change within a recipe version. Challenge selection reads only the one captured local date;
+it does not use Quick weighting, remembered difficulty, runtime randomness, or remote
+configuration.
+
+Both immutable recipe bindings, the configured-version resolver, one-time device-local date
+capture, and the four-candidate seed schedule are implemented.
 
 The generator remains unaware of dates and Daily semantics. It receives ordinary explicit
 generated-puzzle requests. Daily coordination never falls back to device randomness, current
@@ -98,9 +110,11 @@ terminal.
 Application composition supplies the current device-local date through an explicit clock
 boundary. Domain identities and persistence do not read the Android clock directly.
 
-The date is captured when a Daily entry request begins. A local-date change does not mutate an
-already visible Daily Session. Menu resolution compares the current local date with persisted
-Daily identity and does not expose an unfinished prior-date session for backfill.
+The date is captured when a Daily entry request begins. A local-date change does not mutate the
+identity or scheduled challenge already resolved for that request. Menu resolution compares the
+current local date with persisted Daily identity and does not expose an unfinished prior-date
+session for backfill. A valid same-date session using the legacy recipe remains resumable after the
+weekly recipe becomes active, so an upgrade never discards current-day progress.
 
 The clock and time zone are trusted local inputs. Manual changes may make a matching stored
 session or completion visible again; v10 does not add anti-cheat state.
@@ -141,8 +155,9 @@ The snapshot stores:
 - an optional timing start instant stored as Unix epoch milliseconds
 - an optional authoritative movement count
 
-The recipe version resolves the exact generated challenge. Mode, difficulty, profile parameters,
-and display strings are therefore not persisted redundantly in the Daily snapshot.
+The recipe version and canonical local date resolve the exact generated challenge. Mode,
+difficulty, profile parameters, and display strings are therefore not persisted redundantly in the
+Daily snapshot.
 
 Restoration resolves the stored recipe version, verifies its challenge against the puzzle shape
 and snapshot metadata, and reads the exact current puzzle. It never regenerates historical
@@ -226,10 +241,11 @@ Starting the later Daily Challenge:
 
 1. captures the new identity
 2. resolves its immutable recipe
-3. attempts deterministic candidate seeds in order
-4. validates the generated puzzle
-5. builds an exact new snapshot
-6. atomically replaces the stale Daily Session only after the successor is stored
+3. selects the exact challenge scheduled for the captured day of week
+4. attempts deterministic candidate seeds in order
+5. validates the generated puzzle
+6. builds an exact new snapshot
+7. atomically replaces the stale Daily Session only after the successor is stored
 
 Failure or cancellation keeps the prior aggregate intact. The stale session remains hidden and
 cannot be used for past-day play. A successful successor replaces only the Daily slot and does not
@@ -255,6 +271,8 @@ history. Account sync and cross-device transfer remain unsupported.
 - Movement progress and completion preserve one authoritative non-negative count without
   fabricating historical values.
 - A recipe version gives date-derived content a stable compatibility boundary.
+- Weekly variety reuses the sparse generated-challenge catalog without persisting derivable mode,
+  difficulty, or profile metadata.
 - The generator remains reusable and unaware of clocks or presentation.
 - Exact snapshots protect progress from future generator changes.
 - Completion history remains small, local, and independent from puzzle content.
@@ -275,8 +293,9 @@ history. Account sync and cross-device transfer remain unsupported.
 
 A later online product could publish curated daily content or synchronize completion history, but
 that would require a new trust, migration, and account contract. It must not silently reinterpret
-the local v10 identity.
+existing local Daily identities.
 
 A future recipe may select another existing challenge or use a new deterministic algorithm. It
-must use a new stable recipe version and define how a same-date completion from an older recipe
-suppresses duplicate Daily completion.
+must use a new stable recipe version, preserve resolvers needed by stored sessions and
+completions, and define how a same-date completion from an older recipe suppresses duplicate Daily
+completion.

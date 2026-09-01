@@ -109,12 +109,21 @@ The canonical date uses ISO-8601 `YYYY-MM-DD`. Localized display text, the curre
 derivable profile parameters are not part of the identity.
 
 ## Daily Recipe
-An immutable versioned definition that selects one generated challenge and deterministically maps
-a Daily Challenge identity plus candidate index to an ordered bounded sequence of generation
-seeds.
+An immutable versioned definition that selects one exact generated challenge from a Daily
+Challenge identity and deterministically maps that identity plus candidate index to an ordered
+bounded sequence of generation seeds.
 
-The v10 Daily Recipe selects exact `4 Pairs Low`. It does not use Quick weighting or remembered
-Generated Play Option difficulty. A recipe change requires a new stable version.
+The legacy `daily-4-pairs-low-v1` recipe selects exact `4 Pairs Low` for every date. The active
+`daily-weekly-schedule-v2` recipe selects by device-local day of week:
+
+- Monday: `3 Pairs Low`
+- Tuesday and Sunday: `4 Pairs Low`
+- Wednesday and Saturday: `3 Pairs Medium`
+- Thursday: `4 Pairs Medium`
+- Friday: `8 Pairs Medium`
+
+A recipe does not use Quick weighting, remembered Generated Play Option difficulty, runtime
+randomness, or remote configuration. A recipe change requires a new stable version.
 
 ## Daily Session
 The playable lifecycle for one Daily Challenge identity.
@@ -128,9 +137,10 @@ Movement Count starting at zero. A session migrated from storage that predates m
 has no movement count, and tracking cannot be enabled partway through that session.
 
 ## Resumable Daily Session
-The Daily Session currently stored in the Daily aggregate when its identity matches the current
-Daily Challenge, its recipe and puzzle remain supported and valid, no completion owns its date, and
-its current puzzle is not solved.
+The Daily Session currently stored in the Daily aggregate when its local date matches the captured
+current date, its stored recipe and puzzle remain supported and valid, no completion owns its date,
+and its current puzzle is not solved. A supported same-date session from an older recipe remains
+resumable after a newer recipe becomes active.
 
 An unfinished prior-date, solved, mismatched, corrupt, completed, unsupported, or missing Daily
 Session is not resumable.

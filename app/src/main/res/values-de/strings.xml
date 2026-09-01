@@ -9,9 +9,9 @@
     <string name="menu_daily_start_button">Tages-Challenge</string>
     <string name="menu_daily_continue_button">Tages-Challenge fortsetzen</string>
     <string name="menu_daily_completed_button">Tages-Challenge abgeschlossen</string>
-    <string name="menu_daily_start_content_description">Heutige Tages-Challenge starten, 4 Paare, leicht</string>
-    <string name="menu_daily_continue_content_description">Heutige Tages-Challenge fortsetzen, 4 Paare, leicht</string>
-    <string name="menu_daily_completed_content_description">Heutige abgeschlossene Tages-Challenge öffnen, 4 Paare, leicht</string>
+    <string name="menu_daily_start_content_description">Heutige Tages-Challenge starten, %1$s</string>
+    <string name="menu_daily_continue_content_description">Heutige Tages-Challenge fortsetzen, %1$s</string>
+    <string name="menu_daily_completed_content_description">Heutige abgeschlossene Tages-Challenge öffnen, %1$s</string>
     <string name="menu_daily_calendar_content_description">Kalender der abgeschlossenen Tages-Challenges anzeigen</string>
     <string name="menu_daily_not_started_state">Heute noch nicht begonnen</string>
     <string name="menu_daily_in_progress_state">Heute in Bearbeitung</string>
@@ -70,7 +70,9 @@
     <!-- Generated mode screens -->
     <string name="quick_screen_title">Schnell</string>
     <string name="classic_screen_title">Klassisch</string>
+    <string name="three_pairs_screen_title">3 Paare</string>
     <string name="four_pairs_screen_title">4 Paare</string>
+    <string name="eight_pairs_screen_title">8 Paare</string>
 
     <!-- Generated puzzle creation -->
     <string name="generated_puzzle_loading_message">Puzzle wird erstellt…</string>
@@ -114,7 +116,6 @@
     <string name="daily_completion_screen_title">Tages-Challenge abgeschlossen</string>
     <string name="daily_completion_message">Tages-Challenge abgeschlossen!</string>
     <string name="daily_completion_supporting_text">Die heutige Challenge ist abgeschlossen.</string>
-    <string name="daily_completion_challenge_name">4 Paare · Leicht</string>
     <string name="daily_elapsed_time_content_description">Verstrichene Zeit: %1$s</string>
     <string name="daily_completion_duration_label">Lösungszeit</string>
     <plurals name="daily_movement_count">

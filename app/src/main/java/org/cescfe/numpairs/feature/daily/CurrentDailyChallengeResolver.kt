@@ -5,6 +5,8 @@ import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
 import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
 
 data class CurrentDailyChallenge(val identity: DailyChallengeId, val recipe: DailyRecipe) {
+    val challenge = recipe.challengeFor(identity)
+
     init {
         require(identity.recipeVersion == recipe.version) {
             "Current Daily Challenge identity and recipe version must match."
@@ -15,7 +17,7 @@ data class CurrentDailyChallenge(val identity: DailyChallengeId, val recipe: Dai
 class CurrentDailyChallengeResolver(
     private val localDateSource: DeviceLocalDateSource,
     private val recipeCatalog: DailyRecipeCatalog = DailyRecipes.catalog,
-    private val activeRecipeVersion: DailyRecipeVersion = DailyRecipes.FOUR_PAIRS_LOW_V1.version
+    private val activeRecipeVersion: DailyRecipeVersion = DailyRecipes.WEEKLY_SCHEDULE_V2.version
 ) {
     fun resolve(): CurrentDailyChallenge {
         val localDate = localDateSource.currentDate()

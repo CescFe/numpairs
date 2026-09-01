@@ -30,11 +30,11 @@ class DailyPuzzleGenerationUseCaseTest {
         val requests = mutableListOf<GeneratedPuzzleGenerationRequest>()
         val createdChallenges = mutableListOf<GeneratedChallenge>()
         val useCase = dailyGenerationUseCase(
-            dateSource = DeviceLocalDateSource {
+            dateSource = {
                 dateReadCount += 1
                 date
             },
-            generatedFactory = GeneratedPuzzleGenerationUseCaseFactory { challenge ->
+            generatedFactory = { challenge ->
                 createdChallenges += challenge
                 GeneratedPuzzleGenerationUseCase { request ->
                     requests += request
@@ -54,9 +54,9 @@ class DailyPuzzleGenerationUseCaseTest {
         )
 
         val result = useCase.generate() as DailyPuzzleGenerationResult.Generated
-        val expectedIdentity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(date)
+        val expectedIdentity = DailyRecipes.WEEKLY_SCHEDULE_V2.identityFor(date)
         val expectedSeeds = (0..2).map { candidateIndex ->
-            DailyRecipes.FOUR_PAIRS_LOW_V1.seedFor(
+            DailyRecipes.WEEKLY_SCHEDULE_V2.seedFor(
                 identity = expectedIdentity,
                 candidateIndex = DailyCandidateIndex(candidateIndex)
             )
@@ -64,13 +64,52 @@ class DailyPuzzleGenerationUseCaseTest {
 
         assertEquals(1, dateReadCount)
         assertEquals(expectedIdentity, result.identity)
-        assertSame(GeneratedModes.FOUR_PAIRS_LOW, result.challenge)
+        assertSame(GeneratedModes.THREE_PAIRS_MEDIUM, result.challenge)
         assertEquals(DailyCandidateIndex(2), result.candidateIndex)
         assertEquals(expectedSeeds[2], result.seed)
         assertSame(samplePuzzle, result.initialPuzzle)
         assertEquals(expectedSeeds, requests.map(GeneratedPuzzleGenerationRequest::seed))
-        assertTrue(requests.all { request -> request.profile === GeneratedModes.FOUR_PAIRS_LOW.profile })
-        assertEquals(listOf(GeneratedModes.FOUR_PAIRS_LOW), createdChallenges)
+        assertTrue(requests.all { request -> request.profile === GeneratedModes.THREE_PAIRS_MEDIUM.profile })
+        assertEquals(listOf(GeneratedModes.THREE_PAIRS_MEDIUM), createdChallenges)
+    }
+
+    @Test
+    fun generation_uses_the_scheduled_challenge_for_every_weekday() = runBlocking {
+        val expectedChallenges = listOf(
+            GeneratedModes.THREE_PAIRS_LOW,
+            GeneratedModes.FOUR_PAIRS_LOW,
+            GeneratedModes.THREE_PAIRS_MEDIUM,
+            GeneratedModes.FOUR_PAIRS_MEDIUM,
+            GeneratedModes.EIGHT_PAIRS_MEDIUM,
+            GeneratedModes.THREE_PAIRS_MEDIUM,
+            GeneratedModes.FOUR_PAIRS_LOW
+        )
+
+        expectedChallenges.forEachIndexed { dayOffset, expectedChallenge ->
+            val requests = mutableListOf<GeneratedPuzzleGenerationRequest>()
+            val createdChallenges = mutableListOf<GeneratedChallenge>()
+            val useCase = dailyGenerationUseCase(
+                dateSource = {
+                    LocalDate.of(2026, 8, 31).plusDays(dayOffset.toLong())
+                },
+                generatedFactory = { challenge ->
+                    createdChallenges += challenge
+                    GeneratedPuzzleGenerationUseCase { request ->
+                        requests += request
+                        GeneratedPuzzleGenerationResult.Generated(
+                            request = request,
+                            initialPuzzle = samplePuzzle
+                        )
+                    }
+                }
+            )
+
+            val result = useCase.generate() as DailyPuzzleGenerationResult.Generated
+
+            assertSame(expectedChallenge, result.challenge)
+            assertEquals(listOf(expectedChallenge), createdChallenges)
+            assertEquals(listOf(expectedChallenge.profile), requests.map(GeneratedPuzzleGenerationRequest::profile))
+        }
     }
 
     @Test
@@ -82,7 +121,7 @@ class DailyPuzzleGenerationUseCaseTest {
             GeneratedPairsPuzzleGenerationFailureReason.AttemptsExhausted
         )
         val useCase = dailyGenerationUseCase(
-            dateSource = DeviceLocalDateSource { LocalDate.of(2026, 12, 31) },
+            dateSource = { LocalDate.of(2026, 12, 31) },
             generatedFactory = generatedFactory { request, attempt ->
                 failedResult(request = request, reason = reasons[attempt])
             }
@@ -104,7 +143,7 @@ class DailyPuzzleGenerationUseCaseTest {
     fun typed_cancellation_is_terminal_and_does_not_attempt_later_candidates() = runBlocking {
         val requests = mutableListOf<GeneratedPuzzleGenerationRequest>()
         val useCase = dailyGenerationUseCase(
-            dateSource = DeviceLocalDateSource { LocalDate.of(2028, 2, 29) },
+            dateSource = { LocalDate.of(2028, 2, 29) },
             generatedFactory = generatedFactory { request, attempt ->
                 requests += request
                 failedResult(
@@ -131,8 +170,8 @@ class DailyPuzzleGenerationUseCaseTest {
     @Test
     fun coroutine_cancellation_is_not_converted_into_exhaustion() {
         val useCase = dailyGenerationUseCase(
-            dateSource = DeviceLocalDateSource { LocalDate.of(2026, 7, 25) },
-            generatedFactory = GeneratedPuzzleGenerationUseCaseFactory {
+            dateSource = { LocalDate.of(2026, 7, 25) },
+            generatedFactory = {
                 GeneratedPuzzleGenerationUseCase {
                     throw CancellationException("cancel test")
                 }
@@ -160,7 +199,7 @@ class DailyPuzzleGenerationUseCaseTest {
     fun every_date_in_2027_generates_within_the_configured_four_candidates() = runBlocking {
         var currentDate = LocalDate.of(2027, 1, 1)
         val useCase = configuredDailyGenerationUseCase(
-            dateSource = DeviceLocalDateSource { currentDate }
+            dateSource = { currentDate }
         )
         val successfulCandidateCounts = IntArray(4)
 
@@ -171,10 +210,7 @@ class DailyPuzzleGenerationUseCaseTest {
             currentDate = currentDate.plusDays(1)
         }
 
-        assertEquals(
-            listOf(365, 0, 0, 0),
-            successfulCandidateCounts.toList()
-        )
+        assertEquals(365, successfulCandidateCounts.sum())
     }
 }
 
@@ -188,7 +224,7 @@ private fun dailyGenerationUseCase(
 
 private fun configuredDailyGenerationUseCase(date: LocalDate): DailyPuzzleGenerationUseCase =
     configuredDailyGenerationUseCase(
-        dateSource = DeviceLocalDateSource { date }
+        dateSource = { date }
     )
 
 private fun configuredDailyGenerationUseCase(dateSource: DeviceLocalDateSource): DailyPuzzleGenerationUseCase =

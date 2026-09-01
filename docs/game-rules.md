@@ -54,8 +54,16 @@ The player-facing generated play options are:
 - `Classic Medium` and `Classic Hard`: use the matching 8 Pairs challenge
 
 Quick and Classic change puzzle duration, size selection, and difficulty profile, not the pairing,
-operator, usage, or completion rules. Daily Challenge continues using exact `4 Pairs Low` through
-its deterministic recipe.
+operator, usage, or completion rules. Daily Challenge uses this deterministic weekly schedule:
+
+- Monday: `3 Pairs Low`
+- Tuesday and Sunday: `4 Pairs Low`
+- Wednesday and Saturday: `3 Pairs Medium`
+- Thursday: `4 Pairs Medium`
+- Friday: `8 Pairs Medium`
+
+The schedule selects one exact generated challenge from the captured device-local date. It does
+not use Quick weighting or remembered difficulty.
 
 Each tile has two rows:
 
