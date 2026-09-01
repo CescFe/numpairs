@@ -10,6 +10,7 @@ import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyMovementCount
+import org.cescfe.numpairs.domain.daily.DailyRecipeContracts
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfiles
@@ -19,6 +20,7 @@ import org.cescfe.numpairs.domain.puzzle.model.Strip
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -65,6 +67,33 @@ class DailyAggregateCodecTest {
         assertEquals(snapshot.seed, decodedSnapshot.seed)
         assertEquals(snapshot.timingStartInstant, decodedSnapshot.timingStartInstant)
         assertEquals(snapshot.movementCount, decodedSnapshot.movementCount)
+    }
+
+    @Test
+    fun aggregate_round_trip_restores_each_scheduled_profile_without_persisting_it_redundantly() {
+        val dates = listOf(
+            LocalDate.of(2026, 8, 31),
+            LocalDate.of(2026, 9, 1),
+            LocalDate.of(2026, 9, 2),
+            LocalDate.of(2026, 9, 6)
+        )
+
+        dates.forEach { date ->
+            val fixture = generatedDailyFixture(
+                date = date,
+                recipe = DailyRecipeContracts.WEEKLY_SCHEDULE_V2
+            )
+            val aggregate = DailyAggregate(activeSession = fixture.snapshot())
+
+            val decoded = codec.decode(codec.encode(aggregate)) as DailyAggregateDecodingResult.Decoded
+            val restored = requireNotNull(decoded.aggregate.activeSession)
+
+            assertEquals(aggregate, decoded.aggregate)
+            assertSame(
+                DailyRecipeContracts.WEEKLY_SCHEDULE_V2.profileFor(fixture.identity),
+                restored.profile
+            )
+        }
     }
 
     @Test

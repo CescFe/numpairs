@@ -11,7 +11,7 @@ import org.cescfe.numpairs.feature.generated.GeneratedChallenge
 import org.cescfe.numpairs.feature.generated.GeneratedChallengeCatalog
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 
-data class DailyRecipe(val contract: DailyRecipeContract, val challenge: GeneratedChallenge) {
+data class DailyRecipe(val contract: DailyRecipeContract, val challenges: List<GeneratedChallenge>) {
     val version: DailyRecipeVersion
         get() = contract.version
 
@@ -19,8 +19,18 @@ data class DailyRecipe(val contract: DailyRecipeContract, val challenge: Generat
         get() = contract.candidateIndices
 
     init {
-        require(challenge.profile == contract.profile) {
-            "Daily recipe challenge profile must match its platform-independent contract."
+        require(challenges.isNotEmpty()) {
+            "A Daily recipe must configure at least one challenge."
+        }
+        require(challenges.map(GeneratedChallenge::id).distinct().size == challenges.size) {
+            "Daily recipe challenge ids must be unique."
+        }
+        require(
+            challenges.map { challenge ->
+                challenge.profile
+            }.toSet() == contract.profileSelection.profiles
+        ) {
+            "Daily recipe challenges must match every profile in their platform-independent contract."
         }
     }
 
@@ -28,6 +38,11 @@ data class DailyRecipe(val contract: DailyRecipeContract, val challenge: Generat
 
     fun seedFor(identity: DailyChallengeId, candidateIndex: DailyCandidateIndex): Int =
         contract.seedFor(identity = identity, candidateIndex = candidateIndex)
+
+    fun challengeFor(identity: DailyChallengeId): GeneratedChallenge {
+        val profile = contract.profileFor(identity)
+        return challenges.single { challenge -> challenge.profile == profile }
+    }
 }
 
 class DailyRecipeCatalog(
@@ -50,7 +65,9 @@ class DailyRecipeCatalog(
         }
         require(
             all.all { recipe ->
-                generatedChallengeCatalog.resolveChallenge(recipe.challenge.id) == recipe.challenge
+                recipe.challenges.all { challenge ->
+                    generatedChallengeCatalog.resolveChallenge(challenge.id) == challenge
+                }
             }
         ) {
             "Every Daily recipe challenge must belong to the configured generated-challenge catalog."
@@ -62,15 +79,27 @@ class DailyRecipeCatalog(
     }
 
     fun resolveOrNull(version: DailyRecipeVersion): DailyRecipe? = recipesByVersion[version]
+
+    fun challengeFor(identity: DailyChallengeId): GeneratedChallenge =
+        resolve(identity.recipeVersion).challengeFor(identity)
 }
 
 object DailyRecipes {
     val FOUR_PAIRS_LOW_V1: DailyRecipe = DailyRecipe(
         contract = DailyRecipeContracts.FOUR_PAIRS_LOW_V1,
-        challenge = GeneratedModes.FOUR_PAIRS_LOW
+        challenges = listOf(GeneratedModes.FOUR_PAIRS_LOW)
+    )
+    val WEEKLY_SCHEDULE_V2: DailyRecipe = DailyRecipe(
+        contract = DailyRecipeContracts.WEEKLY_SCHEDULE_V2,
+        challenges = listOf(
+            GeneratedModes.THREE_PAIRS_LOW,
+            GeneratedModes.FOUR_PAIRS_LOW,
+            GeneratedModes.THREE_PAIRS_MEDIUM,
+            GeneratedModes.FOUR_PAIRS_MEDIUM
+        )
     )
     val catalog: DailyRecipeCatalog = DailyRecipeCatalog(
-        recipes = listOf(FOUR_PAIRS_LOW_V1),
+        recipes = listOf(FOUR_PAIRS_LOW_V1, WEEKLY_SCHEDULE_V2),
         generatedChallengeCatalog = GeneratedModes.catalog
     )
 }

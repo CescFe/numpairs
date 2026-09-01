@@ -169,7 +169,7 @@ class DailyMenuNavigationTest {
 
     @Test
     fun start_primary_routes_to_one_daily_preparation_attempt() {
-        val dateSource = MutableDateSource(LocalDate.of(2026, 7, 25))
+        val dateSource = MutableDateSource(LocalDate.of(2026, 9, 2))
         val repository = MutableDailyRepository(
             DailyState(
                 activeSession = null,
@@ -190,7 +190,7 @@ class DailyMenuNavigationTest {
             .assertIsDisplayed()
         composeTestRule.runOnIdle {
             assertEquals(1, generationCounter.count)
-            assertEquals(listOf(GeneratedModes.FOUR_PAIRS_LOW), generationCounter.createdChallenges)
+            assertEquals(listOf(GeneratedModes.THREE_PAIRS_MEDIUM), generationCounter.createdChallenges)
             assertTrue(difficultyRepository.explicitSelections.isEmpty())
             assertEquals(0, repository.mutationCount)
         }

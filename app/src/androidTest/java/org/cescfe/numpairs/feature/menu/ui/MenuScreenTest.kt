@@ -79,7 +79,7 @@ class MenuScreenTest {
             .onNodeWithTag(MenuScreenTestTags.DAILY_BUTTON)
             .assertTextEquals(string(R.string.menu_daily_start_button))
             .assertContentDescriptionEquals(
-                string(R.string.menu_daily_start_content_description)
+                string(R.string.menu_daily_start_content_description, "4 pairs · Low")
             ).assert(
                 SemanticsMatcher.expectValue(
                     SemanticsProperties.StateDescription,
@@ -94,7 +94,7 @@ class MenuScreenTest {
             .onNodeWithTag(MenuScreenTestTags.DAILY_BUTTON)
             .assertTextEquals(string(R.string.menu_daily_continue_button))
             .assertContentDescriptionEquals(
-                string(R.string.menu_daily_continue_content_description)
+                string(R.string.menu_daily_continue_content_description, "4 pairs · Low")
             ).assert(
                 SemanticsMatcher.expectValue(
                     SemanticsProperties.StateDescription,
@@ -109,7 +109,7 @@ class MenuScreenTest {
             .onNodeWithTag(MenuScreenTestTags.DAILY_BUTTON)
             .assertTextEquals(string(R.string.menu_daily_completed_button))
             .assertContentDescriptionEquals(
-                string(R.string.menu_daily_completed_content_description)
+                string(R.string.menu_daily_completed_content_description, "4 pairs · Low")
             ).assert(
                 SemanticsMatcher.expectValue(
                     SemanticsProperties.StateDescription,

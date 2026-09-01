@@ -9,9 +9,9 @@
     <string name="menu_daily_start_button">Daily challenge</string>
     <string name="menu_daily_continue_button">Continue daily</string>
     <string name="menu_daily_completed_button">Daily completed</string>
-    <string name="menu_daily_start_content_description">Start today’s Daily challenge, 4 pairs, Low difficulty</string>
-    <string name="menu_daily_continue_content_description">Continue today’s Daily challenge, 4 pairs, Low difficulty</string>
-    <string name="menu_daily_completed_content_description">Open today’s completed Daily challenge, 4 pairs, Low difficulty</string>
+    <string name="menu_daily_start_content_description">Start today’s Daily challenge, %1$s</string>
+    <string name="menu_daily_continue_content_description">Continue today’s Daily challenge, %1$s</string>
+    <string name="menu_daily_completed_content_description">Open today’s completed Daily challenge, %1$s</string>
     <string name="menu_daily_calendar_content_description">View Daily completion calendar</string>
     <string name="menu_daily_not_started_state">Not started today</string>
     <string name="menu_daily_in_progress_state">In progress today</string>
@@ -70,6 +70,7 @@
     <!-- Generated mode screens -->
     <string name="quick_screen_title">Quick</string>
     <string name="classic_screen_title">Classic</string>
+    <string name="three_pairs_screen_title">3 pairs</string>
     <string name="four_pairs_screen_title">4 pairs</string>
 
     <!-- Generated puzzle creation -->
@@ -114,7 +115,6 @@
     <string name="daily_completion_screen_title">Daily completed</string>
     <string name="daily_completion_message">Daily completed!</string>
     <string name="daily_completion_supporting_text">Today’s challenge is complete.</string>
-    <string name="daily_completion_challenge_name">4 pairs · Low</string>
     <string name="daily_elapsed_time_content_description">Elapsed time: %1$s</string>
     <string name="daily_completion_duration_label">Completion time</string>
     <plurals name="daily_movement_count">

@@ -54,6 +54,7 @@ import java.time.LocalDate
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.preferences.PersonalizationTheme
 import org.cescfe.numpairs.feature.daily.DailyRecipes
+import org.cescfe.numpairs.feature.daily.localizedDailyChallengeName
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.cescfe.numpairs.ui.theme.NumPairsThemePreviewParameterProvider
@@ -188,6 +189,7 @@ fun MenuScreen(
 
 @Composable
 private fun DailyMenuRow(state: DailyMenuUiState, onPrimaryClick: () -> Unit, onCalendarClick: () -> Unit) {
+    val challengeName = state.identity.localizedDailyChallengeName()
     val label = stringResource(
         when (state) {
             is DailyMenuUiState.StartToday -> R.string.menu_daily_start_button
@@ -200,7 +202,8 @@ private fun DailyMenuRow(state: DailyMenuUiState, onPrimaryClick: () -> Unit, on
             is DailyMenuUiState.StartToday -> R.string.menu_daily_start_content_description
             is DailyMenuUiState.ContinueToday -> R.string.menu_daily_continue_content_description
             is DailyMenuUiState.CompletedToday -> R.string.menu_daily_completed_content_description
-        }
+        },
+        challengeName
     )
     val actionStateDescription = stringResource(
         when (state) {

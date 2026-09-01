@@ -6,6 +6,7 @@ import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyMovementCount
+import org.cescfe.numpairs.domain.daily.DailyRecipeContract
 import org.cescfe.numpairs.domain.daily.DailyRecipeContracts
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
@@ -84,9 +85,9 @@ internal data class GeneratedDailyFixture(
 
 internal fun generatedDailyFixture(
     date: LocalDate = LocalDate.of(2027, 4, 18),
-    candidateIndex: DailyCandidateIndex = DailyCandidateIndex(0)
+    candidateIndex: DailyCandidateIndex = DailyCandidateIndex(0),
+    recipe: DailyRecipeContract = DailyRecipeContracts.FOUR_PAIRS_LOW_V1
 ): GeneratedDailyFixture {
-    val recipe = DailyRecipeContracts.FOUR_PAIRS_LOW_V1
     val identity = recipe.identityFor(date)
     val seed = recipe.seedFor(identity, candidateIndex)
     return GeneratedDailyFixture(
@@ -94,7 +95,7 @@ internal fun generatedDailyFixture(
         candidateIndex = candidateIndex,
         seed = seed,
         generatedPuzzle = generatedPuzzleFixture(
-            profile = recipe.profile,
+            profile = recipe.profileFor(identity),
             seed = seed
         )
     )

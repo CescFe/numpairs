@@ -7,6 +7,7 @@ import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.domain.daily.DailyRecipeContract
 import org.cescfe.numpairs.domain.daily.DailyRecipeContracts
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
+import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfile
 import org.cescfe.numpairs.domain.puzzle.model.Expression
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
@@ -41,6 +42,7 @@ data class DailySessionSnapshot(
     ) {
         "Daily Session recipe ${dailyChallengeId.recipeVersion.value} is unsupported."
     }
+    val profile: GeneratedPuzzleProfile = recipeContract.profileFor(dailyChallengeId)
 
     init {
         require(candidateIndex in recipeContract.candidateIndices) {
@@ -49,7 +51,7 @@ data class DailySessionSnapshot(
         require(seed == recipeContract.seedFor(dailyChallengeId, candidateIndex)) {
             "Daily Session seed must match its recipe candidate."
         }
-        requirePuzzleMatchesRecipe(initialPuzzle, recipeContract)
+        requirePuzzleMatchesRecipe(initialPuzzle, profile)
         require(initialPuzzle.isIncomplete) {
             "Initial Daily Session puzzle must be incomplete."
         }
@@ -65,13 +67,13 @@ data class DailySessionSnapshot(
         require(initialPuzzle.strip.entries.none { entry -> entry.item is StripItem.PlayerEntered }) {
             "Initial Daily Session strip entries cannot be player-entered."
         }
-        requireInitialStripMatchesRecipe(initialPuzzle, recipeContract)
+        requireInitialStripMatchesRecipe(initialPuzzle, profile)
         requireValidActivePuzzle(currentPuzzle)
     }
 }
 
 internal fun DailySessionSnapshot.requireValidActivePuzzle(activePuzzle: Puzzle) {
-    requirePuzzleMatchesRecipe(activePuzzle, recipeContract)
+    requirePuzzleMatchesRecipe(activePuzzle, profile)
     require(!activePuzzle.isSolved) {
         "An active Daily Session puzzle must be unsolved."
     }
@@ -80,7 +82,7 @@ internal fun DailySessionSnapshot.requireValidActivePuzzle(activePuzzle: Puzzle)
 }
 
 internal fun DailySessionSnapshot.requireValidSolvedPuzzle(solvedPuzzle: Puzzle) {
-    requirePuzzleMatchesRecipe(solvedPuzzle, recipeContract)
+    requirePuzzleMatchesRecipe(solvedPuzzle, profile)
     require(solvedPuzzle.isSolved) {
         "Daily completion puzzle must be solved."
     }
@@ -124,35 +126,35 @@ internal val DAILY_CHALLENGE_ID_COMPARATOR: Comparator<DailyChallengeId> =
 internal val DAILY_COMPLETION_COMPARATOR: Comparator<DailyCompletion> =
     compareBy(DAILY_CHALLENGE_ID_COMPARATOR, DailyCompletion::identity)
 
-private fun requirePuzzleMatchesRecipe(puzzle: Puzzle, recipeContract: DailyRecipeContract) {
-    require(puzzle.board.tiles.size == recipeContract.profile.size.boardTileCount) {
+private fun requirePuzzleMatchesRecipe(puzzle: Puzzle, profile: GeneratedPuzzleProfile) {
+    require(puzzle.board.tiles.size == profile.size.boardTileCount) {
         "Daily Session board shape must match its recipe profile."
     }
-    require(puzzle.strip.entries.size == recipeContract.profile.size.stripEntryCount) {
+    require(puzzle.strip.entries.size == profile.size.stripEntryCount) {
         "Daily Session strip shape must match its recipe profile."
     }
     require(
         puzzle.strip.entries.map { entry -> entry.id }.toSet() ==
-            (0 until recipeContract.profile.size.stripEntryCount).toSet()
+            (0 until profile.size.stripEntryCount).toSet()
     ) {
         "Daily Session strip identities must match its recipe shape."
     }
 }
 
-private fun requireInitialStripMatchesRecipe(puzzle: Puzzle, recipeContract: DailyRecipeContract) {
+private fun requireInitialStripMatchesRecipe(puzzle: Puzzle, profile: GeneratedPuzzleProfile) {
     val knownValues = puzzle.strip.entries.mapNotNull { entry ->
         (entry.item as? StripItem.Known)?.value
     }
-    require(knownValues.size in recipeContract.profile.initialStripMaskPolicy.knownEntryCountRange) {
+    require(knownValues.size in profile.initialStripMaskPolicy.knownEntryCountRange) {
         "Initial Daily Session known-entry count must match its recipe profile."
     }
-    require(knownValues.all { value -> value in recipeContract.profile.stripValuePolicy.valueRange }) {
+    require(knownValues.all { value -> value in profile.stripValuePolicy.valueRange }) {
         "Initial Daily Session known values must match its recipe profile."
     }
     require(
         knownValues.groupingBy { value -> value }
             .eachCount()
-            .all { (_, count) -> count <= recipeContract.profile.stripValuePolicy.maxOccurrencesPerValue }
+            .all { (_, count) -> count <= profile.stripValuePolicy.maxOccurrencesPerValue }
     ) {
         "Initial Daily Session known-value occurrences must match its recipe profile."
     }

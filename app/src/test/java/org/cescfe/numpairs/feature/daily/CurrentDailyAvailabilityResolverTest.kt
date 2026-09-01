@@ -20,6 +20,7 @@ import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
+import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
@@ -50,7 +51,7 @@ class CurrentDailyAvailabilityResolverTest {
     }
 
     @Test
-    fun exact_current_snapshot_is_restored_without_generation_or_repository_mutation() = runBlocking {
+    fun legacy_same_date_snapshot_is_restored_after_the_weekly_recipe_becomes_current() = runBlocking {
         val date = LocalDate.of(2027, 4, 18)
         val fixture = generatedDailyFixture(date = date)
         val snapshot = fixture.snapshot(currentPuzzle = fixture.progressPuzzle())
@@ -65,6 +66,8 @@ class CurrentDailyAvailabilityResolverTest {
             as CurrentDailyAvailability.ContinueToday
 
         assertSame(snapshot, availability.snapshot)
+        assertSame(DailyRecipes.FOUR_PAIRS_LOW_V1, availability.currentDailyChallenge.recipe)
+        assertSame(GeneratedModes.FOUR_PAIRS_LOW, availability.currentDailyChallenge.challenge)
         assertEquals(0, repository.mutationCount)
     }
 

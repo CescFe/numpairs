@@ -31,6 +31,7 @@ class DailyChallengeTitleFormatterTest {
             "Daily · $localizedDate, 4 pares · Baja",
             title.accessibilityText
         )
+        assertEquals("4 pares · Baja", title.challengeText)
         assertEquals("2028-02-29", identity.canonicalLocalDate)
     }
 

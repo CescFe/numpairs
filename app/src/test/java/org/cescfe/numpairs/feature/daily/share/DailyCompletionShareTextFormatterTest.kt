@@ -9,7 +9,9 @@ import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
+import org.cescfe.numpairs.feature.daily.DailyChallengeNameCopy
 import org.cescfe.numpairs.feature.daily.DailyRecipes
+import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -69,7 +71,7 @@ class DailyCompletionShareTextFormatterTest {
             completion = completion(identity, elapsedMilliseconds = 65_432),
             copy = DailyCompletionShareCopy(
                 dailyName = "NumPairs Daily",
-                challengeName = "4 pares · Baja",
+                challengeNames = challengeNames(fourPairsLow = "4 pares · Baja"),
                 completedStatus = "Completado",
                 completedResultStatusFormat = "Completado en %1\$s",
                 movementSingularFormat = "%1\$s movimiento",
@@ -85,6 +87,34 @@ class DailyCompletionShareTextFormatterTest {
         )
         assertEquals("2028-02-29", canonicalDate)
         assertEquals(canonicalDate, identity.canonicalLocalDate)
+    }
+
+    @Test
+    fun formatter_shares_the_authoritative_scheduled_size_and_difficulty_for_every_weekday() {
+        val scenarios = listOf(
+            LocalDate.of(2026, 8, 31) to "3 Pairs · Low",
+            LocalDate.of(2026, 9, 1) to "4 Pairs · Low",
+            LocalDate.of(2026, 9, 2) to "3 Pairs · Medium",
+            LocalDate.of(2026, 9, 3) to "3 Pairs · Low",
+            LocalDate.of(2026, 9, 4) to "4 Pairs · Low",
+            LocalDate.of(2026, 9, 5) to "4 Pairs · Low",
+            LocalDate.of(2026, 9, 6) to "4 Pairs · Medium"
+        )
+
+        scenarios.forEach { (date, expectedChallengeName) ->
+            val identity = DailyRecipes.WEEKLY_SCHEDULE_V2.identityFor(date)
+            val text = DailyCompletionShareTextFormatter().format(
+                completion = completion(identity, elapsedMilliseconds = 65_432),
+                copy = englishCopy(),
+                locale = Locale.US
+            )
+
+            assertEquals(
+                "NumPairs Daily · ${localizedDate(identity, Locale.US)}\n" +
+                    "$expectedChallengeName · Completed in 01:05",
+                text.value
+            )
+        }
     }
 
     @Test
@@ -216,7 +246,9 @@ class DailyCompletionShareTextFormatterTest {
             englishCopy(dailyName = " ")
         }
         assertThrows(IllegalArgumentException::class.java) {
-            englishCopy(challengeName = "")
+            DailyChallengeNameCopy(
+                namesByChallengeId = mapOf(GeneratedModes.FOUR_PAIRS_LOW.id to "")
+            )
         }
         assertThrows(IllegalArgumentException::class.java) {
             englishCopy(completedStatus = "")
@@ -245,14 +277,14 @@ private fun completion(
 
 private fun englishCopy(
     dailyName: String = "NumPairs Daily",
-    challengeName: String = "4 Pairs · Low",
+    challengeNames: DailyChallengeNameCopy = challengeNames(),
     completedStatus: String = "Completed",
     completedResultStatusFormat: String = "Completed in %1\$s",
     movementSingularFormat: String = "%1\$s move",
     movementPluralFormat: String = "%1\$s moves"
 ): DailyCompletionShareCopy = DailyCompletionShareCopy(
     dailyName = dailyName,
-    challengeName = challengeName,
+    challengeNames = challengeNames,
     completedStatus = completedStatus,
     completedResultStatusFormat = completedResultStatusFormat,
     movementSingularFormat = movementSingularFormat,
@@ -271,7 +303,9 @@ private data class LocalizedMovementScenario(
 private fun localizedMovementCopy(scenario: LocalizedMovementScenario): DailyCompletionShareCopy =
     DailyCompletionShareCopy(
         dailyName = "Daily",
-        challengeName = "Challenge",
+        challengeNames = DailyChallengeNameCopy(
+            namesByChallengeId = mapOf(GeneratedModes.FOUR_PAIRS_LOW.id to "Challenge")
+        ),
         completedStatus = "Completed",
         completedResultStatusFormat = scenario.completedResultStatusFormat,
         movementSingularFormat = scenario.movementSingularFormat,
@@ -280,4 +314,18 @@ private fun localizedMovementCopy(scenario: LocalizedMovementScenario): DailyCom
 
 private fun localizedDate(identity: DailyChallengeId, locale: Locale): String = identity.localDate.format(
     DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
+)
+
+private fun challengeNames(
+    threePairsLow: String = "3 Pairs · Low",
+    fourPairsLow: String = "4 Pairs · Low",
+    threePairsMedium: String = "3 Pairs · Medium",
+    fourPairsMedium: String = "4 Pairs · Medium"
+): DailyChallengeNameCopy = DailyChallengeNameCopy(
+    namesByChallengeId = mapOf(
+        GeneratedModes.THREE_PAIRS_LOW.id to threePairsLow,
+        GeneratedModes.FOUR_PAIRS_LOW.id to fourPairsLow,
+        GeneratedModes.THREE_PAIRS_MEDIUM.id to threePairsMedium,
+        GeneratedModes.FOUR_PAIRS_MEDIUM.id to fourPairsMedium
+    )
 )

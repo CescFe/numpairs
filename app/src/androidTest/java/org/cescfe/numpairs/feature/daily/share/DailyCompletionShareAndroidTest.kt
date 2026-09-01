@@ -69,6 +69,33 @@ class DailyCompletionShareAndroidTest {
     }
 
     @Test
+    fun payload_factory_uses_the_scheduled_size_and_difficulty() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val identity = DailyRecipes.WEEKLY_SCHEDULE_V2.identityFor(
+            LocalDate.of(2026, 9, 2)
+        )
+
+        val payload = AndroidDailyCompletionSharePayloadFactory(
+            resources = context.resources
+        ).create(
+            completion = DailyCompletion(
+                identity = identity,
+                elapsedTime = DailyElapsedTime(65_432)
+            )
+        )
+
+        assertTrue(
+            payload.text.value.contains(
+                context.getString(
+                    R.string.generated_challenge_title,
+                    context.getString(R.string.three_pairs_screen_title),
+                    context.getString(R.string.generated_difficulty_medium)
+                )
+            )
+        )
+    }
+
+    @Test
     fun payload_factory_keeps_timed_copy_when_movement_count_is_unknown() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(

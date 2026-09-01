@@ -1102,7 +1102,8 @@ private fun viewModel(
 ): DailyPuzzleViewModel = DailyPuzzleViewModel(
     availabilityResolver = CurrentDailyAvailabilityResolver(
         currentDailyChallengeResolver = CurrentDailyChallengeResolver(
-            localDateSource = dateSource
+            localDateSource = dateSource,
+            activeRecipeVersion = DailyRecipes.FOUR_PAIRS_LOW_V1.version
         ),
         dailySessionRepository = repository
     ),
@@ -1170,7 +1171,7 @@ private fun candidateFailure(
 ): DailyCandidateGenerationFailure {
     val seed = current.recipe.seedFor(current.identity, candidateIndex)
     val request = GeneratedPuzzleGenerationRequest(
-        profile = current.recipe.challenge.profile,
+        profile = current.challenge.profile,
         seed = seed
     )
     return DailyCandidateGenerationFailure(

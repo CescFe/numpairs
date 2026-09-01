@@ -1,5 +1,6 @@
 package org.cescfe.numpairs.feature.daily
 
+import java.time.DayOfWeek
 import java.time.LocalDate
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
 import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
@@ -24,9 +25,9 @@ class CurrentDailyChallengeResolverTest {
 
         assertEquals(1, dateReadCount)
         assertEquals(LocalDate.of(2026, 7, 25), currentDailyChallenge.identity.localDate)
-        assertEquals(DailyRecipes.FOUR_PAIRS_LOW_V1.version, currentDailyChallenge.identity.recipeVersion)
-        assertSame(DailyRecipes.FOUR_PAIRS_LOW_V1, currentDailyChallenge.recipe)
-        assertSame(GeneratedModes.FOUR_PAIRS_LOW, currentDailyChallenge.recipe.challenge)
+        assertEquals(DailyRecipes.WEEKLY_SCHEDULE_V2.version, currentDailyChallenge.identity.recipeVersion)
+        assertSame(DailyRecipes.WEEKLY_SCHEDULE_V2, currentDailyChallenge.recipe)
+        assertSame(GeneratedModes.FOUR_PAIRS_LOW, currentDailyChallenge.challenge)
     }
 
     @Test
@@ -40,7 +41,29 @@ class CurrentDailyChallengeResolverTest {
         currentDate = LocalDate.of(2027, 1, 1)
 
         assertEquals(LocalDate.of(2026, 12, 31), firstResolution.identity.localDate)
+        assertSame(GeneratedModes.THREE_PAIRS_LOW, firstResolution.challenge)
         assertEquals(LocalDate.of(2027, 1, 1), resolver.resolve().identity.localDate)
+    }
+
+    @Test
+    fun resolver_selects_the_configured_challenge_for_every_captured_weekday() {
+        val expectedChallenges = mapOf(
+            DayOfWeek.MONDAY to GeneratedModes.THREE_PAIRS_LOW,
+            DayOfWeek.TUESDAY to GeneratedModes.FOUR_PAIRS_LOW,
+            DayOfWeek.WEDNESDAY to GeneratedModes.THREE_PAIRS_MEDIUM,
+            DayOfWeek.THURSDAY to GeneratedModes.THREE_PAIRS_LOW,
+            DayOfWeek.FRIDAY to GeneratedModes.FOUR_PAIRS_LOW,
+            DayOfWeek.SATURDAY to GeneratedModes.FOUR_PAIRS_LOW,
+            DayOfWeek.SUNDAY to GeneratedModes.FOUR_PAIRS_MEDIUM
+        )
+
+        expectedChallenges.forEach { (dayOfWeek, expectedChallenge) ->
+            val resolver = CurrentDailyChallengeResolver(
+                localDateSource = DeviceLocalDateSource { dateFor(dayOfWeek) }
+            )
+
+            assertSame(expectedChallenge, resolver.resolve().challenge)
+        }
     }
 
     @Test
@@ -57,3 +80,7 @@ class CurrentDailyChallengeResolverTest {
         }
     }
 }
+
+private fun dateFor(dayOfWeek: DayOfWeek): LocalDate = LocalDate.of(2026, 8, 31).plusDays(
+    (dayOfWeek.value - DayOfWeek.MONDAY.value).toLong()
+)

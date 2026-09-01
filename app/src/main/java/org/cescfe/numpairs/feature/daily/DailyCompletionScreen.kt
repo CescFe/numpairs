@@ -99,7 +99,7 @@ internal fun DailyCompletionScreen(
                         textAlign = TextAlign.Center
                     )
                     Text(
-                        text = stringResource(R.string.daily_completion_challenge_name),
+                        text = presentation.challengeText,
                         style = MaterialTheme.typography.bodyLarge,
                         textAlign = TextAlign.Center
                     )
@@ -220,7 +220,8 @@ private fun DailyCompletionScreenPreview(
         DailyCompletionScreen(
             presentation = DailyChallengeTitle(
                 visibleText = "Daily · Jul 25, 2026",
-                accessibilityText = "Daily · Jul 25, 2026, 4 pairs · Low"
+                accessibilityText = "Daily · Jul 25, 2026, 4 pairs · Low",
+                challengeText = "4 pairs · Low"
             ),
             elapsedTime = DailyElapsedTime(83_456),
             movementCount = DailyMovementCount(23),

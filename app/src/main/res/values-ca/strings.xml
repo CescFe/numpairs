@@ -9,9 +9,9 @@
     <string name="menu_daily_start_button">Repte Daily</string>
     <string name="menu_daily_continue_button">Continua Daily</string>
     <string name="menu_daily_completed_button">Daily completat</string>
-    <string name="menu_daily_start_content_description">Comença el repte Daily de hui, 4 parelles, dificultat Baixa</string>
-    <string name="menu_daily_continue_content_description">Continua el repte Daily de hui, 4 parelles, dificultat Baixa</string>
-    <string name="menu_daily_completed_content_description">Obri el repte Daily completat de hui, 4 parelles, dificultat Baixa</string>
+    <string name="menu_daily_start_content_description">Comença el repte Daily de hui, %1$s</string>
+    <string name="menu_daily_continue_content_description">Continua el repte Daily de hui, %1$s</string>
+    <string name="menu_daily_completed_content_description">Obri el repte Daily completat de hui, %1$s</string>
     <string name="menu_daily_calendar_content_description">Mostra el calendari de finalitzacions Daily</string>
     <string name="menu_daily_not_started_state">No començat hui</string>
     <string name="menu_daily_in_progress_state">En curs hui</string>
@@ -70,6 +70,7 @@
     <!-- Generated mode screens -->
     <string name="quick_screen_title">Quick</string>
     <string name="classic_screen_title">Clàssic</string>
+    <string name="three_pairs_screen_title">3 parelles</string>
     <string name="four_pairs_screen_title">4 parelles</string>
 
     <!-- Generated puzzle creation -->
@@ -114,7 +115,6 @@
     <string name="daily_completion_screen_title">Daily completat</string>
     <string name="daily_completion_message">Daily completat!</string>
     <string name="daily_completion_supporting_text">Has completat el repte de hui.</string>
-    <string name="daily_completion_challenge_name">4 parelles · Baixa</string>
     <string name="daily_elapsed_time_content_description">Temps transcorregut: %1$s</string>
     <string name="daily_completion_duration_label">Temps de resolució</string>
     <plurals name="daily_movement_count">

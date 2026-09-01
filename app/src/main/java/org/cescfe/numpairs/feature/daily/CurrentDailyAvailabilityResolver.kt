@@ -39,7 +39,8 @@ sealed interface CurrentDailyAvailability {
 
 class CurrentDailyAvailabilityResolver(
     private val currentDailyChallengeResolver: CurrentDailyChallengeResolver,
-    private val dailySessionRepository: DailySessionRepository
+    private val dailySessionRepository: DailySessionRepository,
+    private val recipeCatalog: DailyRecipeCatalog = DailyRecipes.catalog
 ) {
     suspend fun resolve(): CurrentDailyAvailability {
         val currentDailyChallenge = currentDailyChallengeResolver.resolve()
@@ -62,12 +63,18 @@ class CurrentDailyAvailabilityResolver(
         }
 
         val activeSession = dailyState.activeSession
-        return if (
-            activeSession?.dailyChallengeId == currentDailyChallenge.identity &&
-            activeSession.recipeContract == currentDailyChallenge.recipe.contract
-        ) {
+        val resumableChallenge = activeSession?.takeIf { session ->
+            session.dailyChallengeId.localDate == currentDailyChallenge.identity.localDate
+        }?.let { session ->
+            recipeCatalog.resolveOrNull(session.dailyChallengeId.recipeVersion)?.takeIf { recipe ->
+                session.recipeContract == recipe.contract
+            }?.let { recipe ->
+                CurrentDailyChallenge(identity = session.dailyChallengeId, recipe = recipe)
+            }
+        }
+        return if (activeSession != null && resumableChallenge != null) {
             CurrentDailyAvailability.ContinueToday(
-                currentDailyChallenge = currentDailyChallenge,
+                currentDailyChallenge = resumableChallenge,
                 snapshot = activeSession
             )
         } else {
