@@ -59,6 +59,7 @@ import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.daily.calendar.DailyCalendarScreenTestTags
+import org.cescfe.numpairs.feature.daily.share.AndroidDailyCompletionSharePayloadFactory
 import org.cescfe.numpairs.feature.daily.share.DailyCompletionShareLaunchResult
 import org.cescfe.numpairs.feature.daily.share.DailyCompletionShareLauncher
 import org.cescfe.numpairs.feature.game.GameRoute
@@ -92,7 +93,7 @@ class DailyCompletionSurfaceTest {
                         identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
                             identity.localDate.minusDays(1)
                         ),
-                        elapsedTime = DailyElapsedTime(100_000),
+                        elapsedTime = DailyElapsedTime(140_000),
                         movementCount = DailyMovementCount(25)
                     ),
                     completion(
@@ -135,12 +136,17 @@ class DailyCompletionSurfaceTest {
             .assertTextEquals("23")
         composeTestRule
             .onNodeWithTag(DailyScreenTestTags.PERSONAL_BEST_DURATION)
-            .assertTextEquals("01:40")
+            .assertTextEquals("02:05")
         composeTestRule
             .onNodeWithTag(DailyScreenTestTags.SHARE_RESULT)
             .performClick()
         composeTestRule.runOnIdle {
-            assertTrue(requireNotNull(sharedText).endsWith("Completed in 02:05 · 23 moves"))
+            assertEquals(
+                "NumPairs Daily · Jul 25, 2026 · 4 pairs · Low\n" +
+                    "🏆 New personal best: 02:05 · 23 moves\n" +
+                    "Can you beat my time?",
+                sharedText
+            )
             assertEquals(0, repository.mutationCount)
         }
 
@@ -531,6 +537,67 @@ class DailyCompletionSurfaceTest {
             .assertDoesNotExist()
         composeTestRule.runOnIdle {
             assertEquals(1, celebrationStarts)
+        }
+    }
+
+    @Test
+    fun fresh_personal_record_overlay_shares_the_frozen_record_result() {
+        val identity = identity()
+        val completion = completion(
+            identity = identity,
+            elapsedTime = DailyElapsedTime(125_999),
+            movementCount = DailyMovementCount(23)
+        )
+        val personalBestResult = DailyPersonalBestResult(
+            category = DailyPersonalBestCategory(GeneratedModes.FOUR_PAIRS_LOW.id.value),
+            currentElapsedTime = completion.elapsedTime,
+            previousBestElapsedTime = DailyElapsedTime(140_000),
+            bestElapsedTime = completion.elapsedTime,
+            outcome = DailyPersonalBestOutcome.PERSONAL_RECORD
+        )
+        var sharedText: String? = null
+        val shareLauncher = DailyCompletionShareLauncher { payload ->
+            sharedText = payload.text.value
+            DailyCompletionShareLaunchResult.Launched
+        }
+        val payloadFactory = AndroidDailyCompletionSharePayloadFactory(
+            composeTestRule.activity.resources
+        )
+
+        composeTestRule.setContent {
+            NumPairsTheme {
+                SuccessOverlay(
+                    onDismiss = {},
+                    content = dailyCompletionOverlayContent(
+                        elapsedTime = completion.elapsedTime,
+                        movementCount = completion.movementCount,
+                        personalBestResult = personalBestResult,
+                        isPersonalRecordPresentation = true,
+                        onShareResult = {
+                            shareLauncher.launch(
+                                payloadFactory.create(
+                                    completion = completion,
+                                    personalBestResult = personalBestResult
+                                )
+                            )
+                        },
+                        onViewCalendar = {},
+                        onNavigateBack = {}
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_PRIMARY_ACTION)
+            .performClick()
+        composeTestRule.runOnIdle {
+            assertEquals(
+                "NumPairs Daily · Jul 25, 2026 · 4 pairs · Low\n" +
+                    "🏆 New personal best: 02:05 · 23 moves\n" +
+                    "Can you beat my time?",
+                sharedText
+            )
         }
     }
 

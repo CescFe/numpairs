@@ -4,6 +4,8 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 import org.cescfe.numpairs.domain.daily.DailyCompletion
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestOutcome
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestResult
 import org.cescfe.numpairs.feature.daily.DailyChallengeNameCopy
 import org.cescfe.numpairs.feature.daily.DailyChallengeNameFormatter
 import org.cescfe.numpairs.feature.daily.DailyCompletionResultFormatter
@@ -19,7 +21,9 @@ data class DailyCompletionShareCopy(
     val completedStatus: String,
     val completedResultStatusFormat: String,
     val movementSingularFormat: String,
-    val movementPluralFormat: String
+    val movementPluralFormat: String,
+    val personalRecordResultFormat: String,
+    val personalRecordInvitation: String
 ) {
     init {
         require(dailyName.isNotBlank()) {
@@ -37,6 +41,12 @@ data class DailyCompletionShareCopy(
         require(movementPluralFormat.isNotBlank()) {
             "Daily share plural movement format must not be blank."
         }
+        require(personalRecordResultFormat.isNotBlank()) {
+            "Daily share personal-record result format must not be blank."
+        }
+        require(personalRecordInvitation.isNotBlank()) {
+            "Daily share personal-record invitation must not be blank."
+        }
     }
 }
 
@@ -50,8 +60,17 @@ value class DailyCompletionShareText(val value: String) {
 }
 
 class DailyCompletionShareTextFormatter(private val recipeCatalog: DailyRecipeCatalog = DailyRecipes.catalog) {
-    fun format(completion: DailyCompletion, copy: DailyCompletionShareCopy, locale: Locale): DailyCompletionShareText {
+    fun format(
+        completion: DailyCompletion,
+        personalBestResult: DailyPersonalBestResult,
+        copy: DailyCompletionShareCopy,
+        locale: Locale
+    ): DailyCompletionShareText {
+        require(personalBestResult.currentElapsedTime == completion.elapsedTime) {
+            "Daily sharing must use the completion's stable personal-best outcome."
+        }
         val completedIdentity = completion.identity
+        val challenge = recipeCatalog.challengeFor(completedIdentity)
         val challengeName = DailyChallengeNameFormatter(recipeCatalog).format(
             identity = completedIdentity,
             copy = copy.challengeNames
@@ -75,6 +94,19 @@ class DailyCompletionShareTextFormatter(private val recipeCatalog: DailyRecipeCa
             formattedElapsedTime = formattedElapsedTime,
             formattedMovementCount = formattedMovementCount
         )
+        if (personalBestResult.outcome == DailyPersonalBestOutcome.PERSONAL_RECORD) {
+            require(personalBestResult.category?.generatedChallengeId == challenge.id.value) {
+                "A shared Daily personal record must belong to the completion's challenge."
+            }
+            val personalRecordResult = requireNotNull(formattedResult) {
+                "A shared Daily personal record requires its authoritative duration."
+            }
+            return DailyCompletionShareText(
+                value = "${copy.dailyName} · $localizedDate · $challengeName\n" +
+                    "${String.format(locale, copy.personalRecordResultFormat, personalRecordResult)}\n" +
+                    copy.personalRecordInvitation
+            )
+        }
         val completedStatus = formattedResult?.let { result ->
             String.format(locale, copy.completedResultStatusFormat, result)
         } ?: copy.completedStatus

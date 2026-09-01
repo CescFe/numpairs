@@ -100,6 +100,8 @@
     <string name="daily_share_name">NumPairs Daily</string>
     <string name="daily_share_completed_status">Completado</string>
     <string name="daily_share_completed_in_status">Completado en %1$s</string>
+    <string name="daily_share_personal_record_result">🏆 Nuevo récord personal: %1$s</string>
+    <string name="daily_share_personal_record_invitation">¿Puedes superar mi tiempo?</string>
     <string name="daily_share_chooser_title">Compartir resultado Daily</string>
 
     <!-- Juego y finalización Daily -->

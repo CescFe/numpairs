@@ -12,6 +12,9 @@ import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyMovementCount
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestCategory
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestOutcome
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestResult
 import org.cescfe.numpairs.feature.daily.DailyRecipes
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -31,7 +34,7 @@ class DailyCompletionShareAndroidTest {
 
         val payload = AndroidDailyCompletionSharePayloadFactory(
             resources = context.resources
-        ).create(
+        ).createNonRecord(
             completion = DailyCompletion(
                 identity = identity,
                 elapsedTime = DailyElapsedTime(125_999),
@@ -77,7 +80,7 @@ class DailyCompletionShareAndroidTest {
 
         val payload = AndroidDailyCompletionSharePayloadFactory(
             resources = context.resources
-        ).create(
+        ).createNonRecord(
             completion = DailyCompletion(
                 identity = identity,
                 elapsedTime = DailyElapsedTime(65_432)
@@ -104,7 +107,7 @@ class DailyCompletionShareAndroidTest {
 
         val payload = AndroidDailyCompletionSharePayloadFactory(
             resources = context.resources
-        ).create(
+        ).createNonRecord(
             completion = DailyCompletion(
                 identity = identity,
                 elapsedTime = DailyElapsedTime(125_999),
@@ -128,7 +131,7 @@ class DailyCompletionShareAndroidTest {
 
         val payload = AndroidDailyCompletionSharePayloadFactory(
             resources = context.resources
-        ).create(
+        ).createNonRecord(
             completion = DailyCompletion(
                 identity = identity,
                 elapsedTime = null
@@ -141,6 +144,40 @@ class DailyCompletionShareAndroidTest {
             )
         )
         assertFalse(payload.text.value.contains("00:00"))
+    }
+
+    @Test
+    fun payload_factory_uses_localized_personal_record_copy() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val completion = DailyCompletion(
+            identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(LocalDate.of(2026, 7, 25)),
+            elapsedTime = DailyElapsedTime(108_999),
+            movementCount = DailyMovementCount(23)
+        )
+
+        val payload = AndroidDailyCompletionSharePayloadFactory(
+            resources = context.resources
+        ).create(
+            completion = completion,
+            personalBestResult = personalRecordResult(completion)
+        )
+        val formattedMovements = context.resources.getQuantityString(
+            R.plurals.daily_movement_count,
+            2,
+            "23"
+        )
+
+        assertEquals(
+            context.getString(
+                R.string.daily_share_personal_record_result,
+                "01:48 · $formattedMovements"
+            ),
+            payload.text.value.lines()[1]
+        )
+        assertEquals(
+            context.getString(R.string.daily_share_personal_record_invitation),
+            payload.text.value.lines()[2]
+        )
     }
 
     @Test
@@ -215,4 +252,29 @@ private fun testPayload(): DailyCompletionSharePayload = DailyCompletionSharePay
         "NumPairs Daily · Jul 25, 2026\n4 Pairs · Low · Completed"
     ),
     chooserTitle = "Share Daily result"
+)
+
+private fun AndroidDailyCompletionSharePayloadFactory.createNonRecord(
+    completion: DailyCompletion
+): DailyCompletionSharePayload = create(
+    completion = completion,
+    personalBestResult = DailyPersonalBestResult(
+        category = null,
+        currentElapsedTime = completion.elapsedTime,
+        previousBestElapsedTime = null,
+        bestElapsedTime = null,
+        outcome = DailyPersonalBestOutcome.NOT_RECORD
+    )
+)
+
+private fun personalRecordResult(completion: DailyCompletion): DailyPersonalBestResult = DailyPersonalBestResult(
+    category = DailyPersonalBestCategory(
+        DailyRecipes.catalog.challengeFor(completion.identity).id.value
+    ),
+    currentElapsedTime = requireNotNull(completion.elapsedTime),
+    previousBestElapsedTime = DailyElapsedTime(
+        requireNotNull(completion.elapsedTime).milliseconds + 1
+    ),
+    bestElapsedTime = completion.elapsedTime,
+    outcome = DailyPersonalBestOutcome.PERSONAL_RECORD
 )

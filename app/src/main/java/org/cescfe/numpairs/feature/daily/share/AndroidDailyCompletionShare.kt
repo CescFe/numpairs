@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.res.Resources
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.daily.DailyCompletion
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestResult
 import org.cescfe.numpairs.feature.daily.DailyChallengeNameCopy
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 
@@ -22,7 +23,7 @@ class AndroidDailyCompletionSharePayloadFactory(
     private val resources: Resources,
     private val formatter: DailyCompletionShareTextFormatter = DailyCompletionShareTextFormatter()
 ) {
-    fun create(completion: DailyCompletion): DailyCompletionSharePayload {
+    fun create(completion: DailyCompletion, personalBestResult: DailyPersonalBestResult): DailyCompletionSharePayload {
         val locale = resources.configuration.locales[0]
         val threePairsName = resources.getString(R.string.three_pairs_screen_title)
         val fourPairsName = resources.getString(R.string.four_pairs_screen_title)
@@ -32,6 +33,7 @@ class AndroidDailyCompletionSharePayloadFactory(
         return DailyCompletionSharePayload(
             text = formatter.format(
                 completion = completion,
+                personalBestResult = personalBestResult,
                 copy = DailyCompletionShareCopy(
                     dailyName = resources.getString(R.string.daily_share_name),
                     challengeNames = DailyChallengeNameCopy(
@@ -76,6 +78,12 @@ class AndroidDailyCompletionSharePayloadFactory(
                     movementPluralFormat = resources.getQuantityString(
                         R.plurals.daily_movement_count,
                         2
+                    ),
+                    personalRecordResultFormat = resources.getString(
+                        R.string.daily_share_personal_record_result
+                    ),
+                    personalRecordInvitation = resources.getString(
+                        R.string.daily_share_personal_record_invitation
                     )
                 ),
                 locale = locale
