@@ -116,8 +116,15 @@
     <string name="daily_completion_screen_title">Daily completat</string>
     <string name="daily_completion_message">Daily completat!</string>
     <string name="daily_completion_supporting_text">Has completat el repte de hui.</string>
+    <string name="daily_personal_record_message">Nou rècord personal!</string>
+    <string name="daily_personal_record_supporting_text">Fantàstic! Has superat el teu millor temps. Podràs mantindre la ratxa demà?</string>
+    <string name="daily_personal_record_previous_best">Millor temps anterior: %1$s</string>
+    <string name="daily_personal_record_previous_best_content_description">Millor temps anterior: %1$s</string>
+    <string name="daily_personal_record_badge_content_description">Rècord personal</string>
     <string name="daily_elapsed_time_content_description">Temps transcorregut: %1$s</string>
     <string name="daily_completion_duration_label">Temps de resolució</string>
+    <string name="daily_personal_best_label">Millor temps</string>
+    <string name="daily_personal_best_content_description">Millor temps: %1$s</string>
     <plurals name="daily_movement_count">
         <item quantity="one">%1$s moviment</item>
         <item quantity="many">%1$s moviments</item>

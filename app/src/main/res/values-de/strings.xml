@@ -116,8 +116,15 @@
     <string name="daily_completion_screen_title">Tages-Challenge abgeschlossen</string>
     <string name="daily_completion_message">Tages-Challenge abgeschlossen!</string>
     <string name="daily_completion_supporting_text">Die heutige Challenge ist abgeschlossen.</string>
+    <string name="daily_personal_record_message">Neuer persönlicher Rekord!</string>
+    <string name="daily_personal_record_supporting_text">Großartig! Du hast deine Bestzeit unterboten. Kannst du die Serie morgen fortsetzen?</string>
+    <string name="daily_personal_record_previous_best">Vorherige Bestzeit: %1$s</string>
+    <string name="daily_personal_record_previous_best_content_description">Vorherige Bestzeit: %1$s</string>
+    <string name="daily_personal_record_badge_content_description">Persönlicher Rekord</string>
     <string name="daily_elapsed_time_content_description">Verstrichene Zeit: %1$s</string>
     <string name="daily_completion_duration_label">Lösungszeit</string>
+    <string name="daily_personal_best_label">Bestzeit</string>
+    <string name="daily_personal_best_content_description">Bestzeit: %1$s</string>
     <plurals name="daily_movement_count">
         <item quantity="one">%1$s Zug</item>
         <item quantity="other">%1$s Züge</item>

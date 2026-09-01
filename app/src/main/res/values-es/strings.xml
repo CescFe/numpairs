@@ -116,8 +116,15 @@
     <string name="daily_completion_screen_title">Daily completado</string>
     <string name="daily_completion_message">¡Daily completado!</string>
     <string name="daily_completion_supporting_text">Has completado el reto de hoy.</string>
+    <string name="daily_personal_record_message">¡Nuevo récord personal!</string>
+    <string name="daily_personal_record_supporting_text">¡Increíble! Has superado tu mejor tiempo. ¿Podrás mantener la racha mañana?</string>
+    <string name="daily_personal_record_previous_best">Mejor tiempo anterior: %1$s</string>
+    <string name="daily_personal_record_previous_best_content_description">Mejor tiempo anterior: %1$s</string>
+    <string name="daily_personal_record_badge_content_description">Récord personal</string>
     <string name="daily_elapsed_time_content_description">Tiempo transcurrido: %1$s</string>
     <string name="daily_completion_duration_label">Tiempo de resolución</string>
+    <string name="daily_personal_best_label">Mejor tiempo</string>
+    <string name="daily_personal_best_content_description">Mejor tiempo: %1$s</string>
     <plurals name="daily_movement_count">
         <item quantity="one">%1$s movimiento</item>
         <item quantity="many">%1$s movimientos</item>

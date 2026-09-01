@@ -221,6 +221,12 @@ object NumPairsComponents {
     )
 
     @Composable
+    fun recordBorder(): BorderStroke = BorderStroke(
+        width = FocusBorderWidth,
+        color = MaterialTheme.numPairsSemanticColors.record
+    )
+
+    @Composable
     fun errorBorder(): BorderStroke = BorderStroke(
         width = StrongBorderWidth,
         color = MaterialTheme.numPairsSemanticColors.error
@@ -231,6 +237,12 @@ object NumPairsComponents {
 
     @Composable
     fun successContentColor() = MaterialTheme.numPairsSemanticColors.onSuccessContainer
+
+    @Composable
+    fun recordContainerColor() = MaterialTheme.numPairsSemanticColors.recordContainer
+
+    @Composable
+    fun recordContentColor() = MaterialTheme.numPairsSemanticColors.onRecordContainer
 
     @Composable
     fun errorContainerColor() = MaterialTheme.numPairsSemanticColors.errorContainer

@@ -116,8 +116,15 @@
     <string name="daily_completion_screen_title">Daily completed</string>
     <string name="daily_completion_message">Daily completed!</string>
     <string name="daily_completion_supporting_text">Today’s challenge is complete.</string>
+    <string name="daily_personal_record_message">New personal record!</string>
+    <string name="daily_personal_record_supporting_text">Amazing! You beat your best time. Can you keep the streak going tomorrow?</string>
+    <string name="daily_personal_record_previous_best">Previous best: %1$s</string>
+    <string name="daily_personal_record_previous_best_content_description">Previous best time: %1$s</string>
+    <string name="daily_personal_record_badge_content_description">Personal record</string>
     <string name="daily_elapsed_time_content_description">Elapsed time: %1$s</string>
     <string name="daily_completion_duration_label">Completion time</string>
+    <string name="daily_personal_best_label">Best time</string>
+    <string name="daily_personal_best_content_description">Best time: %1$s</string>
     <plurals name="daily_movement_count">
         <item quantity="one">%1$s move</item>
         <item quantity="other">%1$s moves</item>
