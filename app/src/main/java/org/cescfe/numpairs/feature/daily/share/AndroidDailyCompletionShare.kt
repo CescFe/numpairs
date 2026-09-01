@@ -37,8 +37,16 @@ class AndroidDailyCompletionSharePayloadFactory(
                     completedStatus = resources.getString(
                         R.string.daily_share_completed_status
                     ),
-                    completedInStatusFormat = resources.getString(
+                    completedResultStatusFormat = resources.getString(
                         R.string.daily_share_completed_in_status
+                    ),
+                    movementSingularFormat = resources.getQuantityString(
+                        R.plurals.daily_movement_count,
+                        1
+                    ),
+                    movementPluralFormat = resources.getQuantityString(
+                        R.plurals.daily_movement_count,
+                        2
                     )
                 ),
                 locale = locale
