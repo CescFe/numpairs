@@ -5,6 +5,7 @@ import org.cescfe.numpairs.domain.daily.DailyCandidateIndex
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
+import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.domain.daily.DailyRecipeContracts
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
@@ -27,7 +28,8 @@ internal data class GeneratedDailyFixture(
     fun snapshot(
         sessionId: String = "daily-session-${identity.canonicalLocalDate}",
         currentPuzzle: Puzzle = generatedPuzzle.initialPuzzle,
-        timingStartInstant: DailyTimingStartInstant? = null
+        timingStartInstant: DailyTimingStartInstant? = null,
+        movementCount: DailyMovementCount? = DailyMovementCount.ZERO
     ): DailySessionSnapshot = DailySessionSnapshot(
         sessionId = DailySessionId(sessionId),
         dailyChallengeId = identity,
@@ -35,7 +37,8 @@ internal data class GeneratedDailyFixture(
         seed = seed,
         initialPuzzle = generatedPuzzle.initialPuzzle,
         currentPuzzle = currentPuzzle,
-        timingStartInstant = timingStartInstant
+        timingStartInstant = timingStartInstant,
+        movementCount = movementCount
     )
 
     fun progressPuzzle(): Puzzle {
@@ -105,11 +108,15 @@ internal fun dailyChallengeId(
     recipeVersion = recipeVersion
 )
 
-internal fun dailyCompletion(identity: DailyChallengeId, elapsedMilliseconds: Long? = null): DailyCompletion =
-    DailyCompletion(
-        identity = identity,
-        elapsedTime = elapsedMilliseconds?.let(::DailyElapsedTime)
-    )
+internal fun dailyCompletion(
+    identity: DailyChallengeId,
+    elapsedMilliseconds: Long? = null,
+    movementCount: Long? = null
+): DailyCompletion = DailyCompletion(
+    identity = identity,
+    elapsedTime = elapsedMilliseconds?.let(::DailyElapsedTime),
+    movementCount = movementCount?.let(::DailyMovementCount)
+)
 
 internal fun generatedPuzzleFixture(profile: GeneratedPuzzleProfile, seed: Int): GeneratedPairsPuzzle {
     val outcome = GeneratedPairsPuzzleGenerator(profile).generate(

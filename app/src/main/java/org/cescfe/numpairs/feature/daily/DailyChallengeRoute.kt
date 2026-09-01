@@ -532,6 +532,7 @@ private fun DailyPuzzlePersistenceFailure.messageResource(): Int = when (this) {
     DailyPuzzlePersistenceFailure.StaleSession -> R.string.daily_stale_session_message
     DailyPuzzlePersistenceFailure.InvalidPuzzle -> R.string.daily_invalid_progress_message
     DailyPuzzlePersistenceFailure.InvalidTiming -> R.string.daily_invalid_progress_message
+    DailyPuzzlePersistenceFailure.InvalidMovement -> R.string.daily_invalid_progress_message
     DailyPuzzlePersistenceFailure.Persistence -> R.string.daily_storage_failure_message
 }
 

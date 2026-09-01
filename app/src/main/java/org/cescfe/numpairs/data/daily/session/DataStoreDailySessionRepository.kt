@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.map
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
+import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
@@ -31,6 +32,9 @@ class DataStoreDailySessionRepository(
         }
 
     override suspend fun replaceSession(snapshot: DailySessionSnapshot): DailySessionReplacementResult {
+        require(snapshot.movementCount == DailyMovementCount.ZERO) {
+            "A new Daily Session must start with zero movements."
+        }
         var result: DailySessionReplacementResult? = null
         dataStore.edit { preferences ->
             val aggregate = preferences.currentAggregate()
@@ -82,7 +86,8 @@ class DataStoreDailySessionRepository(
 
     override suspend fun updateCurrentPuzzle(
         expectedSessionId: DailySessionId,
-        puzzle: Puzzle
+        puzzle: Puzzle,
+        movementCount: DailyMovementCount?
     ): DailySessionProgressUpdateResult {
         var result: DailySessionProgressUpdateResult? = null
         dataStore.edit { preferences ->
@@ -93,8 +98,16 @@ class DataStoreDailySessionRepository(
                 return@edit
             }
 
+            if (!movementCount.canFollow(activeSession.movementCount)) {
+                result = DailySessionProgressUpdateResult.InvalidMovement
+                return@edit
+            }
+
             val updatedSession = try {
-                activeSession.copy(currentPuzzle = puzzle)
+                activeSession.copy(
+                    currentPuzzle = puzzle,
+                    movementCount = movementCount
+                )
             } catch (_: IllegalArgumentException) {
                 result = DailySessionProgressUpdateResult.InvalidPuzzle
                 return@edit
@@ -130,6 +143,7 @@ class DataStoreDailySessionRepository(
         expectedSessionId: DailySessionId,
         expectedDailyChallengeId: DailyChallengeId,
         solvedPuzzle: Puzzle,
+        movementCount: DailyMovementCount?,
         elapsedTime: DailyElapsedTime?
     ): DailySessionCompletionResult {
         var result: DailySessionCompletionResult? = null
@@ -165,10 +179,15 @@ class DataStoreDailySessionRepository(
                 result = DailySessionCompletionResult.InvalidTiming
                 return@edit
             }
+            if (!movementCount.canFollow(activeSession.movementCount)) {
+                result = DailySessionCompletionResult.InvalidMovement
+                return@edit
+            }
 
             val completion = DailyCompletion(
                 identity = expectedDailyChallengeId,
-                elapsedTime = elapsedTime
+                elapsedTime = elapsedTime,
+                movementCount = movementCount
             )
             val completions = (aggregate.completions + completion)
                 .sortedWith(DAILY_COMPLETION_COMPARATOR)
@@ -206,3 +225,9 @@ private fun DailyAggregateDecodingResult.decodedAggregateOrEmpty(): DailyAggrega
 }
 
 internal const val DAILY_AGGREGATE_PREFERENCE_KEY_NAME = "daily_aggregate"
+
+private fun DailyMovementCount?.canFollow(previous: DailyMovementCount?): Boolean = when {
+    previous == null -> this == null
+    this == null -> false
+    else -> value >= previous.value
+}

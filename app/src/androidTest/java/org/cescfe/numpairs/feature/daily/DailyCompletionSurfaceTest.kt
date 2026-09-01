@@ -50,6 +50,7 @@ import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
+import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
@@ -673,7 +674,8 @@ private class RecordingDailyRepository(initialState: DailyState) : DailySessionR
 
     override suspend fun updateCurrentPuzzle(
         expectedSessionId: DailySessionId,
-        puzzle: Puzzle
+        puzzle: Puzzle,
+        movementCount: DailyMovementCount?
     ): DailySessionProgressUpdateResult {
         mutationCount += 1
         return DailySessionProgressUpdateResult.Updated
@@ -707,13 +709,15 @@ private class RecordingDailyRepository(initialState: DailyState) : DailySessionR
         expectedSessionId: DailySessionId,
         expectedDailyChallengeId: DailyChallengeId,
         solvedPuzzle: Puzzle,
+        movementCount: DailyMovementCount?,
         elapsedTime: DailyElapsedTime?
     ): DailySessionCompletionResult {
         mutationCount += 1
         return DailySessionCompletionResult.Completed(
             DailyCompletion(
                 identity = expectedDailyChallengeId,
-                elapsedTime = elapsedTime
+                elapsedTime = elapsedTime,
+                movementCount = movementCount
             )
         )
     }

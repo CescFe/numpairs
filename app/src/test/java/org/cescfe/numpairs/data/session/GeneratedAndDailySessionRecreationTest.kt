@@ -82,14 +82,20 @@ class GeneratedAndDailySessionRecreationTest {
         recreatedRepositories.daily.complete(
             expectedSessionId = dailySession.sessionId,
             expectedDailyChallengeId = dailySession.dailyChallengeId,
-            solvedPuzzle = dailyFixture.solvedProgressPuzzle()
+            solvedPuzzle = dailyFixture.solvedProgressPuzzle(),
+            movementCount = dailySession.movementCount
         )
 
         assertEquals(quickSession, recreatedRepositories.generated.session.first())
         assertEquals(
             DailyState(
                 activeSession = null,
-                completions = listOf(dailyCompletion(dailySession.dailyChallengeId))
+                completions = listOf(
+                    dailyCompletion(
+                        identity = dailySession.dailyChallengeId,
+                        movementCount = 0
+                    )
+                )
             ),
             recreatedRepositories.daily.state.first()
         )
@@ -102,7 +108,12 @@ class GeneratedAndDailySessionRecreationTest {
         assertEquals(
             DailyState(
                 activeSession = null,
-                completions = listOf(dailyCompletion(dailySession.dailyChallengeId))
+                completions = listOf(
+                    dailyCompletion(
+                        identity = dailySession.dailyChallengeId,
+                        movementCount = 0
+                    )
+                )
             ),
             recreatedRepositories.daily.state.first()
         )

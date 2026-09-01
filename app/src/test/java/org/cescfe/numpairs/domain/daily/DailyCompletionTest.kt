@@ -31,7 +31,20 @@ class DailyCompletionTest {
     }
 
     @Test
-    fun legacy_completion_explicitly_owns_no_elapsed_time() {
+    fun movement_count_is_non_negative_and_cannot_overflow_when_incremented() {
+        assertEquals(0L, DailyMovementCount.ZERO.value)
+        assertEquals(24L, DailyMovementCount(23).incremented().value)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            DailyMovementCount(-1)
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            DailyMovementCount(Long.MAX_VALUE).incremented()
+        }
+    }
+
+    @Test
+    fun legacy_completion_explicitly_owns_no_elapsed_time_or_movement_count() {
         val completion = DailyCompletion(
             identity = DailyChallengeId(
                 localDate = LocalDate.of(2027, 1, 1),
@@ -41,5 +54,6 @@ class DailyCompletionTest {
         )
 
         assertNull(completion.elapsedTime)
+        assertNull(completion.movementCount)
     }
 }

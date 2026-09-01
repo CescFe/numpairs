@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
+import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
@@ -32,6 +33,8 @@ sealed interface DailySessionProgressUpdateResult {
     data object StaleSession : DailySessionProgressUpdateResult
 
     data object InvalidPuzzle : DailySessionProgressUpdateResult
+
+    data object InvalidMovement : DailySessionProgressUpdateResult
 }
 
 sealed interface DailySessionClearResult {
@@ -50,6 +53,8 @@ sealed interface DailySessionCompletionResult {
     data object InvalidPuzzle : DailySessionCompletionResult
 
     data object InvalidTiming : DailySessionCompletionResult
+
+    data object InvalidMovement : DailySessionCompletionResult
 }
 
 interface DailySessionRepository {
@@ -62,7 +67,11 @@ interface DailySessionRepository {
         startInstant: DailyTimingStartInstant
     ): DailySessionTimingStartResult
 
-    suspend fun updateCurrentPuzzle(expectedSessionId: DailySessionId, puzzle: Puzzle): DailySessionProgressUpdateResult
+    suspend fun updateCurrentPuzzle(
+        expectedSessionId: DailySessionId,
+        puzzle: Puzzle,
+        movementCount: DailyMovementCount?
+    ): DailySessionProgressUpdateResult
 
     suspend fun clearSession(expectedSessionId: DailySessionId): DailySessionClearResult
 
@@ -70,6 +79,7 @@ interface DailySessionRepository {
         expectedSessionId: DailySessionId,
         expectedDailyChallengeId: DailyChallengeId,
         solvedPuzzle: Puzzle,
+        movementCount: DailyMovementCount?,
         elapsedTime: DailyElapsedTime? = null
     ): DailySessionCompletionResult
 }

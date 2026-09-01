@@ -121,3 +121,23 @@ The player wins when:
 - All hidden strip numbers are correctly deduced
 - All numbers are correctly paired
 - All grid operations are correctly resolved
+
+## Daily Challenge Movements
+
+Daily Challenge records one movement for each effective player-driven mutation of the durable
+puzzle state. These mutations include:
+
+- committing or clearing one player-entered strip value
+- assigning or changing one operand
+- assigning or changing one operator
+- resetting one non-pristine tile
+
+A durable mutation counts once even when its UI interaction has several transient steps. If one
+interaction commits two distinct durable mutations, each mutation counts separately. Invalid
+input, confirming an unchanged value, resetting an already pristine tile, opening or closing a
+selector, navigation, backgrounding, device locking, configuration changes, and process
+recreation do not count.
+
+The movement count starts at zero for a newly created Daily Session and is recorded with its
+Current Puzzle. Historical sessions and completions created before movement tracking keep the
+count unknown because their earlier actions cannot be reconstructed from puzzle state.
