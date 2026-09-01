@@ -5,15 +5,22 @@ import org.cescfe.numpairs.data.daily.session.DailySessionRepository
 import org.cescfe.numpairs.data.daily.session.DailySessionSnapshot
 import org.cescfe.numpairs.data.daily.session.DailyState
 import org.cescfe.numpairs.domain.daily.DailyCompletion
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestCategoryResolver
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestHistory
 
 sealed interface CurrentDailyAvailability {
     val currentDailyChallenge: CurrentDailyChallenge
+    val personalBestHistory: DailyPersonalBestHistory
 
-    data class StartToday(override val currentDailyChallenge: CurrentDailyChallenge) : CurrentDailyAvailability
+    data class StartToday(
+        override val currentDailyChallenge: CurrentDailyChallenge,
+        override val personalBestHistory: DailyPersonalBestHistory
+    ) : CurrentDailyAvailability
 
     data class ContinueToday(
         override val currentDailyChallenge: CurrentDailyChallenge,
-        val snapshot: DailySessionSnapshot
+        val snapshot: DailySessionSnapshot,
+        override val personalBestHistory: DailyPersonalBestHistory
     ) : CurrentDailyAvailability {
         init {
             require(snapshot.dailyChallengeId == currentDailyChallenge.identity) {
@@ -27,7 +34,8 @@ sealed interface CurrentDailyAvailability {
 
     data class CompletedToday(
         override val currentDailyChallenge: CurrentDailyChallenge,
-        val completion: DailyCompletion
+        val completion: DailyCompletion,
+        override val personalBestHistory: DailyPersonalBestHistory
     ) : CurrentDailyAvailability {
         init {
             require(completion.identity.localDate == currentDailyChallenge.identity.localDate) {
@@ -40,7 +48,9 @@ sealed interface CurrentDailyAvailability {
 class CurrentDailyAvailabilityResolver(
     private val currentDailyChallengeResolver: CurrentDailyChallengeResolver,
     private val dailySessionRepository: DailySessionRepository,
-    private val recipeCatalog: DailyRecipeCatalog = DailyRecipes.catalog
+    private val recipeCatalog: DailyRecipeCatalog = DailyRecipes.catalog,
+    private val personalBestCategoryResolver: DailyPersonalBestCategoryResolver =
+        DailyRecipePersonalBestCategoryResolver(recipeCatalog)
 ) {
     suspend fun resolve(): CurrentDailyAvailability {
         val currentDailyChallenge = currentDailyChallengeResolver.resolve()
@@ -52,13 +62,18 @@ class CurrentDailyAvailabilityResolver(
     }
 
     fun resolve(currentDailyChallenge: CurrentDailyChallenge, dailyState: DailyState): CurrentDailyAvailability {
+        val personalBestHistory = DailyPersonalBestHistory(
+            completions = dailyState.completions,
+            categoryResolver = personalBestCategoryResolver
+        )
         val completion = dailyState.completions.singleOrNull { completed ->
             completed.identity.localDate == currentDailyChallenge.identity.localDate
         }
         if (completion != null) {
             return CurrentDailyAvailability.CompletedToday(
                 currentDailyChallenge = currentDailyChallenge,
-                completion = completion
+                completion = completion,
+                personalBestHistory = personalBestHistory
             )
         }
 
@@ -75,11 +90,13 @@ class CurrentDailyAvailabilityResolver(
         return if (activeSession != null && resumableChallenge != null) {
             CurrentDailyAvailability.ContinueToday(
                 currentDailyChallenge = resumableChallenge,
-                snapshot = activeSession
+                snapshot = activeSession,
+                personalBestHistory = personalBestHistory
             )
         } else {
             CurrentDailyAvailability.StartToday(
-                currentDailyChallenge = currentDailyChallenge
+                currentDailyChallenge = currentDailyChallenge,
+                personalBestHistory = personalBestHistory
             )
         }
     }
