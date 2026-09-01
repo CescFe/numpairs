@@ -52,6 +52,9 @@ import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyMovementCount
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestHistory
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestOutcome
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestResult
 import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
 import org.cescfe.numpairs.feature.daily.calendar.DailyCalendarRoute
 import org.cescfe.numpairs.feature.daily.share.AndroidDailyCompletionShareLauncher
@@ -59,6 +62,7 @@ import org.cescfe.numpairs.feature.daily.share.AndroidDailyCompletionSharePayloa
 import org.cescfe.numpairs.feature.daily.share.DailyCompletionShareLauncher
 import org.cescfe.numpairs.feature.game.GameRoute
 import org.cescfe.numpairs.feature.game.GameSuccessOverlayContent
+import org.cescfe.numpairs.feature.game.GameSuccessOverlayVisualStyle
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
@@ -92,7 +96,16 @@ fun DailyChallengeRoute(
     )
     val uiState by viewModel.uiState.collectAsState()
     var isCalendarVisible by remember(identity) { mutableStateOf(false) }
+    var personalRecordConfettiCelebrationId by remember(viewModel) {
+        mutableStateOf<Long?>(null)
+    }
     val shareResult = rememberDailyShareResultAction(shareLauncher = shareLauncher)
+
+    LaunchedEffect(uiState) {
+        if (viewModel.claimPersonalRecordCelebration()) {
+            personalRecordConfettiCelebrationId = PERSONAL_RECORD_CONFETTI_CELEBRATION_ID
+        }
+    }
 
     DisposableEffect(viewModel) {
         viewModel.onRouteEntered()
@@ -144,6 +157,10 @@ fun DailyChallengeRoute(
 
         is DailyPuzzleUiState.Completed -> {
             val completion = state.completion.record()
+            val personalBestResult = state.completion.personalBestResult
+            val isPersonalRecordPresentation =
+                state.completion is DailyPuzzleCompletion.Completed &&
+                    personalBestResult.outcome == DailyPersonalBestOutcome.PERSONAL_RECORD
             if (DailyRecipes.catalog.resolveOrNull(completion.identity.recipeVersion) == null) {
                 DailyFailureScreen(
                     modifier = modifier,
@@ -164,6 +181,8 @@ fun DailyChallengeRoute(
                     completionContent = dailyCompletionOverlayContent(
                         elapsedTime = completion.elapsedTime,
                         movementCount = completion.movementCount,
+                        personalBestResult = personalBestResult,
+                        isPersonalRecordPresentation = isPersonalRecordPresentation,
                         onShareResult = {
                             shareResult(completion)
                         },
@@ -172,6 +191,11 @@ fun DailyChallengeRoute(
                         },
                         onNavigateBack = onNavigateBack
                     ),
+                    personalRecordConfettiCelebrationId = personalRecordConfettiCelebrationId
+                        .takeIf { isPersonalRecordPresentation },
+                    onPersonalRecordConfettiCelebrationStarted = {
+                        personalRecordConfettiCelebrationId = null
+                    },
                     onNavigateBack = onNavigateBack
                 )
             }
@@ -191,6 +215,7 @@ fun DailyChallengeRoute(
                     presentation = presentation,
                     elapsedTime = state.completion.elapsedTime,
                     movementCount = state.completion.movementCount,
+                    bestElapsedTime = state.personalBestResult.bestElapsedTime,
                     onShareResult = {
                         shareResult(state.completion)
                     },
@@ -242,14 +267,22 @@ fun DailyCompletedTodayRoute(
 
         requireNotNull(dailyState).completions.any { completion -> completion.identity == identity } &&
             DailyRecipes.catalog.resolveOrNull(identity.recipeVersion) != null -> {
-            val completion = requireNotNull(dailyState).completions.single { completion ->
+            val resolvedDailyState = requireNotNull(dailyState)
+            val completion = resolvedDailyState.completions.single { completion ->
                 completion.identity == identity
+            }
+            val personalBestResult = remember(resolvedDailyState, completion) {
+                DailyPersonalBestHistory(
+                    completions = resolvedDailyState.completions,
+                    categoryResolver = DailyRecipePersonalBestCategoryResolver()
+                ).resultFor(completion)
             }
             val presentation = rememberDailyChallengeTitle(identity)
             DailyCompletionScreen(
                 presentation = presentation,
                 elapsedTime = completion.elapsedTime,
                 movementCount = completion.movementCount,
+                bestElapsedTime = personalBestResult.bestElapsedTime,
                 onShareResult = {
                     shareResult(completion)
                 },
@@ -284,6 +317,8 @@ private fun DailyGameContent(
     onTimerRefresh: (org.cescfe.numpairs.data.daily.session.DailySessionId) -> Unit,
     onRetryPersistence: () -> Unit,
     completionContent: GameSuccessOverlayContent? = null,
+    personalRecordConfettiCelebrationId: Long? = null,
+    onPersonalRecordConfettiCelebrationStarted: () -> Unit = {},
     onNavigateBack: () -> Unit
 ) {
     val session = when (state) {
@@ -319,6 +354,8 @@ private fun DailyGameContent(
             puzzleResetKey = session.id,
             isSuccessOverlayEnabled = state is DailyPuzzleUiState.Completed,
             successOverlayContent = completionContent,
+            successOverlayConfettiCelebrationId = personalRecordConfettiCelebrationId,
+            onSuccessOverlayConfettiCelebrationStarted = onPersonalRecordConfettiCelebrationStarted,
             isCorrectTileMotionEnabled = true,
             isCompletionCelebrationEnabled = true,
             compactTileSelectorsEnabled = compactTileSelectorsEnabled,
@@ -352,10 +389,23 @@ private fun DailyGameContent(
 internal fun dailyCompletionOverlayContent(
     elapsedTime: DailyElapsedTime?,
     movementCount: DailyMovementCount? = null,
+    personalBestResult: DailyPersonalBestResult? = null,
+    isPersonalRecordPresentation: Boolean = false,
     onShareResult: () -> Unit,
     onViewCalendar: () -> Unit,
     onNavigateBack: () -> Unit
 ): GameSuccessOverlayContent {
+    require(
+        !isPersonalRecordPresentation ||
+            personalBestResult?.outcome == DailyPersonalBestOutcome.PERSONAL_RECORD
+    ) {
+        "A Daily personal-record presentation requires a frozen personal-record result."
+    }
+    require(
+        personalBestResult == null || personalBestResult.currentElapsedTime == elapsedTime
+    ) {
+        "Daily completion presentation must use the frozen personal-best duration."
+    }
     val formattedElapsedTime = elapsedTime?.let(DailyElapsedTimeFormatter::format)
     val formattedMovementCount = movementCount?.let { count ->
         formattedDailyMovementCount(count)
@@ -368,11 +418,43 @@ internal fun dailyCompletionOverlayContent(
         formattedElapsedTime = formattedElapsedTime,
         movementCount = movementCount
     )
+    val formattedPreviousBest = personalBestResult
+        ?.previousBestElapsedTime
+        ?.takeIf { isPersonalRecordPresentation }
+        ?.let(DailyElapsedTimeFormatter::format)
     return GameSuccessOverlayContent(
-        message = stringResource(R.string.daily_completion_message),
-        supportingText = stringResource(R.string.daily_completion_supporting_text),
+        message = stringResource(
+            if (isPersonalRecordPresentation) {
+                R.string.daily_personal_record_message
+            } else {
+                R.string.daily_completion_message
+            }
+        ),
+        supportingText = stringResource(
+            if (isPersonalRecordPresentation) {
+                R.string.daily_personal_record_supporting_text
+            } else {
+                R.string.daily_completion_supporting_text
+            }
+        ),
         highlightText = formattedResult,
         highlightContentDescription = resultContentDescription,
+        contextText = formattedPreviousBest?.let { previousBest ->
+            stringResource(R.string.daily_personal_record_previous_best, previousBest)
+        },
+        contextContentDescription = formattedPreviousBest?.let { previousBest ->
+            stringResource(R.string.daily_personal_record_previous_best_content_description, previousBest)
+        },
+        visualStyle = if (isPersonalRecordPresentation) {
+            GameSuccessOverlayVisualStyle.PERSONAL_RECORD
+        } else {
+            GameSuccessOverlayVisualStyle.SUCCESS
+        },
+        badgeContentDescription = if (isPersonalRecordPresentation) {
+            stringResource(R.string.daily_personal_record_badge_content_description)
+        } else {
+            null
+        },
         primaryActionLabel = stringResource(R.string.daily_share_result_action),
         onPrimaryAction = onShareResult,
         secondaryActionLabel = stringResource(R.string.daily_view_calendar_action),
@@ -589,6 +671,7 @@ private fun DailyChallengeId.canonicalKey(): String = "$canonicalLocalDate:${rec
 
 private val DAILY_STATUS_MAX_WIDTH = 480.dp
 private const val DAILY_TIMER_REFRESH_INTERVAL_MILLISECONDS = 250L
+private const val PERSONAL_RECORD_CONFETTI_CELEBRATION_ID = 1L
 private val ZERO_DAILY_ELAPSED_TIME = DailyElapsedTime(0)
 
 @Composable

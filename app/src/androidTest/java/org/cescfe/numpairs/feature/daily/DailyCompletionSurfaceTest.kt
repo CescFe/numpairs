@@ -46,11 +46,15 @@ import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
 import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesRepository
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.preferences.PersonalizationPreferences
+import org.cescfe.numpairs.data.preferences.PersonalizationTheme
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyMovementCount
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestCategory
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestOutcome
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestResult
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
@@ -84,6 +88,13 @@ class DailyCompletionSurfaceTest {
             DailyState(
                 activeSession = null,
                 completions = listOf(
+                    completion(
+                        identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
+                            identity.localDate.minusDays(1)
+                        ),
+                        elapsedTime = DailyElapsedTime(100_000),
+                        movementCount = DailyMovementCount(25)
+                    ),
                     completion(
                         identity = identity,
                         elapsedTime = DailyElapsedTime(125_999),
@@ -122,6 +133,9 @@ class DailyCompletionSurfaceTest {
         composeTestRule
             .onNodeWithTag(DailyScreenTestTags.COMPLETION_MOVEMENTS)
             .assertTextEquals("23")
+        composeTestRule
+            .onNodeWithTag(DailyScreenTestTags.PERSONAL_BEST_DURATION)
+            .assertTextEquals("01:40")
         composeTestRule
             .onNodeWithTag(DailyScreenTestTags.SHARE_RESULT)
             .performClick()
@@ -466,6 +480,148 @@ class DailyCompletionSurfaceTest {
     }
 
     @Test
+    fun fresh_personal_record_uses_star_record_copy_and_previous_best_context() {
+        val elapsedTime = DailyElapsedTime(125_999)
+        val personalBestResult = DailyPersonalBestResult(
+            category = DailyPersonalBestCategory(GeneratedModes.FOUR_PAIRS_LOW.id.value),
+            currentElapsedTime = elapsedTime,
+            previousBestElapsedTime = DailyElapsedTime(140_000),
+            bestElapsedTime = elapsedTime,
+            outcome = DailyPersonalBestOutcome.PERSONAL_RECORD
+        )
+        var celebrationStarts = 0
+
+        composeTestRule.setContent {
+            NumPairsTheme(theme = PersonalizationTheme.FROST) {
+                SuccessOverlay(
+                    onDismiss = {},
+                    content = dailyCompletionOverlayContent(
+                        elapsedTime = elapsedTime,
+                        movementCount = DailyMovementCount(23),
+                        personalBestResult = personalBestResult,
+                        isPersonalRecordPresentation = true,
+                        onShareResult = {},
+                        onViewCalendar = {},
+                        onNavigateBack = {}
+                    ),
+                    confettiCelebrationId = 1L,
+                    onConfettiCelebrationStarted = { celebrationStarts += 1 }
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE)
+            .assertTextEquals("New personal record!")
+        composeTestRule
+            .onNodeWithContentDescription("Personal record")
+            .assertIsDisplayed()
+            .assertHasNoClickAction()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_HIGHLIGHT)
+            .assertTextEquals("02:05 · 23 moves")
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONTEXT)
+            .assertTextEquals("Previous best: 02:20")
+        composeTestRule
+            .onNodeWithContentDescription("Previous best time: 02:20")
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText("OK")
+            .assertDoesNotExist()
+        composeTestRule.runOnIdle {
+            assertEquals(1, celebrationStarts)
+        }
+    }
+
+    @Test
+    fun baseline_keeps_the_normal_completion_badge_and_copy_without_confetti() {
+        val elapsedTime = DailyElapsedTime(125_999)
+        val baseline = DailyPersonalBestResult(
+            category = DailyPersonalBestCategory(GeneratedModes.FOUR_PAIRS_LOW.id.value),
+            currentElapsedTime = elapsedTime,
+            previousBestElapsedTime = null,
+            bestElapsedTime = elapsedTime,
+            outcome = DailyPersonalBestOutcome.BASELINE
+        )
+
+        composeTestRule.setContent {
+            NumPairsTheme {
+                SuccessOverlay(
+                    onDismiss = {},
+                    content = dailyCompletionOverlayContent(
+                        elapsedTime = elapsedTime,
+                        movementCount = DailyMovementCount(23),
+                        personalBestResult = baseline,
+                        onShareResult = {},
+                        onViewCalendar = {},
+                        onNavigateBack = {}
+                    ),
+                    confettiCelebrationId = 1L
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE)
+            .assertTextEquals("Daily completed!")
+        composeTestRule
+            .onNodeWithText("OK")
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONTEXT)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONFETTI)
+            .assertDoesNotExist()
+    }
+
+    @Test
+    fun disabled_animation_keeps_record_content_and_actions_without_confetti() {
+        val elapsedTime = DailyElapsedTime(125_999)
+        val personalBestResult = DailyPersonalBestResult(
+            category = DailyPersonalBestCategory(GeneratedModes.FOUR_PAIRS_LOW.id.value),
+            currentElapsedTime = elapsedTime,
+            previousBestElapsedTime = DailyElapsedTime(140_000),
+            bestElapsedTime = elapsedTime,
+            outcome = DailyPersonalBestOutcome.PERSONAL_RECORD
+        )
+        var shareCount = 0
+
+        composeTestRule.setContent {
+            NumPairsTheme {
+                SuccessOverlay(
+                    onDismiss = {},
+                    content = dailyCompletionOverlayContent(
+                        elapsedTime = elapsedTime,
+                        movementCount = DailyMovementCount(23),
+                        personalBestResult = personalBestResult,
+                        isPersonalRecordPresentation = true,
+                        onShareResult = { shareCount += 1 },
+                        onViewCalendar = {},
+                        onNavigateBack = {}
+                    ),
+                    confettiCelebrationId = 1L,
+                    isConfettiAnimationEnabled = false
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONFETTI)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE)
+            .assertTextEquals("New personal record!")
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_PRIMARY_ACTION)
+            .performClick()
+        composeTestRule.runOnIdle {
+            assertEquals(1, shareCount)
+        }
+    }
+
+    @Test
     fun success_overlay_localizes_a_singular_movement() {
         composeTestRule.setContent {
             NumPairsTheme {
@@ -504,6 +660,7 @@ class DailyCompletionSurfaceTest {
                     ),
                     elapsedTime = elapsedTime,
                     movementCount = DailyMovementCount(23),
+                    bestElapsedTime = DailyElapsedTime(100_000),
                     onShareResult = {},
                     onViewCalendar = {},
                     onNavigateBack = {}
@@ -524,6 +681,12 @@ class DailyCompletionSurfaceTest {
             .assertTextEquals("23")
         composeTestRule
             .onNodeWithContentDescription("Movements: 23")
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(DailyScreenTestTags.PERSONAL_BEST_DURATION)
+            .assertTextEquals("01:40")
+        composeTestRule
+            .onNodeWithContentDescription("Best time: 01:40")
             .assertIsDisplayed()
     }
 
@@ -553,6 +716,9 @@ class DailyCompletionSurfaceTest {
             .assertDoesNotExist()
         composeTestRule
             .onNodeWithTag(DailyScreenTestTags.COMPLETION_MOVEMENTS)
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(DailyScreenTestTags.PERSONAL_BEST_DURATION)
             .assertDoesNotExist()
     }
 

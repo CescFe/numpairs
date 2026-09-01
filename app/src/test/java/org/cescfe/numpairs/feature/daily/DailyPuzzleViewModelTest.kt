@@ -37,6 +37,7 @@ import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
@@ -145,6 +146,7 @@ class DailyPuzzleViewModelTest {
         assertDailyElapsedTimeEquals(5_000, completed.personalBestResult.previousBestElapsedTime)
         assertDailyElapsedTimeEquals(4_000, completed.personalBestResult.bestElapsedTime)
         assertEquals(0, timeSource.readCount)
+        assertFalse(viewModel.claimPersonalRecordCelebration())
     }
 
     @Test
@@ -565,6 +567,7 @@ class DailyPuzzleViewModelTest {
             (completed.completion as DailyPuzzleCompletion.AlreadyCompleted).completion
         )
         assertTrue(completed.session.currentPuzzle.isSolved)
+        assertFalse(viewModel.claimPersonalRecordCelebration())
     }
 
     @Test
@@ -1043,6 +1046,7 @@ class DailyPuzzleViewModelTest {
             frozenPersonalBest,
             completedResult.personalBestResult
         )
+        assertFalse(viewModel.claimPersonalRecordCelebration())
     }
 
     @Test
@@ -1111,6 +1115,87 @@ class DailyPuzzleViewModelTest {
             frozenPersonalBest,
             completedResult.personalBestResult
         )
+        assertTrue(viewModel.claimPersonalRecordCelebration())
+        assertFalse(viewModel.claimPersonalRecordCelebration())
+    }
+
+    @Test
+    fun equal_and_slower_completions_do_not_offer_a_personal_record_celebration() {
+        listOf(5_000L, 6_000L).forEach { completionDuration ->
+            val fixture = generatedDailyFixture()
+            val repository = RecordingDailySessionRepository(
+                initialState = DailyState(
+                    activeSession = fixture.snapshot(),
+                    completions = listOf(
+                        dailyCompletion(
+                            identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
+                                fixture.identity.localDate.minusDays(1)
+                            ),
+                            elapsedMilliseconds = 5_000
+                        )
+                    )
+                )
+            )
+            val timeSource = MutableDailyTimeSource(20_000, 1_000)
+            val viewModel = viewModel(
+                date = fixture.identity.localDate,
+                repository = repository,
+                generator = RecordingDailyPuzzleGenerator(),
+                timeSource = timeSource
+            )
+            viewModel.onRouteEntered()
+            dispatcher.scheduler.advanceUntilIdle()
+            val sessionId = (viewModel.uiState.value as DailyPuzzleUiState.Ready).session.id
+            viewModel.onPuzzlePresented(sessionId)
+            dispatcher.scheduler.advanceUntilIdle()
+
+            timeSource.set(
+                epochMilliseconds = 20_000 + completionDuration,
+                monotonicMilliseconds = 1_000 + completionDuration
+            )
+            viewModel.onPuzzleMutationCommitted(sessionId, fixture.solvedProgressPuzzle())
+            dispatcher.scheduler.advanceUntilIdle()
+
+            val completed = viewModel.uiState.value as DailyPuzzleUiState.Completed
+            assertEquals(
+                DailyPersonalBestOutcome.NOT_RECORD,
+                completed.completion.personalBestResult.outcome
+            )
+            assertFalse(viewModel.claimPersonalRecordCelebration())
+        }
+    }
+
+    @Test
+    fun untimed_legacy_completion_does_not_offer_a_personal_record_celebration() {
+        val fixture = generatedDailyFixture()
+        val repository = RecordingDailySessionRepository(
+            initialState = DailyState(
+                activeSession = fixture.snapshot().copy(
+                    timingStartInstant = null,
+                    movementCount = null
+                ),
+                completions = emptyList()
+            )
+        )
+        val viewModel = viewModel(
+            date = fixture.identity.localDate,
+            repository = repository,
+            generator = RecordingDailyPuzzleGenerator()
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val sessionId = (viewModel.uiState.value as DailyPuzzleUiState.Ready).session.id
+
+        viewModel.onPuzzleMutationCommitted(sessionId, fixture.solvedProgressPuzzle())
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val completed = viewModel.uiState.value as DailyPuzzleUiState.Completed
+        assertNull(completed.completion.completion.elapsedTime)
+        assertEquals(
+            DailyPersonalBestOutcome.NOT_RECORD,
+            completed.completion.personalBestResult.outcome
+        )
+        assertFalse(viewModel.claimPersonalRecordCelebration())
     }
 
     @Test

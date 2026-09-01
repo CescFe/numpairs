@@ -47,7 +47,8 @@ internal fun DailyCompletionScreen(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
     elapsedTime: DailyElapsedTime? = null,
-    movementCount: DailyMovementCount? = null
+    movementCount: DailyMovementCount? = null,
+    bestElapsedTime: DailyElapsedTime? = null
 ) {
     Scaffold(
         modifier = modifier
@@ -118,6 +119,32 @@ internal fun DailyCompletionScreen(
                             text = formattedElapsedTime,
                             modifier = Modifier
                                 .testTag(DailyScreenTestTags.COMPLETION_DURATION)
+                                .semantics {
+                                    contentDescription = accessibilityDescription
+                                },
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontFamily = FontFamily.Monospace,
+                                fontFeatureSettings = "tnum",
+                                fontWeight = FontWeight.Bold
+                            ),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    bestElapsedTime?.let { personalBestElapsedTime ->
+                        val formattedBestElapsedTime = DailyElapsedTimeFormatter.format(personalBestElapsedTime)
+                        val accessibilityDescription = stringResource(
+                            R.string.daily_personal_best_content_description,
+                            formattedBestElapsedTime
+                        )
+                        Text(
+                            text = stringResource(R.string.daily_personal_best_label),
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center
+                        )
+                        Text(
+                            text = formattedBestElapsedTime,
+                            modifier = Modifier
+                                .testTag(DailyScreenTestTags.PERSONAL_BEST_DURATION)
                                 .semantics {
                                     contentDescription = accessibilityDescription
                                 },
@@ -206,6 +233,7 @@ object DailyScreenTestTags {
     const val PERSISTENCE_FAILURE = "daily_persistence_failure"
     const val CHRONOMETER = "daily_chronometer"
     const val COMPLETION_DURATION = "daily_completion_duration"
+    const val PERSONAL_BEST_DURATION = "daily_personal_best_duration"
     const val COMPLETION_MOVEMENTS = "daily_completion_movements"
 }
 
@@ -225,6 +253,7 @@ private fun DailyCompletionScreenPreview(
             ),
             elapsedTime = DailyElapsedTime(83_456),
             movementCount = DailyMovementCount(23),
+            bestElapsedTime = DailyElapsedTime(74_321),
             onShareResult = {},
             onViewCalendar = {},
             onNavigateBack = {}

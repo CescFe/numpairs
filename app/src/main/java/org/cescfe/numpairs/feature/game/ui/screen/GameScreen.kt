@@ -82,6 +82,8 @@ fun GameScreen(
     onRulesHelperPlayTutorialRequested: (() -> Unit)? = null,
     isSuccessOverlayEnabled: Boolean = true,
     successOverlayContent: GameSuccessOverlayContent? = null,
+    successOverlayConfettiCelebrationId: Long? = null,
+    onSuccessOverlayConfettiCelebrationStarted: () -> Unit = {},
     isBoardVisible: Boolean = true,
     stripItemEntryGuidance: String? = null,
     compactTileSelectorsEnabled: Boolean = false,
@@ -196,7 +198,9 @@ fun GameScreen(
                 onDismiss = onSuccessOverlayDismissed,
                 completionActions = completionActions,
                 content = successOverlayContent,
-                completionFeedbackId = completionFeedbackId
+                completionFeedbackId = completionFeedbackId,
+                confettiCelebrationId = successOverlayConfettiCelebrationId,
+                onConfettiCelebrationStarted = onSuccessOverlayConfettiCelebrationStarted
             )
         }
     }

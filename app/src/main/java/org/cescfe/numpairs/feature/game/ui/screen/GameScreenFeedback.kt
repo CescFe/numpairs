@@ -14,12 +14,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -27,11 +29,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -43,6 +50,7 @@ import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.GameSuccessOverlayContent
+import org.cescfe.numpairs.feature.game.GameSuccessOverlayVisualStyle
 import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
 import org.cescfe.numpairs.feature.game.presentation.RuleConflictUiState
 import org.cescfe.numpairs.feature.game.ui.semantics.completionFeedbackSemantics
@@ -54,13 +62,19 @@ internal fun SuccessOverlay(
     onDismiss: () -> Unit,
     completionActions: GameCompletionActions? = null,
     content: GameSuccessOverlayContent? = null,
-    completionFeedbackId: Long? = null
+    completionFeedbackId: Long? = null,
+    confettiCelebrationId: Long? = null,
+    onConfettiCelebrationStarted: () -> Unit = {},
+    isConfettiAnimationEnabled: Boolean = true
 ) {
     require(content == null || completionActions == null) {
         "A success overlay cannot combine custom content with generated-puzzle completion actions."
     }
 
     val interactionSource = remember { MutableInteractionSource() }
+    val isPersonalRecord = content?.visualStyle == GameSuccessOverlayVisualStyle.PERSONAL_RECORD
+    val currentOnConfettiCelebrationStarted by rememberUpdatedState(onConfettiCelebrationStarted)
+    var activeConfettiCelebrationId by remember { mutableStateOf<Long?>(null) }
     val entranceProgress = remember {
         Animatable(if (completionFeedbackId == null) 1f else 0f)
     }
@@ -77,6 +91,19 @@ internal fun SuccessOverlay(
                     easing = FastOutSlowInEasing
                 )
             )
+        }
+    }
+
+    LaunchedEffect(confettiCelebrationId, isPersonalRecord, isConfettiAnimationEnabled) {
+        if (
+            confettiCelebrationId != null &&
+            isPersonalRecord &&
+            activeConfettiCelebrationId == null
+        ) {
+            if (isConfettiAnimationEnabled) {
+                activeConfettiCelebrationId = confettiCelebrationId
+            }
+            currentOnConfettiCelebrationStarted()
         }
     }
 
@@ -114,6 +141,10 @@ internal fun SuccessOverlay(
         modifier = dismissibleOverlayModifier,
         contentAlignment = Alignment.Center
     ) {
+        PersonalRecordConfetti(
+            celebrationId = activeConfettiCelebrationId,
+            animationEnabled = isConfettiAnimationEnabled
+        )
         Surface(
             modifier = Modifier
                 .padding(horizontal = 32.dp)
@@ -127,9 +158,21 @@ internal fun SuccessOverlay(
                     alpha = progress
                 },
             shape = RoundedCornerShape(SUCCESS_OVERLAY_CARD_CORNER_RADIUS),
-            color = NumPairsComponents.successContainerColor(),
-            contentColor = NumPairsComponents.successContentColor(),
-            border = NumPairsComponents.successBorder()
+            color = if (isPersonalRecord) {
+                NumPairsComponents.recordContainerColor()
+            } else {
+                NumPairsComponents.successContainerColor()
+            },
+            contentColor = if (isPersonalRecord) {
+                NumPairsComponents.recordContentColor()
+            } else {
+                NumPairsComponents.successContentColor()
+            },
+            border = if (isPersonalRecord) {
+                NumPairsComponents.recordBorder()
+            } else {
+                NumPairsComponents.successBorder()
+            }
         ) {
             Column(
                 modifier = Modifier
@@ -143,9 +186,26 @@ internal fun SuccessOverlay(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Surface(
+                    modifier = Modifier
+                        .testTag(GameScreenTestTags.SUCCESS_OVERLAY_BADGE)
+                        .let { modifier ->
+                            content?.badgeContentDescription?.let { description ->
+                                modifier.semantics {
+                                    contentDescription = description
+                                }
+                            } ?: modifier
+                        },
                     shape = CircleShape,
-                    color = MaterialTheme.numPairsSemanticColors.success.copy(alpha = 0.16f),
-                    contentColor = MaterialTheme.numPairsSemanticColors.success
+                    color = if (isPersonalRecord) {
+                        MaterialTheme.numPairsSemanticColors.record.copy(alpha = 0.18f)
+                    } else {
+                        MaterialTheme.numPairsSemanticColors.success.copy(alpha = 0.16f)
+                    },
+                    contentColor = if (isPersonalRecord) {
+                        MaterialTheme.numPairsSemanticColors.record
+                    } else {
+                        MaterialTheme.numPairsSemanticColors.success
+                    }
                 ) {
                     Box(
                         modifier = Modifier
@@ -153,10 +213,18 @@ internal fun SuccessOverlay(
                             .heightIn(min = SUCCESS_OVERLAY_BADGE_SIZE),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = stringResource(R.string.success_overlay_badge_text),
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                        if (isPersonalRecord) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_personal_record_star),
+                                contentDescription = null,
+                                modifier = Modifier.size(SUCCESS_OVERLAY_BADGE_ICON_SIZE)
+                            )
+                        } else {
+                            Text(
+                                text = stringResource(R.string.success_overlay_badge_text),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
                     }
                 }
                 Text(
@@ -185,6 +253,26 @@ internal fun SuccessOverlay(
                             fontFamily = FontFamily.Monospace,
                             fontFeatureSettings = "tnum",
                             fontWeight = FontWeight.Bold
+                        ),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                content?.contextText?.let { contextText ->
+                    val contextModifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(GameScreenTestTags.SUCCESS_OVERLAY_CONTEXT)
+                        .let { modifier ->
+                            content.contextContentDescription?.let { description ->
+                                modifier.semantics {
+                                    contentDescription = description
+                                }
+                            } ?: modifier
+                        }
+                    Text(
+                        text = contextText,
+                        modifier = contextModifier,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.SemiBold
                         ),
                         textAlign = TextAlign.Center
                     )

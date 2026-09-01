@@ -23,6 +23,7 @@ import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.domain.daily.DailyPersonalBestHistory
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestOutcome
 import org.cescfe.numpairs.domain.daily.DailyPersonalBestResult
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
@@ -166,6 +167,7 @@ internal class DailyPuzzleViewModel(
     private var pendingTimingStart: PendingDailyTimingStart? = null
     private val elapsedHighWaterBySessionId = mutableMapOf<DailySessionId, DailyElapsedTime>()
     private var personalBestHistory: DailyPersonalBestHistory? = null
+    private var isPersonalRecordCelebrationClaimed = false
 
     fun onRouteEntered() {
         if (preparationJob != null || _uiState.value != DailyPuzzleUiState.Idle) {
@@ -339,6 +341,19 @@ internal class DailyPuzzleViewModel(
             session = readyState.session,
             personalBestResult = readyState.personalBestResult
         )
+    }
+
+    fun claimPersonalRecordCelebration(): Boolean {
+        val completedState = _uiState.value as? DailyPuzzleUiState.Completed ?: return false
+        if (
+            completedState.completion !is DailyPuzzleCompletion.Completed ||
+            completedState.completion.personalBestResult.outcome != DailyPersonalBestOutcome.PERSONAL_RECORD ||
+            isPersonalRecordCelebrationClaimed
+        ) {
+            return false
+        }
+        isPersonalRecordCelebrationClaimed = true
+        return true
     }
 
     private fun resolveAndPrepare() {
