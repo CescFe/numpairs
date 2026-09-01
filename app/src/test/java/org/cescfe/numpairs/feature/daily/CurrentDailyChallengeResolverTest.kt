@@ -27,7 +27,7 @@ class CurrentDailyChallengeResolverTest {
         assertEquals(LocalDate.of(2026, 7, 25), currentDailyChallenge.identity.localDate)
         assertEquals(DailyRecipes.WEEKLY_SCHEDULE_V2.version, currentDailyChallenge.identity.recipeVersion)
         assertSame(DailyRecipes.WEEKLY_SCHEDULE_V2, currentDailyChallenge.recipe)
-        assertSame(GeneratedModes.FOUR_PAIRS_LOW, currentDailyChallenge.challenge)
+        assertSame(GeneratedModes.THREE_PAIRS_MEDIUM, currentDailyChallenge.challenge)
     }
 
     @Test
@@ -41,8 +41,10 @@ class CurrentDailyChallengeResolverTest {
         currentDate = LocalDate.of(2027, 1, 1)
 
         assertEquals(LocalDate.of(2026, 12, 31), firstResolution.identity.localDate)
-        assertSame(GeneratedModes.THREE_PAIRS_LOW, firstResolution.challenge)
-        assertEquals(LocalDate.of(2027, 1, 1), resolver.resolve().identity.localDate)
+        assertSame(GeneratedModes.FOUR_PAIRS_MEDIUM, firstResolution.challenge)
+        val secondResolution = resolver.resolve()
+        assertEquals(LocalDate.of(2027, 1, 1), secondResolution.identity.localDate)
+        assertSame(GeneratedModes.EIGHT_PAIRS_MEDIUM, secondResolution.challenge)
     }
 
     @Test
@@ -51,10 +53,10 @@ class CurrentDailyChallengeResolverTest {
             DayOfWeek.MONDAY to GeneratedModes.THREE_PAIRS_LOW,
             DayOfWeek.TUESDAY to GeneratedModes.FOUR_PAIRS_LOW,
             DayOfWeek.WEDNESDAY to GeneratedModes.THREE_PAIRS_MEDIUM,
-            DayOfWeek.THURSDAY to GeneratedModes.THREE_PAIRS_LOW,
-            DayOfWeek.FRIDAY to GeneratedModes.FOUR_PAIRS_LOW,
-            DayOfWeek.SATURDAY to GeneratedModes.FOUR_PAIRS_LOW,
-            DayOfWeek.SUNDAY to GeneratedModes.FOUR_PAIRS_MEDIUM
+            DayOfWeek.THURSDAY to GeneratedModes.FOUR_PAIRS_MEDIUM,
+            DayOfWeek.FRIDAY to GeneratedModes.EIGHT_PAIRS_MEDIUM,
+            DayOfWeek.SATURDAY to GeneratedModes.THREE_PAIRS_MEDIUM,
+            DayOfWeek.SUNDAY to GeneratedModes.FOUR_PAIRS_LOW
         )
 
         expectedChallenges.forEach { (dayOfWeek, expectedChallenge) ->

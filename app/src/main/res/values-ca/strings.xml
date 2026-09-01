@@ -72,6 +72,7 @@
     <string name="classic_screen_title">Clàssic</string>
     <string name="three_pairs_screen_title">3 parelles</string>
     <string name="four_pairs_screen_title">4 parelles</string>
+    <string name="eight_pairs_screen_title">8 parelles</string>
 
     <!-- Generated puzzle creation -->
     <string name="generated_puzzle_loading_message">Creant puzle…</string>

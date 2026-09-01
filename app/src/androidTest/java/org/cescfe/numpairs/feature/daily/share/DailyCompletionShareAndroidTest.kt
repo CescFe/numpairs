@@ -72,7 +72,7 @@ class DailyCompletionShareAndroidTest {
     fun payload_factory_uses_the_scheduled_size_and_difficulty() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val identity = DailyRecipes.WEEKLY_SCHEDULE_V2.identityFor(
-            LocalDate.of(2026, 9, 2)
+            LocalDate.of(2026, 9, 4)
         )
 
         val payload = AndroidDailyCompletionSharePayloadFactory(
@@ -88,7 +88,7 @@ class DailyCompletionShareAndroidTest {
             payload.text.value.contains(
                 context.getString(
                     R.string.generated_challenge_title,
-                    context.getString(R.string.three_pairs_screen_title),
+                    context.getString(R.string.eight_pairs_screen_title),
                     context.getString(R.string.generated_difficulty_medium)
                 )
             )

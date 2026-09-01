@@ -95,7 +95,8 @@ object DailyRecipes {
             GeneratedModes.THREE_PAIRS_LOW,
             GeneratedModes.FOUR_PAIRS_LOW,
             GeneratedModes.THREE_PAIRS_MEDIUM,
-            GeneratedModes.FOUR_PAIRS_MEDIUM
+            GeneratedModes.FOUR_PAIRS_MEDIUM,
+            GeneratedModes.EIGHT_PAIRS_MEDIUM
         )
     )
     val catalog: DailyRecipeCatalog = DailyRecipeCatalog(

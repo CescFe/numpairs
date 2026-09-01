@@ -9,8 +9,8 @@ starting another normal challenge safely replaces that slot.
 
 v10 adds one Daily Challenge for each device-local calendar date. The first daily recipe selects
 `4 Pairs Low`. A later product increment adds predictable weekly variety across the existing
-`3 Pairs Low`, `4 Pairs Low`, `3 Pairs Medium`, and `4 Pairs Medium` challenges. Daily behavior
-also requires:
+`3 Pairs Low`, `4 Pairs Low`, `3 Pairs Medium`, `4 Pairs Medium`, and `8 Pairs Medium`
+challenges. Daily behavior also requires:
 
 - one stable date-bound content identity
 - deterministic seed selection shared by every installation on the same recipe version
@@ -71,10 +71,11 @@ generated challenges.
   `4 Pairs Low` generated challenge.
 - The active recipe version is `daily-weekly-schedule-v2`. It derives one exact generated
   challenge from the captured date's `DayOfWeek`:
-  - Monday and Thursday: `3 Pairs Low`
-  - Tuesday, Friday, and Saturday: `4 Pairs Low`
-  - Wednesday: `3 Pairs Medium`
-  - Sunday: `4 Pairs Medium`
+  - Monday: `3 Pairs Low`
+  - Tuesday and Sunday: `4 Pairs Low`
+  - Wednesday and Saturday: `3 Pairs Medium`
+  - Thursday: `4 Pairs Medium`
+  - Friday: `8 Pairs Medium`
 - Display copy, localized date text, profile parameters, and current clock state are not part of
   Daily Challenge identity.
 

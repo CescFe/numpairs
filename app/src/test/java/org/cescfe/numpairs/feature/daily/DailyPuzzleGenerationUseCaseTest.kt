@@ -64,13 +64,13 @@ class DailyPuzzleGenerationUseCaseTest {
 
         assertEquals(1, dateReadCount)
         assertEquals(expectedIdentity, result.identity)
-        assertSame(GeneratedModes.FOUR_PAIRS_LOW, result.challenge)
+        assertSame(GeneratedModes.THREE_PAIRS_MEDIUM, result.challenge)
         assertEquals(DailyCandidateIndex(2), result.candidateIndex)
         assertEquals(expectedSeeds[2], result.seed)
         assertSame(samplePuzzle, result.initialPuzzle)
         assertEquals(expectedSeeds, requests.map(GeneratedPuzzleGenerationRequest::seed))
-        assertTrue(requests.all { request -> request.profile === GeneratedModes.FOUR_PAIRS_LOW.profile })
-        assertEquals(listOf(GeneratedModes.FOUR_PAIRS_LOW), createdChallenges)
+        assertTrue(requests.all { request -> request.profile === GeneratedModes.THREE_PAIRS_MEDIUM.profile })
+        assertEquals(listOf(GeneratedModes.THREE_PAIRS_MEDIUM), createdChallenges)
     }
 
     @Test
@@ -79,10 +79,10 @@ class DailyPuzzleGenerationUseCaseTest {
             GeneratedModes.THREE_PAIRS_LOW,
             GeneratedModes.FOUR_PAIRS_LOW,
             GeneratedModes.THREE_PAIRS_MEDIUM,
-            GeneratedModes.THREE_PAIRS_LOW,
-            GeneratedModes.FOUR_PAIRS_LOW,
-            GeneratedModes.FOUR_PAIRS_LOW,
-            GeneratedModes.FOUR_PAIRS_MEDIUM
+            GeneratedModes.FOUR_PAIRS_MEDIUM,
+            GeneratedModes.EIGHT_PAIRS_MEDIUM,
+            GeneratedModes.THREE_PAIRS_MEDIUM,
+            GeneratedModes.FOUR_PAIRS_LOW
         )
 
         expectedChallenges.forEachIndexed { dayOffset, expectedChallenge ->

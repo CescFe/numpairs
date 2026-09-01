@@ -95,10 +95,10 @@ class DailyCompletionShareTextFormatterTest {
             LocalDate.of(2026, 8, 31) to "3 Pairs · Low",
             LocalDate.of(2026, 9, 1) to "4 Pairs · Low",
             LocalDate.of(2026, 9, 2) to "3 Pairs · Medium",
-            LocalDate.of(2026, 9, 3) to "3 Pairs · Low",
-            LocalDate.of(2026, 9, 4) to "4 Pairs · Low",
-            LocalDate.of(2026, 9, 5) to "4 Pairs · Low",
-            LocalDate.of(2026, 9, 6) to "4 Pairs · Medium"
+            LocalDate.of(2026, 9, 3) to "4 Pairs · Medium",
+            LocalDate.of(2026, 9, 4) to "8 Pairs · Medium",
+            LocalDate.of(2026, 9, 5) to "3 Pairs · Medium",
+            LocalDate.of(2026, 9, 6) to "4 Pairs · Low"
         )
 
         scenarios.forEach { (date, expectedChallengeName) ->
@@ -320,12 +320,14 @@ private fun challengeNames(
     threePairsLow: String = "3 Pairs · Low",
     fourPairsLow: String = "4 Pairs · Low",
     threePairsMedium: String = "3 Pairs · Medium",
-    fourPairsMedium: String = "4 Pairs · Medium"
+    fourPairsMedium: String = "4 Pairs · Medium",
+    eightPairsMedium: String = "8 Pairs · Medium"
 ): DailyChallengeNameCopy = DailyChallengeNameCopy(
     namesByChallengeId = mapOf(
         GeneratedModes.THREE_PAIRS_LOW.id to threePairsLow,
         GeneratedModes.FOUR_PAIRS_LOW.id to fourPairsLow,
         GeneratedModes.THREE_PAIRS_MEDIUM.id to threePairsMedium,
-        GeneratedModes.FOUR_PAIRS_MEDIUM.id to fourPairsMedium
+        GeneratedModes.FOUR_PAIRS_MEDIUM.id to fourPairsMedium,
+        GeneratedModes.EIGHT_PAIRS_MEDIUM.id to eightPairsMedium
     )
 )

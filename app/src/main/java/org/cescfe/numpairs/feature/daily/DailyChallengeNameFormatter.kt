@@ -31,6 +31,7 @@ class DailyChallengeNameFormatter(private val recipeCatalog: DailyRecipeCatalog 
 internal fun DailyChallengeId.localizedDailyChallengeName(): String {
     val threePairsName = stringResource(R.string.three_pairs_screen_title)
     val fourPairsName = stringResource(R.string.four_pairs_screen_title)
+    val eightPairsName = stringResource(R.string.eight_pairs_screen_title)
     val lowDifficultyName = stringResource(R.string.generated_difficulty_low)
     val mediumDifficultyName = stringResource(R.string.generated_difficulty_medium)
     val copy = DailyChallengeNameCopy(
@@ -53,6 +54,11 @@ internal fun DailyChallengeId.localizedDailyChallengeName(): String {
             GeneratedModes.FOUR_PAIRS_MEDIUM.id to stringResource(
                 R.string.generated_challenge_title,
                 fourPairsName,
+                mediumDifficultyName
+            ),
+            GeneratedModes.EIGHT_PAIRS_MEDIUM.id to stringResource(
+                R.string.generated_challenge_title,
+                eightPairsName,
                 mediumDifficultyName
             )
         )

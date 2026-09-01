@@ -75,7 +75,8 @@ class DailyAggregateCodecTest {
             LocalDate.of(2026, 8, 31),
             LocalDate.of(2026, 9, 1),
             LocalDate.of(2026, 9, 2),
-            LocalDate.of(2026, 9, 6)
+            LocalDate.of(2026, 9, 3),
+            LocalDate.of(2026, 9, 4)
         )
 
         dates.forEach { date ->

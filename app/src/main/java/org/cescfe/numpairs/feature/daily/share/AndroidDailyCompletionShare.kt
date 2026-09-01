@@ -26,6 +26,7 @@ class AndroidDailyCompletionSharePayloadFactory(
         val locale = resources.configuration.locales[0]
         val threePairsName = resources.getString(R.string.three_pairs_screen_title)
         val fourPairsName = resources.getString(R.string.four_pairs_screen_title)
+        val eightPairsName = resources.getString(R.string.eight_pairs_screen_title)
         val lowDifficultyName = resources.getString(R.string.generated_difficulty_low)
         val mediumDifficultyName = resources.getString(R.string.generated_difficulty_medium)
         return DailyCompletionSharePayload(
@@ -53,6 +54,11 @@ class AndroidDailyCompletionSharePayloadFactory(
                             GeneratedModes.FOUR_PAIRS_MEDIUM.id to resources.getString(
                                 R.string.generated_challenge_title,
                                 fourPairsName,
+                                mediumDifficultyName
+                            ),
+                            GeneratedModes.EIGHT_PAIRS_MEDIUM.id to resources.getString(
+                                R.string.generated_challenge_title,
+                                eightPairsName,
                                 mediumDifficultyName
                             )
                         )

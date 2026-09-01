@@ -38,10 +38,10 @@ class DailyRecipeTest {
             DayOfWeek.MONDAY to GeneratedModes.THREE_PAIRS_LOW,
             DayOfWeek.TUESDAY to GeneratedModes.FOUR_PAIRS_LOW,
             DayOfWeek.WEDNESDAY to GeneratedModes.THREE_PAIRS_MEDIUM,
-            DayOfWeek.THURSDAY to GeneratedModes.THREE_PAIRS_LOW,
-            DayOfWeek.FRIDAY to GeneratedModes.FOUR_PAIRS_LOW,
-            DayOfWeek.SATURDAY to GeneratedModes.FOUR_PAIRS_LOW,
-            DayOfWeek.SUNDAY to GeneratedModes.FOUR_PAIRS_MEDIUM
+            DayOfWeek.THURSDAY to GeneratedModes.FOUR_PAIRS_MEDIUM,
+            DayOfWeek.FRIDAY to GeneratedModes.EIGHT_PAIRS_MEDIUM,
+            DayOfWeek.SATURDAY to GeneratedModes.THREE_PAIRS_MEDIUM,
+            DayOfWeek.SUNDAY to GeneratedModes.FOUR_PAIRS_LOW
         )
 
         assertSame(DailyRecipes.WEEKLY_SCHEDULE_V2, recipe)

@@ -14,10 +14,10 @@ class DailyChallengeNameFormatterTest {
             LocalDate.of(2026, 8, 31) to "3 Pairs · Low",
             LocalDate.of(2026, 9, 1) to "4 Pairs · Low",
             LocalDate.of(2026, 9, 2) to "3 Pairs · Medium",
-            LocalDate.of(2026, 9, 3) to "3 Pairs · Low",
-            LocalDate.of(2026, 9, 4) to "4 Pairs · Low",
-            LocalDate.of(2026, 9, 5) to "4 Pairs · Low",
-            LocalDate.of(2026, 9, 6) to "4 Pairs · Medium"
+            LocalDate.of(2026, 9, 3) to "4 Pairs · Medium",
+            LocalDate.of(2026, 9, 4) to "8 Pairs · Medium",
+            LocalDate.of(2026, 9, 5) to "3 Pairs · Medium",
+            LocalDate.of(2026, 9, 6) to "4 Pairs · Low"
         )
         val formatter = DailyChallengeNameFormatter()
 
@@ -60,6 +60,7 @@ private fun englishCopy(): DailyChallengeNameCopy = DailyChallengeNameCopy(
         GeneratedModes.THREE_PAIRS_LOW.id to "3 Pairs · Low",
         GeneratedModes.FOUR_PAIRS_LOW.id to "4 Pairs · Low",
         GeneratedModes.THREE_PAIRS_MEDIUM.id to "3 Pairs · Medium",
-        GeneratedModes.FOUR_PAIRS_MEDIUM.id to "4 Pairs · Medium"
+        GeneratedModes.FOUR_PAIRS_MEDIUM.id to "4 Pairs · Medium",
+        GeneratedModes.EIGHT_PAIRS_MEDIUM.id to "8 Pairs · Medium"
     )
 )

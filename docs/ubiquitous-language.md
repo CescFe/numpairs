@@ -116,10 +116,11 @@ bounded sequence of generation seeds.
 The legacy `daily-4-pairs-low-v1` recipe selects exact `4 Pairs Low` for every date. The active
 `daily-weekly-schedule-v2` recipe selects by device-local day of week:
 
-- Monday and Thursday: `3 Pairs Low`
-- Tuesday, Friday, and Saturday: `4 Pairs Low`
-- Wednesday: `3 Pairs Medium`
-- Sunday: `4 Pairs Medium`
+- Monday: `3 Pairs Low`
+- Tuesday and Sunday: `4 Pairs Low`
+- Wednesday and Saturday: `3 Pairs Medium`
+- Thursday: `4 Pairs Medium`
+- Friday: `8 Pairs Medium`
 
 A recipe does not use Quick weighting, remembered Generated Play Option difficulty, runtime
 randomness, or remote configuration. A recipe change requires a new stable version.

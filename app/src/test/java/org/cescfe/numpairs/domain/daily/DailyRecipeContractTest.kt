@@ -16,10 +16,10 @@ class DailyRecipeContractTest {
             DayOfWeek.MONDAY to GeneratedPuzzleProfiles.THREE_PAIRS_LOW,
             DayOfWeek.TUESDAY to GeneratedPuzzleProfiles.FOUR_PAIRS_LOW,
             DayOfWeek.WEDNESDAY to GeneratedPuzzleProfiles.THREE_PAIRS_MEDIUM,
-            DayOfWeek.THURSDAY to GeneratedPuzzleProfiles.THREE_PAIRS_LOW,
-            DayOfWeek.FRIDAY to GeneratedPuzzleProfiles.FOUR_PAIRS_LOW,
-            DayOfWeek.SATURDAY to GeneratedPuzzleProfiles.FOUR_PAIRS_LOW,
-            DayOfWeek.SUNDAY to GeneratedPuzzleProfiles.FOUR_PAIRS_MEDIUM
+            DayOfWeek.THURSDAY to GeneratedPuzzleProfiles.FOUR_PAIRS_MEDIUM,
+            DayOfWeek.FRIDAY to GeneratedPuzzleProfiles.EIGHT_PAIRS_MEDIUM,
+            DayOfWeek.SATURDAY to GeneratedPuzzleProfiles.THREE_PAIRS_MEDIUM,
+            DayOfWeek.SUNDAY to GeneratedPuzzleProfiles.FOUR_PAIRS_LOW
         )
 
         expectedProfiles.forEach { (dayOfWeek, expectedProfile) ->
