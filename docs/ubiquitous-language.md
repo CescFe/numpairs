@@ -199,7 +199,45 @@ streak, reward, display text, exact completion instant, or puzzle.
 The local collection of Daily Completion records displayed by the calendar.
 
 The history records at most one completion per local calendar date, remains independent from
-normal generated sessions and preferences, and is not synchronized across installations.
+normal generated sessions and preferences, and is not synchronized across installations. Daily
+Personal Bests and historical Daily Personal-Best Outcomes are derived from this authoritative
+history rather than stored in a second mutable cache.
+
+## Daily Personal-Best Category
+The exact Generated Challenge identity used to group comparable timed Daily Completions.
+
+The supported Daily Recipe history currently resolves five independent categories:
+
+- `3 Pairs Low`
+- `4 Pairs Low`
+- `3 Pairs Medium`
+- `4 Pairs Medium`
+- `8 Pairs Medium`
+
+The legacy `daily-4-pairs-low-v1` recipe and the matching days in the active weekly recipe resolve
+to the same `4 Pairs Low` category. A completion whose recipe cannot safely resolve its exact
+Generated Challenge has no personal-best category.
+
+## Daily Personal Best
+The lowest authoritative Daily Elapsed Time among the resolvable timed Daily Completions in one
+Daily Personal-Best Category.
+
+Daily Personal Bests are local, application-private derived facts. Daily Movement Count, calendar
+streak, completion date, and results from other categories do not participate in the duration
+comparison. An untimed completion does not establish or improve a best.
+
+## Daily Personal-Best Outcome
+The stable classification of one Daily Completion against the earlier Daily Completion History in
+its category.
+
+The first timed result establishes a `Baseline` and is not celebrated as a record. A later result
+is a `Personal Record` only when its millisecond duration is strictly lower than the previous best;
+a tie is `Not Record`. Untimed completions and completions without a resolvable category are also
+`Not Record`.
+
+The outcome freezes the current duration, previous best, resulting best, and classification when
+the puzzle first becomes solved. Historical reconstruction considers earlier canonical Daily dates
+so a later completion cannot retroactively reclassify an older result.
 
 ## Current Puzzle
 The latest committed domain state of the puzzle being played in a normal generated session or

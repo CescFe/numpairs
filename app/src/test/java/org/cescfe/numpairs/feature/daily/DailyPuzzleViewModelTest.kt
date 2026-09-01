@@ -26,8 +26,10 @@ import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyMovementCount
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestOutcome
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
+import org.cescfe.numpairs.domain.daily.assertDailyElapsedTimeEquals
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationFailureReason
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
@@ -105,6 +107,44 @@ class DailyPuzzleViewModelTest {
         assertEquals(completion, completed.completion)
         assertEquals(0, generator.requestCount)
         assertTrue(repository.replaceAttempts.isEmpty())
+    }
+
+    @Test
+    fun completed_today_recreates_the_historical_personal_record_without_reading_the_clock() {
+        val date = LocalDate.of(2027, 4, 18)
+        val currentCompletion = dailyCompletion(
+            identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(date),
+            elapsedMilliseconds = 4_000
+        )
+        val repository = RecordingDailySessionRepository(
+            initialState = DailyState(
+                activeSession = null,
+                completions = listOf(
+                    dailyCompletion(
+                        identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(date.minusDays(1)),
+                        elapsedMilliseconds = 5_000
+                    ),
+                    currentCompletion
+                )
+            )
+        )
+        val timeSource = MutableDailyTimeSource()
+        val viewModel = viewModel(
+            date = date,
+            repository = repository,
+            generator = RecordingDailyPuzzleGenerator(),
+            timeSource = timeSource
+        )
+
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val completed = viewModel.uiState.value as DailyPuzzleUiState.CompletedToday
+        assertEquals(currentCompletion, completed.completion)
+        assertEquals(DailyPersonalBestOutcome.PERSONAL_RECORD, completed.personalBestResult.outcome)
+        assertDailyElapsedTimeEquals(5_000, completed.personalBestResult.previousBestElapsedTime)
+        assertDailyElapsedTimeEquals(4_000, completed.personalBestResult.bestElapsedTime)
+        assertEquals(0, timeSource.readCount)
     }
 
     @Test
@@ -483,13 +523,11 @@ class DailyPuzzleViewModelTest {
 
         val completed = viewModel.uiState.value as DailyPuzzleUiState.Completed
         assertEquals(
-            DailyPuzzleCompletion.Completed(
-                dailyCompletion(
-                    identity = fixture.identity,
-                    movementCount = 2
-                )
+            dailyCompletion(
+                identity = fixture.identity,
+                movementCount = 2
             ),
-            completed.completion
+            (completed.completion as DailyPuzzleCompletion.Completed).completion
         )
         assertEquals(solved, completed.session.currentPuzzle)
         assertEquals(fixture.identity, repository.currentState.completedChallengeIds.single())
@@ -523,8 +561,8 @@ class DailyPuzzleViewModelTest {
 
         val completed = viewModel.uiState.value as DailyPuzzleUiState.Completed
         assertEquals(
-            DailyPuzzleCompletion.AlreadyCompleted(dailyCompletion(fixture.identity)),
-            completed.completion
+            dailyCompletion(fixture.identity),
+            (completed.completion as DailyPuzzleCompletion.AlreadyCompleted).completion
         )
         assertTrue(completed.session.currentPuzzle.isSolved)
     }
@@ -985,17 +1023,25 @@ class DailyPuzzleViewModelTest {
         )
         assertEquals(1_234L, requireNotNull(repository.completionAttempts.single().elapsedTime).milliseconds)
         assertEquals(1L, requireNotNull(repository.completionAttempts.single().movementCount).value)
+        val frozenPersonalBest = requireNotNull(
+            (viewModel.uiState.value as DailyPuzzleUiState.Ready).personalBestResult
+        )
+        assertEquals(DailyPersonalBestOutcome.BASELINE, frozenPersonalBest.outcome)
+        assertDailyElapsedTimeEquals(1_234, frozenPersonalBest.bestElapsedTime)
 
         timeSource.set(epochMilliseconds = 99_000, monotonicMilliseconds = 90_000)
         completionGate.complete(Unit)
         dispatcher.scheduler.advanceUntilIdle()
 
         val completed = viewModel.uiState.value as DailyPuzzleUiState.Completed
+        val completedResult = completed.completion as DailyPuzzleCompletion.Completed
         assertEquals(
             1_234L,
-            requireNotNull(
-                (completed.completion as DailyPuzzleCompletion.Completed).completion.elapsedTime
-            ).milliseconds
+            requireNotNull(completedResult.completion.elapsedTime).milliseconds
+        )
+        assertEquals(
+            frozenPersonalBest,
+            completedResult.personalBestResult
         )
     }
 
@@ -1003,7 +1049,17 @@ class DailyPuzzleViewModelTest {
     fun completion_persistence_retry_reuses_the_frozen_elapsed_time() {
         val fixture = generatedDailyFixture()
         val repository = RecordingDailySessionRepository(
-            initialState = DailyState(fixture.snapshot(), emptyList()),
+            initialState = DailyState(
+                activeSession = fixture.snapshot(),
+                completions = listOf(
+                    dailyCompletion(
+                        identity = DailyRecipes.FOUR_PAIRS_LOW_V1.identityFor(
+                            fixture.identity.localDate.minusDays(1)
+                        ),
+                        elapsedMilliseconds = 5_000
+                    )
+                )
+            ),
             completionFailures = ArrayDeque(listOf(IOException("storage unavailable")))
         )
         val timeSource = MutableDailyTimeSource(20_000, 1_000)
@@ -1026,6 +1082,12 @@ class DailyPuzzleViewModelTest {
             DailyPuzzlePersistenceFailure.Persistence,
             (viewModel.uiState.value as DailyPuzzleUiState.Ready).persistenceFailure
         )
+        val frozenPersonalBest = requireNotNull(
+            (viewModel.uiState.value as DailyPuzzleUiState.Ready).personalBestResult
+        )
+        assertEquals(DailyPersonalBestOutcome.PERSONAL_RECORD, frozenPersonalBest.outcome)
+        assertDailyElapsedTimeEquals(5_000, frozenPersonalBest.previousBestElapsedTime)
+        assertDailyElapsedTimeEquals(3_456, frozenPersonalBest.bestElapsedTime)
 
         timeSource.set(epochMilliseconds = 40_000, monotonicMilliseconds = 21_000)
         viewModel.retryPersistence()
@@ -1040,11 +1102,14 @@ class DailyPuzzleViewModelTest {
             repository.completionAttempts.map { attempt -> requireNotNull(attempt.movementCount).value }
         )
         val completed = viewModel.uiState.value as DailyPuzzleUiState.Completed
+        val completedResult = completed.completion as DailyPuzzleCompletion.Completed
         assertEquals(
             3_456L,
-            requireNotNull(
-                (completed.completion as DailyPuzzleCompletion.Completed).completion.elapsedTime
-            ).milliseconds
+            requireNotNull(completedResult.completion.elapsedTime).milliseconds
+        )
+        assertEquals(
+            frozenPersonalBest,
+            completedResult.personalBestResult
         )
     }
 

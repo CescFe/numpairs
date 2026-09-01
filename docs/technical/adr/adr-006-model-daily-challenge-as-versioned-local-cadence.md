@@ -18,6 +18,7 @@ challenges. Daily behavior also requires:
 - one local completion per date
 - durable no-pause elapsed timing from first presentation to solution
 - a durable count of effective puzzle movements
+- one history-derived personal best for each comparable generated challenge
 - a completion calendar
 - coexistence with an unfinished normal generated session
 - explicit behavior when the local date, recipe, or generator changes
@@ -223,6 +224,39 @@ another record.
 Calendar presentation may preserve and display the completed date of a record whose recipe version
 is no longer active. An active snapshot whose recipe version cannot be resolved is not resumable.
 
+### Personal-Best Derivation
+
+Daily personal bests are derived from authoritative completion history instead of persisted in a
+second mutable cache. One personal-best category is the stable identity of the exact generated
+challenge resolved by the completion's recipe and canonical date. The supported recipe history
+currently resolves five independent categories:
+
+- `3 Pairs Low`
+- `4 Pairs Low`
+- `3 Pairs Medium`
+- `4 Pairs Medium`
+- `8 Pairs Medium`
+
+The lowest non-null millisecond-precision elapsed time in each category is its best. Existing timed
+`daily-4-pairs-low-v1` completions resolve naturally to the same `4 Pairs Low` category as matching
+weekly-recipe completions. A completion with no elapsed time or whose recipe cannot safely resolve
+an exact generated challenge cannot establish or improve a best. Such unsupported completion
+records remain available to calendar history.
+
+For one completion, its previous best is the minimum qualifying duration in the same category on
+an earlier canonical Daily date. The date establishes which history existed before that result; it
+does not participate in the duration comparison. A first timed category result is a baseline, not
+a personal record. A later result is a personal record only when its duration is strictly lower
+than the previous best. Equal and slower durations are not records. Movement count, streak, and
+other generated challenges do not affect the comparison.
+
+The first unsolved-to-solved in-memory transition freezes one result containing the current
+duration, previous best, resulting best, and baseline, personal-record, or non-record outcome before
+completion persistence begins. Persistence failure and retry reuse that result. After successful
+persistence or process recreation, the same result is reconstructed from completion history
+without reading the clock. The aggregate schema remains unchanged because neither a cached best nor
+the derived outcome is persisted.
+
 ### Aggregate Schema Migration
 
 Daily movement tracking changes the aggregate schema from version 2 to version 3. The version-3
@@ -270,6 +304,8 @@ history. Account sync and cross-device transfer remain unsupported.
   duration across recreation and later sharing.
 - Movement progress and completion preserve one authoritative non-negative count without
   fabricating historical values.
+- Personal bests remain derivable from authoritative completion history without a second cache,
+  and each exact generated challenge remains independently comparable.
 - A recipe version gives date-derived content a stable compatibility boundary.
 - Weekly variety reuses the sparse generated-challenge catalog without persisting derivable mode,
   difficulty, or profile metadata.
@@ -285,6 +321,8 @@ history. Account sync and cross-device transfer remain unsupported.
 - Old recipe resolvers must remain available while their active snapshots may still be restored.
 - Trusted local-clock changes can alter reconstructed elapsed time and cannot establish competitive
   integrity.
+- Historical outcome reconstruction uses canonical Daily date order because completion records do
+  not store a separate completion instant.
 - Date rollover, clock changes, stale callbacks, recipe mismatches, and partial corruption require
   explicit test coverage.
 - Local-only history can be reset or manipulated and cannot prove fair participation.

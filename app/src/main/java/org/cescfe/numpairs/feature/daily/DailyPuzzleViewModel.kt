@@ -22,6 +22,8 @@ import org.cescfe.numpairs.data.daily.session.requireValidSolvedPuzzle
 import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyMovementCount
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestHistory
+import org.cescfe.numpairs.domain.daily.DailyPersonalBestResult
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
@@ -56,9 +58,30 @@ internal sealed interface DailyPuzzlePersistenceFailure {
 }
 
 internal sealed interface DailyPuzzleCompletion {
-    data class Completed(val completion: DailyCompletion) : DailyPuzzleCompletion
+    val completion: DailyCompletion
+    val personalBestResult: DailyPersonalBestResult
 
-    data class AlreadyCompleted(val completion: DailyCompletion) : DailyPuzzleCompletion
+    data class Completed(
+        override val completion: DailyCompletion,
+        override val personalBestResult: DailyPersonalBestResult
+    ) : DailyPuzzleCompletion {
+        init {
+            require(personalBestResult.currentElapsedTime == completion.elapsedTime) {
+                "A persisted Daily completion must preserve its frozen personal-best duration."
+            }
+        }
+    }
+
+    data class AlreadyCompleted(
+        override val completion: DailyCompletion,
+        override val personalBestResult: DailyPersonalBestResult
+    ) : DailyPuzzleCompletion {
+        init {
+            require(personalBestResult.currentElapsedTime == completion.elapsedTime) {
+                "An existing Daily completion must preserve its derived personal-best duration."
+            }
+        }
+    }
 }
 
 internal sealed interface DailyPuzzleUiState {
@@ -71,8 +94,18 @@ internal sealed interface DailyPuzzleUiState {
     data class Ready(
         val session: DailyGameSession,
         val elapsedTime: DailyElapsedTime? = null,
+        val personalBestResult: DailyPersonalBestResult? = null,
         val persistenceFailure: DailyPuzzlePersistenceFailure? = null
-    ) : DailyPuzzleUiState
+    ) : DailyPuzzleUiState {
+        init {
+            require(session.currentPuzzle.isSolved == (personalBestResult != null)) {
+                "A solved Daily session must freeze one personal-best result."
+            }
+            require(personalBestResult == null || personalBestResult.currentElapsedTime == elapsedTime) {
+                "A frozen Daily personal-best result must use the visible completion duration."
+            }
+        }
+    }
 
     data class Completed(val session: DailyGameSession, val completion: DailyPuzzleCompletion) : DailyPuzzleUiState {
         init {
@@ -89,14 +122,23 @@ internal sealed interface DailyPuzzleUiState {
             ) {
                 "A completed Daily result must own the captured local date."
             }
+            require(completion.personalBestResult.currentElapsedTime == completion.completion.elapsedTime) {
+                "A completed Daily result must preserve its authoritative duration."
+            }
         }
     }
 
-    data class CompletedToday(val currentDailyChallenge: CurrentDailyChallenge, val completion: DailyCompletion) :
-        DailyPuzzleUiState {
+    data class CompletedToday(
+        val currentDailyChallenge: CurrentDailyChallenge,
+        val completion: DailyCompletion,
+        val personalBestResult: DailyPersonalBestResult
+    ) : DailyPuzzleUiState {
         init {
             require(completion.identity.localDate == currentDailyChallenge.identity.localDate) {
                 "A completed Daily UI state must own the captured local date."
+            }
+            require(personalBestResult.currentElapsedTime == completion.elapsedTime) {
+                "A completed-today Daily result must preserve its authoritative duration."
             }
         }
     }
@@ -123,6 +165,7 @@ internal class DailyPuzzleViewModel(
     private var visibleTimer: VisibleDailyTimer? = null
     private var pendingTimingStart: PendingDailyTimingStart? = null
     private val elapsedHighWaterBySessionId = mutableMapOf<DailySessionId, DailyElapsedTime>()
+    private var personalBestHistory: DailyPersonalBestHistory? = null
 
     fun onRouteEntered() {
         if (preparationJob != null || _uiState.value != DailyPuzzleUiState.Idle) {
@@ -189,7 +232,6 @@ internal class DailyPuzzleViewModel(
             )
             enqueuePersistence(
                 session = session,
-                elapsedTime = elapsedAtAnchor,
                 timingStartOnly = true
             )
         }
@@ -265,13 +307,25 @@ internal class DailyPuzzleViewModel(
         } else {
             state.elapsedTime
         }
+        val personalBestResult = if (puzzle.isSolved) {
+            requirePersonalBestHistory().resultFor(
+                DailyCompletion(
+                    identity = updatedSession.currentDailyChallenge.identity,
+                    elapsedTime = elapsedTime,
+                    movementCount = updatedSession.snapshot.movementCount
+                )
+            )
+        } else {
+            null
+        }
         _uiState.value = DailyPuzzleUiState.Ready(
             session = updatedSession,
-            elapsedTime = elapsedTime
+            elapsedTime = elapsedTime,
+            personalBestResult = personalBestResult
         )
         enqueuePersistence(
             session = updatedSession,
-            elapsedTime = elapsedTime
+            personalBestResult = personalBestResult
         )
     }
 
@@ -283,7 +337,7 @@ internal class DailyPuzzleViewModel(
         _uiState.value = readyState.copy(persistenceFailure = null)
         enqueuePersistence(
             session = readyState.session,
-            elapsedTime = readyState.elapsedTime
+            personalBestResult = readyState.personalBestResult
         )
     }
 
@@ -298,6 +352,7 @@ internal class DailyPuzzleViewModel(
             }
 
             preparationJob = null
+            personalBestHistory = availability.personalBestHistory
             when (availability) {
                 is CurrentDailyAvailability.StartToday -> {
                     startGeneration(
@@ -317,7 +372,10 @@ internal class DailyPuzzleViewModel(
                 is CurrentDailyAvailability.CompletedToday -> {
                     _uiState.value = DailyPuzzleUiState.CompletedToday(
                         currentDailyChallenge = availability.currentDailyChallenge,
-                        completion = availability.completion
+                        completion = availability.completion,
+                        personalBestResult = availability.personalBestHistory.resultFor(
+                            availability.completion
+                        )
                     )
                 }
             }
@@ -426,7 +484,10 @@ internal class DailyPuzzleViewModel(
                     pendingSessionId = null
                     DailyPuzzleUiState.CompletedToday(
                         currentDailyChallenge = expectedCurrentDailyChallenge,
-                        completion = replacement.completion
+                        completion = replacement.completion,
+                        personalBestResult = requirePersonalBestHistory().resultFor(
+                            replacement.completion
+                        )
                     )
                 }
             }
@@ -440,7 +501,7 @@ internal class DailyPuzzleViewModel(
 
     private fun enqueuePersistence(
         session: DailyGameSession,
-        elapsedTime: DailyElapsedTime?,
+        personalBestResult: DailyPersonalBestResult? = null,
         timingStartOnly: Boolean = false
     ) {
         val revision = ++persistenceRevision
@@ -454,7 +515,7 @@ internal class DailyPuzzleViewModel(
                 } else if (session.currentPuzzle.isSolved) {
                     persistCompletion(
                         session = session,
-                        elapsedTime = elapsedTime
+                        personalBestResult = requireNotNull(personalBestResult)
                     )
                 } else {
                     persistProgress(session = session)
@@ -532,50 +593,69 @@ internal class DailyPuzzleViewModel(
 
     private suspend fun persistCompletion(
         session: DailyGameSession,
-        elapsedTime: DailyElapsedTime?
-    ): DailyPuzzlePersistenceFailure? = when (
-        val result = dailySessionRepository.complete(
-            expectedSessionId = session.id,
-            expectedDailyChallengeId = session.currentDailyChallenge.identity,
-            solvedPuzzle = session.currentPuzzle,
-            movementCount = session.snapshot.movementCount,
-            elapsedTime = elapsedTime
+        personalBestResult: DailyPersonalBestResult
+    ): DailyPuzzlePersistenceFailure? {
+        val frozenCompletion = DailyCompletion(
+            identity = session.currentDailyChallenge.identity,
+            elapsedTime = personalBestResult.currentElapsedTime,
+            movementCount = session.snapshot.movementCount
         )
-    ) {
-        is DailySessionCompletionResult.Completed -> {
-            publishCompletion(
+        return when (
+            val result = dailySessionRepository.complete(
                 expectedSessionId = session.id,
-                completion = DailyPuzzleCompletion.Completed(
-                    completion = result.completion
-                )
+                expectedDailyChallengeId = frozenCompletion.identity,
+                solvedPuzzle = session.currentPuzzle,
+                movementCount = frozenCompletion.movementCount,
+                elapsedTime = frozenCompletion.elapsedTime
             )
-            null
-        }
-
-        is DailySessionCompletionResult.AlreadyCompleted -> {
-            publishCompletion(
-                expectedSessionId = session.id,
-                completion = DailyPuzzleCompletion.AlreadyCompleted(
-                    completion = result.completion
+        ) {
+            is DailySessionCompletionResult.Completed -> {
+                check(result.completion == frozenCompletion) {
+                    "Daily completion persistence must preserve the frozen result."
+                }
+                publishCompletion(
+                    expectedSessionId = session.id,
+                    completion = DailyPuzzleCompletion.Completed(
+                        completion = result.completion,
+                        personalBestResult = personalBestResult
+                    )
                 )
-            )
-            null
-        }
+                null
+            }
 
-        DailySessionCompletionResult.StaleSession -> {
-            DailyPuzzlePersistenceFailure.StaleSession
-        }
+            is DailySessionCompletionResult.AlreadyCompleted -> {
+                val authoritativePersonalBestResult = if (
+                    result.completion == frozenCompletion
+                ) {
+                    personalBestResult
+                } else {
+                    requirePersonalBestHistory().resultFor(result.completion)
+                }
+                publishCompletion(
+                    expectedSessionId = session.id,
+                    completion = DailyPuzzleCompletion.AlreadyCompleted(
+                        completion = result.completion,
+                        personalBestResult = authoritativePersonalBestResult
+                    )
+                )
+                null
+            }
 
-        DailySessionCompletionResult.InvalidPuzzle -> {
-            DailyPuzzlePersistenceFailure.InvalidPuzzle
-        }
+            DailySessionCompletionResult.StaleSession -> {
+                DailyPuzzlePersistenceFailure.StaleSession
+            }
 
-        DailySessionCompletionResult.InvalidTiming -> {
-            DailyPuzzlePersistenceFailure.InvalidTiming
-        }
+            DailySessionCompletionResult.InvalidPuzzle -> {
+                DailyPuzzlePersistenceFailure.InvalidPuzzle
+            }
 
-        DailySessionCompletionResult.InvalidMovement -> {
-            DailyPuzzlePersistenceFailure.InvalidMovement
+            DailySessionCompletionResult.InvalidTiming -> {
+                DailyPuzzlePersistenceFailure.InvalidTiming
+            }
+
+            DailySessionCompletionResult.InvalidMovement -> {
+                DailyPuzzlePersistenceFailure.InvalidMovement
+            }
         }
     }
 
@@ -675,6 +755,10 @@ internal class DailyPuzzleViewModel(
         if (readyState.session.id == expectedSessionId) {
             _uiState.value = readyState.copy(persistenceFailure = failure)
         }
+    }
+
+    private fun requirePersonalBestHistory(): DailyPersonalBestHistory = requireNotNull(personalBestHistory) {
+        "Daily personal-best history must be resolved before gameplay starts."
     }
 }
 
