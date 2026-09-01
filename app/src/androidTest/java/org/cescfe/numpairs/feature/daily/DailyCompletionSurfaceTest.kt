@@ -83,7 +83,13 @@ class DailyCompletionSurfaceTest {
         val repository = RecordingDailyRepository(
             DailyState(
                 activeSession = null,
-                completions = listOf(completion(identity, DailyElapsedTime(125_999)))
+                completions = listOf(
+                    completion(
+                        identity = identity,
+                        elapsedTime = DailyElapsedTime(125_999),
+                        movementCount = DailyMovementCount(23)
+                    )
+                )
             )
         )
         var sharedText: String? = null
@@ -113,6 +119,9 @@ class DailyCompletionSurfaceTest {
         composeTestRule
             .onNodeWithTag(DailyScreenTestTags.COMPLETION_DURATION)
             .assertTextEquals("02:05")
+        composeTestRule
+            .onNodeWithTag(DailyScreenTestTags.COMPLETION_MOVEMENTS)
+            .assertTextEquals("23")
         composeTestRule
             .onNodeWithTag(DailyScreenTestTags.SHARE_RESULT)
             .performClick()
@@ -428,7 +437,7 @@ class DailyCompletionSurfaceTest {
     }
 
     @Test
-    fun timed_completion_uses_the_frozen_duration_in_the_success_overlay() {
+    fun tracked_completion_uses_the_frozen_time_and_movements_in_the_success_overlay() {
         val elapsedTime = DailyElapsedTime(125_999)
 
         composeTestRule.setContent {
@@ -437,6 +446,7 @@ class DailyCompletionSurfaceTest {
                     onDismiss = {},
                     content = dailyCompletionOverlayContent(
                         elapsedTime = elapsedTime,
+                        movementCount = DailyMovementCount(23),
                         onShareResult = {},
                         onViewCalendar = {},
                         onNavigateBack = {}
@@ -448,14 +458,39 @@ class DailyCompletionSurfaceTest {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_HIGHLIGHT)
             .assertIsDisplayed()
-            .assertTextEquals("02:05")
+            .assertTextEquals("02:05 · 23 moves")
         composeTestRule
-            .onNodeWithContentDescription("Elapsed time: 02:05")
+            .onNodeWithContentDescription("Elapsed time: 02:05. Movements: 23")
             .assertIsDisplayed()
     }
 
     @Test
-    fun completed_today_summary_uses_the_persisted_duration() {
+    fun success_overlay_localizes_a_singular_movement() {
+        composeTestRule.setContent {
+            NumPairsTheme {
+                SuccessOverlay(
+                    onDismiss = {},
+                    content = dailyCompletionOverlayContent(
+                        elapsedTime = DailyElapsedTime(59_999),
+                        movementCount = DailyMovementCount(1),
+                        onShareResult = {},
+                        onViewCalendar = {},
+                        onNavigateBack = {}
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_HIGHLIGHT)
+            .assertTextEquals("00:59 · 1 move")
+        composeTestRule
+            .onNodeWithContentDescription("Elapsed time: 00:59. Movement: 1")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun completed_today_summary_uses_the_persisted_time_and_movement_count() {
         val elapsedTime = DailyElapsedTime(125_999)
 
         composeTestRule.setContent {
@@ -466,6 +501,7 @@ class DailyCompletionSurfaceTest {
                         accessibilityText = "Daily · Jul 25, 2026, 4 pairs · Low"
                     ),
                     elapsedTime = elapsedTime,
+                    movementCount = DailyMovementCount(23),
                     onShareResult = {},
                     onViewCalendar = {},
                     onNavigateBack = {}
@@ -480,10 +516,17 @@ class DailyCompletionSurfaceTest {
         composeTestRule
             .onNodeWithContentDescription("Elapsed time: 02:05")
             .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(DailyScreenTestTags.COMPLETION_MOVEMENTS)
+            .assertIsDisplayed()
+            .assertTextEquals("23")
+        composeTestRule
+            .onNodeWithContentDescription("Movements: 23")
+            .assertIsDisplayed()
     }
 
     @Test
-    fun legacy_completion_does_not_fabricate_a_zero_duration() {
+    fun legacy_completion_does_not_fabricate_zero_time_or_movements() {
         composeTestRule.setContent {
             NumPairsTheme {
                 DailyCompletionScreen(
@@ -504,6 +547,9 @@ class DailyCompletionSurfaceTest {
             .assertDoesNotExist()
         composeTestRule
             .onNodeWithText("00:00")
+            .assertDoesNotExist()
+        composeTestRule
+            .onNodeWithTag(DailyScreenTestTags.COMPLETION_MOVEMENTS)
             .assertDoesNotExist()
     }
 
@@ -723,8 +769,12 @@ private class RecordingDailyRepository(initialState: DailyState) : DailySessionR
     }
 }
 
-private fun completion(identity: DailyChallengeId, elapsedTime: DailyElapsedTime? = null): DailyCompletion =
-    DailyCompletion(
-        identity = identity,
-        elapsedTime = elapsedTime
-    )
+private fun completion(
+    identity: DailyChallengeId,
+    elapsedTime: DailyElapsedTime? = null,
+    movementCount: DailyMovementCount? = null
+): DailyCompletion = DailyCompletion(
+    identity = identity,
+    elapsedTime = elapsedTime,
+    movementCount = movementCount
+)

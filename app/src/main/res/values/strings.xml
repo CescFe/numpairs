@@ -117,6 +117,16 @@
     <string name="daily_completion_challenge_name">4 pairs · Low</string>
     <string name="daily_elapsed_time_content_description">Elapsed time: %1$s</string>
     <string name="daily_completion_duration_label">Completion time</string>
+    <plurals name="daily_movement_count">
+        <item quantity="one">%1$s move</item>
+        <item quantity="other">%1$s moves</item>
+    </plurals>
+    <plurals name="daily_movement_count_content_description">
+        <item quantity="one">Movement: %1$s</item>
+        <item quantity="other">Movements: %1$s</item>
+    </plurals>
+    <string name="daily_completion_result_content_description">%1$s. %2$s</string>
+    <string name="daily_completion_movements_label">Moves</string>
     <string name="daily_share_result_action">Share result</string>
     <string name="daily_view_calendar_action">View calendar</string>
     <string name="daily_back_to_menu_action">Back to menu</string>
