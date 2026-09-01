@@ -69,8 +69,8 @@ class DataStoreDailySessionRepositoryTest {
         val replacement = generatedDailyFixture(date = LocalDate.of(2027, 4, 19))
             .snapshot(sessionId = "replacement")
 
-        assertEquals(DailyMovementCount.ZERO, first.movementCount)
-        assertEquals(DailyMovementCount.ZERO, replacement.movementCount)
+        assertEquals(0L, requireNotNull(first.movementCount).value)
+        assertEquals(0L, requireNotNull(replacement.movementCount).value)
 
         assertEquals(
             DailySessionReplacementResult.Replaced,
@@ -225,8 +225,8 @@ class DataStoreDailySessionRepositoryTest {
             )
         )
         assertEquals(
-            DailyMovementCount(3),
-            fixture.repository.state.first().activeSession?.movementCount
+            3L,
+            requireNotNull(fixture.repository.state.first().activeSession?.movementCount).value
         )
     }
 

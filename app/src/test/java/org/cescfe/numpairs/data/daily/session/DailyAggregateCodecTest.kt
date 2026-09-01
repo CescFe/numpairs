@@ -216,9 +216,8 @@ class DailyAggregateCodecTest {
         assertEquals(
             DailyAggregateDecodingResult.InvalidData,
             codec.decode(
-                rawCompletionAggregateWithMovementCount(
-                    identity = dailyChallengeId(LocalDate.of(2026, 12, 31)),
-                    movementCount = -1
+                rawCompletionAggregateWithNegativeMovementCount(
+                    identity = dailyChallengeId(LocalDate.of(2026, 12, 31))
                 )
             )
         )
@@ -543,7 +542,7 @@ private fun encodeTimedSession(snapshot: DailySessionSnapshot): ByteArray = Byte
     bytes.toByteArray()
 }
 
-private fun rawCompletionAggregateWithMovementCount(identity: DailyChallengeId, movementCount: Long): ByteArray =
+private fun rawCompletionAggregateWithNegativeMovementCount(identity: DailyChallengeId): ByteArray =
     ByteArrayOutputStream().use { bytes ->
         DataOutputStream(bytes).use { output ->
             output.writeInt(DAILY_AGGREGATE_FILE_MAGIC)
@@ -554,7 +553,7 @@ private fun rawCompletionAggregateWithMovementCount(identity: DailyChallengeId, 
             output.writeUTF(identity.recipeVersion.value)
             output.writeBoolean(false)
             output.writeBoolean(true)
-            output.writeLong(movementCount)
+            output.writeLong(-1L)
         }
         bytes.toByteArray()
     }

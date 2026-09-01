@@ -448,10 +448,10 @@ class DailyPuzzleViewModelTest {
         assertEquals(solved, completed.session.currentPuzzle)
         assertEquals(fixture.identity, repository.currentState.completedChallengeIds.single())
         assertSame(null, repository.currentState.activeSession)
-        assertEquals(DailyMovementCount.ZERO, repository.updateAttempts.single().movementCount)
+        assertEquals(0L, requireNotNull(repository.updateAttempts.single().movementCount).value)
         assertEquals(sessionId, repository.completionAttempts.single().sessionId)
         assertEquals(fixture.identity, repository.completionAttempts.single().identity)
-        assertEquals(DailyMovementCount.ZERO, repository.completionAttempts.single().movementCount)
+        assertEquals(0L, requireNotNull(repository.completionAttempts.single().movementCount).value)
     }
 
     @Test
