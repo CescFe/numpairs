@@ -25,6 +25,7 @@ import org.cescfe.numpairs.data.daily.session.requireValidSolvedPuzzle
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
+import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationFailureReason
@@ -436,14 +437,21 @@ class DailyPuzzleViewModelTest {
 
         val completed = viewModel.uiState.value as DailyPuzzleUiState.Completed
         assertEquals(
-            DailyPuzzleCompletion.Completed(dailyCompletion(fixture.identity)),
+            DailyPuzzleCompletion.Completed(
+                dailyCompletion(
+                    identity = fixture.identity,
+                    movementCount = 0
+                )
+            ),
             completed.completion
         )
         assertEquals(solved, completed.session.currentPuzzle)
         assertEquals(fixture.identity, repository.currentState.completedChallengeIds.single())
         assertSame(null, repository.currentState.activeSession)
+        assertEquals(DailyMovementCount.ZERO, repository.updateAttempts.single().movementCount)
         assertEquals(sessionId, repository.completionAttempts.single().sessionId)
         assertEquals(fixture.identity, repository.completionAttempts.single().identity)
+        assertEquals(DailyMovementCount.ZERO, repository.completionAttempts.single().movementCount)
     }
 
     @Test
@@ -1164,11 +1172,13 @@ private class RecordingDailySessionRepository(
 
     override suspend fun updateCurrentPuzzle(
         expectedSessionId: DailySessionId,
-        puzzle: Puzzle
+        puzzle: Puzzle,
+        movementCount: DailyMovementCount?
     ): DailySessionProgressUpdateResult {
         updateAttempts += ProgressAttempt(
             sessionId = expectedSessionId,
-            puzzle = puzzle
+            puzzle = puzzle,
+            movementCount = movementCount
         )
         pendingUpdateGate?.also { gate ->
             pendingUpdateGate = null
@@ -1182,7 +1192,10 @@ private class RecordingDailySessionRepository(
             return DailySessionProgressUpdateResult.StaleSession
         }
         val updatedSession = try {
-            activeSession.copy(currentPuzzle = puzzle)
+            activeSession.copy(
+                currentPuzzle = puzzle,
+                movementCount = movementCount
+            )
         } catch (_: IllegalArgumentException) {
             return DailySessionProgressUpdateResult.InvalidPuzzle
         } catch (_: IllegalStateException) {
@@ -1221,12 +1234,14 @@ private class RecordingDailySessionRepository(
         expectedSessionId: DailySessionId,
         expectedDailyChallengeId: DailyChallengeId,
         solvedPuzzle: Puzzle,
+        movementCount: DailyMovementCount?,
         elapsedTime: DailyElapsedTime?
     ): DailySessionCompletionResult {
         completionAttempts += CompletionAttempt(
             sessionId = expectedSessionId,
             identity = expectedDailyChallengeId,
             solvedPuzzle = solvedPuzzle,
+            movementCount = movementCount,
             elapsedTime = elapsedTime
         )
         nextCompletionGate?.also { gate ->
@@ -1264,7 +1279,8 @@ private class RecordingDailySessionRepository(
         }
         val completed = DailyCompletion(
             identity = expectedDailyChallengeId,
-            elapsedTime = elapsedTime
+            elapsedTime = elapsedTime,
+            movementCount = movementCount
         )
         mutableState.value = DailyState(
             activeSession = null,
@@ -1274,7 +1290,11 @@ private class RecordingDailySessionRepository(
     }
 }
 
-private data class ProgressAttempt(val sessionId: DailySessionId, val puzzle: Puzzle)
+private data class ProgressAttempt(
+    val sessionId: DailySessionId,
+    val puzzle: Puzzle,
+    val movementCount: DailyMovementCount?
+)
 
 private data class TimingStartAttempt(val sessionId: DailySessionId, val startInstant: DailyTimingStartInstant)
 
@@ -1282,5 +1302,6 @@ private data class CompletionAttempt(
     val sessionId: DailySessionId,
     val identity: DailyChallengeId,
     val solvedPuzzle: Puzzle,
+    val movementCount: DailyMovementCount?,
     val elapsedTime: DailyElapsedTime?
 )

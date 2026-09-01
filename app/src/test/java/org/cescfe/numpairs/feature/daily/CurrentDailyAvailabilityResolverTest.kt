@@ -16,6 +16,7 @@ import org.cescfe.numpairs.data.daily.session.dailyCompletion
 import org.cescfe.numpairs.data.daily.session.generatedDailyFixture
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
+import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
@@ -178,7 +179,8 @@ private class FakeDailySessionRepository(initialState: DailyState) : DailySessio
 
     override suspend fun updateCurrentPuzzle(
         expectedSessionId: DailySessionId,
-        puzzle: Puzzle
+        puzzle: Puzzle,
+        movementCount: DailyMovementCount?
     ): DailySessionProgressUpdateResult {
         mutationCount += 1
         return DailySessionProgressUpdateResult.StaleSession
@@ -201,6 +203,7 @@ private class FakeDailySessionRepository(initialState: DailyState) : DailySessio
         expectedSessionId: DailySessionId,
         expectedDailyChallengeId: DailyChallengeId,
         solvedPuzzle: Puzzle,
+        movementCount: DailyMovementCount?,
         elapsedTime: DailyElapsedTime?
     ): DailySessionCompletionResult {
         mutationCount += 1

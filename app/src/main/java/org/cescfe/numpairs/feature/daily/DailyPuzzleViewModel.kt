@@ -49,6 +49,8 @@ internal sealed interface DailyPuzzlePersistenceFailure {
 
     data object InvalidTiming : DailyPuzzlePersistenceFailure
 
+    data object InvalidMovement : DailyPuzzlePersistenceFailure
+
     data object Persistence : DailyPuzzlePersistenceFailure
 }
 
@@ -517,7 +519,8 @@ internal class DailyPuzzleViewModel(
     private suspend fun persistProgress(session: DailyGameSession): DailyPuzzlePersistenceFailure? = when (
         dailySessionRepository.updateCurrentPuzzle(
             expectedSessionId = session.id,
-            puzzle = session.currentPuzzle
+            puzzle = session.currentPuzzle,
+            movementCount = session.snapshot.movementCount
         )
     ) {
         DailySessionProgressUpdateResult.Updated -> null
@@ -529,6 +532,10 @@ internal class DailyPuzzleViewModel(
         DailySessionProgressUpdateResult.InvalidPuzzle -> {
             DailyPuzzlePersistenceFailure.InvalidPuzzle
         }
+
+        DailySessionProgressUpdateResult.InvalidMovement -> {
+            DailyPuzzlePersistenceFailure.InvalidMovement
+        }
     }
 
     private suspend fun persistCompletion(
@@ -539,6 +546,7 @@ internal class DailyPuzzleViewModel(
             expectedSessionId = session.id,
             expectedDailyChallengeId = session.currentDailyChallenge.identity,
             solvedPuzzle = session.currentPuzzle,
+            movementCount = session.snapshot.movementCount,
             elapsedTime = elapsedTime
         )
     ) {
@@ -572,6 +580,10 @@ internal class DailyPuzzleViewModel(
 
         DailySessionCompletionResult.InvalidTiming -> {
             DailyPuzzlePersistenceFailure.InvalidTiming
+        }
+
+        DailySessionCompletionResult.InvalidMovement -> {
+            DailyPuzzlePersistenceFailure.InvalidMovement
         }
     }
 

@@ -15,6 +15,7 @@ v10 adds one Daily Challenge for each device-local calendar date. The first dail
 - exact progress restoration after process death
 - one local completion per date
 - durable no-pause elapsed timing from first presentation to solution
+- a durable count of effective puzzle movements
 - a completion calendar
 - coexistence with an unfinished normal generated session
 - explicit behavior when the local date, recipe, or generator changes
@@ -124,8 +125,9 @@ The Daily aggregate is separate from:
 
 One aggregate and one DataStore edit own the transition from an active solved puzzle to a
 completion record, including its captured elapsed time when timing started, with no resumable Daily
-Session. A second completion for the same local calendar date is rejected even if a different
-recipe version is later resolved for that date.
+Session. The same edit transfers the final movement count when the session owns one. A second
+completion for the same local calendar date is rejected even if a different recipe version is
+later resolved for that date.
 
 ### Daily Session Snapshot
 
@@ -137,6 +139,7 @@ The snapshot stores:
 - exact initial `Puzzle`
 - exact current `Puzzle`
 - an optional timing start instant stored as Unix epoch milliseconds
+- an optional authoritative movement count
 
 The recipe version resolves the exact generated challenge. Mode, difficulty, profile parameters,
 and display strings are therefore not persisted redundantly in the Daily snapshot.
@@ -144,6 +147,10 @@ and display strings are therefore not persisted redundantly in the Daily snapsho
 Restoration resolves the stored recipe version, verifies its challenge against the puzzle shape
 and snapshot metadata, and reads the exact current puzzle. It never regenerates historical
 progress from the seed.
+
+New snapshots start with a movement count of zero. Snapshots migrated from an aggregate version
+that predates movement tracking retain an absent count for the rest of the session because earlier
+corrections, clears, and resets cannot be reconstructed from the Current Puzzle.
 
 ### Elapsed Timing
 
@@ -164,17 +171,35 @@ process death or device restart. Runtime presentation may use a monotonic clock 
 anchors. Manual device-clock changes can affect reconstructed elapsed time; the local-only product
 does not claim anti-cheat guarantees.
 
+### Movement Count
+
+Daily movement tracking uses one non-negative 64-bit count. An effective movement is one
+player-driven durable Current Puzzle mutation, including a committed or cleared strip value,
+operand assignment, operator assignment, or non-pristine tile reset. Invalid, transient, no-op,
+navigation, and lifecycle interactions do not count.
+
+The repository persists the Current Puzzle and exact movement count in the same identity-guarded
+progress edit. A retry may repeat the current count, and a later update may jump forward when an
+earlier write failed, but the count cannot regress or change between known and unknown. Safe
+increment rejects overflow rather than constructing an invalid value.
+
+The completion transition validates the same consistency rule and stores the supplied final count
+atomically with session removal. A migrated active session with no count remains unknown through
+progress and completion; tracking is never started partway through it.
+
 ### Completion History
 
 A Daily Completion record stores:
 
 - canonical Daily Challenge identity
 - authoritative elapsed time in milliseconds for a newly timed completion
+- authoritative movement count for a newly tracked completion
 
 The identity supplies the completed local date and recipe version. A completion migrated from the
-version-1 aggregate explicitly has no elapsed time, and presentation or sharing must not fabricate
-one. Completion does not store an exact completion instant, score, action count, streak, reward,
-display label, or full puzzle.
+version-1 aggregate explicitly has no elapsed time or movement count. A completion migrated from
+version 2 preserves its elapsed time and has no movement count. Presentation or sharing must not
+fabricate either absent value. Completion does not store an exact completion instant, score,
+streak, reward, display label, or full puzzle.
 
 Completion is recorded only by an identity-guarded atomic repository transition that receives a
 solved current puzzle consistent with the active snapshot. Repeating the transition cannot create
@@ -185,11 +210,12 @@ is no longer active. An active snapshot whose recipe version cannot be resolved 
 
 ### Aggregate Schema Migration
 
-Daily timing changes the aggregate schema from version 1 to version 2. The version-2 codec reads the
-version-1 binary layout explicitly, preserves an exact active session and every completion
-identity, and maps them into the current aggregate. A migrated session has no timing start and a
-migrated completion has no elapsed time. Unsupported future versions and invalid payloads retain
-the existing safe-recovery behavior; version 1 is not treated as unsupported or empty.
+Daily movement tracking changes the aggregate schema from version 2 to version 3. The version-3
+codec reads both earlier binary layouts explicitly. Version 1 preserves exact progress and every
+completion identity while mapping timing and movement data to unknown. Version 2 additionally
+preserves the exact timing start and completion elapsed time while mapping movement data to
+unknown. Unsupported future versions and invalid payloads retain the existing safe-recovery
+behavior; versions 1 and 2 are not treated as unsupported or empty.
 
 ### Replacement And Rollover
 
@@ -226,6 +252,8 @@ history. Account sync and cross-device transfer remain unsupported.
 - Solved state, completion recording, and removal from Daily Resume are atomic.
 - A timing start cannot be reset, and a completion preserves the exact captured millisecond
   duration across recreation and later sharing.
+- Movement progress and completion preserve one authoritative non-negative count without
+  fabricating historical values.
 - A recipe version gives date-derived content a stable compatibility boundary.
 - The generator remains reusable and unaware of clocks or presentation.
 - Exact snapshots protect progress from future generator changes.

@@ -123,7 +123,9 @@ NumPairs owns at most one Daily Session slot, separate from the normal generated
 Daily Session carries a stable session identity, recipe and date identity, successful candidate
 metadata, exact initial puzzle, exact current puzzle, and an optional Daily Timing Start Instant.
 The timing start is absent before the puzzle is first presented and on a session migrated from
-storage that predates Daily timing.
+storage that predates Daily timing. A newly created session also carries an authoritative Daily
+Movement Count starting at zero. A session migrated from storage that predates movement tracking
+has no movement count, and tracking cannot be enabled partway through that session.
 
 ## Resumable Daily Session
 The Daily Session currently stored in the Daily aggregate when its identity matches the current
@@ -139,7 +141,9 @@ The versioned local representation of one Daily Session.
 The snapshot preserves stable Daily Session, Daily Challenge, candidate, board, tile, expression,
 strip-entry, and strip-item identity needed to restore exact progress. Seed and candidate index are
 metadata verified against the recipe; restoration never regenerates from them. Once timing has
-started, the snapshot also preserves its one immutable Daily Timing Start Instant.
+started, the snapshot also preserves its one immutable Daily Timing Start Instant. The snapshot
+preserves the exact Daily Movement Count together with the Current Puzzle when movement tracking
+is available.
 
 ## Daily Timing Start Instant
 The device-clock UTC instant, stored with millisecond precision, that anchors elapsed timing for one
@@ -157,13 +161,29 @@ formatting may show coarser precision. Elapsed timing excludes Daily resolution,
 loading before the puzzle is presented, and excludes persistence or presentation work after the
 puzzle becomes solved.
 
+## Daily Movement
+One effective player-driven mutation of the durable Current Puzzle during a Daily Challenge.
+
+Committed or cleared strip values, operand assignments, operator assignments, and non-pristine
+tile resets are Daily Movements. Transient presentation interactions, invalid input, no-op actions,
+navigation, backgrounding, device locking, configuration changes, and process recreation are not.
+
+## Daily Movement Count
+The non-negative number of effective Daily Movements committed during one Daily Session.
+
+A new Daily Session starts at zero. The count is persisted atomically with the Current Puzzle and
+transferred unchanged to Daily Completion. A migrated session or completion whose historical
+movements cannot be reconstructed has no movement count; consumers must not infer or fabricate
+one.
+
 ## Daily Completion
 The local fact that the puzzle for one Daily Challenge identity became solved.
 
 A completion owns its canonical date and recipe version. A newly timed completion also owns its
-authoritative Daily Elapsed Time. A completion migrated from storage that predates Daily timing has
-no elapsed time; consumers must not fabricate one. A completion contains no score, streak, reward,
-display text, exact completion instant, or puzzle.
+authoritative Daily Elapsed Time, and a newly tracked completion owns its authoritative Daily
+Movement Count. A completion migrated from storage that predates timing or movement tracking keeps
+the corresponding value absent; consumers must not fabricate one. A completion contains no score,
+streak, reward, display text, exact completion instant, or puzzle.
 
 ## Daily Completion History
 The local collection of Daily Completion records displayed by the calendar.

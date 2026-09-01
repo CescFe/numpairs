@@ -18,4 +18,8 @@ value class DailyTimingStartInstant(val epochMilliseconds: Long) {
     }
 }
 
-data class DailyCompletion(val identity: DailyChallengeId, val elapsedTime: DailyElapsedTime?)
+data class DailyCompletion(
+    val identity: DailyChallengeId,
+    val elapsedTime: DailyElapsedTime?,
+    val movementCount: DailyMovementCount? = null
+)

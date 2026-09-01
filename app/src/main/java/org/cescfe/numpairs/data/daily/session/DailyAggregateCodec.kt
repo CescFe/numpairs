@@ -13,6 +13,7 @@ import org.cescfe.numpairs.domain.daily.DailyCandidateIndex
 import org.cescfe.numpairs.domain.daily.DailyChallengeId
 import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
+import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 
@@ -58,7 +59,8 @@ class DailyAggregateCodec {
 
             val schemaVersion = input.readInt()
             when (schemaVersion) {
-                LEGACY_DAILY_AGGREGATE_SCHEMA_VERSION -> decodeLegacyAggregate(input)
+                INITIAL_DAILY_AGGREGATE_SCHEMA_VERSION -> decodeInitialAggregate(input)
+                TIMED_DAILY_AGGREGATE_SCHEMA_VERSION -> decodeTimedAggregate(input)
                 DAILY_AGGREGATE_SCHEMA_VERSION -> decodeCurrentAggregate(input)
                 else -> DailyAggregateDecodingResult.UnsupportedVersion(schemaVersion)
             }
@@ -85,19 +87,30 @@ class DailyAggregateCodec {
             snapshot.timingStartInstant?.let { startInstant ->
                 output.writeLong(startInstant.epochMilliseconds)
             }
+            output.writeBoolean(snapshot.movementCount != null)
+            snapshot.movementCount?.let { movementCount ->
+                output.writeLong(movementCount.value)
+            }
         }
         bytes.toByteArray()
     }
 
-    private fun decodeLegacyAggregate(input: DataInputStream): DailyAggregateDecodingResult = decodeAggregate(
+    private fun decodeInitialAggregate(input: DataInputStream): DailyAggregateDecodingResult = decodeAggregate(
         input = input,
-        decodeSession = ::decodeLegacySessionOrNull,
+        decodeSession = ::decodeInitialSessionOrNull,
         readCompletion = {
             DailyCompletion(
                 identity = readDailyChallengeId(),
-                elapsedTime = null
+                elapsedTime = null,
+                movementCount = null
             )
         }
+    )
+
+    private fun decodeTimedAggregate(input: DataInputStream): DailyAggregateDecodingResult = decodeAggregate(
+        input = input,
+        decodeSession = ::decodeTimedSessionOrNull,
+        readCompletion = DataInputStream::readTimedDailyCompletion
     )
 
     private fun decodeCurrentAggregate(input: DataInputStream): DailyAggregateDecodingResult = decodeAggregate(
@@ -142,25 +155,28 @@ class DailyAggregateCodec {
         }
     }
 
-    private fun decodeLegacySessionOrNull(bytes: ByteArray): DailySessionSnapshot? = decodeSessionOrNull(
+    private fun decodeInitialSessionOrNull(bytes: ByteArray): DailySessionSnapshot? = decodeSessionOrNull(
         bytes = bytes,
-        readTimingStartInstant = { null }
+        readTimingStartInstant = { null },
+        readMovementCount = { null }
+    )
+
+    private fun decodeTimedSessionOrNull(bytes: ByteArray): DailySessionSnapshot? = decodeSessionOrNull(
+        bytes = bytes,
+        readTimingStartInstant = DataInputStream::readDailyTimingStartInstant,
+        readMovementCount = { null }
     )
 
     private fun decodeCurrentSessionOrNull(bytes: ByteArray): DailySessionSnapshot? = decodeSessionOrNull(
         bytes = bytes,
-        readTimingStartInstant = {
-            if (readBoolean()) {
-                DailyTimingStartInstant(readLong())
-            } else {
-                null
-            }
-        }
+        readTimingStartInstant = DataInputStream::readDailyTimingStartInstant,
+        readMovementCount = DataInputStream::readDailyMovementCount
     )
 
     private fun decodeSessionOrNull(
         bytes: ByteArray,
-        readTimingStartInstant: DataInputStream.() -> DailyTimingStartInstant?
+        readTimingStartInstant: DataInputStream.() -> DailyTimingStartInstant?,
+        readMovementCount: DataInputStream.() -> DailyMovementCount?
     ): DailySessionSnapshot? = try {
         DataInputStream(ByteArrayInputStream(bytes)).use { input ->
             val snapshot = DailySessionSnapshot(
@@ -170,7 +186,8 @@ class DailyAggregateCodec {
                 seed = input.readInt(),
                 initialPuzzle = input.readPuzzleSnapshot(),
                 currentPuzzle = input.readPuzzleSnapshot(),
-                timingStartInstant = input.readTimingStartInstant()
+                timingStartInstant = input.readTimingStartInstant(),
+                movementCount = input.readMovementCount()
             )
             snapshot.takeIf { input.available() == 0 }
         }
@@ -201,16 +218,41 @@ private fun DataOutputStream.writeDailyCompletion(completion: DailyCompletion) {
     completion.elapsedTime?.let { elapsedTime ->
         writeLong(elapsedTime.milliseconds)
     }
+    writeBoolean(completion.movementCount != null)
+    completion.movementCount?.let { movementCount ->
+        writeLong(movementCount.value)
+    }
 }
 
 private fun DataInputStream.readDailyCompletion(): DailyCompletion = DailyCompletion(
     identity = readDailyChallengeId(),
-    elapsedTime = if (readBoolean()) {
-        DailyElapsedTime(readLong())
-    } else {
-        null
-    }
+    elapsedTime = readDailyElapsedTime(),
+    movementCount = readDailyMovementCount()
 )
+
+private fun DataInputStream.readTimedDailyCompletion(): DailyCompletion = DailyCompletion(
+    identity = readDailyChallengeId(),
+    elapsedTime = readDailyElapsedTime(),
+    movementCount = null
+)
+
+private fun DataInputStream.readDailyElapsedTime(): DailyElapsedTime? = if (readBoolean()) {
+    DailyElapsedTime(readLong())
+} else {
+    null
+}
+
+private fun DataInputStream.readDailyTimingStartInstant(): DailyTimingStartInstant? = if (readBoolean()) {
+    DailyTimingStartInstant(readLong())
+} else {
+    null
+}
+
+private fun DataInputStream.readDailyMovementCount(): DailyMovementCount? = if (readBoolean()) {
+    DailyMovementCount(readLong())
+} else {
+    null
+}
 
 private const val FILE_MAGIC = 0x4E504441
 private const val MAX_SESSION_PAYLOAD_SIZE = 1_000_000
