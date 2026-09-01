@@ -18,11 +18,11 @@ class DailyPersonalBestHistoryTest {
             completion(date = "2027-01-07", category = EIGHT_MEDIUM, elapsedMilliseconds = 8_000)
         )
 
-        assertEquals(DailyElapsedTime(4_000), history.bestElapsedTimeFor(THREE_LOW))
-        assertEquals(DailyElapsedTime(1_000), history.bestElapsedTimeFor(FOUR_LOW))
-        assertEquals(DailyElapsedTime(3_000), history.bestElapsedTimeFor(THREE_MEDIUM))
-        assertEquals(DailyElapsedTime(2_000), history.bestElapsedTimeFor(FOUR_MEDIUM))
-        assertEquals(DailyElapsedTime(8_000), history.bestElapsedTimeFor(EIGHT_MEDIUM))
+        assertDailyElapsedTimeEquals(4_000, history.bestElapsedTimeFor(THREE_LOW))
+        assertDailyElapsedTimeEquals(1_000, history.bestElapsedTimeFor(FOUR_LOW))
+        assertDailyElapsedTimeEquals(3_000, history.bestElapsedTimeFor(THREE_MEDIUM))
+        assertDailyElapsedTimeEquals(2_000, history.bestElapsedTimeFor(FOUR_MEDIUM))
+        assertDailyElapsedTimeEquals(8_000, history.bestElapsedTimeFor(EIGHT_MEDIUM))
     }
 
     @Test
@@ -32,9 +32,9 @@ class DailyPersonalBestHistoryTest {
         )
 
         assertEquals(THREE_LOW, result.category)
-        assertEquals(DailyElapsedTime(5_000), result.currentElapsedTime)
+        assertDailyElapsedTimeEquals(5_000, result.currentElapsedTime)
         assertNull(result.previousBestElapsedTime)
-        assertEquals(DailyElapsedTime(5_000), result.bestElapsedTime)
+        assertDailyElapsedTimeEquals(5_000, result.bestElapsedTime)
         assertEquals(DailyPersonalBestOutcome.BASELINE, result.outcome)
     }
 
@@ -56,12 +56,12 @@ class DailyPersonalBestHistoryTest {
         )
 
         assertEquals(DailyPersonalBestOutcome.PERSONAL_RECORD, record.outcome)
-        assertEquals(DailyElapsedTime(5_000), record.previousBestElapsedTime)
-        assertEquals(DailyElapsedTime(4_999), record.bestElapsedTime)
+        assertDailyElapsedTimeEquals(5_000, record.previousBestElapsedTime)
+        assertDailyElapsedTimeEquals(4_999, record.bestElapsedTime)
         assertEquals(DailyPersonalBestOutcome.NOT_RECORD, tie.outcome)
-        assertEquals(DailyElapsedTime(5_000), tie.bestElapsedTime)
+        assertDailyElapsedTimeEquals(5_000, tie.bestElapsedTime)
         assertEquals(DailyPersonalBestOutcome.NOT_RECORD, slower.outcome)
-        assertEquals(DailyElapsedTime(5_000), slower.bestElapsedTime)
+        assertDailyElapsedTimeEquals(5_000, slower.bestElapsedTime)
     }
 
     @Test
@@ -82,8 +82,8 @@ class DailyPersonalBestHistoryTest {
         )
 
         assertEquals(DailyPersonalBestOutcome.NOT_RECORD, untimed.outcome)
-        assertEquals(DailyElapsedTime(5_000), untimed.previousBestElapsedTime)
-        assertEquals(DailyElapsedTime(5_000), untimed.bestElapsedTime)
+        assertDailyElapsedTimeEquals(5_000, untimed.previousBestElapsedTime)
+        assertDailyElapsedTimeEquals(5_000, untimed.bestElapsedTime)
         assertEquals(DailyPersonalBestOutcome.NOT_RECORD, unresolved.outcome)
         assertNull(unresolved.category)
         assertNull(unresolved.previousBestElapsedTime)
@@ -102,8 +102,8 @@ class DailyPersonalBestHistoryTest {
         val result = history.resultFor(current)
 
         assertEquals(DailyPersonalBestOutcome.PERSONAL_RECORD, result.outcome)
-        assertEquals(DailyElapsedTime(5_000), result.previousBestElapsedTime)
-        assertEquals(DailyElapsedTime(4_000), result.bestElapsedTime)
+        assertDailyElapsedTimeEquals(5_000, result.previousBestElapsedTime)
+        assertDailyElapsedTimeEquals(4_000, result.bestElapsedTime)
     }
 
     private fun history(vararg completions: DailyCompletion): DailyPersonalBestHistory = DailyPersonalBestHistory(

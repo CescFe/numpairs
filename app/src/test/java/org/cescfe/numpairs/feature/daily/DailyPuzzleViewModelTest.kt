@@ -29,6 +29,7 @@ import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.domain.daily.DailyPersonalBestOutcome
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
+import org.cescfe.numpairs.domain.daily.assertDailyElapsedTimeEquals
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationFailureReason
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
@@ -141,8 +142,8 @@ class DailyPuzzleViewModelTest {
         val completed = viewModel.uiState.value as DailyPuzzleUiState.CompletedToday
         assertEquals(currentCompletion, completed.completion)
         assertEquals(DailyPersonalBestOutcome.PERSONAL_RECORD, completed.personalBestResult.outcome)
-        assertEquals(DailyElapsedTime(5_000), completed.personalBestResult.previousBestElapsedTime)
-        assertEquals(DailyElapsedTime(4_000), completed.personalBestResult.bestElapsedTime)
+        assertDailyElapsedTimeEquals(5_000, completed.personalBestResult.previousBestElapsedTime)
+        assertDailyElapsedTimeEquals(4_000, completed.personalBestResult.bestElapsedTime)
         assertEquals(0, timeSource.readCount)
     }
 
@@ -1026,7 +1027,7 @@ class DailyPuzzleViewModelTest {
             (viewModel.uiState.value as DailyPuzzleUiState.Ready).personalBestResult
         )
         assertEquals(DailyPersonalBestOutcome.BASELINE, frozenPersonalBest.outcome)
-        assertEquals(DailyElapsedTime(1_234), frozenPersonalBest.bestElapsedTime)
+        assertDailyElapsedTimeEquals(1_234, frozenPersonalBest.bestElapsedTime)
 
         timeSource.set(epochMilliseconds = 99_000, monotonicMilliseconds = 90_000)
         completionGate.complete(Unit)
@@ -1085,8 +1086,8 @@ class DailyPuzzleViewModelTest {
             (viewModel.uiState.value as DailyPuzzleUiState.Ready).personalBestResult
         )
         assertEquals(DailyPersonalBestOutcome.PERSONAL_RECORD, frozenPersonalBest.outcome)
-        assertEquals(DailyElapsedTime(5_000), frozenPersonalBest.previousBestElapsedTime)
-        assertEquals(DailyElapsedTime(3_456), frozenPersonalBest.bestElapsedTime)
+        assertDailyElapsedTimeEquals(5_000, frozenPersonalBest.previousBestElapsedTime)
+        assertDailyElapsedTimeEquals(3_456, frozenPersonalBest.bestElapsedTime)
 
         timeSource.set(epochMilliseconds = 40_000, monotonicMilliseconds = 21_000)
         viewModel.retryPersistence()

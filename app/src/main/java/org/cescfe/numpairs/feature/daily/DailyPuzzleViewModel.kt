@@ -232,7 +232,6 @@ internal class DailyPuzzleViewModel(
             )
             enqueuePersistence(
                 session = session,
-                elapsedTime = elapsedAtAnchor,
                 timingStartOnly = true
             )
         }
@@ -326,7 +325,6 @@ internal class DailyPuzzleViewModel(
         )
         enqueuePersistence(
             session = updatedSession,
-            elapsedTime = elapsedTime,
             personalBestResult = personalBestResult
         )
     }
@@ -339,7 +337,6 @@ internal class DailyPuzzleViewModel(
         _uiState.value = readyState.copy(persistenceFailure = null)
         enqueuePersistence(
             session = readyState.session,
-            elapsedTime = readyState.elapsedTime,
             personalBestResult = readyState.personalBestResult
         )
     }
@@ -504,7 +501,6 @@ internal class DailyPuzzleViewModel(
 
     private fun enqueuePersistence(
         session: DailyGameSession,
-        elapsedTime: DailyElapsedTime?,
         personalBestResult: DailyPersonalBestResult? = null,
         timingStartOnly: Boolean = false
     ) {

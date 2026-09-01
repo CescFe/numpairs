@@ -8,6 +8,7 @@ import org.cescfe.numpairs.domain.daily.DailyPersonalBestCategory
 import org.cescfe.numpairs.domain.daily.DailyPersonalBestHistory
 import org.cescfe.numpairs.domain.daily.DailyPersonalBestOutcome
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
+import org.cescfe.numpairs.domain.daily.assertDailyElapsedTimeEquals
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -69,8 +70,8 @@ class DailyRecipePersonalBestCategoryResolverTest {
         val result = history.resultFor(weeklyCompletion)
 
         assertEquals(DailyPersonalBestOutcome.PERSONAL_RECORD, result.outcome)
-        assertEquals(DailyElapsedTime(5_000), result.previousBestElapsedTime)
-        assertEquals(DailyElapsedTime(4_000), result.bestElapsedTime)
+        assertDailyElapsedTimeEquals(5_000, result.previousBestElapsedTime)
+        assertDailyElapsedTimeEquals(4_000, result.bestElapsedTime)
     }
 
     @Test
