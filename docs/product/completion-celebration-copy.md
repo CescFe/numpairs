@@ -21,12 +21,14 @@ The product tone and presentation remain governed by the
 - Stable identifiers express content identity and eligibility; they are not Android resource
   names.
 - General variants are eligible for every supported Low, Medium, and Hard generated challenge.
-- `MEDIUM_SHARP_THINKING` is eligible only for Medium.
-- `HARD_IMPRESSIVE` is eligible only for Hard.
+- `MEDIUM_HARD_IMPRESSIVE` is eligible only for Medium and Hard.
+- `HARD_UNSTOPPABLE` is eligible only for Hard.
 - Low intentionally has no exclusive variant. It receives the complete general pool without copy
   that frames Low as a beginner or lesser achievement.
-- Every statement follows directly from the solved state. No variant implies a personal record,
-  completion duration, movement count, correction-free attempt, streak, or comparative rank.
+- No variant makes a factual claim beyond the solved state and configured difficulty. Rhetorical
+  encouragement and narrator personification are expressive rather than performance data. No
+  variant implies a personal record, completion duration, movement count, correction-free attempt,
+  streak, or comparative rank.
 - Daily personal records and Tutorial completions keep their purpose-specific copy outside this
   catalog.
 
@@ -57,16 +59,17 @@ Intent: direct, polished praise grounded in finding the complete solution.
 | Valencian/Catalan | Excel·lent!   | Has trobat la solució completa.           |
 | German            | Hervorragend! | Du hast die vollständige Lösung gefunden. |
 
-### `NICELY_SOLVED`
+### `YOU_ROCK`
 
-Intent: acknowledge the quality of the solve while restating the completed pairing outcome.
+Intent: address the player directly with a warmer, more personal celebration. Each localization
+uses a natural equivalent instead of preserving the English rock idiom literally.
 
-| Locale            | Title               | Supporting text                  |
-|-------------------|---------------------|----------------------------------|
-| English           | Nicely solved!      | Every pair fell into place.      |
-| Spanish           | ¡Muy bien resuelto! | Todas las parejas han encajado.  |
-| Valencian/Catalan | Molt ben resolt!    | Totes les parelles han encaixat. |
-| German            | Clever gelöst!      | Alle Paare passen zusammen.      |
+| Locale            | Title            | Supporting text                |
+|-------------------|------------------|--------------------------------|
+| English           | You rock!        | That was an impressive solve.  |
+| Spanish           | ¡Eres increíble! | Menuda forma de resolverlo.    |
+| Valencian/Catalan | Eres increïble!  | Quina manera de resoldre’l.    |
+| German            | Du bist spitze!  | Das war wirklich stark gelöst. |
 
 ### `NAILED_IT`
 
@@ -103,48 +106,48 @@ Intent: forward-looking encouragement after acknowledging the solved puzzle thro
 
 ## Difficulty-Specific Variants
 
-### `MEDIUM_SHARP_THINKING`
+### `MEDIUM_HARD_IMPRESSIVE`
 
-Eligibility: Medium only.
+Eligibility: Medium and Hard only.
 
-Intent: recognize the greater deductive demand of a Medium challenge without comparing the player
-with anyone else.
+Intent: provide a playful reward for the greater deductive demand of Medium and Hard. Spanish uses
+the approved cultural reference; other locales preserve its warmth and intensity with natural
+copy rather than reproducing the wordplay literally.
 
-| Locale            | Title             | Supporting text                                         |
-|-------------------|-------------------|---------------------------------------------------------|
-| English           | Sharp thinking!   | You mastered a demanding challenge.                     |
-| Spanish           | ¡Gran deducción!  | Has superado un reto exigente.                          |
-| Valencian/Catalan | Gran deducció!    | Has superat un repte exigent.                           |
-| German            | Stark kombiniert! | Du hast eine anspruchsvolle Herausforderung gemeistert. |
+| Locale            | Title            | Supporting text                      |
+|-------------------|------------------|--------------------------------------|
+| English           | Impressive!      | That took some serious thinking.     |
+| Spanish           | ¡Im-presionante! | En dos palabras.                     |
+| Valencian/Catalan | Impressionant!   | Això sí que ha requerit pensar.      |
+| German            | Beeindruckend!   | Dafür war echtes Köpfchen gefragt.   |
 
-### `HARD_IMPRESSIVE`
+### `HARD_UNSTOPPABLE`
 
 Eligibility: Hard only.
 
-Intent: give the strongest standard praise in the catalog. Spanish uses the approved cultural
-reference; other locales preserve the reward intensity with natural copy instead of reproducing
-the wordplay literally.
+Intent: give the strongest standard praise in the catalog through a conversational narrator voice.
+The rhetorical first person is playful personification, not a claim about a real person or the
+developer's performance.
 
-| Locale            | Title            | Supporting text                                   |
-|-------------------|------------------|---------------------------------------------------|
-| English           | Impressive!      | You conquered a formidable puzzle.                |
-| Spanish           | ¡Im-presionante! | En dos palabras.                                  |
-| Valencian/Catalan | Impressionant!   | Has superat un puzle ben difícil.                 |
-| German            | Beeindruckend!   | Du hast ein besonders schweres Puzzle gemeistert. |
+| Locale            | Title                  | Supporting text                                      |
+|-------------------|------------------------|------------------------------------------------------|
+| English           | Nothing can stop you!  | And I thought this difficulty was impossible!        |
+| Spanish           | ¡No hay quien te pare! | ¡Y yo que pensaba que esta dificultad era imposible! |
+| Valencian/Catalan | No hi ha qui et pare!  | I jo que pensava que esta dificultat era impossible! |
+| German            | Dich hält nichts auf!  | Und ich dachte schon, das wäre unlösbar!             |
 
 ## Localization Guidance
 
 - Localize intent rather than word order. A locale may use a different idiom when a literal
   translation would sound unnatural.
 - Keep titles concise, energetic, and suitable for the overlay headline role.
-- Keep supporting text to one short sentence. `HARD_IMPRESSIVE` in Spanish is the deliberate
+- Keep supporting text to one short sentence. `MEDIUM_HARD_IMPRESSIVE` in Spanish is the deliberate
   exception whose supporting text completes the cultural reference.
 - Preserve the established player-facing terms `puzzle` in English and German, `puzle` in Spanish,
   and `puzle` in Valencian/Catalan.
 - Spanish uses opening and closing exclamation marks. Valencian/Catalan follows the current app
   convention of a closing exclamation mark for these short titles.
-- Valencian/Catalan copy favors the existing Valencian voice, including `faena`, `teua`, and
-  `pròxim`.
+- Valencian/Catalan copy favors the existing Valencian voice, including `teua` and `pròxim`.
 
 ## Spanish Daily Agreement
 
