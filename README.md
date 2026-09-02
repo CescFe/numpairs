@@ -100,8 +100,8 @@ docs/
 ├── product/
 ├── technical/
 │   ├── adr/
-│   ├── code-quality.md
-│   └── delivery-workflow.md
+│   ├── delivery/
+│   └── code-quality.md
 ├── game-rules.md
 └── ubiquitous-language.md
 ```
@@ -132,7 +132,7 @@ Core responsibilities:
 - Local upload signing: [release-signing.md](./docs/technical/release-signing.md)
 - UX decisions: `docs/product/ux-decisions.md`
 - Architectural Decision Records: `docs/technical/adr/`
-- Delivery workflow: [delivery-workflow.md](./docs/technical/delivery-workflow.md)
+- Delivery documentation: [delivery/README.md](./docs/technical/delivery/README.md)
 - Code quality guidelines: [code-quality.md](./docs/technical/code-quality.md)
 - Game rules: `docs/game-rules.md`
 - Ubiquitous Language: `docs/ubiquitous-language.md`

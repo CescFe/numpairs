@@ -17,7 +17,7 @@ Follow each template to provide the needed information to implement the issue.
 ## Implementing An Existing Issue
 
 Before editing repository files, review the issue and its acceptance criteria. Consult the
-[delivery workflow](docs/technical/delivery-workflow.md), [code quality guidelines](docs/technical/code-quality.md),
+[delivery documentation](docs/technical/delivery/README.md), [code quality guidelines](docs/technical/code-quality.md),
 and any product or technical references relevant to the change. The scope of the task determines
 which sections and documents need attention; no complete-document reading is required for every
 change.
