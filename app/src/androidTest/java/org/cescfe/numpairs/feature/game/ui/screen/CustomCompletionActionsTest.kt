@@ -19,7 +19,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.cescfe.numpairs.R
+import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.GameSuccessOverlayContent
+import org.cescfe.numpairs.feature.game.GameSuccessOverlayCopy
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -95,6 +98,37 @@ class CustomCompletionActionsTest {
         val layoutResults = mutableListOf<TextLayoutResult>()
         composeTestRule
             .onNodeWithText("Share result", useUnmergedTree = true)
+            .performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action ->
+                action(layoutResults)
+            }
+
+        assertEquals(FontWeight.Bold, layoutResults.single().layoutInput.style.fontWeight)
+    }
+
+    @Test
+    fun generated_completion_primary_action_uses_bold_button_typography() {
+        composeTestRule.setContent {
+            NumPairsTheme {
+                SuccessOverlay(
+                    onDismiss = {},
+                    completionActions = GameCompletionActions(
+                        onNewPuzzleRequested = {},
+                        onReturnToMenuRequested = {}
+                    ),
+                    celebrationCopy = GameSuccessOverlayCopy(
+                        message = "Great work!",
+                        supportingText = "Your logic paid off."
+                    )
+                )
+            }
+        }
+
+        val layoutResults = mutableListOf<TextLayoutResult>()
+        composeTestRule
+            .onNodeWithText(
+                composeTestRule.activity.getString(R.string.success_overlay_new_puzzle_button),
+                useUnmergedTree = true
+            )
             .performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action ->
                 action(layoutResults)
             }

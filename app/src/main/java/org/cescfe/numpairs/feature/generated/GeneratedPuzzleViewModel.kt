@@ -226,17 +226,7 @@ internal class GeneratedPuzzleViewModel(
         val updatedSession = visibleSession.copy(
             snapshot = visibleSession.snapshot.copy(currentPuzzle = puzzle)
         )
-        _uiState.value = when (state) {
-            is GeneratedPuzzleGenerationUiState.Ready -> state.copy(session = updatedSession)
-
-            is GeneratedPuzzleGenerationUiState.Loading -> state.copy(previousSession = updatedSession)
-
-            is GeneratedPuzzleGenerationUiState.Failed -> state.copy(previousSession = updatedSession)
-
-            GeneratedPuzzleGenerationUiState.Idle,
-            is GeneratedPuzzleGenerationUiState.Restoring,
-            is GeneratedPuzzleGenerationUiState.ResumeUnavailable -> state
-        }
+        _uiState.value = state.withVisibleSession(updatedSession)
         return true
     }
 
@@ -426,4 +416,20 @@ internal data class GeneratedModeGameSession(
 
     val currentPuzzle: Puzzle
         get() = snapshot.currentPuzzle
+}
+
+private fun GeneratedPuzzleGenerationUiState.withVisibleSession(
+    session: GeneratedModeGameSession
+): GeneratedPuzzleGenerationUiState = when (this) {
+    is GeneratedPuzzleGenerationUiState.Ready -> copy(session = session)
+
+    is GeneratedPuzzleGenerationUiState.Loading -> copy(previousSession = session)
+
+    is GeneratedPuzzleGenerationUiState.Failed -> copy(previousSession = session)
+
+    GeneratedPuzzleGenerationUiState.Idle,
+    is GeneratedPuzzleGenerationUiState.Restoring,
+    is GeneratedPuzzleGenerationUiState.ResumeUnavailable -> error(
+        "Only a generated puzzle state with a visible session can replace that session."
+    )
 }

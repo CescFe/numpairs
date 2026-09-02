@@ -84,7 +84,7 @@ class GeneratedPuzzleViewModelTest {
         val repository = RecordingGeneratedSessionRepository()
         val viewModel = GeneratedPuzzleViewModel(
             challenge = GeneratedModes.EIGHT_PAIRS_HARD,
-            generationUseCase = GeneratedPuzzleGenerationUseCase { request ->
+            generationUseCase = { request ->
                 requests += request
                 GeneratedPuzzleGenerationResult.Generated(
                     request = request,
@@ -132,7 +132,7 @@ class GeneratedPuzzleViewModelTest {
             replacementSelections += 1
             GeneratedPuzzleGenerationDefinition(
                 challenge = GeneratedModes.THREE_PAIRS_LOW,
-                generationUseCase = GeneratedPuzzleGenerationUseCase { request ->
+                generationUseCase = { request ->
                     replacementRequests += request
                     GeneratedPuzzleGenerationResult.Generated(
                         request = request,
@@ -181,7 +181,7 @@ class GeneratedPuzzleViewModelTest {
             replacementSelections += 1
             GeneratedPuzzleGenerationDefinition(
                 challenge = GeneratedModes.THREE_PAIRS_MEDIUM,
-                generationUseCase = GeneratedPuzzleGenerationUseCase { request ->
+                generationUseCase = { request ->
                     replacementAttempts += 1
                     if (replacementAttempts == 1) {
                         GeneratedPuzzleGenerationResult.Failed(
@@ -671,7 +671,7 @@ private class UnexpectedGeneratedPuzzleUseCase : GeneratedPuzzleGenerationUseCas
     }
 }
 
-private class QueueGeneratedPuzzleUseCase(private vararg val puzzles: CompletableDeferred<Puzzle>) :
+private class QueueGeneratedPuzzleUseCase(vararg puzzles: CompletableDeferred<Puzzle>) :
     GeneratedPuzzleGenerationUseCase {
     private val remainingPuzzles = ArrayDeque(puzzles.toList())
 

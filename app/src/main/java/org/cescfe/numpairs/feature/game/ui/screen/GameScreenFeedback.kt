@@ -356,7 +356,12 @@ internal fun SuccessOverlay(
                                     .fillMaxWidth()
                                     .testTag(GameScreenTestTags.SUCCESS_OVERLAY_NEW_PUZZLE)
                             ) {
-                                Text(text = stringResource(R.string.success_overlay_new_puzzle_button))
+                                Text(
+                                    text = stringResource(R.string.success_overlay_new_puzzle_button),
+                                    style = MaterialTheme.typography.labelLarge.copy(
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                )
                             }
                             OutlinedButton(
                                 onClick = actions.onReturnToMenuRequested,
