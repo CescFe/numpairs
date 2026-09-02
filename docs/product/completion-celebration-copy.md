@@ -21,10 +21,11 @@ The product tone and presentation remain governed by the
 - Stable identifiers express content identity and eligibility; they are not Android resource
   names.
 - General variants are eligible for every supported Low, Medium, and Hard generated challenge.
+- `KEEP_IT_UP` is reserved for a well-performing, non-record Quick Low completion.
 - `MEDIUM_HARD_IMPRESSIVE` is eligible only for Medium and Hard.
 - `HARD_UNSTOPPABLE` is eligible only for Hard.
-- Low intentionally has no exclusive variant. It receives the complete general pool without copy
-  that frames Low as a beginner or lesser achievement.
+- Low receives the complete general pool. Its additional `KEEP_IT_UP` variant invites the player
+  to try a greater challenge without framing Low itself as a lesser achievement.
 - No variant makes a factual claim beyond the solved state and configured difficulty. Rhetorical
   encouragement and narrator personification are expressive rather than performance data. No
   variant implies a personal record, completion duration, movement count, correction-free attempt,
@@ -32,7 +33,7 @@ The product tone and presentation remain governed by the
 - Daily personal records and Tutorial completions keep their purpose-specific copy outside this
   catalog.
 
-The proposed catalog contains six general variants and two difficulty-specific variants, for a
+The proposed catalog contains five general variants and three context-specific variants, for a
 total of eight.
 
 ## General Variants
@@ -93,18 +94,22 @@ Intent: strong but restrained praise focused on the finished solution.
 | Valencian/Catalan | Brillant!   | La teua solució encaixa a la perfecció. |
 | German            | Großartig!  | Deine Lösung passt perfekt.             |
 
+## Context-Specific Variants
+
 ### `KEEP_IT_UP`
 
-Intent: forward-looking encouragement after acknowledging the solved puzzle through the overlay.
+Eligibility: Quick Low only, when the completion is not presented as a personal record and the
+attempt meets the separately defined good-performance rule.
 
-| Locale            | Title          | Supporting text                           |
-|-------------------|----------------|-------------------------------------------|
-| English           | Keep it up!    | The next challenge awaits.                |
-| Spanish           | ¡Sigue así!    | El siguiente reto ya te espera.           |
-| Valencian/Catalan | Continua així! | El pròxim repte ja t’espera.              |
-| German            | Weiter so!     | Die nächste Herausforderung wartet schon. |
+Intent: invite a player whose Low attempt went well to consider increasing the selected difficulty.
+The prompt addresses the next choice without describing Low as introductory or easy.
 
-## Difficulty-Specific Variants
+| Locale            | Title          | Supporting text                              |
+|-------------------|----------------|----------------------------------------------|
+| English           | Keep it up!    | Ready for a tougher challenge?               |
+| Spanish           | ¡Sigue así!    | ¿Te atreves a subir la dificultad?           |
+| Valencian/Catalan | Continua així! | T’atrevixes a pujar la dificultat?           |
+| German            | Weiter so!     | Bereit für einen höheren Schwierigkeitsgrad? |
 
 ### `MEDIUM_HARD_IMPRESSIVE`
 
@@ -135,6 +140,32 @@ developer's performance.
 | Spanish           | ¡No hay quien te pare! | ¡Y yo que pensaba que esta dificultad era imposible! |
 | Valencian/Catalan | No hi ha qui et pare!  | I jo que pensava que esta dificultat era impossible! |
 | German            | Dich hält nichts auf!  | Und ich dachte schon, das wäre unlösbar!             |
+
+## Good-Performance Eligibility
+
+`KEEP_IT_UP` is a reserved contextual variant rather than an unconditional Low message. Runtime
+activation must wait until authoritative elapsed-time and correction data are available for normal
+generated play.
+
+The later selection rule should follow these constraints:
+
+- Personal-record presentation always has priority. `KEEP_IT_UP` is eligible only for the standard
+  non-record overlay.
+- A first timed baseline, tie, or slower personal result may still qualify when the attempt meets
+  the objective good-performance rule.
+- Either a known good completion time or a known low correction count may qualify the attempt.
+- A good-time threshold must be calibrated independently for `3 Pairs Low` and `4 Pairs Low`;
+  their expected completion times are not interchangeable.
+- Correction eligibility must use the authoritative correction count rather than Daily Movement
+  Count or a puzzle-state inference.
+- An unknown metric cannot satisfy its side of the rule. The other known metric may still qualify
+  the attempt.
+- Daily Low does not use this prompt because its next difficulty is selected by the Daily calendar,
+  not by the player. Classic has no Low challenge.
+
+This copy specification intentionally does not choose the numeric time or correction thresholds.
+Those values require explicit calibration in the issue that activates the performance-based
+selection rule.
 
 ## Localization Guidance
 
@@ -168,6 +199,7 @@ The fixed brand expression `NumPairs Daily` is not inflected.
 ## Deferred Implementation
 
 Issue #714 defines and reviews this catalog only. Runtime selection, Android string resources, the
-standard check badge, and Spanish resource corrections belong to the dependent implementation
-issue. Performance-based variants for elapsed time, corrections, and personal records remain
-outside this catalog and require their own authoritative completion data.
+standard check badge, and Spanish resource corrections belong to dependent implementation work.
+Activating `KEEP_IT_UP` additionally depends on authoritative normal-play elapsed time and
+correction data plus calibrated good-performance thresholds. Personal-record presentation remains
+outside this catalog.
