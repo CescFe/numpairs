@@ -2,7 +2,8 @@
 
 Thank you for contributing to NumPairs. The project uses small, issue-driven changes so that product decisions, implementation, and review remain easy to trace.
 
-This guide distinguishes requesting future work from implementing an existing issue. It does not replace the canonical workflow and quality documents.
+This guide distinguishes requesting future work from implementing an existing issue. It does not
+replace the delivery workflow or code quality guidelines.
 
 ## Requesting An Issue
 
@@ -15,8 +16,8 @@ Follow each template to provide the needed information to implement the issue.
 
 ## Implementing An Existing Issue
 
-Before editing repository files:
-
-1. Read the complete issue and its acceptance criteria.
-2. Read [the delivery workflow](docs/technical/delivery-workflow.md) for repository conventions.
-3. Read [the code quality guidelines](docs/technical/code-quality.md) for implementation expectations.
+Before editing repository files, review the issue and its acceptance criteria. Consult the
+[delivery workflow](docs/technical/delivery-workflow.md), [code quality guidelines](docs/technical/code-quality.md),
+and any product or technical references relevant to the change. The scope of the task determines
+which sections and documents need attention; no complete-document reading is required for every
+change.

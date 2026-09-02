@@ -1,6 +1,7 @@
 # Code Quality Guidelines
 
-This document is the canonical technical quality guidance for NumPairs production and test code. Apply it in proportion to the change and prefer concrete improvements to ceremonial compliance.
+Use these guidelines when changing NumPairs production or test code. Apply them in proportion to
+the change and prefer concrete improvements to ceremonial compliance.
 
 ## Engineering Approach
 
