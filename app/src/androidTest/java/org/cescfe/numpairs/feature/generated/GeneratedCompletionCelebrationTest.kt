@@ -139,13 +139,16 @@ class GeneratedCompletionCelebrationTest {
     fun eightPairsClassicUsesAStandardCompletionCelebration() {
         assertGeneratedModeOptsInToCompletionCelebration(
             menuButtonTag = MenuScreenTestTags.CLASSIC_BUTTON,
-            challengeSelector = fourPairsQuickSelector()
+            challengeSelector = fourPairsQuickSelector(),
+            expectedCopy = R.string.completion_celebration_correction_free_title to
+                R.string.completion_celebration_correction_free_supporting_text
         )
     }
 
     private fun assertGeneratedModeOptsInToCompletionCelebration(
         menuButtonTag: String,
-        challengeSelector: GeneratedPlayChallengeSelector
+        challengeSelector: GeneratedPlayChallengeSelector,
+        expectedCopy: Pair<Int, Int>? = null
     ) {
         var recompositionMarker by mutableIntStateOf(0)
         composeTestRule.setContent {
@@ -184,7 +187,7 @@ class GeneratedCompletionCelebrationTest {
             .tapOperatorOption(Operator.MULTIPLICATION)
 
         assertCompletionFeedback()
-        val selectedCopy = assertStandardCelebrationDisplayed()
+        val selectedCopy = assertStandardCelebrationDisplayed(expectedCopy = expectedCopy)
         composeTestRule.runOnIdle {
             recompositionMarker += 1
         }
@@ -303,6 +306,8 @@ private val STANDARD_CELEBRATION_COPY = listOf(
         R.string.completion_celebration_nailed_it_supporting_text,
     R.string.completion_celebration_brilliant_title to
         R.string.completion_celebration_brilliant_supporting_text,
+    R.string.completion_celebration_correction_free_title to
+        R.string.completion_celebration_correction_free_supporting_text,
     R.string.completion_celebration_impressive_title to
         R.string.completion_celebration_impressive_supporting_text,
     R.string.completion_celebration_unstoppable_title to

@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
+import org.cescfe.numpairs.feature.game.presentation.CommittedPuzzleMutation
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.GameViewModel
 import org.cescfe.numpairs.feature.game.presentation.TileAssignmentCommit
@@ -55,7 +56,7 @@ fun GameRoute(
     contentBeforePuzzle: @Composable ColumnScope.() -> Unit = {},
     onGameUiStateChanged: (GameUiState) -> Unit = {},
     onPuzzleChanged: (Puzzle) -> Unit = {},
-    onPuzzleMutationCommitted: (Puzzle) -> Unit = {},
+    onPuzzleMutationCommitted: (CommittedPuzzleMutation) -> Unit = {},
     onTileAssignmentCommitted: (TileAssignmentCommit) -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
@@ -93,8 +94,8 @@ fun GameRoute(
 
     fun <T> performPuzzleAction(action: () -> T): T {
         val result = action()
-        gameViewModel.consumeCommittedPuzzleMutations().forEach { committedPuzzle ->
-            currentOnPuzzleMutationCommitted(committedPuzzle)
+        gameViewModel.consumeCommittedPuzzleMutations().forEach { committedMutation ->
+            currentOnPuzzleMutationCommitted(committedMutation)
         }
         return result
     }

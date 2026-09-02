@@ -223,6 +223,8 @@
     <string name="completion_celebration_brilliant_supporting_text">Deine Lösung passt perfekt.</string>
     <string name="completion_celebration_keep_it_up_title">Weiter so!</string>
     <string name="completion_celebration_keep_it_up_supporting_text">Bereit für einen höheren Schwierigkeitsgrad?</string>
+    <string name="completion_celebration_correction_free_title">Makellos!</string>
+    <string name="completion_celebration_correction_free_supporting_text">Du hast es gelöst, ohne einen einzigen Zug zu korrigieren.</string>
     <string name="completion_celebration_impressive_title">Beeindruckend!</string>
     <string name="completion_celebration_impressive_supporting_text">Dafür war echtes Köpfchen gefragt.</string>
     <string name="completion_celebration_unstoppable_title">Dich hält nichts auf!</string>

@@ -7,6 +7,7 @@ import java.io.DataOutputStream
 import java.io.IOException
 import org.cescfe.numpairs.data.puzzle.readPuzzleSnapshot
 import org.cescfe.numpairs.data.puzzle.writePuzzleSnapshot
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 
 sealed interface GeneratedSessionSnapshotDecodingResult {
     data class Decoded(val snapshot: GeneratedSessionSnapshot) : GeneratedSessionSnapshotDecodingResult
@@ -32,6 +33,10 @@ class GeneratedSessionSnapshotCodec {
                 output.writeInt(snapshot.seed)
                 output.writePuzzleSnapshot(snapshot.initialPuzzle)
                 output.writePuzzleSnapshot(snapshot.currentPuzzle)
+                output.writeBoolean(snapshot.correctionCount != null)
+                snapshot.correctionCount?.let { correctionCount ->
+                    output.writeLong(correctionCount.value)
+                }
             }
             bytes.toByteArray()
         }
@@ -44,19 +49,19 @@ class GeneratedSessionSnapshotCodec {
             }
 
             val schemaVersion = input.readInt()
-            if (schemaVersion != GENERATED_SESSION_SCHEMA_VERSION) {
-                return GeneratedSessionSnapshotDecodingResult.UnsupportedVersion(schemaVersion)
-            }
+            val snapshot = when (schemaVersion) {
+                INITIAL_GENERATED_SESSION_SCHEMA_VERSION -> input.readSnapshotWith { null }
 
-            val snapshot = GeneratedSessionSnapshot(
-                schemaVersion = schemaVersion,
-                sessionId = GeneratedSessionId(input.readUTF()),
-                modeId = input.readUTF(),
-                profileId = input.readUTF(),
-                seed = input.readInt(),
-                initialPuzzle = input.readPuzzleSnapshot(),
-                currentPuzzle = input.readPuzzleSnapshot()
-            )
+                GENERATED_SESSION_SCHEMA_VERSION -> input.readSnapshotWith {
+                    if (readBoolean()) {
+                        PuzzleCorrectionCount(readLong())
+                    } else {
+                        null
+                    }
+                }
+
+                else -> return GeneratedSessionSnapshotDecodingResult.UnsupportedVersion(schemaVersion)
+            }
 
             if (input.available() != 0) {
                 GeneratedSessionSnapshotDecodingResult.InvalidData
@@ -71,6 +76,26 @@ class GeneratedSessionSnapshotCodec {
     } catch (_: IllegalStateException) {
         GeneratedSessionSnapshotDecodingResult.InvalidData
     }
+}
+
+private fun DataInputStream.readSnapshotWith(
+    readCorrectionCount: DataInputStream.() -> PuzzleCorrectionCount?
+): GeneratedSessionSnapshot {
+    val sessionId = GeneratedSessionId(readUTF())
+    val modeId = readUTF()
+    val profileId = readUTF()
+    val seed = readInt()
+    val initialPuzzle = readPuzzleSnapshot()
+    val currentPuzzle = readPuzzleSnapshot()
+    return GeneratedSessionSnapshot(
+        sessionId = sessionId,
+        modeId = modeId,
+        profileId = profileId,
+        seed = seed,
+        initialPuzzle = initialPuzzle,
+        currentPuzzle = currentPuzzle,
+        correctionCount = readCorrectionCount()
+    )
 }
 
 private const val FILE_MAGIC = 0x4E505331

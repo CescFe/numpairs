@@ -33,8 +33,10 @@ import org.cescfe.numpairs.domain.daily.assertDailyElapsedTimeEquals
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationFailureReason
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
+import org.cescfe.numpairs.feature.game.presentation.CommittedPuzzleMutation
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -425,10 +427,10 @@ class DailyPuzzleViewModelTest {
         val firstProgress = fixture.progressPuzzle()
         val latestProgress = fixture.laterProgressPuzzle()
 
-        viewModel.onPuzzleMutationCommitted(sessionId, firstProgress)
+        viewModel.onPuzzleMutationCommitted(sessionId, firstProgress.asCommittedMutation())
         dispatcher.scheduler.runCurrent()
-        viewModel.onPuzzleMutationCommitted(sessionId, latestProgress)
-        viewModel.onPuzzleMutationCommitted(sessionId, latestProgress)
+        viewModel.onPuzzleMutationCommitted(sessionId, latestProgress.asCommittedMutation())
+        viewModel.onPuzzleMutationCommitted(sessionId, latestProgress.asCommittedMutation())
         dispatcher.scheduler.runCurrent()
 
         val visible = (viewModel.uiState.value as DailyPuzzleUiState.Ready).session
@@ -472,7 +474,7 @@ class DailyPuzzleViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
         val sessionId = (viewModel.uiState.value as DailyPuzzleUiState.Ready).session.id
 
-        viewModel.onPuzzleMutationCommitted(sessionId, fixture.progressPuzzle())
+        viewModel.onPuzzleMutationCommitted(sessionId, fixture.progressPuzzle().asCommittedMutation())
         dispatcher.scheduler.advanceUntilIdle()
         assertEquals(
             DailyPuzzlePersistenceFailure.Persistence,
@@ -510,9 +512,12 @@ class DailyPuzzleViewModelTest {
         val progress = fixture.progressPuzzle()
         val solved = fixture.solvedProgressPuzzle()
 
-        viewModel.onPuzzleMutationCommitted(sessionId, progress)
+        viewModel.onPuzzleMutationCommitted(
+            sessionId,
+            progress.asCommittedMutation(isCorrection = true)
+        )
         dispatcher.scheduler.runCurrent()
-        viewModel.onPuzzleMutationCommitted(sessionId, solved)
+        viewModel.onPuzzleMutationCommitted(sessionId, solved.asCommittedMutation())
         dispatcher.scheduler.runCurrent()
 
         val solving = viewModel.uiState.value as DailyPuzzleUiState.Ready
@@ -527,7 +532,8 @@ class DailyPuzzleViewModelTest {
         assertEquals(
             dailyCompletion(
                 identity = fixture.identity,
-                movementCount = 2
+                movementCount = 2,
+                correctionCount = 1
             ),
             (completed.completion as DailyPuzzleCompletion.Completed).completion
         )
@@ -538,6 +544,7 @@ class DailyPuzzleViewModelTest {
         assertEquals(sessionId, repository.completionAttempts.single().sessionId)
         assertEquals(fixture.identity, repository.completionAttempts.single().identity)
         assertEquals(2L, requireNotNull(repository.completionAttempts.single().movementCount).value)
+        assertEquals(1L, requireNotNull(repository.completionAttempts.single().correctionCount).value)
     }
 
     @Test
@@ -558,7 +565,7 @@ class DailyPuzzleViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
         val sessionId = (viewModel.uiState.value as DailyPuzzleUiState.Ready).session.id
 
-        viewModel.onPuzzleMutationCommitted(sessionId, fixture.solvedProgressPuzzle())
+        viewModel.onPuzzleMutationCommitted(sessionId, fixture.solvedProgressPuzzle().asCommittedMutation())
         dispatcher.scheduler.advanceUntilIdle()
 
         val completed = viewModel.uiState.value as DailyPuzzleUiState.Completed
@@ -592,14 +599,14 @@ class DailyPuzzleViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
         val sessionId = (viewModel.uiState.value as DailyPuzzleUiState.Ready).session.id
 
-        viewModel.onPuzzleMutationCommitted(sessionId, fixture.progressPuzzle())
+        viewModel.onPuzzleMutationCommitted(sessionId, fixture.progressPuzzle().asCommittedMutation())
         dispatcher.scheduler.advanceUntilIdle()
         assertEquals(
             DailyPuzzlePersistenceFailure.StaleSession,
             (viewModel.uiState.value as DailyPuzzleUiState.Ready).persistenceFailure
         )
 
-        viewModel.onPuzzleMutationCommitted(sessionId, fixture.solvedProgressPuzzle())
+        viewModel.onPuzzleMutationCommitted(sessionId, fixture.solvedProgressPuzzle().asCommittedMutation())
         dispatcher.scheduler.advanceUntilIdle()
         assertEquals(
             DailyPuzzlePersistenceFailure.Persistence,
@@ -631,11 +638,11 @@ class DailyPuzzleViewModelTest {
 
         viewModel.onPuzzleMutationCommitted(
             expectedSessionId = DailySessionId("stale-callback"),
-            puzzle = fixture.progressPuzzle()
+            mutation = fixture.progressPuzzle().asCommittedMutation()
         )
         viewModel.onPuzzleMutationCommitted(
             expectedSessionId = ready.session.id,
-            puzzle = org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
+            mutation = org.cescfe.numpairs.data.puzzle.seed.samplePuzzle.asCommittedMutation()
         )
         dispatcher.scheduler.advanceUntilIdle()
 
@@ -666,11 +673,11 @@ class DailyPuzzleViewModelTest {
 
         viewModel.onPuzzleMutationCommitted(
             expectedSessionId = originalSnapshot.sessionId,
-            puzzle = fixture.progressPuzzle()
+            mutation = fixture.progressPuzzle().asCommittedMutation()
         )
         viewModel.onPuzzleMutationCommitted(
             expectedSessionId = originalSnapshot.sessionId,
-            puzzle = fixture.solvedProgressPuzzle()
+            mutation = fixture.solvedProgressPuzzle().asCommittedMutation()
         )
         dispatcher.scheduler.advanceUntilIdle()
 
@@ -700,7 +707,10 @@ class DailyPuzzleViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
         val sessionId = (firstOwner.uiState.value as DailyPuzzleUiState.Ready).session.id
         val progress = fixture.progressPuzzle()
-        firstOwner.onPuzzleMutationCommitted(sessionId, progress)
+        firstOwner.onPuzzleMutationCommitted(
+            sessionId,
+            progress.asCommittedMutation(isCorrection = true)
+        )
         dispatcher.scheduler.advanceUntilIdle()
 
         val recreatedOwner = viewModel(
@@ -714,7 +724,44 @@ class DailyPuzzleViewModelTest {
         val restored = recreatedOwner.uiState.value as DailyPuzzleUiState.Ready
         assertEquals(progress, restored.session.currentPuzzle)
         assertEquals(1L, requireNotNull(restored.session.snapshot.movementCount).value)
+        assertEquals(1L, requireNotNull(restored.session.snapshot.correctionCount).value)
         assertTrue(repository.replaceAttempts.isEmpty())
+    }
+
+    @Test
+    fun migrated_unknown_correction_count_remains_unknown_through_progress_and_completion() {
+        val fixture = generatedDailyFixture()
+        val repository = RecordingDailySessionRepository(
+            initialState = DailyState(
+                activeSession = fixture.snapshot(correctionCount = null),
+                completions = emptyList()
+            )
+        )
+        val viewModel = viewModel(
+            date = fixture.identity.localDate,
+            repository = repository,
+            generator = RecordingDailyPuzzleGenerator()
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val sessionId = (viewModel.uiState.value as DailyPuzzleUiState.Ready).session.id
+
+        viewModel.onPuzzleMutationCommitted(
+            sessionId,
+            fixture.progressPuzzle().asCommittedMutation(isCorrection = true)
+        )
+        viewModel.onPuzzleMutationCommitted(
+            sessionId,
+            fixture.solvedProgressPuzzle().asCommittedMutation(isCorrection = true)
+        )
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertNull(repository.updateAttempts.single().correctionCount)
+        assertNull(repository.completionAttempts.single().correctionCount)
+        val completion = (viewModel.uiState.value as DailyPuzzleUiState.Completed)
+            .completion
+            .completion
+        assertNull(completion.correctionCount)
     }
 
     @Test
@@ -735,8 +782,8 @@ class DailyPuzzleViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
         val sessionId = (viewModel.uiState.value as DailyPuzzleUiState.Ready).session.id
 
-        viewModel.onPuzzleMutationCommitted(sessionId, fixture.progressPuzzle())
-        viewModel.onPuzzleMutationCommitted(sessionId, fixture.solvedProgressPuzzle())
+        viewModel.onPuzzleMutationCommitted(sessionId, fixture.progressPuzzle().asCommittedMutation())
+        viewModel.onPuzzleMutationCommitted(sessionId, fixture.solvedProgressPuzzle().asCommittedMutation())
         dispatcher.scheduler.advanceUntilIdle()
 
         assertNull(repository.updateAttempts.single().movementCount)
@@ -770,13 +817,46 @@ class DailyPuzzleViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
         val ready = viewModel.uiState.value as DailyPuzzleUiState.Ready
 
-        viewModel.onPuzzleMutationCommitted(ready.session.id, fixture.progressPuzzle())
+        viewModel.onPuzzleMutationCommitted(ready.session.id, fixture.progressPuzzle().asCommittedMutation())
         dispatcher.scheduler.advanceUntilIdle()
 
         val unchanged = viewModel.uiState.value as DailyPuzzleUiState.Ready
         assertEquals(fixture.generatedPuzzle.initialPuzzle, unchanged.session.currentPuzzle)
         assertEquals(Long.MAX_VALUE, requireNotNull(unchanged.session.snapshot.movementCount).value)
         assertEquals(DailyPuzzlePersistenceFailure.InvalidMovement, unchanged.persistenceFailure)
+        assertTrue(repository.updateAttempts.isEmpty())
+    }
+
+    @Test
+    fun correction_count_overflow_is_reported_without_mutating_or_persisting_progress() {
+        val fixture = generatedDailyFixture()
+        val repository = RecordingDailySessionRepository(
+            initialState = DailyState(
+                activeSession = fixture.snapshot(
+                    correctionCount = PuzzleCorrectionCount(Long.MAX_VALUE)
+                ),
+                completions = emptyList()
+            )
+        )
+        val viewModel = viewModel(
+            date = fixture.identity.localDate,
+            repository = repository,
+            generator = RecordingDailyPuzzleGenerator()
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val ready = viewModel.uiState.value as DailyPuzzleUiState.Ready
+
+        viewModel.onPuzzleMutationCommitted(
+            ready.session.id,
+            fixture.progressPuzzle().asCommittedMutation(isCorrection = true)
+        )
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val unchanged = viewModel.uiState.value as DailyPuzzleUiState.Ready
+        assertEquals(fixture.generatedPuzzle.initialPuzzle, unchanged.session.currentPuzzle)
+        assertEquals(Long.MAX_VALUE, requireNotNull(unchanged.session.snapshot.correctionCount).value)
+        assertEquals(DailyPuzzlePersistenceFailure.InvalidCorrection, unchanged.persistenceFailure)
         assertTrue(repository.updateAttempts.isEmpty())
     }
 
@@ -1016,7 +1096,10 @@ class DailyPuzzleViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
 
         timeSource.set(epochMilliseconds = 11_234, monotonicMilliseconds = 1_734)
-        viewModel.onPuzzleMutationCommitted(sessionId, fixture.solvedProgressPuzzle())
+        viewModel.onPuzzleMutationCommitted(
+            sessionId,
+            fixture.solvedProgressPuzzle().asCommittedMutation(isCorrection = true)
+        )
         timeSource.set(epochMilliseconds = 15_000, monotonicMilliseconds = 5_500)
         dispatcher.scheduler.runCurrent()
 
@@ -1080,7 +1163,10 @@ class DailyPuzzleViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
 
         timeSource.set(epochMilliseconds = 23_456, monotonicMilliseconds = 4_456)
-        viewModel.onPuzzleMutationCommitted(sessionId, fixture.solvedProgressPuzzle())
+        viewModel.onPuzzleMutationCommitted(
+            sessionId,
+            fixture.solvedProgressPuzzle().asCommittedMutation(isCorrection = true)
+        )
         dispatcher.scheduler.advanceUntilIdle()
         assertEquals(
             DailyPuzzlePersistenceFailure.Persistence,
@@ -1104,6 +1190,10 @@ class DailyPuzzleViewModelTest {
         assertEquals(
             listOf(1L, 1L),
             repository.completionAttempts.map { attempt -> requireNotNull(attempt.movementCount).value }
+        )
+        assertEquals(
+            listOf(1L, 1L),
+            repository.completionAttempts.map { attempt -> requireNotNull(attempt.correctionCount).value }
         )
         val completed = viewModel.uiState.value as DailyPuzzleUiState.Completed
         val completedResult = completed.completion as DailyPuzzleCompletion.Completed
@@ -1153,7 +1243,7 @@ class DailyPuzzleViewModelTest {
                 epochMilliseconds = 20_000 + completionDuration,
                 monotonicMilliseconds = 1_000 + completionDuration
             )
-            viewModel.onPuzzleMutationCommitted(sessionId, fixture.solvedProgressPuzzle())
+            viewModel.onPuzzleMutationCommitted(sessionId, fixture.solvedProgressPuzzle().asCommittedMutation())
             dispatcher.scheduler.advanceUntilIdle()
 
             val completed = viewModel.uiState.value as DailyPuzzleUiState.Completed
@@ -1186,7 +1276,7 @@ class DailyPuzzleViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
         val sessionId = (viewModel.uiState.value as DailyPuzzleUiState.Ready).session.id
 
-        viewModel.onPuzzleMutationCommitted(sessionId, fixture.solvedProgressPuzzle())
+        viewModel.onPuzzleMutationCommitted(sessionId, fixture.solvedProgressPuzzle().asCommittedMutation())
         dispatcher.scheduler.advanceUntilIdle()
 
         val completed = viewModel.uiState.value as DailyPuzzleUiState.Completed
@@ -1215,7 +1305,7 @@ class DailyPuzzleViewModelTest {
         val session = (viewModel.uiState.value as DailyPuzzleUiState.Ready).session
         currentDate = currentDate.plusDays(1)
 
-        viewModel.onPuzzleMutationCommitted(session.id, fixture.solvedProgressPuzzle())
+        viewModel.onPuzzleMutationCommitted(session.id, fixture.solvedProgressPuzzle().asCommittedMutation())
         dispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(fixture.identity, repository.completionAttempts.single().identity)
@@ -1443,12 +1533,14 @@ private class RecordingDailySessionRepository(
     override suspend fun updateCurrentPuzzle(
         expectedSessionId: DailySessionId,
         puzzle: Puzzle,
-        movementCount: DailyMovementCount?
+        movementCount: DailyMovementCount?,
+        correctionCount: PuzzleCorrectionCount?
     ): DailySessionProgressUpdateResult {
         updateAttempts += ProgressAttempt(
             sessionId = expectedSessionId,
             puzzle = puzzle,
-            movementCount = movementCount
+            movementCount = movementCount,
+            correctionCount = correctionCount
         )
         pendingUpdateGate?.also { gate ->
             pendingUpdateGate = null
@@ -1467,7 +1559,8 @@ private class RecordingDailySessionRepository(
         val updatedSession = try {
             activeSession.copy(
                 currentPuzzle = puzzle,
-                movementCount = movementCount
+                movementCount = movementCount,
+                correctionCount = correctionCount
             )
         } catch (_: IllegalArgumentException) {
             return DailySessionProgressUpdateResult.InvalidPuzzle
@@ -1508,6 +1601,7 @@ private class RecordingDailySessionRepository(
         expectedDailyChallengeId: DailyChallengeId,
         solvedPuzzle: Puzzle,
         movementCount: DailyMovementCount?,
+        correctionCount: PuzzleCorrectionCount?,
         elapsedTime: DailyElapsedTime?
     ): DailySessionCompletionResult {
         completionAttempts += CompletionAttempt(
@@ -1515,6 +1609,7 @@ private class RecordingDailySessionRepository(
             identity = expectedDailyChallengeId,
             solvedPuzzle = solvedPuzzle,
             movementCount = movementCount,
+            correctionCount = correctionCount,
             elapsedTime = elapsedTime
         )
         nextCompletionGate?.also { gate ->
@@ -1553,7 +1648,8 @@ private class RecordingDailySessionRepository(
         val completed = DailyCompletion(
             identity = expectedDailyChallengeId,
             elapsedTime = elapsedTime,
-            movementCount = movementCount
+            movementCount = movementCount,
+            correctionCount = correctionCount
         )
         mutableState.value = DailyState(
             activeSession = null,
@@ -1566,7 +1662,8 @@ private class RecordingDailySessionRepository(
 private data class ProgressAttempt(
     val sessionId: DailySessionId,
     val puzzle: Puzzle,
-    val movementCount: DailyMovementCount?
+    val movementCount: DailyMovementCount?,
+    val correctionCount: PuzzleCorrectionCount?
 )
 
 private data class TimingStartAttempt(val sessionId: DailySessionId, val startInstant: DailyTimingStartInstant)
@@ -1576,5 +1673,12 @@ private data class CompletionAttempt(
     val identity: DailyChallengeId,
     val solvedPuzzle: Puzzle,
     val movementCount: DailyMovementCount?,
+    val correctionCount: PuzzleCorrectionCount?,
     val elapsedTime: DailyElapsedTime?
 )
+
+private fun Puzzle.asCommittedMutation(isCorrection: Boolean = false): CommittedPuzzleMutation =
+    CommittedPuzzleMutation(
+        puzzle = this,
+        isCorrection = isCorrection
+    )

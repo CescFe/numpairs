@@ -40,12 +40,12 @@ import androidx.lifecycle.ViewModelProvider
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
-import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.GameRoute
 import org.cescfe.numpairs.feature.game.StandardCompletionCelebrationContext
 import org.cescfe.numpairs.feature.game.StandardCompletionCelebrationSelector
 import org.cescfe.numpairs.feature.game.localizedCopy
+import org.cescfe.numpairs.feature.game.presentation.CommittedPuzzleMutation
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
 @Composable
@@ -110,7 +110,7 @@ fun GeneratedModeRoute(
                     }
                 }
             },
-            onPuzzleChanged = viewModel::onPuzzleChanged,
+            onPuzzleMutationCommitted = viewModel::onPuzzleMutationCommitted,
             onReplacementTransitionConsumed = viewModel::onReplacementTransitionConsumed,
             onRetry = viewModel::retry,
             onNavigateBack = onNavigateBack
@@ -159,7 +159,7 @@ private fun GeneratedPuzzleGameBoundary(
     isGeneratedGameHapticsEnabled: Boolean,
     compactTileSelectorsEnabled: Boolean,
     onNewPuzzleRequested: () -> Unit,
-    onPuzzleChanged: (GeneratedSessionId, Puzzle) -> Unit,
+    onPuzzleMutationCommitted: (GeneratedSessionId, CommittedPuzzleMutation) -> Unit,
     onReplacementTransitionConsumed: (GeneratedPuzzleReplacementTransition) -> Unit,
     onRetry: () -> Unit,
     onNavigateBack: () -> Unit
@@ -236,7 +236,7 @@ private fun GeneratedPuzzleGameBoundary(
         isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,
         compactTileSelectorsEnabled = compactTileSelectorsEnabled,
         onNewPuzzleRequested = onNewPuzzleRequested,
-        onPuzzleChanged = onPuzzleChanged,
+        onPuzzleMutationCommitted = onPuzzleMutationCommitted,
         onNavigateBack = onNavigateBack,
         overlay = {
             when (state) {
@@ -269,7 +269,7 @@ private fun GeneratedPuzzleGameContent(
     isGeneratedGameHapticsEnabled: Boolean,
     compactTileSelectorsEnabled: Boolean,
     onNewPuzzleRequested: () -> Unit,
-    onPuzzleChanged: (GeneratedSessionId, Puzzle) -> Unit,
+    onPuzzleMutationCommitted: (GeneratedSessionId, CommittedPuzzleMutation) -> Unit,
     onNavigateBack: () -> Unit,
     overlay: @Composable () -> Unit = {}
 ) {
@@ -278,7 +278,8 @@ private fun GeneratedPuzzleGameContent(
         StandardCompletionCelebrationContext(
             generatedChallengeId = session.challenge.id.value,
             completionId = session.id.value,
-            difficulty = session.challenge.difficulty
+            difficulty = session.challenge.difficulty,
+            correctionCount = session.snapshot.correctionCount
         )
     ).localizedCopy()
 
@@ -301,8 +302,8 @@ private fun GeneratedPuzzleGameContent(
             successOverlayCopy = completionCelebrationCopy,
             compactTileSelectorsEnabled = compactTileSelectorsEnabled,
             topBarActions = topBarActions,
-            onPuzzleChanged = { puzzle ->
-                onPuzzleChanged(session.id, puzzle)
+            onPuzzleMutationCommitted = { mutation ->
+                onPuzzleMutationCommitted(session.id, mutation)
             },
             onTileAssignmentCommitted = {
                 if (isGeneratedGameHapticsEnabled) {

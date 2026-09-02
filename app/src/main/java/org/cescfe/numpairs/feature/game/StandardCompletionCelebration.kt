@@ -1,6 +1,7 @@
 package org.cescfe.numpairs.feature.game
 
 import org.cescfe.numpairs.domain.generated.profile.DifficultyTier
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 
 internal enum class StandardCompletionCelebration {
     GREAT_WORK,
@@ -9,6 +10,7 @@ internal enum class StandardCompletionCelebration {
     NAILED_IT,
     BRILLIANT,
     KEEP_IT_UP,
+    CORRECTION_FREE,
     MEDIUM_HARD_IMPRESSIVE,
     HARD_UNSTOPPABLE
 }
@@ -16,7 +18,8 @@ internal enum class StandardCompletionCelebration {
 internal data class StandardCompletionCelebrationContext(
     val generatedChallengeId: String,
     val completionId: String,
-    val difficulty: DifficultyTier
+    val difficulty: DifficultyTier,
+    val correctionCount: PuzzleCorrectionCount? = null
 ) {
     init {
         require(generatedChallengeId.isNotBlank()) {
@@ -30,6 +33,12 @@ internal data class StandardCompletionCelebrationContext(
 
 internal object StandardCompletionCelebrationSelector {
     fun select(context: StandardCompletionCelebrationContext): StandardCompletionCelebration {
+        if (
+            context.correctionCount == PuzzleCorrectionCount.ZERO &&
+            context.difficulty in setOf(DifficultyTier.MEDIUM, DifficultyTier.HARD)
+        ) {
+            return StandardCompletionCelebration.CORRECTION_FREE
+        }
         val eligibleVariants = eligibleVariants(context.difficulty)
         val stableSelectionKey = buildString {
             append(context.generatedChallengeId)

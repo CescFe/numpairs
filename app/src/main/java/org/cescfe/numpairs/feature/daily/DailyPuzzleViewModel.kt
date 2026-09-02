@@ -26,7 +26,9 @@ import org.cescfe.numpairs.domain.daily.DailyPersonalBestHistory
 import org.cescfe.numpairs.domain.daily.DailyPersonalBestOutcome
 import org.cescfe.numpairs.domain.daily.DailyPersonalBestResult
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
+import org.cescfe.numpairs.feature.game.presentation.CommittedPuzzleMutation
 
 fun interface DailySessionIdSource {
     fun nextId(): DailySessionId
@@ -54,6 +56,8 @@ internal sealed interface DailyPuzzlePersistenceFailure {
     data object InvalidTiming : DailyPuzzlePersistenceFailure
 
     data object InvalidMovement : DailyPuzzlePersistenceFailure
+
+    data object InvalidCorrection : DailyPuzzlePersistenceFailure
 
     data object Persistence : DailyPuzzlePersistenceFailure
 }
@@ -262,12 +266,12 @@ internal class DailyPuzzleViewModel(
         startGeneration(currentDailyChallenge = failedState.currentDailyChallenge)
     }
 
-    fun onPuzzleMutationCommitted(expectedSessionId: DailySessionId, puzzle: Puzzle) {
+    fun onPuzzleMutationCommitted(expectedSessionId: DailySessionId, mutation: CommittedPuzzleMutation) {
         val state = _uiState.value as? DailyPuzzleUiState.Ready ?: return
         val visibleSession = state.session
         if (
             visibleSession.id != expectedSessionId ||
-            visibleSession.currentPuzzle == puzzle ||
+            visibleSession.currentPuzzle == mutation.puzzle ||
             visibleSession.currentPuzzle.isSolved
         ) {
             return
@@ -283,10 +287,25 @@ internal class DailyPuzzleViewModel(
             )
             return
         }
+        val correctionCount = try {
+            if (mutation.isCorrection) {
+                visibleSession.snapshot.correctionCount?.incremented()
+            } else {
+                visibleSession.snapshot.correctionCount
+            }
+        } catch (_: IllegalArgumentException) {
+            persistenceRevision++
+            publishPersistenceFailure(
+                expectedSessionId = expectedSessionId,
+                failure = DailyPuzzlePersistenceFailure.InvalidCorrection
+            )
+            return
+        }
         val updatedSession = try {
             visibleSession.withCommittedPuzzleMutation(
-                puzzle = puzzle,
-                movementCount = movementCount
+                puzzle = mutation.puzzle,
+                movementCount = movementCount,
+                correctionCount = correctionCount
             )
         } catch (_: IllegalArgumentException) {
             persistenceRevision++
@@ -304,17 +323,18 @@ internal class DailyPuzzleViewModel(
             return
         }
 
-        val elapsedTime = if (puzzle.isSolved) {
+        val elapsedTime = if (mutation.puzzle.isSolved) {
             captureCompletionElapsedTime(visibleSession)
         } else {
             state.elapsedTime
         }
-        val personalBestResult = if (puzzle.isSolved) {
+        val personalBestResult = if (mutation.puzzle.isSolved) {
             requirePersonalBestHistory().resultFor(
                 DailyCompletion(
                     identity = updatedSession.currentDailyChallenge.identity,
                     elapsedTime = elapsedTime,
-                    movementCount = updatedSession.snapshot.movementCount
+                    movementCount = updatedSession.snapshot.movementCount,
+                    correctionCount = updatedSession.snapshot.correctionCount
                 )
             )
         } else {
@@ -588,7 +608,8 @@ internal class DailyPuzzleViewModel(
         dailySessionRepository.updateCurrentPuzzle(
             expectedSessionId = session.id,
             puzzle = session.currentPuzzle,
-            movementCount = session.snapshot.movementCount
+            movementCount = session.snapshot.movementCount,
+            correctionCount = session.snapshot.correctionCount
         )
     ) {
         DailySessionProgressUpdateResult.Updated -> null
@@ -604,6 +625,10 @@ internal class DailyPuzzleViewModel(
         DailySessionProgressUpdateResult.InvalidMovement -> {
             DailyPuzzlePersistenceFailure.InvalidMovement
         }
+
+        DailySessionProgressUpdateResult.InvalidCorrection -> {
+            DailyPuzzlePersistenceFailure.InvalidCorrection
+        }
     }
 
     private suspend fun persistCompletion(
@@ -613,7 +638,8 @@ internal class DailyPuzzleViewModel(
         val frozenCompletion = DailyCompletion(
             identity = session.currentDailyChallenge.identity,
             elapsedTime = personalBestResult.currentElapsedTime,
-            movementCount = session.snapshot.movementCount
+            movementCount = session.snapshot.movementCount,
+            correctionCount = session.snapshot.correctionCount
         )
         return when (
             val result = dailySessionRepository.complete(
@@ -621,6 +647,7 @@ internal class DailyPuzzleViewModel(
                 expectedDailyChallengeId = frozenCompletion.identity,
                 solvedPuzzle = session.currentPuzzle,
                 movementCount = frozenCompletion.movementCount,
+                correctionCount = frozenCompletion.correctionCount,
                 elapsedTime = frozenCompletion.elapsedTime
             )
         ) {
@@ -670,6 +697,10 @@ internal class DailyPuzzleViewModel(
 
             DailySessionCompletionResult.InvalidMovement -> {
                 DailyPuzzlePersistenceFailure.InvalidMovement
+            }
+
+            DailySessionCompletionResult.InvalidCorrection -> {
+                DailyPuzzlePersistenceFailure.InvalidCorrection
             }
         }
     }
@@ -802,21 +833,28 @@ internal data class DailyGameSession(
     val initialPuzzle: Puzzle
         get() = snapshot.initialPuzzle
 
-    fun withCommittedPuzzleMutation(puzzle: Puzzle, movementCount: DailyMovementCount?): DailyGameSession =
-        if (puzzle.isSolved) {
-            copy(
-                snapshot = snapshot.copy(movementCount = movementCount),
-                currentPuzzle = puzzle
-            )
-        } else {
-            copy(
-                snapshot = snapshot.copy(
-                    currentPuzzle = puzzle,
-                    movementCount = movementCount
-                ),
-                currentPuzzle = puzzle
-            )
-        }
+    fun withCommittedPuzzleMutation(
+        puzzle: Puzzle,
+        movementCount: DailyMovementCount?,
+        correctionCount: PuzzleCorrectionCount?
+    ): DailyGameSession = if (puzzle.isSolved) {
+        copy(
+            snapshot = snapshot.copy(
+                movementCount = movementCount,
+                correctionCount = correctionCount
+            ),
+            currentPuzzle = puzzle
+        )
+    } else {
+        copy(
+            snapshot = snapshot.copy(
+                currentPuzzle = puzzle,
+                movementCount = movementCount,
+                correctionCount = correctionCount
+            ),
+            currentPuzzle = puzzle
+        )
+    }
 
     fun withTimingStart(startInstant: DailyTimingStartInstant, replaceExisting: Boolean = false): DailyGameSession {
         val timingStartInstant = if (replaceExisting) {

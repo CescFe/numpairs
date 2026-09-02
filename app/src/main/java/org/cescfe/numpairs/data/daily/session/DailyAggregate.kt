@@ -8,14 +8,16 @@ import org.cescfe.numpairs.domain.daily.DailyRecipeContract
 import org.cescfe.numpairs.domain.daily.DailyRecipeContracts
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfile
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Expression
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 
-const val DAILY_AGGREGATE_SCHEMA_VERSION: Int = 3
+const val DAILY_AGGREGATE_SCHEMA_VERSION: Int = 4
 internal const val INITIAL_DAILY_AGGREGATE_SCHEMA_VERSION: Int = 1
 internal const val TIMED_DAILY_AGGREGATE_SCHEMA_VERSION: Int = 2
+internal const val MOVEMENT_DAILY_AGGREGATE_SCHEMA_VERSION: Int = 3
 internal const val MAX_DAILY_COMPLETION_COUNT: Int = 10_000
 
 @JvmInline
@@ -35,7 +37,8 @@ data class DailySessionSnapshot(
     val initialPuzzle: Puzzle,
     val currentPuzzle: Puzzle,
     val timingStartInstant: DailyTimingStartInstant? = null,
-    val movementCount: DailyMovementCount? = DailyMovementCount.ZERO
+    val movementCount: DailyMovementCount? = DailyMovementCount.ZERO,
+    val correctionCount: PuzzleCorrectionCount? = PuzzleCorrectionCount.ZERO
 ) {
     val recipeContract: DailyRecipeContract = requireNotNull(
         DailyRecipeContracts.catalog.resolveOrNull(dailyChallengeId.recipeVersion)

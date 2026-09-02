@@ -72,7 +72,7 @@ profile parameters, completion data, or transient selector state.
 
 ## Versioned Snapshot
 
-Schema version `1` continues to store:
+Schema version `2` stores:
 
 - stable generated-session id
 - generated-mode id
@@ -80,6 +80,7 @@ Schema version `1` continues to store:
 - generation seed
 - exact initial `Puzzle`
 - exact current `Puzzle`
+- optional authoritative Puzzle Correction Count
 
 The seed is diagnostic and generation metadata. Restoration never reruns the generator because a
 generator or profile implementation may change after the session was created.
@@ -90,6 +91,11 @@ Quick, while existing 8 Pairs snapshots present as Classic. Their stable ids ret
 so valid schema-1 snapshots remain compatible without adding a play-option field. An unknown
 mode, unknown profile, unsupported pair, or profile whose declared mode differs from the stored
 mode is invalid session data and is exposed as an empty slot.
+
+New snapshots start with a known correction count of zero. Schema version `1` is decoded
+explicitly with an unknown correction count because earlier corrections cannot be reconstructed
+from the Current Puzzle. Once unknown, correction tracking is never started partway through that
+session. Unsupported future schema versions retain the existing safe empty-slot behavior.
 
 The initial and current puzzles preserve:
 
@@ -108,12 +114,17 @@ The deterministic codec returns typed decoded, unsupported-version, or invalid-d
 The repository exposes one observable nullable snapshot and three atomic mutations:
 
 - `replace(snapshot)` adopts a successor
-- `updateCurrentPuzzle(expectedSessionId, puzzle)` updates only the owning session
+- `updateCurrentPuzzle(expectedSessionId, puzzle, correctionCount)` updates only the owning session
 - `clear(expectedSessionId)` clears only the owning session
 
 Update and clear compare the expected stable id inside the DataStore edit. A callback from an older screen therefore cannot update or clear a newer replacement.
 
-Generated gameplay forwards only committed domain `Puzzle` changes. Draft text, open selectors, dialogs, overlays, highlights, scroll position, and other presentation state are not persisted. The generated presentation owner orders progress writes so a slower older update cannot finish after a newer update for the same session.
+Generated gameplay forwards only committed domain `Puzzle` changes together with whether each
+action rectified existing durable state. Draft text, open selectors, dialogs, overlays, highlights,
+scroll position, and other presentation state are not persisted. The generated presentation owner
+orders progress writes so a slower older update cannot finish after a newer update for the same
+session. Each accepted write stores the Current Puzzle and correction count atomically, rejects
+count regression and known/unknown transitions, and remains identity guarded.
 
 ---
 
@@ -123,7 +134,8 @@ Generated gameplay forwards only committed domain `Puzzle` changes. Draft text, 
 
 1. Resolve the requested supported challenge and generate and validate a puzzle through its
    bounded generation pipeline.
-2. Build a new versioned snapshot with identical initial and current puzzles.
+2. Build a new versioned snapshot with identical initial and current puzzles and a known zero
+   correction count.
 3. Store the snapshot.
 4. Publish the playable successor.
 
@@ -140,7 +152,13 @@ Missing, stale, mismatched, solved, corrupt, or unsupported sessions are not pre
 
 ### Progress And Completion
 
-Committed strip values, operand assignments, operator assignments, and tile resets replace `currentPuzzle` for the active id. When the puzzle becomes solved, the same identity guard clears the slot. The solved game remains visible in memory for its completion actions, but the normal menu no longer exposes `Resume`.
+Committed strip values, operand assignments, operator assignments, and tile resets replace
+`currentPuzzle` for the active id. A first assignment leaves the correction count unchanged;
+changing or clearing a previous strip value, reassigning an operand, changing an operator, or
+resetting a non-pristine tile increments it once. Cascading puzzle effects remain part of that one
+committed action. A migrated session keeps its unknown count. When the puzzle becomes solved, the
+same identity guard clears the slot. The solved game remains visible in memory for its completion
+actions, but the normal menu no longer exposes `Resume`.
 
 `Play another` uses the create-and-replace pipeline with the completed session's exact mode and
 profile. It does not consult or update the remembered selector default. A late clear from the
@@ -173,11 +191,12 @@ The implemented Daily aggregate uses its own separately excluded
 
 The non-device test suite protects:
 
-- deterministic snapshot round trips and malformed/versioned input
-- one-slot replacement, identity-guarded update/clear, and DataStore recreation
+- deterministic snapshot round trips, schema-1 migration, and malformed/versioned input
+- one-slot replacement, identity-guarded update/clear, correction consistency, and DataStore
+  recreation
 - persistence before readiness
 - exact restoration without generation or writes
-- ordered committed progress and solved clearing
+- ordered committed progress with atomic correction counts and solved clearing
 - stale callback rejection
 - replacement success, failure, cancellation, and duplicate-request handling
 - simultaneous Quick and Daily restoration across repository recreation without cross-slot

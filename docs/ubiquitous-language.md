@@ -77,7 +77,8 @@ A normal replayable generated-puzzle lifecycle identified by a stable session id
 
 NumPairs owns at most one generated session slot for the application, shared by all generated
 challenges. A generated session carries the mode and profile identities that resolve its exact
-challenge, seed metadata, exact initial puzzle, and exact current puzzle.
+challenge, seed metadata, exact initial puzzle, exact current puzzle, and an optional Puzzle
+Correction Count. New sessions start at zero; migrated sessions keep the count unknown.
 
 Daily Challenge uses a separate Daily Session lifecycle and does not occupy this slot.
 
@@ -93,7 +94,10 @@ An opened but untouched generated puzzle is resumable. A solved, stale, mismatch
 ## Generated Session Snapshot
 The versioned local representation of one generated session.
 
-The snapshot preserves stable session, mode, profile, board, tile, expression, strip-entry, and strip-item identity needed to restore the exact current puzzle. Its seed is metadata; the snapshot is not restored by regenerating from the seed.
+The snapshot preserves stable session, mode, profile, board, tile, expression, strip-entry, and
+strip-item identity needed to restore the exact current puzzle. It persists the Puzzle Correction
+Count atomically with that puzzle when tracking is available. Its seed is metadata; the snapshot is
+not restored by regenerating from the seed.
 
 ## Daily Challenge
 The one date-bound playable puzzle selected by a Daily Recipe for one device-local calendar date.
@@ -133,8 +137,9 @@ Daily Session carries a stable session identity, recipe and date identity, succe
 metadata, exact initial puzzle, exact current puzzle, and an optional Daily Timing Start Instant.
 The timing start is absent before the puzzle is first presented and on a session migrated from
 storage that predates Daily timing. A newly created session also carries an authoritative Daily
-Movement Count starting at zero. A session migrated from storage that predates movement tracking
-has no movement count, and tracking cannot be enabled partway through that session.
+Movement Count and Puzzle Correction Count, both starting at zero. A session migrated from storage
+that predates either metric keeps that metric absent, and its tracking cannot be enabled partway
+through that session.
 
 ## Resumable Daily Session
 The Daily Session currently stored in the Daily aggregate when its local date matches the captured
@@ -152,8 +157,8 @@ The snapshot preserves stable Daily Session, Daily Challenge, candidate, board, 
 strip-entry, and strip-item identity needed to restore exact progress. Seed and candidate index are
 metadata verified against the recipe; restoration never regenerates from them. Once timing has
 started, the snapshot also preserves its one immutable Daily Timing Start Instant. The snapshot
-preserves the exact Daily Movement Count together with the Current Puzzle when movement tracking
-is available.
+preserves the exact Daily Movement Count and Puzzle Correction Count together with the Current
+Puzzle when their tracking is available.
 
 ## Daily Timing Start Instant
 The device-clock UTC instant, stored with millisecond precision, that anchors elapsed timing for one
@@ -191,9 +196,9 @@ The local fact that the puzzle for one Daily Challenge identity became solved.
 
 A completion owns its canonical date and recipe version. A newly timed completion also owns its
 authoritative Daily Elapsed Time, and a newly tracked completion owns its authoritative Daily
-Movement Count. A completion migrated from storage that predates timing or movement tracking keeps
-the corresponding value absent; consumers must not fabricate one. A completion contains no score,
-streak, reward, display text, exact completion instant, or puzzle.
+Movement Count and Puzzle Correction Count. A completion migrated from storage that predates any
+of these metrics keeps the corresponding value absent; consumers must not fabricate one. A
+completion contains no score, streak, reward, display text, exact completion instant, or puzzle.
 
 ## Daily Completion History
 The local collection of Daily Completion records displayed by the calendar.
@@ -244,6 +249,24 @@ The latest committed domain state of the puzzle being played in a normal generat
 Daily Session.
 
 Current puzzle changes include committed or cleared strip values, operand assignments, operator assignments, and tile resets. Transient presentation state such as drafts, open selectors, dialogs, overlays, highlights, and scroll position is not part of the current puzzle.
+
+## Puzzle Correction
+One effective player action that rectifies durable Current Puzzle state.
+
+Changing or clearing a player-entered strip value, reassigning an already assigned operand,
+changing an already assigned operator, and resetting a non-pristine tile are corrections. One
+mutation remains one correction when its domain update has cascading effects. First assignments,
+invalid or unchanged input, unavailable selection, pristine reset, transient selectors, navigation,
+and lifecycle events are not corrections.
+
+## Puzzle Correction Count
+The non-negative number of Puzzle Corrections committed during one playable Daily, Quick, or
+Classic attempt.
+
+A new session starts at zero. The count is persisted atomically with its Current Puzzle, never
+regresses or overflows, and is transferred to Daily Completion. A migrated session or completion
+whose historical corrections cannot be reconstructed keeps the count unknown for its remaining
+lifecycle.
 
 ## Tutorial
 A gameplay mode that teaches the core NumPairs rules through authored content and guided player practice.

@@ -20,19 +20,21 @@ The product tone and presentation remain governed by the
   names.
 - General variants are eligible for every supported Low, Medium, and Hard generated challenge.
 - `KEEP_IT_UP` is reserved for a well-performing, non-record Quick Low completion.
+- `CORRECTION_FREE` is reserved for a Medium or Hard completion whose authoritative correction
+  count is known to be zero.
 - `MEDIUM_HARD_IMPRESSIVE` is eligible only for Medium and Hard.
 - `HARD_UNSTOPPABLE` is eligible only for Hard.
 - Low receives the complete general pool. Its additional `KEEP_IT_UP` variant invites the player
   to try a greater challenge without framing Low itself as a lesser achievement.
-- No variant makes a factual claim beyond the solved state and configured difficulty. Rhetorical
-  encouragement and narrator personification are expressive rather than performance data. No
-  variant implies a personal record, completion duration, movement count, correction-free attempt,
-  streak, or comparative rank.
+- With the explicit exception of `CORRECTION_FREE`, no variant makes a factual claim beyond the
+  solved state and configured difficulty. Rhetorical encouragement and narrator personification
+  are expressive rather than performance data. No catalog variant implies a personal record,
+  completion duration, movement count, streak, or comparative rank.
 - Daily personal records and Tutorial completions keep their purpose-specific copy outside this
   catalog.
 
-The proposed catalog contains five general variants and three context-specific variants, for a
-total of eight.
+The implemented catalog contains five general variants and four context-specific variants, for a
+total of nine.
 
 ## General Variants
 
@@ -94,6 +96,22 @@ Intent: strong but restrained praise focused on the finished solution.
 
 ## Context-Specific Variants
 
+### `CORRECTION_FREE`
+
+Eligibility: Medium and Hard only, when the authoritative Puzzle Correction Count is known to be
+zero and the completion is not presented as a personal record.
+
+Intent: truthfully recognize solving a more demanding puzzle without rectifying any earlier
+durable move. Personal-record presentation remains higher priority. Low, positive-count, and
+unknown-count completions continue through the otherwise eligible standard catalog.
+
+| Locale            | Title       | Supporting text                                          |
+|-------------------|-------------|----------------------------------------------------------|
+| English           | Flawless!   | You solved it without correcting a single move.          |
+| Spanish           | ¡Impecable! | Lo resolviste sin corregir una sola jugada.               |
+| Valencian/Catalan | Impecable!  | L’has resolt sense corregir ni una sola jugada.           |
+| German            | Makellos!   | Du hast es gelöst, ohne einen einzigen Zug zu korrigieren. |
+
 ### `KEEP_IT_UP`
 
 Eligibility: Quick Low only, when the completion is not presented as a personal record and the
@@ -142,8 +160,9 @@ developer's performance.
 ## Good-Performance Eligibility
 
 `KEEP_IT_UP` is a reserved contextual variant rather than an unconditional Low message. Runtime
-activation must wait until authoritative elapsed-time and correction data are available for normal
-generated play.
+activation still waits for authoritative elapsed-time support in normal generated play and
+calibrated thresholds. Authoritative normal-play correction data is now available, but no
+correction threshold is selected by this document.
 
 The later selection rule should follow these constraints:
 
@@ -196,8 +215,8 @@ The fixed brand expression `NumPairs Daily` is not inflected.
 
 ## Deferred Implementation
 
-Issue #714 defines and reviews this catalog only. Runtime selection, Android string resources, the
-standard check badge, and Spanish resource corrections belong to dependent implementation work.
-Activating `KEEP_IT_UP` additionally depends on authoritative normal-play elapsed time and
-correction data plus calibrated good-performance thresholds. Personal-record presentation remains
-outside this catalog.
+Issue #714 originally defined and reviewed this catalog. Runtime selection, Android string
+resources, the standard check badge, and Spanish resource corrections were added by dependent
+implementation work. `CORRECTION_FREE` is now implemented from authoritative correction data.
+Activating `KEEP_IT_UP` still depends on authoritative normal-play elapsed time plus calibrated
+good-performance thresholds. Personal-record presentation remains outside this catalog.

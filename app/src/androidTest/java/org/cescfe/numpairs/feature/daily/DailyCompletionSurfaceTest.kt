@@ -56,6 +56,7 @@ import org.cescfe.numpairs.domain.daily.DailyPersonalBestCategory
 import org.cescfe.numpairs.domain.daily.DailyPersonalBestOutcome
 import org.cescfe.numpairs.domain.daily.DailyPersonalBestResult
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.daily.calendar.DailyCalendarScreenTestTags
@@ -63,6 +64,7 @@ import org.cescfe.numpairs.feature.daily.share.AndroidDailyCompletionSharePayloa
 import org.cescfe.numpairs.feature.daily.share.DailyCompletionShareLaunchResult
 import org.cescfe.numpairs.feature.daily.share.DailyCompletionShareLauncher
 import org.cescfe.numpairs.feature.game.GameRoute
+import org.cescfe.numpairs.feature.game.StandardCompletionCelebration
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.game.ui.screen.SuccessOverlay
 import org.cescfe.numpairs.feature.generated.ConfiguredGeneratedPuzzleGenerationUseCaseFactory
@@ -486,6 +488,32 @@ class DailyCompletionSurfaceTest {
     }
 
     @Test
+    fun correction_free_medium_completion_uses_the_flawless_standard_copy() {
+        composeTestRule.setContent {
+            NumPairsTheme {
+                SuccessOverlay(
+                    onDismiss = {},
+                    content = dailyCompletionOverlayContent(
+                        elapsedTime = DailyElapsedTime(125_999),
+                        movementCount = DailyMovementCount(23),
+                        standardCelebration = StandardCompletionCelebration.CORRECTION_FREE,
+                        onShareResult = {},
+                        onViewCalendar = {},
+                        onNavigateBack = {}
+                    )
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE)
+            .assertTextEquals("Flawless!")
+        composeTestRule
+            .onNodeWithText("You solved it without correcting a single move.")
+            .assertIsDisplayed()
+    }
+
+    @Test
     fun fresh_personal_record_uses_star_record_copy_and_previous_best_context() {
         val elapsedTime = DailyElapsedTime(125_999)
         val personalBestResult = DailyPersonalBestResult(
@@ -506,6 +534,7 @@ class DailyCompletionSurfaceTest {
                         movementCount = DailyMovementCount(23),
                         personalBestResult = personalBestResult,
                         isPersonalRecordPresentation = true,
+                        standardCelebration = StandardCompletionCelebration.CORRECTION_FREE,
                         onShareResult = {},
                         onViewCalendar = {},
                         onNavigateBack = {}
@@ -966,7 +995,8 @@ private class RecordingDailyRepository(initialState: DailyState) : DailySessionR
     override suspend fun updateCurrentPuzzle(
         expectedSessionId: DailySessionId,
         puzzle: Puzzle,
-        movementCount: DailyMovementCount?
+        movementCount: DailyMovementCount?,
+        correctionCount: PuzzleCorrectionCount?
     ): DailySessionProgressUpdateResult {
         mutationCount += 1
         return DailySessionProgressUpdateResult.Updated
@@ -1001,6 +1031,7 @@ private class RecordingDailyRepository(initialState: DailyState) : DailySessionR
         expectedDailyChallengeId: DailyChallengeId,
         solvedPuzzle: Puzzle,
         movementCount: DailyMovementCount?,
+        correctionCount: PuzzleCorrectionCount?,
         elapsedTime: DailyElapsedTime?
     ): DailySessionCompletionResult {
         mutationCount += 1
@@ -1008,7 +1039,8 @@ private class RecordingDailyRepository(initialState: DailyState) : DailySessionR
             DailyCompletion(
                 identity = expectedDailyChallengeId,
                 elapsedTime = elapsedTime,
-                movementCount = movementCount
+                movementCount = movementCount,
+                correctionCount = correctionCount
             )
         )
     }

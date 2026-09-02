@@ -225,6 +225,8 @@
     <string name="completion_celebration_brilliant_supporting_text">Tu solución encaja a la perfección.</string>
     <string name="completion_celebration_keep_it_up_title">¡Sigue así!</string>
     <string name="completion_celebration_keep_it_up_supporting_text">¿Te atreves a subir la dificultad?</string>
+    <string name="completion_celebration_correction_free_title">¡Impecable!</string>
+    <string name="completion_celebration_correction_free_supporting_text">Lo resolviste sin corregir una sola jugada.</string>
     <string name="completion_celebration_impressive_title">¡Im-presionante!</string>
     <string name="completion_celebration_impressive_supporting_text">En dos palabras.</string>
     <string name="completion_celebration_unstoppable_title">¡No hay quien te pare!</string>

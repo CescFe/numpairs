@@ -17,6 +17,7 @@ import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionSnapshot
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
+import org.cescfe.numpairs.feature.game.presentation.CommittedPuzzleMutation
 
 fun interface GeneratedPuzzleSeedSource {
     fun nextSeed(): Int
@@ -180,8 +181,15 @@ internal class GeneratedPuzzleViewModel(
         }
     }
 
-    fun onPuzzleChanged(expectedSessionId: GeneratedSessionId, puzzle: Puzzle) {
-        if (!updateVisibleSession(expectedSessionId = expectedSessionId, puzzle = puzzle)) {
+    fun onPuzzleMutationCommitted(expectedSessionId: GeneratedSessionId, mutation: CommittedPuzzleMutation) {
+        val updatedSession = try {
+            updateVisibleSession(
+                expectedSessionId = expectedSessionId,
+                mutation = mutation
+            )
+        } catch (_: IllegalArgumentException) {
+            null
+        } ?: run {
             return
         }
 
@@ -189,12 +197,13 @@ internal class GeneratedPuzzleViewModel(
         sessionWriteJob = viewModelScope.launch {
             precedingWrite?.join()
             try {
-                if (puzzle.isSolved) {
+                if (mutation.puzzle.isSolved) {
                     generatedSessionRepository.clear(expectedSessionId = expectedSessionId)
                 } else {
                     generatedSessionRepository.updateCurrentPuzzle(
                         expectedSessionId = expectedSessionId,
-                        puzzle = puzzle
+                        puzzle = mutation.puzzle,
+                        correctionCount = updatedSession.snapshot.correctionCount
                     )
                 }
             } catch (_: IOException) {
@@ -203,7 +212,10 @@ internal class GeneratedPuzzleViewModel(
         }
     }
 
-    private fun updateVisibleSession(expectedSessionId: GeneratedSessionId, puzzle: Puzzle): Boolean {
+    private fun updateVisibleSession(
+        expectedSessionId: GeneratedSessionId,
+        mutation: CommittedPuzzleMutation
+    ): GeneratedModeGameSession? {
         val state = _uiState.value
         val visibleSession = when (state) {
             is GeneratedPuzzleGenerationUiState.Ready -> state.session
@@ -218,16 +230,24 @@ internal class GeneratedPuzzleViewModel(
         }
         if (
             visibleSession?.id != expectedSessionId ||
-            visibleSession.currentPuzzle == puzzle
+            visibleSession.currentPuzzle == mutation.puzzle
         ) {
-            return false
+            return null
         }
 
+        val correctionCount = if (mutation.isCorrection) {
+            visibleSession.snapshot.correctionCount?.incremented()
+        } else {
+            visibleSession.snapshot.correctionCount
+        }
         val updatedSession = visibleSession.copy(
-            snapshot = visibleSession.snapshot.copy(currentPuzzle = puzzle)
+            snapshot = visibleSession.snapshot.copy(
+                currentPuzzle = mutation.puzzle,
+                correctionCount = correctionCount
+            )
         )
         _uiState.value = state.withVisibleSession(updatedSession)
-        return true
+        return updatedSession
     }
 
     private fun startResume(launchIntent: GeneratedModeLaunchIntent.ResumeSession) {

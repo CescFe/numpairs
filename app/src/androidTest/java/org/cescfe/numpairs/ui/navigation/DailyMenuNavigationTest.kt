@@ -32,6 +32,7 @@ import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.daily.DeviceLocalDateSource
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.daily.CurrentDailyChallengeResolver
 import org.cescfe.numpairs.feature.daily.DailyFeatureDependencies
@@ -288,7 +289,8 @@ private class MutableDailyRepository(initialState: DailyState) : DailySessionRep
     override suspend fun updateCurrentPuzzle(
         expectedSessionId: DailySessionId,
         puzzle: Puzzle,
-        movementCount: DailyMovementCount?
+        movementCount: DailyMovementCount?,
+        correctionCount: PuzzleCorrectionCount?
     ): DailySessionProgressUpdateResult {
         mutationCount += 1
         return DailySessionProgressUpdateResult.Updated
@@ -312,6 +314,7 @@ private class MutableDailyRepository(initialState: DailyState) : DailySessionRep
         expectedDailyChallengeId: DailyChallengeId,
         solvedPuzzle: Puzzle,
         movementCount: DailyMovementCount?,
+        correctionCount: PuzzleCorrectionCount?,
         elapsedTime: DailyElapsedTime?
     ): DailySessionCompletionResult {
         mutationCount += 1
@@ -319,7 +322,8 @@ private class MutableDailyRepository(initialState: DailyState) : DailySessionRep
             DailyCompletion(
                 identity = expectedDailyChallengeId,
                 elapsedTime = elapsedTime,
-                movementCount = movementCount
+                movementCount = movementCount,
+                correctionCount = correctionCount
             )
         )
     }

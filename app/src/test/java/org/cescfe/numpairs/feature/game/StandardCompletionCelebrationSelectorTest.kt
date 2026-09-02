@@ -1,6 +1,7 @@
 package org.cescfe.numpairs.feature.game
 
 import org.cescfe.numpairs.domain.generated.profile.DifficultyTier
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -76,12 +77,65 @@ class StandardCompletionCelebrationSelectorTest {
         }
     }
 
-    private fun context(generatedChallengeId: String, completionId: String, difficulty: DifficultyTier) =
-        StandardCompletionCelebrationContext(
-            generatedChallengeId = generatedChallengeId,
-            completionId = completionId,
-            difficulty = difficulty
+    @Test
+    fun `known zero corrections take priority for medium and hard`() {
+        listOf(DifficultyTier.MEDIUM, DifficultyTier.HARD).forEach { difficulty ->
+            assertEquals(
+                StandardCompletionCelebration.CORRECTION_FREE,
+                StandardCompletionCelebrationSelector.select(
+                    context(
+                        generatedChallengeId = "challenge-${difficulty.name}",
+                        completionId = "completion",
+                        difficulty = difficulty,
+                        correctionCount = PuzzleCorrectionCount.ZERO
+                    )
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `low positive and unknown correction counts stay in the eligible catalog`() {
+        val contexts = listOf(
+            context(
+                generatedChallengeId = "low",
+                completionId = "zero",
+                difficulty = DifficultyTier.LOW,
+                correctionCount = PuzzleCorrectionCount.ZERO
+            ),
+            context(
+                generatedChallengeId = "medium",
+                completionId = "positive",
+                difficulty = DifficultyTier.MEDIUM,
+                correctionCount = PuzzleCorrectionCount(1)
+            ),
+            context(
+                generatedChallengeId = "hard",
+                completionId = "unknown",
+                difficulty = DifficultyTier.HARD,
+                correctionCount = null
+            )
         )
+
+        assertTrue(
+            contexts.none { context ->
+                StandardCompletionCelebrationSelector.select(context) ==
+                    StandardCompletionCelebration.CORRECTION_FREE
+            }
+        )
+    }
+
+    private fun context(
+        generatedChallengeId: String,
+        completionId: String,
+        difficulty: DifficultyTier,
+        correctionCount: PuzzleCorrectionCount? = null
+    ) = StandardCompletionCelebrationContext(
+        generatedChallengeId = generatedChallengeId,
+        completionId = completionId,
+        difficulty = difficulty,
+        correctionCount = correctionCount
+    )
 
     private companion object {
         val GENERAL_VARIANTS = setOf(

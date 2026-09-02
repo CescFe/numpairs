@@ -16,6 +16,7 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -65,7 +66,8 @@ class DataStoreGeneratedSessionRepositoryTest {
 
         val wasUpdated = fixture.repository.updateCurrentPuzzle(
             expectedSessionId = snapshot.sessionId,
-            puzzle = updatedPuzzle
+            puzzle = updatedPuzzle,
+            correctionCount = PuzzleCorrectionCount.ZERO
         )
 
         assertTrue(wasUpdated)
@@ -85,11 +87,81 @@ class DataStoreGeneratedSessionRepositoryTest {
 
         val wasUpdated = fixture.repository.updateCurrentPuzzle(
             expectedSessionId = staleSnapshot.sessionId,
-            puzzle = updatedPuzzle()
+            puzzle = updatedPuzzle(),
+            correctionCount = PuzzleCorrectionCount.ZERO
         )
 
         assertFalse(wasUpdated)
         assertEquals(replacement, fixture.repository.session.first())
+    }
+
+    @Test
+    fun `correction progress accepts retries and forward counts but rejects regressions and unknown mismatches`() =
+        runBlocking {
+            val fixture = createRepository()
+            val snapshot = snapshot()
+            val updatedPuzzle = updatedPuzzle()
+            fixture.repository.replace(snapshot)
+
+            assertTrue(
+                fixture.repository.updateCurrentPuzzle(
+                    expectedSessionId = snapshot.sessionId,
+                    puzzle = updatedPuzzle,
+                    correctionCount = PuzzleCorrectionCount(3)
+                )
+            )
+            assertTrue(
+                fixture.repository.updateCurrentPuzzle(
+                    expectedSessionId = snapshot.sessionId,
+                    puzzle = updatedPuzzle,
+                    correctionCount = PuzzleCorrectionCount(3)
+                )
+            )
+            assertFalse(
+                fixture.repository.updateCurrentPuzzle(
+                    expectedSessionId = snapshot.sessionId,
+                    puzzle = updatedPuzzle,
+                    correctionCount = PuzzleCorrectionCount(2)
+                )
+            )
+            assertFalse(
+                fixture.repository.updateCurrentPuzzle(
+                    expectedSessionId = snapshot.sessionId,
+                    puzzle = updatedPuzzle,
+                    correctionCount = null
+                )
+            )
+
+            assertEquals(
+                3L,
+                requireNotNull(fixture.repository.session.first()?.correctionCount).value
+            )
+        }
+
+    @Test
+    fun `legacy unknown correction count remains unknown through progress`() = runBlocking {
+        val fixture = createRepository()
+        val legacySnapshot = snapshot().copy(correctionCount = null)
+        fixture.dataStore.edit { preferences ->
+            preferences[byteArrayPreferencesKey(GENERATED_SESSION_SNAPSHOT_PREFERENCE_KEY_NAME)] =
+                GeneratedSessionSnapshotCodec().encode(legacySnapshot)
+        }
+
+        assertTrue(
+            fixture.repository.updateCurrentPuzzle(
+                expectedSessionId = legacySnapshot.sessionId,
+                puzzle = updatedPuzzle(),
+                correctionCount = null
+            )
+        )
+        assertFalse(
+            fixture.repository.updateCurrentPuzzle(
+                expectedSessionId = legacySnapshot.sessionId,
+                puzzle = updatedPuzzle(),
+                correctionCount = PuzzleCorrectionCount.ZERO
+            )
+        )
+        assertNull(fixture.repository.session.first()?.correctionCount)
     }
 
     @Test
