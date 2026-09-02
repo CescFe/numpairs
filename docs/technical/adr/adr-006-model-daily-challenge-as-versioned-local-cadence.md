@@ -18,6 +18,7 @@ challenges. Daily behavior also requires:
 - one local completion per date
 - durable no-pause elapsed timing from first presentation to solution
 - a durable count of effective puzzle movements
+- a durable count of player corrections, with unknown legacy values
 - one history-derived personal best for each comparable generated challenge
 - a completion calendar
 - coexistence with an unfinished normal generated session
@@ -142,7 +143,8 @@ One aggregate and one DataStore edit own the transition from an active solved pu
 completion record, including its captured elapsed time when timing started, with no resumable Daily
 Session. The same edit transfers the final movement count when the session owns one. A second
 completion for the same local calendar date is rejected even if a different recipe version is
-later resolved for that date.
+later resolved for that date. The edit also transfers the final correction count when the session
+owns one.
 
 ### Daily Session Snapshot
 
@@ -155,6 +157,7 @@ The snapshot stores:
 - exact current `Puzzle`
 - an optional timing start instant stored as Unix epoch milliseconds
 - an optional authoritative movement count
+- an optional authoritative correction count
 
 The recipe version and canonical local date resolve the exact generated challenge. Mode,
 difficulty, profile parameters, and display strings are therefore not persisted redundantly in the
@@ -167,6 +170,10 @@ progress from the seed.
 New snapshots start with a movement count of zero. Snapshots migrated from an aggregate version
 that predates movement tracking retain an absent count for the rest of the session because earlier
 corrections, clears, and resets cannot be reconstructed from the Current Puzzle.
+
+New snapshots also start with a correction count of zero. Snapshots migrated from an aggregate
+version that predates correction tracking retain an absent count for the rest of the session;
+Current Puzzle state cannot reveal how many earlier rectifications led to it.
 
 ### Elapsed Timing
 
@@ -203,6 +210,21 @@ The completion transition validates the same consistency rule and stores the sup
 atomically with session removal. A migrated active session with no count remains unknown through
 progress and completion; tracking is never started partway through it.
 
+### Correction Count
+
+Puzzle correction tracking uses a separate non-negative 64-bit count. The game mutation boundary
+classifies the intent of each effective committed action instead of inferring it from display
+position or raw numeric equality. Changing or clearing a player-entered strip value, reassigning an
+already assigned operand, changing an assigned operator, and resetting a non-pristine tile each
+count once. First assignments, invalid or unchanged actions, transient selectors, navigation, and
+lifecycle events do not count. Cascading effects remain part of the originating single correction.
+
+The repository persists Current Puzzle, movement count, and correction count atomically under the
+same stable session identity. Equal retry and forward-progress rules apply independently to both
+counts; neither may regress, overflow, or cross between known and unknown. Completion freezes and
+transfers the final correction count through persistence failure and retry. A migrated session with
+an unknown count remains unknown for its remaining lifecycle.
+
 ### Completion History
 
 A Daily Completion record stores:
@@ -210,12 +232,14 @@ A Daily Completion record stores:
 - canonical Daily Challenge identity
 - authoritative elapsed time in milliseconds for a newly timed completion
 - authoritative movement count for a newly tracked completion
+- authoritative correction count for a newly tracked completion
 
 The identity supplies the completed local date and recipe version. A completion migrated from the
-version-1 aggregate explicitly has no elapsed time or movement count. A completion migrated from
-version 2 preserves its elapsed time and has no movement count. Presentation or sharing must not
-fabricate either absent value. Completion does not store an exact completion instant, score,
-streak, reward, display label, or full puzzle.
+version-1 aggregate explicitly has no elapsed time, movement count, or correction count. A
+completion migrated from version 2 preserves its elapsed time and has neither count. A completion
+migrated from version 3 additionally preserves movement count while correction count remains
+unknown. Presentation or sharing must not fabricate an absent value. Completion does not store an
+exact completion instant, score, streak, reward, display label, or full puzzle.
 
 Completion is recorded only by an identity-guarded atomic repository transition that receives a
 solved current puzzle consistent with the active snapshot. Repeating the transition cannot create
@@ -259,12 +283,13 @@ the derived outcome is persisted.
 
 ### Aggregate Schema Migration
 
-Daily movement tracking changes the aggregate schema from version 2 to version 3. The version-3
-codec reads both earlier binary layouts explicitly. Version 1 preserves exact progress and every
-completion identity while mapping timing and movement data to unknown. Version 2 additionally
-preserves the exact timing start and completion elapsed time while mapping movement data to
-unknown. Unsupported future versions and invalid payloads retain the existing safe-recovery
-behavior; versions 1 and 2 are not treated as unsupported or empty.
+Daily correction tracking changes the aggregate schema from version 3 to version 4. The version-4
+codec reads all earlier binary layouts explicitly. Version 1 preserves exact progress and every
+completion identity while mapping timing, movement, and correction data to unknown. Version 2
+additionally preserves the exact timing start and completion elapsed time while movement and
+correction data remain unknown. Version 3 additionally preserves movement data while mapping
+correction data to unknown. Unsupported future versions and invalid payloads retain the existing
+safe-recovery behavior; versions 1, 2, and 3 are not treated as unsupported or empty.
 
 ### Replacement And Rollover
 
@@ -304,6 +329,8 @@ history. Account sync and cross-device transfer remain unsupported.
   duration across recreation and later sharing.
 - Movement progress and completion preserve one authoritative non-negative count without
   fabricating historical values.
+- Correction progress and completion preserve a separate authoritative non-negative count without
+  fabricating zero for historical sessions.
 - Personal bests remain derivable from authoritative completion history without a second cache,
   and each exact generated challenge remains independently comparable.
 - A recipe version gives date-derived content a stable compatibility boundary.

@@ -68,6 +68,7 @@ import org.cescfe.numpairs.feature.game.StandardCompletionCelebration
 import org.cescfe.numpairs.feature.game.StandardCompletionCelebrationContext
 import org.cescfe.numpairs.feature.game.StandardCompletionCelebrationSelector
 import org.cescfe.numpairs.feature.game.localizedCopy
+import org.cescfe.numpairs.feature.game.presentation.CommittedPuzzleMutation
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
@@ -192,7 +193,8 @@ fun DailyChallengeRoute(
                             StandardCompletionCelebrationContext(
                                 generatedChallengeId = state.session.currentDailyChallenge.challenge.id.value,
                                 completionId = completion.identity.canonicalKey(),
-                                difficulty = state.session.currentDailyChallenge.challenge.difficulty
+                                difficulty = state.session.currentDailyChallenge.challenge.difficulty,
+                                correctionCount = completion.correctionCount
                             )
                         ),
                         onShareResult = {
@@ -323,7 +325,7 @@ private fun DailyGameContent(
     compactTileSelectorsEnabled: Boolean,
     onPuzzleMutationCommitted: (
         org.cescfe.numpairs.data.daily.session.DailySessionId,
-        org.cescfe.numpairs.domain.puzzle.model.Puzzle
+        CommittedPuzzleMutation
     ) -> Unit,
     onPuzzlePresented: (org.cescfe.numpairs.data.daily.session.DailySessionId) -> Unit,
     onTimerRefresh: (org.cescfe.numpairs.data.daily.session.DailySessionId) -> Unit,
@@ -371,8 +373,8 @@ private fun DailyGameContent(
             isCorrectTileMotionEnabled = true,
             isCompletionCelebrationEnabled = true,
             compactTileSelectorsEnabled = compactTileSelectorsEnabled,
-            onPuzzleMutationCommitted = { puzzle ->
-                onPuzzleMutationCommitted(session.id, puzzle)
+            onPuzzleMutationCommitted = { mutation ->
+                onPuzzleMutationCommitted(session.id, mutation)
             },
             onTileAssignmentCommitted = { _ ->
                 if (isGeneratedGameHapticsEnabled) {
@@ -677,6 +679,7 @@ private fun DailyPuzzlePersistenceFailure.messageResource(): Int = when (this) {
     DailyPuzzlePersistenceFailure.InvalidPuzzle -> R.string.daily_invalid_progress_message
     DailyPuzzlePersistenceFailure.InvalidTiming -> R.string.daily_invalid_progress_message
     DailyPuzzlePersistenceFailure.InvalidMovement -> R.string.daily_invalid_progress_message
+    DailyPuzzlePersistenceFailure.InvalidCorrection -> R.string.daily_invalid_progress_message
     DailyPuzzlePersistenceFailure.Persistence -> R.string.daily_storage_failure_message
 }
 

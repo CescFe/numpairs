@@ -30,6 +30,7 @@ import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -71,6 +72,8 @@ class DataStoreDailySessionRepositoryTest {
 
         assertEquals(0L, requireNotNull(first.movementCount).value)
         assertEquals(0L, requireNotNull(replacement.movementCount).value)
+        assertEquals(0L, requireNotNull(first.correctionCount).value)
+        assertEquals(0L, requireNotNull(replacement.correctionCount).value)
 
         assertEquals(
             DailySessionReplacementResult.Replaced,
@@ -99,6 +102,21 @@ class DataStoreDailySessionRepositoryTest {
                 fixture.repository.replaceSession(
                     generatedDailyFixture().snapshot(movementCount = DailyMovementCount(1))
                 )
+            }
+        }
+    }
+
+    @Test
+    fun replacement_rejects_a_new_session_with_unknown_or_nonzero_corrections() {
+        val fixture = createRepository()
+
+        listOf(null, PuzzleCorrectionCount(1)).forEach { invalidCount ->
+            assertThrows(IllegalArgumentException::class.java) {
+                runBlocking {
+                    fixture.repository.replaceSession(
+                        generatedDailyFixture().snapshot(correctionCount = invalidCount)
+                    )
+                }
             }
         }
     }
@@ -172,7 +190,8 @@ class DataStoreDailySessionRepositoryTest {
             fixture.repository.updateCurrentPuzzle(
                 expectedSessionId = snapshot.sessionId,
                 puzzle = generatedFixture.progressPuzzle(),
-                movementCount = DailyMovementCount(1)
+                movementCount = DailyMovementCount(1),
+                correctionCount = PuzzleCorrectionCount.ZERO
             )
         )
         assertEquals(
@@ -197,7 +216,8 @@ class DataStoreDailySessionRepositoryTest {
             fixture.repository.updateCurrentPuzzle(
                 expectedSessionId = snapshot.sessionId,
                 puzzle = progressPuzzle,
-                movementCount = DailyMovementCount(3)
+                movementCount = DailyMovementCount(3),
+                correctionCount = PuzzleCorrectionCount.ZERO
             )
         )
         assertEquals(
@@ -205,7 +225,8 @@ class DataStoreDailySessionRepositoryTest {
             fixture.repository.updateCurrentPuzzle(
                 expectedSessionId = snapshot.sessionId,
                 puzzle = progressPuzzle,
-                movementCount = DailyMovementCount(3)
+                movementCount = DailyMovementCount(3),
+                correctionCount = PuzzleCorrectionCount.ZERO
             )
         )
         assertEquals(
@@ -213,7 +234,8 @@ class DataStoreDailySessionRepositoryTest {
             fixture.repository.updateCurrentPuzzle(
                 expectedSessionId = snapshot.sessionId,
                 puzzle = progressPuzzle,
-                movementCount = DailyMovementCount(2)
+                movementCount = DailyMovementCount(2),
+                correctionCount = PuzzleCorrectionCount.ZERO
             )
         )
         assertEquals(
@@ -221,7 +243,8 @@ class DataStoreDailySessionRepositoryTest {
             fixture.repository.updateCurrentPuzzle(
                 expectedSessionId = snapshot.sessionId,
                 puzzle = progressPuzzle,
-                movementCount = null
+                movementCount = null,
+                correctionCount = PuzzleCorrectionCount.ZERO
             )
         )
         assertEquals(
@@ -231,10 +254,61 @@ class DataStoreDailySessionRepositoryTest {
     }
 
     @Test
-    fun migrated_unknown_progress_remains_unknown_and_rejects_enabling_tracking_mid_session() = runBlocking {
+    fun `progress accepts idempotent and forward corrections but rejects regressions and unknown mismatches`() =
+        runBlocking {
+            val fixture = createRepository()
+            val generatedFixture = generatedDailyFixture()
+            val snapshot = generatedFixture.snapshot()
+            val progressPuzzle = generatedFixture.progressPuzzle()
+            fixture.repository.replaceSession(snapshot)
+
+            assertEquals(
+                DailySessionProgressUpdateResult.Updated,
+                fixture.repository.updateCurrentPuzzle(
+                    expectedSessionId = snapshot.sessionId,
+                    puzzle = progressPuzzle,
+                    movementCount = DailyMovementCount(1),
+                    correctionCount = PuzzleCorrectionCount(3)
+                )
+            )
+            assertEquals(
+                DailySessionProgressUpdateResult.Updated,
+                fixture.repository.updateCurrentPuzzle(
+                    expectedSessionId = snapshot.sessionId,
+                    puzzle = progressPuzzle,
+                    movementCount = DailyMovementCount(1),
+                    correctionCount = PuzzleCorrectionCount(3)
+                )
+            )
+            assertEquals(
+                DailySessionProgressUpdateResult.InvalidCorrection,
+                fixture.repository.updateCurrentPuzzle(
+                    expectedSessionId = snapshot.sessionId,
+                    puzzle = progressPuzzle,
+                    movementCount = DailyMovementCount(1),
+                    correctionCount = PuzzleCorrectionCount(2)
+                )
+            )
+            assertEquals(
+                DailySessionProgressUpdateResult.InvalidCorrection,
+                fixture.repository.updateCurrentPuzzle(
+                    expectedSessionId = snapshot.sessionId,
+                    puzzle = progressPuzzle,
+                    movementCount = DailyMovementCount(1),
+                    correctionCount = null
+                )
+            )
+            assertEquals(
+                3L,
+                requireNotNull(fixture.repository.state.first().activeSession?.correctionCount).value
+            )
+        }
+
+    @Test
+    fun `migrated unknown correction progress remains unknown and rejects tracking partway through`() = runBlocking {
         val fixture = createRepository()
         val generatedFixture = generatedDailyFixture()
-        val snapshot = generatedFixture.snapshot(movementCount = null)
+        val snapshot = generatedFixture.snapshot(correctionCount = null)
         fixture.storeAggregate(DailyAggregate(activeSession = snapshot))
 
         assertEquals(
@@ -242,7 +316,39 @@ class DataStoreDailySessionRepositoryTest {
             fixture.repository.updateCurrentPuzzle(
                 expectedSessionId = snapshot.sessionId,
                 puzzle = generatedFixture.progressPuzzle(),
-                movementCount = null
+                movementCount = DailyMovementCount(1),
+                correctionCount = null
+            )
+        )
+        assertEquals(
+            DailySessionProgressUpdateResult.InvalidCorrection,
+            fixture.repository.updateCurrentPuzzle(
+                expectedSessionId = snapshot.sessionId,
+                puzzle = generatedFixture.progressPuzzle(),
+                movementCount = DailyMovementCount(1),
+                correctionCount = PuzzleCorrectionCount.ZERO
+            )
+        )
+        assertNull(fixture.repository.state.first().activeSession?.correctionCount)
+    }
+
+    @Test
+    fun migrated_unknown_progress_remains_unknown_and_rejects_enabling_tracking_mid_session() = runBlocking {
+        val fixture = createRepository()
+        val generatedFixture = generatedDailyFixture()
+        val snapshot = generatedFixture.snapshot(
+            movementCount = null,
+            correctionCount = null
+        )
+        fixture.storeAggregate(DailyAggregate(activeSession = snapshot))
+
+        assertEquals(
+            DailySessionProgressUpdateResult.Updated,
+            fixture.repository.updateCurrentPuzzle(
+                expectedSessionId = snapshot.sessionId,
+                puzzle = generatedFixture.progressPuzzle(),
+                movementCount = null,
+                correctionCount = null
             )
         )
         assertEquals(
@@ -250,7 +356,8 @@ class DataStoreDailySessionRepositoryTest {
             fixture.repository.updateCurrentPuzzle(
                 expectedSessionId = snapshot.sessionId,
                 puzzle = generatedFixture.progressPuzzle(),
-                movementCount = DailyMovementCount.ZERO
+                movementCount = DailyMovementCount.ZERO,
+                correctionCount = null
             )
         )
         assertNull(fixture.repository.state.first().activeSession?.movementCount)
@@ -275,7 +382,8 @@ class DataStoreDailySessionRepositoryTest {
             fixture.repository.updateCurrentPuzzle(
                 expectedSessionId = DailySessionId("stale"),
                 puzzle = generatedFixture.progressPuzzle(),
-                movementCount = DailyMovementCount(1)
+                movementCount = DailyMovementCount(1),
+                correctionCount = PuzzleCorrectionCount.ZERO
             )
         )
         assertEquals(
@@ -283,7 +391,8 @@ class DataStoreDailySessionRepositoryTest {
             fixture.repository.updateCurrentPuzzle(
                 expectedSessionId = snapshot.sessionId,
                 puzzle = changedResultPuzzle,
-                movementCount = DailyMovementCount(1)
+                movementCount = DailyMovementCount(1),
+                correctionCount = PuzzleCorrectionCount.ZERO
             )
         )
         assertEquals(
@@ -291,7 +400,8 @@ class DataStoreDailySessionRepositoryTest {
             fixture.repository.updateCurrentPuzzle(
                 expectedSessionId = snapshot.sessionId,
                 puzzle = generatedFixture.generatedPuzzle.solvedPuzzle,
-                movementCount = DailyMovementCount(1)
+                movementCount = DailyMovementCount(1),
+                correctionCount = PuzzleCorrectionCount.ZERO
             )
         )
         assertEquals(snapshot, fixture.repository.state.first().activeSession)
@@ -364,7 +474,8 @@ class DataStoreDailySessionRepositoryTest {
                 expectedSessionId = snapshot.sessionId,
                 expectedDailyChallengeId = snapshot.dailyChallengeId,
                 solvedPuzzle = generatedFixture.solvedProgressPuzzle(),
-                movementCount = DailyMovementCount(1)
+                movementCount = DailyMovementCount(1),
+                correctionCount = PuzzleCorrectionCount.ZERO
             )
         )
         assertEquals(
@@ -386,7 +497,8 @@ class DataStoreDailySessionRepositoryTest {
         val completion = DailyCompletion(
             identity = snapshot.dailyChallengeId,
             elapsedTime = elapsedTime,
-            movementCount = DailyMovementCount(7)
+            movementCount = DailyMovementCount(7),
+            correctionCount = PuzzleCorrectionCount.ZERO
         )
         fixture.repository.replaceSession(snapshot)
 
@@ -397,6 +509,7 @@ class DataStoreDailySessionRepositoryTest {
                 expectedDailyChallengeId = snapshot.dailyChallengeId,
                 solvedPuzzle = generatedFixture.solvedProgressPuzzle(),
                 movementCount = DailyMovementCount(7),
+                correctionCount = PuzzleCorrectionCount.ZERO,
                 elapsedTime = elapsedTime
             )
         )
@@ -411,6 +524,7 @@ class DataStoreDailySessionRepositoryTest {
                 expectedDailyChallengeId = snapshot.dailyChallengeId,
                 solvedPuzzle = generatedFixture.solvedProgressPuzzle(),
                 movementCount = DailyMovementCount(999),
+                correctionCount = PuzzleCorrectionCount(999),
                 elapsedTime = DailyElapsedTime(999_999)
             )
         )
@@ -426,7 +540,8 @@ class DataStoreDailySessionRepositoryTest {
         fixture.repository.updateCurrentPuzzle(
             expectedSessionId = initialSnapshot.sessionId,
             puzzle = generatedFixture.progressPuzzle(),
-            movementCount = DailyMovementCount(5)
+            movementCount = DailyMovementCount(5),
+            correctionCount = PuzzleCorrectionCount.ZERO
         )
 
         assertEquals(
@@ -435,7 +550,8 @@ class DataStoreDailySessionRepositoryTest {
                 expectedSessionId = initialSnapshot.sessionId,
                 expectedDailyChallengeId = initialSnapshot.dailyChallengeId,
                 solvedPuzzle = generatedFixture.solvedProgressPuzzle(),
-                movementCount = DailyMovementCount(4)
+                movementCount = DailyMovementCount(4),
+                correctionCount = PuzzleCorrectionCount.ZERO
             )
         )
         assertEquals(
@@ -444,7 +560,8 @@ class DataStoreDailySessionRepositoryTest {
                 expectedSessionId = initialSnapshot.sessionId,
                 expectedDailyChallengeId = initialSnapshot.dailyChallengeId,
                 solvedPuzzle = generatedFixture.solvedProgressPuzzle(),
-                movementCount = null
+                movementCount = null,
+                correctionCount = PuzzleCorrectionCount.ZERO
             )
         )
 
@@ -458,7 +575,53 @@ class DataStoreDailySessionRepositoryTest {
                 expectedSessionId = initialSnapshot.sessionId,
                 expectedDailyChallengeId = initialSnapshot.dailyChallengeId,
                 solvedPuzzle = generatedFixture.solvedProgressPuzzle(),
-                movementCount = DailyMovementCount(8)
+                movementCount = DailyMovementCount(8),
+                correctionCount = PuzzleCorrectionCount.ZERO
+            )
+        )
+        assertEquals(listOf(completion), fixture.repository.state.first().completions)
+    }
+
+    @Test
+    fun `completion rejects regressed or unknown corrections and atomically records a forward count`() = runBlocking {
+        val fixture = createRepository()
+        val generatedFixture = generatedDailyFixture()
+        val snapshot = generatedFixture.snapshot()
+        fixture.repository.replaceSession(snapshot)
+        fixture.repository.updateCurrentPuzzle(
+            expectedSessionId = snapshot.sessionId,
+            puzzle = generatedFixture.progressPuzzle(),
+            movementCount = DailyMovementCount(5),
+            correctionCount = PuzzleCorrectionCount(5)
+        )
+
+        listOf(PuzzleCorrectionCount(4), null).forEach { invalidCount ->
+            assertEquals(
+                DailySessionCompletionResult.InvalidCorrection,
+                fixture.repository.complete(
+                    expectedSessionId = snapshot.sessionId,
+                    expectedDailyChallengeId = snapshot.dailyChallengeId,
+                    solvedPuzzle = generatedFixture.solvedProgressPuzzle(),
+                    movementCount = DailyMovementCount(8),
+                    correctionCount = invalidCount
+                )
+            )
+        }
+
+        val completion = DailyCompletion(
+            identity = snapshot.dailyChallengeId,
+            elapsedTime = null,
+            movementCount = DailyMovementCount(8),
+            correctionCount = PuzzleCorrectionCount(6)
+        )
+        assertEquals(
+            DailySessionCompletionResult.Completed(completion),
+            fixture.repository.complete(
+                expectedSessionId = snapshot.sessionId,
+                expectedDailyChallengeId = snapshot.dailyChallengeId,
+                solvedPuzzle = generatedFixture.solvedProgressPuzzle(),
+                movementCount = DailyMovementCount(8),
+                correctionCount = PuzzleCorrectionCount(6)
             )
         )
         assertEquals(listOf(completion), fixture.repository.state.first().completions)
@@ -468,7 +631,10 @@ class DataStoreDailySessionRepositoryTest {
     fun migrated_unknown_completion_remains_unknown() = runBlocking {
         val fixture = createRepository()
         val generatedFixture = generatedDailyFixture()
-        val snapshot = generatedFixture.snapshot(movementCount = null)
+        val snapshot = generatedFixture.snapshot(
+            movementCount = null,
+            correctionCount = null
+        )
         fixture.storeAggregate(DailyAggregate(activeSession = snapshot))
         val completion = untimedCompletion(snapshot.dailyChallengeId)
 
@@ -478,7 +644,8 @@ class DataStoreDailySessionRepositoryTest {
                 expectedSessionId = snapshot.sessionId,
                 expectedDailyChallengeId = snapshot.dailyChallengeId,
                 solvedPuzzle = generatedFixture.solvedProgressPuzzle(),
-                movementCount = null
+                movementCount = null,
+                correctionCount = null
             )
         )
         assertEquals(listOf(completion), fixture.repository.state.first().completions)
@@ -499,7 +666,8 @@ class DataStoreDailySessionRepositoryTest {
                 expectedSessionId = startedSnapshot.sessionId,
                 expectedDailyChallengeId = startedSnapshot.dailyChallengeId,
                 solvedPuzzle = generatedFixture.solvedProgressPuzzle(),
-                movementCount = DailyMovementCount(1)
+                movementCount = DailyMovementCount(1),
+                correctionCount = PuzzleCorrectionCount.ZERO
             )
         )
         assertEquals(startedSnapshot, fixture.repository.state.first().activeSession)
@@ -513,6 +681,7 @@ class DataStoreDailySessionRepositoryTest {
                 expectedDailyChallengeId = untimedSnapshot.dailyChallengeId,
                 solvedPuzzle = generatedFixture.solvedProgressPuzzle(),
                 movementCount = DailyMovementCount(1),
+                correctionCount = PuzzleCorrectionCount.ZERO,
                 elapsedTime = DailyElapsedTime(91_234)
             )
         )
@@ -535,7 +704,8 @@ class DataStoreDailySessionRepositoryTest {
             expectedSessionId = snapshot.sessionId,
             expectedDailyChallengeId = snapshot.dailyChallengeId,
             solvedPuzzle = solvedPuzzle,
-            movementCount = DailyMovementCount(1)
+            movementCount = DailyMovementCount(1),
+            correctionCount = PuzzleCorrectionCount.ZERO
         )
 
         assertEquals(
@@ -544,7 +714,8 @@ class DataStoreDailySessionRepositoryTest {
                 expectedSessionId = snapshot.sessionId,
                 expectedDailyChallengeId = snapshot.dailyChallengeId,
                 solvedPuzzle = solvedPuzzle,
-                movementCount = DailyMovementCount(1)
+                movementCount = DailyMovementCount(1),
+                correctionCount = PuzzleCorrectionCount.ZERO
             )
         )
         assertEquals(
@@ -573,7 +744,8 @@ class DataStoreDailySessionRepositoryTest {
                 expectedSessionId = DailySessionId("missing"),
                 expectedDailyChallengeId = currentFixture.identity,
                 solvedPuzzle = currentFixture.solvedProgressPuzzle(),
-                movementCount = DailyMovementCount.ZERO
+                movementCount = DailyMovementCount.ZERO,
+                correctionCount = PuzzleCorrectionCount.ZERO
             )
         )
         assertEquals(
@@ -598,7 +770,8 @@ class DataStoreDailySessionRepositoryTest {
                 expectedSessionId = predecessor.sessionId,
                 expectedDailyChallengeId = predecessor.dailyChallengeId,
                 solvedPuzzle = predecessorFixture.solvedProgressPuzzle(),
-                movementCount = DailyMovementCount(1)
+                movementCount = DailyMovementCount(1),
+                correctionCount = PuzzleCorrectionCount.ZERO
             )
         )
         assertEquals(
@@ -607,7 +780,8 @@ class DataStoreDailySessionRepositoryTest {
                 expectedSessionId = successor.sessionId,
                 expectedDailyChallengeId = predecessor.dailyChallengeId,
                 solvedPuzzle = successorFixture.solvedProgressPuzzle(),
-                movementCount = DailyMovementCount(1)
+                movementCount = DailyMovementCount(1),
+                correctionCount = PuzzleCorrectionCount.ZERO
             )
         )
         assertEquals(successor, fixture.repository.state.first().activeSession)
@@ -635,7 +809,8 @@ class DataStoreDailySessionRepositoryTest {
                 expectedSessionId = snapshot.sessionId,
                 expectedDailyChallengeId = snapshot.dailyChallengeId,
                 solvedPuzzle = snapshot.currentPuzzle,
-                movementCount = DailyMovementCount(1)
+                movementCount = DailyMovementCount(1),
+                correctionCount = PuzzleCorrectionCount.ZERO
             )
         )
         assertEquals(
@@ -644,7 +819,8 @@ class DataStoreDailySessionRepositoryTest {
                 expectedSessionId = snapshot.sessionId,
                 expectedDailyChallengeId = snapshot.dailyChallengeId,
                 solvedPuzzle = inconsistentPuzzle,
-                movementCount = DailyMovementCount(1)
+                movementCount = DailyMovementCount(1),
+                correctionCount = PuzzleCorrectionCount.ZERO
             )
         )
         assertEquals(snapshot, fixture.repository.state.first().activeSession)
@@ -662,7 +838,8 @@ class DataStoreDailySessionRepositoryTest {
             expectedSessionId = snapshot.sessionId,
             expectedDailyChallengeId = snapshot.dailyChallengeId,
             solvedPuzzle = generatedFixture.solvedProgressPuzzle(),
-            movementCount = DailyMovementCount(1)
+            movementCount = DailyMovementCount(1),
+            correctionCount = PuzzleCorrectionCount.ZERO
         )
         firstFixture.close()
 
@@ -702,7 +879,8 @@ class DataStoreDailySessionRepositoryTest {
                 expectedSessionId = replacement.sessionId,
                 expectedDailyChallengeId = replacement.dailyChallengeId,
                 solvedPuzzle = generatedDailyFixture().solvedProgressPuzzle(),
-                movementCount = DailyMovementCount(1)
+                movementCount = DailyMovementCount(1),
+                correctionCount = PuzzleCorrectionCount.ZERO
             )
         )
         assertEquals(emptyList<DailyChallengeId>(), fixture.repository.state.first().completedChallengeIds)
@@ -776,7 +954,8 @@ class DataStoreDailySessionRepositoryTest {
                     expectedSessionId = activeSession.sessionId,
                     expectedDailyChallengeId = activeSession.dailyChallengeId,
                     solvedPuzzle = generatedFixture.solvedProgressPuzzle(),
-                    movementCount = DailyMovementCount(1)
+                    movementCount = DailyMovementCount(1),
+                    correctionCount = PuzzleCorrectionCount.ZERO
                 )
             }
         }
@@ -798,7 +977,8 @@ class DataStoreDailySessionRepositoryTest {
                     expectedSessionId = activeSession.sessionId,
                     expectedDailyChallengeId = activeSession.dailyChallengeId,
                     solvedPuzzle = generatedFixture.solvedProgressPuzzle(),
-                    movementCount = DailyMovementCount(1)
+                    movementCount = DailyMovementCount(1),
+                    correctionCount = PuzzleCorrectionCount.ZERO
                 )
             }
         )
@@ -829,7 +1009,8 @@ class DataStoreDailySessionRepositoryTest {
             expectedSessionId = dailySnapshot.sessionId,
             expectedDailyChallengeId = dailySnapshot.dailyChallengeId,
             solvedPuzzle = generatedDailyFixture().solvedProgressPuzzle(),
-            movementCount = DailyMovementCount(1)
+            movementCount = DailyMovementCount(1),
+            correctionCount = PuzzleCorrectionCount.ZERO
         )
 
         assertEquals(normalSnapshot, normalRepository.session.first())
@@ -884,5 +1065,6 @@ private fun untimedCompletion(identity: DailyChallengeId, movementCount: DailyMo
     DailyCompletion(
         identity = identity,
         elapsedTime = null,
-        movementCount = movementCount
+        movementCount = movementCount,
+        correctionCount = movementCount?.let { PuzzleCorrectionCount.ZERO }
     )

@@ -87,7 +87,8 @@ class GeneratedAndDailySessionRecreationTest {
             expectedSessionId = dailySession.sessionId,
             expectedDailyChallengeId = dailySession.dailyChallengeId,
             solvedPuzzle = dailyFixture.solvedProgressPuzzle(),
-            movementCount = dailySession.movementCount
+            movementCount = dailySession.movementCount,
+            correctionCount = dailySession.correctionCount
         )
 
         assertEquals(quickSession, recreatedRepositories.generated.session.first())
@@ -97,7 +98,8 @@ class GeneratedAndDailySessionRecreationTest {
                 completions = listOf(
                     dailyCompletion(
                         identity = dailySession.dailyChallengeId,
-                        movementCount = 0
+                        movementCount = 0,
+                        correctionCount = 0
                     )
                 )
             ),
@@ -115,7 +117,8 @@ class GeneratedAndDailySessionRecreationTest {
                 completions = listOf(
                     dailyCompletion(
                         identity = dailySession.dailyChallengeId,
-                        movementCount = 0
+                        movementCount = 0,
+                        correctionCount = 0
                     )
                 )
             ),

@@ -17,9 +17,11 @@ import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationFailureReason
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Expression
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
+import org.cescfe.numpairs.feature.game.presentation.CommittedPuzzleMutation
 import org.cescfe.numpairs.feature.game.presentation.support.solvedPuzzleWithKnownStripAndAssignments
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -66,6 +68,7 @@ class GeneratedPuzzleViewModelTest {
         assertEquals(17, attemptedSnapshot.seed)
         assertEquals(samplePuzzle, attemptedSnapshot.initialPuzzle)
         assertEquals(samplePuzzle, attemptedSnapshot.currentPuzzle)
+        assertEquals(0L, requireNotNull(attemptedSnapshot.correctionCount).value)
         assertNull(repository.session.value)
 
         writeGate.complete(Unit)
@@ -498,13 +501,17 @@ class GeneratedPuzzleViewModelTest {
             strip = samplePuzzle.strip.withUpdatedEntry(index = 1, value = 2)
         )
 
-        viewModel.onPuzzleChanged(sessionId, firstPuzzle)
+        viewModel.onPuzzleMutationCommitted(
+            sessionId,
+            firstPuzzle.asCommittedMutation(isCorrection = true)
+        )
         dispatcher.scheduler.runCurrent()
-        viewModel.onPuzzleChanged(sessionId, latestPuzzle)
+        viewModel.onPuzzleMutationCommitted(sessionId, latestPuzzle.asCommittedMutation())
         dispatcher.scheduler.runCurrent()
 
         val visibleSession = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).session
         assertEquals(latestPuzzle, visibleSession.currentPuzzle)
+        assertEquals(1L, requireNotNull(visibleSession.snapshot.correctionCount).value)
         assertEquals(samplePuzzle, repository.session.value?.currentPuzzle)
 
         firstWriteGate.complete(Unit)
@@ -512,6 +519,42 @@ class GeneratedPuzzleViewModelTest {
 
         assertEquals(listOf(firstPuzzle, latestPuzzle), repository.updateAttempts)
         assertEquals(latestPuzzle, repository.session.value?.currentPuzzle)
+        assertEquals(1L, requireNotNull(repository.session.value?.correctionCount).value)
+    }
+
+    @Test
+    fun legacy_generated_session_keeps_corrections_unknown_after_resume_and_progress() {
+        val currentPuzzle = samplePuzzle.copy(
+            strip = samplePuzzle.strip.withUpdatedEntry(index = 1, value = 1)
+        )
+        val latestPuzzle = samplePuzzle.copy(
+            strip = samplePuzzle.strip.withUpdatedEntry(index = 1, value = 2)
+        )
+        val snapshot = generatedSessionSnapshot(
+            sessionId = "legacy",
+            currentPuzzle = currentPuzzle,
+            correctionCount = null
+        )
+        val repository = RecordingGeneratedSessionRepository(initialSession = snapshot)
+        val viewModel = GeneratedPuzzleViewModel(
+            challenge = GeneratedModes.FOUR_PAIRS_LOW,
+            generationUseCase = UnexpectedGeneratedPuzzleUseCase(),
+            generatedSessionRepository = repository
+        )
+        viewModel.onRouteEntered(
+            GeneratedModeLaunchIntent.ResumeSession(expectedSessionId = snapshot.sessionId)
+        )
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onPuzzleMutationCommitted(
+            snapshot.sessionId,
+            latestPuzzle.asCommittedMutation(isCorrection = true)
+        )
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val visibleSession = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).session
+        assertNull(visibleSession.snapshot.correctionCount)
+        assertNull(repository.session.value?.correctionCount)
     }
 
     @Test
@@ -530,7 +573,7 @@ class GeneratedPuzzleViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
         val sessionId = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).session.id
 
-        viewModel.onPuzzleChanged(sessionId, solvedPuzzle)
+        viewModel.onPuzzleMutationCommitted(sessionId, solvedPuzzle.asCommittedMutation())
         dispatcher.scheduler.advanceUntilIdle()
 
         val visibleSession = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).session
@@ -566,8 +609,11 @@ class GeneratedPuzzleViewModelTest {
             strip = samplePuzzle.strip.withUpdatedEntry(index = 1, value = 2)
         )
 
-        viewModel.onPuzzleChanged(previousSession.id, stalePuzzle)
-        viewModel.onPuzzleChanged(previousSession.id, solvedPuzzleWithKnownStripAndAssignments())
+        viewModel.onPuzzleMutationCommitted(previousSession.id, stalePuzzle.asCommittedMutation())
+        viewModel.onPuzzleMutationCommitted(
+            previousSession.id,
+            solvedPuzzleWithKnownStripAndAssignments().asCommittedMutation()
+        )
         dispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(GeneratedSessionId("replacement"), replacementSession.id)
@@ -720,7 +766,11 @@ private class RecordingGeneratedSessionRepository(
         mutableSession.value = snapshot
     }
 
-    override suspend fun updateCurrentPuzzle(expectedSessionId: GeneratedSessionId, puzzle: Puzzle): Boolean {
+    override suspend fun updateCurrentPuzzle(
+        expectedSessionId: GeneratedSessionId,
+        puzzle: Puzzle,
+        correctionCount: PuzzleCorrectionCount?
+    ): Boolean {
         updateAttempts += puzzle
         pendingUpdateGate?.let { gate ->
             pendingUpdateGate = null
@@ -731,7 +781,10 @@ private class RecordingGeneratedSessionRepository(
             return false
         }
 
-        mutableSession.value = snapshot.copy(currentPuzzle = puzzle)
+        mutableSession.value = snapshot.copy(
+            currentPuzzle = puzzle,
+            correctionCount = correctionCount
+        )
         return true
     }
 
@@ -751,15 +804,23 @@ private fun generatedSessionSnapshot(
     modeId: String = GeneratedModes.FOUR_PAIRS.id.value,
     profileId: String = GeneratedModes.FOUR_PAIRS_LOW.profile.id.value,
     initialPuzzle: Puzzle = samplePuzzle,
-    currentPuzzle: Puzzle = samplePuzzle
+    currentPuzzle: Puzzle = samplePuzzle,
+    correctionCount: PuzzleCorrectionCount? = PuzzleCorrectionCount.ZERO
 ): GeneratedSessionSnapshot = GeneratedSessionSnapshot(
     sessionId = GeneratedSessionId(sessionId),
     modeId = modeId,
     profileId = profileId,
     seed = 7,
     initialPuzzle = initialPuzzle,
-    currentPuzzle = currentPuzzle
+    currentPuzzle = currentPuzzle,
+    correctionCount = correctionCount
 )
+
+private fun Puzzle.asCommittedMutation(isCorrection: Boolean = false): CommittedPuzzleMutation =
+    CommittedPuzzleMutation(
+        puzzle = this,
+        isCorrection = isCorrection
+    )
 
 private fun initialPuzzleFor(solvedPuzzle: Puzzle): Puzzle = solvedPuzzle.copy(
     board = solvedPuzzle.board.copy(

@@ -6,6 +6,7 @@ import org.cescfe.numpairs.domain.daily.DailyCompletion
 import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
 data class DailyState(val activeSession: DailySessionSnapshot?, val completions: List<DailyCompletion>) {
@@ -35,6 +36,8 @@ sealed interface DailySessionProgressUpdateResult {
     data object InvalidPuzzle : DailySessionProgressUpdateResult
 
     data object InvalidMovement : DailySessionProgressUpdateResult
+
+    data object InvalidCorrection : DailySessionProgressUpdateResult
 }
 
 sealed interface DailySessionClearResult {
@@ -55,6 +58,8 @@ sealed interface DailySessionCompletionResult {
     data object InvalidTiming : DailySessionCompletionResult
 
     data object InvalidMovement : DailySessionCompletionResult
+
+    data object InvalidCorrection : DailySessionCompletionResult
 }
 
 interface DailySessionRepository {
@@ -70,7 +75,8 @@ interface DailySessionRepository {
     suspend fun updateCurrentPuzzle(
         expectedSessionId: DailySessionId,
         puzzle: Puzzle,
-        movementCount: DailyMovementCount?
+        movementCount: DailyMovementCount?,
+        correctionCount: PuzzleCorrectionCount?
     ): DailySessionProgressUpdateResult
 
     suspend fun clearSession(expectedSessionId: DailySessionId): DailySessionClearResult
@@ -80,6 +86,7 @@ interface DailySessionRepository {
         expectedDailyChallengeId: DailyChallengeId,
         solvedPuzzle: Puzzle,
         movementCount: DailyMovementCount?,
+        correctionCount: PuzzleCorrectionCount?,
         elapsedTime: DailyElapsedTime? = null
     ): DailySessionCompletionResult
 }

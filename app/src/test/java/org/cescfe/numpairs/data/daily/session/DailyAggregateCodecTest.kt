@@ -14,6 +14,7 @@ import org.cescfe.numpairs.domain.daily.DailyRecipeContracts
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfiles
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Expression
 import org.cescfe.numpairs.domain.puzzle.model.Strip
@@ -35,13 +36,15 @@ class DailyAggregateCodecTest {
         val snapshot = fixture.snapshot(
             currentPuzzle = currentPuzzle,
             timingStartInstant = DailyTimingStartInstant(1_798_761_600_123),
-            movementCount = DailyMovementCount(17)
+            movementCount = DailyMovementCount(17),
+            correctionCount = PuzzleCorrectionCount(3)
         )
         val completions = listOf(
             DailyCompletion(
                 identity = dailyChallengeId(date = LocalDate.of(2026, 12, 31)),
                 elapsedTime = DailyElapsedTime(91_234),
-                movementCount = DailyMovementCount(29)
+                movementCount = DailyMovementCount(29),
+                correctionCount = PuzzleCorrectionCount(5)
             ),
             DailyCompletion(
                 identity = dailyChallengeId(
@@ -67,6 +70,7 @@ class DailyAggregateCodecTest {
         assertEquals(snapshot.seed, decodedSnapshot.seed)
         assertEquals(snapshot.timingStartInstant, decodedSnapshot.timingStartInstant)
         assertEquals(snapshot.movementCount, decodedSnapshot.movementCount)
+        assertEquals(snapshot.correctionCount, decodedSnapshot.correctionCount)
     }
 
     @Test
@@ -173,7 +177,10 @@ class DailyAggregateCodecTest {
         assertEquals(
             DailyAggregateDecodingResult.Decoded(
                 DailyAggregate(
-                    activeSession = legacySession.copy(movementCount = null),
+                    activeSession = legacySession.copy(
+                        movementCount = null,
+                        correctionCount = null
+                    ),
                     completions = legacyCompletionIds.map { identity ->
                         DailyCompletion(
                             identity = identity,
@@ -212,7 +219,10 @@ class DailyAggregateCodecTest {
 
         val expected = DailyAggregateDecodingResult.Decoded(
             DailyAggregate(
-                activeSession = timedSession.copy(movementCount = null),
+                activeSession = timedSession.copy(
+                    movementCount = null,
+                    correctionCount = null
+                ),
                 completions = listOf(timedCompletion, untimedCompletion)
             )
         )
@@ -222,6 +232,38 @@ class DailyAggregateCodecTest {
             codec.decode(
                 codec.encode((decoded as DailyAggregateDecodingResult.Decoded).aggregate)
             )
+        )
+    }
+
+    @Test
+    fun `version three aggregate migrates exact movements without fabricating corrections`() {
+        val fixture = generatedDailyFixture()
+        val movementSession = fixture.snapshot(
+            currentPuzzle = fixture.progressPuzzle(),
+            timingStartInstant = DailyTimingStartInstant(1_798_761_600_123),
+            movementCount = DailyMovementCount(17)
+        )
+        val completion = DailyCompletion(
+            identity = dailyChallengeId(LocalDate.of(2026, 12, 31)),
+            elapsedTime = DailyElapsedTime(91_234),
+            movementCount = DailyMovementCount(29)
+        )
+
+        val decoded = codec.decode(
+            encodeMovementAggregate(
+                activeSession = movementSession,
+                completions = listOf(completion)
+            )
+        )
+
+        assertEquals(
+            DailyAggregateDecodingResult.Decoded(
+                DailyAggregate(
+                    activeSession = movementSession.copy(correctionCount = null),
+                    completions = listOf(completion)
+                )
+            ),
+            decoded
         )
     }
 
@@ -491,6 +533,7 @@ private fun rawCompletionAggregate(vararg completions: DailyChallengeId): ByteAr
                 output.writeUTF(identity.recipeVersion.value)
                 output.writeBoolean(false)
                 output.writeBoolean(false)
+                output.writeBoolean(false)
             }
         }
         bytes.toByteArray()
@@ -567,6 +610,57 @@ private fun encodeTimedSession(snapshot: DailySessionSnapshot): ByteArray = Byte
         output.writeBoolean(snapshot.timingStartInstant != null)
         snapshot.timingStartInstant?.let { startInstant ->
             output.writeLong(startInstant.epochMilliseconds)
+        }
+    }
+    bytes.toByteArray()
+}
+
+private fun encodeMovementAggregate(
+    activeSession: DailySessionSnapshot?,
+    completions: List<DailyCompletion>
+): ByteArray = ByteArrayOutputStream().use { bytes ->
+    DataOutputStream(bytes).use { output ->
+        output.writeInt(DAILY_AGGREGATE_FILE_MAGIC)
+        output.writeInt(MOVEMENT_DAILY_AGGREGATE_SCHEMA_VERSION)
+        output.writeBoolean(activeSession != null)
+        activeSession?.let { snapshot ->
+            val sessionPayload = encodeMovementSession(snapshot)
+            output.writeInt(sessionPayload.size)
+            output.write(sessionPayload)
+        }
+        output.writeInt(completions.size)
+        completions.forEach { completion ->
+            output.writeUTF(completion.identity.canonicalLocalDate)
+            output.writeUTF(completion.identity.recipeVersion.value)
+            output.writeBoolean(completion.elapsedTime != null)
+            completion.elapsedTime?.let { elapsedTime ->
+                output.writeLong(elapsedTime.milliseconds)
+            }
+            output.writeBoolean(completion.movementCount != null)
+            completion.movementCount?.let { movementCount ->
+                output.writeLong(movementCount.value)
+            }
+        }
+    }
+    bytes.toByteArray()
+}
+
+private fun encodeMovementSession(snapshot: DailySessionSnapshot): ByteArray = ByteArrayOutputStream().use { bytes ->
+    DataOutputStream(bytes).use { output ->
+        output.writeUTF(snapshot.sessionId.value)
+        output.writeUTF(snapshot.dailyChallengeId.canonicalLocalDate)
+        output.writeUTF(snapshot.dailyChallengeId.recipeVersion.value)
+        output.writeInt(snapshot.candidateIndex.value)
+        output.writeInt(snapshot.seed)
+        output.writePuzzleSnapshot(snapshot.initialPuzzle)
+        output.writePuzzleSnapshot(snapshot.currentPuzzle)
+        output.writeBoolean(snapshot.timingStartInstant != null)
+        snapshot.timingStartInstant?.let { startInstant ->
+            output.writeLong(startInstant.epochMilliseconds)
+        }
+        output.writeBoolean(snapshot.movementCount != null)
+        snapshot.movementCount?.let { movementCount ->
+            output.writeLong(movementCount.value)
         }
     }
     bytes.toByteArray()

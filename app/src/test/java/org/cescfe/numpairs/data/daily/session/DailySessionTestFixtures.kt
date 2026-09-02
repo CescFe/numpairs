@@ -15,6 +15,7 @@ import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGener
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfile
 import org.cescfe.numpairs.domain.generated.puzzle.GeneratedPairsPuzzle
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.Strip
@@ -30,7 +31,8 @@ internal data class GeneratedDailyFixture(
         sessionId: String = "daily-session-${identity.canonicalLocalDate}",
         currentPuzzle: Puzzle = generatedPuzzle.initialPuzzle,
         timingStartInstant: DailyTimingStartInstant? = null,
-        movementCount: DailyMovementCount? = DailyMovementCount.ZERO
+        movementCount: DailyMovementCount? = DailyMovementCount.ZERO,
+        correctionCount: PuzzleCorrectionCount? = PuzzleCorrectionCount.ZERO
     ): DailySessionSnapshot = DailySessionSnapshot(
         sessionId = DailySessionId(sessionId),
         dailyChallengeId = identity,
@@ -39,7 +41,8 @@ internal data class GeneratedDailyFixture(
         initialPuzzle = generatedPuzzle.initialPuzzle,
         currentPuzzle = currentPuzzle,
         timingStartInstant = timingStartInstant,
-        movementCount = movementCount
+        movementCount = movementCount,
+        correctionCount = correctionCount
     )
 
     fun progressPuzzle(): Puzzle {
@@ -112,11 +115,13 @@ internal fun dailyChallengeId(
 internal fun dailyCompletion(
     identity: DailyChallengeId,
     elapsedMilliseconds: Long? = null,
-    movementCount: Long? = null
+    movementCount: Long? = null,
+    correctionCount: Long? = null
 ): DailyCompletion = DailyCompletion(
     identity = identity,
     elapsedTime = elapsedMilliseconds?.let(::DailyElapsedTime),
-    movementCount = movementCount?.let(::DailyMovementCount)
+    movementCount = movementCount?.let(::DailyMovementCount),
+    correctionCount = correctionCount?.let(::PuzzleCorrectionCount)
 )
 
 internal fun generatedPuzzleFixture(profile: GeneratedPuzzleProfile, seed: Int): GeneratedPairsPuzzle {

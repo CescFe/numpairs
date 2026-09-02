@@ -5,7 +5,7 @@
 - Status: Daily identity, deterministic generation, local-date boundary, versioned aggregate,
   independent session persistence, atomic completion history, and current-session lifecycle
   coordination implemented, including committed gameplay progress, elapsed timing, movement
-  counts, and completion
+  counts, correction counts, and completion
 - Product contract: `docs/product/prd/prd-v10.md`
 - Architecture decision:
   `docs/technical/adr/adr-006-model-daily-challenge-as-versioned-local-cadence.md`
@@ -22,8 +22,10 @@ calendar layout, or core NumPairs rules.
 
 NumPairs stores one application-private Daily aggregate containing:
 
-- at most one exact Daily Session snapshot, including optional timing and movement state
-- local Daily Completion records, including optional elapsed time and movement count
+- at most one exact Daily Session snapshot, including optional timing, movement, and correction
+  state
+- local Daily Completion records, including optional elapsed time, movement count, and correction
+  count
 
 The aggregate is independent from the one normal generated-session slot. An unfinished Daily
 Session and an unfinished normal Quick or Classic session may coexist. Operations on one
@@ -69,7 +71,7 @@ returns the first exact validated initial puzzle.
 
 ## Versioned Aggregate
 
-Current schema version `3` stores:
+Current schema version `4` stores:
 
 - an optional Daily Session snapshot
 - a collection of Daily Completion records
@@ -85,6 +87,7 @@ The snapshot stores:
 - exact current `Puzzle`
 - optional Daily Timing Start Instant in Unix epoch milliseconds
 - optional Daily Movement Count
+- optional authoritative Puzzle Correction Count
 
 The selected generated mode, difficulty, and profile are derived from the recipe version and are
 not persisted again. The candidate index and seed must agree with the recipe mapping.
@@ -103,21 +106,26 @@ New snapshots start with a movement count of zero. The nullable representation i
 session decoded from schema version 1 or 2, where historical movements cannot be reconstructed.
 Once unknown, the count remains unknown for that session.
 
+New snapshots also start with a correction count of zero. A session decoded from schema version 1,
+2, or 3 has an unknown correction count because earlier corrections cannot be reconstructed. Once
+unknown, correction tracking is never started partway through that session.
+
 Each completion record stores:
 
 - canonical local date
 - Daily Recipe version
 - optional authoritative Daily Elapsed Time
 - optional authoritative Daily Movement Count
+- optional authoritative Puzzle Correction Count
 
 The codec rejects duplicate completion identities and more than one completion record for the same
 local date. It does not store a completion timestamp, score, display text, or puzzle.
 
-The codec explicitly migrates both earlier layouts. Schema version `1` preserves exact progress
+The codec explicitly migrates all earlier layouts. Schema version `1` preserves exact progress
 and completion identities while mapping timing and movement values to unknown. Schema version `2`
 preserves exact progress, timing anchors, elapsed completion durations, and completion identities
-while mapping movement values to unknown. Schema version `3` never fabricates a count for either
-legacy layout.
+while mapping movement values to unknown. Schema version `3` preserves movement data while mapping
+correction values to unknown. Schema version `4` never fabricates a metric for any legacy layout.
 
 The deterministic codec returns typed decoded, unsupported-version, and invalid-data outcomes.
 Malformed active-session data must not fabricate a resumable puzzle or completion. The
@@ -125,7 +133,7 @@ implementation should preserve independently valid completion records where the 
 can isolate a malformed optional session; otherwise aggregate corruption recovers to an empty
 local Daily state.
 
-The schema-3 aggregate, explicit schema-1/schema-2 migration, recipe-aware snapshot validation,
+The schema-4 aggregate, explicit schema-1/schema-2/schema-3 migration, recipe-aware snapshot validation,
 canonical completion collection, and deterministic length-delimited codec are implemented. The
 optional session payload is isolated so invalid session bytes can be discarded without losing
 independently valid completion records.
@@ -142,10 +150,11 @@ The repository exposes one observable state containing:
 It owns these atomic mutations:
 
 - `replaceSession(snapshot)` adopts a generated successor only when its date has no completion
-- `updateCurrentPuzzle(expectedSessionId, puzzle, movementCount)` updates only the owning unsolved
-  session and stores puzzle and count together
-- `complete(expectedSessionId, expectedDailyChallengeId, solvedPuzzle, movementCount, elapsedTime)`
-  records one completion and removes the owning active session in the same edit
+- `updateCurrentPuzzle(expectedSessionId, puzzle, movementCount, correctionCount)` updates only the
+  owning unsolved session and stores puzzle and both counts together
+- `complete(expectedSessionId, expectedDailyChallengeId, solvedPuzzle, movementCount,
+  correctionCount, elapsedTime)` records one completion and removes the owning active session in
+  the same edit
 
 Every mutation validates stable session identity inside the DataStore edit. A callback from a
 stale screen cannot update or complete a successor.
@@ -157,14 +166,17 @@ stale screen cannot update or complete a successor.
 - its Daily Challenge identity has no completion
 - its local date has no completion under another recipe version
 - its movement count does not regress or cross between known and unknown
+- its correction count does not regress or cross between known and unknown
 
-Progress accepts an equal count for an idempotent retry and a forward jump when an earlier queued
+Progress accepts equal counts for an idempotent retry and forward jumps when an earlier queued
 write failed. It rejects regressions and known/unknown mismatches. Completion applies the same
-movement consistency rule and returns an explicit invalid-movement outcome when it fails.
+consistency rules and returns an explicit invalid-movement or invalid-correction outcome when one
+fails.
 
 The completion operation is idempotent for already completed Daily identity and returns a typed
 outcome that distinguishes completed, already completed, stale session, invalid puzzle, invalid
-timing, and invalid movement. It never clears a session before the completion record is durable.
+timing, invalid movement, and invalid correction. It never clears a session before the completion
+record is durable.
 
 The identity-guarded completion transition is implemented. It validates solved committed puzzle
 state, records one canonical identity, and removes the owning active session in the same
@@ -201,7 +213,7 @@ including a completion recorded under another recipe version.
 3. Attempt recipe candidate seeds in ascending index order.
 4. Stop at the first generated and validated puzzle.
 5. Build a new snapshot with identical initial and current puzzles.
-   Its authoritative movement count starts at zero and timing remains absent.
+   Its authoritative movement and correction counts start at zero and timing remains absent.
 6. Store the snapshot through `replaceSession`.
 7. Publish the playable Daily Session.
 
@@ -241,17 +253,24 @@ failure produce recoverable typed feature states while leaving the stored predec
 ### Progress And Completion
 
 Committed strip values, operand assignments, operator assignments, and tile resets update the
-active Current Puzzle and exact movement count together through the stable Daily Session id.
+active Current Puzzle, exact movement count, and exact correction count together through the stable
+Daily Session id.
 
 An effective Daily Movement is one player-driven durable Current Puzzle mutation. Transient and
 no-op interactions do not advance the count. A migrated session whose count is unknown persists
 progress with the count still unknown and never starts partial tracking.
 
+A Puzzle Correction is a committed action that rectifies existing durable puzzle state: changing
+or clearing a previous strip value, reassigning an operand, changing an operator, or resetting a
+non-pristine tile. It advances the correction count once even if the puzzle update cascades. First
+assignments do not count. A migrated session with an unknown correction count preserves that
+unknown value through progress and completion.
+
 When the puzzle becomes solved, the presentation owner orders the final mutation after earlier
 progress writes and calls the atomic completion operation with the exact final count. The
-operation records the Daily Challenge identity, elapsed time, and movement count and removes the
-active session together. The solved game remains visible in memory for Share result, View
-calendar, and Back to menu.
+operation records the Daily Challenge identity, elapsed time, movement count, and correction count
+and removes the active session together. The solved game remains visible in memory for Share
+result, View calendar, and Back to menu.
 
 A late progress or completion callback cannot mutate a later Daily Session because the stable
 session ids differ.
@@ -309,7 +328,7 @@ aggregate repository.
 The non-device test suite must protect:
 
 - deterministic aggregate round trips and malformed or unsupported versions
-- explicit schema-1/schema-2 migration without fabricated movement counts
+- explicit schema-1/schema-2/schema-3 migration without fabricated movement or correction counts
 - snapshot identity, recipe, seed, candidate-index, shape, and initial/current consistency
 - rejection of duplicate identity and same-date completion records
 - independent normal and Daily repositories
@@ -317,8 +336,10 @@ The non-device test suite must protect:
 - exact restoration without regeneration or writes
 - safe prior-date replacement, failure, cancellation, and exhaustion
 - ordered committed progress
-- movement-count bounds, idempotent retries, forward jumps, regressions, and known/unknown rules
-- atomic solved completion with exact timing and movement data and active-session removal
+- movement- and correction-count bounds, idempotent retries, forward jumps, regressions, and
+  known/unknown rules
+- atomic solved completion with exact timing, movement, and correction data and active-session
+  removal
 - idempotent repeated completion
 - DataStore recreation and corruption recovery
 - trusted local-date rollover and clock-back behavior

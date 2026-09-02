@@ -1,11 +1,15 @@
 package org.cescfe.numpairs.data.generated.session
 
+import java.io.ByteArrayOutputStream
+import java.io.DataOutputStream
 import java.nio.ByteBuffer
+import org.cescfe.numpairs.data.puzzle.writePuzzleSnapshot
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerator
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfile
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfiles
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Expression
 import org.cescfe.numpairs.domain.puzzle.model.Operator
@@ -32,7 +36,8 @@ class GeneratedSessionSnapshotCodecTest {
             profileId = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW.id.value,
             seed = 207,
             initialPuzzle = puzzle,
-            currentPuzzle = puzzle
+            currentPuzzle = puzzle,
+            correctionCount = PuzzleCorrectionCount(17)
         )
 
         assertEquals(
@@ -143,6 +148,26 @@ class GeneratedSessionSnapshotCodecTest {
     }
 
     @Test
+    fun `version one session migrates without fabricating a correction count`() {
+        val legacySnapshot = snapshot(correctionCount = null)
+
+        val decoded = codec.decode(encodeInitialSnapshot(legacySnapshot))
+
+        assertEquals(
+            GeneratedSessionSnapshotDecodingResult.Decoded(legacySnapshot),
+            decoded
+        )
+        assertEquals(
+            GeneratedSessionSnapshotDecodingResult.Decoded(legacySnapshot),
+            codec.decode(
+                codec.encode(
+                    (decoded as GeneratedSessionSnapshotDecodingResult.Decoded).snapshot
+                )
+            )
+        )
+    }
+
+    @Test
     fun `reports malformed and invariant breaking data`() {
         assertEquals(
             GeneratedSessionSnapshotDecodingResult.InvalidData,
@@ -175,14 +200,16 @@ class GeneratedSessionSnapshotCodecTest {
         profileId: String = "4-pairs-low",
         seed: Int = 207,
         initialPuzzle: Puzzle = repeatedValuePuzzle(),
-        currentPuzzle: Puzzle = initialPuzzle
+        currentPuzzle: Puzzle = initialPuzzle,
+        correctionCount: PuzzleCorrectionCount? = PuzzleCorrectionCount.ZERO
     ): GeneratedSessionSnapshot = GeneratedSessionSnapshot(
         sessionId = GeneratedSessionId("session-207"),
         modeId = modeId,
         profileId = profileId,
         seed = seed,
         initialPuzzle = initialPuzzle,
-        currentPuzzle = currentPuzzle
+        currentPuzzle = currentPuzzle,
+        correctionCount = correctionCount
     )
 
     private fun generatedInitialPuzzle(profile: GeneratedPuzzleProfile, seed: Int): Puzzle {
@@ -224,3 +251,20 @@ class GeneratedSessionSnapshotCodecTest {
         rightOperand = Expression.Operand.Hidden
     )
 }
+
+private fun encodeInitialSnapshot(snapshot: GeneratedSessionSnapshot): ByteArray =
+    ByteArrayOutputStream().use { bytes ->
+        DataOutputStream(bytes).use { output ->
+            output.writeInt(GENERATED_SESSION_FILE_MAGIC)
+            output.writeInt(INITIAL_GENERATED_SESSION_SCHEMA_VERSION)
+            output.writeUTF(snapshot.sessionId.value)
+            output.writeUTF(snapshot.modeId)
+            output.writeUTF(snapshot.profileId)
+            output.writeInt(snapshot.seed)
+            output.writePuzzleSnapshot(snapshot.initialPuzzle)
+            output.writePuzzleSnapshot(snapshot.currentPuzzle)
+        }
+        bytes.toByteArray()
+    }
+
+private const val GENERATED_SESSION_FILE_MAGIC = 0x4E505331

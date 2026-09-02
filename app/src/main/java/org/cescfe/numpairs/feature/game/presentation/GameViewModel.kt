@@ -18,7 +18,7 @@ import org.cescfe.numpairs.domain.puzzle.model.TileResolutionState
 class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
     private var puzzle: Puzzle = initialPuzzle
     private var presentationState = GamePresentationState()
-    private val committedPuzzleMutations = ArrayDeque<Puzzle>()
+    private val committedPuzzleMutations = ArrayDeque<CommittedPuzzleMutation>()
 
     private val _currentPuzzle = MutableStateFlow(puzzle)
     val currentPuzzle: StateFlow<Puzzle> = _currentPuzzle.asStateFlow()
@@ -36,7 +36,7 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
         publishUiState()
     }
 
-    internal fun consumeCommittedPuzzleMutations(): List<Puzzle> {
+    internal fun consumeCommittedPuzzleMutations(): List<CommittedPuzzleMutation> {
         val mutations = committedPuzzleMutations.toList()
         committedPuzzleMutations.clear()
         return mutations
@@ -181,7 +181,8 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
             updatedPuzzle = puzzle.withUpdatedStripEntry(
                 index = input.stripItemIndex,
                 value = value
-            )
+            ),
+            isCorrection = currentStripItem is StripItem.PlayerEntered
         ) {
             dismissStripItemEntryInput()
         }
@@ -198,7 +199,8 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
         }
 
         commit(
-            updatedPuzzle = puzzle.withClearedStripEntry(index = input.stripItemIndex)
+            updatedPuzzle = puzzle.withClearedStripEntry(index = input.stripItemIndex),
+            isCorrection = true
         ) {
             dismissStripItemEntryInput()
         }
@@ -216,7 +218,8 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
 
         return commitTileAssignment(
             tileIndex = target.tileIndex,
-            updatedPuzzle = updatedPuzzle
+            updatedPuzzle = updatedPuzzle,
+            isCorrection = !previousTile.expression.isHidden(target.slot)
         ) {
             advanceAfterOperandSelection(
                 target = target,
@@ -235,7 +238,8 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
 
         return commitTileAssignment(
             tileIndex = tileIndex,
-            updatedPuzzle = updatedPuzzle
+            updatedPuzzle = updatedPuzzle,
+            isCorrection = previousTile.expression.operator != Operator.Hidden
         ) {
             advanceAfterOperatorSelection(
                 tileIndex = tileIndex,
@@ -255,7 +259,10 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
 
         val updatedPuzzle = puzzle.withResetTile(tileIndex = index) ?: return
 
-        commit(updatedPuzzle = updatedPuzzle) {
+        commit(
+            updatedPuzzle = updatedPuzzle,
+            isCorrection = true
+        ) {
             clearModal()
         }
     }
@@ -290,6 +297,7 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
 
     private fun commit(
         updatedPuzzle: Puzzle = puzzle,
+        isCorrection: Boolean = false,
         updatePresentation: GamePresentationState.() -> GamePresentationState = { this }
     ) {
         val nextPresentationState = presentationState
@@ -303,7 +311,12 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
 
         if (hasStateChanged) {
             if (hasPuzzleChanged) {
-                committedPuzzleMutations.addLast(puzzle)
+                committedPuzzleMutations.addLast(
+                    CommittedPuzzleMutation(
+                        puzzle = puzzle,
+                        isCorrection = isCorrection
+                    )
+                )
                 _currentPuzzle.value = puzzle
             }
             publishUiState()
@@ -313,6 +326,7 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
     private fun commitTileAssignment(
         tileIndex: Int,
         updatedPuzzle: Puzzle,
+        isCorrection: Boolean,
         updatePresentation: GamePresentationState.() -> GamePresentationState
     ): TileAssignmentCommit? {
         val previousTile = puzzle.board.tiles.getOrNull(tileIndex) ?: return null
@@ -322,6 +336,7 @@ class GameViewModel(initialPuzzle: Puzzle = samplePuzzle) : ViewModel() {
 
         commit(
             updatedPuzzle = updatedPuzzle,
+            isCorrection = isCorrection,
             updatePresentation = updatePresentation
         )
 

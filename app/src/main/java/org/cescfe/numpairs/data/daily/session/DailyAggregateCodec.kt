@@ -16,6 +16,7 @@ import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 
 sealed interface DailyAggregateDecodingResult {
     data class Decoded(val aggregate: DailyAggregate) : DailyAggregateDecodingResult
@@ -61,6 +62,7 @@ class DailyAggregateCodec {
             when (schemaVersion) {
                 INITIAL_DAILY_AGGREGATE_SCHEMA_VERSION -> decodeInitialAggregate(input)
                 TIMED_DAILY_AGGREGATE_SCHEMA_VERSION -> decodeTimedAggregate(input)
+                MOVEMENT_DAILY_AGGREGATE_SCHEMA_VERSION -> decodeMovementAggregate(input)
                 DAILY_AGGREGATE_SCHEMA_VERSION -> decodeCurrentAggregate(input)
                 else -> DailyAggregateDecodingResult.UnsupportedVersion(schemaVersion)
             }
@@ -91,6 +93,10 @@ class DailyAggregateCodec {
             snapshot.movementCount?.let { movementCount ->
                 output.writeLong(movementCount.value)
             }
+            output.writeBoolean(snapshot.correctionCount != null)
+            snapshot.correctionCount?.let { correctionCount ->
+                output.writeLong(correctionCount.value)
+            }
         }
         bytes.toByteArray()
     }
@@ -102,7 +108,8 @@ class DailyAggregateCodec {
             DailyCompletion(
                 identity = readDailyChallengeId(),
                 elapsedTime = null,
-                movementCount = null
+                movementCount = null,
+                correctionCount = null
             )
         }
     )
@@ -111,6 +118,12 @@ class DailyAggregateCodec {
         input = input,
         decodeSession = ::decodeTimedSessionOrNull,
         readCompletion = DataInputStream::readTimedDailyCompletion
+    )
+
+    private fun decodeMovementAggregate(input: DataInputStream): DailyAggregateDecodingResult = decodeAggregate(
+        input = input,
+        decodeSession = ::decodeMovementSessionOrNull,
+        readCompletion = DataInputStream::readMovementDailyCompletion
     )
 
     private fun decodeCurrentAggregate(input: DataInputStream): DailyAggregateDecodingResult = decodeAggregate(
@@ -158,25 +171,36 @@ class DailyAggregateCodec {
     private fun decodeInitialSessionOrNull(bytes: ByteArray): DailySessionSnapshot? = decodeSessionOrNull(
         bytes = bytes,
         readTimingStartInstant = { null },
-        readMovementCount = { null }
+        readMovementCount = { null },
+        readCorrectionCount = { null }
     )
 
     private fun decodeTimedSessionOrNull(bytes: ByteArray): DailySessionSnapshot? = decodeSessionOrNull(
         bytes = bytes,
         readTimingStartInstant = DataInputStream::readDailyTimingStartInstant,
-        readMovementCount = { null }
+        readMovementCount = { null },
+        readCorrectionCount = { null }
+    )
+
+    private fun decodeMovementSessionOrNull(bytes: ByteArray): DailySessionSnapshot? = decodeSessionOrNull(
+        bytes = bytes,
+        readTimingStartInstant = DataInputStream::readDailyTimingStartInstant,
+        readMovementCount = DataInputStream::readDailyMovementCount,
+        readCorrectionCount = { null }
     )
 
     private fun decodeCurrentSessionOrNull(bytes: ByteArray): DailySessionSnapshot? = decodeSessionOrNull(
         bytes = bytes,
         readTimingStartInstant = DataInputStream::readDailyTimingStartInstant,
-        readMovementCount = DataInputStream::readDailyMovementCount
+        readMovementCount = DataInputStream::readDailyMovementCount,
+        readCorrectionCount = DataInputStream::readPuzzleCorrectionCount
     )
 
     private fun decodeSessionOrNull(
         bytes: ByteArray,
         readTimingStartInstant: DataInputStream.() -> DailyTimingStartInstant?,
-        readMovementCount: DataInputStream.() -> DailyMovementCount?
+        readMovementCount: DataInputStream.() -> DailyMovementCount?,
+        readCorrectionCount: DataInputStream.() -> PuzzleCorrectionCount?
     ): DailySessionSnapshot? = try {
         DataInputStream(ByteArrayInputStream(bytes)).use { input ->
             val snapshot = DailySessionSnapshot(
@@ -187,7 +211,8 @@ class DailyAggregateCodec {
                 initialPuzzle = input.readPuzzleSnapshot(),
                 currentPuzzle = input.readPuzzleSnapshot(),
                 timingStartInstant = input.readTimingStartInstant(),
-                movementCount = input.readMovementCount()
+                movementCount = input.readMovementCount(),
+                correctionCount = input.readCorrectionCount()
             )
             snapshot.takeIf { input.available() == 0 }
         }
@@ -222,18 +247,31 @@ private fun DataOutputStream.writeDailyCompletion(completion: DailyCompletion) {
     completion.movementCount?.let { movementCount ->
         writeLong(movementCount.value)
     }
+    writeBoolean(completion.correctionCount != null)
+    completion.correctionCount?.let { correctionCount ->
+        writeLong(correctionCount.value)
+    }
 }
 
 private fun DataInputStream.readDailyCompletion(): DailyCompletion = DailyCompletion(
     identity = readDailyChallengeId(),
     elapsedTime = readDailyElapsedTime(),
-    movementCount = readDailyMovementCount()
+    movementCount = readDailyMovementCount(),
+    correctionCount = readPuzzleCorrectionCount()
+)
+
+private fun DataInputStream.readMovementDailyCompletion(): DailyCompletion = DailyCompletion(
+    identity = readDailyChallengeId(),
+    elapsedTime = readDailyElapsedTime(),
+    movementCount = readDailyMovementCount(),
+    correctionCount = null
 )
 
 private fun DataInputStream.readTimedDailyCompletion(): DailyCompletion = DailyCompletion(
     identity = readDailyChallengeId(),
     elapsedTime = readDailyElapsedTime(),
-    movementCount = null
+    movementCount = null,
+    correctionCount = null
 )
 
 private fun DataInputStream.readDailyElapsedTime(): DailyElapsedTime? = if (readBoolean()) {
@@ -250,6 +288,12 @@ private fun DataInputStream.readDailyTimingStartInstant(): DailyTimingStartInsta
 
 private fun DataInputStream.readDailyMovementCount(): DailyMovementCount? = if (readBoolean()) {
     DailyMovementCount(readLong())
+} else {
+    null
+}
+
+private fun DataInputStream.readPuzzleCorrectionCount(): PuzzleCorrectionCount? = if (readBoolean()) {
+    PuzzleCorrectionCount(readLong())
 } else {
     null
 }

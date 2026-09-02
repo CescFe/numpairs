@@ -78,6 +78,10 @@ class CompletionCelebrationLocalizationTest {
                 R.string.completion_celebration_keep_it_up_supporting_text
             ),
             ResourcePair(
+                R.string.completion_celebration_correction_free_title,
+                R.string.completion_celebration_correction_free_supporting_text
+            ),
+            ResourcePair(
                 R.string.completion_celebration_impressive_title,
                 R.string.completion_celebration_impressive_supporting_text
             ),
@@ -97,6 +101,7 @@ class CompletionCelebrationLocalizationTest {
                     "You nailed it!" to "The whole puzzle checks out.",
                     "Brilliant!" to "Your solution fits perfectly.",
                     "Keep it up!" to "Ready for a tougher challenge?",
+                    "Flawless!" to "You solved it without correcting a single move.",
                     "Impressive!" to "That took some serious thinking.",
                     "Nothing can stop you!" to "And I thought this difficulty was impossible!"
                 )
@@ -111,6 +116,7 @@ class CompletionCelebrationLocalizationTest {
                     "¡Lo has clavado!" to "Todo el puzle encaja.",
                     "¡Brillante!" to "Tu solución encaja a la perfección.",
                     "¡Sigue así!" to "¿Te atreves a subir la dificultad?",
+                    "¡Impecable!" to "Lo resolviste sin corregir una sola jugada.",
                     "¡Im-presionante!" to "En dos palabras.",
                     "¡No hay quien te pare!" to "¡Y yo que pensaba que esta dificultad era imposible!"
                 )
@@ -125,6 +131,7 @@ class CompletionCelebrationLocalizationTest {
                     "Ho has clavat!" to "Tot el puzle encaixa.",
                     "Brillant!" to "La teua solució encaixa a la perfecció.",
                     "Continua així!" to "T’atrevixes a pujar la dificultat?",
+                    "Impecable!" to "L’has resolt sense corregir ni una sola jugada.",
                     "Impressionant!" to "Això sí que ha requerit pensar.",
                     "No hi ha qui et pare!" to "I jo que pensava que esta dificultat era impossible!"
                 )
@@ -139,6 +146,7 @@ class CompletionCelebrationLocalizationTest {
                     "Volltreffer!" to "Das ganze Puzzle geht auf.",
                     "Großartig!" to "Deine Lösung passt perfekt.",
                     "Weiter so!" to "Bereit für einen höheren Schwierigkeitsgrad?",
+                    "Makellos!" to "Du hast es gelöst, ohne einen einzigen Zug zu korrigieren.",
                     "Beeindruckend!" to "Dafür war echtes Köpfchen gefragt.",
                     "Dich hält nichts auf!" to "Und ich dachte schon, das wäre unlösbar!"
                 )

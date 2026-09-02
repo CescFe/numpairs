@@ -36,6 +36,11 @@ internal fun StandardCompletionCelebration.localizedCopy(): GameSuccessOverlayCo
         supportingText = stringResource(R.string.completion_celebration_keep_it_up_supporting_text)
     )
 
+    StandardCompletionCelebration.CORRECTION_FREE -> GameSuccessOverlayCopy(
+        message = stringResource(R.string.completion_celebration_correction_free_title),
+        supportingText = stringResource(R.string.completion_celebration_correction_free_supporting_text)
+    )
+
     StandardCompletionCelebration.MEDIUM_HARD_IMPRESSIVE -> GameSuccessOverlayCopy(
         message = stringResource(R.string.completion_celebration_impressive_title),
         supportingText = stringResource(R.string.completion_celebration_impressive_supporting_text)

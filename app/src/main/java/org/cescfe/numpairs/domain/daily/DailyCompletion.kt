@@ -1,5 +1,7 @@
 package org.cescfe.numpairs.domain.daily
 
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
+
 @JvmInline
 value class DailyElapsedTime(val milliseconds: Long) {
     init {
@@ -21,5 +23,6 @@ value class DailyTimingStartInstant(val epochMilliseconds: Long) {
 data class DailyCompletion(
     val identity: DailyChallengeId,
     val elapsedTime: DailyElapsedTime?,
-    val movementCount: DailyMovementCount? = null
+    val movementCount: DailyMovementCount? = null,
+    val correctionCount: PuzzleCorrectionCount? = null
 )

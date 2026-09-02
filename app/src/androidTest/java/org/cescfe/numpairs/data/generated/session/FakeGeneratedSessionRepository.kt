@@ -3,6 +3,7 @@ package org.cescfe.numpairs.data.generated.session
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
 class FakeGeneratedSessionRepository(initialSession: GeneratedSessionSnapshot? = null) : GeneratedSessionRepository {
@@ -13,13 +14,20 @@ class FakeGeneratedSessionRepository(initialSession: GeneratedSessionSnapshot? =
         mutableSession.value = snapshot
     }
 
-    override suspend fun updateCurrentPuzzle(expectedSessionId: GeneratedSessionId, puzzle: Puzzle): Boolean {
+    override suspend fun updateCurrentPuzzle(
+        expectedSessionId: GeneratedSessionId,
+        puzzle: Puzzle,
+        correctionCount: PuzzleCorrectionCount?
+    ): Boolean {
         val snapshot = mutableSession.value
         if (snapshot?.sessionId != expectedSessionId) {
             return false
         }
 
-        mutableSession.value = snapshot.copy(currentPuzzle = puzzle)
+        mutableSession.value = snapshot.copy(
+            currentPuzzle = puzzle,
+            correctionCount = correctionCount
+        )
         return true
     }
 

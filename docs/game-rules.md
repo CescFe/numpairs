@@ -149,3 +149,22 @@ recreation do not count.
 The movement count starts at zero for a newly created Daily Session and is recorded with its
 Current Puzzle. Historical sessions and completions created before movement tracking keep the
 count unknown because their earlier actions cannot be reconstructed from puzzle state.
+
+## Puzzle Corrections
+
+Quick, Classic, and Daily attempts track a correction when one effective player action rectifies
+durable puzzle state:
+
+- changing or clearing a player-entered strip value
+- reassigning an operand that was already assigned
+- changing an operator that was already assigned
+- resetting a non-pristine tile
+
+A correction counts once even when the mutation clears referenced operands or has other cascading
+effects. First assignments are not corrections. Invalid input, unchanged confirmation, unavailable
+selection, resetting a pristine tile, transient selectors, navigation, and lifecycle events do not
+count.
+
+New playable attempts start at zero corrections. Attempts and Daily completions created before
+correction tracking keep the count unknown because prior corrections cannot be reconstructed from
+the Current Puzzle.

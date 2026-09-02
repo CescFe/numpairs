@@ -1,9 +1,11 @@
 package org.cescfe.numpairs.data.generated.session
 
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 
-const val GENERATED_SESSION_SCHEMA_VERSION: Int = 1
+const val GENERATED_SESSION_SCHEMA_VERSION: Int = 2
+internal const val INITIAL_GENERATED_SESSION_SCHEMA_VERSION: Int = 1
 
 @JvmInline
 value class GeneratedSessionId(val value: String) {
@@ -21,7 +23,8 @@ data class GeneratedSessionSnapshot(
     val profileId: String,
     val seed: Int,
     val initialPuzzle: Puzzle,
-    val currentPuzzle: Puzzle
+    val currentPuzzle: Puzzle,
+    val correctionCount: PuzzleCorrectionCount? = PuzzleCorrectionCount.ZERO
 ) {
     init {
         require(schemaVersion == GENERATED_SESSION_SCHEMA_VERSION) {
