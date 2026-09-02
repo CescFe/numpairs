@@ -100,8 +100,8 @@ docs/
 ├── product/
 ├── technical/
 │   ├── adr/
-│   ├── delivery/
-│   └── code-quality.md
+│   ├── code-quality/
+│   └── delivery/
 ├── game-rules.md
 └── ubiquitous-language.md
 ```
@@ -131,9 +131,9 @@ Core responsibilities:
 - Generated play-option decision: [ADR-007](./docs/technical/adr/adr-007-separate-play-options-from-generated-modes.md)
 - Local upload signing: [release-signing.md](./docs/technical/release-signing.md)
 - UX decisions: `docs/product/ux-decisions.md`
-- Architectural Decision Records: `docs/technical/adr/`
+- Architectural Decision Records: [adr/README.md](./docs/technical/adr/README.md)
 - Delivery documentation: [delivery/README.md](./docs/technical/delivery/README.md)
-- Code quality guidelines: [code-quality.md](./docs/technical/code-quality.md)
+- Code quality documentation: [code-quality/README.md](./docs/technical/code-quality/README.md)
 - Game rules: `docs/game-rules.md`
 - Ubiquitous Language: `docs/ubiquitous-language.md`
 
