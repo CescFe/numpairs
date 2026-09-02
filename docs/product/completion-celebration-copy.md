@@ -1,7 +1,5 @@
 # Standard Completion Celebration Copy
 
-> Status: proposed for issue [#714](https://github.com/CescFe/numpairs/issues/714).
-
 ## Purpose
 
 This document proposes the localized copy catalog for the standard success overlay shown after a
