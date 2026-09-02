@@ -28,6 +28,8 @@ fun GeneratedLearningRoute(
     launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.DefaultNewPuzzle,
     isGeneratedGameHapticsEnabled: Boolean = true,
     compactTileSelectorsEnabled: Boolean = false,
+    isChronometerExpanded: Boolean = true,
+    onChronometerExpandedChange: (Boolean) -> Unit = {},
     tutorialOverlayMode: TutorialMode? = null,
     onTutorialOverlayClosed: () -> Unit = {},
     newPuzzleChallengeProvider: (() -> GeneratedChallenge)? = null,
@@ -61,6 +63,8 @@ fun GeneratedLearningRoute(
             generatedSessionRepository = generatedSessionRepository,
             isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,
             compactTileSelectorsEnabled = compactTileSelectorsEnabled,
+            isChronometerExpanded = isChronometerExpanded,
+            onChronometerExpandedChange = onChronometerExpandedChange,
             isRulesHelperEnabled = true,
             isRulesHelperActionDiscoveryDotVisible = actionDiscoveryState?.hasSeenHelpAction == false,
             onRulesHelperActionTapped = {

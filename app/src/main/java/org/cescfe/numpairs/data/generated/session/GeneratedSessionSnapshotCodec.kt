@@ -8,6 +8,8 @@ import java.io.IOException
 import org.cescfe.numpairs.data.puzzle.readPuzzleSnapshot
 import org.cescfe.numpairs.data.puzzle.writePuzzleSnapshot
 import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
+import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
+import org.cescfe.numpairs.domain.generated.GeneratedTimingStartInstant
 
 sealed interface GeneratedSessionSnapshotDecodingResult {
     data class Decoded(val snapshot: GeneratedSessionSnapshot) : GeneratedSessionSnapshotDecodingResult
@@ -37,6 +39,14 @@ class GeneratedSessionSnapshotCodec {
                 snapshot.correctionCount?.let { correctionCount ->
                     output.writeLong(correctionCount.value)
                 }
+                output.writeBoolean(snapshot.timingStartInstant != null)
+                snapshot.timingStartInstant?.let { startInstant ->
+                    output.writeLong(startInstant.epochMilliseconds)
+                }
+                output.writeBoolean(snapshot.completionElapsedTime != null)
+                snapshot.completionElapsedTime?.let { elapsedTime ->
+                    output.writeLong(elapsedTime.milliseconds)
+                }
             }
             bytes.toByteArray()
         }
@@ -50,15 +60,23 @@ class GeneratedSessionSnapshotCodec {
 
             val schemaVersion = input.readInt()
             val snapshot = when (schemaVersion) {
-                INITIAL_GENERATED_SESSION_SCHEMA_VERSION -> input.readSnapshotWith { null }
+                INITIAL_GENERATED_SESSION_SCHEMA_VERSION -> input.readSnapshotWith(
+                    readCorrectionCount = { null }
+                )
 
-                GENERATED_SESSION_SCHEMA_VERSION -> input.readSnapshotWith {
-                    if (readBoolean()) {
-                        PuzzleCorrectionCount(readLong())
-                    } else {
-                        null
+                GENERATED_SESSION_ATTEMPT_METRICS_SCHEMA_VERSION -> input.readSnapshotWith(
+                    readCorrectionCount = { readCorrectionCount() }
+                )
+
+                GENERATED_SESSION_SCHEMA_VERSION -> input.readSnapshotWith(
+                    readCorrectionCount = { readCorrectionCount() },
+                    readTimingStart = {
+                        if (readBoolean()) GeneratedTimingStartInstant(readLong()) else null
+                    },
+                    readCompletionElapsedTime = {
+                        if (readBoolean()) GeneratedElapsedTime(readLong()) else null
                     }
-                }
+                )
 
                 else -> return GeneratedSessionSnapshotDecodingResult.UnsupportedVersion(schemaVersion)
             }
@@ -79,7 +97,9 @@ class GeneratedSessionSnapshotCodec {
 }
 
 private fun DataInputStream.readSnapshotWith(
-    readCorrectionCount: DataInputStream.() -> PuzzleCorrectionCount?
+    readCorrectionCount: DataInputStream.() -> PuzzleCorrectionCount?,
+    readTimingStart: DataInputStream.() -> GeneratedTimingStartInstant? = { null },
+    readCompletionElapsedTime: DataInputStream.() -> GeneratedElapsedTime? = { null }
 ): GeneratedSessionSnapshot {
     val sessionId = GeneratedSessionId(readUTF())
     val modeId = readUTF()
@@ -94,8 +114,13 @@ private fun DataInputStream.readSnapshotWith(
         seed = seed,
         initialPuzzle = initialPuzzle,
         currentPuzzle = currentPuzzle,
-        correctionCount = readCorrectionCount()
+        correctionCount = readCorrectionCount(),
+        timingStartInstant = readTimingStart(),
+        completionElapsedTime = readCompletionElapsedTime()
     )
 }
+
+private fun DataInputStream.readCorrectionCount(): PuzzleCorrectionCount? =
+    if (readBoolean()) PuzzleCorrectionCount(readLong()) else null
 
 private const val FILE_MAGIC = 0x4E505331

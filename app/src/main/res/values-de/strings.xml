@@ -77,6 +77,11 @@
     <!-- Generated puzzle creation -->
     <string name="generated_puzzle_loading_message">Puzzle wird erstellt…</string>
     <string name="generated_puzzle_failure_title">Puzzle nicht verfügbar</string>
+    <string name="generated_progress_failure_title">Fortschritt nicht gespeichert</string>
+    <string name="generated_progress_failure_message">Dein Fortschritt und die verstrichene Zeit konnten nicht gespeichert werden. Versuche es erneut, bevor du fortfährst.</string>
+    <string name="generated_elapsed_time_content_description">Verstrichene Zeit: %1$s</string>
+    <string name="generated_hide_elapsed_time_action">Verstrichene Zeit ausblenden</string>
+    <string name="generated_show_elapsed_time_action">Verstrichene Zeit anzeigen</string>
     <string name="generated_puzzle_failure_message">Das Puzzle konnte nicht erstellt werden. Bitte versuche es erneut.</string>
     <string name="generated_puzzle_retry_button">Erneut versuchen</string>
     <string name="onboarding_startup_failure_title">NumPairs kann nicht geöffnet werden</string>

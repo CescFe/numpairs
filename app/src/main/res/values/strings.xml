@@ -77,6 +77,11 @@
     <!-- Generated puzzle creation -->
     <string name="generated_puzzle_loading_message">Creating puzzle…</string>
     <string name="generated_puzzle_failure_title">Puzzle unavailable</string>
+    <string name="generated_progress_failure_title">Progress not saved</string>
+    <string name="generated_progress_failure_message">Your progress and elapsed time could not be saved. Try again before continuing.</string>
+    <string name="generated_elapsed_time_content_description">Elapsed time: %1$s</string>
+    <string name="generated_hide_elapsed_time_action">Hide elapsed time</string>
+    <string name="generated_show_elapsed_time_action">Show elapsed time</string>
     <string name="generated_puzzle_failure_message">We could not create a puzzle. Please try again.</string>
     <string name="generated_puzzle_retry_button">Retry</string>
     <string name="onboarding_startup_failure_title">Unable to open NumPairs</string>

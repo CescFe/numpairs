@@ -37,6 +37,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
@@ -47,6 +51,9 @@ import org.cescfe.numpairs.feature.game.StandardCompletionCelebrationSelector
 import org.cescfe.numpairs.feature.game.localizedCopy
 import org.cescfe.numpairs.feature.game.presentation.CommittedPuzzleMutation
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
+import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
+import org.cescfe.numpairs.feature.time.ElapsedTimeSource
+import org.cescfe.numpairs.feature.time.SystemElapsedTimeSource
 
 @Composable
 fun GeneratedModeRoute(
@@ -58,6 +65,9 @@ fun GeneratedModeRoute(
     launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.DefaultNewPuzzle,
     isGeneratedGameHapticsEnabled: Boolean = true,
     compactTileSelectorsEnabled: Boolean = false,
+    isChronometerExpanded: Boolean = true,
+    onChronometerExpandedChange: (Boolean) -> Unit = {},
+    timeSource: ElapsedTimeSource = SystemElapsedTimeSource,
     isRulesHelperEnabled: Boolean = false,
     isRulesHelperActionDiscoveryDotVisible: Boolean = false,
     onRulesHelperActionTapped: () -> Unit = {},
@@ -73,7 +83,8 @@ fun GeneratedModeRoute(
     val viewModel = rememberGeneratedPuzzleViewModel(
         challenge = challenge,
         generationUseCase = generationUseCase,
-        generatedSessionRepository = generatedSessionRepository
+        generatedSessionRepository = generatedSessionRepository,
+        timeSource = timeSource
     )
     val uiState by viewModel.uiState.collectAsState()
 
@@ -96,6 +107,8 @@ fun GeneratedModeRoute(
             topBarActions = topBarActions,
             isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,
             compactTileSelectorsEnabled = compactTileSelectorsEnabled,
+            isChronometerExpanded = isChronometerExpanded,
+            onChronometerExpandedChange = onChronometerExpandedChange,
             onNewPuzzleRequested = {
                 if (newPuzzleChallengeProvider == null) {
                     viewModel.onNewPuzzleRequested()
@@ -111,7 +124,10 @@ fun GeneratedModeRoute(
                 }
             },
             onPuzzleMutationCommitted = viewModel::onPuzzleMutationCommitted,
+            onPuzzlePresented = viewModel::onPuzzlePresented,
+            onTimerRefresh = viewModel::onTimerRefresh,
             onReplacementTransitionConsumed = viewModel::onReplacementTransitionConsumed,
+            onRetryPersistence = viewModel::retryPersistence,
             onRetry = viewModel::retry,
             onNavigateBack = onNavigateBack
         )
@@ -158,9 +174,14 @@ private fun GeneratedPuzzleGameBoundary(
     topBarActions: @Composable RowScope.() -> Unit,
     isGeneratedGameHapticsEnabled: Boolean,
     compactTileSelectorsEnabled: Boolean,
+    isChronometerExpanded: Boolean,
+    onChronometerExpandedChange: (Boolean) -> Unit,
     onNewPuzzleRequested: () -> Unit,
     onPuzzleMutationCommitted: (GeneratedSessionId, CommittedPuzzleMutation) -> Unit,
+    onPuzzlePresented: (GeneratedSessionId) -> Unit,
+    onTimerRefresh: (GeneratedSessionId) -> Unit,
     onReplacementTransitionConsumed: (GeneratedPuzzleReplacementTransition) -> Unit,
+    onRetryPersistence: () -> Unit,
     onRetry: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
@@ -235,8 +256,14 @@ private fun GeneratedPuzzleGameBoundary(
         topBarActions = topBarActions,
         isGeneratedGameHapticsEnabled = isGeneratedGameHapticsEnabled,
         compactTileSelectorsEnabled = compactTileSelectorsEnabled,
+        elapsedTime = (state as? GeneratedPuzzleGenerationUiState.Ready)?.elapsedTime
+            ?: session.snapshot.completionElapsedTime,
+        isChronometerExpanded = isChronometerExpanded,
+        onChronometerExpandedChange = onChronometerExpandedChange,
         onNewPuzzleRequested = onNewPuzzleRequested,
         onPuzzleMutationCommitted = onPuzzleMutationCommitted,
+        onPuzzlePresented = onPuzzlePresented,
+        onTimerRefresh = onTimerRefresh,
         onNavigateBack = onNavigateBack,
         overlay = {
             when (state) {
@@ -254,6 +281,12 @@ private fun GeneratedPuzzleGameBoundary(
             }
         }
     )
+    if ((state as? GeneratedPuzzleGenerationUiState.Ready)?.hasPersistenceFailure == true) {
+        GeneratedPersistenceFailureDialog(
+            onRetry = onRetryPersistence,
+            onNavigateBack = onNavigateBack
+        )
+    }
 }
 
 @Composable
@@ -268,12 +301,19 @@ private fun GeneratedPuzzleGameContent(
     topBarActions: @Composable RowScope.() -> Unit,
     isGeneratedGameHapticsEnabled: Boolean,
     compactTileSelectorsEnabled: Boolean,
+    elapsedTime: GeneratedElapsedTime?,
+    isChronometerExpanded: Boolean,
+    onChronometerExpandedChange: (Boolean) -> Unit,
     onNewPuzzleRequested: () -> Unit,
     onPuzzleMutationCommitted: (GeneratedSessionId, CommittedPuzzleMutation) -> Unit,
+    onPuzzlePresented: (GeneratedSessionId) -> Unit,
+    onTimerRefresh: (GeneratedSessionId) -> Unit,
     onNavigateBack: () -> Unit,
     overlay: @Composable () -> Unit = {}
 ) {
     val hapticFeedback = LocalHapticFeedback.current
+    val formattedElapsedTime = session.snapshot.completionElapsedTime
+        ?.let(GeneratedElapsedTimeFormatter::format)
     val completionCelebrationCopy = StandardCompletionCelebrationSelector.select(
         StandardCompletionCelebrationContext(
             generatedChallengeId = session.challenge.id.value,
@@ -281,7 +321,23 @@ private fun GeneratedPuzzleGameContent(
             difficulty = session.challenge.difficulty,
             correctionCount = session.snapshot.correctionCount
         )
-    ).localizedCopy()
+    ).localizedCopy().copy(
+        highlightText = formattedElapsedTime,
+        highlightContentDescription = formattedElapsedTime?.let { formatted ->
+            stringResource(R.string.generated_elapsed_time_content_description, formatted)
+        }
+    )
+
+    LaunchedEffect(session.id, session.currentPuzzle.isSolved) {
+        if (session.currentPuzzle.isSolved) {
+            return@LaunchedEffect
+        }
+        onPuzzlePresented(session.id)
+        while (currentCoroutineContext().isActive) {
+            delay(GENERATED_TIMER_REFRESH_INTERVAL_MILLISECONDS.milliseconds)
+            onTimerRefresh(session.id)
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         GameRoute(
@@ -301,7 +357,14 @@ private fun GeneratedPuzzleGameContent(
             isCompletionCelebrationEnabled = true,
             successOverlayCopy = completionCelebrationCopy,
             compactTileSelectorsEnabled = compactTileSelectorsEnabled,
-            topBarActions = topBarActions,
+            topBarActions = {
+                GeneratedChronometer(
+                    elapsedTime = elapsedTime ?: ZERO_GENERATED_ELAPSED_TIME,
+                    isExpanded = isChronometerExpanded,
+                    onExpandedChange = onChronometerExpandedChange
+                )
+                topBarActions()
+            },
             onPuzzleMutationCommitted = { mutation ->
                 onPuzzleMutationCommitted(session.id, mutation)
             },
@@ -469,21 +532,48 @@ private fun GeneratedPuzzleFailureDialog(onRetry: () -> Unit, onNavigateBack: ()
 }
 
 @Composable
+private fun GeneratedPersistenceFailureDialog(onRetry: () -> Unit, onNavigateBack: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onNavigateBack,
+        shape = NumPairsComponents.LargeShape,
+        containerColor = NumPairsComponents.raisedSurfaceColor(),
+        title = {
+            Text(text = stringResource(R.string.generated_progress_failure_title))
+        },
+        text = {
+            Text(text = stringResource(R.string.generated_progress_failure_message))
+        },
+        confirmButton = {
+            Button(onClick = onRetry) {
+                Text(text = stringResource(R.string.generated_puzzle_retry_button))
+            }
+        },
+        dismissButton = {
+            Button(onClick = onNavigateBack) {
+                Text(text = stringResource(R.string.generated_puzzle_back_to_menu_button))
+            }
+        }
+    )
+}
+
+@Composable
 private fun rememberGeneratedPuzzleViewModel(
     challenge: GeneratedChallenge,
     generationUseCase: GeneratedPuzzleGenerationUseCase,
-    generatedSessionRepository: GeneratedSessionRepository
+    generatedSessionRepository: GeneratedSessionRepository,
+    timeSource: ElapsedTimeSource
 ): GeneratedPuzzleViewModel {
     val activity = LocalContext.current.findComponentActivity()
         ?: error("GeneratedModeRoute requires a ComponentActivity host.")
 
-    return remember(activity, challenge.id, generationUseCase, generatedSessionRepository) {
+    return remember(activity, challenge.id, generationUseCase, generatedSessionRepository, timeSource) {
         ViewModelProvider(
             activity,
             GeneratedPuzzleViewModelFactory(
                 challenge = challenge,
                 generationUseCase = generationUseCase,
-                generatedSessionRepository = generatedSessionRepository
+                generatedSessionRepository = generatedSessionRepository,
+                timeSource = timeSource
             )
         )[challenge.generatedPuzzleViewModelKey(), GeneratedPuzzleViewModel::class.java]
     }
@@ -494,7 +584,8 @@ internal fun GeneratedChallenge.generatedPuzzleViewModelKey(): String = "generat
 private class GeneratedPuzzleViewModelFactory(
     private val challenge: GeneratedChallenge,
     private val generationUseCase: GeneratedPuzzleGenerationUseCase,
-    private val generatedSessionRepository: GeneratedSessionRepository
+    private val generatedSessionRepository: GeneratedSessionRepository,
+    private val timeSource: ElapsedTimeSource
 ) : ViewModelProvider.Factory {
     override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
         require(modelClass.isAssignableFrom(GeneratedPuzzleViewModel::class.java)) {
@@ -506,7 +597,8 @@ private class GeneratedPuzzleViewModelFactory(
                 GeneratedPuzzleViewModel(
                     challenge = challenge,
                     generationUseCase = generationUseCase,
-                    generatedSessionRepository = generatedSessionRepository
+                    generatedSessionRepository = generatedSessionRepository,
+                    timeSource = timeSource
                 )
             )
         )
@@ -523,6 +615,8 @@ internal const val GENERATED_PUZZLE_LOADING_TAG = "generatedPuzzleLoading"
 internal const val GENERATED_PUZZLE_FAILURE_TAG = "generatedPuzzleFailure"
 internal const val GENERATED_SESSION_RESUME_UNAVAILABLE_TAG = "generatedSessionResumeUnavailable"
 internal const val GENERATED_PUZZLE_CONTENT_TAG = "generatedPuzzleContent"
+private const val GENERATED_TIMER_REFRESH_INTERVAL_MILLISECONDS = 250L
+private val ZERO_GENERATED_ELAPSED_TIME = GeneratedElapsedTime(0)
 internal const val REPLACEMENT_TRANSITION_INITIAL_ALPHA = 0.82f
 internal const val REPLACEMENT_TRANSITION_INITIAL_SCALE = 0.985f
 internal const val REPLACEMENT_TRANSITION_DURATION_MILLIS = 260

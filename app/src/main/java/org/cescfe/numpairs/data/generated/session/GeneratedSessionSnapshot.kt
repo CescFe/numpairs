@@ -1,11 +1,14 @@
 package org.cescfe.numpairs.data.generated.session
 
 import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
+import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
+import org.cescfe.numpairs.domain.generated.GeneratedTimingStartInstant
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 
-const val GENERATED_SESSION_SCHEMA_VERSION: Int = 2
+const val GENERATED_SESSION_SCHEMA_VERSION: Int = 3
 internal const val INITIAL_GENERATED_SESSION_SCHEMA_VERSION: Int = 1
+internal const val GENERATED_SESSION_ATTEMPT_METRICS_SCHEMA_VERSION: Int = 2
 
 @JvmInline
 value class GeneratedSessionId(val value: String) {
@@ -24,7 +27,9 @@ data class GeneratedSessionSnapshot(
     val seed: Int,
     val initialPuzzle: Puzzle,
     val currentPuzzle: Puzzle,
-    val correctionCount: PuzzleCorrectionCount? = PuzzleCorrectionCount.ZERO
+    val correctionCount: PuzzleCorrectionCount? = PuzzleCorrectionCount.ZERO,
+    val timingStartInstant: GeneratedTimingStartInstant? = null,
+    val completionElapsedTime: GeneratedElapsedTime? = null
 ) {
     init {
         require(schemaVersion == GENERATED_SESSION_SCHEMA_VERSION) {
@@ -35,6 +40,9 @@ data class GeneratedSessionSnapshot(
         }
         require(profileId.isNotBlank()) {
             "Generated session profile id must not be blank."
+        }
+        require(completionElapsedTime == null || timingStartInstant != null) {
+            "A generated completion duration requires a timing start."
         }
         require(
             initialPuzzle.board.tiles.map { tile -> tile.result } ==

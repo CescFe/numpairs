@@ -15,9 +15,15 @@ import kotlinx.coroutines.launch
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionSnapshot
+import org.cescfe.numpairs.data.generated.session.GeneratedSessionTimingStartResult
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
+import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
+import org.cescfe.numpairs.domain.generated.GeneratedTimingStartInstant
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.game.presentation.CommittedPuzzleMutation
+import org.cescfe.numpairs.feature.time.ElapsedTimeReading
+import org.cescfe.numpairs.feature.time.ElapsedTimeSource
+import org.cescfe.numpairs.feature.time.SystemElapsedTimeSource
 
 fun interface GeneratedPuzzleSeedSource {
     fun nextSeed(): Int
@@ -54,7 +60,9 @@ internal sealed interface GeneratedPuzzleGenerationUiState {
 
     data class Ready(
         val session: GeneratedModeGameSession,
-        val replacementTransition: GeneratedPuzzleReplacementTransition? = null
+        val replacementTransition: GeneratedPuzzleReplacementTransition? = null,
+        val elapsedTime: GeneratedElapsedTime? = session.snapshot.completionElapsedTime,
+        val hasPersistenceFailure: Boolean = false
     ) : GeneratedPuzzleGenerationUiState {
         init {
             require(replacementTransition == null || replacementTransition.successorSessionId == session.id) {
@@ -78,7 +86,8 @@ internal class GeneratedPuzzleViewModel(
     private val generationUseCase: GeneratedPuzzleGenerationUseCase,
     private val generatedSessionRepository: GeneratedSessionRepository,
     private val seedSource: GeneratedPuzzleSeedSource = ThreadLocalGeneratedPuzzleSeedSource,
-    private val sessionIdSource: GeneratedSessionIdSource = UuidGeneratedSessionIdSource
+    private val sessionIdSource: GeneratedSessionIdSource = UuidGeneratedSessionIdSource,
+    private val timeSource: ElapsedTimeSource = SystemElapsedTimeSource
 ) : ViewModel() {
     private val initialDefinition = GeneratedPuzzleGenerationDefinition(
         challenge = challenge,
@@ -91,6 +100,9 @@ internal class GeneratedPuzzleViewModel(
     private var generationToken = 0
     private var activeLaunchIntent: GeneratedModeLaunchIntent? = null
     private var sessionWriteJob: Job? = null
+    private var visibleTimer: VisibleGeneratedTimer? = null
+    private var pendingTimingStart: PendingGeneratedTimingStart? = null
+    private val elapsedHighWaterBySessionId = mutableMapOf<GeneratedSessionId, GeneratedElapsedTime>()
 
     fun onRouteEntered(launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.DefaultNewPuzzle) {
         if (launchIntent != activeLaunchIntent) {
@@ -181,11 +193,94 @@ internal class GeneratedPuzzleViewModel(
         }
     }
 
+    fun onPuzzlePresented(expectedSessionId: GeneratedSessionId) {
+        val state = _uiState.value as? GeneratedPuzzleGenerationUiState.Ready ?: return
+        if (
+            state.session.id != expectedSessionId ||
+            state.session.currentPuzzle.isSolved ||
+            visibleTimer?.sessionId == expectedSessionId
+        ) {
+            return
+        }
+
+        val reading = timeSource.read()
+        val persistedStart = state.session.snapshot.timingStartInstant
+        val pendingStart = pendingTimingStart
+            ?.takeIf { pending -> pending.sessionId == expectedSessionId }
+            ?.startInstant
+        val startInstant = persistedStart
+            ?: pendingStart
+            ?: GeneratedTimingStartInstant(reading.epochMilliseconds)
+        val restoredElapsed = GeneratedElapsedTime(
+            nonNegativeDifference(
+                current = reading.epochMilliseconds,
+                earlier = startInstant.epochMilliseconds
+            )
+        )
+        val elapsedAtAnchor = maxElapsedTime(
+            restoredElapsed,
+            elapsedHighWaterBySessionId[expectedSessionId]
+        )
+        val session = state.session.withTimingStart(startInstant)
+        visibleTimer = VisibleGeneratedTimer(
+            sessionId = expectedSessionId,
+            anchorMonotonicMilliseconds = reading.monotonicMilliseconds,
+            elapsedAtAnchor = elapsedAtAnchor,
+            highWater = elapsedAtAnchor
+        )
+        elapsedHighWaterBySessionId[expectedSessionId] = elapsedAtAnchor
+        _uiState.value = state.copy(
+            session = session,
+            elapsedTime = elapsedAtAnchor
+        )
+
+        if (persistedStart == null) {
+            pendingTimingStart = PendingGeneratedTimingStart(
+                sessionId = expectedSessionId,
+                startInstant = startInstant
+            )
+            enqueueSessionPersistence(session = session, timingStartOnly = true)
+        }
+    }
+
+    fun onTimerRefresh(expectedSessionId: GeneratedSessionId) {
+        val state = _uiState.value as? GeneratedPuzzleGenerationUiState.Ready ?: return
+        val timer = visibleTimer ?: return
+        if (
+            state.session.id != expectedSessionId ||
+            state.session.currentPuzzle.isSolved ||
+            timer.sessionId != expectedSessionId
+        ) {
+            return
+        }
+
+        val elapsedTime = timer.readElapsed(timeSource.read())
+        elapsedHighWaterBySessionId[expectedSessionId] = elapsedTime
+        if (elapsedTime != state.elapsedTime) {
+            _uiState.value = state.copy(elapsedTime = elapsedTime)
+        }
+    }
+
+    fun retryPersistence() {
+        val state = _uiState.value as? GeneratedPuzzleGenerationUiState.Ready ?: return
+        if (!state.hasPersistenceFailure) {
+            return
+        }
+        _uiState.value = state.copy(hasPersistenceFailure = false)
+        enqueueSessionPersistence(session = state.session, timingStartOnly = false)
+    }
+
     fun onPuzzleMutationCommitted(expectedSessionId: GeneratedSessionId, mutation: CommittedPuzzleMutation) {
+        val completionElapsedTime = if (mutation.puzzle.isSolved) {
+            captureCompletionElapsedTime(expectedSessionId)
+        } else {
+            null
+        }
         val updatedSession = try {
             updateVisibleSession(
                 expectedSessionId = expectedSessionId,
-                mutation = mutation
+                mutation = mutation,
+                completionElapsedTime = completionElapsedTime
             )
         } catch (_: IllegalArgumentException) {
             null
@@ -193,28 +288,13 @@ internal class GeneratedPuzzleViewModel(
             return
         }
 
-        val precedingWrite = sessionWriteJob
-        sessionWriteJob = viewModelScope.launch {
-            precedingWrite?.join()
-            try {
-                if (mutation.puzzle.isSolved) {
-                    generatedSessionRepository.clear(expectedSessionId = expectedSessionId)
-                } else {
-                    generatedSessionRepository.updateCurrentPuzzle(
-                        expectedSessionId = expectedSessionId,
-                        puzzle = mutation.puzzle,
-                        correctionCount = updatedSession.snapshot.correctionCount
-                    )
-                }
-            } catch (_: IOException) {
-                // Keep the playable in-memory session when local persistence is temporarily unavailable.
-            }
-        }
+        enqueueSessionPersistence(session = updatedSession, timingStartOnly = false)
     }
 
     private fun updateVisibleSession(
         expectedSessionId: GeneratedSessionId,
-        mutation: CommittedPuzzleMutation
+        mutation: CommittedPuzzleMutation,
+        completionElapsedTime: GeneratedElapsedTime?
     ): GeneratedModeGameSession? {
         val state = _uiState.value
         val visibleSession = when (state) {
@@ -243,10 +323,15 @@ internal class GeneratedPuzzleViewModel(
         val updatedSession = visibleSession.copy(
             snapshot = visibleSession.snapshot.copy(
                 currentPuzzle = mutation.puzzle,
-                correctionCount = correctionCount
+                correctionCount = correctionCount,
+                completionElapsedTime = completionElapsedTime
             )
         )
-        _uiState.value = state.withVisibleSession(updatedSession)
+        _uiState.value = state.withVisibleSession(
+            session = updatedSession,
+            elapsedTime = completionElapsedTime
+                ?: (state as? GeneratedPuzzleGenerationUiState.Ready)?.elapsedTime
+        )
         return updatedSession
     }
 
@@ -360,6 +445,15 @@ internal class GeneratedPuzzleViewModel(
         )
 
         return try {
+            sessionWriteJob?.join()
+            if (previousSession != null && !persistPendingTimingStart(previousSession.id)) {
+                return GeneratedPuzzleGenerationUiState.Failed(
+                    definition = definition,
+                    request = outcome.request,
+                    failure = GeneratedPuzzlePreparationFailure.Persistence,
+                    previousSession = previousSession
+                )
+            }
             generatedSessionRepository.replace(snapshot)
             val session = GeneratedModeGameSession(
                 challenge = definition.challenge,
@@ -390,6 +484,145 @@ internal class GeneratedPuzzleViewModel(
             profile = challenge.profile,
             seed = seedSource.nextSeed()
         )
+
+    private fun enqueueSessionPersistence(session: GeneratedModeGameSession, timingStartOnly: Boolean) {
+        val precedingWrite = sessionWriteJob
+        sessionWriteJob = viewModelScope.launch {
+            precedingWrite?.join()
+            try {
+                if (!persistPendingTimingStart(session.id)) {
+                    publishPersistenceFailure(session.id)
+                    return@launch
+                }
+                if (!timingStartOnly) {
+                    val wasUpdated = generatedSessionRepository.updateCurrentPuzzle(
+                        expectedSessionId = session.id,
+                        puzzle = session.currentPuzzle,
+                        correctionCount = session.snapshot.correctionCount,
+                        completionElapsedTime = session.snapshot.completionElapsedTime
+                    )
+                    if (!wasUpdated) {
+                        publishPersistenceFailure(session.id)
+                        return@launch
+                    }
+                    if (session.currentPuzzle.isSolved && !generatedSessionRepository.clear(session.id)) {
+                        publishPersistenceFailure(session.id)
+                        return@launch
+                    }
+                }
+                clearPersistenceFailure(session.id)
+            } catch (_: IOException) {
+                publishPersistenceFailure(session.id)
+            }
+        }
+    }
+
+    private suspend fun persistPendingTimingStart(expectedSessionId: GeneratedSessionId): Boolean {
+        val pending = pendingTimingStart
+            ?.takeIf { pendingStart -> pendingStart.sessionId == expectedSessionId }
+            ?: return true
+        return when (
+            val result = generatedSessionRepository.startTiming(
+                expectedSessionId = expectedSessionId,
+                startInstant = pending.startInstant
+            )
+        ) {
+            is GeneratedSessionTimingStartResult.Started -> {
+                acceptPersistedTimingStart(expectedSessionId, result.startInstant)
+                true
+            }
+
+            is GeneratedSessionTimingStartResult.AlreadyStarted -> {
+                acceptPersistedTimingStart(expectedSessionId, result.startInstant)
+                true
+            }
+
+            GeneratedSessionTimingStartResult.StaleSession -> false
+        }
+    }
+
+    private fun acceptPersistedTimingStart(
+        sessionId: GeneratedSessionId,
+        startInstant: GeneratedTimingStartInstant
+    ) {
+        val pending = pendingTimingStart ?: return
+        if (pending.sessionId != sessionId) {
+            return
+        }
+        pendingTimingStart = null
+        val state = _uiState.value as? GeneratedPuzzleGenerationUiState.Ready ?: return
+        if (state.session.id != sessionId || state.session.snapshot.timingStartInstant == startInstant) {
+            return
+        }
+
+        val session = state.session.withTimingStart(startInstant, replaceExisting = true)
+        if (session.currentPuzzle.isSolved) {
+            _uiState.value = state.copy(session = session)
+            return
+        }
+        val reading = timeSource.read()
+        val elapsedTime = maxElapsedTime(
+            GeneratedElapsedTime(
+                nonNegativeDifference(reading.epochMilliseconds, startInstant.epochMilliseconds)
+            ),
+            state.elapsedTime,
+            elapsedHighWaterBySessionId[sessionId]
+        )
+        elapsedHighWaterBySessionId[sessionId] = elapsedTime
+        visibleTimer = VisibleGeneratedTimer(
+            sessionId = sessionId,
+            anchorMonotonicMilliseconds = reading.monotonicMilliseconds,
+            elapsedAtAnchor = elapsedTime,
+            highWater = elapsedTime
+        )
+        _uiState.value = state.copy(session = session, elapsedTime = elapsedTime)
+    }
+
+    private fun captureCompletionElapsedTime(sessionId: GeneratedSessionId): GeneratedElapsedTime? {
+        val state = _uiState.value as? GeneratedPuzzleGenerationUiState.Ready ?: return null
+        if (state.session.id != sessionId || state.session.currentPuzzle.isSolved) {
+            return state.session.snapshot.completionElapsedTime
+        }
+        val timer = visibleTimer
+        val measured = when {
+            timer?.sessionId == sessionId -> timer.readElapsed(timeSource.read())
+            state.session.snapshot.timingStartInstant != null -> {
+                val reading = timeSource.read()
+                GeneratedElapsedTime(
+                    nonNegativeDifference(
+                        reading.epochMilliseconds,
+                        state.session.snapshot.timingStartInstant.epochMilliseconds
+                    )
+                )
+            }
+
+            else -> null
+        }
+        visibleTimer = null
+        return measured?.let { elapsedTime ->
+            maxElapsedTime(
+                elapsedTime,
+                state.elapsedTime,
+                elapsedHighWaterBySessionId[sessionId]
+            ).also { frozen ->
+                elapsedHighWaterBySessionId[sessionId] = frozen
+            }
+        }
+    }
+
+    private fun publishPersistenceFailure(expectedSessionId: GeneratedSessionId) {
+        val state = _uiState.value as? GeneratedPuzzleGenerationUiState.Ready ?: return
+        if (state.session.id == expectedSessionId) {
+            _uiState.value = state.copy(hasPersistenceFailure = true)
+        }
+    }
+
+    private fun clearPersistenceFailure(expectedSessionId: GeneratedSessionId) {
+        val state = _uiState.value as? GeneratedPuzzleGenerationUiState.Ready ?: return
+        if (state.session.id == expectedSessionId && state.hasPersistenceFailure) {
+            _uiState.value = state.copy(hasPersistenceFailure = false)
+        }
+    }
 }
 
 internal data class GeneratedPuzzleGenerationDefinition(
@@ -436,12 +669,26 @@ internal data class GeneratedModeGameSession(
 
     val currentPuzzle: Puzzle
         get() = snapshot.currentPuzzle
+
+    fun withTimingStart(
+        startInstant: GeneratedTimingStartInstant,
+        replaceExisting: Boolean = false
+    ): GeneratedModeGameSession = copy(
+        snapshot = snapshot.copy(
+            timingStartInstant = if (replaceExisting) {
+                startInstant
+            } else {
+                snapshot.timingStartInstant ?: startInstant
+            }
+        )
+    )
 }
 
 private fun GeneratedPuzzleGenerationUiState.withVisibleSession(
-    session: GeneratedModeGameSession
+    session: GeneratedModeGameSession,
+    elapsedTime: GeneratedElapsedTime?
 ): GeneratedPuzzleGenerationUiState = when (this) {
-    is GeneratedPuzzleGenerationUiState.Ready -> copy(session = session)
+    is GeneratedPuzzleGenerationUiState.Ready -> copy(session = session, elapsedTime = elapsedTime)
 
     is GeneratedPuzzleGenerationUiState.Loading -> copy(previousSession = session)
 
@@ -452,4 +699,48 @@ private fun GeneratedPuzzleGenerationUiState.withVisibleSession(
     is GeneratedPuzzleGenerationUiState.ResumeUnavailable -> error(
         "Only a generated puzzle state with a visible session can replace that session."
     )
+}
+
+private data class PendingGeneratedTimingStart(
+    val sessionId: GeneratedSessionId,
+    val startInstant: GeneratedTimingStartInstant
+)
+
+private data class VisibleGeneratedTimer(
+    val sessionId: GeneratedSessionId,
+    val anchorMonotonicMilliseconds: Long,
+    val elapsedAtAnchor: GeneratedElapsedTime,
+    var highWater: GeneratedElapsedTime
+) {
+    fun readElapsed(reading: ElapsedTimeReading): GeneratedElapsedTime {
+        val monotonicDelta = nonNegativeDifference(
+            current = reading.monotonicMilliseconds,
+            earlier = anchorMonotonicMilliseconds
+        )
+        val measuredElapsed = GeneratedElapsedTime(
+            saturatedSum(elapsedAtAnchor.milliseconds, monotonicDelta)
+        )
+        highWater = maxElapsedTime(highWater, measuredElapsed)
+        return highWater
+    }
+}
+
+private fun nonNegativeDifference(current: Long, earlier: Long): Long = if (current >= earlier) {
+    current - earlier
+} else {
+    0L
+}
+
+private fun saturatedSum(first: Long, second: Long): Long = if (Long.MAX_VALUE - first < second) {
+    Long.MAX_VALUE
+} else {
+    first + second
+}
+
+private fun maxElapsedTime(
+    first: GeneratedElapsedTime,
+    second: GeneratedElapsedTime?,
+    third: GeneratedElapsedTime? = null
+): GeneratedElapsedTime = listOf(second, third).fold(first) { maximum, candidate ->
+    if (candidate != null && candidate.milliseconds > maximum.milliseconds) candidate else maximum
 }

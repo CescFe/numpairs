@@ -16,6 +16,7 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
+import org.cescfe.numpairs.domain.generated.GeneratedTimingStartInstant
 import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.junit.After
@@ -74,6 +75,33 @@ class DataStoreGeneratedSessionRepositoryTest {
         assertEquals(
             snapshot.copy(currentPuzzle = updatedPuzzle),
             fixture.repository.session.first()
+        )
+    }
+
+    @Test
+    fun `timing start is identity guarded and can only be established once`() = runBlocking {
+        val fixture = createRepository()
+        val snapshot = snapshot()
+        fixture.repository.replace(snapshot)
+
+        assertEquals(
+            GeneratedSessionTimingStartResult.StaleSession,
+            fixture.repository.startTiming(
+                GeneratedSessionId("stale"),
+                GeneratedTimingStartInstant(1_000)
+            )
+        )
+        assertEquals(
+            GeneratedSessionTimingStartResult.Started(GeneratedTimingStartInstant(2_000)),
+            fixture.repository.startTiming(snapshot.sessionId, GeneratedTimingStartInstant(2_000))
+        )
+        assertEquals(
+            GeneratedSessionTimingStartResult.AlreadyStarted(GeneratedTimingStartInstant(2_000)),
+            fixture.repository.startTiming(snapshot.sessionId, GeneratedTimingStartInstant(9_000))
+        )
+        assertEquals(
+            GeneratedTimingStartInstant(2_000),
+            fixture.repository.session.first()?.timingStartInstant
         )
     }
 

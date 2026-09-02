@@ -10,13 +10,21 @@ enum class GameSuccessOverlayStandardBadge {
     CHECK
 }
 
-data class GameSuccessOverlayCopy(val message: String, val supportingText: String) {
+data class GameSuccessOverlayCopy(
+    val message: String,
+    val supportingText: String,
+    val highlightText: String? = null,
+    val highlightContentDescription: String? = null
+) {
     init {
         require(message.isNotBlank()) {
             "A success-overlay message must not be blank."
         }
         require(supportingText.isNotBlank()) {
             "Success-overlay supporting text must not be blank."
+        }
+        require(highlightText != null || highlightContentDescription == null) {
+            "A success-overlay highlight description requires visible highlight text."
         }
     }
 }

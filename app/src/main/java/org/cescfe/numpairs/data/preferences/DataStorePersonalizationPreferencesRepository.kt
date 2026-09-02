@@ -27,7 +27,8 @@ class DataStorePersonalizationPreferencesRepository(private val dataStore: DataS
                     preferences[PreferenceKeys.SELECTED_THEME]
                 ),
                 generatedGameHapticsEnabled = preferences[PreferenceKeys.GENERATED_GAME_HAPTICS_ENABLED] ?: true,
-                compactTileSelectorsEnabled = preferences[PreferenceKeys.COMPACT_TILE_SELECTORS_ENABLED] ?: false
+                compactTileSelectorsEnabled = preferences[PreferenceKeys.COMPACT_TILE_SELECTORS_ENABLED] ?: false,
+                generatedChronometerExpanded = preferences[PreferenceKeys.GENERATED_CHRONOMETER_EXPANDED] ?: true
             )
         }
 
@@ -49,9 +50,16 @@ class DataStorePersonalizationPreferencesRepository(private val dataStore: DataS
         }
     }
 
+    override suspend fun setGeneratedChronometerExpanded(expanded: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferenceKeys.GENERATED_CHRONOMETER_EXPANDED] = expanded
+        }
+    }
+
     private object PreferenceKeys {
         val SELECTED_THEME = stringPreferencesKey("personalization_selected_theme")
         val GENERATED_GAME_HAPTICS_ENABLED = booleanPreferencesKey("personalization_generated_game_haptics_enabled")
         val COMPACT_TILE_SELECTORS_ENABLED = booleanPreferencesKey("personalization_compact_tile_selectors_enabled")
+        val GENERATED_CHRONOMETER_EXPANDED = booleanPreferencesKey("generated_chronometer_expanded")
     }
 }

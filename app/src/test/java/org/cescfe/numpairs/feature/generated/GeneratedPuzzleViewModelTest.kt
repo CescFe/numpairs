@@ -13,16 +13,21 @@ import kotlinx.coroutines.test.setMain
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionSnapshot
+import org.cescfe.numpairs.data.generated.session.GeneratedSessionTimingStartResult
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationFailureReason
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
+import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
+import org.cescfe.numpairs.domain.generated.GeneratedTimingStartInstant
 import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Expression
 import org.cescfe.numpairs.domain.puzzle.model.Operator
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.game.presentation.CommittedPuzzleMutation
 import org.cescfe.numpairs.feature.game.presentation.support.solvedPuzzleWithKnownStripAndAssignments
+import org.cescfe.numpairs.feature.time.ElapsedTimeReading
+import org.cescfe.numpairs.feature.time.ElapsedTimeSource
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -658,6 +663,116 @@ class GeneratedPuzzleViewModelTest {
         assertEquals(previousSession.snapshot, repository.session.value)
         assertEquals(1, repository.replaceAttempts.size)
     }
+
+    @Test
+    fun timing_starts_once_on_first_playable_presentation_and_uses_monotonic_continuation() {
+        val repository = RecordingGeneratedSessionRepository()
+        val timeSource = MutableElapsedTimeSource(epochMilliseconds = 10_000, monotonicMilliseconds = 500)
+        val viewModel = GeneratedPuzzleViewModel(
+            challenge = GeneratedModes.FOUR_PAIRS_LOW,
+            generationUseCase = generatedPuzzleUseCase(),
+            generatedSessionRepository = repository,
+            seedSource = QueueGeneratedPuzzleSeedSource(101),
+            sessionIdSource = QueueGeneratedSessionIdSource("timed"),
+            timeSource = timeSource
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val sessionId = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).session.id
+
+        assertNull(repository.session.value?.timingStartInstant)
+        viewModel.onPuzzlePresented(sessionId)
+        dispatcher.scheduler.advanceUntilIdle()
+        timeSource.advance(epochMilliseconds = 1_234, monotonicMilliseconds = 1_234)
+        viewModel.onPuzzlePresented(sessionId)
+        viewModel.onTimerRefresh(sessionId)
+
+        val state = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready
+        assertEquals(GeneratedTimingStartInstant(10_000), state.session.snapshot.timingStartInstant)
+        assertEquals(GeneratedElapsedTime(1_234), state.elapsedTime)
+        assertEquals(listOf(GeneratedTimingStartInstant(10_000)), repository.startTimingAttempts)
+        assertEquals(GeneratedTimingStartInstant(10_000), repository.session.value?.timingStartInstant)
+    }
+
+    @Test
+    fun restoration_uses_wall_clock_then_never_moves_backwards_in_the_visible_session() {
+        val snapshot = generatedSessionSnapshot(sessionId = "restored").copy(
+            timingStartInstant = GeneratedTimingStartInstant(5_000)
+        )
+        val repository = RecordingGeneratedSessionRepository(initialSession = snapshot)
+        val timeSource = MutableElapsedTimeSource(epochMilliseconds = 10_000, monotonicMilliseconds = 1_000)
+        val viewModel = GeneratedPuzzleViewModel(
+            challenge = GeneratedModes.FOUR_PAIRS_LOW,
+            generationUseCase = UnexpectedGeneratedPuzzleUseCase(),
+            generatedSessionRepository = repository,
+            timeSource = timeSource
+        )
+        viewModel.onRouteEntered(GeneratedModeLaunchIntent.ResumeSession(snapshot.sessionId))
+        dispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.onPuzzlePresented(snapshot.sessionId)
+        assertEquals(
+            GeneratedElapsedTime(5_000),
+            (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).elapsedTime
+        )
+        timeSource.set(epochMilliseconds = 4_000, monotonicMilliseconds = 1_500)
+        viewModel.onTimerRefresh(snapshot.sessionId)
+        assertEquals(
+            GeneratedElapsedTime(5_500),
+            (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).elapsedTime
+        )
+        timeSource.set(epochMilliseconds = 3_000, monotonicMilliseconds = 900)
+        viewModel.onTimerRefresh(snapshot.sessionId)
+        assertEquals(
+            GeneratedElapsedTime(5_500),
+            (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).elapsedTime
+        )
+        assertTrue(repository.startTimingAttempts.isEmpty())
+    }
+
+    @Test
+    fun solved_transition_freezes_before_io_and_retry_reuses_the_same_millisecond_duration() {
+        val solvedPuzzle = solvedPuzzleWithKnownStripAndAssignments()
+        val initialPuzzle = initialPuzzleFor(solvedPuzzle)
+        val repository = RecordingGeneratedSessionRepository(updateFailuresRemaining = 1)
+        val timeSource = MutableElapsedTimeSource(epochMilliseconds = 20_000, monotonicMilliseconds = 2_000)
+        val viewModel = GeneratedPuzzleViewModel(
+            challenge = GeneratedModes.FOUR_PAIRS_LOW,
+            generationUseCase = generatedPuzzleUseCase(CompletableDeferred(initialPuzzle)),
+            generatedSessionRepository = repository,
+            seedSource = QueueGeneratedPuzzleSeedSource(103),
+            sessionIdSource = QueueGeneratedSessionIdSource("completion-retry"),
+            timeSource = timeSource
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val sessionId = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).session.id
+        viewModel.onPuzzlePresented(sessionId)
+        dispatcher.scheduler.advanceUntilIdle()
+        timeSource.advance(epochMilliseconds = 2_345, monotonicMilliseconds = 2_345)
+
+        viewModel.onPuzzleMutationCommitted(sessionId, solvedPuzzle.asCommittedMutation())
+        val frozenState = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready
+        assertEquals(GeneratedElapsedTime(2_345), frozenState.session.snapshot.completionElapsedTime)
+        timeSource.advance(epochMilliseconds = 9_000, monotonicMilliseconds = 9_000)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertTrue((viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).hasPersistenceFailure)
+
+        viewModel.retryPersistence()
+        timeSource.advance(epochMilliseconds = 4_000, monotonicMilliseconds = 4_000)
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(
+            listOf(GeneratedElapsedTime(2_345), GeneratedElapsedTime(2_345)),
+            repository.completionElapsedTimeAttempts
+        )
+        assertNull(repository.session.value)
+        assertEquals(
+            GeneratedElapsedTime(2_345),
+            (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready)
+                .session.snapshot.completionElapsedTime
+        )
+    }
 }
 
 private fun generatedPuzzleUseCase(
@@ -744,7 +859,8 @@ private class RecordingGeneratedSessionRepository(
     initialSession: GeneratedSessionSnapshot? = null,
     writeGate: CompletableDeferred<Unit>? = null,
     private val replaceFailure: IOException? = null,
-    firstUpdateGate: CompletableDeferred<Unit>? = null
+    firstUpdateGate: CompletableDeferred<Unit>? = null,
+    private var updateFailuresRemaining: Int = 0
 ) : GeneratedSessionRepository {
     private val mutableSession = MutableStateFlow(initialSession)
     private var pendingUpdateGate = firstUpdateGate
@@ -752,6 +868,8 @@ private class RecordingGeneratedSessionRepository(
     val replaceAttempts = mutableListOf<GeneratedSessionSnapshot>()
     val updateAttempts = mutableListOf<Puzzle>()
     val clearAttempts = mutableListOf<GeneratedSessionId>()
+    val startTimingAttempts = mutableListOf<GeneratedTimingStartInstant>()
+    val completionElapsedTimeAttempts = mutableListOf<GeneratedElapsedTime?>()
     var nextReplaceGate: CompletableDeferred<Unit>? = writeGate
 
     override suspend fun replace(snapshot: GeneratedSessionSnapshot) {
@@ -766,12 +884,34 @@ private class RecordingGeneratedSessionRepository(
         mutableSession.value = snapshot
     }
 
+    override suspend fun startTiming(
+        expectedSessionId: GeneratedSessionId,
+        startInstant: GeneratedTimingStartInstant
+    ): GeneratedSessionTimingStartResult {
+        startTimingAttempts += startInstant
+        val snapshot = mutableSession.value
+        if (snapshot?.sessionId != expectedSessionId) {
+            return GeneratedSessionTimingStartResult.StaleSession
+        }
+        snapshot.timingStartInstant?.let { existing ->
+            return GeneratedSessionTimingStartResult.AlreadyStarted(existing)
+        }
+        mutableSession.value = snapshot.copy(timingStartInstant = startInstant)
+        return GeneratedSessionTimingStartResult.Started(startInstant)
+    }
+
     override suspend fun updateCurrentPuzzle(
         expectedSessionId: GeneratedSessionId,
         puzzle: Puzzle,
-        correctionCount: PuzzleCorrectionCount?
+        correctionCount: PuzzleCorrectionCount?,
+        completionElapsedTime: GeneratedElapsedTime?
     ): Boolean {
         updateAttempts += puzzle
+        completionElapsedTimeAttempts += completionElapsedTime
+        if (updateFailuresRemaining > 0) {
+            updateFailuresRemaining--
+            throw IOException("Controlled generated-session update failure.")
+        }
         pendingUpdateGate?.let { gate ->
             pendingUpdateGate = null
             gate.await()
@@ -783,7 +923,8 @@ private class RecordingGeneratedSessionRepository(
 
         mutableSession.value = snapshot.copy(
             currentPuzzle = puzzle,
-            correctionCount = correctionCount
+            correctionCount = correctionCount,
+            completionElapsedTime = completionElapsedTime
         )
         return true
     }
@@ -821,6 +962,26 @@ private fun Puzzle.asCommittedMutation(isCorrection: Boolean = false): Committed
         puzzle = this,
         isCorrection = isCorrection
     )
+
+private class MutableElapsedTimeSource(
+    epochMilliseconds: Long,
+    monotonicMilliseconds: Long
+) : ElapsedTimeSource {
+    private var reading = ElapsedTimeReading(epochMilliseconds, monotonicMilliseconds)
+
+    override fun read(): ElapsedTimeReading = reading
+
+    fun advance(epochMilliseconds: Long, monotonicMilliseconds: Long) {
+        set(
+            epochMilliseconds = reading.epochMilliseconds + epochMilliseconds,
+            monotonicMilliseconds = reading.monotonicMilliseconds + monotonicMilliseconds
+        )
+    }
+
+    fun set(epochMilliseconds: Long, monotonicMilliseconds: Long) {
+        reading = ElapsedTimeReading(epochMilliseconds, monotonicMilliseconds)
+    }
+}
 
 private fun initialPuzzleFor(solvedPuzzle: Puzzle): Puzzle = solvedPuzzle.copy(
     board = solvedPuzzle.board.copy(

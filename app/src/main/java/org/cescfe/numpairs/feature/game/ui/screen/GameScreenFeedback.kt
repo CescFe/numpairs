@@ -256,12 +256,13 @@ internal fun SuccessOverlay(
                     style = MaterialTheme.typography.headlineSmall,
                     textAlign = TextAlign.Center
                 )
-                content?.highlightText?.let { highlightText ->
+                (content?.highlightText ?: celebrationCopy?.highlightText)?.let { highlightText ->
                     val highlightModifier = Modifier
                         .fillMaxWidth()
                         .testTag(GameScreenTestTags.SUCCESS_OVERLAY_HIGHLIGHT)
                         .let { modifier ->
-                            content.highlightContentDescription?.let { description ->
+                            (content?.highlightContentDescription
+                                ?: celebrationCopy?.highlightContentDescription)?.let { description ->
                                 modifier.semantics {
                                     contentDescription = description
                                 }

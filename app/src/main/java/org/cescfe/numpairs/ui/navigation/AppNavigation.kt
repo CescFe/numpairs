@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import org.cescfe.numpairs.data.generated.selection.GeneratedDifficultySelectionRepository
@@ -37,6 +38,7 @@ import org.cescfe.numpairs.feature.onboarding.OnboardingLoadingScreen
 import org.cescfe.numpairs.feature.onboarding.RequiredOnboardingRoute
 import org.cescfe.numpairs.feature.personalization.PersonalizationRoute
 import org.cescfe.numpairs.feature.tutorial.TutorialRoute
+import kotlinx.coroutines.launch
 
 sealed interface AppDestination {
     data object Menu : AppDestination
@@ -142,6 +144,7 @@ private fun UnlockedAppNavigation(
 ) {
     val generatedSessionSnapshot by generatedSessionRepository.session.collectAsState(initial = null)
     val personalizationPreferences by personalizationPreferencesRepository.preferences.collectAsState(initial = null)
+    val coroutineScope = rememberCoroutineScope()
     val resumableSession = generatedSessionSnapshot.toResumableGeneratedSessionOrNull(
         challengeCatalog = generatedChallengeCatalog
     )
@@ -298,6 +301,13 @@ private fun UnlockedAppNavigation(
                         personalizationPreferences?.generatedGameHapticsEnabled == true,
                     compactTileSelectorsEnabled =
                         personalizationPreferences?.compactTileSelectorsEnabled == true,
+                    isChronometerExpanded =
+                        personalizationPreferences?.generatedChronometerExpanded != false,
+                    onChronometerExpandedChange = { expanded ->
+                        coroutineScope.launch {
+                            personalizationPreferencesRepository.setGeneratedChronometerExpanded(expanded)
+                        }
+                    },
                     newPuzzleChallengeProvider = {
                         generatedPlayChallengeSelector.select(
                             optionId = GeneratedPlayOptions.QUICK.id,
@@ -318,6 +328,13 @@ private fun UnlockedAppNavigation(
                         personalizationPreferences?.generatedGameHapticsEnabled == true,
                     compactTileSelectorsEnabled =
                         personalizationPreferences?.compactTileSelectorsEnabled == true,
+                    isChronometerExpanded =
+                        personalizationPreferences?.generatedChronometerExpanded != false,
+                    onChronometerExpandedChange = { expanded ->
+                        coroutineScope.launch {
+                            personalizationPreferencesRepository.setGeneratedChronometerExpanded(expanded)
+                        }
+                    },
                     modifier = modifier,
                     onNavigateBack = navigateToMenu
                 )
