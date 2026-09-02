@@ -5,6 +5,22 @@ enum class GameSuccessOverlayVisualStyle {
     PERSONAL_RECORD
 }
 
+enum class GameSuccessOverlayStandardBadge {
+    OK,
+    CHECK
+}
+
+data class GameSuccessOverlayCopy(val message: String, val supportingText: String) {
+    init {
+        require(message.isNotBlank()) {
+            "A success-overlay message must not be blank."
+        }
+        require(supportingText.isNotBlank()) {
+            "Success-overlay supporting text must not be blank."
+        }
+    }
+}
+
 data class GameSuccessOverlayContent(
     val message: String,
     val supportingText: String,
@@ -13,6 +29,7 @@ data class GameSuccessOverlayContent(
     val contextText: String? = null,
     val contextContentDescription: String? = null,
     val visualStyle: GameSuccessOverlayVisualStyle = GameSuccessOverlayVisualStyle.SUCCESS,
+    val standardBadge: GameSuccessOverlayStandardBadge = GameSuccessOverlayStandardBadge.OK,
     val badgeContentDescription: String? = null,
     val primaryActionLabel: String,
     val onPrimaryAction: () -> Unit,

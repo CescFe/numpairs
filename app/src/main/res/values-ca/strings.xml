@@ -117,7 +117,6 @@
     <string name="daily_retry_action">Torna-ho a provar</string>
     <string name="daily_completion_screen_title">Daily completat</string>
     <string name="daily_completion_message">Daily completat!</string>
-    <string name="daily_completion_supporting_text">Has completat el repte de hui.</string>
     <string name="daily_personal_record_message">Nou rècord personal!</string>
     <string name="daily_personal_record_supporting_text">Fantàstic! Has superat el teu millor temps. Podràs mantindre la ratxa demà?</string>
     <string name="daily_personal_record_previous_best">Millor temps anterior: %1$s</string>
@@ -212,7 +211,24 @@
     <!-- Game screen: feedback and overlays -->
     <string name="success_overlay_message">Puzle completat!</string>
     <string name="success_overlay_badge_text">OK</string>
+    <string name="success_overlay_badge_content_description">Puzle completat</string>
     <string name="success_overlay_supporting_text">Totes les parelles coincidixen.</string>
+    <string name="completion_celebration_great_work_title">Molt bon treball!</string>
+    <string name="completion_celebration_great_work_supporting_text">La teua lògica ha donat resultat.</string>
+    <string name="completion_celebration_excellent_title">Excel·lent!</string>
+    <string name="completion_celebration_excellent_supporting_text">Has trobat la solució completa.</string>
+    <string name="completion_celebration_you_rock_title">Eres increïble!</string>
+    <string name="completion_celebration_you_rock_supporting_text">Quina manera de resoldre’l.</string>
+    <string name="completion_celebration_nailed_it_title">Ho has clavat!</string>
+    <string name="completion_celebration_nailed_it_supporting_text">Tot el puzle encaixa.</string>
+    <string name="completion_celebration_brilliant_title">Brillant!</string>
+    <string name="completion_celebration_brilliant_supporting_text">La teua solució encaixa a la perfecció.</string>
+    <string name="completion_celebration_keep_it_up_title">Continua així!</string>
+    <string name="completion_celebration_keep_it_up_supporting_text">T’atrevixes a pujar la dificultat?</string>
+    <string name="completion_celebration_impressive_title">Impressionant!</string>
+    <string name="completion_celebration_impressive_supporting_text">Això sí que ha requerit pensar.</string>
+    <string name="completion_celebration_unstoppable_title">No hi ha qui et pare!</string>
+    <string name="completion_celebration_unstoppable_supporting_text">I jo que pensava que esta dificultat era impossible!</string>
     <string name="success_overlay_new_puzzle_button">Juga’n un altre</string>
     <string name="success_overlay_return_to_menu_button">Torna al menú</string>
     <string name="hint_action_content_description">Obrir pistes de pràctica</string>

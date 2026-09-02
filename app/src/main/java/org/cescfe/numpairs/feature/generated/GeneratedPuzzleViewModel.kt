@@ -226,17 +226,7 @@ internal class GeneratedPuzzleViewModel(
         val updatedSession = visibleSession.copy(
             snapshot = visibleSession.snapshot.copy(currentPuzzle = puzzle)
         )
-        _uiState.value = when (state) {
-            is GeneratedPuzzleGenerationUiState.Ready -> state.copy(session = updatedSession)
-
-            is GeneratedPuzzleGenerationUiState.Loading -> state.copy(previousSession = updatedSession)
-
-            is GeneratedPuzzleGenerationUiState.Failed -> state.copy(previousSession = updatedSession)
-
-            GeneratedPuzzleGenerationUiState.Idle,
-            is GeneratedPuzzleGenerationUiState.Restoring,
-            is GeneratedPuzzleGenerationUiState.ResumeUnavailable -> state
-        }
+        _uiState.value = state.withVisibleSession(updatedSession)
         return true
     }
 
@@ -265,6 +255,7 @@ internal class GeneratedPuzzleViewModel(
             _uiState.value = snapshot?.let { resumableSnapshot ->
                 GeneratedPuzzleGenerationUiState.Ready(
                     session = GeneratedModeGameSession(
+                        challenge = challenge,
                         snapshot = resumableSnapshot,
                         request = GeneratedPuzzleGenerationRequest(
                             profile = challenge.profile,
@@ -351,6 +342,7 @@ internal class GeneratedPuzzleViewModel(
         return try {
             generatedSessionRepository.replace(snapshot)
             val session = GeneratedModeGameSession(
+                challenge = definition.challenge,
                 snapshot = snapshot,
                 request = outcome.request
             )
@@ -397,10 +389,17 @@ internal data class GeneratedPuzzleReplacementTransition(
 }
 
 internal data class GeneratedModeGameSession(
+    val challenge: GeneratedChallenge,
     val snapshot: GeneratedSessionSnapshot,
     val request: GeneratedPuzzleGenerationRequest
 ) {
     init {
+        require(snapshot.modeId == challenge.modeId.value) {
+            "Generated game session mode must match its challenge."
+        }
+        require(snapshot.profileId == challenge.profile.id.value) {
+            "Generated game session profile must match its challenge."
+        }
         require(snapshot.profileId == request.profileId.value) {
             "Generated game session profile must match its generation request."
         }
@@ -417,4 +416,20 @@ internal data class GeneratedModeGameSession(
 
     val currentPuzzle: Puzzle
         get() = snapshot.currentPuzzle
+}
+
+private fun GeneratedPuzzleGenerationUiState.withVisibleSession(
+    session: GeneratedModeGameSession
+): GeneratedPuzzleGenerationUiState = when (this) {
+    is GeneratedPuzzleGenerationUiState.Ready -> copy(session = session)
+
+    is GeneratedPuzzleGenerationUiState.Loading -> copy(previousSession = session)
+
+    is GeneratedPuzzleGenerationUiState.Failed -> copy(previousSession = session)
+
+    GeneratedPuzzleGenerationUiState.Idle,
+    is GeneratedPuzzleGenerationUiState.Restoring,
+    is GeneratedPuzzleGenerationUiState.ResumeUnavailable -> error(
+        "Only a generated puzzle state with a visible session can replace that session."
+    )
 }

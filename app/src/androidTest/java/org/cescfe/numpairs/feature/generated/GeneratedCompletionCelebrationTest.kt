@@ -13,9 +13,13 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.generated.selection.FakeGeneratedDifficultySelectionRepository
 import org.cescfe.numpairs.data.generated.session.FakeGeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
@@ -37,6 +41,7 @@ import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.game.ui.semantics.CompletionFeedbackIdKey
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.testing.fourPairsQuickSelector
+import org.cescfe.numpairs.testing.threePairsQuickSelector
 import org.cescfe.numpairs.ui.navigation.AppNavigation
 import org.cescfe.numpairs.ui.navigation.navigateToSelectedGeneratedChallenge
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
@@ -115,43 +120,60 @@ class GeneratedCompletionCelebrationTest {
     }
 
     @Test
-    fun fourPairsOptsInToCompletionCelebration() {
+    fun threePairsQuickUsesAStandardCompletionCelebration() {
         assertGeneratedModeOptsInToCompletionCelebration(
-            menuButtonTag = MenuScreenTestTags.QUICK_BUTTON
+            menuButtonTag = MenuScreenTestTags.QUICK_BUTTON,
+            challengeSelector = threePairsQuickSelector()
         )
     }
 
     @Test
-    fun eightPairsOptsInToCompletionCelebration() {
+    fun fourPairsQuickUsesAStandardCompletionCelebration() {
         assertGeneratedModeOptsInToCompletionCelebration(
-            menuButtonTag = MenuScreenTestTags.CLASSIC_BUTTON
+            menuButtonTag = MenuScreenTestTags.QUICK_BUTTON,
+            challengeSelector = fourPairsQuickSelector()
         )
     }
 
-    private fun assertGeneratedModeOptsInToCompletionCelebration(menuButtonTag: String) {
+    @Test
+    fun eightPairsClassicUsesAStandardCompletionCelebration() {
+        assertGeneratedModeOptsInToCompletionCelebration(
+            menuButtonTag = MenuScreenTestTags.CLASSIC_BUTTON,
+            challengeSelector = fourPairsQuickSelector()
+        )
+    }
+
+    private fun assertGeneratedModeOptsInToCompletionCelebration(
+        menuButtonTag: String,
+        challengeSelector: GeneratedPlayChallengeSelector
+    ) {
+        var recompositionMarker by mutableIntStateOf(0)
         composeTestRule.setContent {
             NumPairsTheme {
-                AppNavigation(
-                    onboardingRepository = FakeOnboardingRepository(),
-                    generatedSessionRepository = FakeGeneratedSessionRepository(),
-                    generatedDifficultySelectionRepository = FakeGeneratedDifficultySelectionRepository(),
-                    personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(
-                        initialPreferences = PersonalizationPreferences(
-                            generatedGameHapticsEnabled = false
-                        )
-                    ),
-                    topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
-                    generatedPlayChallengeSelector = fourPairsQuickSelector(),
-                    generatedChallengeCatalog = GeneratedModes.catalog,
-                    generatedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory {
-                        GeneratedPuzzleGenerationUseCase { request ->
-                            GeneratedPuzzleGenerationResult.Generated(
-                                request = request,
-                                initialPuzzle = oneOperatorAwayFromSolvedPuzzle()
+                Column {
+                    Text(text = recompositionMarker.toString())
+                    AppNavigation(
+                        onboardingRepository = FakeOnboardingRepository(),
+                        generatedSessionRepository = FakeGeneratedSessionRepository(),
+                        generatedDifficultySelectionRepository = FakeGeneratedDifficultySelectionRepository(),
+                        personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(
+                            initialPreferences = PersonalizationPreferences(
+                                generatedGameHapticsEnabled = false
                             )
+                        ),
+                        topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
+                        generatedPlayChallengeSelector = challengeSelector,
+                        generatedChallengeCatalog = GeneratedModes.catalog,
+                        generatedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory {
+                            GeneratedPuzzleGenerationUseCase { request ->
+                                GeneratedPuzzleGenerationResult.Generated(
+                                    request = request,
+                                    initialPuzzle = oneOperatorAwayFromSolvedPuzzle()
+                                )
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
 
@@ -162,6 +184,38 @@ class GeneratedCompletionCelebrationTest {
             .tapOperatorOption(Operator.MULTIPLICATION)
 
         assertCompletionFeedback()
+        val selectedCopy = assertStandardCelebrationDisplayed()
+        composeTestRule.runOnIdle {
+            recompositionMarker += 1
+        }
+        composeTestRule.waitForIdle()
+        assertStandardCelebrationDisplayed(expectedCopy = selectedCopy)
+    }
+
+    private fun assertStandardCelebrationDisplayed(expectedCopy: Pair<Int, Int>? = null): Pair<Int, Int> {
+        composeTestRule
+            .onNodeWithContentDescription(string(R.string.success_overlay_badge_content_description))
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText("OK")
+            .assertDoesNotExist()
+
+        val selectedCopy = expectedCopy ?: STANDARD_CELEBRATION_COPY.single { (titleResource, _) ->
+            composeTestRule.onAllNodesWithText(string(titleResource)).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule
+            .onNodeWithText(string(selectedCopy.first))
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText(string(selectedCopy.second))
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_NEW_PUZZLE)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_RETURN_TO_MENU)
+            .assertIsDisplayed()
+        return selectedCopy
     }
 
     @Test
@@ -205,6 +259,8 @@ class GeneratedCompletionCelebrationTest {
         interactions = composeTestRule
     )
 
+    private fun string(resourceId: Int): String = composeTestRule.activity.getString(resourceId)
+
     private fun assertCompletionFeedback() {
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.BOARD)
@@ -235,6 +291,23 @@ class GeneratedCompletionCelebrationTest {
             .assert(SemanticsMatcher.keyNotDefined(CompletionFeedbackIdKey))
     }
 }
+
+private val STANDARD_CELEBRATION_COPY = listOf(
+    R.string.completion_celebration_great_work_title to
+        R.string.completion_celebration_great_work_supporting_text,
+    R.string.completion_celebration_excellent_title to
+        R.string.completion_celebration_excellent_supporting_text,
+    R.string.completion_celebration_you_rock_title to
+        R.string.completion_celebration_you_rock_supporting_text,
+    R.string.completion_celebration_nailed_it_title to
+        R.string.completion_celebration_nailed_it_supporting_text,
+    R.string.completion_celebration_brilliant_title to
+        R.string.completion_celebration_brilliant_supporting_text,
+    R.string.completion_celebration_impressive_title to
+        R.string.completion_celebration_impressive_supporting_text,
+    R.string.completion_celebration_unstoppable_title to
+        R.string.completion_celebration_unstoppable_supporting_text
+)
 
 private fun solvedPuzzle(): Puzzle {
     val firstOperand = ResolvedOperandAssignment(value = 1, stripEntryId = StripEntryId(0))

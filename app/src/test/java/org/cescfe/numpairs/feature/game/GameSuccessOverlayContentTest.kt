@@ -5,6 +5,22 @@ import org.junit.Test
 
 class GameSuccessOverlayContentTest {
     @Test
+    fun standard_completion_copy_requires_an_indivisible_nonblank_pair() {
+        assertThrows(IllegalArgumentException::class.java) {
+            GameSuccessOverlayCopy(
+                message = "",
+                supportingText = "Supporting"
+            )
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            GameSuccessOverlayCopy(
+                message = "Completed",
+                supportingText = " "
+            )
+        }
+    }
+
+    @Test
     fun highlight_accessibility_requires_visible_highlight_text() {
         assertThrows(IllegalArgumentException::class.java) {
             GameSuccessOverlayContent(

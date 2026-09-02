@@ -115,9 +115,8 @@
     <string name="daily_invalid_progress_message">No se ha podido guardar este progreso Daily porque ya no coincide con el puzle original.</string>
     <string name="daily_progress_failure_title">Progreso Daily sin guardar</string>
     <string name="daily_retry_action">Reintentar</string>
-    <string name="daily_completion_screen_title">Daily completado</string>
-    <string name="daily_completion_message">¡Daily completado!</string>
-    <string name="daily_completion_supporting_text">Has completado el reto de hoy.</string>
+    <string name="daily_completion_screen_title">Daily completada</string>
+    <string name="daily_completion_message">¡Daily completada!</string>
     <string name="daily_personal_record_message">¡Nuevo récord personal!</string>
     <string name="daily_personal_record_supporting_text">¡Increíble! Has superado tu mejor tiempo. ¿Podrás mantener la racha mañana?</string>
     <string name="daily_personal_record_previous_best">Mejor tiempo anterior: %1$s</string>
@@ -212,7 +211,24 @@
     <!-- Game screen: feedback and overlays -->
     <string name="success_overlay_message">¡Puzle completado!</string>
     <string name="success_overlay_badge_text">OK</string>
+    <string name="success_overlay_badge_content_description">Puzle completado</string>
     <string name="success_overlay_supporting_text">Todos los pares coinciden.</string>
+    <string name="completion_celebration_great_work_title">¡Buen trabajo!</string>
+    <string name="completion_celebration_great_work_supporting_text">Tu lógica ha dado sus frutos.</string>
+    <string name="completion_celebration_excellent_title">¡Excelente!</string>
+    <string name="completion_celebration_excellent_supporting_text">Has dado con la solución completa.</string>
+    <string name="completion_celebration_you_rock_title">¡Eres increíble!</string>
+    <string name="completion_celebration_you_rock_supporting_text">Menuda forma de resolverlo.</string>
+    <string name="completion_celebration_nailed_it_title">¡Lo has clavado!</string>
+    <string name="completion_celebration_nailed_it_supporting_text">Todo el puzle encaja.</string>
+    <string name="completion_celebration_brilliant_title">¡Brillante!</string>
+    <string name="completion_celebration_brilliant_supporting_text">Tu solución encaja a la perfección.</string>
+    <string name="completion_celebration_keep_it_up_title">¡Sigue así!</string>
+    <string name="completion_celebration_keep_it_up_supporting_text">¿Te atreves a subir la dificultad?</string>
+    <string name="completion_celebration_impressive_title">¡Im-presionante!</string>
+    <string name="completion_celebration_impressive_supporting_text">En dos palabras.</string>
+    <string name="completion_celebration_unstoppable_title">¡No hay quien te pare!</string>
+    <string name="completion_celebration_unstoppable_supporting_text">¡Y yo que pensaba que esta dificultad era imposible!</string>
     <string name="success_overlay_new_puzzle_button">Jugar otro</string>
     <string name="success_overlay_return_to_menu_button">Volver al menú</string>
     <string name="hint_action_content_description">Abrir pistas de práctica</string>
