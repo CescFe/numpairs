@@ -631,10 +631,17 @@ class DailyCompletionSurfaceTest {
 
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE)
-            .assertTextEquals("Daily completed!")
+            .assertTextEquals("Great work!")
+        composeTestRule
+            .onNodeWithText("Your logic paid off.")
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithContentDescription("Puzzle completed")
+            .assertIsDisplayed()
+            .assertHasNoClickAction()
         composeTestRule
             .onNodeWithText("OK")
-            .assertIsDisplayed()
+            .assertDoesNotExist()
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONTEXT)
             .assertDoesNotExist()

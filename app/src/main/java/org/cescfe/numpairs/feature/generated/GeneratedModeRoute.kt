@@ -43,6 +43,9 @@ import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.GameRoute
+import org.cescfe.numpairs.feature.game.StandardCompletionCelebrationContext
+import org.cescfe.numpairs.feature.game.StandardCompletionCelebrationSelector
+import org.cescfe.numpairs.feature.game.localizedCopy
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
 @Composable
@@ -271,6 +274,13 @@ private fun GeneratedPuzzleGameContent(
     overlay: @Composable () -> Unit = {}
 ) {
     val hapticFeedback = LocalHapticFeedback.current
+    val completionCelebrationCopy = StandardCompletionCelebrationSelector.select(
+        StandardCompletionCelebrationContext(
+            generatedChallengeId = session.challenge.id.value,
+            completionId = session.id.value,
+            difficulty = session.challenge.difficulty
+        )
+    ).localizedCopy()
 
     Box(modifier = modifier.fillMaxSize()) {
         GameRoute(
@@ -288,6 +298,7 @@ private fun GeneratedPuzzleGameContent(
             onRulesHelperPlayTutorialRequested = onRulesHelperPlayTutorialRequested,
             isCorrectTileMotionEnabled = true,
             isCompletionCelebrationEnabled = true,
+            successOverlayCopy = completionCelebrationCopy,
             compactTileSelectorsEnabled = compactTileSelectorsEnabled,
             topBarActions = topBarActions,
             onPuzzleChanged = { puzzle ->

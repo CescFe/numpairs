@@ -50,6 +50,8 @@ import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.GameSuccessOverlayContent
+import org.cescfe.numpairs.feature.game.GameSuccessOverlayCopy
+import org.cescfe.numpairs.feature.game.GameSuccessOverlayStandardBadge
 import org.cescfe.numpairs.feature.game.GameSuccessOverlayVisualStyle
 import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
 import org.cescfe.numpairs.feature.game.presentation.RuleConflictUiState
@@ -62,6 +64,7 @@ internal fun SuccessOverlay(
     onDismiss: () -> Unit,
     completionActions: GameCompletionActions? = null,
     content: GameSuccessOverlayContent? = null,
+    celebrationCopy: GameSuccessOverlayCopy? = null,
     completionFeedbackId: Long? = null,
     confettiCelebrationId: Long? = null,
     onConfettiCelebrationStarted: () -> Unit = {},
@@ -70,9 +73,19 @@ internal fun SuccessOverlay(
     require(content == null || completionActions == null) {
         "A success overlay cannot combine custom content with generated-puzzle completion actions."
     }
+    require(content == null || celebrationCopy == null) {
+        "A success overlay cannot combine custom content with separate celebration copy."
+    }
 
     val interactionSource = remember { MutableInteractionSource() }
     val isPersonalRecord = content?.visualStyle == GameSuccessOverlayVisualStyle.PERSONAL_RECORD
+    val usesCompletionCheck = !isPersonalRecord &&
+        (celebrationCopy != null || content?.standardBadge == GameSuccessOverlayStandardBadge.CHECK)
+    val standardBadgeContentDescription = if (usesCompletionCheck) {
+        stringResource(R.string.success_overlay_badge_content_description)
+    } else {
+        null
+    }
     val currentOnConfettiCelebrationStarted by rememberUpdatedState(onConfettiCelebrationStarted)
     var activeConfettiCelebrationId by remember { mutableStateOf<Long?>(null) }
     val entranceProgress = remember {
@@ -189,7 +202,7 @@ internal fun SuccessOverlay(
                     modifier = Modifier
                         .testTag(GameScreenTestTags.SUCCESS_OVERLAY_BADGE)
                         .let { modifier ->
-                            content?.badgeContentDescription?.let { description ->
+                            (content?.badgeContentDescription ?: standardBadgeContentDescription)?.let { description ->
                                 modifier.semantics {
                                     contentDescription = description
                                 }
@@ -219,6 +232,12 @@ internal fun SuccessOverlay(
                                 contentDescription = null,
                                 modifier = Modifier.size(SUCCESS_OVERLAY_BADGE_ICON_SIZE)
                             )
+                        } else if (usesCompletionCheck) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_completion_check),
+                                contentDescription = null,
+                                modifier = Modifier.size(SUCCESS_OVERLAY_BADGE_ICON_SIZE)
+                            )
                         } else {
                             Text(
                                 text = stringResource(R.string.success_overlay_badge_text),
@@ -228,7 +247,9 @@ internal fun SuccessOverlay(
                     }
                 }
                 Text(
-                    text = content?.message ?: stringResource(R.string.success_overlay_message),
+                    text = content?.message
+                        ?: celebrationCopy?.message
+                        ?: stringResource(R.string.success_overlay_message),
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE),
@@ -278,7 +299,9 @@ internal fun SuccessOverlay(
                     )
                 }
                 Text(
-                    text = content?.supportingText ?: stringResource(R.string.success_overlay_supporting_text),
+                    text = content?.supportingText
+                        ?: celebrationCopy?.supportingText
+                        ?: stringResource(R.string.success_overlay_supporting_text),
                     modifier = Modifier.fillMaxWidth(),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center

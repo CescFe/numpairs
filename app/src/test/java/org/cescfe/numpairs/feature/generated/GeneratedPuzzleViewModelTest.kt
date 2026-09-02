@@ -74,6 +74,7 @@ class GeneratedPuzzleViewModelTest {
         val ready = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready
         assertEquals(attemptedSnapshot, repository.session.value)
         assertEquals(attemptedSnapshot, ready.session.snapshot)
+        assertEquals(GeneratedModes.FOUR_PAIRS_LOW, ready.session.challenge)
         assertNull(ready.replacementTransition)
     }
 
@@ -104,6 +105,7 @@ class GeneratedPuzzleViewModelTest {
         assertEquals(listOf(71, 73), requests.map(GeneratedPuzzleGenerationRequest::seed))
         assertTrue(requests.all { request -> request.profileId == GeneratedModes.EIGHT_PAIRS_HARD.profile.id })
         assertEquals(GeneratedSessionId("hard-replay"), ready.session.id)
+        assertEquals(GeneratedModes.EIGHT_PAIRS_HARD, ready.session.challenge)
         assertEquals(GeneratedModes.EIGHT_PAIRS.id.value, ready.session.snapshot.modeId)
         assertEquals(GeneratedModes.EIGHT_PAIRS_HARD.profile.id.value, ready.session.snapshot.profileId)
         assertEquals(ready.session.snapshot, repository.session.value)
@@ -155,6 +157,7 @@ class GeneratedPuzzleViewModelTest {
         assertEquals(listOf(83), replacementRequests.map(GeneratedPuzzleGenerationRequest::seed))
         assertEquals(GeneratedModes.THREE_PAIRS.id.value, ready.session.snapshot.modeId)
         assertEquals(GeneratedModes.THREE_PAIRS_LOW.profile.id.value, ready.session.snapshot.profileId)
+        assertEquals(GeneratedModes.THREE_PAIRS_LOW, ready.session.challenge)
         assertEquals(GeneratedSessionId("quick-three"), ready.session.id)
         assertEquals(ready.session.snapshot, repository.session.value)
     }
@@ -318,6 +321,7 @@ class GeneratedPuzzleViewModelTest {
     fun replacement_transition_requires_distinct_ids_and_the_ready_successor() {
         val readySnapshot = generatedSessionSnapshot(sessionId = "ready")
         val readySession = GeneratedModeGameSession(
+            challenge = GeneratedModes.FOUR_PAIRS_LOW,
             snapshot = readySnapshot,
             request = GeneratedPuzzleGenerationRequest(
                 profile = GeneratedModes.FOUR_PAIRS_LOW.profile,
@@ -417,6 +421,7 @@ class GeneratedPuzzleViewModelTest {
         val ready = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready
         assertEquals(snapshot, ready.session.snapshot)
         assertEquals(currentPuzzle, ready.session.currentPuzzle)
+        assertEquals(GeneratedModes.FOUR_PAIRS_LOW, ready.session.challenge)
         assertEquals(snapshot.seed, ready.session.request.seed)
         assertEquals(snapshot.profileId, ready.session.request.profileId.value)
         assertEquals(0, generationUseCase.requestCount)

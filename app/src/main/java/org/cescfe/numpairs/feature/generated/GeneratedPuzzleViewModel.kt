@@ -265,6 +265,7 @@ internal class GeneratedPuzzleViewModel(
             _uiState.value = snapshot?.let { resumableSnapshot ->
                 GeneratedPuzzleGenerationUiState.Ready(
                     session = GeneratedModeGameSession(
+                        challenge = challenge,
                         snapshot = resumableSnapshot,
                         request = GeneratedPuzzleGenerationRequest(
                             profile = challenge.profile,
@@ -351,6 +352,7 @@ internal class GeneratedPuzzleViewModel(
         return try {
             generatedSessionRepository.replace(snapshot)
             val session = GeneratedModeGameSession(
+                challenge = definition.challenge,
                 snapshot = snapshot,
                 request = outcome.request
             )
@@ -397,10 +399,17 @@ internal data class GeneratedPuzzleReplacementTransition(
 }
 
 internal data class GeneratedModeGameSession(
+    val challenge: GeneratedChallenge,
     val snapshot: GeneratedSessionSnapshot,
     val request: GeneratedPuzzleGenerationRequest
 ) {
     init {
+        require(snapshot.modeId == challenge.modeId.value) {
+            "Generated game session mode must match its challenge."
+        }
+        require(snapshot.profileId == challenge.profile.id.value) {
+            "Generated game session profile must match its challenge."
+        }
         require(snapshot.profileId == request.profileId.value) {
             "Generated game session profile must match its generation request."
         }

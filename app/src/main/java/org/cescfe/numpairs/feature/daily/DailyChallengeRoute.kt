@@ -62,7 +62,12 @@ import org.cescfe.numpairs.feature.daily.share.AndroidDailyCompletionSharePayloa
 import org.cescfe.numpairs.feature.daily.share.DailyCompletionShareLauncher
 import org.cescfe.numpairs.feature.game.GameRoute
 import org.cescfe.numpairs.feature.game.GameSuccessOverlayContent
+import org.cescfe.numpairs.feature.game.GameSuccessOverlayStandardBadge
 import org.cescfe.numpairs.feature.game.GameSuccessOverlayVisualStyle
+import org.cescfe.numpairs.feature.game.StandardCompletionCelebration
+import org.cescfe.numpairs.feature.game.StandardCompletionCelebrationContext
+import org.cescfe.numpairs.feature.game.StandardCompletionCelebrationSelector
+import org.cescfe.numpairs.feature.game.localizedCopy
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
@@ -183,6 +188,13 @@ fun DailyChallengeRoute(
                         movementCount = completion.movementCount,
                         personalBestResult = personalBestResult,
                         isPersonalRecordPresentation = isPersonalRecordPresentation,
+                        standardCelebration = StandardCompletionCelebrationSelector.select(
+                            StandardCompletionCelebrationContext(
+                                generatedChallengeId = state.session.currentDailyChallenge.challenge.id.value,
+                                completionId = completion.identity.canonicalKey(),
+                                difficulty = state.session.currentDailyChallenge.challenge.difficulty
+                            )
+                        ),
                         onShareResult = {
                             shareResult(completion, personalBestResult)
                         },
@@ -391,6 +403,7 @@ internal fun dailyCompletionOverlayContent(
     movementCount: DailyMovementCount? = null,
     personalBestResult: DailyPersonalBestResult? = null,
     isPersonalRecordPresentation: Boolean = false,
+    standardCelebration: StandardCompletionCelebration = StandardCompletionCelebration.GREAT_WORK,
     onShareResult: () -> Unit,
     onViewCalendar: () -> Unit,
     onNavigateBack: () -> Unit
@@ -422,21 +435,18 @@ internal fun dailyCompletionOverlayContent(
         ?.previousBestElapsedTime
         ?.takeIf { isPersonalRecordPresentation }
         ?.let(DailyElapsedTimeFormatter::format)
+    val standardCelebrationCopy = standardCelebration.localizedCopy()
     return GameSuccessOverlayContent(
-        message = stringResource(
-            if (isPersonalRecordPresentation) {
-                R.string.daily_personal_record_message
-            } else {
-                R.string.daily_completion_message
-            }
-        ),
-        supportingText = stringResource(
-            if (isPersonalRecordPresentation) {
-                R.string.daily_personal_record_supporting_text
-            } else {
-                R.string.daily_completion_supporting_text
-            }
-        ),
+        message = if (isPersonalRecordPresentation) {
+            stringResource(R.string.daily_personal_record_message)
+        } else {
+            standardCelebrationCopy.message
+        },
+        supportingText = if (isPersonalRecordPresentation) {
+            stringResource(R.string.daily_personal_record_supporting_text)
+        } else {
+            standardCelebrationCopy.supportingText
+        },
         highlightText = formattedResult,
         highlightContentDescription = resultContentDescription,
         contextText = formattedPreviousBest?.let { previousBest ->
@@ -450,6 +460,7 @@ internal fun dailyCompletionOverlayContent(
         } else {
             GameSuccessOverlayVisualStyle.SUCCESS
         },
+        standardBadge = GameSuccessOverlayStandardBadge.CHECK,
         badgeContentDescription = if (isPersonalRecordPresentation) {
             stringResource(R.string.daily_personal_record_badge_content_description)
         } else {

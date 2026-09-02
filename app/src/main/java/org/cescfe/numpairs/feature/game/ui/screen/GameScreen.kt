@@ -40,6 +40,7 @@ import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.GameHighlightState
 import org.cescfe.numpairs.feature.game.GameInteractionPolicy
 import org.cescfe.numpairs.feature.game.GameSuccessOverlayContent
+import org.cescfe.numpairs.feature.game.GameSuccessOverlayCopy
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
 import org.cescfe.numpairs.feature.game.presentation.PuzzleOutcomeUiState
 import org.cescfe.numpairs.feature.game.presentation.RuleConflictUiState
@@ -82,6 +83,7 @@ fun GameScreen(
     onRulesHelperPlayTutorialRequested: (() -> Unit)? = null,
     isSuccessOverlayEnabled: Boolean = true,
     successOverlayContent: GameSuccessOverlayContent? = null,
+    successOverlayCopy: GameSuccessOverlayCopy? = null,
     successOverlayConfettiCelebrationId: Long? = null,
     onSuccessOverlayConfettiCelebrationStarted: () -> Unit = {},
     isBoardVisible: Boolean = true,
@@ -198,6 +200,7 @@ fun GameScreen(
                 onDismiss = onSuccessOverlayDismissed,
                 completionActions = completionActions,
                 content = successOverlayContent,
+                celebrationCopy = successOverlayCopy,
                 completionFeedbackId = completionFeedbackId,
                 confettiCelebrationId = successOverlayConfettiCelebrationId,
                 onConfettiCelebrationStarted = onSuccessOverlayConfettiCelebrationStarted

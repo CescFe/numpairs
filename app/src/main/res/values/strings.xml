@@ -117,7 +117,6 @@
     <string name="daily_retry_action">Retry</string>
     <string name="daily_completion_screen_title">Daily completed</string>
     <string name="daily_completion_message">Daily completed!</string>
-    <string name="daily_completion_supporting_text">Today’s challenge is complete.</string>
     <string name="daily_personal_record_message">New personal record!</string>
     <string name="daily_personal_record_supporting_text">Amazing! You beat your best time. Can you keep the streak going tomorrow?</string>
     <string name="daily_personal_record_previous_best">Previous best: %1$s</string>
@@ -210,7 +209,24 @@
     <!-- Game screen: feedback and overlays -->
     <string name="success_overlay_message">Puzzle Completed!</string>
     <string name="success_overlay_badge_text">OK</string>
+    <string name="success_overlay_badge_content_description">Puzzle completed</string>
     <string name="success_overlay_supporting_text">All pairs matched.</string>
+    <string name="completion_celebration_great_work_title">Great work!</string>
+    <string name="completion_celebration_great_work_supporting_text">Your logic paid off.</string>
+    <string name="completion_celebration_excellent_title">Excellent!</string>
+    <string name="completion_celebration_excellent_supporting_text">You found the complete solution.</string>
+    <string name="completion_celebration_you_rock_title">You rock!</string>
+    <string name="completion_celebration_you_rock_supporting_text">That was an impressive solve.</string>
+    <string name="completion_celebration_nailed_it_title">You nailed it!</string>
+    <string name="completion_celebration_nailed_it_supporting_text">The whole puzzle checks out.</string>
+    <string name="completion_celebration_brilliant_title">Brilliant!</string>
+    <string name="completion_celebration_brilliant_supporting_text">Your solution fits perfectly.</string>
+    <string name="completion_celebration_keep_it_up_title">Keep it up!</string>
+    <string name="completion_celebration_keep_it_up_supporting_text">Ready for a tougher challenge?</string>
+    <string name="completion_celebration_impressive_title">Impressive!</string>
+    <string name="completion_celebration_impressive_supporting_text">That took some serious thinking.</string>
+    <string name="completion_celebration_unstoppable_title">Nothing can stop you!</string>
+    <string name="completion_celebration_unstoppable_supporting_text">And I thought this difficulty was impossible!</string>
     <string name="success_overlay_new_puzzle_button">Play another</string>
     <string name="success_overlay_return_to_menu_button">Back to menu</string>
     <string name="hint_action_content_description">Open practice hints</string>
