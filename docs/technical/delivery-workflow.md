@@ -256,5 +256,3 @@ Before reporting a milestone ready for manual closure:
 - update local `main` from `origin/main`
 - run final formatting, unit-test, lint, and instrumented-test compilation checks
 - confirm the worktree is clean and synchronized with `origin/main`
-
-Agents must not close GitHub milestones.

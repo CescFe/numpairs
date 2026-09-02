@@ -18,6 +18,5 @@ Follow each template to provide the needed information to implement the issue.
 Before editing repository files:
 
 1. Read the complete issue and its acceptance criteria.
-2. The canonical repository guidance for agent routing is [AGENTS.md](AGENTS.md).
-3. Read [the delivery workflow](docs/technical/delivery-workflow.md) for repository conventions.
-4. Read [the code quality guidelines](docs/technical/code-quality.md) for implementation expectations.
+2. Read [the delivery workflow](docs/technical/delivery-workflow.md) for repository conventions.
+3. Read [the code quality guidelines](docs/technical/code-quality.md) for implementation expectations.
