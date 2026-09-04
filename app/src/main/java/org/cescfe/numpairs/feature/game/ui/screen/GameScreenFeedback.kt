@@ -281,12 +281,15 @@ internal fun SuccessOverlay(
                         textAlign = TextAlign.Center
                     )
                 }
-                content?.contextText?.let { contextText ->
+                (content?.contextText ?: celebrationCopy?.contextText)?.let { contextText ->
                     val contextModifier = Modifier
                         .fillMaxWidth()
                         .testTag(GameScreenTestTags.SUCCESS_OVERLAY_CONTEXT)
                         .let { modifier ->
-                            content.contextContentDescription?.let { description ->
+                            (
+                                content?.contextContentDescription
+                                    ?: celebrationCopy?.contextContentDescription
+                                )?.let { description ->
                                 modifier.semantics {
                                     contentDescription = description
                                 }

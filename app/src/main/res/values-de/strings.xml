@@ -80,6 +80,8 @@
     <string name="generated_progress_failure_title">Fortschritt nicht gespeichert</string>
     <string name="generated_progress_failure_message">Dein Fortschritt und die verstrichene Zeit konnten nicht gespeichert werden. Versuche es erneut, bevor du fortfährst.</string>
     <string name="generated_elapsed_time_content_description">Verstrichene Zeit: %1$s</string>
+    <string name="generated_personal_best">Bestzeit: %1$s</string>
+    <string name="generated_personal_best_content_description">Bestzeit: %1$s</string>
     <string name="generated_hide_elapsed_time_action">Verstrichene Zeit ausblenden</string>
     <string name="generated_show_elapsed_time_action">Verstrichene Zeit anzeigen</string>
     <string name="generated_puzzle_failure_message">Das Puzzle konnte nicht erstellt werden. Bitte versuche es erneut.</string>

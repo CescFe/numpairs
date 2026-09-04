@@ -21,6 +21,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.cescfe.numpairs.data.generated.session.DataStoreGeneratedSessionRepository
+import org.cescfe.numpairs.data.generated.session.GENERATED_SESSION_SNAPSHOT_PREFERENCE_KEY_NAME
+import org.cescfe.numpairs.data.generated.session.GeneratedAggregate
+import org.cescfe.numpairs.data.generated.session.GeneratedAggregateCodec
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionSnapshot
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
@@ -30,6 +33,8 @@ import org.cescfe.numpairs.domain.daily.DailyElapsedTime
 import org.cescfe.numpairs.domain.daily.DailyMovementCount
 import org.cescfe.numpairs.domain.daily.DailyRecipeVersion
 import org.cescfe.numpairs.domain.daily.DailyTimingStartInstant
+import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
+import org.cescfe.numpairs.domain.generated.GeneratedPersonalBestCategory
 import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.junit.After
@@ -993,6 +998,17 @@ class DataStoreDailySessionRepositoryTest {
         val dailyFixture = createRepository()
         val normalDataStoreFixture = createRepository()
         val normalRepository = DataStoreGeneratedSessionRepository(normalDataStoreFixture.dataStore)
+        val normalBest = GeneratedElapsedTime(54_321)
+        normalDataStoreFixture.dataStore.edit { preferences ->
+            preferences[byteArrayPreferencesKey(GENERATED_SESSION_SNAPSHOT_PREFERENCE_KEY_NAME)] =
+                GeneratedAggregateCodec().encode(
+                    GeneratedAggregate(
+                        personalBests = mapOf(
+                            GeneratedPersonalBestCategory.FOUR_PAIRS_LOW to normalBest
+                        )
+                    )
+                )
+        }
         val normalSnapshot = GeneratedSessionSnapshot(
             sessionId = GeneratedSessionId("normal-session"),
             modeId = "four-pairs",
@@ -1014,6 +1030,10 @@ class DataStoreDailySessionRepositoryTest {
         )
 
         assertEquals(normalSnapshot, normalRepository.session.first())
+        assertEquals(
+            normalBest,
+            normalRepository.state.first().personalBests[GeneratedPersonalBestCategory.FOUR_PAIRS_LOW]
+        )
         assertEquals(
             listOf(dailySnapshot.dailyChallengeId),
             dailyFixture.repository.state.first().completedChallengeIds

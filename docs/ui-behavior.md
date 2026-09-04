@@ -291,6 +291,7 @@ system-themed icons, whose tint is controlled by the launcher rather than NumPai
 A solved normal Quick or Classic puzzle shows exactly:
 
 - the frozen completion duration
+- the resulting best time when the timed result has a resolvable exact challenge
 - primary: `Play another`
 - secondary: `Back to menu`
 
@@ -315,9 +316,12 @@ tapping again restores the value. The shared local expanded/collapsed preference
 Quick and Classic sessions. Daily keeps its fixed non-interactive chronometer and Tutorial has no
 timer.
 
-Solving freezes the displayed duration before completion animation and clears menu resumability
-before `Back to menu` returns to the menu. Completion does not record progression or completion
-counts. There is no `Change difficulty`, restart, or additional completion action.
+Solving freezes the displayed duration and exact-challenge personal-best result before completion
+animation. Baseline, Personal Record, and Not Record use the standard completion styling here;
+record-specific gold styling, star, and confetti are not enabled. The identity-guarded completion
+transaction updates the resulting category best and clears menu resumability before `Back to
+menu` returns to the menu. Completion does not record progression or completion counts. There is
+no `Change difficulty`, restart, or additional completion action.
 
 ---
 

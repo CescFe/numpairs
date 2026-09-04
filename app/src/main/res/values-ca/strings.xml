@@ -80,6 +80,8 @@
     <string name="generated_progress_failure_title">Progrés sense guardar</string>
     <string name="generated_progress_failure_message">No s’han pogut guardar el teu progrés ni el temps transcorregut. Torna-ho a provar abans de continuar.</string>
     <string name="generated_elapsed_time_content_description">Temps transcorregut: %1$s</string>
+    <string name="generated_personal_best">Millor temps: %1$s</string>
+    <string name="generated_personal_best_content_description">Millor temps: %1$s</string>
     <string name="generated_hide_elapsed_time_action">Oculta el temps transcorregut</string>
     <string name="generated_show_elapsed_time_action">Mostra el temps transcorregut</string>
     <string name="generated_puzzle_failure_message">No s’ha pogut crear un puzle. Torna-ho a provar.</string>

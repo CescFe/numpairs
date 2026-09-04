@@ -12,11 +12,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.cescfe.numpairs.data.generated.session.GeneratedSessionCompletionResult
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionSnapshot
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionTimingStartResult
 import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
+import org.cescfe.numpairs.domain.generated.GeneratedPersonalBestCategory
+import org.cescfe.numpairs.domain.generated.GeneratedPersonalBestCategoryResolver
+import org.cescfe.numpairs.domain.generated.GeneratedPersonalBestResult
 import org.cescfe.numpairs.domain.generated.GeneratedTimingStartInstant
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
@@ -55,18 +59,30 @@ internal sealed interface GeneratedPuzzleGenerationUiState {
     data class Loading(
         val definition: GeneratedPuzzleGenerationDefinition,
         val request: GeneratedPuzzleGenerationRequest,
-        val previousSession: GeneratedModeGameSession?
+        val previousSession: GeneratedModeGameSession?,
+        val previousPersonalBestResult: GeneratedPersonalBestResult? = null
     ) : GeneratedPuzzleGenerationUiState
 
     data class Ready(
         val session: GeneratedModeGameSession,
         val replacementTransition: GeneratedPuzzleReplacementTransition? = null,
         val elapsedTime: GeneratedElapsedTime? = session.snapshot.completionElapsedTime,
+        val personalBests: Map<GeneratedPersonalBestCategory, GeneratedElapsedTime> = emptyMap(),
+        val personalBestResult: GeneratedPersonalBestResult? = null,
         val hasPersistenceFailure: Boolean = false
     ) : GeneratedPuzzleGenerationUiState {
         init {
             require(replacementTransition == null || replacementTransition.successorSessionId == session.id) {
                 "A replacement transition must target the ready session."
+            }
+            require(personalBestResult == null || session.currentPuzzle.isSolved) {
+                "A generated personal-best result requires a solved visible session."
+            }
+            require(
+                personalBestResult?.currentElapsedTime == null ||
+                    personalBestResult.currentElapsedTime == session.snapshot.completionElapsedTime
+            ) {
+                "A generated personal-best result must use the visible frozen duration."
             }
         }
     }
@@ -75,7 +91,8 @@ internal sealed interface GeneratedPuzzleGenerationUiState {
         val definition: GeneratedPuzzleGenerationDefinition,
         val request: GeneratedPuzzleGenerationRequest,
         val failure: GeneratedPuzzlePreparationFailure,
-        val previousSession: GeneratedModeGameSession?
+        val previousSession: GeneratedModeGameSession?,
+        val previousPersonalBestResult: GeneratedPersonalBestResult? = null
     ) : GeneratedPuzzleGenerationUiState
 
     data class ResumeUnavailable(val expectedSessionId: GeneratedSessionId) : GeneratedPuzzleGenerationUiState
@@ -87,7 +104,9 @@ internal class GeneratedPuzzleViewModel(
     private val generatedSessionRepository: GeneratedSessionRepository,
     private val seedSource: GeneratedPuzzleSeedSource = ThreadLocalGeneratedPuzzleSeedSource,
     private val sessionIdSource: GeneratedSessionIdSource = UuidGeneratedSessionIdSource,
-    private val timeSource: ElapsedTimeSource = SystemElapsedTimeSource
+    private val timeSource: ElapsedTimeSource = SystemElapsedTimeSource,
+    private val personalBestCategoryResolver: GeneratedPersonalBestCategoryResolver =
+        GeneratedChallengePersonalBestCategoryResolver()
 ) : ViewModel() {
     private val initialDefinition = GeneratedPuzzleGenerationDefinition(
         challenge = challenge,
@@ -112,11 +131,15 @@ internal class GeneratedPuzzleViewModel(
             activeLaunchIntent = launchIntent
 
             when (launchIntent) {
-                is GeneratedModeLaunchIntent.NewPuzzle -> startGeneration(
-                    definition = initialDefinition,
-                    request = nextRequest(initialDefinition.challenge),
-                    previousSession = (_uiState.value as? GeneratedPuzzleGenerationUiState.Ready)?.session
-                )
+                is GeneratedModeLaunchIntent.NewPuzzle -> {
+                    val ready = _uiState.value as? GeneratedPuzzleGenerationUiState.Ready
+                    startGeneration(
+                        definition = initialDefinition,
+                        request = nextRequest(initialDefinition.challenge),
+                        previousSession = ready?.session,
+                        previousPersonalBestResult = ready?.personalBestResult
+                    )
+                }
 
                 is GeneratedModeLaunchIntent.ResumeSession -> startResume(launchIntent)
             }
@@ -137,7 +160,8 @@ internal class GeneratedPuzzleViewModel(
             is GeneratedPuzzleGenerationUiState.Loading -> startGeneration(
                 definition = state.definition,
                 request = state.request,
-                previousSession = state.previousSession
+                previousSession = state.previousSession,
+                previousPersonalBestResult = state.previousPersonalBestResult
             )
 
             is GeneratedPuzzleGenerationUiState.Restoring -> startResume(
@@ -163,7 +187,8 @@ internal class GeneratedPuzzleViewModel(
         startGeneration(
             definition = state.definition,
             request = nextRequest(state.definition.challenge),
-            previousSession = state.previousSession
+            previousSession = state.previousSession,
+            previousPersonalBestResult = state.previousPersonalBestResult
         )
     }
 
@@ -182,7 +207,8 @@ internal class GeneratedPuzzleViewModel(
         startGeneration(
             definition = definition,
             request = nextRequest(definition.challenge),
-            previousSession = state.session
+            previousSession = state.session,
+            previousPersonalBestResult = state.personalBestResult
         )
     }
 
@@ -270,7 +296,11 @@ internal class GeneratedPuzzleViewModel(
             return
         }
         _uiState.value = state.copy(hasPersistenceFailure = false)
-        enqueueSessionPersistence(session = state.session, timingStartOnly = false)
+        enqueueSessionPersistence(
+            session = state.session,
+            timingStartOnly = false,
+            personalBestResult = state.personalBestResult
+        )
     }
 
     fun onPuzzleMutationCommitted(expectedSessionId: GeneratedSessionId, mutation: CommittedPuzzleMutation) {
@@ -279,11 +309,20 @@ internal class GeneratedPuzzleViewModel(
         } else {
             null
         }
+        val personalBestResult = if (mutation.puzzle.isSolved) {
+            freezePersonalBestResult(
+                expectedSessionId = expectedSessionId,
+                completionElapsedTime = completionElapsedTime
+            )
+        } else {
+            null
+        }
         val updatedSession = try {
             updateVisibleSession(
                 expectedSessionId = expectedSessionId,
                 mutation = mutation,
-                completionElapsedTime = completionElapsedTime
+                completionElapsedTime = completionElapsedTime,
+                personalBestResult = personalBestResult
             )
         } catch (_: IllegalArgumentException) {
             null
@@ -291,13 +330,18 @@ internal class GeneratedPuzzleViewModel(
             return
         }
 
-        enqueueSessionPersistence(session = updatedSession, timingStartOnly = false)
+        enqueueSessionPersistence(
+            session = updatedSession,
+            timingStartOnly = false,
+            personalBestResult = personalBestResult
+        )
     }
 
     private fun updateVisibleSession(
         expectedSessionId: GeneratedSessionId,
         mutation: CommittedPuzzleMutation,
-        completionElapsedTime: GeneratedElapsedTime?
+        completionElapsedTime: GeneratedElapsedTime?,
+        personalBestResult: GeneratedPersonalBestResult?
     ): GeneratedModeGameSession? {
         val state = _uiState.value
         val visibleSession = when (state) {
@@ -334,7 +378,8 @@ internal class GeneratedPuzzleViewModel(
         _uiState.value = state.withVisibleSession(
             session = updatedSession,
             elapsedTime = completionElapsedTime
-                ?: (state as? GeneratedPuzzleGenerationUiState.Ready)?.elapsedTime
+                ?: (state as? GeneratedPuzzleGenerationUiState.Ready)?.elapsedTime,
+            personalBestResult = personalBestResult
         )
         return updatedSession
     }
@@ -349,7 +394,8 @@ internal class GeneratedPuzzleViewModel(
             expectedSessionId = launchIntent.expectedSessionId
         )
         val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
-            val snapshot = generatedSessionRepository.session.first()
+            val repositoryState = generatedSessionRepository.state.first()
+            val snapshot = repositoryState.activeSession
                 ?.takeIf { storedSnapshot ->
                     storedSnapshot.sessionId == launchIntent.expectedSessionId &&
                         storedSnapshot.modeId == challenge.modeId.value &&
@@ -370,7 +416,8 @@ internal class GeneratedPuzzleViewModel(
                             profile = challenge.profile,
                             seed = resumableSnapshot.seed
                         )
-                    )
+                    ),
+                    personalBests = repositoryState.personalBests
                 )
             } ?: GeneratedPuzzleGenerationUiState.ResumeUnavailable(
                 expectedSessionId = launchIntent.expectedSessionId
@@ -383,7 +430,8 @@ internal class GeneratedPuzzleViewModel(
     private fun startGeneration(
         definition: GeneratedPuzzleGenerationDefinition,
         request: GeneratedPuzzleGenerationRequest,
-        previousSession: GeneratedModeGameSession?
+        previousSession: GeneratedModeGameSession?,
+        previousPersonalBestResult: GeneratedPersonalBestResult? = null
     ) {
         require(definition.challenge.profile.id == request.profileId) {
             "Generated puzzle definition must match its request profile."
@@ -396,7 +444,8 @@ internal class GeneratedPuzzleViewModel(
         _uiState.value = GeneratedPuzzleGenerationUiState.Loading(
             definition = definition,
             request = request,
-            previousSession = previousSession
+            previousSession = previousSession,
+            previousPersonalBestResult = previousPersonalBestResult
         )
         val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
             val outcome = definition.generationUseCase.generate(request = request)
@@ -409,7 +458,8 @@ internal class GeneratedPuzzleViewModel(
                     prepareGeneratedSession(
                         definition = definition,
                         outcome = outcome,
-                        previousSession = previousSession
+                        previousSession = previousSession,
+                        previousPersonalBestResult = previousPersonalBestResult
                     )
                 }
 
@@ -418,7 +468,8 @@ internal class GeneratedPuzzleViewModel(
                         definition = definition,
                         request = outcome.request,
                         failure = GeneratedPuzzlePreparationFailure.Generation(outcome),
-                        previousSession = previousSession
+                        previousSession = previousSession,
+                        previousPersonalBestResult = previousPersonalBestResult
                     )
                 }
             }
@@ -436,7 +487,8 @@ internal class GeneratedPuzzleViewModel(
     private suspend fun prepareGeneratedSession(
         definition: GeneratedPuzzleGenerationDefinition,
         outcome: GeneratedPuzzleGenerationResult.Generated,
-        previousSession: GeneratedModeGameSession?
+        previousSession: GeneratedModeGameSession?,
+        previousPersonalBestResult: GeneratedPersonalBestResult?
     ): GeneratedPuzzleGenerationUiState {
         val sessionId = sessionIdSource.nextId()
         val snapshot = GeneratedSessionSnapshot(
@@ -455,10 +507,12 @@ internal class GeneratedPuzzleViewModel(
                     definition = definition,
                     request = outcome.request,
                     failure = GeneratedPuzzlePreparationFailure.Persistence,
-                    previousSession = previousSession
+                    previousSession = previousSession,
+                    previousPersonalBestResult = previousPersonalBestResult
                 )
             }
             generatedSessionRepository.replace(snapshot)
+            val repositoryState = generatedSessionRepository.state.first()
             val session = GeneratedModeGameSession(
                 challenge = definition.challenge,
                 snapshot = snapshot,
@@ -471,14 +525,16 @@ internal class GeneratedPuzzleViewModel(
                         predecessorSessionId = predecessor.id,
                         successorSessionId = session.id
                     )
-                }
+                },
+                personalBests = repositoryState.personalBests
             )
         } catch (_: IOException) {
             GeneratedPuzzleGenerationUiState.Failed(
                 definition = definition,
                 request = outcome.request,
                 failure = GeneratedPuzzlePreparationFailure.Persistence,
-                previousSession = previousSession
+                previousSession = previousSession,
+                previousPersonalBestResult = previousPersonalBestResult
             )
         }
     }
@@ -489,7 +545,11 @@ internal class GeneratedPuzzleViewModel(
             seed = seedSource.nextSeed()
         )
 
-    private fun enqueueSessionPersistence(session: GeneratedModeGameSession, timingStartOnly: Boolean) {
+    private fun enqueueSessionPersistence(
+        session: GeneratedModeGameSession,
+        timingStartOnly: Boolean,
+        personalBestResult: GeneratedPersonalBestResult? = null
+    ) {
         val precedingWrite = sessionWriteJob
         sessionWriteJob = viewModelScope.launch {
             precedingWrite?.join()
@@ -499,19 +559,30 @@ internal class GeneratedPuzzleViewModel(
                     return@launch
                 }
                 if (!timingStartOnly) {
-                    val wasUpdated = generatedSessionRepository.updateCurrentPuzzle(
-                        expectedSessionId = session.id,
-                        puzzle = session.currentPuzzle,
-                        correctionCount = session.snapshot.correctionCount,
-                        completionElapsedTime = session.snapshot.completionElapsedTime
-                    )
-                    if (!wasUpdated) {
-                        publishPersistenceFailure(session.id)
-                        return@launch
-                    }
-                    if (session.currentPuzzle.isSolved && !generatedSessionRepository.clear(session.id)) {
-                        publishPersistenceFailure(session.id)
-                        return@launch
+                    if (session.currentPuzzle.isSolved) {
+                        val completionResult = generatedSessionRepository.complete(
+                            expectedSessionId = session.id,
+                            solvedPuzzle = session.currentPuzzle,
+                            correctionCount = session.snapshot.correctionCount,
+                            personalBestResult = requireNotNull(personalBestResult) {
+                                "A solved generated session requires a frozen personal-best result."
+                            }
+                        )
+                        if (completionResult != GeneratedSessionCompletionResult.Completed) {
+                            publishPersistenceFailure(session.id)
+                            return@launch
+                        }
+                    } else {
+                        val wasUpdated = generatedSessionRepository.updateCurrentPuzzle(
+                            expectedSessionId = session.id,
+                            puzzle = session.currentPuzzle,
+                            correctionCount = session.snapshot.correctionCount,
+                            completionElapsedTime = null
+                        )
+                        if (!wasUpdated) {
+                            publishPersistenceFailure(session.id)
+                            return@launch
+                        }
                     }
                 }
                 clearPersistenceFailure(session.id)
@@ -612,6 +683,26 @@ internal class GeneratedPuzzleViewModel(
         }
     }
 
+    private fun freezePersonalBestResult(
+        expectedSessionId: GeneratedSessionId,
+        completionElapsedTime: GeneratedElapsedTime?
+    ): GeneratedPersonalBestResult? {
+        val state = _uiState.value as? GeneratedPuzzleGenerationUiState.Ready ?: return null
+        if (state.session.id != expectedSessionId || state.session.currentPuzzle.isSolved) {
+            return state.personalBestResult
+        }
+        val snapshot = state.session.snapshot
+        val category = personalBestCategoryResolver.categoryFor(
+            modeId = snapshot.modeId,
+            profileId = snapshot.profileId
+        )
+        return GeneratedPersonalBestResult.classify(
+            category = category,
+            currentElapsedTime = completionElapsedTime,
+            previousBestElapsedTime = category?.let(state.personalBests::get)
+        )
+    }
+
     private fun publishPersistenceFailure(expectedSessionId: GeneratedSessionId) {
         val state = _uiState.value as? GeneratedPuzzleGenerationUiState.Ready ?: return
         if (state.session.id == expectedSessionId) {
@@ -688,13 +779,24 @@ internal data class GeneratedModeGameSession(
 
 private fun GeneratedPuzzleGenerationUiState.withVisibleSession(
     session: GeneratedModeGameSession,
-    elapsedTime: GeneratedElapsedTime?
+    elapsedTime: GeneratedElapsedTime?,
+    personalBestResult: GeneratedPersonalBestResult?
 ): GeneratedPuzzleGenerationUiState = when (this) {
-    is GeneratedPuzzleGenerationUiState.Ready -> copy(session = session, elapsedTime = elapsedTime)
+    is GeneratedPuzzleGenerationUiState.Ready -> copy(
+        session = session,
+        elapsedTime = elapsedTime,
+        personalBestResult = personalBestResult
+    )
 
-    is GeneratedPuzzleGenerationUiState.Loading -> copy(previousSession = session)
+    is GeneratedPuzzleGenerationUiState.Loading -> copy(
+        previousSession = session,
+        previousPersonalBestResult = personalBestResult ?: previousPersonalBestResult
+    )
 
-    is GeneratedPuzzleGenerationUiState.Failed -> copy(previousSession = session)
+    is GeneratedPuzzleGenerationUiState.Failed -> copy(
+        previousSession = session,
+        previousPersonalBestResult = personalBestResult ?: previousPersonalBestResult
+    )
 
     GeneratedPuzzleGenerationUiState.Idle,
     is GeneratedPuzzleGenerationUiState.Restoring,

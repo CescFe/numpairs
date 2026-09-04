@@ -2,7 +2,7 @@
 
 ## Document Status
 
-- Status: implemented normal generated-session persistence with v11 play-option compatibility
+- Status: implemented normal generated-session and exact-challenge personal-best persistence
 - Product contracts: `docs/product/prd/prd-v7.md`, `docs/product/prd/prd-v8.md`, and
   `docs/product/prd/prd-v10.md`; current contract: `docs/product/prd/prd-v11.md`
 - Related generation reference: `docs/product/puzzle-generation.md`
@@ -23,8 +23,9 @@ NumPairs stores at most one normal generated session for the whole application. 
 belong to any challenge in the supported generated-challenge catalog: `3 Pairs Low`,
 `3 Pairs Medium`, `4 Pairs Low`, `4 Pairs Medium`, `8 Pairs Medium`, or `8 Pairs Hard`. Quick and
 Classic group these exact challenges for player-facing selection; they do not create independent
-save slots. There is no independent normal save per option or mode, normal generated history,
-account sync, or manual save management.
+save slots. The same six exact challenges form six independent personal-best categories; Quick is
+never persisted as one shared category. There is no independent normal save per option or mode,
+normal generated history, account sync, or manual save management.
 
 `MainActivity` creates one application-scoped `GeneratedSessionRepository` from
 application-private storage and passes it only through generated-play and unlocked-navigation
@@ -70,9 +71,16 @@ profile parameters, completion data, or transient selector state.
 
 ---
 
-## Versioned Snapshot
+## Versioned Aggregate And Snapshot
 
-Schema version `3` stores:
+Aggregate schema version `1` stores the optional active generated-session snapshot plus at most
+one millisecond best duration for each of the six supported exact Generated Challenges. The
+aggregate stores neither Quick nor Classic identity and contains no completion history. A raw
+schema-1, schema-2, or schema-3 snapshot from an earlier application version decodes as an
+aggregate with that active session and no fabricated personal best; the next aggregate write
+migrates it in place.
+
+Nested session schema version `3` stores:
 
 - stable generated-session id
 - generated-mode id
@@ -110,18 +118,23 @@ The initial and current puzzles preserve:
 
 Snapshot construction rejects changed board results, changed strip-entry identity sets, changed known values, and invalid initial player-entered values. Puzzle completion remains derived from `currentPuzzle.isSolved`; no separate persisted completion flag is a second source of truth.
 
-The deterministic codec returns typed decoded, unsupported-version, or invalid-data outcomes. Unsupported or invalid session bytes are exposed as an empty slot, so they do not block startup or a later replacement.
+The deterministic aggregate and snapshot codecs return typed decoded, unsupported-version, or
+invalid-data outcomes. Unsupported or invalid bytes are exposed as an empty aggregate, so they do
+not block startup or a later replacement.
 
 ---
 
 ## Repository Contract
 
-The repository exposes one observable nullable snapshot and four atomic mutations:
+The repository exposes one observable aggregate state, a compatibility view of its nullable
+snapshot, and five atomic mutations:
 
 - `replace(snapshot)` adopts a successor
 - `startTiming(expectedSessionId, startInstant)` establishes one start only for the owning session
 - `updateCurrentPuzzle(expectedSessionId, puzzle, correctionCount, completionElapsedTime)` updates
-  only the owning session
+  only the owning unsolved session
+- `complete(expectedSessionId, solvedPuzzle, correctionCount, personalBestResult)` clears the
+  owning session and applies its already-frozen resulting category best together
 - `clear(expectedSessionId)` clears only the owning session
 
 Start, update, and clear compare the expected stable id inside the DataStore edit. A callback from
@@ -133,7 +146,8 @@ action rectified existing durable state. Draft text, open selectors, dialogs, ov
 scroll position, and other presentation state are not persisted. The generated presentation owner
 orders progress writes so a slower older update cannot finish after a newer update for the same
 session. Each accepted write stores the Current Puzzle and correction count atomically, rejects
-count regression and known/unknown transitions, and remains identity guarded.
+count regression and known/unknown transitions, and remains identity guarded. Completion also
+guards the exact previous category best, so a stale comparison cannot overwrite newer data.
 
 ---
 
@@ -180,10 +194,17 @@ changing or clearing a previous strip value, reassigning an operand, changing an
 resetting a non-pristine tile increments it once. Cascading puzzle effects remain part of that one
 committed action. A migrated session keeps its unknown count. The first unsolved-to-solved
 transition freezes one millisecond-precision duration before repository work or completion
-animation. The solved puzzle, metrics, timing start, and frozen duration are written together
-before the same identity guard clears the slot. A persistence retry reuses that exact in-memory
-snapshot rather than remeasuring. The solved game remains visible in memory for its completion
-actions, but the normal menu no longer exposes `Resume`.
+animation. It resolves the stored mode/profile pair to one exact configured challenge, then also
+freezes the category, previous best, resulting best, and Baseline, Personal Record, or Not Record
+outcome. The first timed result is a Baseline. Only a duration strictly below the previous
+millisecond best is a Personal Record; ties and slower durations are Not Record. Corrections,
+seed, puzzle content, and other attempt data do not participate. Untimed or unresolved results do
+not establish or improve a best.
+
+The solved session is removed and its resulting category best is applied in one identity-guarded
+DataStore transaction. A persistence retry reuses the exact frozen duration and personal-best
+result rather than remeasuring or comparing against its failed attempt. The solved game remains
+visible in memory for its completion actions, but the normal menu no longer exposes `Resume`.
 
 `Play another` uses the create-and-replace pipeline with the completed session's exact mode and
 profile. It does not consult or update the remembered selector default. A late clear from the
@@ -193,11 +214,12 @@ solved session cannot clear the successor because their stable ids differ.
 
 ## Local Storage And Transfer
 
-The snapshot is encoded as one byte-array value in the dedicated Preferences DataStore file:
+The aggregate is encoded as one byte-array value in the dedicated Preferences DataStore file:
 
 `datastore/generated_session.preferences_pb`
 
-Room or another relational database is not used because the product owns one versioned aggregate with atomic replacement, not a queryable collection.
+Room or another relational database is not used because the product owns one versioned aggregate
+with atomic replacement, not a queryable collection.
 
 The file is excluded from:
 
@@ -216,9 +238,10 @@ The implemented Daily aggregate uses its own separately excluded
 
 The non-device test suite protects:
 
-- deterministic snapshot round trips, schema-1 migration, and malformed/versioned input
-- one-slot replacement, identity-guarded update/clear, correction consistency, and DataStore
-  recreation
+- deterministic aggregate and snapshot round trips, legacy snapshot migration, and
+  malformed/versioned input
+- six-category independence, baseline and strict-duration comparison, untimed and unresolved
+  outcomes, identity-guarded atomic completion, and DataStore recreation
 - persistence before readiness
 - exact restoration without generation or writes
 - ordered committed progress with atomic correction counts and solved clearing

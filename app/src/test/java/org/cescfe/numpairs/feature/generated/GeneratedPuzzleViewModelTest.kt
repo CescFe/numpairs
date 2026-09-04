@@ -10,12 +10,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import org.cescfe.numpairs.data.generated.session.GeneratedSessionCompletionResult
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionSnapshot
+import org.cescfe.numpairs.data.generated.session.GeneratedSessionState
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionTimingStartResult
 import org.cescfe.numpairs.data.puzzle.seed.samplePuzzle
 import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
+import org.cescfe.numpairs.domain.generated.GeneratedPersonalBestCategory
+import org.cescfe.numpairs.domain.generated.GeneratedPersonalBestOutcome
+import org.cescfe.numpairs.domain.generated.GeneratedPersonalBestResult
 import org.cescfe.numpairs.domain.generated.GeneratedTimingStartInstant
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationFailureReason
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
@@ -583,8 +588,136 @@ class GeneratedPuzzleViewModelTest {
 
         val visibleSession = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).session
         assertEquals(solvedPuzzle, visibleSession.currentPuzzle)
-        assertEquals(listOf(sessionId), repository.clearAttempts)
+        assertEquals(listOf(sessionId), repository.completionAttempts)
         assertNull(repository.session.value)
+        assertEquals(
+            GeneratedPersonalBestOutcome.NOT_RECORD,
+            (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready)
+                .personalBestResult?.outcome
+        )
+        assertTrue(repository.state.value.personalBests.isEmpty())
+    }
+
+    @Test
+    fun exact_quick_challenge_best_classifies_a_strict_improvement_independently() {
+        val solvedPuzzle = solvedPuzzleWithKnownStripAndAssignments()
+        val initialPuzzle = initialPuzzleFor(solvedPuzzle)
+        val category = GeneratedPersonalBestCategory.FOUR_PAIRS_LOW
+        val otherQuickCategory = GeneratedPersonalBestCategory.THREE_PAIRS_LOW
+        val repository = RecordingGeneratedSessionRepository(
+            initialPersonalBests = mapOf(
+                category to GeneratedElapsedTime(1_001),
+                otherQuickCategory to GeneratedElapsedTime(400)
+            )
+        )
+        val timeSource = MutableElapsedTimeSource(epochMilliseconds = 20_000, monotonicMilliseconds = 2_000)
+        val viewModel = GeneratedPuzzleViewModel(
+            challenge = GeneratedModes.FOUR_PAIRS_LOW,
+            generationUseCase = generatedPuzzleUseCase(CompletableDeferred(initialPuzzle)),
+            generatedSessionRepository = repository,
+            seedSource = QueueGeneratedPuzzleSeedSource(999),
+            sessionIdSource = QueueGeneratedSessionIdSource("four-low-record"),
+            timeSource = timeSource
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val sessionId = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).session.id
+        viewModel.onPuzzlePresented(sessionId)
+        dispatcher.scheduler.advanceUntilIdle()
+        timeSource.advance(epochMilliseconds = 1_000, monotonicMilliseconds = 1_000)
+
+        viewModel.onPuzzleMutationCommitted(
+            sessionId,
+            solvedPuzzle.asCommittedMutation(isCorrection = true)
+        )
+        val frozen = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).personalBestResult
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(
+            GeneratedPersonalBestResult(
+                category = category,
+                currentElapsedTime = GeneratedElapsedTime(1_000),
+                previousBestElapsedTime = GeneratedElapsedTime(1_001),
+                bestElapsedTime = GeneratedElapsedTime(1_000),
+                outcome = GeneratedPersonalBestOutcome.PERSONAL_RECORD
+            ),
+            frozen
+        )
+        assertEquals(GeneratedElapsedTime(1_000), repository.state.value.personalBests[category])
+        assertEquals(GeneratedElapsedTime(400), repository.state.value.personalBests[otherQuickCategory])
+    }
+
+    @Test
+    fun `exact tie is not a record and keeps the resulting best`() {
+        val solvedPuzzle = solvedPuzzleWithKnownStripAndAssignments()
+        val initialPuzzle = initialPuzzleFor(solvedPuzzle)
+        val category = GeneratedPersonalBestCategory.EIGHT_PAIRS_HARD
+        val repository = RecordingGeneratedSessionRepository(
+            initialPersonalBests = mapOf(category to GeneratedElapsedTime(2_500))
+        )
+        val timeSource = MutableElapsedTimeSource(epochMilliseconds = 30_000, monotonicMilliseconds = 3_000)
+        val viewModel = GeneratedPuzzleViewModel(
+            challenge = GeneratedModes.EIGHT_PAIRS_HARD,
+            generationUseCase = generatedPuzzleUseCase(CompletableDeferred(initialPuzzle)),
+            generatedSessionRepository = repository,
+            seedSource = QueueGeneratedPuzzleSeedSource(123),
+            sessionIdSource = QueueGeneratedSessionIdSource("hard-tie"),
+            timeSource = timeSource
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val sessionId = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).session.id
+        viewModel.onPuzzlePresented(sessionId)
+        dispatcher.scheduler.advanceUntilIdle()
+        timeSource.advance(epochMilliseconds = 2_500, monotonicMilliseconds = 2_500)
+
+        viewModel.onPuzzleMutationCommitted(sessionId, solvedPuzzle.asCommittedMutation())
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val result = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).personalBestResult
+        assertEquals(GeneratedPersonalBestOutcome.NOT_RECORD, result?.outcome)
+        assertEquals(GeneratedElapsedTime(2_500), result?.previousBestElapsedTime)
+        assertEquals(GeneratedElapsedTime(2_500), result?.bestElapsedTime)
+    }
+
+    @Test
+    fun `timed completion with an unconfigured exact challenge cannot change a best`() {
+        val solvedPuzzle = solvedPuzzleWithKnownStripAndAssignments()
+        val initialPuzzle = initialPuzzleFor(solvedPuzzle)
+        val unsupportedChallenge = GeneratedChallenge(
+            id = GeneratedChallengeId("unsupported-low"),
+            modeId = GeneratedModeId("unsupported"),
+            difficulty = GeneratedModes.FOUR_PAIRS_LOW.difficulty,
+            profile = GeneratedModes.FOUR_PAIRS_LOW.profile
+        )
+        val existingBests = mapOf(
+            GeneratedPersonalBestCategory.FOUR_PAIRS_LOW to GeneratedElapsedTime(5_000)
+        )
+        val repository = RecordingGeneratedSessionRepository(initialPersonalBests = existingBests)
+        val timeSource = MutableElapsedTimeSource(epochMilliseconds = 40_000, monotonicMilliseconds = 4_000)
+        val viewModel = GeneratedPuzzleViewModel(
+            challenge = unsupportedChallenge,
+            generationUseCase = generatedPuzzleUseCase(CompletableDeferred(initialPuzzle)),
+            generatedSessionRepository = repository,
+            seedSource = QueueGeneratedPuzzleSeedSource(717),
+            sessionIdSource = QueueGeneratedSessionIdSource("unsupported"),
+            timeSource = timeSource
+        )
+        viewModel.onRouteEntered()
+        dispatcher.scheduler.advanceUntilIdle()
+        val sessionId = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).session.id
+        viewModel.onPuzzlePresented(sessionId)
+        dispatcher.scheduler.advanceUntilIdle()
+        timeSource.advance(epochMilliseconds = 100, monotonicMilliseconds = 100)
+
+        viewModel.onPuzzleMutationCommitted(sessionId, solvedPuzzle.asCommittedMutation())
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val result = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).personalBestResult
+        assertEquals(GeneratedPersonalBestOutcome.NOT_RECORD, result?.outcome)
+        assertNull(result?.category)
+        assertNull(result?.bestElapsedTime)
+        assertEquals(existingBests, repository.state.value.personalBests)
     }
 
     @Test
@@ -882,6 +1015,19 @@ class GeneratedPuzzleViewModelTest {
             listOf(GeneratedElapsedTime(2_345), GeneratedElapsedTime(2_345)),
             repository.completionElapsedTimeAttempts
         )
+        assertEquals(2, repository.personalBestResultAttempts.size)
+        assertEquals(
+            repository.personalBestResultAttempts.first(),
+            repository.personalBestResultAttempts.last()
+        )
+        assertEquals(
+            GeneratedPersonalBestOutcome.BASELINE,
+            repository.personalBestResultAttempts.first().outcome
+        )
+        assertEquals(
+            GeneratedElapsedTime(2_345),
+            repository.state.value.personalBests[GeneratedPersonalBestCategory.FOUR_PAIRS_LOW]
+        )
         assertNull(repository.session.value)
         assertEquals(
             2_345L,
@@ -975,6 +1121,7 @@ private class QueueGeneratedSessionIdSource(vararg ids: String) : GeneratedSessi
 
 private class RecordingGeneratedSessionRepository(
     initialSession: GeneratedSessionSnapshot? = null,
+    initialPersonalBests: Map<GeneratedPersonalBestCategory, GeneratedElapsedTime> = emptyMap(),
     writeGate: CompletableDeferred<Unit>? = null,
     private val replaceFailure: IOException? = null,
     firstUpdateGate: CompletableDeferred<Unit>? = null,
@@ -983,13 +1130,22 @@ private class RecordingGeneratedSessionRepository(
     private val startTimingGate: CompletableDeferred<Unit>? = null
 ) : GeneratedSessionRepository {
     private val mutableSession = MutableStateFlow(initialSession)
+    private val mutableState = MutableStateFlow(
+        GeneratedSessionState(
+            activeSession = initialSession,
+            personalBests = initialPersonalBests
+        )
+    )
     private var pendingUpdateGate = firstUpdateGate
+    override val state: StateFlow<GeneratedSessionState> = mutableState.asStateFlow()
     override val session: StateFlow<GeneratedSessionSnapshot?> = mutableSession.asStateFlow()
     val replaceAttempts = mutableListOf<GeneratedSessionSnapshot>()
     val updateAttempts = mutableListOf<Puzzle>()
     val clearAttempts = mutableListOf<GeneratedSessionId>()
     val startTimingAttempts = mutableListOf<GeneratedTimingStartInstant>()
     val completionElapsedTimeAttempts = mutableListOf<GeneratedElapsedTime?>()
+    val personalBestResultAttempts = mutableListOf<GeneratedPersonalBestResult>()
+    val completionAttempts = mutableListOf<GeneratedSessionId>()
     var nextReplaceGate: CompletableDeferred<Unit>? = writeGate
 
     override suspend fun replace(snapshot: GeneratedSessionSnapshot) {
@@ -1001,7 +1157,7 @@ private class RecordingGeneratedSessionRepository(
         replaceFailure?.let { failure ->
             throw failure
         }
-        mutableSession.value = snapshot
+        updateSession(snapshot)
     }
 
     override suspend fun startTiming(
@@ -1021,7 +1177,7 @@ private class RecordingGeneratedSessionRepository(
         snapshot.timingStartInstant?.let { existing ->
             return GeneratedSessionTimingStartResult.AlreadyStarted(existing)
         }
-        mutableSession.value = snapshot.copy(timingStartInstant = startInstant)
+        updateSession(snapshot.copy(timingStartInstant = startInstant))
         return GeneratedSessionTimingStartResult.Started(startInstant)
     }
 
@@ -1046,12 +1202,51 @@ private class RecordingGeneratedSessionRepository(
             return false
         }
 
-        mutableSession.value = snapshot.copy(
-            currentPuzzle = puzzle,
-            correctionCount = correctionCount,
-            completionElapsedTime = completionElapsedTime
+        updateSession(
+            snapshot.copy(
+                currentPuzzle = puzzle,
+                correctionCount = correctionCount,
+                completionElapsedTime = completionElapsedTime
+            )
         )
         return true
+    }
+
+    override suspend fun complete(
+        expectedSessionId: GeneratedSessionId,
+        solvedPuzzle: Puzzle,
+        correctionCount: PuzzleCorrectionCount?,
+        personalBestResult: GeneratedPersonalBestResult
+    ): GeneratedSessionCompletionResult {
+        completionAttempts += expectedSessionId
+        completionElapsedTimeAttempts += personalBestResult.currentElapsedTime
+        personalBestResultAttempts += personalBestResult
+        if (updateFailuresRemaining > 0) {
+            updateFailuresRemaining--
+            throw IOException("Controlled generated-session completion failure.")
+        }
+        val snapshot = mutableSession.value
+        if (snapshot?.sessionId != expectedSessionId) {
+            return GeneratedSessionCompletionResult.StaleSession
+        }
+        val category = personalBestResult.category
+        if (
+            category != null &&
+            mutableState.value.personalBests[category] != personalBestResult.previousBestElapsedTime
+        ) {
+            return GeneratedSessionCompletionResult.StalePersonalBest
+        }
+        val resultingBests = if (category != null && personalBestResult.bestElapsedTime != null) {
+            mutableState.value.personalBests + (category to personalBestResult.bestElapsedTime)
+        } else {
+            mutableState.value.personalBests
+        }
+        mutableSession.value = null
+        mutableState.value = GeneratedSessionState(
+            activeSession = null,
+            personalBests = resultingBests
+        )
+        return GeneratedSessionCompletionResult.Completed
     }
 
     override suspend fun clear(expectedSessionId: GeneratedSessionId): Boolean {
@@ -1060,8 +1255,13 @@ private class RecordingGeneratedSessionRepository(
             return false
         }
 
-        mutableSession.value = null
+        updateSession(null)
         return true
+    }
+
+    private fun updateSession(snapshot: GeneratedSessionSnapshot?) {
+        mutableSession.value = snapshot
+        mutableState.value = mutableState.value.copy(activeSession = snapshot)
     }
 }
 

@@ -14,7 +14,9 @@ data class GameSuccessOverlayCopy(
     val message: String,
     val supportingText: String,
     val highlightText: String? = null,
-    val highlightContentDescription: String? = null
+    val highlightContentDescription: String? = null,
+    val contextText: String? = null,
+    val contextContentDescription: String? = null
 ) {
     init {
         require(message.isNotBlank()) {
@@ -25,6 +27,9 @@ data class GameSuccessOverlayCopy(
         }
         require(highlightText != null || highlightContentDescription == null) {
             "A success-overlay highlight description requires visible highlight text."
+        }
+        require(contextText != null || contextContentDescription == null) {
+            "A success-overlay context description requires visible context text."
         }
     }
 }
