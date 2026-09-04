@@ -82,6 +82,12 @@
     <string name="generated_elapsed_time_content_description">Elapsed time: %1$s</string>
     <string name="generated_personal_best">Best time: %1$s</string>
     <string name="generated_personal_best_content_description">Best time: %1$s</string>
+    <string name="generated_personal_record_message">New personal record!</string>
+    <string name="generated_personal_record_supporting_text">You beat your best time!</string>
+    <string name="generated_personal_record_current_time_content_description">Personal record time: %1$s</string>
+    <string name="generated_personal_record_context">%1$s · Previous best: %2$s</string>
+    <string name="generated_personal_record_context_content_description">Record category: %1$s. Previous best time: %2$s</string>
+    <string name="generated_personal_record_badge_content_description">Personal record</string>
     <string name="generated_hide_elapsed_time_action">Hide elapsed time</string>
     <string name="generated_show_elapsed_time_action">Show elapsed time</string>
     <string name="generated_puzzle_failure_message">We could not create a puzzle. Please try again.</string>

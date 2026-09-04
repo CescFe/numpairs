@@ -45,9 +45,11 @@ import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
 import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
+import org.cescfe.numpairs.domain.generated.GeneratedPersonalBestOutcome
 import org.cescfe.numpairs.domain.generated.GeneratedPersonalBestResult
 import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.GameRoute
+import org.cescfe.numpairs.feature.game.GameSuccessOverlayVisualStyle
 import org.cescfe.numpairs.feature.game.StandardCompletionCelebrationContext
 import org.cescfe.numpairs.feature.game.StandardCompletionCelebrationSelector
 import org.cescfe.numpairs.feature.game.localizedCopy
@@ -321,7 +323,7 @@ private fun GeneratedPuzzleGameContent(
         ?.takeIf { result -> result.currentElapsedTime != null }
         ?.bestElapsedTime
         ?.let(GeneratedElapsedTimeFormatter::format)
-    val completionCelebrationCopy = StandardCompletionCelebrationSelector.select(
+    val standardCompletionCelebrationCopy = StandardCompletionCelebrationSelector.select(
         StandardCompletionCelebrationContext(
             generatedChallengeId = session.challenge.id.value,
             completionId = session.id.value,
@@ -340,6 +342,48 @@ private fun GeneratedPuzzleGameContent(
             stringResource(R.string.generated_personal_best_content_description, formatted)
         }
     )
+    val completionCelebrationCopy = if (
+        personalBestResult?.outcome == GeneratedPersonalBestOutcome.PERSONAL_RECORD
+    ) {
+        require(personalBestResult.currentElapsedTime == session.snapshot.completionElapsedTime) {
+            "Generated personal-record presentation must use the frozen completion duration."
+        }
+        require(personalBestResult.category?.generatedChallengeId == session.challenge.id.value) {
+            "Generated personal-record presentation must use the completed challenge category."
+        }
+        val currentTime = GeneratedElapsedTimeFormatter.format(
+            requireNotNull(personalBestResult.currentElapsedTime)
+        )
+        val previousBest = GeneratedElapsedTimeFormatter.format(
+            requireNotNull(personalBestResult.previousBestElapsedTime)
+        )
+        val category = session.challenge.localizedPersonalRecordCategory()
+        standardCompletionCelebrationCopy.copy(
+            message = stringResource(R.string.generated_personal_record_message),
+            supportingText = stringResource(R.string.generated_personal_record_supporting_text),
+            highlightText = currentTime,
+            highlightContentDescription = stringResource(
+                R.string.generated_personal_record_current_time_content_description,
+                currentTime
+            ),
+            contextText = stringResource(
+                R.string.generated_personal_record_context,
+                category,
+                previousBest
+            ),
+            contextContentDescription = stringResource(
+                R.string.generated_personal_record_context_content_description,
+                category,
+                previousBest
+            ),
+            visualStyle = GameSuccessOverlayVisualStyle.PERSONAL_RECORD,
+            badgeContentDescription = stringResource(
+                R.string.generated_personal_record_badge_content_description
+            )
+        )
+    } else {
+        standardCompletionCelebrationCopy
+    }
 
     LaunchedEffect(session.id, session.currentPuzzle.isSolved) {
         if (session.currentPuzzle.isSolved) {
@@ -414,6 +458,19 @@ private fun GeneratedPuzzleGenerationUiState.visiblePersonalBestResult(): Genera
     GeneratedPuzzleGenerationUiState.Idle,
     is GeneratedPuzzleGenerationUiState.Restoring,
     is GeneratedPuzzleGenerationUiState.ResumeUnavailable -> null
+}
+
+@Composable
+private fun GeneratedChallenge.localizedPersonalRecordCategory(): String {
+    val size = stringResource(
+        when (modeId) {
+            GeneratedModes.THREE_PAIRS.id -> R.string.three_pairs_screen_title
+            GeneratedModes.FOUR_PAIRS.id -> R.string.four_pairs_screen_title
+            GeneratedModes.EIGHT_PAIRS.id -> R.string.eight_pairs_screen_title
+            else -> error("No personal-record category is configured for mode ${modeId.value}.")
+        }
+    )
+    return stringResource(R.string.generated_challenge_title, size, difficulty.localizedTitle())
 }
 
 @Composable

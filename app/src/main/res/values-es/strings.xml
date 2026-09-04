@@ -82,6 +82,12 @@
     <string name="generated_elapsed_time_content_description">Tiempo transcurrido: %1$s</string>
     <string name="generated_personal_best">Mejor tiempo: %1$s</string>
     <string name="generated_personal_best_content_description">Mejor tiempo: %1$s</string>
+    <string name="generated_personal_record_message">¡Nuevo récord personal!</string>
+    <string name="generated_personal_record_supporting_text">¡Has superado tu mejor tiempo!</string>
+    <string name="generated_personal_record_current_time_content_description">Tiempo del récord personal: %1$s</string>
+    <string name="generated_personal_record_context">%1$s · Mejor tiempo anterior: %2$s</string>
+    <string name="generated_personal_record_context_content_description">Categoría del récord: %1$s. Mejor tiempo anterior: %2$s</string>
+    <string name="generated_personal_record_badge_content_description">Récord personal</string>
     <string name="generated_hide_elapsed_time_action">Ocultar tiempo transcurrido</string>
     <string name="generated_show_elapsed_time_action">Mostrar tiempo transcurrido</string>
     <string name="generated_puzzle_failure_message">No se ha podido crear un puzle. Inténtalo de nuevo.</string>

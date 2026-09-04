@@ -82,6 +82,12 @@
     <string name="generated_elapsed_time_content_description">Temps transcorregut: %1$s</string>
     <string name="generated_personal_best">Millor temps: %1$s</string>
     <string name="generated_personal_best_content_description">Millor temps: %1$s</string>
+    <string name="generated_personal_record_message">Nou rècord personal!</string>
+    <string name="generated_personal_record_supporting_text">Has superat el teu millor temps!</string>
+    <string name="generated_personal_record_current_time_content_description">Temps del rècord personal: %1$s</string>
+    <string name="generated_personal_record_context">%1$s · Millor temps anterior: %2$s</string>
+    <string name="generated_personal_record_context_content_description">Categoria del rècord: %1$s. Millor temps anterior: %2$s</string>
+    <string name="generated_personal_record_badge_content_description">Rècord personal</string>
     <string name="generated_hide_elapsed_time_action">Oculta el temps transcorregut</string>
     <string name="generated_show_elapsed_time_action">Mostra el temps transcorregut</string>
     <string name="generated_puzzle_failure_message">No s’ha pogut crear un puzle. Torna-ho a provar.</string>

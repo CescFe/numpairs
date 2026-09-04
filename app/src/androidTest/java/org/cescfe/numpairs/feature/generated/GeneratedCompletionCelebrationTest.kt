@@ -202,6 +202,128 @@ class GeneratedCompletionCelebrationTest {
             .assertContentDescriptionEquals("Best time: 02:00")
     }
 
+    @Test
+    fun threePairsQuickPersonalRecordUsesRecordPresentationWithExactCategory() {
+        assertPersonalRecordPresentation(
+            challenge = GeneratedModes.THREE_PAIRS_LOW,
+            category = GeneratedPersonalBestCategory.THREE_PAIRS_LOW,
+            expectedCategory = "3 pairs · Low"
+        )
+    }
+
+    @Test
+    fun threePairsMediumQuickPersonalRecordUsesRecordPresentationWithExactCategory() {
+        assertPersonalRecordPresentation(
+            challenge = GeneratedModes.THREE_PAIRS_MEDIUM,
+            category = GeneratedPersonalBestCategory.THREE_PAIRS_MEDIUM,
+            expectedCategory = "3 pairs · Medium"
+        )
+    }
+
+    @Test
+    fun fourPairsQuickPersonalRecordUsesRecordPresentationWithExactCategory() {
+        assertPersonalRecordPresentation(
+            challenge = GeneratedModes.FOUR_PAIRS_MEDIUM,
+            category = GeneratedPersonalBestCategory.FOUR_PAIRS_MEDIUM,
+            expectedCategory = "4 pairs · Medium"
+        )
+    }
+
+    @Test
+    fun fourPairsLowQuickPersonalRecordUsesRecordPresentationWithExactCategory() {
+        assertPersonalRecordPresentation(
+            challenge = GeneratedModes.FOUR_PAIRS_LOW,
+            category = GeneratedPersonalBestCategory.FOUR_PAIRS_LOW,
+            expectedCategory = "4 pairs · Low"
+        )
+    }
+
+    @Test
+    fun eightPairsClassicPersonalRecordUsesRecordPresentationWithExactCategory() {
+        assertPersonalRecordPresentation(
+            challenge = GeneratedModes.EIGHT_PAIRS_HARD,
+            category = GeneratedPersonalBestCategory.EIGHT_PAIRS_HARD,
+            expectedCategory = "8 pairs · Hard"
+        )
+    }
+
+    @Test
+    fun eightPairsMediumClassicPersonalRecordUsesRecordPresentationWithExactCategory() {
+        assertPersonalRecordPresentation(
+            challenge = GeneratedModes.EIGHT_PAIRS_MEDIUM,
+            category = GeneratedPersonalBestCategory.EIGHT_PAIRS_MEDIUM,
+            expectedCategory = "8 pairs · Medium"
+        )
+    }
+
+    private fun assertPersonalRecordPresentation(
+        challenge: GeneratedChallenge,
+        category: GeneratedPersonalBestCategory,
+        expectedCategory: String
+    ) {
+        var reading = ElapsedTimeReading(epochMilliseconds = 1_000, monotonicMilliseconds = 100)
+        composeTestRule.setContent {
+            NumPairsTheme {
+                GeneratedModeRoute(
+                    challenge = challenge,
+                    title = expectedCategory,
+                    generationUseCase = { request ->
+                        GeneratedPuzzleGenerationResult.Generated(
+                            request = request,
+                            initialPuzzle = oneOperatorAwayFromSolvedPuzzle()
+                        )
+                    },
+                    generatedSessionRepository = FakeGeneratedSessionRepository(
+                        initialPersonalBests = mapOf(category to GeneratedElapsedTime(180_000))
+                    ),
+                    timeSource = { reading }
+                )
+            }
+        }
+
+        composeTestRule.runOnIdle {
+            reading = ElapsedTimeReading(
+                epochMilliseconds = 126_999,
+                monotonicMilliseconds = 126_099
+            )
+        }
+        gameRobot()
+            .scrollToBoard()
+            .tapTileOperator(index = 1)
+            .tapOperatorOption(Operator.MULTIPLICATION)
+
+        composeTestRule
+            .onNodeWithContentDescription("Personal record")
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText("New personal record!")
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithText("You beat your best time!")
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_HIGHLIGHT)
+            .assertTextEquals("02:05")
+            .assertContentDescriptionEquals("Personal record time: 02:05")
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONTEXT)
+            .assertTextEquals("$expectedCategory · Previous best: 03:00")
+            .assertContentDescriptionEquals(
+                "Record category: $expectedCategory. Previous best time: 03:00"
+            )
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_NEW_PUZZLE)
+            .assertIsDisplayed()
+            .assertIsEnabled()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_RETURN_TO_MENU)
+            .assertIsDisplayed()
+            .assertIsEnabled()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONFETTI)
+            .assertDoesNotExist()
+    }
+
     private fun assertGeneratedModeOptsInToCompletionCelebration(
         menuButtonTag: String,
         challengeSelector: GeneratedPlayChallengeSelector,

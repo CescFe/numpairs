@@ -16,7 +16,9 @@ data class GameSuccessOverlayCopy(
     val highlightText: String? = null,
     val highlightContentDescription: String? = null,
     val contextText: String? = null,
-    val contextContentDescription: String? = null
+    val contextContentDescription: String? = null,
+    val visualStyle: GameSuccessOverlayVisualStyle = GameSuccessOverlayVisualStyle.SUCCESS,
+    val badgeContentDescription: String? = null
 ) {
     init {
         require(message.isNotBlank()) {
@@ -30,6 +32,12 @@ data class GameSuccessOverlayCopy(
         }
         require(contextText != null || contextContentDescription == null) {
             "A success-overlay context description requires visible context text."
+        }
+        require(
+            visualStyle != GameSuccessOverlayVisualStyle.PERSONAL_RECORD ||
+                !badgeContentDescription.isNullOrBlank()
+        ) {
+            "A personal-record success-overlay badge requires an accessibility description."
         }
     }
 }

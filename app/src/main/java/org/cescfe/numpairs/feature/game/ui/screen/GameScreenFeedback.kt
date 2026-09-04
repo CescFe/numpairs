@@ -78,7 +78,9 @@ internal fun SuccessOverlay(
     }
 
     val interactionSource = remember { MutableInteractionSource() }
-    val isPersonalRecord = content?.visualStyle == GameSuccessOverlayVisualStyle.PERSONAL_RECORD
+    val isPersonalRecord =
+        content?.visualStyle == GameSuccessOverlayVisualStyle.PERSONAL_RECORD ||
+            celebrationCopy?.visualStyle == GameSuccessOverlayVisualStyle.PERSONAL_RECORD
     val usesCompletionCheck = !isPersonalRecord &&
         (celebrationCopy != null || content?.standardBadge == GameSuccessOverlayStandardBadge.CHECK)
     val standardBadgeContentDescription = if (usesCompletionCheck) {
@@ -202,7 +204,11 @@ internal fun SuccessOverlay(
                     modifier = Modifier
                         .testTag(GameScreenTestTags.SUCCESS_OVERLAY_BADGE)
                         .let { modifier ->
-                            (content?.badgeContentDescription ?: standardBadgeContentDescription)?.let { description ->
+                            (
+                                content?.badgeContentDescription
+                                    ?: celebrationCopy?.badgeContentDescription
+                                    ?: standardBadgeContentDescription
+                                )?.let { description ->
                                 modifier.semantics {
                                     contentDescription = description
                                 }
