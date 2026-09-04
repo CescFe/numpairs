@@ -82,6 +82,12 @@
     <string name="generated_elapsed_time_content_description">Verstrichene Zeit: %1$s</string>
     <string name="generated_personal_best">Bestzeit: %1$s</string>
     <string name="generated_personal_best_content_description">Bestzeit: %1$s</string>
+    <string name="generated_personal_record_message">Neuer persönlicher Rekord!</string>
+    <string name="generated_personal_record_supporting_text">Du hast deine Bestzeit unterboten!</string>
+    <string name="generated_personal_record_current_time_content_description">Zeit des persönlichen Rekords: %1$s</string>
+    <string name="generated_personal_record_context">%1$s · Vorherige Bestzeit: %2$s</string>
+    <string name="generated_personal_record_context_content_description">Rekordkategorie: %1$s. Vorherige Bestzeit: %2$s</string>
+    <string name="generated_personal_record_badge_content_description">Persönlicher Rekord</string>
     <string name="generated_hide_elapsed_time_action">Verstrichene Zeit ausblenden</string>
     <string name="generated_show_elapsed_time_action">Verstrichene Zeit anzeigen</string>
     <string name="generated_puzzle_failure_message">Das Puzzle konnte nicht erstellt werden. Bitte versuche es erneut.</string>

@@ -94,6 +94,8 @@ class LocalizationResourceTest {
             resources = resources,
             accessibilityDescription = "Tiempo transcurrido: 02:05",
             personalBest = "Mejor tiempo: 02:05",
+            personalRecordMessage = "¡Nuevo récord personal!",
+            personalRecordSupportingText = "¡Has superado tu mejor tiempo!",
             hideAction = "Ocultar tiempo transcurrido",
             showAction = "Mostrar tiempo transcurrido"
         )
@@ -182,6 +184,8 @@ class LocalizationResourceTest {
             resources = resources,
             accessibilityDescription = "Temps transcorregut: 02:05",
             personalBest = "Millor temps: 02:05",
+            personalRecordMessage = "Nou rècord personal!",
+            personalRecordSupportingText = "Has superat el teu millor temps!",
             hideAction = "Oculta el temps transcorregut",
             showAction = "Mostra el temps transcorregut"
         )
@@ -269,6 +273,8 @@ class LocalizationResourceTest {
             resources = resources,
             accessibilityDescription = "Elapsed time: 02:05",
             personalBest = "Best time: 02:05",
+            personalRecordMessage = "New personal record!",
+            personalRecordSupportingText = "You beat your best time!",
             hideAction = "Hide elapsed time",
             showAction = "Show elapsed time"
         )
@@ -286,6 +292,8 @@ class LocalizationResourceTest {
             resources = resources,
             accessibilityDescription = "Verstrichene Zeit: 02:05",
             personalBest = "Bestzeit: 02:05",
+            personalRecordMessage = "Neuer persönlicher Rekord!",
+            personalRecordSupportingText = "Du hast deine Bestzeit unterboten!",
             hideAction = "Verstrichene Zeit ausblenden",
             showAction = "Verstrichene Zeit anzeigen"
         )
@@ -345,6 +353,8 @@ class LocalizationResourceTest {
         resources: Resources,
         accessibilityDescription: String,
         personalBest: String,
+        personalRecordMessage: String,
+        personalRecordSupportingText: String,
         hideAction: String,
         showAction: String
     ) {
@@ -356,6 +366,11 @@ class LocalizationResourceTest {
         assertEquals(
             personalBest,
             resources.getString(R.string.generated_personal_best_content_description, "02:05")
+        )
+        assertEquals(personalRecordMessage, resources.getString(R.string.generated_personal_record_message))
+        assertEquals(
+            personalRecordSupportingText,
+            resources.getString(R.string.generated_personal_record_supporting_text)
         )
         assertEquals(hideAction, resources.getString(R.string.generated_hide_elapsed_time_action))
         assertEquals(showAction, resources.getString(R.string.generated_show_elapsed_time_action))
