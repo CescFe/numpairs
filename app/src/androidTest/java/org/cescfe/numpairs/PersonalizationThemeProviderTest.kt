@@ -72,5 +72,9 @@ class PersonalizationThemeProviderTest {
         override suspend fun setCompactTileSelectorsEnabled(enabled: Boolean) {
             state.value = state.value.copy(compactTileSelectorsEnabled = enabled)
         }
+
+        override suspend fun setGeneratedChronometerExpanded(expanded: Boolean) {
+            state.value = state.value.copy(generatedChronometerExpanded = expanded)
+        }
     }
 }

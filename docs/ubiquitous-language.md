@@ -77,8 +77,9 @@ A normal replayable generated-puzzle lifecycle identified by a stable session id
 
 NumPairs owns at most one generated session slot for the application, shared by all generated
 challenges. A generated session carries the mode and profile identities that resolve its exact
-challenge, seed metadata, exact initial puzzle, exact current puzzle, and an optional Puzzle
-Correction Count. New sessions start at zero; migrated sessions keep the count unknown.
+challenge, seed metadata, exact initial puzzle, exact current puzzle, an optional Puzzle Correction
+Count, and its generated-attempt timing state. New sessions start with zero corrections and no
+timing start; migrated sessions keep unavailable metrics unknown.
 
 Daily Challenge uses a separate Daily Session lifecycle and does not occupy this slot.
 
@@ -96,8 +97,25 @@ The versioned local representation of one generated session.
 
 The snapshot preserves stable session, mode, profile, board, tile, expression, strip-entry, and
 strip-item identity needed to restore the exact current puzzle. It persists the Puzzle Correction
-Count atomically with that puzzle when tracking is available. Its seed is metadata; the snapshot is
-not restored by regenerating from the seed.
+Count atomically with that puzzle when tracking is available, one immutable Generated Timing Start
+Instant after presentation, and the frozen Generated Elapsed Time during completion persistence.
+Its seed is metadata; the snapshot is not restored by regenerating from the seed.
+
+## Generated Timing Start Instant
+The device-clock UTC instant, stored with millisecond precision, that anchors elapsed timing for
+one Quick or Classic attempt.
+
+The start is recorded at most once when the playable puzzle is first presented. It excludes
+selection, generation, loading, and failure time and is not reset or paused by navigation,
+backgrounding, device locking, configuration change, or process recreation.
+
+## Generated Elapsed Time
+The non-negative millisecond duration captured from a Generated Timing Start Instant until the
+current puzzle first becomes solved.
+
+Millisecond precision is authoritative for persistence and future comparison. The visible
+chronometer truncates to whole seconds, supports minutes beyond 59, and never changes the frozen
+completion duration.
 
 ## Daily Challenge
 The one date-bound playable puzzle selected by a Daily Recipe for one device-local calendar date.

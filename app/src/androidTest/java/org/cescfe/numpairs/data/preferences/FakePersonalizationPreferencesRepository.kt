@@ -31,4 +31,10 @@ class FakePersonalizationPreferencesRepository(
             preferences.copy(compactTileSelectorsEnabled = enabled)
         }
     }
+
+    override suspend fun setGeneratedChronometerExpanded(expanded: Boolean) {
+        mutablePreferences.update { preferences ->
+            preferences.copy(generatedChronometerExpanded = expanded)
+        }
+    }
 }

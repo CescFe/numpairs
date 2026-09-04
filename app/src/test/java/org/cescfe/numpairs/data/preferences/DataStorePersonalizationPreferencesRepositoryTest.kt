@@ -63,6 +63,7 @@ class DataStorePersonalizationPreferencesRepositoryTest {
         firstFixture.repository.selectTheme(PersonalizationTheme.TERMINAL)
         firstFixture.repository.setGeneratedGameHapticsEnabled(false)
         firstFixture.repository.setCompactTileSelectorsEnabled(true)
+        firstFixture.repository.setGeneratedChronometerExpanded(false)
         firstFixture.close()
 
         val secondFixture = createRepository(dataStoreFile)
@@ -71,7 +72,8 @@ class DataStorePersonalizationPreferencesRepositoryTest {
             PersonalizationPreferences(
                 selectedTheme = PersonalizationTheme.TERMINAL,
                 generatedGameHapticsEnabled = false,
-                compactTileSelectorsEnabled = true
+                compactTileSelectorsEnabled = true,
+                generatedChronometerExpanded = false
             ),
             secondFixture.repository.preferences.first()
         )

@@ -4,11 +4,14 @@ import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 import java.nio.ByteBuffer
 import org.cescfe.numpairs.data.puzzle.writePuzzleSnapshot
+import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
+import org.cescfe.numpairs.domain.generated.GeneratedTimingStartInstant
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerator
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfile
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfiles
+import org.cescfe.numpairs.domain.generated.puzzle.GeneratedPairsPuzzle
 import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Expression
@@ -58,6 +61,38 @@ class GeneratedSessionSnapshotCodecTest {
             seed = 208,
             initialPuzzle = puzzle,
             currentPuzzle = puzzle
+        )
+
+        assertEquals(
+            GeneratedSessionSnapshotDecodingResult.Decoded(snapshot),
+            codec.decode(codec.encode(snapshot))
+        )
+    }
+
+    @Test
+    fun `round trips timing start and frozen millisecond completion duration`() {
+        val puzzle = generatedPuzzle(
+            profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW,
+            seed = 211
+        )
+        val completedPuzzle = puzzle.solvedPuzzle.copy(
+            strip = Strip.fromEntries(
+                puzzle.solvedPuzzle.strip.entries.mapIndexed { index, entry ->
+                    if (puzzle.initialPuzzle.strip.entries[index].item == StripItem.Hidden) {
+                        entry.copy(
+                            item = StripItem.PlayerEntered((entry.item as StripItem.Known).value)
+                        )
+                    } else {
+                        entry
+                    }
+                }
+            )
+        )
+        val snapshot = snapshot(
+            initialPuzzle = puzzle.initialPuzzle,
+            currentPuzzle = completedPuzzle,
+            timingStartInstant = GeneratedTimingStartInstant(1_700_000_000_123),
+            completionElapsedTime = GeneratedElapsedTime(125_999)
         )
 
         assertEquals(
@@ -168,6 +203,22 @@ class GeneratedSessionSnapshotCodecTest {
     }
 
     @Test
+    fun `version two attempt metrics migrate without fabricating timing`() {
+        val legacySnapshot = snapshot(correctionCount = PuzzleCorrectionCount(4))
+
+        val decoded = codec.decode(encodeAttemptMetricsSnapshot(legacySnapshot))
+
+        assertEquals(
+            GeneratedSessionSnapshotDecodingResult.Decoded(legacySnapshot),
+            decoded
+        )
+        val migrated = (decoded as GeneratedSessionSnapshotDecodingResult.Decoded).snapshot
+        assertEquals(4L, requireNotNull(migrated.correctionCount).value)
+        assertEquals(null, migrated.timingStartInstant)
+        assertEquals(null, migrated.completionElapsedTime)
+    }
+
+    @Test
     fun `reports malformed and invariant breaking data`() {
         assertEquals(
             GeneratedSessionSnapshotDecodingResult.InvalidData,
@@ -201,7 +252,9 @@ class GeneratedSessionSnapshotCodecTest {
         seed: Int = 207,
         initialPuzzle: Puzzle = repeatedValuePuzzle(),
         currentPuzzle: Puzzle = initialPuzzle,
-        correctionCount: PuzzleCorrectionCount? = PuzzleCorrectionCount.ZERO
+        correctionCount: PuzzleCorrectionCount? = PuzzleCorrectionCount.ZERO,
+        timingStartInstant: GeneratedTimingStartInstant? = null,
+        completionElapsedTime: GeneratedElapsedTime? = null
     ): GeneratedSessionSnapshot = GeneratedSessionSnapshot(
         sessionId = GeneratedSessionId("session-207"),
         modeId = modeId,
@@ -209,10 +262,15 @@ class GeneratedSessionSnapshotCodecTest {
         seed = seed,
         initialPuzzle = initialPuzzle,
         currentPuzzle = currentPuzzle,
-        correctionCount = correctionCount
+        correctionCount = correctionCount,
+        timingStartInstant = timingStartInstant,
+        completionElapsedTime = completionElapsedTime
     )
 
-    private fun generatedInitialPuzzle(profile: GeneratedPuzzleProfile, seed: Int): Puzzle {
+    private fun generatedInitialPuzzle(profile: GeneratedPuzzleProfile, seed: Int): Puzzle =
+        generatedPuzzle(profile = profile, seed = seed).initialPuzzle
+
+    private fun generatedPuzzle(profile: GeneratedPuzzleProfile, seed: Int): GeneratedPairsPuzzle {
         val outcome = GeneratedPairsPuzzleGenerator(profile = profile).generate(
             request = GeneratedPuzzleGenerationRequest(
                 profile = profile,
@@ -220,7 +278,7 @@ class GeneratedSessionSnapshotCodecTest {
             )
         )
 
-        return (outcome as GeneratedPairsPuzzleGenerationOutcome.Generated).puzzle.initialPuzzle
+        return (outcome as GeneratedPairsPuzzleGenerationOutcome.Generated).puzzle
     }
 
     private fun repeatedValuePuzzle(
@@ -263,6 +321,25 @@ private fun encodeInitialSnapshot(snapshot: GeneratedSessionSnapshot): ByteArray
             output.writeInt(snapshot.seed)
             output.writePuzzleSnapshot(snapshot.initialPuzzle)
             output.writePuzzleSnapshot(snapshot.currentPuzzle)
+        }
+        bytes.toByteArray()
+    }
+
+private fun encodeAttemptMetricsSnapshot(snapshot: GeneratedSessionSnapshot): ByteArray =
+    ByteArrayOutputStream().use { bytes ->
+        DataOutputStream(bytes).use { output ->
+            output.writeInt(GENERATED_SESSION_FILE_MAGIC)
+            output.writeInt(GENERATED_SESSION_ATTEMPT_METRICS_SCHEMA_VERSION)
+            output.writeUTF(snapshot.sessionId.value)
+            output.writeUTF(snapshot.modeId)
+            output.writeUTF(snapshot.profileId)
+            output.writeInt(snapshot.seed)
+            output.writePuzzleSnapshot(snapshot.initialPuzzle)
+            output.writePuzzleSnapshot(snapshot.currentPuzzle)
+            output.writeBoolean(snapshot.correctionCount != null)
+            snapshot.correctionCount?.let { correctionCount ->
+                output.writeLong(correctionCount.value)
+            }
         }
         bytes.toByteArray()
     }

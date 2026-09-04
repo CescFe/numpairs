@@ -10,8 +10,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertContentDescriptionEquals
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -40,6 +43,7 @@ import org.cescfe.numpairs.feature.game.ui.screen.GameScreenRobot
 import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.game.ui.semantics.CompletionFeedbackIdKey
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
+import org.cescfe.numpairs.feature.time.ElapsedTimeReading
 import org.cescfe.numpairs.testing.fourPairsQuickSelector
 import org.cescfe.numpairs.testing.threePairsQuickSelector
 import org.cescfe.numpairs.ui.navigation.AppNavigation
@@ -145,6 +149,48 @@ class GeneratedCompletionCelebrationTest {
         )
     }
 
+    @Test
+    fun generated_completion_overlay_uses_the_exact_frozen_chronometer_duration() {
+        var reading = ElapsedTimeReading(epochMilliseconds = 1_000, monotonicMilliseconds = 100)
+        composeTestRule.setContent {
+            NumPairsTheme {
+                GeneratedModeRoute(
+                    challenge = GeneratedModes.FOUR_PAIRS_LOW,
+                    title = "Quick · Low",
+                    generationUseCase = { request ->
+                        GeneratedPuzzleGenerationResult.Generated(
+                            request = request,
+                            initialPuzzle = oneOperatorAwayFromSolvedPuzzle()
+                        )
+                    },
+                    generatedSessionRepository = FakeGeneratedSessionRepository(),
+                    timeSource = { reading }
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(GENERATED_CHRONOMETER_VALUE_TAG, useUnmergedTree = true)
+            .assertIsDisplayed()
+            .assertTextEquals("00:00")
+        composeTestRule.runOnIdle {
+            reading = ElapsedTimeReading(
+                epochMilliseconds = 126_999,
+                monotonicMilliseconds = 126_099
+            )
+        }
+        gameRobot()
+            .scrollToBoard()
+            .tapTileOperator(index = 1)
+            .tapOperatorOption(Operator.MULTIPLICATION)
+
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_HIGHLIGHT)
+            .assertIsDisplayed()
+            .assertTextEquals("02:05")
+            .assertContentDescriptionEquals("Elapsed time: 02:05")
+    }
+
     private fun assertGeneratedModeOptsInToCompletionCelebration(
         menuButtonTag: String,
         challengeSelector: GeneratedPlayChallengeSelector,
@@ -181,6 +227,10 @@ class GeneratedCompletionCelebrationTest {
         }
 
         composeTestRule.navigateToSelectedGeneratedChallenge(menuButtonTag)
+        composeTestRule
+            .onNodeWithTag(GENERATED_CHRONOMETER_TAG)
+            .assertIsDisplayed()
+            .assertHasClickAction()
         gameRobot()
             .scrollToBoard()
             .tapTileOperator(index = 1)
@@ -232,6 +282,10 @@ class GeneratedCompletionCelebrationTest {
                 )
             }
         }
+
+        composeTestRule
+            .onNodeWithTag(GENERATED_CHRONOMETER_TAG)
+            .assertDoesNotExist()
 
         gameRobot()
             .scrollToBoard()

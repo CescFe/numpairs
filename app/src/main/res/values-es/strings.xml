@@ -77,6 +77,11 @@
     <!-- Generated puzzle creation -->
     <string name="generated_puzzle_loading_message">Creando puzle…</string>
     <string name="generated_puzzle_failure_title">Puzle no disponible</string>
+    <string name="generated_progress_failure_title">Progreso sin guardar</string>
+    <string name="generated_progress_failure_message">No se han podido guardar tu progreso ni el tiempo transcurrido. Reinténtalo antes de continuar.</string>
+    <string name="generated_elapsed_time_content_description">Tiempo transcurrido: %1$s</string>
+    <string name="generated_hide_elapsed_time_action">Ocultar tiempo transcurrido</string>
+    <string name="generated_show_elapsed_time_action">Mostrar tiempo transcurrido</string>
     <string name="generated_puzzle_failure_message">No se ha podido crear un puzle. Inténtalo de nuevo.</string>
     <string name="generated_puzzle_retry_button">Reintentar</string>
     <string name="onboarding_startup_failure_title">No se puede abrir NumPairs</string>
