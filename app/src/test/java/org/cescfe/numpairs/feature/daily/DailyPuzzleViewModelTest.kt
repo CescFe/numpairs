@@ -1304,6 +1304,7 @@ class DailyPuzzleViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
         val session = (viewModel.uiState.value as DailyPuzzleUiState.Ready).session
         currentDate = currentDate.plusDays(1)
+        assertEquals(fixture.identity.localDate.plusDays(1), currentDate)
 
         viewModel.onPuzzleMutationCommitted(session.id, fixture.solvedProgressPuzzle().asCommittedMutation())
         dispatcher.scheduler.advanceUntilIdle()

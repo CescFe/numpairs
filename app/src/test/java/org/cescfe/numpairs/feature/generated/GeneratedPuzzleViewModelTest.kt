@@ -688,10 +688,16 @@ class GeneratedPuzzleViewModelTest {
         viewModel.onTimerRefresh(sessionId)
 
         val state = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready
-        assertEquals(GeneratedTimingStartInstant(10_000), state.session.snapshot.timingStartInstant)
-        assertEquals(GeneratedElapsedTime(1_234), state.elapsedTime)
+        assertEquals(
+            10_000L,
+            requireNotNull(state.session.snapshot.timingStartInstant).epochMilliseconds
+        )
+        assertEquals(1_234L, requireNotNull(state.elapsedTime).milliseconds)
         assertEquals(listOf(GeneratedTimingStartInstant(10_000)), repository.startTimingAttempts)
-        assertEquals(GeneratedTimingStartInstant(10_000), repository.session.value?.timingStartInstant)
+        assertEquals(
+            10_000L,
+            requireNotNull(repository.session.value?.timingStartInstant).epochMilliseconds
+        )
     }
 
     @Test
@@ -717,8 +723,11 @@ class GeneratedPuzzleViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
 
         val presented = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready
-        assertEquals(GeneratedElapsedTime(0), presented.elapsedTime)
-        assertEquals(GeneratedTimingStartInstant(50_000), presented.session.snapshot.timingStartInstant)
+        assertEquals(0L, requireNotNull(presented.elapsedTime).milliseconds)
+        assertEquals(
+            50_000L,
+            requireNotNull(presented.session.snapshot.timingStartInstant).epochMilliseconds
+        )
         assertEquals(listOf(GeneratedTimingStartInstant(50_000)), repository.startTimingAttempts)
     }
 
@@ -785,7 +794,10 @@ class GeneratedPuzzleViewModelTest {
             listOf(GeneratedTimingStartInstant(90_000), GeneratedTimingStartInstant(90_000)),
             repository.startTimingAttempts
         )
-        assertEquals(GeneratedTimingStartInstant(90_000), repository.session.value?.timingStartInstant)
+        assertEquals(
+            90_000L,
+            requireNotNull(repository.session.value?.timingStartInstant).epochMilliseconds
+        )
         assertTrue(!(viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).hasPersistenceFailure)
     }
 
@@ -807,20 +819,26 @@ class GeneratedPuzzleViewModelTest {
 
         viewModel.onPuzzlePresented(snapshot.sessionId)
         assertEquals(
-            GeneratedElapsedTime(5_000),
-            (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).elapsedTime
+            5_000L,
+            requireNotNull(
+                (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).elapsedTime
+            ).milliseconds
         )
         timeSource.set(epochMilliseconds = 4_000, monotonicMilliseconds = 1_500)
         viewModel.onTimerRefresh(snapshot.sessionId)
         assertEquals(
-            GeneratedElapsedTime(5_500),
-            (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).elapsedTime
+            5_500L,
+            requireNotNull(
+                (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).elapsedTime
+            ).milliseconds
         )
         timeSource.set(epochMilliseconds = 3_000, monotonicMilliseconds = 900)
         viewModel.onTimerRefresh(snapshot.sessionId)
         assertEquals(
-            GeneratedElapsedTime(5_500),
-            (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).elapsedTime
+            5_500L,
+            requireNotNull(
+                (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).elapsedTime
+            ).milliseconds
         )
         assertTrue(repository.startTimingAttempts.isEmpty())
     }
@@ -848,7 +866,10 @@ class GeneratedPuzzleViewModelTest {
 
         viewModel.onPuzzleMutationCommitted(sessionId, solvedPuzzle.asCommittedMutation())
         val frozenState = viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready
-        assertEquals(GeneratedElapsedTime(2_345), frozenState.session.snapshot.completionElapsedTime)
+        assertEquals(
+            2_345L,
+            requireNotNull(frozenState.session.snapshot.completionElapsedTime).milliseconds
+        )
         timeSource.advance(epochMilliseconds = 9_000, monotonicMilliseconds = 9_000)
         dispatcher.scheduler.advanceUntilIdle()
         assertTrue((viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).hasPersistenceFailure)
@@ -863,9 +884,11 @@ class GeneratedPuzzleViewModelTest {
         )
         assertNull(repository.session.value)
         assertEquals(
-            GeneratedElapsedTime(2_345),
-            (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready)
-                .session.snapshot.completionElapsedTime
+            2_345L,
+            requireNotNull(
+                (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready)
+                    .session.snapshot.completionElapsedTime
+            ).milliseconds
         )
     }
 }

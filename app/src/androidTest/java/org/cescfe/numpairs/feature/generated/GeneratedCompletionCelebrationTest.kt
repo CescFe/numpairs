@@ -157,7 +157,7 @@ class GeneratedCompletionCelebrationTest {
                 GeneratedModeRoute(
                     challenge = GeneratedModes.FOUR_PAIRS_LOW,
                     title = "Quick · Low",
-                    generationUseCase = GeneratedPuzzleGenerationUseCase { request ->
+                    generationUseCase = { request ->
                         GeneratedPuzzleGenerationResult.Generated(
                             request = request,
                             initialPuzzle = oneOperatorAwayFromSolvedPuzzle()

@@ -213,7 +213,7 @@ class GeneratedSessionSnapshotCodecTest {
             decoded
         )
         val migrated = (decoded as GeneratedSessionSnapshotDecodingResult.Decoded).snapshot
-        assertEquals(PuzzleCorrectionCount(4), migrated.correctionCount)
+        assertEquals(4L, requireNotNull(migrated.correctionCount).value)
         assertEquals(null, migrated.timingStartInstant)
         assertEquals(null, migrated.completionElapsedTime)
     }
