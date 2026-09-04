@@ -643,8 +643,14 @@ class GeneratedPuzzleViewModelTest {
             ),
             frozen
         )
-        assertEquals(GeneratedElapsedTime(1_000), repository.state.value.personalBests[category])
-        assertEquals(GeneratedElapsedTime(400), repository.state.value.personalBests[otherQuickCategory])
+        assertEquals(
+            1_000L,
+            requireNotNull(repository.state.value.personalBests[category]).milliseconds
+        )
+        assertEquals(
+            400L,
+            requireNotNull(repository.state.value.personalBests[otherQuickCategory]).milliseconds
+        )
     }
 
     @Test
@@ -676,8 +682,8 @@ class GeneratedPuzzleViewModelTest {
 
         val result = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).personalBestResult
         assertEquals(GeneratedPersonalBestOutcome.NOT_RECORD, result?.outcome)
-        assertEquals(GeneratedElapsedTime(2_500), result?.previousBestElapsedTime)
-        assertEquals(GeneratedElapsedTime(2_500), result?.bestElapsedTime)
+        assertEquals(2_500L, requireNotNull(result?.previousBestElapsedTime).milliseconds)
+        assertEquals(2_500L, requireNotNull(result.bestElapsedTime).milliseconds)
     }
 
     @Test
@@ -1025,8 +1031,10 @@ class GeneratedPuzzleViewModelTest {
             repository.personalBestResultAttempts.first().outcome
         )
         assertEquals(
-            GeneratedElapsedTime(2_345),
-            repository.state.value.personalBests[GeneratedPersonalBestCategory.FOUR_PAIRS_LOW]
+            2_345L,
+            requireNotNull(
+                repository.state.value.personalBests[GeneratedPersonalBestCategory.FOUR_PAIRS_LOW]
+            ).milliseconds
         )
         assertNull(repository.session.value)
         assertEquals(

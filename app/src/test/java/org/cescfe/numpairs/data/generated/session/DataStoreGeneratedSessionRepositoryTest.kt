@@ -106,8 +106,8 @@ class DataStoreGeneratedSessionRepositoryTest {
             fixture.repository.startTiming(snapshot.sessionId, GeneratedTimingStartInstant(9_000))
         )
         assertEquals(
-            GeneratedTimingStartInstant(2_000),
-            fixture.repository.session.first()?.timingStartInstant
+            2_000L,
+            requireNotNull(fixture.repository.session.first()?.timingStartInstant).epochMilliseconds
         )
     }
 
@@ -399,9 +399,11 @@ class DataStoreGeneratedSessionRepositoryTest {
 
         assertNull(secondFixture.repository.state.first().activeSession)
         assertEquals(
-            elapsedTime,
-            secondFixture.repository.state.first()
-                .personalBests[GeneratedPersonalBestCategory.FOUR_PAIRS_LOW]
+            elapsedTime.milliseconds,
+            requireNotNull(
+                secondFixture.repository.state.first()
+                    .personalBests[GeneratedPersonalBestCategory.FOUR_PAIRS_LOW]
+            ).milliseconds
         )
     }
 

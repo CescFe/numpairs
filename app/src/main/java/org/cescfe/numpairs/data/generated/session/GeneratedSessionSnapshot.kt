@@ -47,38 +47,45 @@ data class GeneratedSessionSnapshot(
         require(completionElapsedTime == null || currentPuzzle.isSolved) {
             "A generated completion duration requires a solved puzzle."
         }
-        require(
-            initialPuzzle.board.tiles.map { tile -> tile.result } ==
-                currentPuzzle.board.tiles.map { tile -> tile.result }
-        ) {
-            "Generated session puzzle results must remain unchanged."
-        }
-        require(
-            initialPuzzle.strip.entries.map { entry -> entry.id }.toSet() ==
-                currentPuzzle.strip.entries.map { entry -> entry.id }.toSet()
-        ) {
-            "Generated session strip entry identities must remain unchanged."
-        }
+        requireConsistentGeneratedSessionPuzzle(
+            initialPuzzle = initialPuzzle,
+            currentPuzzle = currentPuzzle
+        )
+    }
+}
 
-        val currentItemsByEntryId = currentPuzzle.strip.entries.associate { entry ->
-            entry.id to entry.item
-        }
-        initialPuzzle.strip.entries.forEach { initialEntry ->
-            val initialItem = initialEntry.item
-            val currentItem = currentItemsByEntryId.getValue(initialEntry.id)
-            when (initialItem) {
-                StripItem.Hidden -> require(currentItem !is StripItem.Known) {
-                    "Hidden generated session strip entries cannot become known entries."
-                }
+internal fun requireConsistentGeneratedSessionPuzzle(initialPuzzle: Puzzle, currentPuzzle: Puzzle) {
+    require(
+        initialPuzzle.board.tiles.map { tile -> tile.result } ==
+            currentPuzzle.board.tiles.map { tile -> tile.result }
+    ) {
+        "Generated session puzzle results must remain unchanged."
+    }
+    require(
+        initialPuzzle.strip.entries.map { entry -> entry.id }.toSet() ==
+            currentPuzzle.strip.entries.map { entry -> entry.id }.toSet()
+    ) {
+        "Generated session strip entry identities must remain unchanged."
+    }
 
-                is StripItem.Known -> require(currentItem == initialItem) {
-                    "Known generated session strip entries must remain unchanged."
-                }
-
-                is StripItem.PlayerEntered -> error(
-                    "Initial generated session strip entries cannot be player-entered."
-                )
+    val currentItemsByEntryId = currentPuzzle.strip.entries.associate { entry ->
+        entry.id to entry.item
+    }
+    initialPuzzle.strip.entries.forEach { initialEntry ->
+        val initialItem = initialEntry.item
+        val currentItem = currentItemsByEntryId.getValue(initialEntry.id)
+        when (initialItem) {
+            StripItem.Hidden -> require(currentItem !is StripItem.Known) {
+                "Hidden generated session strip entries cannot become known entries."
             }
+
+            is StripItem.Known -> require(currentItem == initialItem) {
+                "Known generated session strip entries must remain unchanged."
+            }
+
+            is StripItem.PlayerEntered -> error(
+                "Initial generated session strip entries cannot be player-entered."
+            )
         }
     }
 }

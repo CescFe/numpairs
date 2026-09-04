@@ -1031,8 +1031,10 @@ class DataStoreDailySessionRepositoryTest {
 
         assertEquals(normalSnapshot, normalRepository.session.first())
         assertEquals(
-            normalBest,
-            normalRepository.state.first().personalBests[GeneratedPersonalBestCategory.FOUR_PAIRS_LOW]
+            normalBest.milliseconds,
+            requireNotNull(
+                normalRepository.state.first().personalBests[GeneratedPersonalBestCategory.FOUR_PAIRS_LOW]
+            ).milliseconds
         )
         assertEquals(
             listOf(dailySnapshot.dailyChallengeId),

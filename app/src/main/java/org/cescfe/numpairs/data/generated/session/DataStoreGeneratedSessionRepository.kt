@@ -138,10 +138,9 @@ class DataStoreGeneratedSessionRepository(
                 return@edit
             }
             try {
-                activeSession.copy(
-                    currentPuzzle = solvedPuzzle,
-                    correctionCount = correctionCount,
-                    completionElapsedTime = personalBestResult.currentElapsedTime
+                requireConsistentGeneratedSessionPuzzle(
+                    initialPuzzle = activeSession.initialPuzzle,
+                    currentPuzzle = solvedPuzzle
                 )
             } catch (_: IllegalArgumentException) {
                 result = GeneratedSessionCompletionResult.InvalidPuzzle

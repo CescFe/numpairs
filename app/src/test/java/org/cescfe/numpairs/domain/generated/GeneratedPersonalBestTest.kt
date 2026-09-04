@@ -44,21 +44,30 @@ class GeneratedPersonalBestTest {
     fun `only a strictly faster millisecond duration is a personal record`() {
         assertEquals(
             GeneratedPersonalBestOutcome.PERSONAL_RECORD,
-            classify(current = 59_999, previous = 60_000).outcome
+            classify(current = 59_999).outcome
         )
-        assertEquals(GeneratedElapsedTime(59_999), classify(current = 59_999, previous = 60_000).bestElapsedTime)
+        assertEquals(
+            59_999L,
+            requireNotNull(classify(current = 59_999).bestElapsedTime).milliseconds
+        )
 
         assertEquals(
             GeneratedPersonalBestOutcome.NOT_RECORD,
-            classify(current = 60_000, previous = 60_000).outcome
+            classify(current = 60_000).outcome
         )
-        assertEquals(GeneratedElapsedTime(60_000), classify(current = 60_000, previous = 60_000).bestElapsedTime)
+        assertEquals(
+            60_000L,
+            requireNotNull(classify(current = 60_000).bestElapsedTime).milliseconds
+        )
 
         assertEquals(
             GeneratedPersonalBestOutcome.NOT_RECORD,
-            classify(current = 60_001, previous = 60_000).outcome
+            classify(current = 60_001).outcome
         )
-        assertEquals(GeneratedElapsedTime(60_000), classify(current = 60_001, previous = 60_000).bestElapsedTime)
+        assertEquals(
+            60_000L,
+            requireNotNull(classify(current = 60_001).bestElapsedTime).milliseconds
+        )
     }
 
     @Test
@@ -77,7 +86,7 @@ class GeneratedPersonalBestTest {
             previousBestElapsedTime = GeneratedElapsedTime(42_000)
         )
         assertEquals(GeneratedPersonalBestOutcome.NOT_RECORD, untimedWithBest.outcome)
-        assertEquals(GeneratedElapsedTime(42_000), untimedWithBest.bestElapsedTime)
+        assertEquals(42_000L, requireNotNull(untimedWithBest.bestElapsedTime).milliseconds)
 
         val unresolved = GeneratedPersonalBestResult.classify(
             category = null,
@@ -89,10 +98,10 @@ class GeneratedPersonalBestTest {
         assertNull(unresolved.bestElapsedTime)
     }
 
-    private fun classify(current: Long, previous: Long): GeneratedPersonalBestResult =
+    private fun classify(current: Long): GeneratedPersonalBestResult =
         GeneratedPersonalBestResult.classify(
             category = category,
             currentElapsedTime = GeneratedElapsedTime(current),
-            previousBestElapsedTime = GeneratedElapsedTime(previous)
+            previousBestElapsedTime = GeneratedElapsedTime(60_000)
         )
 }
