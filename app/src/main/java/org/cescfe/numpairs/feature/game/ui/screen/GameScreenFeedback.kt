@@ -36,6 +36,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.MotionDurationScale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.currentCoroutineContext
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.domain.puzzle.model.PuzzleCompletionState
 import org.cescfe.numpairs.feature.game.GameCompletionActions
@@ -110,12 +112,14 @@ internal fun SuccessOverlay(
     }
 
     LaunchedEffect(confettiCelebrationId, isPersonalRecord, isConfettiAnimationEnabled) {
+        val isMotionEnabled = isConfettiAnimationEnabled &&
+            currentCoroutineContext()[MotionDurationScale]?.scaleFactor != 0f
         if (
             confettiCelebrationId != null &&
             isPersonalRecord &&
             activeConfettiCelebrationId == null
         ) {
-            if (isConfettiAnimationEnabled) {
+            if (isMotionEnabled) {
                 activeConfettiCelebrationId = confettiCelebrationId
             }
             currentOnConfettiCelebrationStarted()
