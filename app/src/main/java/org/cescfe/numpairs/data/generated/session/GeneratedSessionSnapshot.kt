@@ -1,8 +1,8 @@
 package org.cescfe.numpairs.data.generated.session
 
-import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
 import org.cescfe.numpairs.domain.generated.GeneratedTimingStartInstant
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
 
@@ -43,6 +43,9 @@ data class GeneratedSessionSnapshot(
         }
         require(completionElapsedTime == null || timingStartInstant != null) {
             "A generated completion duration requires a timing start."
+        }
+        require(completionElapsedTime == null || currentPuzzle.isSolved) {
+            "A generated completion duration requires a solved puzzle."
         }
         require(
             initialPuzzle.board.tiles.map { tile -> tile.result } ==

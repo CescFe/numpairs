@@ -80,7 +80,8 @@ class DataStoreGeneratedSessionRepository(
             if (
                 snapshot?.sessionId == expectedSessionId &&
                 correctionCount.canFollow(snapshot.correctionCount) &&
-                completionElapsedTime.canFollow(snapshot.completionElapsedTime, puzzle.isSolved)
+                completionElapsedTime.canFollow(snapshot.completionElapsedTime, puzzle.isSolved) &&
+                (completionElapsedTime == null || snapshot.timingStartInstant != null)
             ) {
                 preferences[PreferenceKeys.SNAPSHOT] = codec.encode(
                     snapshot.copy(

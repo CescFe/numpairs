@@ -7,9 +7,9 @@ import java.io.DataOutputStream
 import java.io.IOException
 import org.cescfe.numpairs.data.puzzle.readPuzzleSnapshot
 import org.cescfe.numpairs.data.puzzle.writePuzzleSnapshot
-import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
 import org.cescfe.numpairs.domain.generated.GeneratedTimingStartInstant
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 
 sealed interface GeneratedSessionSnapshotDecodingResult {
     data class Decoded(val snapshot: GeneratedSessionSnapshot) : GeneratedSessionSnapshotDecodingResult

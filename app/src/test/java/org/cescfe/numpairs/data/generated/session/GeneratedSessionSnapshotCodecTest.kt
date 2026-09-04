@@ -4,13 +4,14 @@ import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
 import java.nio.ByteBuffer
 import org.cescfe.numpairs.data.puzzle.writePuzzleSnapshot
+import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
+import org.cescfe.numpairs.domain.generated.GeneratedTimingStartInstant
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerationOutcome
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPairsPuzzleGenerator
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfile
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfiles
-import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
-import org.cescfe.numpairs.domain.generated.GeneratedTimingStartInstant
+import org.cescfe.numpairs.domain.generated.puzzle.GeneratedPairsPuzzle
 import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Board
 import org.cescfe.numpairs.domain.puzzle.model.Expression
@@ -70,7 +71,26 @@ class GeneratedSessionSnapshotCodecTest {
 
     @Test
     fun `round trips timing start and frozen millisecond completion duration`() {
+        val puzzle = generatedPuzzle(
+            profile = GeneratedPuzzleProfiles.FOUR_PAIRS_LOW,
+            seed = 211
+        )
+        val completedPuzzle = puzzle.solvedPuzzle.copy(
+            strip = Strip.fromEntries(
+                puzzle.solvedPuzzle.strip.entries.mapIndexed { index, entry ->
+                    if (puzzle.initialPuzzle.strip.entries[index].item == StripItem.Hidden) {
+                        entry.copy(
+                            item = StripItem.PlayerEntered((entry.item as StripItem.Known).value)
+                        )
+                    } else {
+                        entry
+                    }
+                }
+            )
+        )
         val snapshot = snapshot(
+            initialPuzzle = puzzle.initialPuzzle,
+            currentPuzzle = completedPuzzle,
             timingStartInstant = GeneratedTimingStartInstant(1_700_000_000_123),
             completionElapsedTime = GeneratedElapsedTime(125_999)
         )
@@ -247,7 +267,10 @@ class GeneratedSessionSnapshotCodecTest {
         completionElapsedTime = completionElapsedTime
     )
 
-    private fun generatedInitialPuzzle(profile: GeneratedPuzzleProfile, seed: Int): Puzzle {
+    private fun generatedInitialPuzzle(profile: GeneratedPuzzleProfile, seed: Int): Puzzle =
+        generatedPuzzle(profile = profile, seed = seed).initialPuzzle
+
+    private fun generatedPuzzle(profile: GeneratedPuzzleProfile, seed: Int): GeneratedPairsPuzzle {
         val outcome = GeneratedPairsPuzzleGenerator(profile = profile).generate(
             request = GeneratedPuzzleGenerationRequest(
                 profile = profile,
@@ -255,7 +278,7 @@ class GeneratedSessionSnapshotCodecTest {
             )
         )
 
-        return (outcome as GeneratedPairsPuzzleGenerationOutcome.Generated).puzzle.initialPuzzle
+        return (outcome as GeneratedPairsPuzzleGenerationOutcome.Generated).puzzle
     }
 
     private fun repeatedValuePuzzle(

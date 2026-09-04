@@ -31,5 +31,5 @@ interface PersonalizationPreferencesRepository {
 
     suspend fun setCompactTileSelectorsEnabled(enabled: Boolean)
 
-    suspend fun setGeneratedChronometerExpanded(expanded: Boolean) {}
+    suspend fun setGeneratedChronometerExpanded(expanded: Boolean)
 }

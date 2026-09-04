@@ -16,9 +16,9 @@ import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionSnapshot
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionTimingStartResult
-import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
 import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
 import org.cescfe.numpairs.domain.generated.GeneratedTimingStartInstant
+import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 import org.cescfe.numpairs.feature.game.presentation.CommittedPuzzleMutation
 import org.cescfe.numpairs.feature.time.ElapsedTimeReading
@@ -175,6 +175,9 @@ internal class GeneratedPuzzleViewModel(
 
     fun onNewPuzzleRequested(definitionProvider: () -> GeneratedPuzzleGenerationDefinition) {
         val state = _uiState.value as? GeneratedPuzzleGenerationUiState.Ready ?: return
+        if (state.hasPersistenceFailure && state.session.currentPuzzle.isSolved) {
+            return
+        }
         val definition = definitionProvider()
         startGeneration(
             definition = definition,
@@ -310,7 +313,8 @@ internal class GeneratedPuzzleViewModel(
         }
         if (
             visibleSession?.id != expectedSessionId ||
-            visibleSession.currentPuzzle == mutation.puzzle
+            visibleSession.currentPuzzle == mutation.puzzle ||
+            visibleSession.currentPuzzle.isSolved
         ) {
             return null
         }
@@ -541,10 +545,7 @@ internal class GeneratedPuzzleViewModel(
         }
     }
 
-    private fun acceptPersistedTimingStart(
-        sessionId: GeneratedSessionId,
-        startInstant: GeneratedTimingStartInstant
-    ) {
+    private fun acceptPersistedTimingStart(sessionId: GeneratedSessionId, startInstant: GeneratedTimingStartInstant) {
         val pending = pendingTimingStart ?: return
         if (pending.sessionId != sessionId) {
             return
@@ -586,6 +587,7 @@ internal class GeneratedPuzzleViewModel(
         val timer = visibleTimer
         val measured = when {
             timer?.sessionId == sessionId -> timer.readElapsed(timeSource.read())
+
             state.session.snapshot.timingStartInstant != null -> {
                 val reading = timeSource.read()
                 GeneratedElapsedTime(

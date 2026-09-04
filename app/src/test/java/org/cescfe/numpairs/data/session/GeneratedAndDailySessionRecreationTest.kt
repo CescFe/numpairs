@@ -23,7 +23,9 @@ import org.cescfe.numpairs.data.generated.session.DataStoreGeneratedSessionRepos
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionSnapshot
+import org.cescfe.numpairs.data.generated.session.GeneratedSessionTimingStartResult
 import org.cescfe.numpairs.domain.daily.DailyRecipeContracts
+import org.cescfe.numpairs.domain.generated.GeneratedTimingStartInstant
 import org.cescfe.numpairs.domain.generated.generation.generatedPuzzle
 import org.cescfe.numpairs.domain.generated.profile.GeneratedPuzzleProfiles
 import org.cescfe.numpairs.domain.puzzle.model.StripItem
@@ -63,9 +65,20 @@ class GeneratedAndDailySessionRecreationTest {
         val dailySession = dailyFixture.snapshot(currentPuzzle = dailyFixture.progressPuzzle())
 
         originalRepositories.generated.replace(quickSession)
+        assertEquals(
+            GeneratedSessionTimingStartResult.Started(GeneratedTimingStartInstant(4_200)),
+            originalRepositories.generated.startTiming(
+                expectedSessionId = quickSession.sessionId,
+                startInstant = GeneratedTimingStartInstant(4_200)
+            )
+        )
         originalRepositories.daily.replaceSession(dailySession)
 
-        assertEquals(quickSession, originalRepositories.generated.session.first())
+        val timedQuickSession = quickSession.copy(
+            timingStartInstant = GeneratedTimingStartInstant(4_200)
+        )
+
+        assertEquals(timedQuickSession, originalRepositories.generated.session.first())
         assertEquals(
             DailyState(activeSession = dailySession, completions = emptyList()),
             originalRepositories.daily.state.first()
@@ -77,7 +90,7 @@ class GeneratedAndDailySessionRecreationTest {
             dailySessionFile = dailySessionFile
         )
 
-        assertEquals(quickSession, recreatedRepositories.generated.session.first())
+        assertEquals(timedQuickSession, recreatedRepositories.generated.session.first())
         assertEquals(
             DailyState(activeSession = dailySession, completions = emptyList()),
             recreatedRepositories.daily.state.first()
@@ -91,7 +104,7 @@ class GeneratedAndDailySessionRecreationTest {
             correctionCount = dailySession.correctionCount
         )
 
-        assertEquals(quickSession, recreatedRepositories.generated.session.first())
+        assertEquals(timedQuickSession, recreatedRepositories.generated.session.first())
         assertEquals(
             DailyState(
                 activeSession = null,

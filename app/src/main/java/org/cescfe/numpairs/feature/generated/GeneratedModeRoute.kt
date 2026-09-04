@@ -44,16 +44,16 @@ import kotlinx.coroutines.isActive
 import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
+import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
 import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.GameRoute
 import org.cescfe.numpairs.feature.game.StandardCompletionCelebrationContext
 import org.cescfe.numpairs.feature.game.StandardCompletionCelebrationSelector
 import org.cescfe.numpairs.feature.game.localizedCopy
 import org.cescfe.numpairs.feature.game.presentation.CommittedPuzzleMutation
-import org.cescfe.numpairs.ui.theme.NumPairsComponents
-import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
 import org.cescfe.numpairs.feature.time.ElapsedTimeSource
 import org.cescfe.numpairs.feature.time.SystemElapsedTimeSource
+import org.cescfe.numpairs.ui.theme.NumPairsComponents
 
 @Composable
 fun GeneratedModeRoute(

@@ -3,9 +3,9 @@ package org.cescfe.numpairs.data.generated.session
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
 import org.cescfe.numpairs.domain.generated.GeneratedTimingStartInstant
+import org.cescfe.numpairs.domain.puzzle.PuzzleCorrectionCount
 import org.cescfe.numpairs.domain.puzzle.model.Puzzle
 
 class FakeGeneratedSessionRepository(initialSession: GeneratedSessionSnapshot? = null) : GeneratedSessionRepository {

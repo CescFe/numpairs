@@ -261,8 +261,10 @@ internal fun SuccessOverlay(
                         .fillMaxWidth()
                         .testTag(GameScreenTestTags.SUCCESS_OVERLAY_HIGHLIGHT)
                         .let { modifier ->
-                            (content?.highlightContentDescription
-                                ?: celebrationCopy?.highlightContentDescription)?.let { description ->
+                            (
+                                content?.highlightContentDescription
+                                    ?: celebrationCopy?.highlightContentDescription
+                                )?.let { description ->
                                 modifier.semantics {
                                     contentDescription = description
                                 }

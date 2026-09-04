@@ -290,6 +290,7 @@ system-themed icons, whose tint is controlled by the launcher rather than NumPai
 
 A solved normal Quick or Classic puzzle shows exactly:
 
+- the frozen completion duration
 - primary: `Play another`
 - secondary: `Back to menu`
 
@@ -307,9 +308,16 @@ selected successor challenge. Only after a
 successor is safely stored and adopted does a brief entrance transition introduce it; the
 transition is transient and is not persisted.
 
-Solving clears menu resumability before `Back to menu` returns to the menu. Completion does not
-record progression or completion counts. There is no `Change difficulty`, restart, timer, or
-additional completion action.
+Quick and Classic show a stopwatch control in the shared game TopAppBar. It starts at `00:00`, uses
+fixed-width numerals, truncates sub-second precision, and supports minutes beyond 59. The expanded
+control shows the icon and value; tapping it collapses to an icon without pausing timing, and
+tapping again restores the value. The shared local expanded/collapsed preference applies to later
+Quick and Classic sessions. Daily keeps its fixed non-interactive chronometer and Tutorial has no
+timer.
+
+Solving freezes the displayed duration before completion animation and clears menu resumability
+before `Back to menu` returns to the menu. Completion does not record progression or completion
+counts. There is no `Change difficulty`, restart, or additional completion action.
 
 ---
 

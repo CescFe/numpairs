@@ -72,7 +72,7 @@ profile parameters, completion data, or transient selector state.
 
 ## Versioned Snapshot
 
-Schema version `2` stores:
+Schema version `3` stores:
 
 - stable generated-session id
 - generated-mode id
@@ -81,6 +81,8 @@ Schema version `2` stores:
 - exact initial `Puzzle`
 - exact current `Puzzle`
 - optional authoritative Puzzle Correction Count
+- optional immutable local timing-start instant
+- optional frozen completion elapsed time in milliseconds
 
 The seed is diagnostic and generation metadata. Restoration never reruns the generator because a
 generator or profile implementation may change after the session was created.
@@ -92,10 +94,13 @@ so valid schema-1 snapshots remain compatible without adding a play-option field
 mode, unknown profile, unsupported pair, or profile whose declared mode differs from the stored
 mode is invalid session data and is exposed as an empty slot.
 
-New snapshots start with a known correction count of zero. Schema version `1` is decoded
-explicitly with an unknown correction count because earlier corrections cannot be reconstructed
-from the Current Puzzle. Once unknown, correction tracking is never started partway through that
-session. Unsupported future schema versions retain the existing safe empty-slot behavior.
+New snapshots start with a known correction count of zero and no timing state. Schema version `1`
+is decoded explicitly with an unknown correction count because earlier corrections cannot be
+reconstructed from the Current Puzzle. Schema version `2` preserves its correction count. Both
+older versions migrate without a timing start or completion duration: an unfinished migrated
+session begins timing only when its playable puzzle is first presented after upgrade. Once a
+correction count is unknown, tracking is never started partway through that session. Unsupported
+future schema versions retain the existing safe empty-slot behavior.
 
 The initial and current puzzles preserve:
 
@@ -111,13 +116,17 @@ The deterministic codec returns typed decoded, unsupported-version, or invalid-d
 
 ## Repository Contract
 
-The repository exposes one observable nullable snapshot and three atomic mutations:
+The repository exposes one observable nullable snapshot and four atomic mutations:
 
 - `replace(snapshot)` adopts a successor
-- `updateCurrentPuzzle(expectedSessionId, puzzle, correctionCount)` updates only the owning session
+- `startTiming(expectedSessionId, startInstant)` establishes one start only for the owning session
+- `updateCurrentPuzzle(expectedSessionId, puzzle, correctionCount, completionElapsedTime)` updates
+  only the owning session
 - `clear(expectedSessionId)` clears only the owning session
 
-Update and clear compare the expected stable id inside the DataStore edit. A callback from an older screen therefore cannot update or clear a newer replacement.
+Start, update, and clear compare the expected stable id inside the DataStore edit. A callback from
+an older screen therefore cannot start, update, or clear a newer replacement. An already-started
+session returns its authoritative stored start instead of replacing it.
 
 Generated gameplay forwards only committed domain `Puzzle` changes together with whether each
 action rectified existing durable state. Draft text, open selectors, dialogs, overlays, highlights,
@@ -150,14 +159,30 @@ the remembered selector default, or mutating either repository.
 
 Missing, stale, mismatched, solved, corrupt, or unsupported sessions are not presented as resumable gameplay. The route offers a safe return to the menu.
 
+### Elapsed Timing
+
+Quick and Classic start timing exactly once when the persisted generated puzzle first reaches its
+playable presentation. Selection, generation, initial loading, and failure surfaces are excluded.
+The start is stored with the generated session before later progress and before a successor may
+replace it. A persistence failure keeps the same pending start available for retry.
+
+The visible runtime timer anchors a monotonic reading to elapsed time reconstructed from the
+persisted local wall-clock start. It retains a per-session high-water value, so clock anomalies do
+not make one visible runtime session move backwards. Navigation, backgrounding, device locking,
+configuration change, and process recreation do not pause timing; process restoration reconstructs
+elapsed time from the wall-clock anchor and then resumes monotonic measurement.
+
 ### Progress And Completion
 
 Committed strip values, operand assignments, operator assignments, and tile resets replace
 `currentPuzzle` for the active id. A first assignment leaves the correction count unchanged;
 changing or clearing a previous strip value, reassigning an operand, changing an operator, or
 resetting a non-pristine tile increments it once. Cascading puzzle effects remain part of that one
-committed action. A migrated session keeps its unknown count. When the puzzle becomes solved, the
-same identity guard clears the slot. The solved game remains visible in memory for its completion
+committed action. A migrated session keeps its unknown count. The first unsolved-to-solved
+transition freezes one millisecond-precision duration before repository work or completion
+animation. The solved puzzle, metrics, timing start, and frozen duration are written together
+before the same identity guard clears the slot. A persistence retry reuses that exact in-memory
+snapshot rather than remeasuring. The solved game remains visible in memory for its completion
 actions, but the normal menu no longer exposes `Resume`.
 
 `Play another` uses the create-and-replace pipeline with the completed session's exact mode and

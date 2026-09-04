@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.launch
 import org.cescfe.numpairs.data.generated.selection.GeneratedDifficultySelectionRepository
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
 import org.cescfe.numpairs.data.onboarding.OnboardingRepository
@@ -38,7 +39,6 @@ import org.cescfe.numpairs.feature.onboarding.OnboardingLoadingScreen
 import org.cescfe.numpairs.feature.onboarding.RequiredOnboardingRoute
 import org.cescfe.numpairs.feature.personalization.PersonalizationRoute
 import org.cescfe.numpairs.feature.tutorial.TutorialRoute
-import kotlinx.coroutines.launch
 
 sealed interface AppDestination {
     data object Menu : AppDestination
