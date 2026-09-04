@@ -98,10 +98,9 @@ class GeneratedPersonalBestTest {
         assertNull(unresolved.bestElapsedTime)
     }
 
-    private fun classify(current: Long): GeneratedPersonalBestResult =
-        GeneratedPersonalBestResult.classify(
-            category = category,
-            currentElapsedTime = GeneratedElapsedTime(current),
-            previousBestElapsedTime = GeneratedElapsedTime(60_000)
-        )
+    private fun classify(current: Long): GeneratedPersonalBestResult = GeneratedPersonalBestResult.classify(
+        category = category,
+        currentElapsedTime = GeneratedElapsedTime(current),
+        previousBestElapsedTime = GeneratedElapsedTime(60_000)
+    )
 }
