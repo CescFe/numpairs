@@ -45,6 +45,7 @@ import org.cescfe.numpairs.R
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionId
 import org.cescfe.numpairs.data.generated.session.GeneratedSessionRepository
 import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
+import org.cescfe.numpairs.domain.generated.GeneratedPersonalBestResult
 import org.cescfe.numpairs.feature.game.GameCompletionActions
 import org.cescfe.numpairs.feature.game.GameRoute
 import org.cescfe.numpairs.feature.game.StandardCompletionCelebrationContext
@@ -258,6 +259,7 @@ private fun GeneratedPuzzleGameBoundary(
         compactTileSelectorsEnabled = compactTileSelectorsEnabled,
         elapsedTime = (state as? GeneratedPuzzleGenerationUiState.Ready)?.elapsedTime
             ?: session.snapshot.completionElapsedTime,
+        personalBestResult = state.visiblePersonalBestResult(),
         isChronometerExpanded = isChronometerExpanded,
         onChronometerExpandedChange = onChronometerExpandedChange,
         onNewPuzzleRequested = onNewPuzzleRequested,
@@ -302,6 +304,7 @@ private fun GeneratedPuzzleGameContent(
     isGeneratedGameHapticsEnabled: Boolean,
     compactTileSelectorsEnabled: Boolean,
     elapsedTime: GeneratedElapsedTime?,
+    personalBestResult: GeneratedPersonalBestResult?,
     isChronometerExpanded: Boolean,
     onChronometerExpandedChange: (Boolean) -> Unit,
     onNewPuzzleRequested: () -> Unit,
@@ -314,6 +317,10 @@ private fun GeneratedPuzzleGameContent(
     val hapticFeedback = LocalHapticFeedback.current
     val formattedElapsedTime = session.snapshot.completionElapsedTime
         ?.let(GeneratedElapsedTimeFormatter::format)
+    val formattedBestTime = personalBestResult
+        ?.takeIf { result -> result.currentElapsedTime != null }
+        ?.bestElapsedTime
+        ?.let(GeneratedElapsedTimeFormatter::format)
     val completionCelebrationCopy = StandardCompletionCelebrationSelector.select(
         StandardCompletionCelebrationContext(
             generatedChallengeId = session.challenge.id.value,
@@ -325,6 +332,12 @@ private fun GeneratedPuzzleGameContent(
         highlightText = formattedElapsedTime,
         highlightContentDescription = formattedElapsedTime?.let { formatted ->
             stringResource(R.string.generated_elapsed_time_content_description, formatted)
+        },
+        contextText = formattedBestTime?.let { formatted ->
+            stringResource(R.string.generated_personal_best, formatted)
+        },
+        contextContentDescription = formattedBestTime?.let { formatted ->
+            stringResource(R.string.generated_personal_best_content_description, formatted)
         }
     )
 
@@ -385,6 +398,18 @@ private fun GeneratedPuzzleGenerationUiState.visibleSession(): GeneratedModeGame
     is GeneratedPuzzleGenerationUiState.Loading -> previousSession
 
     is GeneratedPuzzleGenerationUiState.Failed -> previousSession
+
+    GeneratedPuzzleGenerationUiState.Idle,
+    is GeneratedPuzzleGenerationUiState.Restoring,
+    is GeneratedPuzzleGenerationUiState.ResumeUnavailable -> null
+}
+
+private fun GeneratedPuzzleGenerationUiState.visiblePersonalBestResult(): GeneratedPersonalBestResult? = when (this) {
+    is GeneratedPuzzleGenerationUiState.Ready -> personalBestResult
+
+    is GeneratedPuzzleGenerationUiState.Loading -> previousPersonalBestResult
+
+    is GeneratedPuzzleGenerationUiState.Failed -> previousPersonalBestResult
 
     GeneratedPuzzleGenerationUiState.Idle,
     is GeneratedPuzzleGenerationUiState.Restoring,

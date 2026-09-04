@@ -29,6 +29,8 @@ import org.cescfe.numpairs.data.onboarding.FakeOnboardingRepository
 import org.cescfe.numpairs.data.preferences.FakePersonalizationPreferencesRepository
 import org.cescfe.numpairs.data.preferences.FakeTopAppBarActionDiscoveryRepository
 import org.cescfe.numpairs.data.preferences.PersonalizationPreferences
+import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
+import org.cescfe.numpairs.domain.generated.GeneratedPersonalBestCategory
 import org.cescfe.numpairs.domain.puzzle.assignment.ResolvedOperandAssignment
 import org.cescfe.numpairs.domain.puzzle.assignment.StripEntryId
 import org.cescfe.numpairs.domain.puzzle.construction.resolvedTile
@@ -163,7 +165,11 @@ class GeneratedCompletionCelebrationTest {
                             initialPuzzle = oneOperatorAwayFromSolvedPuzzle()
                         )
                     },
-                    generatedSessionRepository = FakeGeneratedSessionRepository(),
+                    generatedSessionRepository = FakeGeneratedSessionRepository(
+                        initialPersonalBests = mapOf(
+                            GeneratedPersonalBestCategory.FOUR_PAIRS_LOW to GeneratedElapsedTime(120_000)
+                        )
+                    ),
                     timeSource = { reading }
                 )
             }
@@ -189,6 +195,11 @@ class GeneratedCompletionCelebrationTest {
             .assertIsDisplayed()
             .assertTextEquals("02:05")
             .assertContentDescriptionEquals("Elapsed time: 02:05")
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONTEXT)
+            .assertIsDisplayed()
+            .assertTextEquals("Best time: 02:00")
+            .assertContentDescriptionEquals("Best time: 02:00")
     }
 
     private fun assertGeneratedModeOptsInToCompletionCelebration(
@@ -267,6 +278,9 @@ class GeneratedCompletionCelebrationTest {
             .assertIsDisplayed()
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_RETURN_TO_MENU)
+            .assertIsDisplayed()
+        composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONTEXT)
             .assertIsDisplayed()
         return selectedCopy
     }

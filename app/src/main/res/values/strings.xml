@@ -80,6 +80,8 @@
     <string name="generated_progress_failure_title">Progress not saved</string>
     <string name="generated_progress_failure_message">Your progress and elapsed time could not be saved. Try again before continuing.</string>
     <string name="generated_elapsed_time_content_description">Elapsed time: %1$s</string>
+    <string name="generated_personal_best">Best time: %1$s</string>
+    <string name="generated_personal_best_content_description">Best time: %1$s</string>
     <string name="generated_hide_elapsed_time_action">Hide elapsed time</string>
     <string name="generated_show_elapsed_time_action">Show elapsed time</string>
     <string name="generated_puzzle_failure_message">We could not create a puzzle. Please try again.</string>

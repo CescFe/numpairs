@@ -262,6 +262,29 @@ The outcome freezes the current duration, previous best, resulting best, and cla
 the puzzle first becomes solved. Historical reconstruction considers earlier canonical Daily dates
 so a later completion cannot retroactively reclassify an older result.
 
+## Generated Personal-Best Category
+One of the six exact configured Generated Challenge identities used to compare normal Quick and
+Classic timed completions: `3 Pairs Low`, `4 Pairs Low`, `3 Pairs Medium`, `4 Pairs Medium`,
+`8 Pairs Medium`, or `8 Pairs Hard`.
+
+The category resolves from the authoritative mode/profile pair. Quick and Classic are presentation
+groupings and are not stored as personal-best identities. An unsupported exact pair has no
+category. Generated categories and their persisted bests are separate from Daily history even
+when they identify the same size and difficulty.
+
+## Generated Personal Best
+The persisted lowest authoritative Generated Elapsed Time for normal play in one Generated
+Personal-Best Category. The first timed result establishes a `Baseline`; only a later strictly
+lower millisecond duration is a `Personal Record`. An exact tie or slower result is `Not Record`.
+Corrections, seed, puzzle contents, and other attempt data do not participate. Untimed and
+unresolved completions cannot establish or improve a best.
+
+## Generated Personal-Best Outcome
+The classification frozen for the first solved transition in normal generated play together with
+its current duration, previous best, resulting best, and category. Persistence retries reuse this
+exact result. The resulting best and removal of the solved active session share one
+identity-guarded local transaction.
+
 ## Current Puzzle
 The latest committed domain state of the puzzle being played in a normal generated session or
 Daily Session.

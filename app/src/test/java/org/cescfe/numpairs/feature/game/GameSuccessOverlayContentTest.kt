@@ -31,6 +31,13 @@ class GameSuccessOverlayContentTest {
                 onPrimaryAction = {}
             )
         }
+        assertThrows(IllegalArgumentException::class.java) {
+            GameSuccessOverlayCopy(
+                message = "Completed",
+                supportingText = "Supporting",
+                contextContentDescription = "Best time: 02:05"
+            )
+        }
     }
 
     @Test

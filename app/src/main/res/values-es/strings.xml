@@ -80,6 +80,8 @@
     <string name="generated_progress_failure_title">Progreso sin guardar</string>
     <string name="generated_progress_failure_message">No se han podido guardar tu progreso ni el tiempo transcurrido. Reinténtalo antes de continuar.</string>
     <string name="generated_elapsed_time_content_description">Tiempo transcurrido: %1$s</string>
+    <string name="generated_personal_best">Mejor tiempo: %1$s</string>
+    <string name="generated_personal_best_content_description">Mejor tiempo: %1$s</string>
     <string name="generated_hide_elapsed_time_action">Ocultar tiempo transcurrido</string>
     <string name="generated_show_elapsed_time_action">Mostrar tiempo transcurrido</string>
     <string name="generated_puzzle_failure_message">No se ha podido crear un puzle. Inténtalo de nuevo.</string>
