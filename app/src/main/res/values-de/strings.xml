@@ -163,13 +163,13 @@
     <string name="tutorial_pair_explanation_copy">Wie findest du sie heraus? Bilde Paare aus den Zahlen der oberen Reihe. Jedes Paar vervollständigt zwei Kacheln: eine Addition und eine Multiplikation.</string>
     <string name="tutorial_previous_step_action">Zurück</string>
     <string name="tutorial_next_step_action">Weiter</string>
-    <string name="tutorial_worked_example_introduction_copy">Pass gut auf: Das ist das erste und letzte Mal, dass wir ein Puzzle für dich lösen.</string>
+    <string name="tutorial_worked_example_introduction_copy">Schauen wir uns gemeinsam ein Beispiel an, damit du siehst, wie alles zusammenpasst.</string>
     <string name="tutorial_worked_example_product_four_five_copy">4 × 5 = 20, also ist 20 die Multiplikationskachel dieses Paars.</string>
     <string name="tutorial_worked_example_sum_four_five_copy">Dasselbe Paar vervollständigt auch die Addition: 4 + 5 = 9.</string>
     <string name="tutorial_worked_example_reveal_three_copy">Die Kacheln mit den Ergebnissen 5 und 6 sind noch unvollständig. Zusammen mit 2 kann die versteckte Zahl nur 3 sein.</string>
     <string name="tutorial_worked_example_product_two_three_copy">2 × 3 = 6 vervollständigt die verbleibende Multiplikation.</string>
     <string name="tutorial_worked_example_sum_two_three_copy">2 + 3 = 5 vervollständigt die Addition und löst das Puzzle.</string>
-    <string name="tutorial_repeated_value_practice_copy">Jetzt bist du dran: Löse das Puzzle. Tippe auf ein beliebiges ?, um zu beginnen. Zahlen können mehrfach vorkommen. Tipp: Multiplikationen sind oft ein guter Ausgangspunkt.</string>
+    <string name="tutorial_repeated_value_practice_copy">Jetzt kannst du es selbst ausprobieren. Tippe auf ein beliebiges ?, um zu beginnen. Zahlen können mehrfach vorkommen. Tipp: Multiplikationen sind oft ein guter Ausgangspunkt.</string>
     <string name="tutorial_success_overlay_message">Tutorial abgeschlossen!</string>
     <string name="tutorial_success_overlay_supporting_text">Du kennst jetzt die Grundlagen von NumPairs.</string>
     <string name="tutorial_success_overlay_continue_button">Weiter</string>

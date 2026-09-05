@@ -163,13 +163,13 @@
     <string name="tutorial_pair_explanation_copy">How do you work them out? Pair up the numbers in the sequence above. Each pair completes two tiles: one addition and one multiplication.</string>
     <string name="tutorial_previous_step_action">Back</string>
     <string name="tutorial_next_step_action">Next</string>
-    <string name="tutorial_worked_example_introduction_copy">Watch closely: this is the first and last time we’ll solve a puzzle for you.</string>
+    <string name="tutorial_worked_example_introduction_copy">Let’s work through one example together so you can see how the pieces fit.</string>
     <string name="tutorial_worked_example_product_four_five_copy">4 × 5 = 20, so 20 is this pair’s multiplication tile.</string>
     <string name="tutorial_worked_example_sum_four_five_copy">The same pair also completes the addition: 4 + 5 = 9.</string>
     <string name="tutorial_worked_example_reveal_three_copy">The tiles showing 5 and 6 are still incomplete. Paired with 2, the hidden number can only be 3.</string>
     <string name="tutorial_worked_example_product_two_three_copy">2 × 3 = 6 completes the remaining multiplication.</string>
     <string name="tutorial_worked_example_sum_two_three_copy">2 + 3 = 5 completes the addition and solves the puzzle.</string>
-    <string name="tutorial_repeated_value_practice_copy">Your turn: solve the puzzle. Tap any ? to begin. Numbers may repeat. Tip: multiplication is often a good place to start.</string>
+    <string name="tutorial_repeated_value_practice_copy">Now you can try one yourself. Tap any ? to begin. Numbers may repeat. Tip: multiplication is often a good place to start.</string>
     <string name="tutorial_success_overlay_message">Tutorial completed!</string>
     <string name="tutorial_success_overlay_supporting_text">You now know the essentials for playing NumPairs</string>
     <string name="tutorial_success_overlay_continue_button">Continue</string>

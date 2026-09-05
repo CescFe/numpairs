@@ -149,14 +149,14 @@ class LocalizationResourceTest {
         assertTutorialCopy(
             resources = resources,
             expectedCopy = listOf(
-                "Para atenció: esta serà la primera i última vegada que resoldrem un puzle per tu.",
+                "Vegem un exemple junts perquè pugues veure com encaixen les peces.",
                 "4 × 5 = 20, així que 20 és la casella de multiplicació d’esta parella.",
                 "La mateixa parella també resol la suma: 4 + 5 = 9.",
                 "Queden per completar les caselles amb els resultats 5 i 6. Junt amb el 2, " +
                     "el nombre ocult només pot ser 3.",
                 "2 × 3 = 6 completa la multiplicació que falta.",
                 "2 + 3 = 5 completa la suma i resol el puzle.",
-                "Ara tu: resol el puzle. Toca qualsevol ? per començar. Els nombres es poden repetir. " +
+                "Ara pots provar-ho tu. Toca qualsevol ? per començar. Els nombres es poden repetir. " +
                     "Consell: les multiplicacions solen ser un bon punt de partida."
             )
         )
@@ -238,14 +238,14 @@ class LocalizationResourceTest {
         assertTutorialCopy(
             resources = resources,
             expectedCopy = listOf(
-                "Watch closely: this is the first and last time we’ll solve a puzzle for you.",
+                "Let’s work through one example together so you can see how the pieces fit.",
                 "4 × 5 = 20, so 20 is this pair’s multiplication tile.",
                 "The same pair also completes the addition: 4 + 5 = 9.",
                 "The tiles showing 5 and 6 are still incomplete. Paired with 2, " +
                     "the hidden number can only be 3.",
                 "2 × 3 = 6 completes the remaining multiplication.",
                 "2 + 3 = 5 completes the addition and solves the puzzle.",
-                "Your turn: solve the puzzle. Tap any ? to begin. Numbers may repeat. " +
+                "Now you can try one yourself. Tap any ? to begin. Numbers may repeat. " +
                     "Tip: multiplication is often a good place to start."
             )
         )
