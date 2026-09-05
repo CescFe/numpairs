@@ -72,8 +72,9 @@ class LocalizationResourceTest {
         )
         assertTutorialSuccessCopy(
             resources = resources,
-            message = "¡Tutorial completado!",
-            supportingText = "Ya conoces lo esencial para jugar a NumPairs",
+            message = "¡Enhorabuena!",
+            supportingText = "¡Ya estás listo para el verdadero desafío de NumPairs!",
+            guidance = "En las dificultades más bajas, toca el icono de pistas o el de ayuda si necesitas una mano.",
             continueAction = "Continuar"
         )
         assertEquals("Saltar tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
@@ -162,8 +163,10 @@ class LocalizationResourceTest {
         )
         assertTutorialSuccessCopy(
             resources = resources,
-            message = "Tutorial completat!",
-            supportingText = "Ja coneixes l’essencial per jugar a NumPairs",
+            message = "Enhorabona!",
+            supportingText = "Ja estàs preparat per al veritable desafiament de NumPairs!",
+            guidance = "En les dificultats més baixes, toca la icona de pistes o la d’ajuda si " +
+                "necessites un cop de mà.",
             continueAction = "Continua"
         )
         assertEquals("Omet el tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
@@ -251,8 +254,9 @@ class LocalizationResourceTest {
         )
         assertTutorialSuccessCopy(
             resources = resources,
-            message = "Tutorial completed!",
-            supportingText = "You now know the essentials for playing NumPairs",
+            message = "Congratulations!",
+            supportingText = "You’re ready for the real NumPairs challenge!",
+            guidance = "On lower difficulties, tap the hint or help icon whenever you need a hand.",
             continueAction = "Continue"
         )
         assertEquals("Skip tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
@@ -283,6 +287,14 @@ class LocalizationResourceTest {
     @Test
     fun germanDeviceLanguageUsesGermanDailyTimingResources() {
         val resources = resourcesFor(languageTag = "de")
+        assertTutorialSuccessCopy(
+            resources = resources,
+            message = "Glückwunsch!",
+            supportingText = "Jetzt bist du bereit für die echte NumPairs-Herausforderung!",
+            guidance = "In niedrigeren Schwierigkeitsgraden kannst du bei Bedarf auf das Hinweis- oder " +
+                "Hilfe-Symbol tippen.",
+            continueAction = "Weiter"
+        )
         assertDailyTimingCopy(
             resources = resources,
             accessibilityDescription = "Verstrichene Zeit: 02:05",
@@ -334,10 +346,12 @@ class LocalizationResourceTest {
         resources: Resources,
         message: String,
         supportingText: String,
+        guidance: String,
         continueAction: String
     ) {
         assertEquals(message, resources.getString(R.string.tutorial_success_overlay_message))
         assertEquals(supportingText, resources.getString(R.string.tutorial_success_overlay_supporting_text))
+        assertEquals(guidance, resources.getString(R.string.tutorial_success_overlay_guidance))
         assertEquals(continueAction, resources.getString(R.string.tutorial_success_overlay_continue_button))
     }
 

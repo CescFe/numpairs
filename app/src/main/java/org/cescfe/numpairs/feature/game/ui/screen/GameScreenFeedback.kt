@@ -10,6 +10,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -357,6 +358,43 @@ internal fun SuccessOverlay(
                                 .testTag(GameScreenTestTags.SUCCESS_OVERLAY_TERTIARY_ACTION)
                         ) {
                             Text(text = label)
+                        }
+                    }
+                    content.guidance?.let { guidance ->
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag(GameScreenTestTags.SUCCESS_OVERLAY_GUIDANCE)
+                                .semantics(mergeDescendants = true) {
+                                    contentDescription = guidance.contentDescription
+                                },
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = guidance.message,
+                                style = MaterialTheme.typography.bodySmall,
+                                textAlign = TextAlign.Center
+                            )
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_hint),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(SUCCESS_OVERLAY_GUIDANCE_ICON_SIZE)
+                                        .testTag(GameScreenTestTags.SUCCESS_OVERLAY_GUIDANCE_HINT_ICON)
+                                )
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_help),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(SUCCESS_OVERLAY_GUIDANCE_ICON_SIZE)
+                                        .testTag(GameScreenTestTags.SUCCESS_OVERLAY_GUIDANCE_HELP_ICON)
+                                )
+                            }
                         }
                     }
                 } else {

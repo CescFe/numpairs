@@ -42,6 +42,17 @@ data class GameSuccessOverlayCopy(
     }
 }
 
+data class GameSuccessOverlayGuidance(val message: String, val contentDescription: String = message) {
+    init {
+        require(message.isNotBlank()) {
+            "A completion guidance message must not be blank."
+        }
+        require(contentDescription.isNotBlank()) {
+            "A completion guidance content description must not be blank."
+        }
+    }
+}
+
 data class GameSuccessOverlayContent(
     val message: String,
     val supportingText: String,
@@ -52,6 +63,7 @@ data class GameSuccessOverlayContent(
     val visualStyle: GameSuccessOverlayVisualStyle = GameSuccessOverlayVisualStyle.SUCCESS,
     val standardBadge: GameSuccessOverlayStandardBadge = GameSuccessOverlayStandardBadge.OK,
     val badgeContentDescription: String? = null,
+    val guidance: GameSuccessOverlayGuidance? = null,
     val primaryActionLabel: String,
     val onPrimaryAction: () -> Unit,
     val secondaryActionLabel: String? = null,

@@ -40,6 +40,8 @@ import org.cescfe.numpairs.feature.game.GameHighlightState
 import org.cescfe.numpairs.feature.game.GameInteractionPolicy
 import org.cescfe.numpairs.feature.game.GameRoute
 import org.cescfe.numpairs.feature.game.GameSuccessOverlayContent
+import org.cescfe.numpairs.feature.game.GameSuccessOverlayGuidance
+import org.cescfe.numpairs.feature.game.GameSuccessOverlayStandardBadge
 import org.cescfe.numpairs.feature.game.GameTileExpressionSlot
 import org.cescfe.numpairs.feature.game.GameTileExpressionSlotHighlight
 import org.cescfe.numpairs.feature.game.presentation.GameUiState
@@ -136,6 +138,10 @@ fun TutorialRoute(
         GameSuccessOverlayContent(
             message = stringResource(R.string.tutorial_success_overlay_message),
             supportingText = stringResource(R.string.tutorial_success_overlay_supporting_text),
+            standardBadge = GameSuccessOverlayStandardBadge.CHECK,
+            guidance = GameSuccessOverlayGuidance(
+                message = stringResource(R.string.tutorial_success_overlay_guidance)
+            ),
             primaryActionLabel = stringResource(R.string.tutorial_success_overlay_continue_button),
             onPrimaryAction = {
                 if (!hasReportedCompletion) {
