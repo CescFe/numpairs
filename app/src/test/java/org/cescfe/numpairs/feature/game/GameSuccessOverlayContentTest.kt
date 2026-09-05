@@ -5,19 +5,6 @@ import org.junit.Test
 
 class GameSuccessOverlayContentTest {
     @Test
-    fun completion_guidance_requires_nonblank_message_and_content_description() {
-        assertThrows(IllegalArgumentException::class.java) {
-            GameSuccessOverlayGuidance(message = " ")
-        }
-        assertThrows(IllegalArgumentException::class.java) {
-            GameSuccessOverlayGuidance(
-                message = "Need help",
-                contentDescription = " "
-            )
-        }
-    }
-
-    @Test
     fun standard_completion_copy_requires_an_indivisible_nonblank_pair() {
         assertThrows(IllegalArgumentException::class.java) {
             GameSuccessOverlayCopy(

@@ -174,7 +174,6 @@
     <string name="tutorial_repeated_value_practice_copy">Ara pots provar-ho tu. Toca qualsevol ? per començar. Els nombres es poden repetir. Consell: les multiplicacions solen ser un bon punt de partida.</string>
     <string name="tutorial_success_overlay_message">Enhorabona!</string>
     <string name="tutorial_success_overlay_supporting_text">Ja estàs preparat per al veritable desafiament de NumPairs!</string>
-    <string name="tutorial_success_overlay_guidance">En les dificultats més baixes, toca la icona de pistes o la d’ajuda si necessites un cop de mà.</string>
     <string name="tutorial_success_overlay_continue_button">Continua</string>
     <string name="onboarding_skip_tutorial_action">Omet el tutorial</string>
     <string name="onboarding_skip_tutorial_title">Vols ometre el tutorial?</string>

@@ -172,7 +172,6 @@
     <string name="tutorial_repeated_value_practice_copy">Now you can try one yourself. Tap any ? to begin. Numbers may repeat. Tip: multiplication is often a good place to start.</string>
     <string name="tutorial_success_overlay_message">Congratulations!</string>
     <string name="tutorial_success_overlay_supporting_text">You’re ready for the real NumPairs challenge!</string>
-    <string name="tutorial_success_overlay_guidance">On lower difficulties, tap the hint or help icon whenever you need a hand.</string>
     <string name="tutorial_success_overlay_continue_button">Continue</string>
     <string name="onboarding_skip_tutorial_action">Skip tutorial</string>
     <string name="onboarding_skip_tutorial_title">Skip the tutorial?</string>
