@@ -35,6 +35,7 @@ import org.cescfe.numpairs.feature.time.ElapsedTimeReading
 import org.cescfe.numpairs.feature.time.ElapsedTimeSource
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
@@ -487,6 +488,7 @@ class GeneratedPuzzleViewModelTest {
             )
             assertEquals(0, generationUseCase.requestCount)
             assertTrue(repository.replaceAttempts.isEmpty())
+            assertFalse(viewModel.claimPersonalRecordCelebration())
         }
     }
 
@@ -595,6 +597,7 @@ class GeneratedPuzzleViewModelTest {
             (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready)
                 .personalBestResult?.outcome
         )
+        assertFalse(viewModel.claimPersonalRecordCelebration())
         assertTrue(repository.state.value.personalBests.isEmpty())
     }
 
@@ -628,9 +631,18 @@ class GeneratedPuzzleViewModelTest {
 
         viewModel.onPuzzleMutationCommitted(
             sessionId,
-            solvedPuzzle.asCommittedMutation(isCorrection = true)
+            solvedPuzzle.asCommittedMutation()
         )
         val frozen = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).personalBestResult
+        assertEquals(
+            0L,
+            requireNotNull(
+                (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready)
+                    .session.snapshot.correctionCount
+            ).value
+        )
+        assertTrue(viewModel.claimPersonalRecordCelebration())
+        assertFalse(viewModel.claimPersonalRecordCelebration())
         dispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(
@@ -682,6 +694,7 @@ class GeneratedPuzzleViewModelTest {
 
         val result = (viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).personalBestResult
         assertEquals(GeneratedPersonalBestOutcome.NOT_RECORD, result?.outcome)
+        assertFalse(viewModel.claimPersonalRecordCelebration())
         assertEquals(2_500L, requireNotNull(result?.previousBestElapsedTime).milliseconds)
         assertEquals(2_500L, requireNotNull(result.bestElapsedTime).milliseconds)
     }
@@ -723,6 +736,7 @@ class GeneratedPuzzleViewModelTest {
         assertEquals(GeneratedPersonalBestOutcome.NOT_RECORD, result?.outcome)
         assertNull(result?.category)
         assertNull(result?.bestElapsedTime)
+        assertFalse(viewModel.claimPersonalRecordCelebration())
         assertEquals(existingBests, repository.state.value.personalBests)
     }
 
@@ -986,7 +1000,12 @@ class GeneratedPuzzleViewModelTest {
     fun solved_transition_freezes_before_io_and_retry_reuses_the_same_millisecond_duration() {
         val solvedPuzzle = solvedPuzzleWithKnownStripAndAssignments()
         val initialPuzzle = initialPuzzleFor(solvedPuzzle)
-        val repository = RecordingGeneratedSessionRepository(updateFailuresRemaining = 1)
+        val repository = RecordingGeneratedSessionRepository(
+            initialPersonalBests = mapOf(
+                GeneratedPersonalBestCategory.FOUR_PAIRS_LOW to GeneratedElapsedTime(2_346)
+            ),
+            updateFailuresRemaining = 1
+        )
         val timeSource = MutableElapsedTimeSource(epochMilliseconds = 20_000, monotonicMilliseconds = 2_000)
         val viewModel = GeneratedPuzzleViewModel(
             challenge = GeneratedModes.FOUR_PAIRS_LOW,
@@ -1009,6 +1028,8 @@ class GeneratedPuzzleViewModelTest {
             2_345L,
             requireNotNull(frozenState.session.snapshot.completionElapsedTime).milliseconds
         )
+        assertTrue(viewModel.claimPersonalRecordCelebration())
+        assertFalse(viewModel.claimPersonalRecordCelebration())
         timeSource.advance(epochMilliseconds = 9_000, monotonicMilliseconds = 9_000)
         dispatcher.scheduler.advanceUntilIdle()
         assertTrue((viewModel.uiState.value as GeneratedPuzzleGenerationUiState.Ready).hasPersistenceFailure)
@@ -1027,9 +1048,10 @@ class GeneratedPuzzleViewModelTest {
             repository.personalBestResultAttempts.last()
         )
         assertEquals(
-            GeneratedPersonalBestOutcome.BASELINE,
+            GeneratedPersonalBestOutcome.PERSONAL_RECORD,
             repository.personalBestResultAttempts.first().outcome
         )
+        assertFalse(viewModel.claimPersonalRecordCelebration())
         assertEquals(
             2_345L,
             requireNotNull(

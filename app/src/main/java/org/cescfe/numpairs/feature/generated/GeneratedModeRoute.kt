@@ -90,6 +90,15 @@ fun GeneratedModeRoute(
         timeSource = timeSource
     )
     val uiState by viewModel.uiState.collectAsState()
+    var personalRecordConfettiCelebrationId by remember(viewModel) {
+        mutableStateOf<Long?>(null)
+    }
+
+    LaunchedEffect(uiState) {
+        if (viewModel.claimPersonalRecordCelebration()) {
+            personalRecordConfettiCelebrationId = GENERATED_PERSONAL_RECORD_CONFETTI_CELEBRATION_ID
+        }
+    }
 
     DisposableEffect(viewModel, launchIntent) {
         viewModel.onRouteEntered(launchIntent = launchIntent)
@@ -130,6 +139,10 @@ fun GeneratedModeRoute(
             onPuzzlePresented = viewModel::onPuzzlePresented,
             onTimerRefresh = viewModel::onTimerRefresh,
             onReplacementTransitionConsumed = viewModel::onReplacementTransitionConsumed,
+            personalRecordConfettiCelebrationId = personalRecordConfettiCelebrationId,
+            onPersonalRecordConfettiCelebrationStarted = {
+                personalRecordConfettiCelebrationId = null
+            },
             onRetryPersistence = viewModel::retryPersistence,
             onRetry = viewModel::retry,
             onNavigateBack = onNavigateBack
@@ -184,6 +197,8 @@ private fun GeneratedPuzzleGameBoundary(
     onPuzzlePresented: (GeneratedSessionId) -> Unit,
     onTimerRefresh: (GeneratedSessionId) -> Unit,
     onReplacementTransitionConsumed: (GeneratedPuzzleReplacementTransition) -> Unit,
+    personalRecordConfettiCelebrationId: Long?,
+    onPersonalRecordConfettiCelebrationStarted: () -> Unit,
     onRetryPersistence: () -> Unit,
     onRetry: () -> Unit,
     onNavigateBack: () -> Unit
@@ -268,6 +283,8 @@ private fun GeneratedPuzzleGameBoundary(
         onPuzzleMutationCommitted = onPuzzleMutationCommitted,
         onPuzzlePresented = onPuzzlePresented,
         onTimerRefresh = onTimerRefresh,
+        personalRecordConfettiCelebrationId = personalRecordConfettiCelebrationId,
+        onPersonalRecordConfettiCelebrationStarted = onPersonalRecordConfettiCelebrationStarted,
         onNavigateBack = onNavigateBack,
         overlay = {
             when (state) {
@@ -313,6 +330,8 @@ private fun GeneratedPuzzleGameContent(
     onPuzzleMutationCommitted: (GeneratedSessionId, CommittedPuzzleMutation) -> Unit,
     onPuzzlePresented: (GeneratedSessionId) -> Unit,
     onTimerRefresh: (GeneratedSessionId) -> Unit,
+    personalRecordConfettiCelebrationId: Long?,
+    onPersonalRecordConfettiCelebrationStarted: () -> Unit,
     onNavigateBack: () -> Unit,
     overlay: @Composable () -> Unit = {}
 ) {
@@ -413,6 +432,8 @@ private fun GeneratedPuzzleGameContent(
             isCorrectTileMotionEnabled = true,
             isCompletionCelebrationEnabled = true,
             successOverlayCopy = completionCelebrationCopy,
+            successOverlayConfettiCelebrationId = personalRecordConfettiCelebrationId,
+            onSuccessOverlayConfettiCelebrationStarted = onPersonalRecordConfettiCelebrationStarted,
             compactTileSelectorsEnabled = compactTileSelectorsEnabled,
             topBarActions = {
                 GeneratedChronometer(
@@ -698,6 +719,7 @@ internal const val GENERATED_PUZZLE_FAILURE_TAG = "generatedPuzzleFailure"
 internal const val GENERATED_SESSION_RESUME_UNAVAILABLE_TAG = "generatedSessionResumeUnavailable"
 internal const val GENERATED_PUZZLE_CONTENT_TAG = "generatedPuzzleContent"
 private const val GENERATED_TIMER_REFRESH_INTERVAL_MILLISECONDS = 250L
+private const val GENERATED_PERSONAL_RECORD_CONFETTI_CELEBRATION_ID = 1L
 private val ZERO_GENERATED_ELAPSED_TIME = GeneratedElapsedTime(0)
 internal const val REPLACEMENT_TRANSITION_INITIAL_ALPHA = 0.82f
 internal const val REPLACEMENT_TRANSITION_INITIAL_SCALE = 0.985f

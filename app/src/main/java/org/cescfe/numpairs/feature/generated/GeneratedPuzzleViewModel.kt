@@ -20,6 +20,7 @@ import org.cescfe.numpairs.data.generated.session.GeneratedSessionTimingStartRes
 import org.cescfe.numpairs.domain.generated.GeneratedElapsedTime
 import org.cescfe.numpairs.domain.generated.GeneratedPersonalBestCategory
 import org.cescfe.numpairs.domain.generated.GeneratedPersonalBestCategoryResolver
+import org.cescfe.numpairs.domain.generated.GeneratedPersonalBestOutcome
 import org.cescfe.numpairs.domain.generated.GeneratedPersonalBestResult
 import org.cescfe.numpairs.domain.generated.GeneratedTimingStartInstant
 import org.cescfe.numpairs.domain.generated.generation.GeneratedPuzzleGenerationRequest
@@ -122,6 +123,7 @@ internal class GeneratedPuzzleViewModel(
     private var visibleTimer: VisibleGeneratedTimer? = null
     private var pendingTimingStart: PendingGeneratedTimingStart? = null
     private val elapsedHighWaterBySessionId = mutableMapOf<GeneratedSessionId, GeneratedElapsedTime>()
+    private var pendingPersonalRecordCelebrationSessionId: GeneratedSessionId? = null
 
     fun onRouteEntered(launchIntent: GeneratedModeLaunchIntent = GeneratedModeLaunchIntent.DefaultNewPuzzle) {
         if (launchIntent != activeLaunchIntent) {
@@ -180,6 +182,7 @@ internal class GeneratedPuzzleViewModel(
         generationToken++
         generationJob?.cancel()
         generationJob = null
+        pendingPersonalRecordCelebrationSessionId = null
     }
 
     fun retry() {
@@ -303,6 +306,32 @@ internal class GeneratedPuzzleViewModel(
         )
     }
 
+    fun claimPersonalRecordCelebration(): Boolean {
+        val expectedSessionId = pendingPersonalRecordCelebrationSessionId ?: return false
+        val state = _uiState.value
+        val (visibleSession, personalBestResult) = when (state) {
+            is GeneratedPuzzleGenerationUiState.Ready -> state.session to state.personalBestResult
+
+            is GeneratedPuzzleGenerationUiState.Loading -> state.previousSession to state.previousPersonalBestResult
+
+            is GeneratedPuzzleGenerationUiState.Failed -> state.previousSession to state.previousPersonalBestResult
+
+            GeneratedPuzzleGenerationUiState.Idle,
+            is GeneratedPuzzleGenerationUiState.Restoring,
+            is GeneratedPuzzleGenerationUiState.ResumeUnavailable -> null to null
+        }
+        if (
+            visibleSession?.id != expectedSessionId ||
+            !visibleSession.currentPuzzle.isSolved ||
+            personalBestResult?.outcome != GeneratedPersonalBestOutcome.PERSONAL_RECORD
+        ) {
+            return false
+        }
+
+        pendingPersonalRecordCelebrationSessionId = null
+        return true
+    }
+
     fun onPuzzleMutationCommitted(expectedSessionId: GeneratedSessionId, mutation: CommittedPuzzleMutation) {
         val completionElapsedTime = if (mutation.puzzle.isSolved) {
             captureCompletionElapsedTime(expectedSessionId)
@@ -328,6 +357,10 @@ internal class GeneratedPuzzleViewModel(
             null
         } ?: run {
             return
+        }
+
+        if (personalBestResult?.outcome == GeneratedPersonalBestOutcome.PERSONAL_RECORD) {
+            pendingPersonalRecordCelebrationSessionId = updatedSession.id
         }
 
         enqueueSessionPersistence(
@@ -439,6 +472,7 @@ internal class GeneratedPuzzleViewModel(
         if (generationJob != null) {
             return
         }
+        pendingPersonalRecordCelebrationSessionId = null
 
         val token = ++generationToken
         _uiState.value = GeneratedPuzzleGenerationUiState.Loading(
