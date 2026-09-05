@@ -81,8 +81,6 @@ internal fun PersonalRecordConfetti(celebrationId: Long?, animationEnabled: Bool
                 return@forEachIndexed
             }
 
-            val particleWidth = baseWidth
-            val particleHeight = baseHeight
             val center = Offset(
                 x = size.width * (
                     particle.startXFraction +
@@ -90,7 +88,7 @@ internal fun PersonalRecordConfetti(celebrationId: Long?, animationEnabled: Bool
                     ),
                 y = confettiVerticalCenter(
                     viewportHeight = size.height,
-                    particleHeight = particleHeight,
+                    particleHeight = baseHeight,
                     progress = particleProgress
                 )
             )
@@ -101,11 +99,11 @@ internal fun PersonalRecordConfetti(celebrationId: Long?, animationEnabled: Bool
                 drawRoundRect(
                     color = particleColors[index % particleColors.size],
                     topLeft = Offset(
-                        x = center.x - (particleWidth / 2f),
-                        y = center.y - (particleHeight / 2f)
+                        x = center.x - (baseWidth / 2f),
+                        y = center.y - (baseHeight / 2f)
                     ),
-                    size = Size(particleWidth, particleHeight),
-                    cornerRadius = CornerRadius(particleWidth / 3f),
+                    size = Size(baseWidth, baseHeight),
+                    cornerRadius = CornerRadius(baseWidth / 3f),
                     alpha = personalRecordConfettiAlpha(particleProgress)
                 )
             }
