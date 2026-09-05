@@ -268,6 +268,7 @@
     <string name="solving_tips_strip_hidden_range">Hidden strip values must still fit between their visible neighbors.</string>
     <string name="solving_tips_strip_highest_anchor">The highest strip value is an anchor for large products and impossible sums.</string>
     <string name="solving_tips_products_title">Find products</string>
+    <string name="solving_tips_products_starting_point">Multiplication is often a good place to start.</string>
     <string name="solving_tips_products_large_results">Large results are usually product tiles.</string>
     <string name="solving_tips_products_factors">Check its factors.</string>
     <string name="solving_tips_sums_title">Find sums</string>

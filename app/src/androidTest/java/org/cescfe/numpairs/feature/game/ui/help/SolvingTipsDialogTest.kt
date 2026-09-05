@@ -50,6 +50,7 @@ class SolvingTipsDialogTest {
         assertSolvingTipsTextExists(R.string.solving_tips_strip_hidden_range)
         assertSolvingTipsTextExists(R.string.solving_tips_strip_highest_anchor)
         assertSolvingTipsTextExists(R.string.solving_tips_products_title)
+        assertSolvingTipsTextExists(R.string.solving_tips_products_starting_point)
         assertSolvingTipsTextExists(R.string.solving_tips_products_large_results)
         assertSolvingTipsTextExists(R.string.solving_tips_products_factors)
         assertSolvingTipsTextExists(R.string.solving_tips_sums_title)

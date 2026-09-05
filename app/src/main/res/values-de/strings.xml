@@ -268,6 +268,7 @@
     <string name="solving_tips_strip_hidden_range">Verborgene Werte der Zahlenreihe müssen weiterhin zwischen ihre sichtbaren Nachbarn passen.</string>
     <string name="solving_tips_strip_highest_anchor">Der höchste Wert der Zahlenreihe ist ein guter Anhaltspunkt für große Produkte und unmögliche Summen.</string>
     <string name="solving_tips_products_title">Produkte finden</string>
+    <string name="solving_tips_products_starting_point">Multiplikationen sind oft ein guter Ausgangspunkt.</string>
     <string name="solving_tips_products_large_results">Große Ergebnisse gehören meist zu Multiplikationskacheln.</string>
     <string name="solving_tips_products_factors">Prüfe die Faktoren des Ergebnisses.</string>
     <string name="solving_tips_sums_title">Summen finden</string>

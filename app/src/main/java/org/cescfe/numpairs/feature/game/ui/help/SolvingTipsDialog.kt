@@ -133,6 +133,7 @@ private fun SolvingTipsContent(containerColor: Color) {
             SolvingTipsSection(
                 title = stringResource(R.string.solving_tips_products_title),
                 bullets = listOf(
+                    stringResource(R.string.solving_tips_products_starting_point),
                     stringResource(R.string.solving_tips_products_large_results),
                     stringResource(R.string.solving_tips_products_factors)
                 )

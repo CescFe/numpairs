@@ -270,6 +270,7 @@
     <string name="solving_tips_strip_hidden_range">Els valors ocults de la sèrie han de continuar encaixant entre els seus veïns visibles.</string>
     <string name="solving_tips_strip_highest_anchor">El valor més alt de la sèrie és una referència per a productes grans i sumes impossibles.</string>
     <string name="solving_tips_products_title">Troba productes</string>
+    <string name="solving_tips_products_starting_point">Les multiplicacions solen ser un bon punt de partida.</string>
     <string name="solving_tips_products_large_results">Els resultats grans solen ser caselles de producte.</string>
     <string name="solving_tips_products_factors">Comprova’n els factors.</string>
     <string name="solving_tips_sums_title">Troba sumes</string>
