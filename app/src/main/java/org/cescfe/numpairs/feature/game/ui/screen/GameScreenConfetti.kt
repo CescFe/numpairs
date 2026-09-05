@@ -62,7 +62,7 @@ internal fun PersonalRecordConfetti(celebrationId: Long?, animationEnabled: Bool
             primaryColor
         )
     }
-    val particles = remember { dailyRecordConfettiParticles() }
+    val particles = remember { personalRecordConfettiParticles() }
 
     Canvas(
         modifier = modifier
@@ -86,10 +86,12 @@ internal fun PersonalRecordConfetti(celebrationId: Long?, animationEnabled: Bool
                     particle.startXFraction +
                         (particle.horizontalDriftFraction * particleProgress)
                     ),
-                y = size.height * (-0.04f + (0.82f * particleProgress))
+                y = confettiVerticalCenter(
+                    viewportHeight = size.height,
+                    particleHeight = baseHeight,
+                    progress = particleProgress
+                )
             )
-            val particleWidth = baseWidth * particle.sizeScale
-            val particleHeight = baseHeight * particle.sizeScale
             rotate(
                 degrees = particle.rotationDegrees * particleProgress,
                 pivot = center
@@ -97,36 +99,44 @@ internal fun PersonalRecordConfetti(celebrationId: Long?, animationEnabled: Bool
                 drawRoundRect(
                     color = particleColors[index % particleColors.size],
                     topLeft = Offset(
-                        x = center.x - (particleWidth / 2f),
-                        y = center.y - (particleHeight / 2f)
+                        x = center.x - (baseWidth / 2f),
+                        y = center.y - (baseHeight / 2f)
                     ),
-                    size = Size(particleWidth, particleHeight),
-                    cornerRadius = CornerRadius(particleWidth / 3f),
-                    alpha = (1f - particleProgress).coerceAtLeast(0f)
+                    size = Size(baseWidth, baseHeight),
+                    cornerRadius = CornerRadius(baseWidth / 3f),
+                    alpha = personalRecordConfettiAlpha(particleProgress)
                 )
             }
         }
     }
 }
 
-private data class ConfettiParticle(
+internal data class ConfettiParticle(
     val startXFraction: Float,
     val horizontalDriftFraction: Float,
     val delayFraction: Float,
-    val rotationDegrees: Float,
-    val sizeScale: Float
+    val rotationDegrees: Float
 )
 
-private fun dailyRecordConfettiParticles(): List<ConfettiParticle> = List(CONFETTI_PARTICLE_COUNT) { index ->
+internal fun personalRecordConfettiParticles(): List<ConfettiParticle> = List(CONFETTI_PARTICLE_COUNT) { index ->
     ConfettiParticle(
         startXFraction = 0.06f + (((index * 37) % 89) / 100f),
-        horizontalDriftFraction = ((index % 5) - 2) * 0.025f,
+        horizontalDriftFraction = ((index % 5) - 2) * (CONFETTI_MAX_HORIZONTAL_DRIFT_FRACTION / 2f),
         delayFraction = (index % 4) * 0.045f,
-        rotationDegrees = 150f + ((index % 6) * 45f),
-        sizeScale = 0.75f + ((index % 3) * 0.15f)
+        rotationDegrees = 150f + ((index % 6) * 45f)
     )
 }
 
-private const val CONFETTI_PARTICLE_COUNT = 18
-private val CONFETTI_PARTICLE_WIDTH = 5.dp
-private val CONFETTI_PARTICLE_HEIGHT = 10.dp
+internal fun personalRecordConfettiAlpha(progress: Float): Float =
+    ((1f - progress.coerceIn(0f, 1f)) / (1f - CONFETTI_OPAQUE_TRAVEL_FRACTION))
+        .coerceIn(0f, 1f)
+
+internal fun confettiVerticalCenter(viewportHeight: Float, particleHeight: Float, progress: Float): Float =
+    (-particleHeight / 2f) +
+        ((viewportHeight + particleHeight) * progress.coerceIn(0f, 1f))
+
+internal const val CONFETTI_PARTICLE_COUNT = 36
+internal val CONFETTI_PARTICLE_WIDTH = 6.dp
+internal val CONFETTI_PARTICLE_HEIGHT = 12.dp
+internal const val CONFETTI_OPAQUE_TRAVEL_FRACTION = 0.6f
+internal const val CONFETTI_MAX_HORIZONTAL_DRIFT_FRACTION = 0.08f
