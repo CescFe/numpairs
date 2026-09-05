@@ -72,8 +72,8 @@ class LocalizationResourceTest {
         )
         assertTutorialSuccessCopy(
             resources = resources,
-            message = "¡Tutorial completado!",
-            supportingText = "Ya conoces lo esencial para jugar a NumPairs",
+            message = "¡Enhorabuena!",
+            supportingText = "¡Ya estás listo para el verdadero desafío de NumPairs!",
             continueAction = "Continuar"
         )
         assertEquals("Saltar tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
@@ -162,8 +162,8 @@ class LocalizationResourceTest {
         )
         assertTutorialSuccessCopy(
             resources = resources,
-            message = "Tutorial completat!",
-            supportingText = "Ja coneixes l’essencial per jugar a NumPairs",
+            message = "Enhorabona!",
+            supportingText = "Ja estàs preparat per al veritable desafiament de NumPairs!",
             continueAction = "Continua"
         )
         assertEquals("Omet el tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
@@ -251,8 +251,8 @@ class LocalizationResourceTest {
         )
         assertTutorialSuccessCopy(
             resources = resources,
-            message = "Tutorial completed!",
-            supportingText = "You now know the essentials for playing NumPairs",
+            message = "Congratulations!",
+            supportingText = "You’re ready for the real NumPairs challenge!",
             continueAction = "Continue"
         )
         assertEquals("Skip tutorial", resources.getString(R.string.onboarding_skip_tutorial_action))
@@ -283,6 +283,12 @@ class LocalizationResourceTest {
     @Test
     fun germanDeviceLanguageUsesGermanDailyTimingResources() {
         val resources = resourcesFor(languageTag = "de")
+        assertTutorialSuccessCopy(
+            resources = resources,
+            message = "Glückwunsch!",
+            supportingText = "Jetzt bist du bereit für die echte NumPairs-Herausforderung!",
+            continueAction = "Weiter"
+        )
         assertDailyTimingCopy(
             resources = resources,
             accessibilityDescription = "Verstrichene Zeit: 02:05",

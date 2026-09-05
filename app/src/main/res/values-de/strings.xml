@@ -170,8 +170,8 @@
     <string name="tutorial_worked_example_product_two_three_copy">2 × 3 = 6 vervollständigt die verbleibende Multiplikation.</string>
     <string name="tutorial_worked_example_sum_two_three_copy">2 + 3 = 5 vervollständigt die Addition und löst das Puzzle.</string>
     <string name="tutorial_repeated_value_practice_copy">Jetzt kannst du es selbst ausprobieren. Tippe auf ein beliebiges ?, um zu beginnen. Zahlen können mehrfach vorkommen. Tipp: Multiplikationen sind oft ein guter Ausgangspunkt.</string>
-    <string name="tutorial_success_overlay_message">Tutorial abgeschlossen!</string>
-    <string name="tutorial_success_overlay_supporting_text">Du kennst jetzt die Grundlagen von NumPairs.</string>
+    <string name="tutorial_success_overlay_message">Glückwunsch!</string>
+    <string name="tutorial_success_overlay_supporting_text">Jetzt bist du bereit für die echte NumPairs-Herausforderung!</string>
     <string name="tutorial_success_overlay_continue_button">Weiter</string>
     <string name="onboarding_skip_tutorial_action">Tutorial überspringen</string>
     <string name="onboarding_skip_tutorial_title">Tutorial überspringen?</string>

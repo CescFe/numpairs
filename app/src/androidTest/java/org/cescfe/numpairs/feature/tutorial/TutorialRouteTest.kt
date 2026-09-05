@@ -337,8 +337,11 @@ class TutorialRouteTest {
             .onNodeWithText(string(R.string.tutorial_success_overlay_supporting_text))
             .assertIsDisplayed()
         composeTestRule
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_BADGE)
+            .assertContentDescriptionEquals(string(R.string.success_overlay_badge_content_description))
+        composeTestRule
             .onNodeWithText("OK")
-            .assertIsDisplayed()
+            .assertDoesNotExist()
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_PRIMARY_ACTION)
             .assertIsDisplayed()
