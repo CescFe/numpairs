@@ -20,7 +20,7 @@ Gradle build guarantees zero IDE warnings.
 - Assign, return, or assert the result of immutable operations such as data-class `copy`; invoking
   them without consuming the returned value does not change the original object.
 
-If recurring IntelliJ-only inspections need CI enforcement, evaluate an IntelliJ inspection runner
-such as Qodana in a dedicated infrastructure issue. Adding that tool requires an explicit decision
-about configuration ownership, runtime cost, report retention, and which inspection severities fail
-the build; do not introduce it incidentally in a feature change.
+The [IntelliJ inspection pilot](intellij-inspections-pilot.md) evaluates Qodana Community for Android
+in pull requests. It is informational, independent of `Build and Validate`, and does not change the
+required-check policy. Promotion to enforcement requires a separate decision based on measured
+compatibility, useful findings, false positives, runtime, and cache cost.

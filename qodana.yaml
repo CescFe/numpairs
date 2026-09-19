@@ -1,0 +1,20 @@
+# Informational pilot: no failThreshold or automatic fixes.
+version: '1.0'
+linter: jetbrains/qodana-jvm-android:2026.2@sha256:195d0a2c8345c6dba6e388d51a7f6c543fc46f4c17f4cd43b188aafd5ca6b716
+projectJDK: '21'
+profile:
+  base:
+    name: empty
+  inspections:
+    - inspection: RedundantSamConstructor
+      enabled: true
+    - inspection: SimpleRedundantLet
+      enabled: true
+    - inspection: ComplexRedundantLet
+      enabled: true
+    - inspection: UnusedSymbol
+      enabled: true
+    - inspection: ConstantConditionIf
+      enabled: true
+    - inspection: UnusedDataClassCopyResult
+      enabled: true

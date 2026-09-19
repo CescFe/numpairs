@@ -1,0 +1,113 @@
+name: Pilot IntelliJ Inspections
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: intellij-pilot-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  inspect:
+    name: IntelliJ Inspections (informational)
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Independent of Build and Validate; never add this pilot to required checks.
+    env:
+      QODANA_IMAGE: jetbrains/qodana-jvm-android:2026.2@sha256:195d0a2c8345c6dba6e388d51a7f6c543fc46f4c17f4cd43b188aafd5ca6b716
+    steps:
+      - name: Checkout real PR head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve comparison and preserve pilot configuration
+        id: range
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git cat-file -e "$BASE_SHA^{commit}"
+          test "$(git rev-parse HEAD)" = "$HEAD_SHA"
+          merge_base=$(git merge-base "$BASE_SHA" "$HEAD_SHA")
+          echo "base=$merge_base" >> "$GITHUB_OUTPUT"
+          echo "head=$HEAD_SHA" >> "$GITHUB_OUTPUT"
+          mkdir -p "$RUNNER_TEMP/qodana-config" "$RUNNER_TEMP/qodana-results" "$RUNNER_TEMP/qodana-cache"
+          cp qodana.yaml "$RUNNER_TEMP/qodana-config/qodana.yaml"
+          cp .github/scripts/qodana_report.py "$RUNNER_TEMP/qodana-config/qodana_report.py"
+
+      - name: Restore PR inspection cache
+        id: cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/qodana-cache
+          # One immutable cache per PR/configuration, not one per commit.
+          key: qodana-2026.2-${{ runner.os }}-pr-${{ github.event.pull_request.number }}-${{ hashFiles('qodana.yaml', 'gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties') }}
+
+      - name: Download pinned Community Android runner
+        timeout-minutes: 5
+        run: docker pull "$QODANA_IMAGE"
+
+      - name: Inspect merge base to head
+        id: scan
+        timeout-minutes: 20
+        env:
+          DIFF_START: ${{ steps.range.outputs.base }}
+          DIFF_END: ${{ steps.range.outputs.head }}
+        run: |
+          started=$(date +%s)
+          set +e
+          docker run --rm --name qodana-pilot --memory=6g --cpus=2 \
+            --user "$(id -u):$(id -g)" \
+            -v "$GITHUB_WORKSPACE:/data/project" \
+            -v "$RUNNER_TEMP/qodana-config:/data/pilot:ro" \
+            -v "$RUNNER_TEMP/qodana-results:/data/results" \
+            -v "$RUNNER_TEMP/qodana-cache:/data/cache" \
+            "$QODANA_IMAGE" \
+            --config /data/pilot/qodana.yaml \
+            --diff-start "$DIFF_START" --diff-end "$DIFF_END"
+          status=$?
+          echo "seconds=$(($(date +%s) - started))" >> "$GITHUB_OUTPUT"
+          exit "$status"
+
+      - name: Stop any timed-out container
+        if: always()
+        run: docker rm -f qodana-pilot 2>/dev/null || true
+
+      - name: Publish bounded incremental report
+        if: ${{ always() && steps.range.outcome == 'success' }}
+        env:
+          SCAN_OUTCOME: ${{ steps.scan.outcome }}
+          SCAN_SECONDS: ${{ steps.scan.outputs.seconds }}
+          CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
+          DIFF_START: ${{ steps.range.outputs.base }}
+          DIFF_END: ${{ steps.range.outputs.head }}
+        run: |
+          du -sh "$RUNNER_TEMP/qodana-cache" "$RUNNER_TEMP/qodana-results"
+          python3 -B "$RUNNER_TEMP/qodana-config/qodana_report.py" \
+            "$RUNNER_TEMP/qodana-results/qodana.sarif.json" \
+            "$RUNNER_TEMP/qodana-artifact"
+
+      - name: Upload new findings and run evidence
+        if: ${{ always() && steps.range.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: intellij-pilot-pr-${{ github.event.pull_request.number }}
+          path: ${{ runner.temp }}/qodana-artifact/
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Save first successful PR cache
+        if: ${{ success() && steps.cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/qodana-cache
+          key: ${{ steps.cache.outputs.cache-primary-key }}
