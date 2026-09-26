@@ -97,7 +97,7 @@ def parse_release_identity(contents: str, source: str = str(VERSION_FILE)) -> Re
 def validate_pull_request_identity(
     base: ReleaseIdentity,
     candidate: ReleaseIdentity,
-    production_tags: Collection[str],
+    release_tags: Collection[str],
 ) -> None:
     if candidate == base:
         return
@@ -114,14 +114,14 @@ def validate_pull_request_identity(
         )
 
     candidate_tag = f"v{candidate.version_name}"
-    if candidate_tag in production_tags:
+    if candidate_tag in release_tags:
         raise ValidationError(
-            f"VERSION_NAME {candidate.version_name} is already released as immutable tag "
+            f"VERSION_NAME {candidate.version_name} already has an immutable candidate tag "
             f"{candidate_tag}. Choose a new SemVer release name."
         )
 
 
-def validate_production_tag(
+def validate_release_tag(
     tag_name: str,
     identity: ReleaseIdentity,
     belongs_to_main: bool,
@@ -129,18 +129,18 @@ def validate_production_tag(
     match = TAG_PATTERN.fullmatch(tag_name)
     if match is None:
         raise ValidationError(
-            f"Invalid production tag '{tag_name}'. Expected vMAJOR.MINOR.PATCH, such as v1.0.0."
+            f"Invalid release tag '{tag_name}'. Expected vMAJOR.MINOR.PATCH, such as v1.0.0."
         )
 
     tagged_version = SemanticVersion(*(int(component) for component in match.groups()))
     if tagged_version != identity.version_name:
         raise ValidationError(
-            f"Production tag {tag_name} does not match VERSION_NAME {identity.version_name} "
+            f"Release tag {tag_name} does not match VERSION_NAME {identity.version_name} "
             "in the tagged revision."
         )
     if not belongs_to_main:
         raise ValidationError(
-            f"Production tag {tag_name} does not identify a revision belonging to main."
+            f"Release tag {tag_name} does not identify a revision belonging to main."
         )
 
 
@@ -208,12 +208,12 @@ def validate_pull_request_command(arguments: argparse.Namespace) -> None:
 def validate_tag_command(arguments: argparse.Namespace) -> None:
     commit = tag_commit(arguments.tag)
     identity = read_revision_identity(commit)
-    validate_production_tag(
+    validate_release_tag(
         arguments.tag,
         identity,
         revision_belongs_to(commit, arguments.main_revision),
     )
-    print(f"Validated production tag {arguments.tag} for app release identity {identity}.")
+    print(f"Validated release candidate tag {arguments.tag} for app release identity {identity}.")
 
 
 def create_argument_parser() -> argparse.ArgumentParser:
@@ -232,7 +232,7 @@ def create_argument_parser() -> argparse.ArgumentParser:
 
     tag_parser = subparsers.add_parser(
         "tag",
-        help="Validate a production tag against its committed identity and main.",
+        help="Validate a release candidate tag against its committed identity and main.",
     )
     tag_parser.add_argument("--tag", required=True)
     tag_parser.add_argument("--main-revision", default="origin/main")

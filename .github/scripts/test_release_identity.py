@@ -6,7 +6,7 @@ from release_identity import (
     SemanticVersion,
     ValidationError,
     parse_release_identity,
-    validate_production_tag,
+    validate_release_tag,
     validate_pull_request_identity,
 )
 
@@ -51,7 +51,7 @@ class ReleaseIdentityParsingTest(unittest.TestCase):
 
 
 class PullRequestIdentityValidationTest(unittest.TestCase):
-    def test_accepts_unchanged_identity_even_after_its_production_tag_exists(self) -> None:
+    def test_accepts_unchanged_identity_even_after_its_candidate_tag_exists(self) -> None:
         current = identity("1.0.0", 3)
 
         validate_pull_request_identity(current, current, {"v1.0.0"})
@@ -87,7 +87,7 @@ class PullRequestIdentityValidationTest(unittest.TestCase):
             )
 
     def test_rejects_reuse_of_a_tagged_version_name(self) -> None:
-        with self.assertRaisesRegex(ValidationError, "already released as immutable tag"):
+        with self.assertRaisesRegex(ValidationError, "already has an immutable candidate tag"):
             validate_pull_request_identity(
                 identity("1.0.0", 3),
                 identity("1.0.0", 4),
@@ -95,21 +95,21 @@ class PullRequestIdentityValidationTest(unittest.TestCase):
             )
 
 
-class ProductionTagValidationTest(unittest.TestCase):
+class ReleaseTagValidationTest(unittest.TestCase):
     def test_accepts_matching_tag_on_main(self) -> None:
-        validate_production_tag("v1.0.0", identity("1.0.0", 3), True)
+        validate_release_tag("v1.0.0", identity("1.0.0", 3), True)
 
     def test_rejects_malformed_tag(self) -> None:
-        with self.assertRaisesRegex(ValidationError, "Invalid production tag"):
-            validate_production_tag("v1.0", identity("1.0.0", 3), True)
+        with self.assertRaisesRegex(ValidationError, "Invalid release tag"):
+            validate_release_tag("v1.0", identity("1.0.0", 3), True)
 
     def test_rejects_tag_that_does_not_match_committed_version_name(self) -> None:
         with self.assertRaisesRegex(ValidationError, "does not match VERSION_NAME"):
-            validate_production_tag("v1.1.0", identity("1.0.0", 3), True)
+            validate_release_tag("v1.1.0", identity("1.0.0", 3), True)
 
     def test_rejects_tag_outside_main_history(self) -> None:
         with self.assertRaisesRegex(ValidationError, "belonging to main"):
-            validate_production_tag("v1.0.0", identity("1.0.0", 3), False)
+            validate_release_tag("v1.0.0", identity("1.0.0", 3), False)
 
 
 if __name__ == "__main__":
