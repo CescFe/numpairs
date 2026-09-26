@@ -26,10 +26,10 @@ import org.cescfe.numpairs.feature.game.ui.screen.GameScreenTestTags
 import org.cescfe.numpairs.feature.generated.GeneratedModes
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
-import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -114,7 +114,11 @@ class GeneratedSessionResumeNavigationTest {
             )
         composeTestRule.runOnIdle {
             assertEquals(0, generationCounter.count)
-            assertEquals(snapshot, repository.session.value)
+            val resumedSnapshot = checkNotNull(repository.session.value) {
+                "The resumed session should be stored"
+            }
+            assertEquals(snapshot, resumedSnapshot.copy(timingStartInstant = null))
+            assertNotNull(resumedSnapshot.timingStartInstant)
         }
     }
 
@@ -167,7 +171,11 @@ class GeneratedSessionResumeNavigationTest {
             .assertDoesNotExist()
         composeTestRule.runOnIdle {
             assertEquals(0, generationCounter.count)
-            assertEquals(snapshot, repository.session.value)
+            val resumedSnapshot = checkNotNull(repository.session.value) {
+                "The resumed session should be stored"
+            }
+            assertEquals(snapshot, resumedSnapshot.copy(timingStartInstant = null))
+            assertNotNull(resumedSnapshot.timingStartInstant)
         }
     }
 
@@ -184,7 +192,7 @@ class GeneratedSessionResumeNavigationTest {
                     personalizationPreferencesRepository = FakePersonalizationPreferencesRepository(),
                     topAppBarActionDiscoveryRepository = FakeTopAppBarActionDiscoveryRepository(),
                     generatedChallengeCatalog = GeneratedModes.catalog,
-                    generatedPuzzleGenerationUseCaseFactory = GeneratedPuzzleGenerationUseCaseFactory {
+                    generatedPuzzleGenerationUseCaseFactory = {
                         GeneratedPuzzleGenerationUseCase { request ->
                             generationCounter.count++
                             GeneratedPuzzleGenerationResult.Generated(

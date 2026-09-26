@@ -479,7 +479,7 @@ class DailyCompletionSurfaceTest {
         }
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_HIGHLIGHT)
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_HIGHLIGHT, useUnmergedTree = true)
             .assertIsDisplayed()
             .assertTextEquals("02:05 · 23 moves")
         composeTestRule
@@ -506,7 +506,7 @@ class DailyCompletionSurfaceTest {
         }
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE)
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE, useUnmergedTree = true)
             .assertTextEquals("Flawless!")
         composeTestRule
             .onNodeWithText("You solved it without correcting a single move.")
@@ -546,17 +546,17 @@ class DailyCompletionSurfaceTest {
         }
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE)
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE, useUnmergedTree = true)
             .assertTextEquals("New personal record!")
         composeTestRule
-            .onNodeWithContentDescription("Personal record")
+            .onNodeWithContentDescription("Personal record", useUnmergedTree = true)
             .assertIsDisplayed()
             .assertHasNoClickAction()
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_HIGHLIGHT)
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_HIGHLIGHT, useUnmergedTree = true)
             .assertTextEquals("02:05 · 23 moves")
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONTEXT)
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONTEXT, useUnmergedTree = true)
             .assertTextEquals("Previous best: 02:20")
         composeTestRule
             .onNodeWithContentDescription("Previous best time: 02:20")
@@ -659,23 +659,23 @@ class DailyCompletionSurfaceTest {
         }
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE)
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE, useUnmergedTree = true)
             .assertTextEquals("Great work!")
         composeTestRule
             .onNodeWithText("Your logic paid off.")
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithContentDescription("Puzzle completed")
+            .onNodeWithContentDescription("Puzzle completed", useUnmergedTree = true)
             .assertIsDisplayed()
             .assertHasNoClickAction()
         composeTestRule
             .onNodeWithText("OK")
             .assertDoesNotExist()
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONTEXT)
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONTEXT, useUnmergedTree = true)
             .assertDoesNotExist()
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONFETTI)
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONFETTI, useUnmergedTree = true)
             .assertDoesNotExist()
     }
 
@@ -711,10 +711,10 @@ class DailyCompletionSurfaceTest {
         }
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONFETTI)
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONFETTI, useUnmergedTree = true)
             .assertDoesNotExist()
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE)
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE, useUnmergedTree = true)
             .assertTextEquals("New personal record!")
         composeTestRule
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_PRIMARY_ACTION)
@@ -742,7 +742,7 @@ class DailyCompletionSurfaceTest {
         }
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_HIGHLIGHT)
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_HIGHLIGHT, useUnmergedTree = true)
             .assertTextEquals("00:59 · 1 move")
         composeTestRule
             .onNodeWithContentDescription("Elapsed time: 00:59. Movement: 1")
