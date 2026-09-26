@@ -121,7 +121,9 @@ class GeneratedPuzzleGenerationRouteTest {
             .assertIsDisplayed()
         composeTestRule.runOnIdle {
             assertEquals(0, useCase.requestCount)
-            assertEquals(snapshot, repository.session.value)
+            val resumedSnapshot = repository.session.value
+            assertEquals(snapshot, resumedSnapshot?.copy(timingStartInstant = null))
+            assertTrue(resumedSnapshot?.timingStartInstant != null)
         }
     }
 

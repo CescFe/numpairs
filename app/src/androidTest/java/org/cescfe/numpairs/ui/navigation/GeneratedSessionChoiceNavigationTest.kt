@@ -36,6 +36,7 @@ import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.testing.performGlobalTapNearTopLeft
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -142,7 +143,11 @@ class GeneratedSessionChoiceNavigationTest {
             .assertIsDisplayed()
         composeTestRule.runOnIdle {
             assertTrue(recorder.generatedChallenges.isEmpty())
-            assertEquals(snapshot, repository.session.value)
+            val resumedSnapshot = checkNotNull(repository.session.value) {
+                "The resumed session should be stored"
+            }
+            assertEquals(snapshot, resumedSnapshot.copy(timingStartInstant = null))
+            assertNotNull(resumedSnapshot.timingStartInstant)
         }
     }
 

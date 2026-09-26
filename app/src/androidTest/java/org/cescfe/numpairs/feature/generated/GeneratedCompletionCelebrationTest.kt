@@ -191,12 +191,12 @@ class GeneratedCompletionCelebrationTest {
             .tapOperatorOption(Operator.MULTIPLICATION)
 
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_HIGHLIGHT)
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_HIGHLIGHT, useUnmergedTree = true)
             .assertIsDisplayed()
             .assertTextEquals("02:05")
             .assertContentDescriptionEquals("Elapsed time: 02:05")
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONTEXT)
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONTEXT, useUnmergedTree = true)
             .assertIsDisplayed()
             .assertTextEquals("Best time: 02:00")
             .assertContentDescriptionEquals("Best time: 02:00")
@@ -302,11 +302,11 @@ class GeneratedCompletionCelebrationTest {
             .onNodeWithText("You beat your best time!")
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_HIGHLIGHT)
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_HIGHLIGHT, useUnmergedTree = true)
             .assertTextEquals("02:05")
             .assertContentDescriptionEquals("Personal record time: 02:05")
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONTEXT)
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONTEXT, useUnmergedTree = true)
             .assertTextEquals("$expectedCategory · Previous best: 03:00")
             .assertContentDescriptionEquals(
                 "Record category: $expectedCategory. Previous best time: 03:00"
@@ -320,7 +320,7 @@ class GeneratedCompletionCelebrationTest {
             .assertIsDisplayed()
             .assertIsEnabled()
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONFETTI)
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONFETTI, useUnmergedTree = true)
             .assertDoesNotExist()
     }
 
@@ -402,7 +402,7 @@ class GeneratedCompletionCelebrationTest {
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_RETURN_TO_MENU)
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONTEXT)
+            .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_CONTEXT, useUnmergedTree = true)
             .assertIsDisplayed()
         return selectedCopy
     }

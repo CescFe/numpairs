@@ -50,6 +50,7 @@ import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationResult
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCase
 import org.cescfe.numpairs.feature.generated.GeneratedPuzzleGenerationUseCaseFactory
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
+import org.cescfe.numpairs.feature.time.ElapsedTimeReading
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -164,7 +165,11 @@ class DailyMenuNavigationTest {
             .assertIsDisplayed()
         composeTestRule.runOnIdle {
             assertEquals(0, generationCounter.count)
-            assertEquals(0, repository.mutationCount)
+            assertEquals(1, repository.mutationCount)
+            assertEquals(
+                snapshot.copy(timingStartInstant = DailyTimingStartInstant(1_000)),
+                repository.state.value.activeSession
+            )
         }
     }
 
@@ -234,7 +239,13 @@ class DailyMenuNavigationTest {
                     dailyFeatureDependencies = DailyFeatureDependencies(
                         dailySessionRepository = repository,
                         deviceLocalDateSource = dateSource,
-                        generatedPuzzleGenerationUseCaseFactory = generationFactory
+                        generatedPuzzleGenerationUseCaseFactory = generationFactory,
+                        timeSource = {
+                            ElapsedTimeReading(
+                                epochMilliseconds = 1_000,
+                                monotonicMilliseconds = 500
+                            )
+                        }
                     )
                 )
             }
@@ -301,7 +312,17 @@ private class MutableDailyRepository(initialState: DailyState) : DailySessionRep
         startInstant: DailyTimingStartInstant
     ): DailySessionTimingStartResult {
         mutationCount += 1
-        return DailySessionTimingStartResult.StaleSession
+        val activeSession = state.value.activeSession
+        if (activeSession?.sessionId != expectedSessionId) {
+            return DailySessionTimingStartResult.StaleSession
+        }
+        activeSession.timingStartInstant?.let { existingStart ->
+            return DailySessionTimingStartResult.AlreadyStarted(existingStart)
+        }
+        state.value = state.value.copy(
+            activeSession = activeSession.copy(timingStartInstant = startInstant)
+        )
+        return DailySessionTimingStartResult.Started(startInstant)
     }
 
     override suspend fun clearSession(expectedSessionId: DailySessionId): DailySessionClearResult {
