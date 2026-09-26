@@ -77,6 +77,18 @@ android {
     androidResources {
         generateLocaleConfig = true
     }
+    testOptions {
+        animationsDisabled = true
+        managedDevices {
+            localDevices {
+                create("pixel2Api30Atd") {
+                    device = "Pixel 2"
+                    apiLevel = 30
+                    systemImageSource = "aosp-atd"
+                }
+            }
+        }
+    }
     lint {
         warningsAsErrors = true
 

@@ -1,0 +1,191 @@
+name: Instrumented Android Tests (Pilot)
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+      - converted_to_draft
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - '.github/workflows/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'gradlew'
+      - 'version.properties'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: instrumented-android-tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  instrumented_tests:
+    name: Instrumented Tests (Pilot)
+    if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.draft }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      GRADLE_OPTS: >-
+        -Dorg.gradle.jvmargs=-Xmx2048m
+        -Dorg.gradle.caching=true
+        -Dorg.gradle.parallel=true
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-provider: basic
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: >-
+            platform-tools
+            emulator
+            build-tools;36.1.0
+            platforms;android-36.1
+
+      - name: Enable KVM access for the Android emulator
+        run: sudo chmod a+rw /dev/kvm
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run the complete instrumented suite
+        id: instrumented_tests
+        shell: bash
+        run: |
+          set -uo pipefail
+
+          started_at="$(date +%s)"
+          ./gradlew pixel2Api30AtdDebugAndroidTest \
+            --build-cache \
+            --parallel \
+            --info \
+            -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect \
+            2>&1 | tee managed-device-gradle.log
+          gradle_status="${PIPESTATUS[0]}"
+          finished_at="$(date +%s)"
+
+          echo "duration_seconds=$((finished_at - started_at))" >> "$GITHUB_OUTPUT"
+          exit "$gradle_status"
+
+      - name: Summarize test results and pilot measurements
+        if: always()
+        env:
+          TEST_OUTCOME: ${{ steps.instrumented_tests.outcome }}
+          TEST_DURATION_SECONDS: ${{ steps.instrumented_tests.outputs.duration_seconds }}
+        run: |
+          python3 - <<'PY'
+          import html
+          import os
+          import re
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          results_dir = Path("app/build/outputs/androidTest-results/managedDevice/debug")
+          result_files = sorted(results_dir.rglob("TEST-*.xml")) if results_dir.exists() else []
+          totals = {"tests": 0, "failures": 0, "errors": 0, "skipped": 0}
+
+          for result_file in result_files:
+              root = ET.parse(result_file).getroot()
+              suites = [root] if root.tag == "testsuite" else list(root.iter("testsuite"))
+              for suite in suites:
+                  for name in totals:
+                      totals[name] += int(suite.attrib.get(name, "0"))
+
+          executed = totals["tests"] - totals["skipped"]
+          passed = executed - totals["failures"] - totals["errors"]
+          outcome = os.environ.get("TEST_OUTCOME", "unknown")
+          duration = os.environ.get("TEST_DURATION_SECONDS") or "unavailable"
+          startup_status = (
+              "confirmado: los tests se ejecutaron en el dispositivo administrado"
+              if executed
+              else "no confirmado; revisar el log de Gradle"
+          )
+
+          def directory_size(path):
+              if not path.exists():
+                  return None
+              return sum(
+                  file.stat().st_size
+                  for file in path.rglob("*")
+                  if file.is_file() and not file.is_symlink()
+              )
+
+          sdk_root_value = os.environ.get("ANDROID_HOME") or os.environ.get("ANDROID_SDK_ROOT")
+          sdk_root = Path(sdk_root_value) if sdk_root_value else None
+          image_dir = sdk_root / "system-images/android-30/aosp_atd" if sdk_root else None
+          avd_dir = Path(os.environ.get("ANDROID_AVD_HOME", str(Path.home() / ".android/avd")))
+
+          startup_lines = []
+          gradle_log = Path("managed-device-gradle.log")
+          if gradle_log.exists():
+              startup_lines = [
+                  line.strip()
+                  for line in gradle_log.read_text(errors="replace").splitlines()
+                  if re.search(r"managed device|emulator|boot", line, re.IGNORECASE)
+              ][-8:]
+
+          summary = [
+              "## Instrumented Android tests (pilot)",
+              f"- Resultado del job: **{outcome}**",
+              f"- Tests ejecutados: **{executed}** ({passed} correctos, "
+              f"{totals['failures']} fallidos, {totals['errors']} errores; "
+              f"{totals['skipped']} omitidos; {totals['tests']} reportados en "
+              f"{len(result_files)} XML)",
+              f"- Duración total de la tarea Gradle: **{duration} s**",
+              f"- Arranque del emulador: **{startup_status}**",
+          ]
+
+          for label, path in (("Imagen AOSP ATD API 30", image_dir), ("AVD administrado", avd_dir)):
+              size = directory_size(path) if path else None
+              display = f"{size / (1024 * 1024):.1f} MiB" if size is not None else "no disponible"
+              summary.append(f"- Almacenamiento ({label}): **{display}**")
+
+          if startup_lines:
+              summary.extend(["", "<details>", "<summary>Mensajes del log relacionados con emulador/arranque</summary>", "", "```text"])
+              summary.extend(html.escape(line) for line in startup_lines)
+              summary.extend(["```", "</details>"])
+          elif not result_files:
+              summary.append("- No se encontraron informes XML; revisa si el emulador llegó a iniciar los tests.")
+
+          Path(os.environ["GITHUB_STEP_SUMMARY"]).write_text("\n".join(summary) + "\n")
+
+          if outcome == "success" and executed == 0:
+              raise SystemExit("Gradle terminó correctamente, pero no se encontraron tests ejecutados en los XML.")
+          PY
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: instrumented-test-failure-diagnostics
+          path: |
+            managed-device-gradle.log
+            app/build/reports/androidTests/managedDevice/debug/**
+            app/build/outputs/androidTest-results/managedDevice/debug/**
+            app/build/outputs/managed_device_android_test_additional_output/debug/**
+          if-no-files-found: warn
+          retention-days: 3
