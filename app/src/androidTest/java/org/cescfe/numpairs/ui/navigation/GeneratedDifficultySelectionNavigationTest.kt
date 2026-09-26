@@ -40,6 +40,7 @@ import org.cescfe.numpairs.feature.menu.ui.GeneratedDifficultyMenuOptionId
 import org.cescfe.numpairs.feature.menu.ui.MenuScreenTestTags
 import org.cescfe.numpairs.ui.theme.NumPairsTheme
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -203,9 +204,11 @@ class GeneratedDifficultySelectionNavigationTest {
                 DifficultyTier.MEDIUM,
                 fixture.difficultyRepository.currentDifficulty(GeneratedPlayOptions.CLASSIC.id)
             )
-            val resumedSnapshot = fixture.sessionRepository.session.value
-            assertEquals(snapshot, resumedSnapshot?.copy(timingStartInstant = null))
-            assertTrue(resumedSnapshot?.timingStartInstant != null)
+            val resumedSnapshot = checkNotNull(fixture.sessionRepository.session.value) {
+                "The resumed session should be stored"
+            }
+            assertEquals(snapshot, resumedSnapshot.copy(timingStartInstant = null))
+            assertNotNull(resumedSnapshot.timingStartInstant)
         }
     }
 
