@@ -114,7 +114,9 @@ class GeneratedSessionResumeNavigationTest {
             )
         composeTestRule.runOnIdle {
             assertEquals(0, generationCounter.count)
-            assertEquals(snapshot, repository.session.value)
+            val resumedSnapshot = repository.session.value
+            assertEquals(snapshot, resumedSnapshot?.copy(timingStartInstant = null))
+            assertTrue(resumedSnapshot?.timingStartInstant != null)
         }
     }
 
@@ -167,7 +169,9 @@ class GeneratedSessionResumeNavigationTest {
             .assertDoesNotExist()
         composeTestRule.runOnIdle {
             assertEquals(0, generationCounter.count)
-            assertEquals(snapshot, repository.session.value)
+            val resumedSnapshot = repository.session.value
+            assertEquals(snapshot, resumedSnapshot?.copy(timingStartInstant = null))
+            assertTrue(resumedSnapshot?.timingStartInstant != null)
         }
     }
 

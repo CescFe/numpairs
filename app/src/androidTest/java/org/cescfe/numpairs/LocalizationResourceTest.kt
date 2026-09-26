@@ -58,16 +58,15 @@ class LocalizationResourceTest {
         assertTutorialCopy(
             resources = resources,
             expectedCopy = listOf(
-                "Presta atención: esta será la primera y última vez que resolveremos un puzle por ti.",
+                "Veamos juntos un ejemplo para que descubras cómo encajan las piezas.",
                 "4 × 5 = 20, así que 20 es la casilla de multiplicación de esta pareja.",
                 "La misma pareja también resuelve la suma: 4 + 5 = 9.",
                 "Quedan por completar las casillas con resultados 5 y 6. Junto al 2, " +
                     "el número oculto solo puede ser 3.",
                 "2 × 3 = 6 completa la multiplicación que falta.",
                 "2 + 3 = 5 completa la suma y resuelve el puzle.",
-                "Ahora tú: resuelve el puzle. Toca cualquier ? para empezar. " +
-                    "Los números pueden repetirse. Consejo: las multiplicaciones suelen ser " +
-                    "un buen punto de partida."
+                "Ahora puedes intentarlo tú. Toca cualquier ? para empezar. Los números pueden " +
+                    "repetirse. Consejo: las multiplicaciones suelen ser un buen punto de partida."
             )
         )
         assertTutorialSuccessCopy(

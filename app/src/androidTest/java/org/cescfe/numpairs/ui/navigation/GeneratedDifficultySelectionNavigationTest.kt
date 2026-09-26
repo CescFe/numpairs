@@ -203,7 +203,9 @@ class GeneratedDifficultySelectionNavigationTest {
                 DifficultyTier.MEDIUM,
                 fixture.difficultyRepository.currentDifficulty(GeneratedPlayOptions.CLASSIC.id)
             )
-            assertEquals(snapshot, fixture.sessionRepository.session.value)
+            val resumedSnapshot = fixture.sessionRepository.session.value
+            assertEquals(snapshot, resumedSnapshot?.copy(timingStartInstant = null))
+            assertTrue(resumedSnapshot?.timingStartInstant != null)
         }
     }
 
