@@ -1,0 +1,167 @@
+name: Create release tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_commit:
+        description: Full commit SHA from main to tag for this release
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: create-release-tag-${{ inputs.release_commit }}
+  cancel-in-progress: false
+
+jobs:
+  create_tag:
+    name: Validate and create release tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Validate release revision
+        id: revision
+        env:
+          WORKFLOW_REF: ${{ github.ref }}
+          RELEASE_COMMIT_INPUT: ${{ inputs.release_commit }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$WORKFLOW_REF" != "refs/heads/main" ]]; then
+            echo "Run this workflow from main; selected ref was $WORKFLOW_REF." >&2
+            exit 1
+          fi
+
+          if [[ ! "$RELEASE_COMMIT_INPUT" =~ ^[[:xdigit:]]{40}$ ]]; then
+            echo "release_commit must be a full 40-character commit SHA." >&2
+            exit 1
+          fi
+
+          git fetch origin main --no-tags
+          RELEASE_COMMIT="$(git rev-parse --verify "${RELEASE_COMMIT_INPUT}^{commit}")"
+
+          if ! git merge-base --is-ancestor "$RELEASE_COMMIT" origin/main; then
+            echo "Release commit $RELEASE_COMMIT is not contained in origin/main." >&2
+            exit 1
+          fi
+
+          git checkout --detach "$RELEASE_COMMIT"
+          echo "release_commit=$RELEASE_COMMIT" >> "$GITHUB_OUTPUT"
+
+      - name: Validate and derive release identity
+        id: identity
+        run: |
+          set -euo pipefail
+
+          python3 -B .github/scripts/release_identity.py current
+          python3 -B - <<'PY'
+          import os
+          import sys
+          from pathlib import Path
+
+          sys.path.insert(0, str(Path(".github/scripts").resolve()))
+          from release_identity import read_worktree_identity
+
+          identity = read_worktree_identity()
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as output:
+              print(f"version_name={identity.version_name}", file=output)
+              print(f"version_code={identity.version_code}", file=output)
+              print(f"tag_name=v{identity.version_name}", file=output)
+          PY
+
+      - name: Create or verify immutable tag
+        id: tag
+        env:
+          RELEASE_COMMIT: ${{ steps.revision.outputs.release_commit }}
+          TAG_NAME: ${{ steps.identity.outputs.tag_name }}
+          VERSION_NAME: ${{ steps.identity.outputs.version_name }}
+          VERSION_CODE: ${{ steps.identity.outputs.version_code }}
+        run: |
+          set -euo pipefail
+
+          REMOTE_TAG_REF="$(git ls-remote --refs origin "refs/tags/$TAG_NAME")"
+          if [[ -n "$REMOTE_TAG_REF" ]]; then
+            # Refresh only this runner's local tag ref from origin before comparing it.
+            git fetch --no-tags origin "+refs/tags/$TAG_NAME:refs/tags/$TAG_NAME"
+            EXISTING_COMMIT="$(git rev-parse --verify "refs/tags/$TAG_NAME^{commit}")"
+            if [[ "$EXISTING_COMMIT" != "$RELEASE_COMMIT" ]]; then
+              echo "Tag $TAG_NAME already points to $EXISTING_COMMIT, not $RELEASE_COMMIT." >&2
+              exit 1
+            fi
+
+            echo "action=already_exists" >> "$GITHUB_OUTPUT"
+          else
+            if git show-ref --verify --quiet "refs/tags/$TAG_NAME"; then
+              echo "Tag $TAG_NAME exists locally but not on origin; refusing to replace it." >&2
+              exit 1
+            fi
+
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag --annotate \
+              --message "NumPairs $VERSION_NAME ($VERSION_CODE)" \
+              "$TAG_NAME" \
+              "$RELEASE_COMMIT"
+            echo "action=created" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate tag before pushing
+        env:
+          RELEASE_COMMIT: ${{ steps.revision.outputs.release_commit }}
+          TAG_NAME: ${{ steps.identity.outputs.tag_name }}
+        run: |
+          set -euo pipefail
+
+          python3 -B .github/scripts/release_identity.py tag \
+            --tag "$TAG_NAME" \
+            --main-revision origin/main
+
+          TAGGED_COMMIT="$(git rev-parse --verify "refs/tags/$TAG_NAME^{commit}")"
+          if [[ "$TAGGED_COMMIT" != "$RELEASE_COMMIT" ]]; then
+            echo "Tag $TAG_NAME does not point to the selected release commit." >&2
+            exit 1
+          fi
+
+      - name: Push release tag
+        env:
+          TAG_ACTION: ${{ steps.tag.outputs.action }}
+          TAG_NAME: ${{ steps.identity.outputs.tag_name }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$TAG_ACTION" == "created" ]]; then
+            git push origin "refs/tags/$TAG_NAME"
+          else
+            echo "Tag $TAG_NAME already points to the selected release commit; nothing to push."
+          fi
+
+      - name: Summarize release tag
+        env:
+          RELEASE_COMMIT: ${{ steps.revision.outputs.release_commit }}
+          TAG_ACTION: ${{ steps.tag.outputs.action }}
+          TAG_NAME: ${{ steps.identity.outputs.tag_name }}
+          VERSION_NAME: ${{ steps.identity.outputs.version_name }}
+          VERSION_CODE: ${{ steps.identity.outputs.version_code }}
+        run: |
+          {
+            echo "## Release tag ready"
+            echo
+            echo "- Action: $TAG_ACTION"
+            echo "- Tag: \`$TAG_NAME\`"
+            echo "- Commit: \`$RELEASE_COMMIT\`"
+            echo "- versionName: \`$VERSION_NAME\`"
+            echo "- versionCode: \`$VERSION_CODE\`"
+            echo
+            echo "Build and upload the AAB from this tagged commit using the Internal release workflow."
+          } >> "$GITHUB_STEP_SUMMARY"
