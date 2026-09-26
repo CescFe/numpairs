@@ -44,7 +44,9 @@ MAJOR.MINOR.PATCH
 - `PATCH` changes for compatible fixes, quality improvements, or release corrections.
 
 Testing-track state is represented by Google Play rather than prerelease suffixes. The repository
-therefore stores no `alpha`, `beta`, or track suffix in `versionName`.
+therefore stores no `alpha`, `beta`, or track suffix in `versionName`. GitHub marks a tagged
+candidate release as a prerelease while Google Play reviews it; the release becomes stable when
+Play reports it as published.
 
 ### App Version Code
 
@@ -52,9 +54,10 @@ therefore stores no `alpha`, `beta`, or track suffix in `versionName`.
 uploaded to any Google Play track must use a code greater than every AAB previously uploaded for
 the package, including a replacement for a rejected or withdrawn candidate.
 
-A replacement may retain its `versionName` while the intended release has not reached Production
-and has no production tag. Once a release is active and tagged, every correction uses a new
-SemVer release name and a new version code.
+A correction that changes only Play Console metadata may reuse the exact tagged artifact. Any
+correction that requires a replacement AAB uses a new SemVer release name and a version code
+greater than every code already uploaded. Candidate tags are immutable, so a version name already
+tagged for a candidate cannot identify a different source revision or replacement artifact.
 
 ### Product Milestone
 
@@ -84,11 +87,14 @@ that identity and the resulting artifact as it progresses through Google Play.
 
 Release changes are reviewed through a dedicated Pull Request. CI compares changed values with
 the target branch, rejects a non-increasing version code or decreasing SemVer name, and checks
-that any production tag `vX.Y.Z` exactly matches the committed `versionName`.
+that any release tag `vX.Y.Z` exactly matches the committed `versionName` and identifies a
+revision on `main`.
 
-Production tags are immutable. Each production GitHub Release records the exact app version,
-version code, source commit, and release notes without publishing the private upload key or
-attaching the signed AAB by default.
+Candidate tags are immutable and are pushed once the release source is frozen, before building the
+signed AAB. Each candidate GitHub Release records the exact app version, version code, source
+commit, AAB checksum, and release notes as a prerelease while Google Play reviews it. After Play
+reports the release as published, the GitHub Release is marked stable. The private upload key and
+signed AAB are never published.
 
 ## Signing And Key Ownership
 
@@ -113,8 +119,8 @@ credentials during the manual phase. It must:
 - validate strict SemVer and a positive integer version code
 - require a changed version code to increase relative to the Pull Request base
 - prevent SemVer regression
-- allow the same release name only for an untagged pre-production replacement
-- verify that a `vX.Y.Z` tag matches the source version
+- reject reuse of a SemVer release name once its immutable `vX.Y.Z` candidate tag exists
+- verify that a `vX.Y.Z` candidate tag matches the source version and belongs to `main`
 - compile the release AAB without an upload key
 - retain the existing formatting, lint, unit-test, and instrumented-test compilation coverage
 
@@ -145,19 +151,25 @@ payment CTA for Sponsors and offers no sponsor-only digital content or gameplay 
 The manual path remains the source of truth until it has completed successfully:
 
 1. Merge a release Pull Request containing the intended version identity and release notes.
-2. Run repository validation and create one signed AAB from the exact merged `main` revision.
-3. Verify the AAB signature and upload it to Google Play Internal testing.
-4. Validate installation and representative app behavior through the Play-delivered build.
-5. Promote the same AAB to Closed testing without rebuilding it.
+2. Freeze the exact merged `main` revision, create its immutable `vX.Y.Z` candidate tag, and let
+   CI validate the tag.
+3. Build and verify one signed AAB from that tagged revision; record its SHA-256 checksum.
+4. Publish a GitHub prerelease for the tag with the version identity, source commit, checksum, and
+   release notes. Do not attach the signed AAB.
+5. Upload that same AAB to Google Play Internal testing, validate the Play-delivered build, and
+   promote the same artifact through any required testing tracks.
 6. For the new personal developer account, keep at least 12 testers opted in continuously for the
    required 14-day period and apply for Production access.
-7. Promote the same version code to Production after the testing and policy gates succeed.
-8. After Google Play confirms Production, create the immutable `vX.Y.Z` tag and GitHub Release on
-   the exact source commit.
+7. Submit the same artifact to Production and track the Play submission until its status is
+   `Published`; `Ready to publish` still requires the developer to publish it.
+8. Once Play reports `Published` and the release is active, mark the GitHub prerelease as stable
+   and cross-check the tag, commit, artifact checksum, and Play identity.
 
 Internal testers who will participate in Closed testing must leave Internal first or use a
-separate eligible account. A defect found before Production is corrected through another atomic
-Pull Request and a higher version code; the previously uploaded code is never reused.
+separate eligible account. If Play rejects a submission because of listing or policy metadata,
+correct that metadata and resubmit the same tagged artifact. If a rejection requires a new AAB,
+keep the rejected candidate record and prepare a new SemVer release name, source tag, and higher
+version code; never reuse an uploaded code or move an existing tag.
 
 After initial Production access, later releases normally move through Internal testing and then
 Production. Closed testing remains available when release risk justifies it but is not treated as
@@ -172,7 +184,8 @@ same version, signing, artifact, and approval contracts:
 - a separate protected Production environment requires explicit approval
 - an explicit `main` revision is validated, signed, and uploaded to Internal
 - Production promotion selects the already uploaded Play artifact and never rebuilds it
-- the production tag and GitHub Release are created only after Play confirms the promotion
+- the immutable candidate tag and GitHub prerelease identify the source before Play submission
+- a GitHub prerelease becomes stable only after Play confirms the release is published
 - failed or partially published runs remain recoverable without reusing a version code
 
 Automation does not grant general repository workflows access to the upload key or Production

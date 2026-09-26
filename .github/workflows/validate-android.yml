@@ -55,7 +55,7 @@ jobs:
           python3 -B .github/scripts/release_identity.py pull-request
           --base-revision "$BASE_REVISION"
 
-      - name: Validate production tag
+      - name: Validate release candidate tag
         if: github.event_name == 'push' && github.ref_type == 'tag'
         env:
           TAG_NAME: ${{ github.ref_name }}
