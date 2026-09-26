@@ -549,7 +549,7 @@ class DailyCompletionSurfaceTest {
             .onNodeWithTag(GameScreenTestTags.SUCCESS_OVERLAY_MESSAGE, useUnmergedTree = true)
             .assertTextEquals("New personal record!")
         composeTestRule
-            .onNodeWithContentDescription("Personal record")
+            .onNodeWithContentDescription("Personal record", useUnmergedTree = true)
             .assertIsDisplayed()
             .assertHasNoClickAction()
         composeTestRule
@@ -665,7 +665,7 @@ class DailyCompletionSurfaceTest {
             .onNodeWithText("Your logic paid off.")
             .assertIsDisplayed()
         composeTestRule
-            .onNodeWithContentDescription("Puzzle completed")
+            .onNodeWithContentDescription("Puzzle completed", useUnmergedTree = true)
             .assertIsDisplayed()
             .assertHasNoClickAction()
         composeTestRule
